@@ -238,7 +238,9 @@ class ShapeGenerator extends ShapeVisitor.Default<Void> {
 
         // Write constructor.
         writer.openBlock("constructor(serviceId: string, args: {");
-        writer.write("message?: string;");
+        if (!shape.getMemberNames().contains("message")) {
+            writer.write("message?: string;");
+        }
         config.memberPrefix = "";
         config.noDocs = true;
         config.writeMembers(writer, shape);
