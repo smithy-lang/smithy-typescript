@@ -62,7 +62,7 @@ class ShapeGenerator extends ShapeVisitor.Default<Void> {
 
     void execute() {
         // Write shared / static content.
-        fileManifest.writeFile("shared/sharedTypes.ts", getClass(), "shapeTypes.ts");
+        fileManifest.writeFile("shared/shapeTypes.ts", getClass(), "shapeTypes.ts");
 
         // Generate models.
         nonTraits.shapes().sorted().forEach(shape -> shape.accept(this));
