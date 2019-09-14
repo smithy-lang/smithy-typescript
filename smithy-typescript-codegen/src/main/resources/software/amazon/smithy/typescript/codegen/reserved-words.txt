@@ -1,0 +1,116 @@
+# TypeScript reserved words.
+#
+# Smithy's rules around the names of types are already pretty strict and
+# mostly compatible with TypeScript's naming conventions. Furthermore, the
+# code generator will automatically uppercase every instance where a
+# TypeScript type is generated from a Smithy type. This makes the majority
+# of all of the reserved words in TypeScript something that will never be
+# encountered when generating code. However, it's possible that other
+# SymbolProvider implementations could be used that do emit reserved
+# words for identifiers, hence this code is useful as an extra layer of
+# protection.
+*
+# Various built-in types defined by JavaScript and/or TypeScript are
+# included in the set of reserved words (for example, Pick). This
+# should prevent most conflicts with built-in types based on the information
+# available as of today (September, 2019), however, the list of built-in
+# types available in TypeScript are likely to grow over time. Adding new
+# reserved words to this list when new TypeScript types are added could
+# potentially result in a breaking change to previously generated clients,
+# so adding new reserved words is discouraged. Ideally we could have just
+# automatically added an alias for built-in types that conflict with
+# generated types, but, unfortunately, it's not currently possible to
+# alias a built-in TypeScript or JavaScript type.
+#
+# When a reserved word is encountered, this implementation will
+# continue to prefix the word with "_" until it's no longer considered
+# reserved.
+#
+# See: https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md#221-reserved-words
+
+# Reserved and cannot be used as identifiers
+break
+case
+catch
+class
+const
+continue
+debugger
+default
+delete
+do
+else
+enum
+export
+extends
+false
+finally
+for
+function
+if
+import
+in
+instanceof
+new
+null
+return
+super
+switch
+this
+throw
+true
+try
+typeof
+var
+void
+while
+with
+
+# Not valid for identifiers
+implements
+interface
+let
+package
+private
+protected
+public
+static
+yield
+
+# Not valid for user defined type names.
+any
+boolean
+number
+string
+symbol
+
+# Common types and interfaces that could potentially conflict with generated code.
+Array
+Boolean
+ConstructorParameters
+Date
+Exclude
+Extract
+Infinity
+InstanceType
+Math
+NaN
+NonNullable
+Number
+Object
+Omit
+Parameters
+Partial
+Pick
+Promise
+PromiseLike
+Readonly
+ReadonlyArray
+Record
+RegExp
+Required
+ReturnType
+Set
+String
+ThisType
+WeakMap

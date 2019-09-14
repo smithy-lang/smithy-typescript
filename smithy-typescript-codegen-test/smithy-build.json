@@ -1,0 +1,10 @@
+{
+    "version": "1.0",
+    "plugins": {
+        "typescript-codegen": {
+            "service": "example.weather.foo#Weather",
+            "package": "weather",
+            "target": "node"
+        }
+    }
+ }
