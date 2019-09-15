@@ -30,7 +30,7 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
-        new ShapeGenerator(context).execute();
+        new CodegenVisitor(context).execute();
     }
 
     /**
@@ -40,5 +40,27 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
      */
     public static SymbolProviderBuilder symbolProviderBuilder() {
         return new SymbolProviderBuilder();
+    }
+
+    /**
+     * Specifies the target environment where JavaScript code is run.
+     */
+    public enum Target {
+        /**
+         * Symbols are used in the browser, meaning things like Node streams
+         * can't be used.
+         */
+        BROWSER,
+
+        /**
+         * Symbols are used in Node, meaning things like Node streams can
+         * be used.
+         */
+        NODE,
+
+        /**
+         * Symbols are meant to operate with both Node and the browser.
+         */
+        UNIVERSAL
     }
 }

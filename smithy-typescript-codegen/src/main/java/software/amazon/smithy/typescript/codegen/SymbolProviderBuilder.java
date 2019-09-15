@@ -34,7 +34,7 @@ public final class SymbolProviderBuilder implements SmithyBuilder<SymbolProvider
     private static final String TARGET_PROPERTY = "target";
 
     private Model model;
-    private TypeScriptTarget typeScriptTarget;
+    private TypeScriptCodegenPlugin.Target typeScriptTarget;
 
     SymbolProviderBuilder() {}
 
@@ -44,7 +44,7 @@ public final class SymbolProviderBuilder implements SmithyBuilder<SymbolProvider
         SmithyBuilder.requiredState(MODEL_PROPERTY, model);
         SmithyBuilder.requiredState(TARGET_PROPERTY, typeScriptTarget);
 
-        TypeScriptSymbolProvider symbolProvider = new TypeScriptSymbolProvider(model, typeScriptTarget);
+        SymbolVisitor symbolProvider = new SymbolVisitor(model, typeScriptTarget);
 
         // Load reserved words from a new-line delimited file.
         ReservedWords reservedWords = new ReservedWordsBuilder()
@@ -76,7 +76,7 @@ public final class SymbolProviderBuilder implements SmithyBuilder<SymbolProvider
      * @param typeScriptTarget Environment where the symbols are used.
      * @return Returns the builder.
      */
-    public SymbolProviderBuilder targetEnvironment(TypeScriptTarget typeScriptTarget) {
+    public SymbolProviderBuilder targetEnvironment(TypeScriptCodegenPlugin.Target typeScriptTarget) {
         this.typeScriptTarget = typeScriptTarget;
         return this;
     }

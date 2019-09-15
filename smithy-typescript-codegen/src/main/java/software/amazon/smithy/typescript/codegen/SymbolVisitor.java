@@ -59,14 +59,14 @@ import software.amazon.smithy.utils.StringUtils;
  *
  * @see TypeScriptCodegenPlugin#symbolProviderBuilder
  */
-final class TypeScriptSymbolProvider implements SymbolProvider, ShapeVisitor<Symbol> {
+final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
-    private static final Logger LOGGER = Logger.getLogger(TypeScriptSymbolProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
     private final Model model;
-    private final TypeScriptTarget typeScriptTarget;
+    private final TypeScriptCodegenPlugin.Target typeScriptTarget;
 
-    TypeScriptSymbolProvider(Model model, TypeScriptTarget target) {
+    SymbolVisitor(Model model, TypeScriptCodegenPlugin.Target target) {
         this.model = model;
         this.typeScriptTarget = target;
     }

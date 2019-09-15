@@ -38,7 +38,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
-class ShapeGenerator extends ShapeVisitor.Default<Void> {
+class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -48,7 +48,7 @@ class ShapeGenerator extends ShapeVisitor.Default<Void> {
     private final ShapeIndex nonTraits;
     private final Map<String, TypeScriptWriter> writers = new HashMap<>();
 
-    ShapeGenerator(PluginContext context) {
+    CodegenVisitor(PluginContext context) {
         settings = TypeScriptSettings.from(context.getSettings());
         nonTraits = context.getNonTraitShapes();
         model = context.getModel();
@@ -161,7 +161,7 @@ class ShapeGenerator extends ShapeVisitor.Default<Void> {
         writer.write("readonly $$name = $S;", shape.getId().getName());
 
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, symbol, shape.getAllMembers().values());
+                model, symbolProvider, shape.getAllMembers().values());
         config.memberPrefix = "readonly ";
         config.writeMembers(writer, shape);
 
@@ -232,7 +232,7 @@ class ShapeGenerator extends ShapeVisitor.Default<Void> {
 
         // Write properties.
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, symbol, shape.getAllMembers().values());
+                model, symbolProvider, shape.getAllMembers().values());
         config.memberPrefix = "readonly ";
         config.writeMembers(writer, shape);
 
@@ -323,16 +323,12 @@ class ShapeGenerator extends ShapeVisitor.Default<Void> {
     @Override
     public Void unionShape(UnionShape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        // Generate a normal structure prefixed with "_".
-        String shadowName = "_" + symbol.getName();
 
         TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
         writer.addImport("TaggedUnion", "./shared/shapeTypes");
         writer.openBlock("export type $L = TaggedUnion<{", symbol.getName());
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, symbol, shape.getAllMembers().values());
-        config.interfaceName = shadowName;
-        config.isPrivate = true;
+                model, symbolProvider, shape.getAllMembers().values());
         config.writeMembers(writer, shape);
         writer.closeBlock("}>;");
 

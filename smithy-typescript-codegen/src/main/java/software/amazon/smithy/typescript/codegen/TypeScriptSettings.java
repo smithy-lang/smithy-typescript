@@ -36,7 +36,7 @@ public final class TypeScriptSettings {
 
     private String packageName;
     private ShapeId service;
-    private TypeScriptTarget environment;
+    private TypeScriptCodegenPlugin.Target environment;
     private ObjectNode pluginSettings = Node.objectNode();
 
     /**
@@ -49,7 +49,7 @@ public final class TypeScriptSettings {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(PACKAGE, TARGET, SERVICE));
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
-        settings.setEnvironment(TypeScriptTarget.valueOf(
+        settings.setEnvironment(TypeScriptCodegenPlugin.Target.valueOf(
                 config.expectStringMember(TARGET).getValue().toUpperCase(Locale.ENGLISH)));
         settings.setService(config.expectStringMember(SERVICE).expectShapeId());
         settings.setPluginSettings(config);
@@ -87,11 +87,11 @@ public final class TypeScriptSettings {
      *
      * @return Returns the target JavaScript environment.
      */
-    public TypeScriptTarget getEnvironment() {
+    public TypeScriptCodegenPlugin.Target getEnvironment() {
         return Objects.requireNonNull(environment, TARGET + " not set");
     }
 
-    public void setEnvironment(TypeScriptTarget environment) {
+    public void setEnvironment(TypeScriptCodegenPlugin.Target environment) {
         this.environment = environment;
     }
 

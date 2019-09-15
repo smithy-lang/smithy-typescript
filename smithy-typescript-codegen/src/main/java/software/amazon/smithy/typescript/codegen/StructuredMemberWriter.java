@@ -16,12 +16,10 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Collection;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Generates objects, interfaces, enums, etc.
@@ -30,25 +28,14 @@ final class StructuredMemberWriter {
 
     Model model;
     SymbolProvider symbolProvider;
-    String interfaceName;
     Collection<MemberShape> members;
     String memberPrefix = "";
-    boolean isPrivate;
     boolean noDocs;
 
-    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Symbol symbol, Collection<MemberShape> members) {
+    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = members;
-        interfaceName = StringUtils.capitalize(symbol.getName());
-    }
-
-    void write(TypeScriptWriter writer, Shape shape) {
-        writer.writeShapeDocs(shape);
-        String exportPrefix = isPrivate ? "" : "export ";
-        writer.openBlock("${L}interface $L {", exportPrefix, interfaceName);
-        writeMembers(writer, shape);
-        writer.closeBlock("}");
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
