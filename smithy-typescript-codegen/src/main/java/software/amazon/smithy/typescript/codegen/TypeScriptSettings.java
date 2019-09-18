@@ -16,7 +16,6 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Objects;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
@@ -31,12 +30,10 @@ import software.amazon.smithy.model.shapes.ShapeId;
 public final class TypeScriptSettings {
 
     private static final String PACKAGE = "package";
-    private static final String TARGET = "target";
     private static final String SERVICE = "service";
 
     private String packageName;
     private ShapeId service;
-    private TypeScriptCodegenPlugin.Target environment;
     private ObjectNode pluginSettings = Node.objectNode();
 
     /**
@@ -47,10 +44,8 @@ public final class TypeScriptSettings {
      */
     public static TypeScriptSettings from(ObjectNode config) {
         TypeScriptSettings settings = new TypeScriptSettings();
-        config.warnIfAdditionalProperties(Arrays.asList(PACKAGE, TARGET, SERVICE));
+        config.warnIfAdditionalProperties(Arrays.asList(PACKAGE, SERVICE));
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
-        settings.setEnvironment(TypeScriptCodegenPlugin.Target.valueOf(
-                config.expectStringMember(TARGET).getValue().toUpperCase(Locale.ENGLISH)));
         settings.setService(config.expectStringMember(SERVICE).expectShapeId());
         settings.setPluginSettings(config);
         return settings;
@@ -80,19 +75,6 @@ public final class TypeScriptSettings {
 
     public void setService(ShapeId service) {
         this.service = service;
-    }
-
-    /**
-     * Gets the target environment that is being generated for.
-     *
-     * @return Returns the target JavaScript environment.
-     */
-    public TypeScriptCodegenPlugin.Target getEnvironment() {
-        return Objects.requireNonNull(environment, TARGET + " not set");
-    }
-
-    public void setEnvironment(TypeScriptCodegenPlugin.Target environment) {
-        this.environment = environment;
     }
 
     /**

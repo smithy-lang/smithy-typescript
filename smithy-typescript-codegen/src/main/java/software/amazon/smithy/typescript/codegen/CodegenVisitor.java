@@ -54,10 +54,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         model = context.getModel();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        symbolProvider = TypeScriptCodegenPlugin.symbolProviderBuilder()
-                .model(model)
-                .targetEnvironment(settings.getEnvironment())
-                .build();
+        symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
     }
 
     void execute() {

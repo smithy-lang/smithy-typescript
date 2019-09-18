@@ -130,6 +130,7 @@ union Precipitation {
     snow: SimpleYesNo,
     mixed: TypedYesNo,
     other: OtherStructure,
+    blob: Blob,
 }
 
 structure OtherStructure {}

@@ -17,6 +17,12 @@ package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
+import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
+import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Plugin to trigger TypeScript code generation.
@@ -34,33 +40,25 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
     }
 
     /**
-     * Creates a builder that is used to create TypeScript symbols.
+     * Creates a TypeScript symbol provider.
      *
-     * @return Returns the created builder.
+     * @param model Model to generate symbols for.
+     * @return Returns the created provider.
      */
-    public static SymbolProviderBuilder symbolProviderBuilder() {
-        return new SymbolProviderBuilder();
-    }
+    public static SymbolProvider createSymbolProvider(Model model) {
+        SymbolVisitor symbolProvider = new SymbolVisitor(model);
 
-    /**
-     * Specifies the target environment where JavaScript code is run.
-     */
-    public enum Target {
-        /**
-         * Symbols are used in the browser, meaning things like Node streams
-         * can't be used.
-         */
-        BROWSER,
+        // Load reserved words from a new-line delimited file.
+        ReservedWords reservedWords = new ReservedWordsBuilder()
+                .loadWords(TypeScriptCodegenPlugin.class.getResource("reserved-words.txt"))
+                .build();
 
-        /**
-         * Symbols are used in Node, meaning things like Node streams can
-         * be used.
-         */
-        NODE,
-
-        /**
-         * Symbols are meant to operate with both Node and the browser.
-         */
-        UNIVERSAL
+        return ReservedWordSymbolProvider.builder()
+                .nameReservedWords(reservedWords)
+                .symbolProvider(symbolProvider)
+                // Only escape words when the symbol has a namespace. This
+                // prevents escaping intentional references to reserved words.
+                .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getNamespace()))
+                .build();
     }
 }

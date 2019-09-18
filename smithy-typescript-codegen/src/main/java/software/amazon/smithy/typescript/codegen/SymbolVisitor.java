@@ -56,19 +56,15 @@ import software.amazon.smithy.utils.StringUtils;
  *
  * <p>Reserved words for TypeScript are automatically escaped so that they are
  * prefixed with "_". See "reserved-words.txt" for the list of words.
- *
- * @see TypeScriptCodegenPlugin#symbolProviderBuilder
  */
 final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
     private final Model model;
-    private final TypeScriptCodegenPlugin.Target typeScriptTarget;
 
-    SymbolVisitor(Model model, TypeScriptCodegenPlugin.Target target) {
+    SymbolVisitor(Model model) {
         this.model = model;
-        this.typeScriptTarget = target;
     }
 
     @Override
@@ -78,7 +74,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return symbol;
     }
 
-    // TODO: StreamType should be a generic property for anything with streaming members.
     @Override
     public Symbol blobShape(BlobShape shape) {
         // Blobs must only rely on types defined by ECMAScript or by the SDK
@@ -87,17 +82,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return createSymbol(shape, "Uint8Array");
         }
 
-        // Streaming blobs need to use a different abstraction that's per/target.
-        switch (typeScriptTarget) {
-            case BROWSER:
-                return createSymbol(shape, "Stream");
-            case NODE:
-                return createSymbol(shape, "Blob");
-            case UNIVERSAL:
-                return createSymbol(shape, "Uint8Array");
-            default:
-                throw new IllegalStateException("Unreachable enum value");
-        }
+        return createSymbol(shape, "ArrayBuffer | ArrayBufferView | string | Readable | Blob");
     }
 
     @Override

@@ -16,10 +16,7 @@ public class SymbolProviderTest {
     public void createsSymbols() {
         Shape shape = StructureShape.builder().id("com.foo.baz#Hello").build();
         Model model = Model.assembler().addShape(shape).assemble().unwrap();
-        SymbolProvider provider = TypeScriptCodegenPlugin.symbolProviderBuilder()
-                .model(model)
-                .targetEnvironment(TypeScriptCodegenPlugin.Target.BROWSER)
-                .build();
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("Hello"));
@@ -32,10 +29,7 @@ public class SymbolProviderTest {
     public void escapesReservedWords() {
         Shape shape = StructureShape.builder().id("com.foo.baz#Pick").build();
         Model model = Model.assembler().addShape(shape).assemble().unwrap();
-        SymbolProvider provider = TypeScriptCodegenPlugin.symbolProviderBuilder()
-                .model(model)
-                .targetEnvironment(TypeScriptCodegenPlugin.Target.BROWSER)
-                .build();
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("_Pick"));
@@ -45,10 +39,7 @@ public class SymbolProviderTest {
     public void doesNotEscapeBuiltinSymbols() {
         Shape shape = StringShape.builder().id("com.foo.baz#String").build();
         Model model = Model.assembler().addShape(shape).assemble().unwrap();
-        SymbolProvider provider = TypeScriptCodegenPlugin.symbolProviderBuilder()
-                .model(model)
-                .targetEnvironment(TypeScriptCodegenPlugin.Target.BROWSER)
-                .build();
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("string"));
