@@ -303,9 +303,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      *     value: Attacker,
      *     visitor: Visitor<T>
      *   ): T {
-     *     if ("lion" in value) return visitor.lion(value);
-     *     if ("tiger" in value) return visitor.tiger(value);
-     *     if ("bear" in value) return visitor.bear(visitor);
+     *     if (value.lion !== undefined) return visitor.lion(value.lion);
+     *     if (value.tiger !== undefined) return visitor.tiger(value.tiger);
+     *     if (value.bear !== undefined) return visitor.bear(value.bear);
      *     return visitor.$unknown(value.$unknown[0], value.$unknown[1]);
      *   }
      * }
@@ -351,7 +351,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         writer.dedent().write("): T {").indent();
         for (MemberShape member : shape.getAllMembers().values()) {
             String memberName = symbolProvider.toMemberName(member);
-            writer.write("if ($1S in value) return visitor.$1L(value.$1L);", memberName);
+            writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
         }
         writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
         writer.closeBlock("}"); // Close the visit() function
