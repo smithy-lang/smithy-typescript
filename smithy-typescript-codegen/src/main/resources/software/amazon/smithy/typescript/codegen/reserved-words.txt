@@ -86,6 +86,9 @@ symbol
 
 # Common types and interfaces that could potentially conflict with generated code.
 Array
+ArrayBuffer
+ArrayBufferView
+Blob
 Boolean
 ConstructorParameters
 Date
@@ -104,6 +107,7 @@ Partial
 Pick
 Promise
 PromiseLike
+Readable
 Readonly
 ReadonlyArray
 Record
@@ -112,5 +116,6 @@ Required
 ReturnType
 Set
 String
+Stream
 ThisType
 WeakMap
