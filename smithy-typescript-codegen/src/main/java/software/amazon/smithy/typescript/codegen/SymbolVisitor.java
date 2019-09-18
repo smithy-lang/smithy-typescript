@@ -76,8 +76,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol blobShape(BlobShape shape) {
-        // Blobs must only rely on types defined by ECMAScript or by the SDK
-        // so we use Uint8Arrays instead of Blobs or Buffers.
         if (!shape.hasTrait(StreamingTrait.class)) {
             return createSymbol(shape, "Uint8Array");
         }
@@ -296,6 +294,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             filename = builder.toString();
         }
 
-        return format("models/%s.ts", filename).replace("//", "/");
+        return format("types/%s.ts", filename).replace("//", "/");
     }
 }

@@ -22,7 +22,7 @@ public class SymbolProviderTest {
         assertThat(symbol.getName(), equalTo("Hello"));
         assertThat(symbol.getNamespace(), equalTo("com/foo/baz"));
         assertThat(symbol.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol.getDefinitionFile(), equalTo("models/com/foo/baz.ts"));
+        assertThat(symbol.getDefinitionFile(), equalTo("types/com/foo/baz.ts"));
     }
 
     @Test
