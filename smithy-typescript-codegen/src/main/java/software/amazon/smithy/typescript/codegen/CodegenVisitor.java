@@ -133,8 +133,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * import { SmithyStructure as $SmithyStructure } from "../shared/shapeTypes";
      *
      * export class Person implements $SmithyStructure {
-     *   readonly $namespace = "smithy.example";
-     *   readonly $name = "Person";
+     *   readonly $id = "smithy.example#Person";
      *   readonly name: string | undefined;
      *   readonly age?: number | null;
      *   constructor(args: {
@@ -154,8 +153,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
         writer.addImport("SmithyStructure", "$SmithyStructure", "./shared/shapeTypes");
         writer.openBlock("export class $L implements $$SmithyStructure {", symbol.getName());
-        writer.write("readonly $$namespace = $S;", shape.getId().getNamespace());
-        writer.write("readonly $$name = $S;", shape.getId().getName());
+        writer.write("readonly $$id = $S;", shape.getId());
 
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
@@ -203,15 +201,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      *
      * export class NoSuchResource extends $SmithyException {
      *   readonly resourceType: string | undefined;
-     *   constructor(serviceName: string, args: {
-     *     resourceType: string | undefined;
+     *   constructor(args: {
+     *     $service: string;
      *     message?: string;
+     *     resourceType: string | undefined;
      *   }) {
      *     super({
-     *       namespace: "smithy.example",
+     *       id: "example.weather.foo#NoSuchResource",
      *       name: "NoSuchResource",
      *       fault: "client",
-     *       service: serviceName
+     *       service: args.$service,
      *     });
      *     this.resourceType = args.resourceType;
      *   }
@@ -234,7 +233,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         config.writeMembers(writer, shape);
 
         // Write constructor.
-        writer.openBlock("constructor(serviceId: string, args: {");
+        writer.openBlock("constructor(args: {");
+        writer.write("$$service: string;");
         if (!shape.getMemberNames().contains("message")) {
             writer.write("message?: string;");
         }
@@ -245,10 +245,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         writer.indent();
 
         writer.openBlock("super({");
-        writer.write("namespace: $S,", shape.getId().getNamespace());
+        writer.write("id: $S,", shape.getId());
         writer.write("name: $S,", shape.getId().getName());
         writer.write("fault: $S,", errorTrait.getValue());
-        writer.write("service: serviceId,");
+        writer.write("service: args.$$service,");
         writer.closeBlock("});");
 
         for (MemberShape member : shape.getAllMembers().values()) {
