@@ -40,7 +40,9 @@ export class SmithyException extends Error implements SmithyStructure {
   }
 }
 
-// Document types from Smithy models are represented using the following types.
+/**
+ * Smithy document type values.
+ */
 export namespace DocumentType {
   export type Value = Scalar | Structure | List;
   export type Scalar = string | number | boolean | null | Uint8Array | Date;
