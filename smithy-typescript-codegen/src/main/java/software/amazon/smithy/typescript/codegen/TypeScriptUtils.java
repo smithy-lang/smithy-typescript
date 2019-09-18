@@ -58,7 +58,6 @@ final class TypeScriptUtils {
         return PROPERTY_NAME_REGEX.matcher(value).matches();
     }
 
-
     /**
      * Creates a list of pipe separated enum variants as a union.
      *
