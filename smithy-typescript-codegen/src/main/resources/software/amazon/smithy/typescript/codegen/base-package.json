@@ -1,0 +1,27 @@
+{
+  "name": "${package}",
+  "description": "${packageDescription}",
+  "version": "${packageVersion}",
+  "scripts": {
+    "clean": "npm run remove-definitions && npm run remove-maps && npm run remove-js",
+    "build-documentation": "npm run clean && typedoc ./",
+    "prepublishOnly": "tsc",
+    "pretest": "tsc",
+    "remove-definitions": "rimraf *.d.ts && rimraf ./commands/*.d.ts && rimraf ./types/*.d.ts",
+    "remove-documentation": "rimraf ./docs",
+    "remove-js": "rimraf *.js && rimraf ./commands/*.js && rimraf ./shared/*.js && rimraf ./types/*.js",
+    "remove-maps": "rimraf *.js.map && rimraf ./commands/*.js.map && rimraf ./shared/*.js.map && rimraf ./types/*.js.map",
+    "test": "exit 0",
+    "smoke-test": "karma start karma.conf"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "dependencies": {
+    "tslib": "^1.10.0"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.0",
+    "typedoc": "^0.15.0",
+    "typescript": "^3.6.3"
+  }
+}

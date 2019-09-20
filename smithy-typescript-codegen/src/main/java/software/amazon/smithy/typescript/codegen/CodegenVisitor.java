@@ -15,17 +15,19 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -46,7 +48,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
     private final ShapeIndex nonTraits;
-    private final Map<String, TypeScriptWriter> writers = new HashMap<>();
+    private final CodeWriterDelegator<TypeScriptWriter> writers;
 
     CodegenVisitor(PluginContext context) {
         settings = TypeScriptSettings.from(context.getSettings());
@@ -54,18 +56,45 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         model = context.getModel();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        symbolProvider = SymbolProvider.cache(TypeScriptCodegenPlugin.createSymbolProvider(model));
+
+        Walker walker = new Walker(model.getKnowledge(NeighborProviderIndex.class).getProvider());
+        writers = CodeWriterDelegator.<TypeScriptWriter>builder()
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .fileManifest(fileManifest)
+                .factory((shape, symbol) -> new TypeScriptWriter(symbol.getNamespace()))
+                .beforeWrite((filename, writer, shapes) -> {
+                    // Add dependencies of the shape and any references it has by
+                    // walking the shape's neighbors.
+                    for (Shape shape : shapes) {
+                        writer.addImport(symbolProvider.toSymbol(shape));
+                        walker.walkShapes(shape).forEach(neighbor -> {
+                            writer.addImport(symbolProvider.toSymbol(neighbor));
+                        });
+                    }
+                })
+                .build();
     }
 
     void execute() {
         // Write shared / static content.
         fileManifest.writeFile("shared/shapeTypes.ts", getClass(), "shapeTypes.ts");
+        fileManifest.writeFile("tsconfig.json", getClass(), "tsconfig.json");
 
         // Generate models.
         nonTraits.shapes().sorted().forEach(shape -> shape.accept(this));
 
         // Write each pending writer.
-        writers.forEach((filename, writer) -> fileManifest.writeFile(filename, writer.toString()));
+        // writers.forEach((filename, writer) -> fileManifest.writeFile(filename, writer.toString()));
+        writers.writeFiles();
+
+        // Write the package.json file, including all symbol dependencies.
+        PackageJsonGenerator.writePackageJson(settings, fileManifest, SymbolDependency.gatherDependencies(
+                nonTraits.shapes()
+                        .map(symbolProvider::toSymbol)
+                        .map(Symbol::getDependencies)
+                        .flatMap(Collection::stream)));
     }
 
     @Override
@@ -150,8 +179,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     private void renderNonErrorStructure(StructureShape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
-        writer.addImport("SmithyStructure", "$SmithyStructure", "./shared/shapeTypes");
+        TypeScriptWriter writer = writers.createWriter(shape);
         writer.openBlock("export class $L implements $$SmithyStructure {", symbol.getName());
         writer.write("readonly $$id = $S;", shape.getId());
 
@@ -222,8 +250,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private void renderErrorStructure(StructureShape shape) {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
-        TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
-        writer.addImport("SmithyException", "$SmithyException", "./shared/shapeTypes");
+        TypeScriptWriter writer = writers.createWriter(shape);
         writer.openBlock("export class $L extends $$SmithyException {", symbol.getName());
 
         // Write properties.
@@ -321,8 +348,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     public Void unionShape(UnionShape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
 
-        TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
-        writer.addImport("TaggedUnion", "./shared/shapeTypes");
+        TypeScriptWriter writer = writers.createWriter(shape);
         writer.openBlock("export type $L = TaggedUnion<{", symbol.getName());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
@@ -394,17 +420,25 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     @Override
     public Void stringShape(StringShape shape) {
-        shape.getTrait(EnumTrait.class).filter(EnumTrait::hasNames).ifPresent(trait -> {
+        shape.getTrait(EnumTrait.class).ifPresent(trait -> {
             Symbol symbol = symbolProvider.toSymbol(shape);
-            TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
-            writer.openBlock("export enum $L {", symbol.getName());
-            trait.getValues().forEach((value, body) -> body.getName().ifPresent(name -> {
-                body.getDocumentation().ifPresent(writer::writeDocs);
-                writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), value);
-            }));
-            writer.closeBlock("};");
+            TypeScriptWriter writer = writers.createWriter(shape);
+            // Unnamed enums generate a union of string literals.
+            if (!trait.hasNames()) {
+                writer.write("export type $L = $L",
+                             symbol.getName(), TypeScriptUtils.getEnumVariants(trait.getValues().keySet()));
+            } else {
+                // Named enums generate an actual enum type.
+                writer.openBlock("export enum $L {", symbol.getName());
+                trait.getValues().forEach((value, body) -> body.getName().ifPresent(name -> {
+                    body.getDocumentation().ifPresent(writer::writeDocs);
+                    writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), value);
+                }));
+                writer.closeBlock("};");
+            }
         });
 
+        // Normal string shapes don't generate any code on their own.
         return null;
     }
 
@@ -426,8 +460,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     // TODO: This does not need to be an exported type. Move this to the command.
     private void renderErrorUnion(OperationIndex operationIndex, OperationShape operation) {
-        Symbol symbol = symbolProvider.toSymbol(operation);
-        TypeScriptWriter writer = getWriter(symbol.getDefinitionFile(), symbol.getNamespace());
+        TypeScriptWriter writer = writers.createWriter(operation);
         List<StructureShape> errors = operationIndex.getErrors(operation);
 
         if (errors.size() == 0) {
@@ -441,17 +474,5 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             Symbol target = symbolProvider.toSymbol(errors.get(i));
             writer.write("  | $T$L", target, endOfLine);
         }
-    }
-
-    private TypeScriptWriter getWriter(String filename, String moduleName) {
-        boolean needsNewline = writers.containsKey(filename);
-        TypeScriptWriter writer = writers.computeIfAbsent(filename, f -> new TypeScriptWriter(moduleName));
-
-        // Add newlines between types in the same file.
-        if (needsNewline) {
-            writer.write("");
-        }
-
-        return writer;
     }
 }

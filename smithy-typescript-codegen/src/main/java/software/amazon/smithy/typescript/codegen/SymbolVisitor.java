@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -48,6 +49,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -60,6 +62,9 @@ import software.amazon.smithy.utils.StringUtils;
 final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
+    private static final String TYPES_NODE_VERSION = "^12.7.5";
+    private static final String TYPES_BIG_JS_VERSION = "^4.0.5";
+    private static final String BIG_JS_VERSION = "^5.2.2";
 
     private final Model model;
 
@@ -77,22 +82,25 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol blobShape(BlobShape shape) {
         if (!shape.hasTrait(StreamingTrait.class)) {
-            return createSymbol(shape, "Uint8Array");
+            return createSymbolBuilder(shape, "Uint8Array").build();
         }
 
-        return createSymbol(shape, "ArrayBuffer | ArrayBufferView | string | Readable | Blob");
+        // Note: `Readable` needs an import and a dependency.
+        return createSymbolBuilder(shape, "ArrayBuffer | ArrayBufferView | string | Readable | Blob", null)
+                .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
+                .addDependency(PackageJsonGenerator.DEV_DEPENDENCY, "@types/node", TYPES_NODE_VERSION)
+                .build();
     }
 
     @Override
     public Symbol booleanShape(BooleanShape shape) {
-        return createSymbol(shape, "boolean");
+        return createSymbolBuilder(shape, "boolean").build();
     }
 
     @Override
     public Symbol listShape(ListShape shape) {
         Symbol reference = toSymbol(shape.getMember());
-        return Symbol.builder()
-                .name(format("Array<%s>", reference.getName()))
+        return createSymbolBuilder(shape, format("Array<%s>", reference.getName()), null)
                 .addReference(reference)
                 .build();
     }
@@ -100,8 +108,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol setShape(SetShape shape) {
         Symbol reference = toSymbol(shape.getMember());
-        return Symbol.builder()
-                .name(format("Set<%s>", reference.getName()))
+        return createSymbolBuilder(shape, format("Set<%s>", reference.getName()), null)
                 .addReference(reference)
                 .build();
     }
@@ -122,8 +129,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol mapShape(MapShape shape) {
         Symbol reference = toSymbol(shape.getValue());
-        return Symbol.builder()
-                .name(format("{ [key: string]: %s }", reference.getName()))
+        return createSymbolBuilder(shape, format("{ [key: string]: %s }", reference.getName()), null)
                 .addReference(reference)
                 .build();
     }
@@ -159,34 +165,31 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol createNumber(Shape shape) {
-        return createSymbol(shape, "number");
+        return createSymbolBuilder(shape, "number").build();
     }
 
     @Override
     public Symbol bigIntegerShape(BigIntegerShape shape) {
-        return createSymbol(shape, "BigInt");
+        return createSymbolBuilder(shape, "BigInt").build();
     }
 
     @Override
     public Symbol bigDecimalShape(BigDecimalShape shape) {
-        return Symbol.builder()
-                .name("Big")
-                .namespace("@types/big.js", "/")
+        return createSymbolBuilder(shape, "Big", "@types/big.js")
+                .addDependency(PackageJsonGenerator.DEV_DEPENDENCY, "@types/big.js", TYPES_BIG_JS_VERSION)
+                .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "big.js", BIG_JS_VERSION)
                 .build();
     }
 
     @Override
     public Symbol documentShape(DocumentShape shape) {
-        return Symbol.builder()
-                .name("DocumentType.Value")
-                .namespace("@smithy/core", "/")
-                .build();
+        return createSymbolBuilder(shape, "DocumentType.Value", "./shared/shapeTypes").build();
     }
 
     @Override
     public Symbol operationShape(OperationShape shape) {
         String commandName = StringUtils.capitalize(shape.getId().getName()) + "Command";
-        return createSymbol(shape, commandName, formatModuleName(shape));
+        return createSymbolBuilder(shape, commandName, formatModuleName(shape)).build();
     }
 
     @Override
@@ -194,36 +197,46 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         // Enums that provide a name for each variant create an actual enum type.
         return shape.getTrait(EnumTrait.class)
                 .map(enumTrait -> createEnumSymbol(shape, enumTrait))
-                .orElseGet(() -> createSymbol(shape, "string"));
+                .orElseGet(() -> createSymbolBuilder(shape, "string").build());
     }
 
     private Symbol createEnumSymbol(StringShape shape, EnumTrait enumTrait) {
-        Symbol stringSymbol = enumTrait.hasNames()
-                ? createObjectSymbol(shape)
-                : createSymbol(shape, "string");
-        return stringSymbol.toBuilder()
+        return createObjectSymbolBuilder(shape)
                 .putProperty(EnumTrait.class.getName(), enumTrait)
                 .build();
     }
 
     @Override
     public Symbol resourceShape(ResourceShape shape) {
-        return createObjectSymbol(shape);
+        return createObjectSymbolBuilder(shape).build();
     }
 
     @Override
     public Symbol serviceShape(ServiceShape shape) {
-        return createObjectSymbol(shape);
+        return createObjectSymbolBuilder(shape).build();
     }
 
     @Override
     public Symbol structureShape(StructureShape shape) {
-        return createObjectSymbol(shape);
+        // Error and normal structures need specific imports for their *definition*.
+        Symbol importSymbol = shape.hasTrait(ErrorTrait.class)
+                ? Symbol.builder().name("SmithyException").namespace("./shared/shapeTypes", "").build()
+                : Symbol.builder().name("SmithyStructure").namespace("./shared/shapeTypes", "").build();
+        // Ensure there will never be conflicts by prefixing the import with "$".
+        SymbolReference reference = SymbolReference.builder()
+                .symbol(importSymbol)
+                .alias("$" + importSymbol.getName())
+                .options(SymbolReference.ContextOption.DECLARE)
+                .build();
+
+        return createObjectSymbolBuilder(shape).addReference(reference).build();
     }
 
     @Override
     public Symbol unionShape(UnionShape shape) {
-        return createObjectSymbol(shape);
+        Symbol taggedUnion = Symbol.builder().name("TaggedUnion").namespace("./shared/shapeTypes", "/").build();
+        SymbolReference reference = new SymbolReference(taggedUnion, SymbolReference.ContextOption.DECLARE);
+        return createObjectSymbolBuilder(shape).addReference(reference).build();
     }
 
     @Override
@@ -240,41 +253,33 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol createMemberSymbolWithEnumTarget(Symbol targetSymbol) {
-        EnumTrait trait = targetSymbol.getProperty(EnumTrait.class.getName(), EnumTrait.class)
-                .orElseThrow(IllegalStateException::new);
-        // Clear out the namespace to prevent any kind of import.
-        Symbol.Builder builder = targetSymbol.toBuilder().namespace(null, "/");
-
-        // Enum traits with names become an exported union of string literals.
-        if (trait.hasNames()) {
-            builder.name(targetSymbol.getName() + " | string").addReference(targetSymbol);
-        } else {
-            builder.name(TypeScriptUtils.getEnumVariants(trait.getValues().keySet()) + " | string");
-        }
-
-        return builder.build();
+        return targetSymbol.toBuilder()
+                .namespace(null, "/")
+                .name(targetSymbol.getName() + " | string")
+                .addReference(targetSymbol)
+                .build();
     }
 
     @Override
     public Symbol timestampShape(TimestampShape shape) {
-        return createSymbol(shape, "Date");
+        return createSymbolBuilder(shape, "Date").build();
     }
 
-    private static Symbol createObjectSymbol(Shape shape) {
+    private static Symbol.Builder createObjectSymbolBuilder(Shape shape) {
         String name = StringUtils.capitalize(shape.getId().getName());
-        return createSymbol(shape, name, formatModuleName(shape));
+        return createSymbolBuilder(shape, name, formatModuleName(shape));
     }
 
-    private static Symbol createSymbol(Shape shape, String typeName) {
-        return createSymbol(shape, typeName, null);
+    private static Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
+        return Symbol.builder().putProperty("shape", shape).name(typeName);
     }
 
-    private static Symbol createSymbol(Shape shape, String typeName, String namespace) {
+    private static Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
         return Symbol.builder()
+                .putProperty("shape", shape)
                 .name(typeName)
                 .namespace(namespace, "/")
-                .definitionFile(toFilename(shape, typeName, namespace))
-                .build();
+                .definitionFile(toFilename(shape, typeName, namespace));
     }
 
     private static String toFilename(Shape shape, String name, String namespace) {
