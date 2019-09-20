@@ -17,8 +17,6 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.BiFunction;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -39,14 +37,17 @@ import software.amazon.smithy.utils.CodeWriter;
  * module paths against the moduleName of the writer. Module names that
  * start with anything other than "." (e.g., "@", "/", etc.) are never
  * relativized.
+ *
+ * TODO: Make this public when it's stable.
  */
 final class TypeScriptWriter extends CodeWriter {
 
     private final Path moduleName;
-    private final Map<String, Map<String, String>> imports = new TreeMap<>();
+    private final ImportDeclarations imports;
 
     TypeScriptWriter(String moduleName) {
         this.moduleName = Paths.get(moduleName);
+        imports = new ImportDeclarations(moduleName);
 
         setIndentText("  ");
         trimTrailingSpaces(true);
@@ -62,21 +63,30 @@ final class TypeScriptWriter extends CodeWriter {
      */
     TypeScriptWriter addImport(Symbol symbol) {
         if (!symbol.getNamespace().isEmpty()) {
-            addImport(symbol.getName(), symbol.getNamespace());
+            addImport(symbol.getName(), symbol.getName(), symbol.getNamespace());
+            for (SymbolReference reference : symbol.getReferences()) {
+                addImport(reference);
+            }
         }
 
         return this;
     }
 
     /**
-     * Imports a type from a module only if necessary.
+     * Imports a symbol reference.
      *
-     * @param name Type to import.
-     * @param from Module to import the type from.
+     * @param reference Symbol reference to import.
      * @return Returns the writer.
      */
-    TypeScriptWriter addImport(String name, String from) {
-        return addImport(name, name, from);
+    TypeScriptWriter addImport(SymbolReference reference) {
+        // If there's no alias, then just import the symbol normally.
+        if (reference.getAlias().equals(reference.getSymbol().getName())) {
+            return addImport(reference.getSymbol());
+        }
+
+        // Symbols with references are always imported since they don't
+        // conflict and must be imported in order for the code to work.
+        return addImport(reference.getSymbol().getName(), reference.getAlias(), reference.getSymbol().getNamespace());
     }
 
     /**
@@ -88,15 +98,7 @@ final class TypeScriptWriter extends CodeWriter {
      * @return Returns the writer.
      */
     TypeScriptWriter addImport(String name, String as, String from) {
-        if (!from.startsWith("@") && !from.startsWith("/")) {
-            // A relative import is resolved against the current file.
-            from = moduleName.relativize(Paths.get(from)).toString();
-        }
-
-        if (!from.equals(moduleName.toString()) && !from.isEmpty()) {
-            imports.computeIfAbsent(from, m -> new TreeMap<>()).put(as, name);
-        }
-
+        imports.addImport(name, as, from);
         return this;
     }
 
@@ -161,41 +163,7 @@ final class TypeScriptWriter extends CodeWriter {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-
-        if (!imports.isEmpty()) {
-            for (Map.Entry<String, Map<String, String>> entry : imports.entrySet()) {
-                String module = entry.getKey();
-                Map<String, String> imports = entry.getValue();
-
-                if (imports.size() == 1) {
-                    Map.Entry<String, String> singleEntry = imports.entrySet().iterator().next();
-                    result.append("import { ")
-                            .append(createImportStatement(singleEntry))
-                            .append(" } from \"")
-                            .append(module)
-                            .append("\";\n");
-                } else {
-                    result.append("import {\n");
-                    for (Map.Entry<String, String> importEntry : imports.entrySet()) {
-                        result.append("  ");
-                        result.append(createImportStatement(importEntry));
-                        result.append(",\n");
-                    }
-                    result.append("} from \"").append(module).append("\";\n");
-                }
-            }
-            result.append("\n");
-        }
-
-        result.append(super.toString());
-        return result.toString();
-    }
-
-    private String createImportStatement(Map.Entry<String, String> entry) {
-        return entry.getKey().equals(entry.getValue())
-               ? entry.getKey()
-               : entry.getValue() + " as " + entry.getKey();
+        return imports.toString() + super.toString();
     }
 
     /**
@@ -213,7 +181,7 @@ final class TypeScriptWriter extends CodeWriter {
 
             for (SymbolReference reference : typeSymbol.getReferences()) {
                 if (reference.hasOption(SymbolReference.ContextOption.USE)) {
-                    addImport(reference.getSymbol());
+                    addImport(reference);
                 }
             }
 
