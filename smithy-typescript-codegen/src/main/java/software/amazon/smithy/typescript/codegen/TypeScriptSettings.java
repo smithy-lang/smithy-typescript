@@ -30,9 +30,15 @@ import software.amazon.smithy.model.shapes.ShapeId;
 public final class TypeScriptSettings {
 
     private static final String PACKAGE = "package";
+    private static final String PACKAGE_DESCRIPTION = "packageDescription";
+    private static final String PACKAGE_VERSION = "packageVersion";
+    private static final String PACKAGE_JSON = "packageJson";
     private static final String SERVICE = "service";
 
     private String packageName;
+    private String packageDescription;
+    private String packageVersion;
+    private ObjectNode packageJson;
     private ShapeId service;
     private ObjectNode pluginSettings = Node.objectNode();
 
@@ -44,9 +50,14 @@ public final class TypeScriptSettings {
      */
     public static TypeScriptSettings from(ObjectNode config) {
         TypeScriptSettings settings = new TypeScriptSettings();
-        config.warnIfAdditionalProperties(Arrays.asList(PACKAGE, SERVICE));
-        settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
+        config.warnIfAdditionalProperties(Arrays.asList(
+                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE));
         settings.setService(config.expectStringMember(SERVICE).expectShapeId());
+        settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
+        settings.setPackageVersion(config.expectStringMember(PACKAGE_VERSION).getValue());
+        settings.setPackageDescription(config.getStringMemberOrDefault(
+                PACKAGE_DESCRIPTION, settings.getPackageName() + " client"));
+        settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         settings.setPluginSettings(config);
         return settings;
     }
@@ -103,5 +114,50 @@ public final class TypeScriptSettings {
                 .orElseThrow(() -> new CodegenException("Service shape not found: " + getService()))
                 .asServiceShape()
                 .orElseThrow(() -> new CodegenException("Shape is not a Service: " + getService()));
+    }
+
+    /**
+     * Gets the description of the package that will be placed in the
+     * "description" field of the generated package.json.
+     *
+     * @return Returns the description.
+     */
+    public String getPackageDescription() {
+        return packageDescription;
+    }
+
+    public void setPackageDescription(String packageDescription) {
+        this.packageDescription = packageDescription;
+    }
+
+    /**
+     * Gets the version of the generated package that will be used with the
+     * generated package.json file.
+     *
+     * @return Returns the package version.
+     */
+    public String getPackageVersion() {
+        return packageVersion;
+    }
+
+    public void setPackageVersion(String packageVersion) {
+        this.packageVersion = packageVersion;
+    }
+
+    /**
+     * Gets a chunk of custom properties to merge into the generated
+     * package.json file.
+     *
+     * <p>This JSON is used to provide any property present in the
+     * package.json file that isn't captured by any other settings.
+     *
+     * @return Returns the custom package JSON.
+     */
+    public ObjectNode getPackageJson() {
+        return packageJson;
+    }
+
+    public void setPackageJson(ObjectNode packageJson) {
+        this.packageJson = packageJson;
     }
 }
