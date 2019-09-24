@@ -43,10 +43,12 @@ import software.amazon.smithy.utils.CodeWriter;
 final class TypeScriptWriter extends CodeWriter {
 
     private final Path moduleName;
+    private final String moduleNameString;
     private final ImportDeclarations imports;
 
     TypeScriptWriter(String moduleName) {
         this.moduleName = Paths.get(moduleName);
+        moduleNameString = moduleName;
         imports = new ImportDeclarations(moduleName);
 
         setIndentText("  ");
@@ -63,7 +65,9 @@ final class TypeScriptWriter extends CodeWriter {
      */
     TypeScriptWriter addImport(Symbol symbol) {
         if (!symbol.getNamespace().isEmpty()) {
-            addImport(symbol.getName(), symbol.getName(), symbol.getNamespace());
+            if (!symbol.getNamespace().equals(moduleNameString)) {
+                addImport(symbol.getName(), symbol.getName(), symbol.getNamespace());
+            }
             for (SymbolReference reference : symbol.getReferences()) {
                 addImport(reference);
             }
