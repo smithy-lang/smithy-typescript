@@ -44,6 +44,15 @@ public class ImportDeclarationsTest {
     }
 
     @Test
+    public void relativizesImportsWithTrailingFilename() {
+        ImportDeclarations declarations = new ImportDeclarations("foo/bar/index");
+        declarations.addImport("Baz", "", "./shared/shapeTypes");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import { Baz } from \"../../../shared/shapeTypes\";"));
+    }
+
+    @Test
     public void automaticallyCorrectsBasePath() {
         ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
         declarations.addImport("Baz", "", "./foo/bar/bam/qux");

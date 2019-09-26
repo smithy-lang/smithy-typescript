@@ -82,7 +82,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         nonTraits.shapes().sorted().forEach(shape -> shape.accept(this));
 
         // Write each pending writer.
-        // writers.forEach((filename, writer) -> fileManifest.writeFile(filename, writer.toString()));
         writers.writeFiles();
 
         // Write the package.json file, including all symbol dependencies.
@@ -250,17 +249,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         writer.openBlock("export class $L extends $$SmithyException {", symbol.getName());
 
         // Write properties.
+        // Skip "message" since it is something that SmithyException defines.
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
         config.memberPrefix = "readonly ";
+        config.skipMembers.add("message");
         config.writeMembers(writer, shape);
 
         // Write constructor.
         writer.openBlock("constructor(args: {");
         writer.write("$$service: string;");
-        if (!shape.getMemberNames().contains("message")) {
-            writer.write("message?: string;");
-        }
+        writer.write("message?: string;");
+
         config.memberPrefix = "";
         config.noDocs = true;
         config.writeMembers(writer, shape);
@@ -268,6 +268,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         writer.indent();
 
         writer.openBlock("super({");
+        // Provide a default value for message in case it was optional in the shape.
+        // It's required in SmithyException, so provide a default value.
+        writer.write("message: args.message || \"\",");
         writer.write("id: $S,", shape.getId());
         writer.write("name: $S,", shape.getId().getName());
         writer.write("fault: $S,", errorTrait.getValue());
@@ -276,7 +279,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         for (MemberShape member : shape.getAllMembers().values()) {
             String memberName = symbolProvider.toMemberName(member);
-            writer.write("this.$1L = args.$1L;", memberName);
+            if (!memberName.equals("message")) {
+                writer.write("this.$1L = args.$1L;", memberName);
+            }
         }
 
         writer.closeBlock("}"); // constructor

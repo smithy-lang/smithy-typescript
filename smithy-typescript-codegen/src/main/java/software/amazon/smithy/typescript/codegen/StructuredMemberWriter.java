@@ -16,6 +16,8 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -23,6 +25,8 @@ import software.amazon.smithy.model.shapes.Shape;
 
 /**
  * Generates objects, interfaces, enums, etc.
+ *
+ * TODO: Replace this with a builder for generating classes and interfaces.
  */
 final class StructuredMemberWriter {
 
@@ -31,6 +35,7 @@ final class StructuredMemberWriter {
     Collection<MemberShape> members;
     String memberPrefix = "";
     boolean noDocs;
+    final Set<String> skipMembers = new HashSet<>();
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
         this.model = model;
@@ -41,6 +46,10 @@ final class StructuredMemberWriter {
     void writeMembers(TypeScriptWriter writer, Shape shape) {
         int position = -1;
         for (MemberShape member : members) {
+            if (skipMembers.contains(member.getMemberName())) {
+                continue;
+            }
+
             position++;
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
@@ -48,6 +57,7 @@ final class StructuredMemberWriter {
             String typeSuffix = member.isRequired() ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                          symbolProvider.toSymbol(member), typeSuffix);
+
             if (wroteDocs && position < members.size() - 1) {
                 writer.write("");
             }
