@@ -20,24 +20,9 @@ are as follows:
    }
 
    dependencies {
-       implementation(project(":smithy-typescript-codegen"))
-   }
-   ```
-
-nb. If you wish to setup your package outside the `smithy-typescript` package,
-use the fully qualified implementation in your dependencies instead of the
-`project`.
-
-   ```kotlin
-   plugins {
-       id("software.amazon.smithy").version("0.3.0")
-   }
-
-   dependencies {
        implementation("software.amazon.smithy:smithy-typescript-codegen:0.1.0")
    }
    ```
-
 
 3. Create a `smithy-build.json` file with the following contents,
    substituting "example.foo#MyClient" with the name of the service
