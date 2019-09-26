@@ -17,12 +17,8 @@ package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
-import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
-import software.amazon.smithy.codegen.core.ReservedWords;
-import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Plugin to trigger TypeScript code generation.
@@ -58,19 +54,6 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
      * @return Returns the created provider.
      */
     public static SymbolProvider createSymbolProvider(Model model, String rootNamespace, String targetNamespace) {
-        SymbolVisitor symbolProvider = new SymbolVisitor(model, rootNamespace, targetNamespace);
-
-        // Load reserved words from a new-line delimited file.
-        ReservedWords reservedWords = new ReservedWordsBuilder()
-                .loadWords(TypeScriptCodegenPlugin.class.getResource("reserved-words.txt"))
-                .build();
-
-        return ReservedWordSymbolProvider.builder()
-                .nameReservedWords(reservedWords)
-                .symbolProvider(symbolProvider)
-                // Only escape words when the symbol has a namespace. This
-                // prevents escaping intentional references to reserved words.
-                .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getNamespace()))
-                .build();
+        return new SymbolVisitor(model, rootNamespace, targetNamespace);
     }
 }

@@ -69,7 +69,9 @@ structure CityCoordinates {
 structure NoSuchResource {
     /// The type of resource that was not found.
     @required
-    resourceType: String
+    resourceType: String,
+
+    message: String,
 }
 
 // The paginated trait indicates that the operation may

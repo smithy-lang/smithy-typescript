@@ -18,10 +18,12 @@ package software.amazon.smithy.typescript.codegen;
 import static java.lang.String.format;
 
 import java.util.Locale;
-import java.util.StringJoiner;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.ShapeIdShader;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -72,11 +74,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final String BIG_JS_VERSION = "^5.2.2";
     private static final Pattern SHAPE_ID_NAMESPACE_SPLITTER = Pattern.compile("\\.");
     private static final Pattern SHAPE_ID_NAMESPACE_PART_SPLITTER = Pattern.compile("_");
-    private static final Pattern SLASH_SPLITTER = Pattern.compile("/");
 
     private final Model model;
     private final ShapeIdShader shader;
     private final String targetNamespace;
+    private final ReservedWordSymbolProvider.Escaper escaper;
 
     SymbolVisitor(Model model, String rootNamespace, String targetNamespace) {
         this.model = model;
@@ -90,13 +92,30 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         } else {
             shader = null;
         }
+
+        // Load reserved words from a new-line delimited file.
+        ReservedWords reservedWords = new ReservedWordsBuilder()
+                .loadWords(TypeScriptCodegenPlugin.class.getResource("reserved-words.txt"))
+                .build();
+
+        escaper = ReservedWordSymbolProvider.builder()
+                .nameReservedWords(reservedWords)
+                // Only escape words when the symbol has a definition file to
+                // prevent escaping intentional references to built-in types.
+                .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getDefinitionFile()))
+                .buildEscaper();
     }
 
     @Override
     public Symbol toSymbol(Shape shape) {
         Symbol symbol = shape.accept(this);
         LOGGER.fine(() -> "Creating symbol from " + shape + ": " + symbol);
-        return symbol;
+        return escaper.escapeSymbol(shape, symbol);
+    }
+
+    @Override
+    public String toMemberName(MemberShape shape) {
+        return escaper.escapeMemberName(shape.getMemberName());
     }
 
     @Override
@@ -210,7 +229,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol operationShape(OperationShape shape) {
         ShapeId shaded = shadeShapeId(shape);
         String commandName = StringUtils.capitalize(shaded.getName()) + "Command";
-        return createSymbolBuilder(shape, commandName, formatModuleName(shaded)).build();
+        return createGeneratedSymbolBuilder(shape, commandName, formatModuleName(shaded)).build();
     }
 
     @Override
@@ -295,7 +314,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
         ShapeId shaded = shadeShapeId(shape);
         String name = StringUtils.capitalize(shaded.getName());
-        return createSymbolBuilder(shape, name, formatModuleName(shaded));
+        return createGeneratedSymbolBuilder(shape, name, formatModuleName(shaded));
     }
 
     private Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
@@ -306,7 +325,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return Symbol.builder()
                 .putProperty("shape", shape)
                 .name(typeName)
-                .namespace(namespace, "/")
+                .namespace(namespace, "/");
+    }
+
+    private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
+        return createSymbolBuilder(shape, typeName, namespace)
                 .definitionFile(toFilename(shape, typeName, namespace));
     }
 
@@ -325,9 +348,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             result.append("/");
         }
 
-        // Remove the trailing "/".
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
+        return result.append("index").toString();
     }
 
     private String toFilename(Shape shape, String name, String namespace) {
@@ -335,17 +356,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return name + "Client.ts";
         }
 
-        String filename;
-        if (namespace == null) {
-            filename = "index.ts";
-        } else {
-            StringJoiner joiner = new StringJoiner("/", "", "/index.ts");
-            for (String part : SLASH_SPLITTER.split(namespace)) {
-                joiner.add(part);
-            }
-            filename = joiner.toString();
-        }
-
-        return format("types/%s", filename).replace("//", "/");
+        return "types/" + namespace.replace(".", "/") + ".ts";
     }
 }
