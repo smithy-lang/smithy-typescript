@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import software.amazon.smithy.model.shapes.ShapeId;
 
 public class TypeScriptUtilsTest {
     @Test
@@ -23,10 +22,5 @@ public class TypeScriptUtilsTest {
         assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo", "bar")), equalTo("\"foo\" | \"bar\""));
         assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo!!")), equalTo("\"foo!!\""));
         assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo\"", "bar")), equalTo("\"foo\\\"\" | \"bar\""));
-    }
-
-    @Test
-    public void convertsShapeIdsToModuleNames() {
-        assertThat(TypeScriptUtils.formatModuleName(ShapeId.from("foo.baz#Bar")), equalTo("foo/baz"));
     }
 }

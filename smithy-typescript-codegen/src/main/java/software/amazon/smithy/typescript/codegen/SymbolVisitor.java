@@ -16,10 +16,13 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
-import static software.amazon.smithy.typescript.codegen.TypeScriptUtils.formatModuleName;
 
+import java.util.Locale;
+import java.util.StringJoiner;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.ShapeIdShader;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -42,11 +45,13 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -65,11 +70,26 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final String TYPES_NODE_VERSION = "^12.7.5";
     private static final String TYPES_BIG_JS_VERSION = "^4.0.5";
     private static final String BIG_JS_VERSION = "^5.2.2";
+    private static final Pattern SHAPE_ID_NAMESPACE_SPLITTER = Pattern.compile("\\.");
+    private static final Pattern SHAPE_ID_NAMESPACE_PART_SPLITTER = Pattern.compile("_");
+    private static final Pattern SLASH_SPLITTER = Pattern.compile("/");
 
     private final Model model;
+    private final ShapeIdShader shader;
+    private final String targetNamespace;
 
-    SymbolVisitor(Model model) {
+    SymbolVisitor(Model model, String rootNamespace, String targetNamespace) {
         this.model = model;
+        this.targetNamespace = targetNamespace;
+
+        if (rootNamespace != null && targetNamespace != null) {
+            shader = ShapeIdShader.builder()
+                    .rootNamespace(rootNamespace)
+                    .targetNamespace(targetNamespace)
+                    .build();
+        } else {
+            shader = null;
+        }
     }
 
     @Override
@@ -188,8 +208,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol operationShape(OperationShape shape) {
-        String commandName = StringUtils.capitalize(shape.getId().getName()) + "Command";
-        return createSymbolBuilder(shape, commandName, formatModuleName(shape)).build();
+        ShapeId shaded = shadeShapeId(shape);
+        String commandName = StringUtils.capitalize(shaded.getName()) + "Command";
+        return createSymbolBuilder(shape, commandName, formatModuleName(shaded)).build();
     }
 
     @Override
@@ -265,16 +286,23 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return createSymbolBuilder(shape, "Date").build();
     }
 
-    private static Symbol.Builder createObjectSymbolBuilder(Shape shape) {
-        String name = StringUtils.capitalize(shape.getId().getName());
-        return createSymbolBuilder(shape, name, formatModuleName(shape));
+    private ShapeId shadeShapeId(ToShapeId id) {
+        return shader == null
+               ? id.toShapeId()
+               : shader.shade(id.toShapeId(), ShapeIdShader.ShadeOption.SQUASH_INTO_NAMESPACE);
     }
 
-    private static Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
+    private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
+        ShapeId shaded = shadeShapeId(shape);
+        String name = StringUtils.capitalize(shaded.getName());
+        return createSymbolBuilder(shape, name, formatModuleName(shaded));
+    }
+
+    private Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
         return Symbol.builder().putProperty("shape", shape).name(typeName);
     }
 
-    private static Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
+    private Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
         return Symbol.builder()
                 .putProperty("shape", shape)
                 .name(typeName)
@@ -282,23 +310,42 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .definitionFile(toFilename(shape, typeName, namespace));
     }
 
-    private static String toFilename(Shape shape, String name, String namespace) {
+    private String formatModuleName(ToShapeId id) {
+        StringBuilder result = new StringBuilder();
+
+        for (String part : SHAPE_ID_NAMESPACE_SPLITTER.split(id.toShapeId().getNamespace())) {
+            String[] inner = SHAPE_ID_NAMESPACE_PART_SPLITTER.split(part);
+            for (int i = 0; i < inner.length; i++) {
+                String innerValue = inner[i].toLowerCase(Locale.ENGLISH);
+                if (i > 0) {
+                    innerValue = StringUtils.capitalize(innerValue);
+                }
+                result.append(innerValue);
+            }
+            result.append("/");
+        }
+
+        // Remove the trailing "/".
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
+
+    private String toFilename(Shape shape, String name, String namespace) {
         if (shape.isServiceShape()) {
-            return format("%sClient.ts", name);
+            return name + "Client.ts";
         }
 
         String filename;
         if (namespace == null) {
-            filename = name;
+            filename = "index.ts";
         } else {
-            StringBuilder builder = new StringBuilder();
-            String[] parts = namespace.split("/");
-            for (String part : parts) {
-                builder.append('/').append(part);
+            StringJoiner joiner = new StringJoiner("/", "", "/index.ts");
+            for (String part : SLASH_SPLITTER.split(namespace)) {
+                joiner.add(part);
             }
-            filename = builder.toString();
+            filename = joiner.toString();
         }
 
-        return format("types/%s.ts", filename).replace("//", "/");
+        return format("types/%s", filename).replace("//", "/");
     }
 }

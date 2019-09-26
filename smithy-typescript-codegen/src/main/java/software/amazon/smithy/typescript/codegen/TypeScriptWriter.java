@@ -18,10 +18,14 @@ package software.amazon.smithy.typescript.codegen;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.BiFunction;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
@@ -55,6 +59,40 @@ final class TypeScriptWriter extends CodeWriter {
         trimTrailingSpaces(true);
         trimBlankLines();
         putFormatter('T', new TypeScriptSymbolFormatter());
+    }
+
+    /**
+     * Handles delegating out access to {@code TypeScriptWriter}s based on
+     * the resolved filename of a symbol.
+     *
+     * @param model Model that contains all shapes being generated.
+     * @param symbolProvider Symbol provider that converts shapes to symbols.
+     * @param fileManifest The manifest of where files are written.
+     * @return Returns the created delegator.
+     */
+    static CodeWriterDelegator<TypeScriptWriter> createDelegator(
+            Model model,
+            SymbolProvider symbolProvider,
+            FileManifest fileManifest
+    ) {
+        Walker walker = new Walker(model.getKnowledge(NeighborProviderIndex.class).getProvider());
+
+        return CodeWriterDelegator.<TypeScriptWriter>builder()
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .fileManifest(fileManifest)
+                .factory((shape, symbol) -> new TypeScriptWriter(symbol.getNamespace()))
+                .beforeWrite((filename, writer, shapes) -> {
+                    // Add dependencies of the shape and any references it has by
+                    // walking the shape's neighbors.
+                    for (Shape shape : shapes) {
+                        writer.addImport(symbolProvider.toSymbol(shape));
+                        walker.walkShapes(shape).forEach(neighbor -> {
+                            writer.addImport(symbolProvider.toSymbol(neighbor));
+                        });
+                    }
+                })
+                .build();
     }
 
     /**

@@ -18,7 +18,6 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -71,15 +70,5 @@ final class TypeScriptUtils {
         return values.stream()
                 .map(value -> StringUtils.escapeJavaString(value, ""))
                 .collect(Collectors.joining(" | "));
-    }
-
-    /**
-     * Formats a Smithy Shape ID namespace as a typescript module.
-     *
-     * @param id Shape ID to format.
-     * @return Returns the TypeScript module name.
-     */
-    static String formatModuleName(ToShapeId id) {
-        return id.toShapeId().getNamespace().replace(".", "/");
     }
 }

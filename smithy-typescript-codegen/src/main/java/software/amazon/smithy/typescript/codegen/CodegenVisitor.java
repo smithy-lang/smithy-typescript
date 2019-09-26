@@ -17,17 +17,17 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.codegen.core.ShapeIdShader;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -39,8 +39,15 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.utils.MapUtils;
 
 class CodegenVisitor extends ShapeVisitor.Default<Void> {
+
+    /** A mapping of static resource files to copy over to a new filename. */
+    private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
+            "shared/shapeTypes.ts", "shapeTypes.ts",
+            "tsconfig.json", "tsconfig.json"
+    );
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -56,31 +63,20 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         model = context.getModel();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        symbolProvider = SymbolProvider.cache(TypeScriptCodegenPlugin.createSymbolProvider(model));
 
-        Walker walker = new Walker(model.getKnowledge(NeighborProviderIndex.class).getProvider());
-        writers = CodeWriterDelegator.<TypeScriptWriter>builder()
-                .model(model)
-                .symbolProvider(symbolProvider)
-                .fileManifest(fileManifest)
-                .factory((shape, symbol) -> new TypeScriptWriter(symbol.getNamespace()))
-                .beforeWrite((filename, writer, shapes) -> {
-                    // Add dependencies of the shape and any references it has by
-                    // walking the shape's neighbors.
-                    for (Shape shape : shapes) {
-                        writer.addImport(symbolProvider.toSymbol(shape));
-                        walker.walkShapes(shape).forEach(neighbor -> {
-                            writer.addImport(symbolProvider.toSymbol(neighbor));
-                        });
-                    }
-                })
-                .build();
+        // Shade the generated shape IDs if a target namespace was specified.
+        String targetNamespace = context.getSettings().getStringMemberOrDefault(ShapeIdShader.TARGET_NAMESPACE, null);
+        String rootNamespace = targetNamespace == null ? null : service.getId().getNamespace();
+
+        symbolProvider = SymbolProvider.cache(
+                TypeScriptCodegenPlugin.createSymbolProvider(model, rootNamespace, targetNamespace));
+
+        writers = TypeScriptWriter.createDelegator(model, symbolProvider, fileManifest);
     }
 
     void execute() {
         // Write shared / static content.
-        fileManifest.writeFile("shared/shapeTypes.ts", getClass(), "shapeTypes.ts");
-        fileManifest.writeFile("tsconfig.json", getClass(), "tsconfig.json");
+        STATIC_FILE_COPIES.forEach((from, to) -> fileManifest.writeFile(from, getClass(), to));
 
         // Generate models.
         nonTraits.shapes().sorted().forEach(shape -> shape.accept(this));

@@ -3,6 +3,7 @@
     "plugins": {
         "typescript-codegen": {
             "service": "example.weather#Weather",
+            "targetNamespace": "Weather",
             "package": "weather",
             "packageVersion": "0.0.1",
             "packageJson": {

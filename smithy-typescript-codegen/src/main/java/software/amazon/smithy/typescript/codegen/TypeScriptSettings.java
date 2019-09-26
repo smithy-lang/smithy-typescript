@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Arrays;
 import java.util.Objects;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.ShapeIdShader;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -51,7 +52,8 @@ public final class TypeScriptSettings {
     public static TypeScriptSettings from(ObjectNode config) {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(
-                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE));
+                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE,
+                ShapeIdShader.TARGET_NAMESPACE));
         settings.setService(config.expectStringMember(SERVICE).expectShapeId());
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
         settings.setPackageVersion(config.expectStringMember(PACKAGE_VERSION).getValue());

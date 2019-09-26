@@ -16,6 +16,8 @@
 extra["displayName"] = "Smithy :: Typescript :: Codegen :: Test"
 extra["moduleName"] = "software.amazon.smithy.typescript.codegen.test"
 
+tasks["jar"].enabled = false
+
 plugins {
     java
     id("software.amazon.smithy").version("0.3.0")
