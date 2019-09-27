@@ -1,19 +1,21 @@
+export const TYPE = "__type";
+
 /**
- * Type that is implemented by all Smithy structures.
+ * Checks if the given value is a Smithy structure of the given type.
  */
-export interface SmithyStructure {
-  $id: string;
+export function isa<T>(o: any, ...ids: string[]): o is T {
+  return typeof o === "object" && TYPE in o && ids.indexOf(o[TYPE]) > -1;
 }
 
 /**
- * Type that is extended by all Smithy shapes marked with the
+ * Type that is implemented by all Smithy shapes marked with the
  * error trait.
  */
-export class SmithyException extends Error implements SmithyStructure {
+export interface SmithyException {
   /**
    * The shape ID of the exception.
    */
-  readonly $id: string;
+  readonly __type: string;
 
   /**
    * Whether the client or server are at fault.
@@ -21,23 +23,14 @@ export class SmithyException extends Error implements SmithyStructure {
   readonly $fault: "client" | "server";
 
   /**
+   * The name of the error.
+   */
+  readonly $name: string;
+
+  /**
    * The service that encountered the exception.
    */
-  readonly $service: string;
-
-  constructor(args: {
-    id: string;
-    name: string;
-    service: string;
-    fault: "client" | "server";
-    message?: string | undefined;
-  }) {
-    super(args.message || "");
-    this.$id = args.id;
-    this.name = args.name;
-    this.$service = args.service;
-    this.$fault = args.fault;
-  }
+  readonly $service?: string;
 }
 
 /**

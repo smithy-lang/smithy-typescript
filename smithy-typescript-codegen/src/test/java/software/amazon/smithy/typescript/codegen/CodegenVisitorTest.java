@@ -12,20 +12,37 @@ import software.amazon.smithy.model.node.Node;
 public class CodegenVisitorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
-        testErrorStructureCodegen("error-test-empty.smithy");
+        testErrorStructureCodegen("error-test-empty.smithy",
+                                  "export interface Err extends _smithy.SmithyException {\n"
+                                  + "  __type: \"smithy.example#Err\";\n"
+                                  + "  $name: \"Err\";\n"
+                                  + "  $fault: \"client\";\n"
+                                  + "}");
     }
 
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
-        testErrorStructureCodegen("error-test-optional-message.smithy");
+        testErrorStructureCodegen("error-test-optional-message.smithy",
+                                  "export interface Err extends _smithy.SmithyException {\n"
+                                  + "  __type: \"smithy.example#Err\";\n"
+                                  + "  $name: \"Err\";\n"
+                                  + "  $fault: \"client\";\n"
+                                  + "  message?: string;\n"
+                                  + "}");
     }
 
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
-        testErrorStructureCodegen("error-test-required-message.smithy");
+        testErrorStructureCodegen("error-test-required-message.smithy",
+                                  "export interface Err extends _smithy.SmithyException {\n"
+                                  + "  __type: \"smithy.example#Err\";\n"
+                                  + "  $name: \"Err\";\n"
+                                  + "  $fault: \"client\";\n"
+                                  + "  message: string | undefined;\n"
+                                  + "}");
     }
 
-    public void testErrorStructureCodegen(String file) {
+    public void testErrorStructureCodegen(String file, String expectedType) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource(file))
                 .assemble()
@@ -44,18 +61,11 @@ public class CodegenVisitorTest {
         new TypeScriptCodegenPlugin().execute(context);
         String contents = manifest.getFileString("/types/smithy/example/index.ts").get();
 
-        assertThat(contents, containsString("export class Err extends $SmithyException {\n"
-                                            + "  constructor(args: {\n"
-                                            + "    $service: string;\n"
-                                            + "    message?: string;\n"
-                                            + "  }) {\n"
-                                            + "    super({\n"
-                                            + "      message: args.message || \"\",\n"
-                                            + "      id: \"smithy.example#Err\",\n"
-                                            + "      name: \"Err\",\n"
-                                            + "      fault: \"client\",\n"
-                                            + "      service: args.$service,\n"
-                                            + "    });\n"
+        assertThat(contents, containsString(expectedType));
+        assertThat(contents, containsString("namespace Err {\n"
+                                            + "  export const ID = \"smithy.example#Err\";\n"
+                                            + "  export function isa(o: any): o is Err {\n"
+                                            + "    return _smithy.isa(o, ID);\n"
                                             + "  }\n"
                                             + "}"));
     }
