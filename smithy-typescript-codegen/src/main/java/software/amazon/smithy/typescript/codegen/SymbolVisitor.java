@@ -357,6 +357,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return name + "Client.ts";
         }
 
-        return "types/" + namespace.replace(".", "/") + ".ts";
+        return "models/" + namespace.replace(".", "/") + ".ts";
     }
 }

@@ -59,7 +59,7 @@ public class CodegenVisitorTest {
                 .build();
 
         new TypeScriptCodegenPlugin().execute(context);
-        String contents = manifest.getFileString("/types/smithy/example/index.ts").get();
+        String contents = manifest.getFileString("/models/smithy/example/index.ts").get();
 
         assertThat(contents, containsString(expectedType));
         assertThat(contents, containsString("namespace Err {\n"
