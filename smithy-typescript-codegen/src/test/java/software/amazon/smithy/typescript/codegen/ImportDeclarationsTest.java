@@ -80,4 +80,15 @@ public class ImportDeclarationsTest {
 
         assertThat(result, containsString("import { SharedThing } from \"../../shared/types\";"));
     }
+
+    @Test
+    public void canImportStarImport() {
+        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        declarations.addImport("*", "_baz", "@types/foo");
+        declarations.addImport("*", "*", "@types/other");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import * as _baz from \"@types/foo\";"));
+        assertThat(result, containsString("import * from \"@types/other\";"));
+    }
 }

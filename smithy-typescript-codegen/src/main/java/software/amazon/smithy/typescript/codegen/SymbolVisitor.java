@@ -56,7 +56,6 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -222,7 +221,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol documentShape(DocumentShape shape) {
-        return createSymbolBuilder(shape, "DocumentType.Value", "./shared/shapeTypes").build();
+        return addSmithyImport(createSymbolBuilder(shape, "_smithy.DocumentType.Value")).build();
     }
 
     @Override
@@ -258,25 +257,27 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol structureShape(StructureShape shape) {
-        // Error and normal structures need specific imports for their *definition*.
-        Symbol importSymbol = shape.hasTrait(ErrorTrait.class)
-                ? Symbol.builder().name("SmithyException").namespace("./shared/shapeTypes", "").build()
-                : Symbol.builder().name("SmithyStructure").namespace("./shared/shapeTypes", "").build();
-        // Ensure there will never be conflicts by prefixing the import with "$".
+        Symbol.Builder builder = createObjectSymbolBuilder(shape);
+        addSmithyImport(builder);
+        return builder.build();
+    }
+
+    private Symbol.Builder addSmithyImport(Symbol.Builder builder) {
+        Symbol importSymbol = Symbol.builder()
+                .name("*")
+                .namespace("./lib/smithy", "")
+                .build();
         SymbolReference reference = SymbolReference.builder()
                 .symbol(importSymbol)
-                .alias("$" + importSymbol.getName())
+                .alias("_smithy")
                 .options(SymbolReference.ContextOption.DECLARE)
                 .build();
-
-        return createObjectSymbolBuilder(shape).addReference(reference).build();
+        return builder.addReference(reference);
     }
 
     @Override
     public Symbol unionShape(UnionShape shape) {
-        Symbol taggedUnion = Symbol.builder().name("TaggedUnion").namespace("./shared/shapeTypes", "/").build();
-        SymbolReference reference = new SymbolReference(taggedUnion, SymbolReference.ContextOption.DECLARE);
-        return createObjectSymbolBuilder(shape).addReference(reference).build();
+        return addSmithyImport(createObjectSymbolBuilder(shape)).build();
     }
 
     @Override

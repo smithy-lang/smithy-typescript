@@ -45,7 +45,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     /** A mapping of static resource files to copy over to a new filename. */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
-            "shared/shapeTypes.ts", "shapeTypes.ts",
+            "lib/smithy.ts", "smithy.ts",
             "tsconfig.json", "tsconfig.json"
     );
 
@@ -98,11 +98,12 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     /**
-     * Renders structures as classes.
+     * Renders structures as interfaces.
      *
-     * <p>Classes are used for structures because we plan on adding
-     * inheritance to Smithy. We want developers to be able to use
-     * instanceof checks to widen types at runtime.
+     * <p>A namespace is created with the same name as the structure to
+     * provide helper functionality for checking if a given value is
+     * known to be of the same type as the structure. This will be
+     * even more useful if/when inheritance is added to Smithy.
      *
      * <p>Note that the {@code required} trait on structures is used to
      * determine whether or not a generated TypeScript interface uses
@@ -154,18 +155,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * <p>The following TypeScript is rendered:
      *
      * <pre>{@code
-     * import { SmithyStructure as $SmithyStructure } from "../shared/shapeTypes";
+     * import * as _smithy from "../lib/smithy";
      *
-     * export class Person implements $SmithyStructure {
-     *   readonly $id = "smithy.example#Person";
-     *   readonly name: string | undefined;
-     *   readonly age?: number | null;
-     *   constructor(args: {
-     *     name: string | undefined;
-     *     age?: number | null;
-     *   }) {
-     *     this.name = args.name;
-     *     this.age = args.arg;
+     * export interface Person {
+     *   __type?: "smithy.example#Person";
+     *   name: string | undefined;
+     *   age?: number | null;
+     * }
+     *
+     * export namespace Person {
+     *   export const ID = "smithy.example#Person";
+     *   export function isa(o: any): o is Person {
+     *     return _smithy.isa(o, ID);
      *   }
      * }
      * }</pre>
@@ -175,35 +176,19 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private void renderNonErrorStructure(StructureShape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         TypeScriptWriter writer = writers.createWriter(shape);
-        writer.openBlock("export class $L implements $$SmithyStructure {", symbol.getName());
-        writer.write("readonly $$id = $S;", shape.getId());
-
+        writer.openBlock("export interface $L {", symbol.getName());
+        writer.write("__type?: $S;", shape.getId());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
-        config.memberPrefix = "readonly ";
         config.writeMembers(writer, shape);
-
-        if (shape.getAllMembers().isEmpty()) {
-            writer.write("constructor(args?: {}) {}");
-        } else {
-            writer.openBlock("constructor(args: {");
-            config.memberPrefix = "";
-            config.writeMembers(writer, shape);
-            writer.closeBlock("}) {");
-            writer.indent();
-            for (MemberShape member : shape.getAllMembers().values()) {
-                String memberName = symbolProvider.toMemberName(member);
-                writer.write("this.$1L = args.$1L;", memberName);
-            }
-            writer.closeBlock("}");
-        }
-
         writer.closeBlock("}");
+        writer.write("");
+        renderStructureNamespace(shape, writer);
     }
 
     /**
-     * Error structures always extend from SmithyException and add the appropriate
-     * fault property.
+     * Error structures generate interfaces that extend from SmithyException
+     * and add the appropriate fault property.
      *
      * <p>Given the following Smithy structure:
      *
@@ -220,22 +205,19 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * <p>The following TypeScript is generated:
      *
      * <pre>{@code
-     * import { SmithyException as $SmithyException } from "../shared/shapeTypes";
+     * import * as _smithy from "../lib/smithy";
      *
-     * export class NoSuchResource extends $SmithyException {
-     *   readonly resourceType: string | undefined;
-     *   constructor(args: {
-     *     $service: string;
-     *     message?: string;
-     *     resourceType: string | undefined;
-     *   }) {
-     *     super({
-     *       id: "example.weather.foo#NoSuchResource",
-     *       name: "NoSuchResource",
-     *       fault: "client",
-     *       service: args.$service,
-     *     });
-     *     this.resourceType = args.resourceType;
+     * export interface NoSuchResource extends _smithy.SmithyException {
+     *   __type: "smithy.example#NoSuchResource";
+     *   $name: "NoSuchResource";
+     *   $fault: "client";
+     *   resourceType: string | undefined;
+     * }
+     *
+     * export namespace Person {
+     *   export const ID = "smithy.example#NoSuchResource";
+     *   export function isa(o: any): o is NoSuchResource {
+     *     return _smithy.isa(o, ID);
      *   }
      * }
      * }</pre>
@@ -246,46 +228,27 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
         TypeScriptWriter writer = writers.createWriter(shape);
-        writer.openBlock("export class $L extends $$SmithyException {", symbol.getName());
-
-        // Write properties.
-        // Skip "message" since it is something that SmithyException defines.
+        writer.openBlock("export interface $L extends _smithy.SmithyException {", symbol.getName());
+        writer.write("__type: $S;", shape.getId());
+        writer.write("$$name: $S;", shape.getId().getName());
+        writer.write("$$fault: $S;", errorTrait.getValue());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
-        config.memberPrefix = "readonly ";
-        config.skipMembers.add("message");
         config.writeMembers(writer, shape);
+        writer.closeBlock("}"); // interface
+        writer.write("");
+        renderStructureNamespace(shape, writer);
+    }
 
-        // Write constructor.
-        writer.openBlock("constructor(args: {");
-        writer.write("$$service: string;");
-        writer.write("message?: string;");
-
-        config.memberPrefix = "";
-        config.noDocs = true;
-        config.writeMembers(writer, shape);
-        writer.closeBlock("}) {");
-        writer.indent();
-
-        writer.openBlock("super({");
-        // Provide a default value for message in case it was optional in the shape.
-        // It's required in SmithyException, so provide a default value.
-        writer.write("message: args.message || \"\",");
-        writer.write("id: $S,", shape.getId());
-        writer.write("name: $S,", shape.getId().getName());
-        writer.write("fault: $S,", errorTrait.getValue());
-        writer.write("service: args.$$service,");
-        writer.closeBlock("});");
-
-        for (MemberShape member : shape.getAllMembers().values()) {
-            String memberName = symbolProvider.toMemberName(member);
-            if (!memberName.equals("message")) {
-                writer.write("this.$1L = args.$1L;", memberName);
-            }
-        }
-
-        writer.closeBlock("}"); // constructor
-        writer.closeBlock("}"); // class
+    private void renderStructureNamespace(StructureShape shape, TypeScriptWriter writer) {
+        Symbol symbol = symbolProvider.toSymbol(shape);
+        writer
+                .openBlock("export namespace $L {", symbol.getName())
+                    .write("export const ID = $S;", shape.getId())
+                    .openBlock("export function isa(o: any): o is $L {", symbol.getName())
+                        .write("return _smithy.isa(o, ID);")
+                    .closeBlock("}")
+                .closeBlock("}");
     }
 
     /**
@@ -350,7 +313,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Symbol symbol = symbolProvider.toSymbol(shape);
 
         TypeScriptWriter writer = writers.createWriter(shape);
-        writer.openBlock("export type $L = TaggedUnion<{", symbol.getName());
+        writer.openBlock("export type $L = _smithy.TaggedUnion<{", symbol.getName());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
         config.writeMembers(writer, shape);

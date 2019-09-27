@@ -63,18 +63,26 @@ final class ImportDeclarations {
         if (!imports.isEmpty()) {
             for (Map.Entry<String, Map<String, String>> entry : imports.entrySet()) {
                 String module = entry.getKey();
-                Map<String, String> imports = entry.getValue();
+                Map<String, String> moduleImports = entry.getValue();
 
-                if (imports.size() == 1) {
-                    Map.Entry<String, String> singleEntry = imports.entrySet().iterator().next();
-                    result.append("import { ")
-                            .append(createImportStatement(singleEntry))
-                            .append(" } from \"")
-                            .append(module)
-                            .append("\";\n");
+                if (moduleImports.size() == 1) {
+                    Map.Entry<String, String> singleEntry = moduleImports.entrySet().iterator().next();
+                    if (singleEntry.getValue().equals("*")) {
+                        result.append("import ")
+                                .append(createImportStatement(singleEntry))
+                                .append(" from \"")
+                                .append(module)
+                                .append("\";\n");
+                    } else {
+                        result.append("import { ")
+                                .append(createImportStatement(singleEntry))
+                                .append(" } from \"")
+                                .append(module)
+                                .append("\";\n");
+                    }
                 } else {
                     result.append("import {\n");
-                    for (Map.Entry<String, String> importEntry : imports.entrySet()) {
+                    for (Map.Entry<String, String> importEntry : moduleImports.entrySet()) {
                         result.append("  ");
                         result.append(createImportStatement(importEntry));
                         result.append(",\n");
