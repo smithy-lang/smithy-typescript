@@ -277,7 +277,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol unionShape(UnionShape shape) {
-        return addSmithyImport(createObjectSymbolBuilder(shape)).build();
+        return createObjectSymbolBuilder(shape).build();
     }
 
     @Override

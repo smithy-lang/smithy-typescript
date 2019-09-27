@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.ShapeIdShader;
@@ -40,6 +41,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.MapUtils;
+import software.amazon.smithy.utils.StringUtils;
 
 class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
@@ -242,26 +244,28 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     private void renderStructureNamespace(StructureShape shape, TypeScriptWriter writer) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        writer
-                .openBlock("export namespace $L {", symbol.getName())
-                    .write("export const ID = $S;", shape.getId())
-                    .openBlock("export function isa(o: any): o is $L {", symbol.getName())
-                        .write("return _smithy.isa(o, ID);")
-                    .closeBlock("}")
-                .closeBlock("}");
+        writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+            writer.write("export const ID = $S;", shape.getId());
+            writer.openBlock("export function isa(o: any): o is $L {", "}", symbol.getName(), () -> {
+                writer.write("return _smithy.isa(o, ID);");
+            });
+        });
     }
 
     /**
      * Renders a TypeScript union.
      *
      * <p>Smithy tagged unions are rendered as a set of TypeScript interfaces
-     * and functionality used to visit each variant.
+     * and functionality used to visit each variant. Only a single member
+     * can be set at any given time. A member that contains unknown variants
+     * is automatically added to each tagged union. If set, it contains the
+     * name of the property that was set and its value stored as an
+     * {@code any}.
      *
-     * <p>The {@code TaggedUnion} type wraps the generated interface to
-     * allow for only a single value to be set at any given time. This also
-     * allows for an unknown variant to be stored in the {@code $unknown}
-     * member using a tuple of the unknown tag (a string) followed by the
-     * value (an any).
+     * <p>A {@code Visitor} interface and a method used to dispatch to the
+     * visitor is generated for each tagged union. This allows for working
+     * with tagged unions functionally and account for each variant in a
+     * typed way.
      *
      * <p>For example, given the following Smithy model:
      *
@@ -276,20 +280,46 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * <p>The following code is generated:
      *
      * <pre>{@code
-     * export type Attacker = TaggedUnion<{
-     *   lion?: Lion;
-     *   tiger?: Tiger;
-     *   bear?: Bear;
-     * }>;
+     * export type Attacker =
+     *   | Attacker.LionMember
+     *   | Attacker.TigerMember
+     *   | Attacker.BearMember
+     *   | Attacker.$UnknownMember;
      *
-     * namespace Attacker {
+     * export namespace Attacker {
+     *   export const ID = "smithy.example#Attacker";
+     *   interface $Base {
+     *     __type?: "smithy.example#Attacker",
+     *   }
+     *   export interface LionMember extends $Base {
+     *     lion: Lion;
+     *     tiger?: never;
+     *     $unknown?: never;
+     *   }
+     *   export interface TigerMember extends $Base {
+     *     lion?: never;
+     *     tiger?: Tiger;
+     *     bear?: never;
+     *     $unknown?: never;
+     *   }
+     *   export interface BearMember extends $Base {
+     *     lion?: never;
+     *     tiger?: never;
+     *     bear: Bear;
+     *     $unknown: never;
+     *   }
+     *   export interface $UnknownMember extends $Base {
+     *     lion?: never;
+     *     tiger?: never;
+     *     bear?: never;
+     *     $unknown: [string, any];
+     *   }
      *   export interface Visitor<T> {
      *     lion: (value: Lion) => T;
      *     tiger: (value: Tiger) => T;
      *     bear: (value: Bear) => T;
      *     _: (name: string, value: any) => T;
      *   }
-     *
      *   export function visit<T>(
      *     value: Attacker,
      *     visitor: Visitor<T>
@@ -297,14 +327,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      *     if (value.lion !== undefined) return visitor.lion(value.lion);
      *     if (value.tiger !== undefined) return visitor.tiger(value.tiger);
      *     if (value.bear !== undefined) return visitor.bear(value.bear);
-     *     return visitor.$unknown(value.$unknown[0], value.$unknown[1]);
+     *     return visitor._(value.$unknown[0], value.$unknown[1]);
      *   }
      * }
      * }</pre>
      *
      * <p>Important: Tagged unions in TypeScript are intentionally designed
      * so that it is forward-compatible to change a structure with optional
-     * and mutually exclusive members to a taggged union.
+     * and mutually exclusive members to a tagged union.
      *
      * @param shape Shape to render as a union.
      */
@@ -312,40 +342,68 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     public Void unionShape(UnionShape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
 
+        Map<String, String> variantMap = new TreeMap<>();
+        for (MemberShape member : shape.getAllMembers().values()) {
+            String variant = StringUtils.capitalize(symbolProvider.toMemberName(member)) + "Member";
+            variantMap.put(member.getMemberName(), variant);
+        }
+
+        // Write out the union type of all variants.
         TypeScriptWriter writer = writers.createWriter(shape);
-        writer.openBlock("export type $L = _smithy.TaggedUnion<{", symbol.getName());
-        StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
-        config.writeMembers(writer, shape);
-        writer.closeBlock("}>;");
+        writer.openBlock("export type $L = ", "", symbol.getName(), () -> {
+            for (String variant : variantMap.values()) {
+                writer.write("| $L.$L", symbol.getName(), variant);
+            }
+            writer.write("| $L.$$UnknownMember", symbol.getName());
+        });
 
-        writer.write("");
-        writer.openBlock("namespace $L {", symbol.getName());
-
-        // Create the visitor type for the union.
-        writer.openBlock("export interface ${L}Visitor<T> {", symbol.getName());
-        for (MemberShape member : shape.getAllMembers().values()) {
-            String memberName = symbolProvider.toMemberName(member);
-            writer.write("$L: (value: $T) => T;",
-                         TypeScriptUtils.sanitizePropertyName(memberName),
-                         symbolProvider.toSymbol(member));
-        }
-        writer.write("_: (name: string, value: any) => T;");
-        writer.closeBlock("}"); // Close the visitor interface.
-
-        // Create the visitor dispatcher for the union.
-        writer.write("");
-        writer.write("export function visit<T>(").indent();
-        writer.write("value: $L,", symbol.getName());
-        writer.write("visitor: ${1L}Visitor<T>", symbol.getName());
-        writer.dedent().write("): T {").indent();
-        for (MemberShape member : shape.getAllMembers().values()) {
-            String memberName = symbolProvider.toMemberName(member);
-            writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
-        }
-        writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
-        writer.closeBlock("}"); // Close the visit() function
-        writer.closeBlock("}"); // Close the visitor namespace.
+        // Write out the namespace that contains each variant and visitor.
+        writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+            writer.write("export const ID = $S", shape.getId());
+            writer.openBlock("interface $$Base {", "}", () -> {
+                writer.write("__type?: $S;", shape.getId());
+            });
+            for (MemberShape member : shape.getAllMembers().values()) {
+                String name = variantMap.get(member.getMemberName());
+                writer.openBlock("export interface $L extends $$Base {", "}", name, () -> {
+                    for (MemberShape variantMember : shape.getAllMembers().values()) {
+                        if (variantMember.getMemberName().equals(member.getMemberName())) {
+                            writer.write("$L: $T;", symbolProvider.toMemberName(variantMember),
+                                         symbolProvider.toSymbol(variantMember));
+                        } else {
+                            writer.write("$L?: never;", symbolProvider.toMemberName(variantMember));
+                        }
+                    }
+                    writer.write("$$unknown?: never;");
+                });
+            }
+            // Write out the unknown variant.
+            writer.openBlock("export interface $$UnknownMember extends $$Base {", "}", () -> {
+                for (MemberShape member : shape.getAllMembers().values()) {
+                    writer.write("$L?: never;", symbolProvider.toMemberName(member));
+                }
+                writer.write("$$unknown: [string, any];");
+            });
+            // Write out the visitor type.
+            writer.openBlock("export interface Visitor<T> {", "}", () -> {
+                for (MemberShape member : shape.getAllMembers().values()) {
+                    writer.write("$L: (value: $T) => T;",
+                                 symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
+                }
+                writer.write("_: (name: string, value: any) => T;");
+            });
+            // Create the visitor dispatcher for the union.
+            writer.write("export function visit<T>(").indent();
+            writer.write("value: $L,", symbol.getName());
+            writer.write("visitor: Visitor<T>");
+            writer.dedent().write("): T {").indent();
+            for (MemberShape member : shape.getAllMembers().values()) {
+                String memberName = symbolProvider.toMemberName(member);
+                writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
+            }
+            writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
+            writer.dedent().write("}");
+        });
 
         return null;
     }
