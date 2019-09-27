@@ -23,7 +23,7 @@ public class SymbolProviderTest {
         assertThat(symbol.getName(), equalTo("Hello"));
         assertThat(symbol.getNamespace(), equalTo("com/foo/baz/index"));
         assertThat(symbol.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol.getDefinitionFile(), equalTo("types/com/foo/baz/index.ts"));
+        assertThat(symbol.getDefinitionFile(), equalTo("models/com/foo/baz/index.ts"));
     }
 
     @Test
@@ -38,12 +38,12 @@ public class SymbolProviderTest {
         assertThat(symbol1.getName(), equalTo("Hello"));
         assertThat(symbol1.getNamespace(), equalTo("ec2/index"));
         assertThat(symbol1.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol1.getDefinitionFile(), equalTo("types/ec2/index.ts"));
+        assertThat(symbol1.getDefinitionFile(), equalTo("models/ec2/index.ts"));
 
         assertThat(symbol2.getName(), equalTo("Hello"));
         assertThat(symbol2.getNamespace(), equalTo("ec2/baz/index"));
         assertThat(symbol2.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol2.getDefinitionFile(), equalTo("types/ec2/baz/index.ts"));
+        assertThat(symbol2.getDefinitionFile(), equalTo("models/ec2/baz/index.ts"));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SymbolProviderTest {
         assertThat(symbol1.getName(), equalTo("Hello"));
         assertThat(symbol1.getNamespace(), equalTo("cloudwatchEvents/index"));
         assertThat(symbol1.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol1.getDefinitionFile(), equalTo("types/cloudwatchEvents/index.ts"));
+        assertThat(symbol1.getDefinitionFile(), equalTo("models/cloudwatchEvents/index.ts"));
     }
 
     @Test
