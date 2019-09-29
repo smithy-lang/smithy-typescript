@@ -309,7 +309,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private ShapeId shadeShapeId(ToShapeId id) {
         return shader == null
                ? id.toShapeId()
-               : shader.shade(id.toShapeId(), ShapeIdShader.ShadeOption.SQUASH_INTO_NAMESPACE);
+               : shader.shade(id.toShapeId(), ShapeIdShader.ShadeOption.MERGE_NAMESPACE);
     }
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
