@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.TreeMap;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
-import software.amazon.smithy.codegen.core.ShapeIdShader;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -67,7 +66,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         fileManifest = context.getFileManifest();
 
         // Shade the generated shape IDs if a target namespace was specified.
-        String targetNamespace = context.getSettings().getStringMemberOrDefault(ShapeIdShader.TARGET_NAMESPACE, null);
+        String targetNamespace = context.getSettings()
+                .getStringMemberOrDefault(TypeScriptSettings.TARGET_NAMESPACE, null);
         String rootNamespace = targetNamespace == null ? null : service.getId().getNamespace();
 
         symbolProvider = SymbolProvider.cache(

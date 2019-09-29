@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static java.lang.String.format;
 
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -75,7 +76,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final Pattern SHAPE_ID_NAMESPACE_PART_SPLITTER = Pattern.compile("_");
 
     private final Model model;
-    private final ShapeIdShader shader;
+    private final Function<ShapeId, ShapeId> shader;
     private final String targetNamespace;
     private final ReservedWordSymbolProvider.Escaper escaper;
 
@@ -83,14 +84,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         this.model = model;
         this.targetNamespace = targetNamespace;
 
-        if (rootNamespace != null && targetNamespace != null) {
-            shader = ShapeIdShader.builder()
-                    .rootNamespace(rootNamespace)
-                    .targetNamespace(targetNamespace)
-                    .build();
-        } else {
-            shader = null;
-        }
+        shader = rootNamespace != null && targetNamespace != null
+                ? ShapeIdShader.createShader(rootNamespace, targetNamespace, ShapeIdShader.MERGE_NAMESPACE)
+                : Function.identity();
 
         // Load reserved words from a new-line delimited file.
         ReservedWords reservedWords = new ReservedWordsBuilder()
@@ -307,9 +303,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private ShapeId shadeShapeId(ToShapeId id) {
-        return shader == null
-               ? id.toShapeId()
-               : shader.shade(id.toShapeId(), ShapeIdShader.ShadeOption.MERGE_NAMESPACE);
+        return shader.apply(id.toShapeId());
     }
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
