@@ -178,6 +178,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private void renderNonErrorStructure(StructureShape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         TypeScriptWriter writer = writers.createWriter(shape);
+        writer.writeShapeDocs(shape);
         writer.openBlock("export interface $L {", symbol.getName());
         writer.write("__type?: $S;", shape.getId());
         StructuredMemberWriter config = new StructuredMemberWriter(
@@ -230,6 +231,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
         TypeScriptWriter writer = writers.createWriter(shape);
+        writer.writeShapeDocs(shape);
         writer.openBlock("export interface $L extends _smithy.SmithyException {", symbol.getName());
         writer.write("__type: $S;", shape.getId());
         writer.write("$$name: $S;", shape.getId().getName());
@@ -350,6 +352,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Write out the union type of all variants.
         TypeScriptWriter writer = writers.createWriter(shape);
+        writer.writeShapeDocs(shape);
         writer.openBlock("export type $L = ", "", symbol.getName(), () -> {
             for (String variant : variantMap.values()) {
                 writer.write("| $L.$L", symbol.getName(), variant);
@@ -365,6 +368,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             });
             for (MemberShape member : shape.getAllMembers().values()) {
                 String name = variantMap.get(member.getMemberName());
+                writer.writeMemberDocs(model, member);
                 writer.openBlock("export interface $L extends $$Base {", "}", name, () -> {
                     for (MemberShape variantMember : shape.getAllMembers().values()) {
                         if (variantMember.getMemberName().equals(member.getMemberName())) {

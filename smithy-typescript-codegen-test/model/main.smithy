@@ -34,6 +34,7 @@ string CityId
 @http(method: "GET", uri: "/cities/{cityId}")
 operation GetCity(GetCityInput) -> GetCityOutput errors [NoSuchResource]
 
+/// The input used to get a city.
 structure GetCityInput {
     // "cityId" provides the identifier for the resource and
     // has to be marked as required.
