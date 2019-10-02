@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "module": "commonjs",
     "declaration": true,
     "strict": true,
@@ -8,15 +8,9 @@
     "downlevelIteration": true,
     "importHelpers": true,
     "noEmitHelpers": true,
-    "lib": [
-      "es5",
-      "es2015.promise",
-      "es2015.collection",
-      "es2015.iterable",
-      "es2015.symbol.wellknown",
-      "dom"
-    ],
-    "incremental": true
+    "incremental": true,
+    "resolveJsonModule": true,
+    "declarationDir": "./types"
   },
   "typedocOptions": {
     "exclude": "**/node_modules/**",
@@ -25,6 +19,7 @@
     "hideGenerator": true,
     "ignoreCompilerErrors": true,
     "mode": "file",
-    "out": "./docs"
+    "out": "./docs",
+    "plugin": "@aws-sdk/client-documentation-generator"
   }
 }
