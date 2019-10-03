@@ -20,11 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -181,7 +183,19 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Symbol symbol = symbolProvider.toSymbol(shape);
         TypeScriptWriter writer = writers.createWriter(shape);
         writer.writeShapeDocs(shape);
-        writer.openBlock("export interface $L {", symbol.getName());
+
+        // Find symbol references with the "extends" property.
+        String extendsFrom = symbol.getReferences().stream()
+                .filter(ref -> ref.getProperty("extends").isPresent())
+                .map(SymbolReference::getAlias)
+                .collect(Collectors.joining(", "));
+
+        if (extendsFrom.isEmpty()) {
+            writer.openBlock("export interface $L {", symbol.getName());
+        } else {
+            writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
+        }
+
         writer.write("__type?: $S;", shape.getId());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());

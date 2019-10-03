@@ -18,9 +18,11 @@ package software.amazon.smithy.typescript.codegen;
 import static java.lang.String.format;
 
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -30,6 +32,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -58,6 +61,7 @@ import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -72,6 +76,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final String TYPES_NODE_VERSION = "^12.7.5";
     private static final String TYPES_BIG_JS_VERSION = "^4.0.5";
     private static final String BIG_JS_VERSION = "^5.2.2";
+    private static final String AWS_SDK_TYPES_VERSION = "^0.1.0-preview.5";
     private static final Pattern SHAPE_ID_NAMESPACE_SPLITTER = Pattern.compile("\\.");
     private static final Pattern SHAPE_ID_NAMESPACE_PART_SPLITTER = Pattern.compile("_");
 
@@ -79,6 +84,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private final Function<ShapeId, ShapeId> shader;
     private final String targetNamespace;
     private final ReservedWordSymbolProvider.Escaper escaper;
+    private final Set<StructureShape> outputShapes;
 
     SymbolVisitor(Model model, String rootNamespace, String targetNamespace) {
         this.model = model;
@@ -99,6 +105,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 // prevent escaping intentional references to built-in types.
                 .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getDefinitionFile()))
                 .buildEscaper();
+
+        // Get each structure that's used as output.
+        OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
+        outputShapes = model.getShapeIndex().shapes(OperationShape.class)
+                .flatMap(operationShape -> OptionalUtils.stream(operationIndex.getOutput(operationShape)))
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -255,6 +267,17 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol structureShape(StructureShape shape) {
         Symbol.Builder builder = createObjectSymbolBuilder(shape);
         addSmithyImport(builder);
+
+        if (outputShapes.contains(shape)) {
+            builder.addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "@aws-sdk/types", AWS_SDK_TYPES_VERSION);
+            builder.addReference(SymbolReference.builder()
+                    .alias("$MetadataBearer")
+                    .symbol(Symbol.builder().name("MetadataBearer").namespace("@aws-sdk/types", "/").build())
+                    .putProperty("extends", true)
+                    .build());
+            builder.putProperty("isOutput", true);
+        }
+
         return builder.build();
     }
 

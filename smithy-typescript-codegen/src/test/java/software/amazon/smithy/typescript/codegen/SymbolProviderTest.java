@@ -2,6 +2,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -10,6 +11,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 public class SymbolProviderTest {
@@ -111,5 +113,32 @@ public class SymbolProviderTest {
         Symbol listSymbol = provider.toSymbol(list);
 
         assertThat(listSymbol.getName(), equalTo("Array<_Record>"));
+    }
+
+    @Test
+    public void outputStructuresAreMetadataBearers() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("output-structure.smithy"))
+                .assemble()
+                .unwrap();
+
+        Shape input = model.getShapeIndex().getShape(ShapeId.from("smithy.example#GetFooInput")).get();
+        Shape output = model.getShapeIndex().getShape(ShapeId.from("smithy.example#GetFooOutput")).get();
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        Symbol inputSymbol = provider.toSymbol(input);
+        Symbol outputSymbol = provider.toSymbol(output);
+
+        // Input does not use MetadataBearer
+        assertThat(inputSymbol.getReferences().stream()
+                .filter(ref -> ref.getProperty("extends").isPresent())
+                .count(), equalTo(0L));
+
+        // Output uses MetadataBearer
+        assertThat(outputSymbol.getReferences().stream()
+                .filter(ref -> ref.getProperty("extends").isPresent())
+                .count(), greaterThan(0L));
+        assertThat(outputSymbol.getReferences().stream()
+                 .filter(ref -> ref.getAlias().equals("$MetadataBearer"))
+                 .count(), greaterThan(0L));
     }
 }
