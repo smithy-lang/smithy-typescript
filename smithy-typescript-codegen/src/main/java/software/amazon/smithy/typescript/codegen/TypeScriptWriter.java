@@ -24,8 +24,6 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
-import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
@@ -41,10 +39,8 @@ import software.amazon.smithy.utils.CodeWriter;
  * module paths against the moduleName of the writer. Module names that
  * start with anything other than "." (e.g., "@", "/", etc.) are never
  * relativized.
- *
- * TODO: Make this public when it's stable.
  */
-final class TypeScriptWriter extends CodeWriter {
+public final class TypeScriptWriter extends CodeWriter {
 
     private final Path moduleName;
     private final String moduleNameString;
@@ -75,60 +71,61 @@ final class TypeScriptWriter extends CodeWriter {
             SymbolProvider symbolProvider,
             FileManifest fileManifest
     ) {
-        Walker walker = new Walker(model.getKnowledge(NeighborProviderIndex.class).getProvider());
-
         return CodeWriterDelegator.<TypeScriptWriter>builder()
                 .model(model)
                 .symbolProvider(symbolProvider)
                 .fileManifest(fileManifest)
                 .factory((shape, symbol) -> new TypeScriptWriter(symbol.getNamespace()))
                 .beforeWrite((filename, writer, shapes) -> {
-                    // Add dependencies of the shape and any references it has by
-                    // walking the shape's neighbors.
+                    // Add imports necessary for DECLARE statements.
                     for (Shape shape : shapes) {
-                        writer.addImport(symbolProvider.toSymbol(shape));
-                        walker.walkShapes(shape).forEach(neighbor -> {
-                            writer.addImport(symbolProvider.toSymbol(neighbor));
-                        });
+                        Symbol symbol = symbolProvider.toSymbol(shape);
+                        writer.addImportReferences(symbol, SymbolReference.ContextOption.DECLARE);
                     }
                 })
                 .build();
     }
 
     /**
-     * Imports a symbol if necessary.
+     * Imports a symbol if necessary, using the name of the symbol
+     * and only "USE" references.
      *
      * @param symbol Symbol to import.
      * @return Returns the writer.
      */
-    TypeScriptWriter addImport(Symbol symbol) {
-        if (!symbol.getNamespace().isEmpty()) {
-            if (!symbol.getNamespace().equals(moduleNameString)) {
-                addImport(symbol.getName(), symbol.getName(), symbol.getNamespace());
-            }
-            for (SymbolReference reference : symbol.getReferences()) {
-                addImport(reference);
-            }
+    TypeScriptWriter addUseImports(Symbol symbol) {
+        return addImport(symbol, symbol.getName(), SymbolReference.ContextOption.USE);
+    }
+
+    /**
+     * Imports a symbol if necessary using an alias and list of context options.
+     *
+     * @param symbol Symbol to optionally import.
+     * @param alias The alias to refer to the symbol by.
+     * @param options The list of context options (e.g., is it a USE or DECLARE symbol).
+     * @return Returns the writer.
+     */
+    TypeScriptWriter addImport(Symbol symbol, String alias, SymbolReference.ContextOption... options) {
+        if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
+            addImport(symbol.getName(), alias, symbol.getNamespace());
         }
+
+        // Just because the direct symbol wasn't imported doesn't mean that the
+        // symbols it needs to be declared don't need to be imported.
+        addImportReferences(symbol, options);
 
         return this;
     }
 
-    /**
-     * Imports a symbol reference.
-     *
-     * @param reference Symbol reference to import.
-     * @return Returns the writer.
-     */
-    TypeScriptWriter addImport(SymbolReference reference) {
-        // If there's no alias, then just import the symbol normally.
-        if (reference.getAlias().equals(reference.getSymbol().getName())) {
-            return addImport(reference.getSymbol());
+    void addImportReferences(Symbol symbol, SymbolReference.ContextOption... options) {
+        for (SymbolReference reference : symbol.getReferences()) {
+            for (SymbolReference.ContextOption option : options) {
+                if (reference.hasOption(option)) {
+                    addImport(reference.getSymbol(), reference.getAlias(), options);
+                    break;
+                }
+            }
         }
-
-        // Symbols with references are always imported since they don't
-        // conflict and must be imported in order for the code to work.
-        return addImport(reference.getSymbol().getName(), reference.getAlias(), reference.getSymbol().getNamespace());
     }
 
     /**
@@ -214,20 +211,18 @@ final class TypeScriptWriter extends CodeWriter {
     private final class TypeScriptSymbolFormatter implements BiFunction<Object, String, String> {
         @Override
         public String apply(Object type, String indent) {
-            if (!(type instanceof Symbol)) {
-                throw new CodegenException("Invalid type provided to $T. Expected a Symbol: " + type);
+            if (type instanceof Symbol) {
+                Symbol typeSymbol = (Symbol) type;
+                addUseImports(typeSymbol);
+                return typeSymbol.getName();
+            } else if (type instanceof SymbolReference) {
+                SymbolReference typeSymbol = (SymbolReference) type;
+                addImport(typeSymbol.getSymbol(), typeSymbol.getAlias(), SymbolReference.ContextOption.USE);
+                return typeSymbol.getAlias();
+            } else {
+                throw new CodegenException(
+                        "Invalid type provided to $T. Expected a Symbol or SymbolReferenced, but found " + type);
             }
-
-            Symbol typeSymbol = (Symbol) type;
-            addImport(typeSymbol);
-
-            for (SymbolReference reference : typeSymbol.getReferences()) {
-                if (reference.hasOption(SymbolReference.ContextOption.USE)) {
-                    addImport(reference);
-                }
-            }
-
-            return typeSymbol.getName();
         }
     }
 }

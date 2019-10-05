@@ -59,7 +59,7 @@ public class CodegenVisitorTest {
                 .build();
 
         new TypeScriptCodegenPlugin().execute(context);
-        String contents = manifest.getFileString("/models/smithy/example/index.ts").get();
+        String contents = manifest.getFileString("/models/index.ts").get();
 
         assertThat(contents, containsString(expectedType));
         assertThat(contents, containsString("namespace Err {\n"
@@ -68,5 +68,10 @@ public class CodegenVisitorTest {
                                             + "    return _smithy.isa(o, ID);\n"
                                             + "  }\n"
                                             + "}"));
+    }
+
+    @Test
+    public void generatesServiceAndCommandShapes() {
+        // TODO
     }
 }

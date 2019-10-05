@@ -20,7 +20,7 @@ tasks["jar"].enabled = false
 
 plugins {
     java
-    id("software.amazon.smithy").version("0.3.0")
+    id("software.amazon.smithy").version("0.3.1")
 }
 
 repositories {

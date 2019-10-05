@@ -25,10 +25,8 @@ import software.amazon.smithy.utils.IoUtils;
 
 /**
  * Private class used to generates a package.json file for the project.
- *
- * TODO: Make this extensible and pluggable.
  */
-final class PackageJsonGenerator {
+public final class PackageJsonGenerator {
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

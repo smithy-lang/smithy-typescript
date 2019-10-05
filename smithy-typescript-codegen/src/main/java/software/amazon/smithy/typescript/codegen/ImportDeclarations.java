@@ -17,6 +17,8 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -33,7 +35,8 @@ final class ImportDeclarations {
             relativize = "./" + relativize;
         }
 
-        this.relativize = Paths.get(relativize);
+        // Strip off the filename of what's being relativized since it isn't needed.
+        this.relativize = Paths.get(relativize).getParent();
     }
 
     ImportDeclarations addImport(String name, String alias, String module) {
@@ -64,25 +67,30 @@ final class ImportDeclarations {
             for (Map.Entry<String, Map<String, String>> entry : imports.entrySet()) {
                 String module = entry.getKey();
                 Map<String, String> moduleImports = entry.getValue();
+                List<Map.Entry<String, String>> nonStarEntries = new ArrayList<>(moduleImports.entrySet());
 
-                if (moduleImports.size() == 1) {
-                    Map.Entry<String, String> singleEntry = moduleImports.entrySet().iterator().next();
-                    if (singleEntry.getValue().equals("*")) {
+                // "*" imports must be special-cased and can't be joined with named imports, and
+                // remove "*" imports from nonStarEntries which is iterated afterwards.
+                for (Map.Entry<String, String> importEntry : moduleImports.entrySet()) {
+                    if (importEntry.getValue().equals("*")) {
+                        nonStarEntries.remove(importEntry);
                         result.append("import ")
-                                .append(createImportStatement(singleEntry))
+                                .append(createImportStatement(importEntry))
                                 .append(" from \"")
                                 .append(module)
                                 .append("\";\n");
-                    } else {
-                        result.append("import { ")
-                                .append(createImportStatement(singleEntry))
-                                .append(" } from \"")
-                                .append(module)
-                                .append("\";\n");
                     }
-                } else {
+                }
+
+                if (nonStarEntries.size() == 1) {
+                    result.append("import { ")
+                            .append(createImportStatement(nonStarEntries.get(0)))
+                            .append(" } from \"")
+                            .append(module)
+                            .append("\";\n");
+                } else if (!nonStarEntries.isEmpty()) {
                     result.append("import {\n");
-                    for (Map.Entry<String, String> importEntry : moduleImports.entrySet()) {
+                    for (Map.Entry<String, String> importEntry : nonStarEntries) {
                         result.append("  ");
                         result.append(createImportStatement(importEntry));
                         result.append(",\n");

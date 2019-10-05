@@ -17,17 +17,13 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
-import java.util.Locale;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
 import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
-import software.amazon.smithy.codegen.core.ShapeIdShader;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -51,7 +47,7 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -77,22 +73,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final String TYPES_BIG_JS_VERSION = "^4.0.5";
     private static final String BIG_JS_VERSION = "^5.2.2";
     private static final String AWS_SDK_TYPES_VERSION = "^0.1.0-preview.5";
-    private static final Pattern SHAPE_ID_NAMESPACE_SPLITTER = Pattern.compile("\\.");
-    private static final Pattern SHAPE_ID_NAMESPACE_PART_SPLITTER = Pattern.compile("_");
+    private static final String AWS_SDK_SMITHY_CLIENT_VERSION = "^0.1.0-preview.5";
 
     private final Model model;
-    private final Function<ShapeId, ShapeId> shader;
-    private final String targetNamespace;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> outputShapes;
 
-    SymbolVisitor(Model model, String rootNamespace, String targetNamespace) {
+    SymbolVisitor(Model model) {
         this.model = model;
-        this.targetNamespace = targetNamespace;
-
-        shader = rootNamespace != null && targetNamespace != null
-                ? ShapeIdShader.createShader(rootNamespace, targetNamespace, ShapeIdShader.MERGE_NAMESPACE)
-                : Function.identity();
 
         // Load reserved words from a new-line delimited file.
         ReservedWords reservedWords = new ReservedWordsBuilder()
@@ -234,9 +222,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol operationShape(OperationShape shape) {
-        ShapeId shaded = shadeShapeId(shape);
-        String commandName = StringUtils.capitalize(shaded.getName()) + "Command";
-        return createGeneratedSymbolBuilder(shape, commandName, formatModuleName(shaded)).build();
+        String commandName = flattenShapeName(shape) + "Command";
+        String moduleName = formatModuleName(shape.getType(), commandName);
+        return createGeneratedSymbolBuilder(shape, commandName, moduleName).build();
     }
 
     @Override
@@ -260,7 +248,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol serviceShape(ServiceShape shape) {
-        return createObjectSymbolBuilder(shape).build();
+        return createObjectSymbolBuilder(shape)
+                .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "@aws-sdk/smithy-client",
+                               AWS_SDK_SMITHY_CLIENT_VERSION)
+                .build();
     }
 
     @Override
@@ -270,11 +261,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         if (outputShapes.contains(shape)) {
             builder.addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "@aws-sdk/types", AWS_SDK_TYPES_VERSION);
-            builder.addReference(SymbolReference.builder()
+            SymbolReference reference = SymbolReference.builder()
+                    .options(SymbolReference.ContextOption.DECLARE)
                     .alias("$MetadataBearer")
                     .symbol(Symbol.builder().name("MetadataBearer").namespace("@aws-sdk/types", "/").build())
                     .putProperty("extends", true)
-                    .build());
+                    .build();
+            builder.addReference(reference);
             builder.putProperty("isOutput", true);
         }
 
@@ -284,7 +277,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private Symbol.Builder addSmithyImport(Symbol.Builder builder) {
         Symbol importSymbol = Symbol.builder()
                 .name("*")
-                .namespace("./lib/smithy", "")
+                .namespace("./lib/smithy", "/")
                 .build();
         SymbolReference reference = SymbolReference.builder()
                 .symbol(importSymbol)
@@ -325,14 +318,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return createSymbolBuilder(shape, "Date").build();
     }
 
-    private ShapeId shadeShapeId(ToShapeId id) {
-        return shader.apply(id.toShapeId());
+    private String flattenShapeName(ToShapeId id) {
+        return StringUtils.capitalize(id.toShapeId().getName());
     }
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
-        ShapeId shaded = shadeShapeId(shape);
-        String name = StringUtils.capitalize(shaded.getName());
-        return createGeneratedSymbolBuilder(shape, name, formatModuleName(shaded));
+        String name = flattenShapeName(shape);
+        String moduleName = formatModuleName(shape.getType(), name);
+        return createGeneratedSymbolBuilder(shape, name, moduleName);
     }
 
     private Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
@@ -348,32 +341,25 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
         return createSymbolBuilder(shape, typeName, namespace)
-                .definitionFile(toFilename(shape, typeName, namespace));
+                .definitionFile(toFilename(namespace));
     }
 
-    private String formatModuleName(ToShapeId id) {
-        StringBuilder result = new StringBuilder();
-
-        for (String part : SHAPE_ID_NAMESPACE_SPLITTER.split(id.toShapeId().getNamespace())) {
-            String[] inner = SHAPE_ID_NAMESPACE_PART_SPLITTER.split(part);
-            for (int i = 0; i < inner.length; i++) {
-                String innerValue = inner[i].toLowerCase(Locale.ENGLISH);
-                if (i > 0) {
-                    innerValue = StringUtils.capitalize(innerValue);
-                }
-                result.append(innerValue);
-            }
-            result.append("/");
+    private String formatModuleName(ShapeType shapeType, String name) {
+        // All shapes except for the service and operations are stored in models.
+        if (shapeType == ShapeType.SERVICE) {
+            return "./" + name + "Client";
+        } else if (shapeType == ShapeType.OPERATION) {
+            return "./commands/" + name;
+        } else {
+            return "./models/index";
         }
-
-        return result.append("index").toString();
     }
 
-    private String toFilename(Shape shape, String name, String namespace) {
-        if (shape.isServiceShape()) {
-            return name + "Client.ts";
+    private String toFilename(String namespace) {
+        String result = namespace.replace(".", "/") + ".ts";
+        if (result.startsWith("//")) {
+            result = "." + result.substring(1);
         }
-
-        return "models/" + namespace.replace(".", "/") + ".ts";
+        return result;
     }
 }

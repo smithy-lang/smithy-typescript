@@ -133,9 +133,7 @@ subprojects {
 
         repositories {
             mavenLocal()
-            maven {
-                url = uri("http://repo.maven.apache.org/maven2")
-            }
+            mavenCentral()
         }
 
         publishing {

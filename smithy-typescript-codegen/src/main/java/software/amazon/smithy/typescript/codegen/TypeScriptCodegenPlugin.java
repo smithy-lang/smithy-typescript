@@ -42,18 +42,6 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
      * @return Returns the created provider.
      */
     public static SymbolProvider createSymbolProvider(Model model) {
-        return createSymbolProvider(model, null, null);
-    }
-
-    /**
-     * Creates a TypeScript symbol provider.
-     *
-     * @param model Model to generate symbols for.
-     * @param rootNamespace The namespace that is the root of the shaded target namespace.
-     * @param targetNamespace The namespace to shade all ShapeIds into.
-     * @return Returns the created provider.
-     */
-    public static SymbolProvider createSymbolProvider(Model model, String rootNamespace, String targetNamespace) {
-        return new SymbolVisitor(model, rootNamespace, targetNamespace);
+        return new SymbolVisitor(model);
     }
 }
