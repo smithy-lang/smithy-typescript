@@ -36,7 +36,7 @@ public class ImportDeclarationsTest {
 
     @Test
     public void relativizesImports() {
-        ImportDeclarations declarations = new ImportDeclarations("./foo/bar");
+        ImportDeclarations declarations = new ImportDeclarations("./foo/bar/index");
         declarations.addImport("Baz", "", "./foo/bar/bam");
         String result = declarations.toString();
 
@@ -44,8 +44,17 @@ public class ImportDeclarationsTest {
     }
 
     @Test
-    public void relativizesImportsWithTrailingFilename() {
+    public void relativizesImportsWithTrailingFilenameOnIndex() {
         ImportDeclarations declarations = new ImportDeclarations("foo/bar/index");
+        declarations.addImport("Baz", "", "./shared/shapeTypes");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import { Baz } from \"../../shared/shapeTypes\";"));
+    }
+
+    @Test
+    public void relativizesImportsWithTrailingFilenameNotIndex() {
+        ImportDeclarations declarations = new ImportDeclarations("foo/bar/hello/index");
         declarations.addImport("Baz", "", "./shared/shapeTypes");
         String result = declarations.toString();
 
@@ -54,7 +63,7 @@ public class ImportDeclarationsTest {
 
     @Test
     public void automaticallyCorrectsBasePath() {
-        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        ImportDeclarations declarations = new ImportDeclarations("/foo/bar/index");
         declarations.addImport("Baz", "", "./foo/bar/bam/qux");
         String result = declarations.toString();
 
@@ -74,7 +83,7 @@ public class ImportDeclarationsTest {
 
     @Test
     public void canImportFilesUpLevels() {
-        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        ImportDeclarations declarations = new ImportDeclarations("./foo/bar/index");
         declarations.addImport("SharedThing", "", "./shared/types");
         String result = declarations.toString();
 
@@ -90,5 +99,34 @@ public class ImportDeclarationsTest {
 
         assertThat(result, containsString("import * as _baz from \"@types/foo\";"));
         assertThat(result, containsString("import * from \"@types/other\";"));
+    }
+
+    @Test
+    public void canImportStarImportsWithNamedImports() {
+        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        declarations.addImport("*", "_baz", "@types/foo");
+        declarations.addImport("Bar", "Bar", "@types/foo");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import * as _baz from \"@types/foo\";"));
+        assertThat(result, containsString("import { Bar } from \"@types/foo\";"));
+    }
+
+    @Test
+    public void canImportNestedFromRoot() {
+        ImportDeclarations declarations = new ImportDeclarations("");
+        declarations.addImport("Foo", "", "./models/foo");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import { Foo } from \"./models/foo\";"));
+    }
+
+    @Test
+    public void canImportNestedFromClient() {
+        ImportDeclarations declarations = new ImportDeclarations("./FooClient");
+        declarations.addImport("Foo", "", "./models/hello/index");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import { Foo } from \"./models/hello/index\";"));
     }
 }

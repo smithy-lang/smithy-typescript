@@ -14,4 +14,14 @@ public class TypeScriptWriterTest {
 
         assertThat(result, equalTo("/**\n * These are the docs.\n * More.\n */\n"));
     }
+
+    @Test
+    public void addsFormatterForSymbols() {
+        // TODO
+    }
+
+    @Test
+    public void addsFormatterForSymbolReferences() {
+        // TODO
+    }
 }

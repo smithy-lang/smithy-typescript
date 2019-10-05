@@ -2,6 +2,8 @@
 
 Smithy code generators for TypeScript.
 
+**WARNING: All interfaces are subject to change.**
+
 ## Generating a client
 
 This repository builds TypeScript declarations and JavaScript clients from Smithy

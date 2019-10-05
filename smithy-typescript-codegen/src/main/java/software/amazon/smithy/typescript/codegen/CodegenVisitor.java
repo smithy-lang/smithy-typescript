@@ -15,10 +15,12 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -28,7 +30,6 @@ import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -41,6 +42,8 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -61,6 +64,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final SymbolProvider symbolProvider;
     private final ShapeIndex nonTraits;
     private final CodeWriterDelegator<TypeScriptWriter> writers;
+    private final List<TypeScriptIntegration> integrations = new ArrayList<>();
+    private final List<RuntimeClientPlugin> runtimePlugins;
+    private final ApplicationProtocol applicationProtocol;
 
     CodegenVisitor(PluginContext context) {
         settings = TypeScriptSettings.from(context.getSettings());
@@ -68,16 +74,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         model = context.getModel();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-
-        // Shade the generated shape IDs if a target namespace was specified.
-        String targetNamespace = context.getSettings()
-                .getStringMemberOrDefault(TypeScriptSettings.TARGET_NAMESPACE, null);
-        String rootNamespace = targetNamespace == null ? null : service.getId().getNamespace();
-
-        symbolProvider = SymbolProvider.cache(
-                TypeScriptCodegenPlugin.createSymbolProvider(model, rootNamespace, targetNamespace));
-
+        symbolProvider = SymbolProvider.cache(TypeScriptCodegenPlugin.createSymbolProvider(model));
         writers = TypeScriptWriter.createDelegator(model, symbolProvider, fileManifest);
+
+        // Load all integrations.
+        ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
+        ServiceLoader.load(TypeScriptIntegration.class, loader).forEach(integrations::add);
+        applicationProtocol = ApplicationProtocol.resolve(settings, service, integrations);
+
+        // Load each runtime plugin.
+        runtimePlugins = integrations.stream()
+                .flatMap(c -> c.getClientPlugins().stream())
+                .collect(Collectors.toList());
     }
 
     void execute() {
@@ -486,35 +494,24 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     @Override
     public Void serviceShape(ServiceShape shape) {
-        if (Objects.equals(service, shape)) {
-            TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
-            OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
-            topDownIndex.getContainedOperations(service).forEach(operationShape -> {
-                // TODO: Render command
-                if (!operationIndex.getErrors(operationShape).isEmpty()) {
-                    // renderErrorUnion(operationIndex, operationShape);
-                }
-            });
+        if (!Objects.equals(service, shape)) {
+            return null;
+        }
+
+        // Generate the service client itself.
+        TypeScriptWriter writer = writers.createWriter(shape);
+        new ServiceGenerator(settings, model, service, symbolProvider,
+                             writer, runtimePlugins, applicationProtocol).run();
+
+        // Generate each operation for the service.
+        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
+            TypeScriptWriter commandWriter = writers.createWriter(operation);
+            new CommandGenerator(settings, model, service, operation, symbolProvider,
+                                 commandWriter, runtimePlugins, applicationProtocol)
+                    .run();
         }
 
         return null;
-    }
-
-    // TODO: This does not need to be an exported type. Move this to the command.
-    private void renderErrorUnion(OperationIndex operationIndex, OperationShape operation) {
-        TypeScriptWriter writer = writers.createWriter(operation);
-        List<StructureShape> errors = operationIndex.getErrors(operation);
-
-        if (errors.size() == 0) {
-            return;
-        }
-
-        writer.write("type $LExceptionsUnion =", operation.getId().getName());
-
-        for (int i = 0; i < errors.size(); i++) {
-            String endOfLine = i == errors.size() - 1 ? ";" : "";
-            Symbol target = symbolProvider.toSymbol(errors.get(i));
-            writer.write("  | $T$L", target, endOfLine);
-        }
     }
 }

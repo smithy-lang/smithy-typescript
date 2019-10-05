@@ -2,6 +2,7 @@ $version: "0.4.0"
 namespace example.weather
 
 /// Provides weather forecasts.
+@protocols([{name: "aws.rest-json-1.1"}])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01",
@@ -137,7 +138,7 @@ structure GetForecastInput {
 }
 
 structure GetForecastOutput {
-    chanceOfRain: Float
+    chanceOfRain: Float,
 }
 
 union Precipitation {
@@ -148,6 +149,7 @@ union Precipitation {
     mixed: TypedYesNo,
     other: OtherStructure,
     blob: Blob,
+    baz: example.weather.nested.more#Baz,
 }
 
 structure OtherStructure {}
@@ -169,7 +171,7 @@ operation GetCityImage(GetCityImageInput) -> GetCityImageOutput errors [NoSuchRe
 
 structure GetCityImageInput {
     @required @httpLabel
-    cityId: CityId
+    cityId: CityId,
 }
 
 structure GetCityImageOutput {

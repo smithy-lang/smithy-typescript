@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,7 +80,7 @@ final class CodeWriterDelegator<T extends CodeWriter> {
      */
     public T createWriter(Shape shape) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        String filename = symbol.getDefinitionFile();
+        String filename = Paths.get(symbol.getDefinitionFile()).normalize().toString();
 
         boolean needsNewline = writers.containsKey(filename);
         T writer = writers.computeIfAbsent(filename, f -> factory.apply(shape, symbol));
