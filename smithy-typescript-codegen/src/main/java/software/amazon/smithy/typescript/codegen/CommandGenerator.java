@@ -104,44 +104,9 @@ final class CommandGenerator implements Runnable {
             writer.write("// End section: $L", COMMAND_PROPERTIES_SECTION);
             writer.write("");
 
-            writer.openBlock("constructor(readonly input: $L) {", "}", inputType, () -> {
-                // The constructor can be intercepted and changed.
-                writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
-                        .pushState(COMMAND_CONSTRUCTOR_SECTION)
-                        .write("super();")
-                        .popState()
-                        .write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION);
-            });
-
+            generateCommandConstructor();
             writer.write("");
-            writer.write("resolveMiddleware(")
-                    .indent()
-                    .write("clientStack: $$types.MiddlewareStack<$L, $L>,", inputType, outputType)
-                    .write("configuration: $L,", configType)
-                    .write("options?: $T", applicationProtocol.getOptionsType())
-                    .dedent();
-            writer.openBlock("): $$types.Handler<$L, $L> {", "}", inputType, outputType, () -> {
-                // Add serialization and deserialization plugins.
-                writer.write("this.use(serializerPlugin(configuration, this.serialize));");
-                writer.write("this.use(deserializerPlugin<$L>(configuration, this.deserialize));", outputType);
-
-                // Add customizations.
-                addCommandSpecificPlugins();
-
-                // Resolve the middleware stack.
-                writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
-                writer.openBlock("const handlerExecutionContext: $$types.HandlerExecutionContext = {", "}", () -> {
-                    writer.write("logger: {} as any,");
-                });
-                writer.write("const { httpHandler } = configuration;");
-                writer.openBlock("return stack.resolve(", ");", () -> {
-                    writer.write("(request: $$types.FinalizeHandlerArguments<any>) => ");
-                    writer.write("  httpHandler.handle(request.request as $T, options || {}),",
-                                 applicationProtocol.getRequestType());
-                    writer.write("handlerExecutionContext");
-                });
-            });
-
+            generateCommandMiddlewareResolver(configType);
             writeSerde();
 
             // Hook for adding more methods to the command.
@@ -149,6 +114,47 @@ final class CommandGenerator implements Runnable {
                     .pushState(COMMAND_BODY_EXTRA_SECTION)
                     .popState()
                     .write("// End section: $L", COMMAND_BODY_EXTRA_SECTION);
+        });
+    }
+
+    private void generateCommandConstructor() {
+        writer.openBlock("constructor(readonly input: $L) {", "}", inputType, () -> {
+            // The constructor can be intercepted and changed.
+            writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
+                    .pushState(COMMAND_CONSTRUCTOR_SECTION)
+                    .write("super();")
+                    .popState()
+                    .write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION);
+        });
+    }
+
+    private void generateCommandMiddlewareResolver(String configType) {
+        writer.write("resolveMiddleware(")
+                .indent()
+                .write("clientStack: $$types.MiddlewareStack<$L, $L>,", inputType, outputType)
+                .write("configuration: $L,", configType)
+                .write("options?: $T", applicationProtocol.getOptionsType())
+                .dedent();
+        writer.openBlock("): $$types.Handler<$L, $L> {", "}", inputType, outputType, () -> {
+            // Add serialization and deserialization plugins.
+            writer.write("this.use(serializerPlugin(configuration, this.serialize));");
+            writer.write("this.use(deserializerPlugin<$L>(configuration, this.deserialize));", outputType);
+
+            // Add customizations.
+            addCommandSpecificPlugins();
+
+            // Resolve the middleware stack.
+            writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
+            writer.openBlock("const handlerExecutionContext: $$types.HandlerExecutionContext = {", "}", () -> {
+                writer.write("logger: {} as any,");
+            });
+            writer.write("const { httpHandler } = configuration;");
+            writer.openBlock("return stack.resolve(", ");", () -> {
+                writer.write("(request: $$types.FinalizeHandlerArguments<any>) => ");
+                writer.write("  httpHandler.handle(request.request as $T, options || {}),",
+                             applicationProtocol.getRequestType());
+                writer.write("handlerExecutionContext");
+            });
         });
     }
 
