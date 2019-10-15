@@ -74,4 +74,9 @@ public class CodegenVisitorTest {
     public void generatesServiceAndCommandShapes() {
         // TODO
     }
+
+    @Test
+    public void invokesOnWriterCustomizations() {
+        // TODO
+    }
 }

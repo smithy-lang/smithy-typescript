@@ -79,15 +79,15 @@ public interface TypeScriptIntegration {
      * };
      * }</pre>
      *
-     * @param context SmithyBuild plugin context.
      * @param settings Setting used to generate.
+     * @param model Model to generate from.
      * @param symbolProvider Symbol provider used for codegen.
      * @param shape Shape being generated.
      * @param writer Writer that will be used.
      */
     default void onWriter(
-            PluginContext context,
             TypeScriptSettings settings,
+            Model model,
             SymbolProvider symbolProvider,
             Shape shape,
             TypeScriptWriter writer

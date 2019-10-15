@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
-import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -31,7 +31,6 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -45,7 +44,6 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
-import software.amazon.smithy.utils.StringUtils;
 
 class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
@@ -142,12 +140,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     @Override
     public Void structureShape(StructureShape shape) {
-        if (shape.hasTrait(ErrorTrait.class)) {
-            renderErrorStructure(shape);
-        } else {
-            renderNonErrorStructure(shape);
-        }
-
+        useWriter(shape, writer -> {
+            if (shape.hasTrait(ErrorTrait.class)) {
+                renderErrorStructure(shape, writer);
+            } else {
+                renderNonErrorStructure(shape, writer);
+            }
+        });
         return null;
     }
 
@@ -186,10 +185,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * }</pre>
      *
      * @param shape Structure to render.
+     * @param writer Writer to write to.
      */
-    private void renderNonErrorStructure(StructureShape shape) {
+    private void renderNonErrorStructure(StructureShape shape, TypeScriptWriter writer) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        TypeScriptWriter writer = writers.createWriter(shape);
         writer.writeShapeDocs(shape);
 
         // Find symbol references with the "extends" property.
@@ -250,11 +249,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * }</pre>
      *
      * @param shape Error shape being generated.
+     * @param writer Writer to write to.
      */
-    private void renderErrorStructure(StructureShape shape) {
+    private void renderErrorStructure(StructureShape shape, TypeScriptWriter writer) {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
-        TypeScriptWriter writer = writers.createWriter(shape);
         writer.writeShapeDocs(shape);
         writer.openBlock("export interface $L extends _smithy.SmithyException {", symbol.getName());
         writer.write("__type: $S;", shape.getId());
@@ -281,158 +280,12 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     /**
      * Renders a TypeScript union.
      *
-     * <p>Smithy tagged unions are rendered as a set of TypeScript interfaces
-     * and functionality used to visit each variant. Only a single member
-     * can be set at any given time. A member that contains unknown variants
-     * is automatically added to each tagged union. If set, it contains the
-     * name of the property that was set and its value stored as an
-     * {@code any}.
-     *
-     * <p>A {@code Visitor} interface and a method used to dispatch to the
-     * visitor is generated for each tagged union. This allows for working
-     * with tagged unions functionally and account for each variant in a
-     * typed way.
-     *
-     * <p>For example, given the following Smithy model:
-     *
-     * <pre>{@code
-     * union Attacker {
-     *     lion: Lion,
-     *     tiger: Tiger,
-     *     bear: Bear,
-     * }
-     * }</pre>
-     *
-     * <p>The following code is generated:
-     *
-     * <pre>{@code
-     * export type Attacker =
-     *   | Attacker.LionMember
-     *   | Attacker.TigerMember
-     *   | Attacker.BearMember
-     *   | Attacker.$UnknownMember;
-     *
-     * export namespace Attacker {
-     *   export const ID = "smithy.example#Attacker";
-     *   interface $Base {
-     *     __type?: "smithy.example#Attacker",
-     *   }
-     *   export interface LionMember extends $Base {
-     *     lion: Lion;
-     *     tiger?: never;
-     *     $unknown?: never;
-     *   }
-     *   export interface TigerMember extends $Base {
-     *     lion?: never;
-     *     tiger?: Tiger;
-     *     bear?: never;
-     *     $unknown?: never;
-     *   }
-     *   export interface BearMember extends $Base {
-     *     lion?: never;
-     *     tiger?: never;
-     *     bear: Bear;
-     *     $unknown: never;
-     *   }
-     *   export interface $UnknownMember extends $Base {
-     *     lion?: never;
-     *     tiger?: never;
-     *     bear?: never;
-     *     $unknown: [string, any];
-     *   }
-     *   export interface Visitor<T> {
-     *     lion: (value: Lion) => T;
-     *     tiger: (value: Tiger) => T;
-     *     bear: (value: Bear) => T;
-     *     _: (name: string, value: any) => T;
-     *   }
-     *   export function visit<T>(
-     *     value: Attacker,
-     *     visitor: Visitor<T>
-     *   ): T {
-     *     if (value.lion !== undefined) return visitor.lion(value.lion);
-     *     if (value.tiger !== undefined) return visitor.tiger(value.tiger);
-     *     if (value.bear !== undefined) return visitor.bear(value.bear);
-     *     return visitor._(value.$unknown[0], value.$unknown[1]);
-     *   }
-     * }
-     * }</pre>
-     *
-     * <p>Important: Tagged unions in TypeScript are intentionally designed
-     * so that it is forward-compatible to change a structure with optional
-     * and mutually exclusive members to a tagged union.
-     *
      * @param shape Shape to render as a union.
+     * @see UnionGenerator
      */
     @Override
     public Void unionShape(UnionShape shape) {
-        Symbol symbol = symbolProvider.toSymbol(shape);
-
-        Map<String, String> variantMap = new TreeMap<>();
-        for (MemberShape member : shape.getAllMembers().values()) {
-            String variant = StringUtils.capitalize(symbolProvider.toMemberName(member)) + "Member";
-            variantMap.put(member.getMemberName(), variant);
-        }
-
-        // Write out the union type of all variants.
-        TypeScriptWriter writer = writers.createWriter(shape);
-        writer.writeShapeDocs(shape);
-        writer.openBlock("export type $L = ", "", symbol.getName(), () -> {
-            for (String variant : variantMap.values()) {
-                writer.write("| $L.$L", symbol.getName(), variant);
-            }
-            writer.write("| $L.$$UnknownMember", symbol.getName());
-        });
-
-        // Write out the namespace that contains each variant and visitor.
-        writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-            writer.write("export const ID = $S", shape.getId());
-            writer.openBlock("interface $$Base {", "}", () -> {
-                writer.write("__type?: $S;", shape.getId());
-            });
-            for (MemberShape member : shape.getAllMembers().values()) {
-                String name = variantMap.get(member.getMemberName());
-                writer.writeMemberDocs(model, member);
-                writer.openBlock("export interface $L extends $$Base {", "}", name, () -> {
-                    for (MemberShape variantMember : shape.getAllMembers().values()) {
-                        if (variantMember.getMemberName().equals(member.getMemberName())) {
-                            writer.write("$L: $T;", symbolProvider.toMemberName(variantMember),
-                                         symbolProvider.toSymbol(variantMember));
-                        } else {
-                            writer.write("$L?: never;", symbolProvider.toMemberName(variantMember));
-                        }
-                    }
-                    writer.write("$$unknown?: never;");
-                });
-            }
-            // Write out the unknown variant.
-            writer.openBlock("export interface $$UnknownMember extends $$Base {", "}", () -> {
-                for (MemberShape member : shape.getAllMembers().values()) {
-                    writer.write("$L?: never;", symbolProvider.toMemberName(member));
-                }
-                writer.write("$$unknown: [string, any];");
-            });
-            // Write out the visitor type.
-            writer.openBlock("export interface Visitor<T> {", "}", () -> {
-                for (MemberShape member : shape.getAllMembers().values()) {
-                    writer.write("$L: (value: $T) => T;",
-                                 symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
-                }
-                writer.write("_: (name: string, value: any) => T;");
-            });
-            // Create the visitor dispatcher for the union.
-            writer.write("export function visit<T>(").indent();
-            writer.write("value: $L,", symbol.getName());
-            writer.write("visitor: Visitor<T>");
-            writer.dedent().write("): T {").indent();
-            for (MemberShape member : shape.getAllMembers().values()) {
-                String memberName = symbolProvider.toMemberName(member);
-                writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
-            }
-            writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
-            writer.dedent().write("}");
-        });
-
+        useWriter(shape, writer -> new UnionGenerator(model, symbolProvider, writer, shape).run());
         return null;
     }
 
@@ -472,20 +325,21 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     public Void stringShape(StringShape shape) {
         shape.getTrait(EnumTrait.class).ifPresent(trait -> {
             Symbol symbol = symbolProvider.toSymbol(shape);
-            TypeScriptWriter writer = writers.createWriter(shape);
-            // Unnamed enums generate a union of string literals.
-            if (!trait.hasNames()) {
-                writer.write("export type $L = $L",
-                             symbol.getName(), TypeScriptUtils.getEnumVariants(trait.getValues().keySet()));
-            } else {
-                // Named enums generate an actual enum type.
-                writer.openBlock("export enum $L {", symbol.getName());
-                trait.getValues().forEach((value, body) -> body.getName().ifPresent(name -> {
-                    body.getDocumentation().ifPresent(writer::writeDocs);
-                    writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), value);
-                }));
-                writer.closeBlock("};");
-            }
+            useWriter(shape, writer -> {
+                // Unnamed enums generate a union of string literals.
+                if (!trait.hasNames()) {
+                    writer.write("export type $L = $L",
+                                 symbol.getName(), TypeScriptUtils.getEnumVariants(trait.getValues().keySet()));
+                } else {
+                    // Named enums generate an actual enum type.
+                    writer.openBlock("export enum $L {", symbol.getName());
+                    trait.getValues().forEach((value, body) -> body.getName().ifPresent(name -> {
+                        body.getDocumentation().ifPresent(writer::writeDocs);
+                        writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), value);
+                    }));
+                    writer.closeBlock("};");
+                }
+            });
         });
 
         // Normal string shapes don't generate any code on their own.
@@ -499,19 +353,32 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         // Generate the service client itself.
-        TypeScriptWriter writer = writers.createWriter(shape);
-        new ServiceGenerator(settings, model, service, symbolProvider,
-                             writer, runtimePlugins, applicationProtocol).run();
+        useWriter(shape, writer -> new ServiceGenerator(
+                settings, model, service, symbolProvider, writer, runtimePlugins, applicationProtocol).run());
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
-            TypeScriptWriter commandWriter = writers.createWriter(operation);
-            new CommandGenerator(settings, model, service, operation, symbolProvider,
-                                 commandWriter, runtimePlugins, applicationProtocol)
-                    .run();
+            useWriter(operation, commandWriter -> new CommandGenerator(
+                    settings, model, service, operation, symbolProvider,
+                    commandWriter, runtimePlugins, applicationProtocol).run());
         }
 
         return null;
+    }
+
+    // Handles adding and removing onWriter callbacks for each shape.
+    private void useWriter(Shape shape, Consumer<TypeScriptWriter> consumer) {
+        TypeScriptWriter writer = writers.createWriter(shape);
+        writer.pushState();
+
+        // Allow integrations to do things like add onSection callbacks.
+        // These onSection callbacks are removed when popState is called.
+        for (TypeScriptIntegration integration : integrations) {
+            integration.onWriter(settings, model, symbolProvider, shape, writer);
+        }
+
+        consumer.accept(writer);
+        writer.popState();
     }
 }
