@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -127,7 +128,7 @@ final class ServiceGenerator implements Runnable {
         // Get the configuration symbol types to reference in code. These are
         // all "&"'d together to create a big configuration type that aggregates
         // more modular configuration types.
-        List<Symbol> configTypes = runtimePlugins.stream()
+        List<SymbolReference> configTypes = runtimePlugins.stream()
                 .filter(RuntimeClientPlugin::hasConfig)
                 .map(RuntimeClientPlugin::getSymbol)
                 .collect(Collectors.toList());
@@ -138,8 +139,8 @@ final class ServiceGenerator implements Runnable {
 
         if (!configTypes.isEmpty()) {
             writer.indent();
-            for (Symbol symbol : configTypes) {
-                writer.write("& $T.Input", symbol);
+            for (SymbolReference symbolReference : configTypes) {
+                writer.write("& $T.Input", symbolReference);
             }
         }
 
@@ -149,8 +150,8 @@ final class ServiceGenerator implements Runnable {
                      resolvedConfigType, applicationProtocol.getOptionsType());
         if (!configTypes.isEmpty()) {
             writer.indent();
-            for (Symbol symbol : configTypes) {
-                writer.write("& $T.Resolved", symbol);
+            for (SymbolReference symbolReference : configTypes) {
+                writer.write("& $T.Resolved", symbolReference);
             }
         }
 

@@ -17,7 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
 import java.util.Set;
-import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolReference;
 
 /**
  * Represents a runtime plugin.
@@ -48,7 +48,7 @@ public interface RuntimeClientPlugin {
      *
      * @return Returns the symbol used to reference the plugin.
      */
-    Symbol getSymbol();
+    SymbolReference getSymbol();
 
     /**
      * Returns true if the plugin has configuration to resolve.
