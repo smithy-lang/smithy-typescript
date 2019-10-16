@@ -98,14 +98,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         serviceShapes.forEach(shape -> shape.accept(this));
 
         // Write each pending writer.
-        writers.writeFiles();
+        Collection<TypeScriptWriter> usedWriters = writers.flush();
 
         // Write the package.json file, including all symbol dependencies.
         PackageJsonGenerator.writePackageJson(settings, fileManifest, SymbolDependency.gatherDependencies(
-                serviceShapes.stream()
-                        .map(symbolProvider::toSymbol)
-                        .map(Symbol::getDependencies)
-                        .flatMap(Collection::stream)));
+                usedWriters.stream().flatMap(writer -> writer.getDependencies().stream())));
     }
 
     @Override

@@ -37,6 +37,8 @@ final class CommandGenerator implements Runnable {
     static final String COMMAND_BODY_EXTRA_SECTION = "command_body_extra";
     static final String COMMAND_CONSTRUCTOR_SECTION = "command_constructor";
 
+    private static final String MIDDLEWARE_SERDE_VERSION = "^0.1.0-preview.1";
+
     private final TypeScriptSettings settings;
     private final Model model;
     private final ServiceShape service;
@@ -129,6 +131,18 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandMiddlewareResolver(String configType) {
+        Symbol ser = Symbol.builder()
+                .name("serializerPlugin")
+                .namespace("@aws-sdk/middleware-serde", "/")
+                .build();
+        Symbol deser = Symbol.builder()
+                .name("deserializerPlugin")
+                .namespace("@aws-sdk/middleware-serde", "/")
+                .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY,
+                               "@aws-sdk/middleware-serde",
+                               MIDDLEWARE_SERDE_VERSION)
+                .build();
+
         writer.write("resolveMiddleware(")
                 .indent()
                 .write("clientStack: $$types.MiddlewareStack<$L, $L>,", inputType, outputType)
@@ -137,8 +151,8 @@ final class CommandGenerator implements Runnable {
                 .dedent();
         writer.openBlock("): $$types.Handler<$L, $L> {", "}", inputType, outputType, () -> {
             // Add serialization and deserialization plugins.
-            writer.write("this.use(serializerPlugin(configuration, this.serialize));");
-            writer.write("this.use(deserializerPlugin<$L>(configuration, this.deserialize));", outputType);
+            writer.write("this.use($T(configuration, this.serialize));", ser);
+            writer.write("this.use($T<$L>(configuration, this.deserialize));", deser, outputType);
 
             // Add customizations.
             addCommandSpecificPlugins();

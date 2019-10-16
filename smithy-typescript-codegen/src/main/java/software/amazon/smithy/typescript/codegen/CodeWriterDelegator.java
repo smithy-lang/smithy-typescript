@@ -16,6 +16,8 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,12 +97,15 @@ final class CodeWriterDelegator<T extends CodeWriter> {
         return writer;
     }
 
-    public void writeFiles() {
+    public Collection<T> flush() {
         writers.forEach((filename, writer) -> {
             beforeWrite.apply(filename, writer, shapesPerFile.getOrDefault(filename, Collections.emptySet()));
             fileManifest.writeFile(filename, writer.toString());
         });
+
+        Collection<T> flushed = new ArrayList<>(writers.values());
         writers.clear();
+        return flushed;
     }
 
     public interface BeforeWrite<T> {

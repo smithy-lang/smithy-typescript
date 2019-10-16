@@ -17,10 +17,14 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
@@ -45,6 +49,7 @@ public final class TypeScriptWriter extends CodeWriter {
     private final Path moduleName;
     private final String moduleNameString;
     private final ImportDeclarations imports;
+    private final List<SymbolDependency> dependencies = new ArrayList<>();
 
     TypeScriptWriter(String moduleName) {
         this.moduleName = Paths.get(moduleName);
@@ -81,6 +86,7 @@ public final class TypeScriptWriter extends CodeWriter {
                     for (Shape shape : shapes) {
                         Symbol symbol = symbolProvider.toSymbol(shape);
                         writer.addImportReferences(symbol, SymbolReference.ContextOption.DECLARE);
+                        symbol.getDependencies().forEach(writer::addDependency);
                     }
                 })
                 .build();
@@ -106,6 +112,9 @@ public final class TypeScriptWriter extends CodeWriter {
      * @return Returns the writer.
      */
     TypeScriptWriter addImport(Symbol symbol, String alias, SymbolReference.ContextOption... options) {
+        // Always add dependencies.
+        dependencies.addAll(symbol.getDependencies());
+
         if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
             addImport(symbol.getName(), alias, symbol.getNamespace());
         }
@@ -198,6 +207,15 @@ public final class TypeScriptWriter extends CodeWriter {
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
+    }
+
+    TypeScriptWriter addDependency(SymbolDependency dependency) {
+        dependencies.add(dependency);
+        return this;
+    }
+
+    Collection<SymbolDependency> getDependencies() {
+        return dependencies;
     }
 
     @Override

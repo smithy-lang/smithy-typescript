@@ -29,7 +29,7 @@ public class CodeWriterDelegatorTest {
 
         TypeScriptWriter writer = delegator.createWriter(fooShape);
         writer.write("Hello!");
-        delegator.writeFiles();
+        delegator.flush();
 
         assertThat(manifest.getFileString("Foo.txt").get(), equalTo("Hello!\n"));
     }
@@ -46,7 +46,7 @@ public class CodeWriterDelegatorTest {
 
         delegator.createWriter(fooShape).write("Hello!");
         delegator.createWriter(fooShape).write("Goodbye!");
-        delegator.writeFiles();
+        delegator.flush();
 
         assertThat(manifest.getFileString("Foo.txt").get(), equalTo("Hello!\n\n// yap\nGoodbye!\n"));
     }
@@ -66,7 +66,7 @@ public class CodeWriterDelegatorTest {
 
         TypeScriptWriter vended = delegator.createWriter(fooShape);
         vended.write("Hello!");
-        delegator.writeFiles();
+        delegator.flush();
 
         assertThat(before, containsInAnyOrder(Triple.of("Foo.txt", vended, SetUtils.of(fooShape))));
     }
