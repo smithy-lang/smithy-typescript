@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -31,6 +33,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -90,15 +93,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Write shared / static content.
         STATIC_FILE_COPIES.forEach((from, to) -> fileManifest.writeFile(from, getClass(), to));
 
-        // Generate models.
-        nonTraits.shapes().sorted().forEach(shape -> shape.accept(this));
+        // Generate models that are connected to the service being generated.
+        Set<Shape> serviceShapes = new TreeSet<>(new Walker(nonTraits).walkShapes(service));
+        serviceShapes.forEach(shape -> shape.accept(this));
 
         // Write each pending writer.
         writers.writeFiles();
 
         // Write the package.json file, including all symbol dependencies.
         PackageJsonGenerator.writePackageJson(settings, fileManifest, SymbolDependency.gatherDependencies(
-                nonTraits.shapes()
+                serviceShapes.stream()
                         .map(symbolProvider::toSymbol)
                         .map(Symbol::getDependencies)
                         .flatMap(Collection::stream)));
