@@ -142,10 +142,12 @@ final class ServiceGenerator implements Runnable {
             for (SymbolReference symbolReference : configTypes) {
                 writer.write("& $T.Input", symbolReference);
             }
+            writer.dedent();
         }
 
         // Generate the corresponding "Resolved" configuration type to account for
         // each "Input" configuration type.
+        writer.write("");
         writer.write("export type $L = SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
         if (!configTypes.isEmpty()) {
@@ -153,6 +155,7 @@ final class ServiceGenerator implements Runnable {
             for (SymbolReference symbolReference : configTypes) {
                 writer.write("& $T.Resolved", symbolReference);
             }
+            writer.dedent();
         }
 
         writer.popState();
@@ -193,14 +196,14 @@ final class ServiceGenerator implements Runnable {
             // after the other until all of the runtime plugins have been called.
             // Only plugins that have configuration are called. Each time the
             // configuration is updated, the configuration variable is incremented
-            // (e.g., intermediateConfig_0, intermediateConfig_1, etc).
+            // (e.g., _config_0, _config_1, etc).
             for (RuntimeClientPlugin plugin : runtimePlugins) {
                 if (plugin.hasConfig()) {
                     configVariable++;
                     writer.write("let $L = $T.resolve($L);",
-                                 generateConfigVariable(configVariable - 1),
+                                 generateConfigVariable(configVariable),
                                  plugin.getSymbol(),
-                                 generateConfigVariable(configVariable));
+                                 generateConfigVariable(configVariable - 1));
                 }
             }
 
@@ -220,7 +223,7 @@ final class ServiceGenerator implements Runnable {
     }
 
     private String generateConfigVariable(int number) {
-        return "intermediateConfig_" + number;
+        return "_config_" + number;
     }
 
     private void generateDestroyMethod() {
