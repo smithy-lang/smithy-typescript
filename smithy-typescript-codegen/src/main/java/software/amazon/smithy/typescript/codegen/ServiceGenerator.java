@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -107,6 +108,7 @@ final class ServiceGenerator implements Runnable {
         List<Symbol> symbols = topDownIndex.getContainedOperations(service).stream()
                 .flatMap(operation -> OptionalUtils.stream(mapper.apply(operation)))
                 .map(symbolProvider::toSymbol)
+                .sorted(Comparator.comparing(Symbol::getName))
                 .collect(Collectors.toList());
 
         writer.write("export type $L = ", typeName);
