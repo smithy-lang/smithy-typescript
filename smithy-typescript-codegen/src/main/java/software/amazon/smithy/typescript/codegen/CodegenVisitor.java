@@ -24,6 +24,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -50,6 +51,8 @@ import software.amazon.smithy.utils.MapUtils;
 
 class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
+    private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
+
     /** A mapping of static resource files to copy over to a new filename. */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
             "lib/smithy.ts", "smithy.ts",
@@ -66,7 +69,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ShapeIndex nonTraits;
     private final CodeWriterDelegator<TypeScriptWriter> writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
-    private final List<RuntimeClientPlugin> runtimePlugins;
+    private final List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
     private final ApplicationProtocol applicationProtocol;
 
     CodegenVisitor(PluginContext context) {
@@ -77,16 +80,22 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         fileManifest = context.getFileManifest();
         symbolProvider = SymbolProvider.cache(TypeScriptCodegenPlugin.createSymbolProvider(model));
         writers = TypeScriptWriter.createDelegator(model, symbolProvider, fileManifest);
+        LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
 
         // Load all integrations.
         ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
-        ServiceLoader.load(TypeScriptIntegration.class, loader).forEach(integrations::add);
-        applicationProtocol = ApplicationProtocol.resolve(settings, service, integrations);
+        LOGGER.info("Attempting to discover TypeScriptIntegration from the classpath...");
+        ServiceLoader.load(TypeScriptIntegration.class, loader)
+                .forEach(integration -> {
+                    LOGGER.info(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
+                    integrations.add(integration);
+                    runtimePlugins.forEach(runtimePlugin -> {
+                        LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin.getSymbol());
+                        runtimePlugins.add(runtimePlugin);
+                    });
+                });
 
-        // Load each runtime plugin.
-        runtimePlugins = integrations.stream()
-                .flatMap(c -> c.getClientPlugins().stream())
-                .collect(Collectors.toList());
+        applicationProtocol = ApplicationProtocol.resolve(settings, service, integrations);
     }
 
     void execute() {
