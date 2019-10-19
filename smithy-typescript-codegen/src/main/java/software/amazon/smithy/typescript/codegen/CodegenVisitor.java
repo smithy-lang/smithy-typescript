@@ -89,8 +89,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 .forEach(integration -> {
                     LOGGER.info(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
                     integrations.add(integration);
-                    runtimePlugins.forEach(runtimePlugin -> {
-                        LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin.getSymbol());
+                    integration.getClientPlugins().forEach(runtimePlugin -> {
+                        LOGGER.info(() -> "Adding TypeScript runtime plugin: " + runtimePlugin.getSymbol());
                         runtimePlugins.add(runtimePlugin);
                     });
                 });
