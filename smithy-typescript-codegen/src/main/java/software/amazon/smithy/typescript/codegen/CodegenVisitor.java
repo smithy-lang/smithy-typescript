@@ -45,6 +45,8 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.ProtocolsTrait;
+import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
@@ -373,6 +375,31 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                     settings, model, service, operation, symbolProvider,
                     commandWriter, runtimePlugins, applicationProtocol).run());
         }
+
+        // Generate each protocol.
+        shape.getTrait(ProtocolsTrait.class).ifPresent(protocolsTrait -> {
+            LOGGER.info("Looking for protocol generators for protocols: " + protocolsTrait.getProtocolNames());
+            for (TypeScriptIntegration integration : integrations) {
+                for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
+                    if (protocolsTrait.hasProtocol(generator.getName())) {
+                        LOGGER.info("Generating serde for protocol " + generator.getName() + " on " + shape.getId());
+                        String fileRoot = "protocol/" + ProtocolGenerator.getSanitizedName(generator.getName());
+                        String namespace = "./" + fileRoot;
+                        TypeScriptWriter writer = new TypeScriptWriter(namespace);
+                        ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+                        context.setIntegrations(integrations);
+                        context.setModel(model);
+                        context.setService(shape);
+                        context.setSettings(settings);
+                        context.setSymbolProvider(symbolProvider);
+                        context.setWriter(writer);
+                        generator.generateRequestSerializers(context);
+                        generator.generateResponseDeserializers(context);
+                        fileManifest.writeFile(fileRoot + ".ts", writer.toString());
+                    }
+                }
+            }
+        });
 
         return null;
     }
