@@ -38,7 +38,7 @@ import software.amazon.smithy.utils.SmithyBuilder;
  *
  * <p>This abstraction is used to make it so that multiple shapes can generate
  * code into the same file. All CodeWriters created by this class are stored
- * in memory until a call to {@link #writeFiles()}, which causes each
+ * in memory until a call to {@link #flush()}, which causes each
  * CodeWriter to dump their contents to the provided {@code FileManifest}
  * in the mapped filename provided by the given {@code SymbolProvider}.
  *
