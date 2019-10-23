@@ -18,9 +18,12 @@ package software.amazon.smithy.typescript.codegen;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -45,6 +48,8 @@ import software.amazon.smithy.utils.CodeWriter;
  * relativized.
  */
 public final class TypeScriptWriter extends CodeWriter {
+
+    private static final Logger LOGGER = Logger.getLogger(TypeScriptWriter.class.getName());
 
     private final Path moduleName;
     private final String moduleNameString;
@@ -99,8 +104,19 @@ public final class TypeScriptWriter extends CodeWriter {
      * @param symbol Symbol to import.
      * @return Returns the writer.
      */
-    TypeScriptWriter addUseImports(Symbol symbol) {
+    public TypeScriptWriter addUseImports(Symbol symbol) {
         return addImport(symbol, symbol.getName(), SymbolReference.ContextOption.USE);
+    }
+
+    /**
+     * Imports a symbol reference if necessary, using the alias of the
+     * reference and only associated "USE" references.
+     *
+     * @param symbolReference Symbol reference to import.
+     * @return Returns the writer.
+     */
+    public TypeScriptWriter addUseImports(SymbolReference symbolReference) {
+        return addImport(symbolReference.getSymbol(), symbolReference.getAlias(), SymbolReference.ContextOption.USE);
     }
 
     /**
@@ -111,7 +127,17 @@ public final class TypeScriptWriter extends CodeWriter {
      * @param options The list of context options (e.g., is it a USE or DECLARE symbol).
      * @return Returns the writer.
      */
-    TypeScriptWriter addImport(Symbol symbol, String alias, SymbolReference.ContextOption... options) {
+    public TypeScriptWriter addImport(Symbol symbol, String alias, SymbolReference.ContextOption... options) {
+        LOGGER.finest(() -> {
+            StringJoiner stackTrace = new StringJoiner("\n");
+            for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+                stackTrace.add(element.toString());
+            }
+            return String.format(
+                    "Adding TypeScript import %s as `%s` (%s); Stack trace: %s",
+                    symbol, alias, Arrays.toString(options), stackTrace);
+        });
+
         // Always add dependencies.
         dependencies.addAll(symbol.getDependencies());
 
@@ -145,7 +171,7 @@ public final class TypeScriptWriter extends CodeWriter {
      * @param from Module to import the type from.
      * @return Returns the writer.
      */
-    TypeScriptWriter addImport(String name, String as, String from) {
+    public TypeScriptWriter addImport(String name, String as, String from) {
         imports.addImport(name, as, from);
         return this;
     }
@@ -168,12 +194,12 @@ public final class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Writes documentation comments.
+     * Writes documentation comments from a string.
      *
      * @param docs Documentation to write.
      * @return Returns the writer.
      */
-    TypeScriptWriter writeDocs(String docs) {
+    public TypeScriptWriter writeDocs(String docs) {
         writeDocs(() -> write(docs));
         return this;
     }
@@ -209,7 +235,16 @@ public final class TypeScriptWriter extends CodeWriter {
                 }).orElse(false);
     }
 
-    TypeScriptWriter addDependency(SymbolDependency dependency) {
+    /**
+     * Adds a dependency to the generated code.
+     *
+     * <p>The dependencies of all writers are merged together to eventually generate
+     * a package.json file.
+     *
+     * @param dependency Dependency to add.
+     * @return Returns the writer.
+     */
+    public TypeScriptWriter addDependency(SymbolDependency dependency) {
         dependencies.add(dependency);
         return this;
     }
@@ -239,7 +274,7 @@ public final class TypeScriptWriter extends CodeWriter {
                 return typeSymbol.getAlias();
             } else {
                 throw new CodegenException(
-                        "Invalid type provided to $T. Expected a Symbol or SymbolReferenced, but found " + type);
+                        "Invalid type provided to $T. Expected a Symbol or SymbolReference, but found " + type);
             }
         }
     }
