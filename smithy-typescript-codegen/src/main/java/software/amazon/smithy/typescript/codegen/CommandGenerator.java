@@ -173,8 +173,8 @@ final class CommandGenerator implements Runnable {
     }
 
     private void addInputAndOutputTypes() {
-        writeInputOrOutputType(outputType, operationIndex.getInput(operation).orElse(null));
-        writeInputOrOutputType(inputType, operationIndex.getOutput(operation).orElse(null));
+        writeInputOrOutputType(inputType, operationIndex.getInput(operation).orElse(null));
+        writeInputOrOutputType(outputType, operationIndex.getOutput(operation).orElse(null));
         writer.write("");
     }
 
