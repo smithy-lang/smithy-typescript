@@ -89,7 +89,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("SerializerUtils", "SerializerUtils", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String serializerMethodName = "serialize" + ProtocolGenerator.getSanitizedName(getName()) + symbol.getName();
@@ -99,7 +99,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("export function $L(\n"
                          + "  input: $L,\n"
-                         + "  utils: SerializerUtils\n"
+                         + "  context: SerdeContext\n"
                          + "): $T {", "}", serializerMethodName, inputType, requestType, () -> {
             List<HttpBinding> labelBindings = writeRequestLabels(context, operation, bindingIndex, trait);
             List<HttpBinding> queryBindings = writeRequestQueryString(context, operation, bindingIndex);
@@ -107,7 +107,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             List<HttpBinding> documentBindings = writeRequestBody(context, operation, bindingIndex);
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
-                writer.write("...utils.endpoint,");
+                writer.write("...context.endpoint,");
                 writer.write("protocol: \"https\",");
                 writer.write("method: $S,", trait.getMethod());
                 if (labelBindings.isEmpty()) {
@@ -310,7 +310,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the response type is imported.
         writer.addUseImports(responseType);
-        writer.addImport("DeserializerUtils", "DeserializerUtils", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = "deserialize" + ProtocolGenerator.getSanitizedName(getName()) + symbol.getName();
 
@@ -320,7 +320,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("export function $L(\n"
                          + "  output: $T,\n"
-                         + "  utils: DeserializerUtils\n"
+                         + "  context: SerdeContext\n"
                          + "): Promise<$L> {", "}", methodName, responseType, outputType, () -> {
             // TODO: Check status code to create appropriate error type or response type.
             writeHeaders(context, operation, bindingIndex);

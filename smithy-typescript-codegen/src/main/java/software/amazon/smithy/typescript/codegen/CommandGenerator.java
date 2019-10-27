@@ -89,13 +89,13 @@ final class CommandGenerator implements Runnable {
         writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbol.getNamespace());
         writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbol.getNamespace());
         writer.addImport("Command", "$Command", "@aws-sdk/smithy-client");
-        writer.addImport("*", "$types", "@aws-sdk/types");
+        writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", "@aws-sdk/types");
+        writer.addImport("Handler", "Handler", "@aws-sdk/types");
+        writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", "@aws-sdk/types");
+        writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
 
         addInputAndOutputTypes();
-
-        // This "Utils" type is used when serializing and deserializing commands. It
-        // provides various platform specific methods that serde needs.
-        writer.write("type Utils = { [key: string]: any };").write("");
 
         String name = symbol.getName();
         writer.openBlock("export class $L extends $$Command<$L, $L> {", "}", name, inputType, outputType, () -> {
@@ -126,17 +126,13 @@ final class CommandGenerator implements Runnable {
                     .pushState(COMMAND_CONSTRUCTOR_SECTION)
                     .write("super();")
                     .popState()
-                    .write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION);
+                    .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
         });
     }
 
     private void generateCommandMiddlewareResolver(String configType) {
-        Symbol ser = Symbol.builder()
-                .name("serializerPlugin")
-                .namespace("@aws-sdk/middleware-serde", "/")
-                .build();
-        Symbol deser = Symbol.builder()
-                .name("deserializerPlugin")
+        Symbol serde = Symbol.builder()
+                .name("serdePlugin")
                 .namespace("@aws-sdk/middleware-serde", "/")
                 .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY,
                                "@aws-sdk/middleware-serde",
@@ -145,26 +141,25 @@ final class CommandGenerator implements Runnable {
 
         writer.write("resolveMiddleware(")
                 .indent()
-                .write("clientStack: $$types.MiddlewareStack<$L, $L>,", inputType, outputType)
+                .write("clientStack: MiddlewareStack<$L, $L>,", inputType, outputType)
                 .write("configuration: $L,", configType)
                 .write("options?: $T", applicationProtocol.getOptionsType())
                 .dedent();
-        writer.openBlock("): $$types.Handler<$L, $L> {", "}", inputType, outputType, () -> {
-            // Add serialization and deserialization plugins.
-            writer.write("this.use($T(configuration, this.serialize));", ser);
-            writer.write("this.use($T<$L>(configuration, this.deserialize));", deser, outputType);
+        writer.openBlock("): Handler<$L, $L> {", "}", inputType, outputType, () -> {
+            // Add serialization and deserialization plugin.
+            writer.write("this.use($T(configuration, this.serialize, this.deserialize));", serde);
 
             // Add customizations.
             addCommandSpecificPlugins();
 
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
-            writer.openBlock("const handlerExecutionContext: $$types.HandlerExecutionContext = {", "}", () -> {
+            writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
             });
             writer.write("const { httpHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
-                writer.write("(request: $$types.FinalizeHandlerArguments<any>) => ");
+                writer.write("(request: FinalizeHandlerArguments<any>) => ");
                 writer.write("  httpHandler.handle(request.request as $T, options || {}),",
                              applicationProtocol.getRequestType());
                 writer.write("handlerExecutionContext");
@@ -205,7 +200,7 @@ final class CommandGenerator implements Runnable {
                 .indent()
                     .write("input: $L,", inputType)
                     .write("protocol: string,")
-                    .write("utils?: Utils")
+                    .write("context: SerdeContext")
                 .dedent()
                 .openBlock("): $T {", "}", applicationProtocol.getRequestType(), () -> writeSerdeDispatcher("input"));
 
@@ -214,7 +209,7 @@ final class CommandGenerator implements Runnable {
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
                     .write("protocol: string,")
-                    .write("utils?: Utils")
+                    .write("context: SerdeContext")
                 .dedent()
                 .openBlock("): Promise<$L> {", "}", outputType, () -> writeSerdeDispatcher("output"))
                 .write("");
@@ -226,11 +221,13 @@ final class CommandGenerator implements Runnable {
             // For example:
             // case 'aws.rest-json-1.1':
             //   return getFooCommandAws_RestJson1_1Serialize(input, utils);
-            //
-            for (String protocol : settings.getProtocols()) {
+            // TODO Validate this is the right set of protocols; settings.protocols was empty here.
+            for (String protocol : settings.resolveServiceProtocols(service)) {
                 String serdeFunctionName = getSerdeFunctionName(symbol, protocol, inputOrOutput);
+                writer.addImport(serdeFunctionName, serdeFunctionName,
+                        "./protocols/" + ProtocolGenerator.getSanitizedName(protocol));
                 writer.write("case '$L':", protocol)
-                        .write("  return $L($L, utils);", serdeFunctionName, inputOrOutput);
+                        .write("  return $L($L, context);", serdeFunctionName, inputOrOutput);
             }
 
             writer.write("default:")

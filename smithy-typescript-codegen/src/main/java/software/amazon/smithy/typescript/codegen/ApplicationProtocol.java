@@ -96,6 +96,7 @@ public final class ApplicationProtocol {
             ServiceShape service,
             Collection<TypeScriptIntegration> integrations
     ) {
+        // TODO If we're going to need to resolve this more than once, store it.
         List<String> resolvedProtocols = settings.resolveServiceProtocols(service);
         // Get the list of protocol generators that have implementations from the service.
         List<ProtocolGenerator> generators = integrations.stream()

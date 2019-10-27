@@ -189,7 +189,7 @@ public final class TypeScriptSettings {
     /**
      * Gets the explicitly configured list of protocols to generate.
      *
-     * <p>Every returned protocol must utilize compatibke application protocols.
+     * <p>Every returned protocol must utilize compatible application protocols.
      *
      * @return Returns the configured list of protocols or an empty list.
      */
