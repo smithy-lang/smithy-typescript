@@ -69,7 +69,7 @@ final class CommandGenerator implements Runnable {
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.runtimePlugins = runtimePlugins.stream()
-                .filter(plugin -> plugin.getOperationNames().contains(operation.getId().getName()))
+                .filter(plugin -> plugin.matchesOperation(model, service, operation))
                 .collect(Collectors.toList());
         this.applicationProtocol = applicationProtocol;
 
@@ -147,7 +147,7 @@ final class CommandGenerator implements Runnable {
                 .dedent();
         writer.openBlock("): Handler<$L, $L> {", "}", inputType, outputType, () -> {
             // Add serialization and deserialization plugin.
-            writer.write("this.use($T(configuration, this.serialize, this.deserialize));", serde);
+            writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
 
             // Add customizations.
             addCommandSpecificPlugins();
@@ -188,9 +188,9 @@ final class CommandGenerator implements Runnable {
         // applied automatically when the Command's middleware stack is copied from
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
-            if (plugin.hasMiddleware() && plugin.getOperationNames().contains(operation.getId().getName())) {
-                writer.write("this.use($T.getMiddleware(configuration));", plugin.getSymbol());
-            }
+            plugin.getPluginFunction().ifPresent(symbol -> {
+                writer.write("this.middlewareStack.use($T(configuration));", symbol);
+            });
         }
     }
 

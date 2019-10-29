@@ -70,7 +70,7 @@ final class ServiceGenerator implements Runnable {
         this.writer = writer;
         this.runtimePlugins = runtimePlugins.stream()
                 // Only apply plugins that target the entire client.
-                .filter(plugin -> plugin.getOperationNames().isEmpty())
+                .filter(plugin -> plugin.matchesService(model, service))
                 .collect(Collectors.toList());
         this.applicationProtocol = applicationProtocol;
 
@@ -127,22 +127,21 @@ final class ServiceGenerator implements Runnable {
         // Hook for intercepting the client configuration.
         writer.pushState(CLIENT_CONFIG_SECTION);
 
-        // Get the configuration symbol types to reference in code. These are
-        // all "&"'d together to create a big configuration type that aggregates
-        // more modular configuration types.
-        List<SymbolReference> configTypes = runtimePlugins.stream()
-                .filter(RuntimeClientPlugin::hasConfig)
-                .map(RuntimeClientPlugin::getSymbol)
-                .collect(Collectors.toList());
-
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
         writer.write("export type $L = SmithyConfiguration<$T>", configType, applicationProtocol.getOptionsType());
 
-        if (!configTypes.isEmpty()) {
+        // Get the configuration symbol types to reference in code. These are
+        // all "&"'d together to create a big configuration type that aggregates
+        // more modular configuration types.
+        List<SymbolReference> inputTypes = runtimePlugins.stream()
+                .flatMap(p -> OptionalUtils.stream(p.getInputConfig()))
+                .collect(Collectors.toList());
+
+        if (!inputTypes.isEmpty()) {
             writer.indent();
-            for (SymbolReference symbolReference : configTypes) {
-                writer.write("& $T.Input", symbolReference);
+            for (SymbolReference symbolReference : inputTypes) {
+                writer.write("& $T", symbolReference);
             }
             writer.dedent();
         }
@@ -152,11 +151,12 @@ final class ServiceGenerator implements Runnable {
         writer.write("");
         writer.write("export type $L = SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
-        if (!configTypes.isEmpty()) {
+
+        if (!inputTypes.isEmpty()) {
             writer.indent();
-            for (SymbolReference symbolReference : configTypes) {
-                writer.write("& $T.Resolved", symbolReference);
-            }
+            runtimePlugins.stream()
+                    .flatMap(p -> OptionalUtils.stream(p.getResolvedConfig()))
+                    .forEach(symbol -> writer.write("& $T", symbol));
             writer.dedent();
         }
 
@@ -200,11 +200,11 @@ final class ServiceGenerator implements Runnable {
             // configuration is updated, the configuration variable is incremented
             // (e.g., _config_0, _config_1, etc).
             for (RuntimeClientPlugin plugin : runtimePlugins) {
-                if (plugin.hasConfig()) {
+                if (plugin.getResolveFunction().isPresent()) {
                     configVariable++;
-                    writer.write("let $L = $T.resolve($L);",
+                    writer.write("let $L = $T($L);",
                                  generateConfigVariable(configVariable),
-                                 plugin.getSymbol(),
+                                 plugin.getResolveFunction().get(),
                                  generateConfigVariable(configVariable - 1));
                 }
             }
@@ -215,9 +215,9 @@ final class ServiceGenerator implements Runnable {
             // Add runtime plugins that contain middleware to the middleware stack
             // of the client.
             for (RuntimeClientPlugin plugin : runtimePlugins) {
-                if (plugin.hasMiddleware()) {
-                    writer.write("super.use($T.getMiddleware(this.config));", plugin.getSymbol());
-                }
+                plugin.getPluginFunction().ifPresent(symbol -> {
+                    writer.write("this.middlewareStack.use($T(this.config));", symbol);
+                });
             }
 
             writer.popState();
@@ -234,9 +234,9 @@ final class ServiceGenerator implements Runnable {
         writer.openBlock("destroy(): void {", "}", () -> {
             writer.pushState(CLIENT_DESTROY_SECTION);
             for (RuntimeClientPlugin plugin : runtimePlugins) {
-                if (plugin.hasDestroy()) {
-                    writer.write("$T.destroy(this, this.config);", plugin.getSymbol());
-                }
+                plugin.getDestroyFunction().ifPresent(destroy -> {
+                    writer.write("$T(this.config);", destroy);
+                });
             }
             writer.popState();
         });
