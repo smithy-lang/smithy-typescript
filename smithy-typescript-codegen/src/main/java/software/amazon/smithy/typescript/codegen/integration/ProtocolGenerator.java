@@ -19,9 +19,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -118,6 +120,50 @@ public interface ProtocolGenerator {
      * @param context Deserialization context.
      */
     void generateResponseDeserializers(GenerationContext context);
+
+    /**
+     * Generates the name of a serializer function for shapes of a service.
+     *
+     * @param symbol The symbol the serializer function is being generated for.
+     * @param protocol Name of the protocol being generated.
+     * @return Returns the generated function name.
+     */
+    static String getSerFunctionName(Symbol symbol, String protocol) {
+        // e.g., serializeAws_restJson1_1ExecuteStatement
+        String functionName = "serialize" + ProtocolGenerator.getSanitizedName(protocol);
+
+        // These need intermediate serializers, so generate a separate name.
+        Shape shape = symbol.expectProperty("shape", Shape.class);
+        if (shape.isListShape() || shape.isSetShape() || shape.isMapShape()) {
+            functionName += shape.getId().getName();
+        } else {
+            functionName += symbol.getName();
+        }
+
+        return functionName;
+    }
+
+    /**
+     * Generates the name of a deserializer function for shapes of a service.
+     *
+     * @param symbol The symbol the deserializer function is being generated for.
+     * @param protocol Name of the protocol being generated.
+     * @return Returns the generated function name.
+     */
+    static String getDeserFunctionName(Symbol symbol, String protocol) {
+        // e.g., deserializeAws_restJson1_1ExecuteStatement
+        String functionName = "deserialize" + ProtocolGenerator.getSanitizedName(protocol);
+
+        // These need intermediate serializers, so generate a separate name.
+        Shape shape = symbol.expectProperty("shape", Shape.class);
+        if (shape.isListShape() || shape.isSetShape() || shape.isMapShape()) {
+            functionName += shape.getId().getName();
+        } else {
+            functionName += symbol.getName();
+        }
+
+        return functionName;
+    }
 
     /**
      * Context object used for service serialization and deserialization.

@@ -26,7 +26,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Generates a client command using plugins.
@@ -202,7 +201,7 @@ final class CommandGenerator implements Runnable {
                     .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
-                .openBlock("): $T {", "}", applicationProtocol.getRequestType(), () -> writeSerdeDispatcher("input"));
+                .openBlock("): $T {", "}", applicationProtocol.getRequestType(), () -> writeSerdeDispatcher(true));
 
         writer.write("")
                 .write("private deserialize(")
@@ -211,11 +210,11 @@ final class CommandGenerator implements Runnable {
                     .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
-                .openBlock("): Promise<$L> {", "}", outputType, () -> writeSerdeDispatcher("output"))
+                .openBlock("): Promise<$L> {", "}", outputType, () -> writeSerdeDispatcher(false))
                 .write("");
     }
 
-    private void writeSerdeDispatcher(String inputOrOutput) {
+    private void writeSerdeDispatcher(boolean isInput) {
         writer.openBlock("switch (protocol) {", "}", () -> {
             // Generate case statements for each supported protocol.
             // For example:
@@ -223,29 +222,18 @@ final class CommandGenerator implements Runnable {
             //   return getFooCommandAws_RestJson1_1Serialize(input, utils);
             // TODO Validate this is the right set of protocols; settings.protocols was empty here.
             for (String protocol : settings.resolveServiceProtocols(service)) {
-                String serdeFunctionName = getSerdeFunctionName(symbol, protocol, inputOrOutput);
+                String serdeFunctionName = isInput
+                        ? ProtocolGenerator.getSerFunctionName(symbol, protocol)
+                        : ProtocolGenerator.getDeserFunctionName(symbol, protocol);
                 writer.addImport(serdeFunctionName, serdeFunctionName,
                         "./protocols/" + ProtocolGenerator.getSanitizedName(protocol));
                 writer.write("case '$L':", protocol)
-                        .write("  return $L($L, context);", serdeFunctionName, inputOrOutput);
+                        .write("  return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
             }
 
             writer.write("default:")
                     .write("  throw new Error(\"Unknown protocol, \" + protocol + \". Expected one of: $L\");",
                            settings.getProtocols());
         });
-    }
-
-    private static String getSerdeFunctionName(Symbol commandSymbol, String protocol, String inputOrOutput) {
-        String functionName = StringUtils.uncapitalize(commandSymbol.getName());
-        functionName += ProtocolGenerator.getSanitizedName(protocol);
-
-        if (inputOrOutput.equals("input")) {
-            functionName += "Serialize";
-        } else {
-            functionName += "Deserialize";
-        }
-
-        return functionName;
     }
 }
