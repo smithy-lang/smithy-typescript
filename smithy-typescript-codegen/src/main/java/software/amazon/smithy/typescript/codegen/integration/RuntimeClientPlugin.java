@@ -24,7 +24,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.typescript.codegen.PackageJsonGenerator;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependencies;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.StringUtils;
 import software.amazon.smithy.utils.ToSmithyBuilder;
@@ -614,7 +614,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             return Symbol.builder()
                     .namespace(packageName, "/")
                     .name(name)
-                    .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, packageName, version)
+                    .addDependency(TypeScriptDependencies.NORMAL_DEPENDENCY, packageName, version)
                     .build();
         }
     }

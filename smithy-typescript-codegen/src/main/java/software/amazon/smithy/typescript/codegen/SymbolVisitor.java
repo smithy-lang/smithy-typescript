@@ -69,11 +69,6 @@ import software.amazon.smithy.utils.StringUtils;
 final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
-    private static final String TYPES_NODE_VERSION = "^12.7.5";
-    private static final String TYPES_BIG_JS_VERSION = "^4.0.5";
-    private static final String BIG_JS_VERSION = "^5.2.2";
-    private static final String AWS_SDK_TYPES_VERSION = "^0.1.0-preview.5";
-    private static final String AWS_SDK_SMITHY_CLIENT_VERSION = "^0.1.0-preview.5";
 
     private final Model model;
     private final ReservedWordSymbolProvider.Escaper escaper;
@@ -122,7 +117,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         // Note: `Readable` needs an import and a dependency.
         return createSymbolBuilder(shape, "ArrayBuffer | ArrayBufferView | string | Readable | Blob", null)
                 .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
-                .addDependency(PackageJsonGenerator.DEV_DEPENDENCY, "@types/node", TYPES_NODE_VERSION)
+                .addDependency(TypeScriptDependencies.TYPES_NODE)
                 .build();
     }
 
@@ -210,8 +205,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol bigDecimalShape(BigDecimalShape shape) {
         return createSymbolBuilder(shape, "Big", "@types/big.js")
-                .addDependency(PackageJsonGenerator.DEV_DEPENDENCY, "@types/big.js", TYPES_BIG_JS_VERSION)
-                .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "big.js", BIG_JS_VERSION)
+                .addDependency(TypeScriptDependencies.TYPES_BIG_JS)
+                .addDependency(TypeScriptDependencies.BIG_JS)
                 .build();
     }
 
@@ -249,8 +244,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol serviceShape(ServiceShape shape) {
         return createObjectSymbolBuilder(shape)
-                .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "@aws-sdk/smithy-client",
-                               AWS_SDK_SMITHY_CLIENT_VERSION)
+                .addDependency(TypeScriptDependencies.AWS_SMITHY_CLIENT)
                 .build();
     }
 
@@ -260,7 +254,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         addSmithyImport(builder);
 
         if (outputShapes.contains(shape)) {
-            builder.addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY, "@aws-sdk/types", AWS_SDK_TYPES_VERSION);
+            builder.addDependency(TypeScriptDependencies.AWS_SDK_TYPES);
             SymbolReference reference = SymbolReference.builder()
                     .options(SymbolReference.ContextOption.DECLARE)
                     .alias("$MetadataBearer")
