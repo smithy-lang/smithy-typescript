@@ -74,8 +74,7 @@ public final class ApplicationProtocol {
                         .symbol(Symbol.builder()
                                         .namespace("@aws-sdk/protocol-http", "/")
                                         .name("HttpRequest")
-                                        .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY,
-                                                       "@aws-sdk/protocol-http", HTTP_PROTOCOL_VERSION)
+                                        .addDependency(TypeScriptDependencies.HTTP_PROTOCOL)
                                         .build())
                         .alias("__HttpRequest")
                         .build(),
@@ -83,8 +82,7 @@ public final class ApplicationProtocol {
                         .symbol(Symbol.builder()
                                         .namespace("@aws-sdk/protocol-http", "/")
                                         .name("HttpResponse")
-                                        .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY,
-                                                       "@aws-sdk/protocol-http", HTTP_PROTOCOL_VERSION)
+                                        .addDependency(TypeScriptDependencies.HTTP_PROTOCOL)
                                         .build())
                         .alias("__HttpResponse")
                         .build()

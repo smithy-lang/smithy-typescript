@@ -36,8 +36,6 @@ final class CommandGenerator implements Runnable {
     static final String COMMAND_BODY_EXTRA_SECTION = "command_body_extra";
     static final String COMMAND_CONSTRUCTOR_SECTION = "command_constructor";
 
-    private static final String MIDDLEWARE_SERDE_VERSION = "^0.1.0-preview.1";
-
     private final TypeScriptSettings settings;
     private final Model model;
     private final ServiceShape service;
@@ -133,9 +131,7 @@ final class CommandGenerator implements Runnable {
         Symbol serde = Symbol.builder()
                 .name("serdePlugin")
                 .namespace("@aws-sdk/middleware-serde", "/")
-                .addDependency(PackageJsonGenerator.NORMAL_DEPENDENCY,
-                               "@aws-sdk/middleware-serde",
-                               MIDDLEWARE_SERDE_VERSION)
+                .addDependency(TypeScriptDependencies.MIDDLEWARE_SERDE)
                 .build();
 
         writer.write("resolveMiddleware(")
