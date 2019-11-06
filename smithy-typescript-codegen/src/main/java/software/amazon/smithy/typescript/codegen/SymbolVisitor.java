@@ -350,10 +350,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private String toFilename(String namespace) {
-        String result = namespace.replace(".", "/") + ".ts";
-        if (result.startsWith("//")) {
-            result = "." + result.substring(1);
-        }
-        return result;
+        return namespace + ".ts";
     }
 }

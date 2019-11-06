@@ -33,8 +33,8 @@ import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegrati
 public final class ApplicationProtocol {
 
     private static final Logger LOGGER = Logger.getLogger(ApplicationProtocol.class.getName());
-    private static final String HTTP_PROTOCOL_VERSION = "^0.1.0-preview.1";
 
+    private final String name;
     private final SymbolReference optionsType;
     private final SymbolReference requestType;
     private final SymbolReference responseType;
@@ -42,15 +42,18 @@ public final class ApplicationProtocol {
     /**
      * Creates a resolved application protocol.
      *
+     * @param name The protocol name (e.g., http, mqtt, etc).
      * @param optionsType The type used to provide options to clients and commands.
      * @param requestType The type used to represent request messages for the protocol.
      * @param responseType The type used to represent response messages for the protocol.
      */
     public ApplicationProtocol(
+            String name,
             SymbolReference optionsType,
             SymbolReference requestType,
             SymbolReference responseType
     ) {
+        this.name = name;
         this.optionsType = optionsType;
         this.requestType = requestType;
         this.responseType = responseType;
@@ -63,6 +66,7 @@ public final class ApplicationProtocol {
      */
     public static ApplicationProtocol createDefaultHttpApplicationProtocol() {
         return new ApplicationProtocol(
+                "http",
                 SymbolReference.builder()
                         .symbol(Symbol.builder()
                                         .namespace("@aws-sdk/types", "/")
@@ -118,6 +122,36 @@ public final class ApplicationProtocol {
         }
 
         return applicationProtocol;
+    }
+
+    /**
+     * Gets the protocol name.
+     *
+     * <p>All HTTP protocols should start with "http".
+     * All MQTT protocols should start with "mqtt".
+     *
+     * @return Returns the protocol name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Checks if the protocol is an HTTP based protocol.
+     *
+     * @return Returns true if it is HTTP based.
+     */
+    public boolean isHttpProtocol() {
+        return getName().startsWith("http");
+    }
+
+    /**
+     * Checks if the protocol is an MQTT based protocol.
+     *
+     * @return Returns true if it is MQTT based.
+     */
+    public boolean isMqttProtocol() {
+        return getName().startsWith("mqtt");
     }
 
     /**

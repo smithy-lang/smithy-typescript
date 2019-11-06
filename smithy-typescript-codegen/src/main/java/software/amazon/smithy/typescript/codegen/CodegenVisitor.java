@@ -16,14 +16,14 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -69,7 +69,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
     private final ShapeIndex nonTraits;
-    private final CodeWriterDelegator<TypeScriptWriter> writers;
+    private final TypeScriptDelegator writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
     private final List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
     private final ApplicationProtocol applicationProtocol;
@@ -81,7 +81,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
         symbolProvider = SymbolProvider.cache(TypeScriptCodegenPlugin.createSymbolProvider(model));
-        writers = TypeScriptWriter.createDelegator(model, symbolProvider, fileManifest);
         LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
 
         // Load all integrations.
@@ -97,23 +96,70 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                     });
                 });
 
+        writers = new TypeScriptDelegator(settings, model, fileManifest, symbolProvider, integrations);
         applicationProtocol = ApplicationProtocol.resolve(settings, service, integrations);
     }
 
     void execute() {
         // Write shared / static content.
-        STATIC_FILE_COPIES.forEach((from, to) -> fileManifest.writeFile(from, getClass(), to));
+        STATIC_FILE_COPIES.forEach((from, to) -> {
+            LOGGER.fine(() -> "Writing contents of `" + from + "` to `" + to + "`");
+            fileManifest.writeFile(from, getClass(), to);
+        });
 
         // Generate models that are connected to the service being generated.
+        LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
         Set<Shape> serviceShapes = new TreeSet<>(new Walker(nonTraits).walkShapes(service));
         serviceShapes.forEach(shape -> shape.accept(this));
 
+        // Generate the client Node and Browser configuration files. These
+        // files are switched between in package.json based on the targeted
+        // environment.
+        String defaultProtocolName = getDefaultGenerator()
+                .map(ProtocolGenerator::getName)
+                .orElse(null);
+        LOGGER.fine("Resolved the default protocol of the client to " + defaultProtocolName);
+        generateRuntimeConfig("runtimeConfig.ts.template", defaultProtocolName);
+        generateRuntimeConfig("runtimeConfig.browser.ts.template", defaultProtocolName);
+
         // Write each pending writer.
-        Collection<TypeScriptWriter> usedWriters = writers.flush();
+        LOGGER.fine("Flushing TypeScript writers");
+        List<SymbolDependency> dependencies = writers.getDependencies();
+        writers.flushWriters();
 
         // Write the package.json file, including all symbol dependencies.
-        PackageJsonGenerator.writePackageJson(settings, fileManifest, SymbolDependency.gatherDependencies(
-                usedWriters.stream().flatMap(writer -> writer.getDependencies().stream())));
+        LOGGER.fine("Generating package.json files");
+        PackageJsonGenerator.writePackageJson(
+                settings, fileManifest, SymbolDependency.gatherDependencies(dependencies.stream()));
+    }
+
+    // Finds the first listed protocol from the service that has a
+    // discovered protocol generator that matches the name.
+    private Optional<ProtocolGenerator> getDefaultGenerator() {
+        List<String> protocols = settings.resolveServiceProtocols(service);
+        Map<String, ProtocolGenerator> generators = integrations.stream()
+                .flatMap(integration -> integration.getProtocolGenerators().stream())
+                .collect(Collectors.toMap(ProtocolGenerator::getName, Function.identity()));
+        return protocols.stream()
+                .filter(generators::containsKey)
+                .map(generators::get)
+                .findFirst();
+    }
+
+    private void generateRuntimeConfig(String templateName, String defaultProtocolName) {
+        String template = TypeScriptUtils.loadResourceAsString(templateName);
+        String target = templateName.replace(".template", "");
+        writers.useFileWriter(target, writer -> {
+            String clientModule = symbolProvider.toSymbol(service).getNamespace();
+            // Set to undefined if no default protocol can be resolved. This is typically
+            // only the case when testing out code generators. The runtime code is expected
+            // to throw an exception when a user tries to send a request but the default
+            // protocol is undedfined.
+            String defaultProtocolValue = defaultProtocolName == null
+                    ? "undefined"
+                    : "\"" + defaultProtocolName + "\"";
+            writer.write(template, clientModule, defaultProtocolValue, "");
+        });
     }
 
     @Override
@@ -152,7 +198,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     @Override
     public Void structureShape(StructureShape shape) {
-        useWriter(shape, writer -> {
+        writers.useShapeWriter(shape, writer -> {
             if (shape.hasTrait(ErrorTrait.class)) {
                 renderErrorStructure(shape, writer);
             } else {
@@ -297,7 +343,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     @Override
     public Void unionShape(UnionShape shape) {
-        useWriter(shape, writer -> new UnionGenerator(model, symbolProvider, writer, shape).run());
+        writers.useShapeWriter(shape, writer -> new UnionGenerator(model, symbolProvider, writer, shape).run());
         return null;
     }
 
@@ -337,7 +383,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     public Void stringShape(StringShape shape) {
         shape.getTrait(EnumTrait.class).ifPresent(trait -> {
             Symbol symbol = symbolProvider.toSymbol(shape);
-            useWriter(shape, writer -> {
+            writers.useShapeWriter(shape, writer -> {
                 // Unnamed enums generate a union of string literals.
                 if (!trait.hasNames()) {
                     writer.write("export type $L = $L",
@@ -361,17 +407,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     @Override
     public Void serviceShape(ServiceShape shape) {
         if (!Objects.equals(service, shape)) {
+            LOGGER.fine(() -> "Skipping `" + service.getId() + "` because it is not `" + service.getId() + "`");
             return null;
         }
 
         // Generate the service client itself.
-        useWriter(shape, writer -> new ServiceGenerator(
+        writers.useShapeWriter(shape, writer -> new ServiceGenerator(
                 settings, model, service, symbolProvider, writer, runtimePlugins, applicationProtocol).run());
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
-            useWriter(operation, commandWriter -> new CommandGenerator(
+            writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, service, operation, symbolProvider,
                     commandWriter, runtimePlugins, applicationProtocol).run());
         }
@@ -402,20 +449,5 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         });
 
         return null;
-    }
-
-    // Handles adding and removing onWriter callbacks for each shape.
-    private void useWriter(Shape shape, Consumer<TypeScriptWriter> consumer) {
-        TypeScriptWriter writer = writers.createWriter(shape);
-        writer.pushState();
-
-        // Allow integrations to do things like add onSection callbacks.
-        // These onSection callbacks are removed when popState is called.
-        for (TypeScriptIntegration integration : integrations) {
-            integration.onWriter(settings, model, symbolProvider, shape, writer);
-        }
-
-        consumer.accept(writer);
-        writer.popState();
     }
 }

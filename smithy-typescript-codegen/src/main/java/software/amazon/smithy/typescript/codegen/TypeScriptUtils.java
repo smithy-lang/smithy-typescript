@@ -15,9 +15,13 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -70,5 +74,19 @@ final class TypeScriptUtils {
         return values.stream()
                 .map(value -> StringUtils.escapeJavaString(value, ""))
                 .collect(Collectors.joining(" | "));
+    }
+
+    /**
+     * Loads the contents of a resource into a string.
+     *
+     * @param name Relative path of the resource to load.
+     * @return Returns the loaded contents.
+     */
+    static String loadResourceAsString(String name) {
+        try (InputStream is = TypeScriptUtils.class.getResourceAsStream(name)) {
+            return IoUtils.toUtf8String(is);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
