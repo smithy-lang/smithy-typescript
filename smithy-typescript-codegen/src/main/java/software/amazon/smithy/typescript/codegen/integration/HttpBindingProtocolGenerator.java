@@ -71,6 +71,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     @Override
+    public void generateSharedComponents(GenerationContext context) {
+        TypeScriptWriter writer = context.getWriter();
+
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        writer.addImport("ResponseMetadata", "ResponseMetadata", "@aws-sdk/types");
+        writer.openBlock("const deserializeMetadata = (output: $T): ResponseMetadata => ({", "});", responseType,
+                () -> {
+                    writer.write("httpStatusCode: output.statusCode,");
+                    writer.write("httpHeaders: output.headers,");
+                    writer.write("requestId: output.headers[\"x-amzn-requestid\"]");
+                });
+        writer.write("");
+    }
+
+    @Override
     public void generateRequestSerializers(GenerationContext context) {
         TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);

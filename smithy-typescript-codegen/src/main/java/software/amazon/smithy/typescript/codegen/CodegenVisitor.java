@@ -442,6 +442,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         context.setWriter(writer);
                         generator.generateRequestSerializers(context);
                         generator.generateResponseDeserializers(context);
+                        generator.generateSharedComponents(context);
                         fileManifest.writeFile(fileRoot + ".ts", writer.toString());
                     }
                 }
