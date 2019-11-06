@@ -106,6 +106,13 @@ public interface ProtocolGenerator {
     }
 
     /**
+     * Generates any standard code for service request/response serde.
+     *
+     * @param context Serde context.
+     */
+    default void generateSharedComponents(GenerationContext context) {}
+
+    /**
      * Generates the code used to serialize the shapes of a service
      * for requests.
      *
