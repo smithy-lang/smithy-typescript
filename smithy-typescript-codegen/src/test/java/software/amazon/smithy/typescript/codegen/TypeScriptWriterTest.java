@@ -16,6 +16,16 @@ public class TypeScriptWriterTest {
     }
 
     @Test
+    public void doesNotAddNewlineBetweenManagedAndExplicitImports() {
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.write("import { Foo } from \"baz\";");
+        writer.addImport("Baz", "Baz", "hello");
+        String result = writer.toString();
+
+        assertThat(result, equalTo("import { Baz } from \"hello\";\nimport { Foo } from \"baz\";\n"));
+    }
+
+    @Test
     public void addsFormatterForSymbols() {
         // TODO
     }

@@ -51,6 +51,10 @@ final class PackageJsonGenerator {
             node = node.withMember(depEntry.getKey(), builder.build());
         }
 
+        // Add the Node vs Browser hook.
+        node = node.withMember("browser", Node.objectNode()
+                .withMember("./runtimeConfig", "./runtimeConfig.browser"));
+
         // Expand template parameters.
         String template = Node.prettyPrintJson(node);
         template = template.replace("${package}", settings.getPackageName());

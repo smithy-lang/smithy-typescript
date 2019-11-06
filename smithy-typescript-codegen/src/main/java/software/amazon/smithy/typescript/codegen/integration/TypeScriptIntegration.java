@@ -64,33 +64,61 @@ public interface TypeScriptIntegration {
     }
 
     /**
-     * Called before writing the code for a specific shape.
+     * Called exactly once when a writer is first created.
      *
-     * <p>This gives an opportunity to intercept code sections of a
-     * {@link TypeScriptWriter} by name. For example:
+     * <p>Unlike {@link #onShapeWriterUse}, any changes made to the writer
+     * in this callback (for example, adding section interceptors) stay with
+     * the writer even after this callback has completed.
+     *
+     * @param settings Settings used to generate.
+     * @param model Model to generate from.
+     * @param symbolProvider Symbol provider used to generate code.
+     * @param writer Writer that was created.
+     */
+    default void onWriterCreated(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
+    ) {
+        // pass
+    }
+
+    /**
+     * Called each time a writer is used that defines a shape.
+     *
+     * <p>This method could be called multiple times for the same writer
+     * but for different shapes. It gives an opportunity to intercept code
+     * sections of a {@link TypeScriptWriter} by name using the shape for
+     * context. For example:
      *
      * <pre>
      * {@code
      * TypeScriptIntegration customization = new TypeScriptIntegration() {
-     *     public onWriter(TypeScriptSettings settings, Model model, SymbolProvider symbolProvider,
-     *             Shape shape, TypeScriptWriter writer) {
+     *     public onWriterUse(TypeScriptSettings settings, Model model, SymbolProvider symbolProvider,
+     *             TypeScriptWriter writer, Shape definedShape) {
      *         writer.onSection("example", text -&gt; writer.write("Intercepted: " + text"));
      *     }
      * };
      * }</pre>
      *
-     * @param settings Setting used to generate.
+     * <p>Any mutations made on the writer (for example, adding
+     * section interceptors) are removed after the callback has completed;
+     * the callback is invoked in between pushing and popping state from
+     * the writer.
+     *
+     * @param settings Settings used to generate.
      * @param model Model to generate from.
      * @param symbolProvider Symbol provider used for codegen.
-     * @param shape Shape being generated.
      * @param writer Writer that will be used.
+     * @param definedShape Shape that is being defined in the writer.
      */
-    default void onWriter(
+    default void onShapeWriterUse(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            Shape shape,
-            TypeScriptWriter writer
+            TypeScriptWriter writer,
+            Shape definedShape
     ) {
         // pass
     }
