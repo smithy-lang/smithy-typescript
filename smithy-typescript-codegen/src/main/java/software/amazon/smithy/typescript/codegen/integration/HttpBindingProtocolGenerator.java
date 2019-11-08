@@ -91,8 +91,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
 
         SymbolReference responseType = getApplicationProtocol().getResponseType();
-        writer.addImport("ResponseMetadata", "ResponseMetadata", "@aws-sdk/types");
-        writer.openBlock("const deserializeMetadata = (output: $T): ResponseMetadata => ({", "});", responseType,
+        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
+        writer.openBlock("const deserializeMetadata = (output: $T): __ResponseMetadata => ({", "});", responseType,
                 () -> {
                     writer.write("httpStatusCode: output.statusCode,");
                     writer.write("httpHeaders: output.headers,");
