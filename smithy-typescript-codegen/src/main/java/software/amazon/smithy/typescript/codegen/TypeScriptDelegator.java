@@ -123,7 +123,7 @@ final class TypeScriptDelegator {
             // Allow integrations to do things like add onSection callbacks
             // or add things like license headers.
             for (TypeScriptIntegration integration : integrations) {
-                integration.onWriterCreated(settings, model, symbolProvider, createdWriter);
+                integration.onWriterCreated(settings, model, symbolProvider, createdWriter, formattedFilename);
             }
 
             return createdWriter;

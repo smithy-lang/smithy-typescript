@@ -59,7 +59,7 @@ public class TypeScriptDelegatorTest {
         SymbolProvider provider = createProvider();
         MockManifest manifest = new MockManifest();
         List<Pair<TypeScriptWriter, Shape>> before = new ArrayList<>();
-        List<TypeScriptWriter> created = new ArrayList<>();
+        List<Pair<TypeScriptWriter, String>> created = new ArrayList<>();
         TypeScriptSettings settings = new TypeScriptSettings();
 
         TypeScriptIntegration integration = new TypeScriptIntegration() {
@@ -68,9 +68,10 @@ public class TypeScriptDelegatorTest {
                     TypeScriptSettings settings,
                     Model model,
                     SymbolProvider symbolProvider,
-                    TypeScriptWriter writer
+                    TypeScriptWriter writer,
+                    String filename
             ) {
-                created.add(writer);
+                created.add(Pair.of(writer, filename));
             }
 
             @Override
@@ -92,7 +93,7 @@ public class TypeScriptDelegatorTest {
             writer.write("Hello!");
             delegator.flushWriters();
             assertThat(before, containsInAnyOrder(Pair.of(writer, fooShape)));
-            assertThat(created, contains(writer));
+            assertThat(created, contains(Pair.of(writer, "Foo.txt")));
         });
     }
 
