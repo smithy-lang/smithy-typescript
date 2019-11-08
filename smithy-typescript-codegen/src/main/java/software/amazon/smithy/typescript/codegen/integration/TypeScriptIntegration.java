@@ -74,12 +74,14 @@ public interface TypeScriptIntegration {
      * @param model Model to generate from.
      * @param symbolProvider Symbol provider used to generate code.
      * @param writer Writer that was created.
+     * @param filename The relative filename of the writer.
      */
     default void onWriterCreated(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+            TypeScriptWriter writer,
+            String filename
     ) {
         // pass
     }
