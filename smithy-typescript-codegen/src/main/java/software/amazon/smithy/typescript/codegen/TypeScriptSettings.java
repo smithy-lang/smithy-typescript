@@ -208,6 +208,7 @@ public final class TypeScriptSettings {
      *
      * @param service Service to get the protocols from if "protocols" is not set.
      * @return Returns the possibly empty list of protocols.
+     * TODO: This could be moved into a shared codegen feature.
      */
     public List<String> resolveServiceProtocols(ServiceShape service) {
         if (!protocols.isEmpty()) {

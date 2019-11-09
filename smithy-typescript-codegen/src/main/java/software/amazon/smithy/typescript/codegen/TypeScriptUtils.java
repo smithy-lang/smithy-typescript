@@ -81,6 +81,7 @@ final class TypeScriptUtils {
      *
      * @param name Relative path of the resource to load.
      * @return Returns the loaded contents.
+     * TODO: this should be a shared feature in smithy-utils
      */
     static String loadResourceAsString(String name) {
         try (InputStream is = TypeScriptUtils.class.getResourceAsStream(name)) {

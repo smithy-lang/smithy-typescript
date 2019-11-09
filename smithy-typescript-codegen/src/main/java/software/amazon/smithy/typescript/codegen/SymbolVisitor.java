@@ -117,7 +117,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         // Note: `Readable` needs an import and a dependency.
         return createSymbolBuilder(shape, "ArrayBuffer | ArrayBufferView | string | Readable | Blob", null)
                 .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
-                .addDependency(TypeScriptDependencies.TYPES_NODE)
                 .build();
     }
 
@@ -204,9 +203,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol bigDecimalShape(BigDecimalShape shape) {
-        return createSymbolBuilder(shape, "Big", "@types/big.js")
-                .addDependency(TypeScriptDependencies.TYPES_BIG_JS)
-                .addDependency(TypeScriptDependencies.BIG_JS)
+        return createSymbolBuilder(shape, "Big", TypeScriptDependency.TYPES_BIG_JS.packageName)
+                .addDependency(TypeScriptDependency.TYPES_BIG_JS)
+                .addDependency(TypeScriptDependency.BIG_JS)
                 .build();
     }
 
@@ -243,9 +242,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol serviceShape(ServiceShape shape) {
-        return createObjectSymbolBuilder(shape)
-                .addDependency(TypeScriptDependencies.AWS_SMITHY_CLIENT)
-                .build();
+        return createObjectSymbolBuilder(shape).build();
     }
 
     @Override
@@ -254,11 +251,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         addSmithyImport(builder);
 
         if (outputShapes.contains(shape)) {
-            builder.addDependency(TypeScriptDependencies.AWS_SDK_TYPES);
             SymbolReference reference = SymbolReference.builder()
                     .options(SymbolReference.ContextOption.DECLARE)
                     .alias("$MetadataBearer")
-                    .symbol(Symbol.builder().name("MetadataBearer").namespace("@aws-sdk/types", "/").build())
+                    .symbol(TypeScriptDependency.AWS_SDK_TYPES.createSymbol("MetadataBearer"))
                     .putProperty("extends", true)
                     .build();
             builder.addReference(reference);

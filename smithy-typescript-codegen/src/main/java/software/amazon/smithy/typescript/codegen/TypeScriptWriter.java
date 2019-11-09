@@ -26,7 +26,9 @@ import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolContainer;
 import software.amazon.smithy.codegen.core.SymbolDependency;
+import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -76,14 +78,17 @@ public final class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Imports a symbol if necessary, using the name of the symbol
-     * and only "USE" references.
+     * Imports one or more symbols if necessary, using the name of the
+     * symbol and only "USE" references.
      *
-     * @param symbol Symbol to import.
+     * @param container Container of symbols to add.
      * @return Returns the writer.
      */
-    public TypeScriptWriter addUseImports(Symbol symbol) {
-        return addImport(symbol, symbol.getName(), SymbolReference.ContextOption.USE);
+    public TypeScriptWriter addUseImports(SymbolContainer container) {
+        for (Symbol symbol : container.getSymbols()) {
+            addImport(symbol, symbol.getName(), SymbolReference.ContextOption.USE);
+        }
+        return this;
     }
 
     /**
@@ -214,16 +219,16 @@ public final class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Adds a dependency to the generated code.
+     * Adds one or more dependencies to the generated code.
      *
      * <p>The dependencies of all writers are merged together to eventually generate
      * a package.json file.
      *
-     * @param dependency Dependency to add.
+     * @param dependencies TypeScriptDependency to add.
      * @return Returns the writer.
      */
-    public TypeScriptWriter addDependency(SymbolDependency dependency) {
-        dependencies.add(dependency);
+    public TypeScriptWriter addDependency(SymbolDependencyContainer dependencies) {
+        this.dependencies.addAll(dependencies.getDependencies());
         return this;
     }
 

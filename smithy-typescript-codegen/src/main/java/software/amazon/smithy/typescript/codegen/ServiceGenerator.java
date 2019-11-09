@@ -30,6 +30,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.OptionalUtils;
 
 /**
@@ -38,7 +39,6 @@ import software.amazon.smithy.utils.OptionalUtils;
 final class ServiceGenerator implements Runnable {
 
     static final String CLIENT_CONFIG_SECTION = "client_config";
-    static final String CLIENT_ADDITIONAL_DEPENDENCY_CONFIG = "client_additional_dependency_config";
     static final String CLIENT_PROPERTIES_SECTION = "client_properties";
     static final String CLIENT_BODY_EXTRA_SECTION = "client_body_extra";
     static final String CLIENT_CONSTRUCTOR_SECTION = "client_constructor";
@@ -52,23 +52,25 @@ final class ServiceGenerator implements Runnable {
     private final Symbol symbol;
     private final String configType;
     private final String resolvedConfigType;
+    private final List<TypeScriptIntegration> integrations;
     private final List<RuntimeClientPlugin> runtimePlugins;
     private final ApplicationProtocol applicationProtocol;
 
     ServiceGenerator(
             TypeScriptSettings settings,
             Model model,
-            ServiceShape service,
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
+            List<TypeScriptIntegration> integrations,
             List<RuntimeClientPlugin> runtimePlugins,
             ApplicationProtocol applicationProtocol
     ) {
         this.settings = settings;
         this.model = model;
-        this.service = service;
+        this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
         this.writer = writer;
+        this.integrations = integrations;
         this.runtimePlugins = runtimePlugins.stream()
                 // Only apply plugins that target the entire client.
                 .filter(plugin -> plugin.matchesService(model, service))
@@ -181,8 +183,8 @@ final class ServiceGenerator implements Runnable {
                         "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
             }
 
-            writer.writeDocs("The default protocol to use for all requests.");
-            writer.write("defaultProtocol: string | undefined;\n");
+            writer.writeDocs("The protocol to use for all requests.");
+            writer.write("protocol: string | undefined;\n");
 
             writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
             writer.writeDocs("A constructor for a class implementing the @aws-sdk/types.Hash interface \n"
@@ -219,8 +221,10 @@ final class ServiceGenerator implements Runnable {
             writer.writeDocs("The function that will be used to populate default value in 'User-Agent' header");
             writer.write("defaultUserAgent?: string;\n");
 
-            // Hook to add more dependency configuration.
-            writer.pushState(CLIENT_ADDITIONAL_DEPENDENCY_CONFIG).popState();
+            // Write custom configuration dependencies.
+            for (TypeScriptIntegration integration : integrations) {
+                integration.addConfigInterfaceFields(settings, model, symbolProvider, writer);
+            }
         }).write("");
     }
 

@@ -7,10 +7,10 @@ import { fromUtf8, toUtf8 } from "@aws-sdk/util-utf8-browser";
 import { fromBase64, toBase64 } from "@aws-sdk/util-base64-browser";
 import { defaultUserAgent } from "@aws-sdk/util-user-agent-browser";
 import { name, version } from "./package.json";
-import { ClientRuntimeDependencies } from "./$1L";
+import { ClientRuntimeDependencies } from "${clientModuleName}";
 
 export const ClientRuntimeConfiguration: Required<ClientRuntimeDependencies> = {
-  defaultProtocol: $2L,
+  protocol: "${protocol}",
   httpHandler: new FetchHttpHandler(),
   sha256: Sha256,
   urlParser: parseUrl,
@@ -21,5 +21,5 @@ export const ClientRuntimeConfiguration: Required<ClientRuntimeDependencies> = {
   utf8Decoder: fromUtf8,
   utf8Encoder: toUtf8,
   defaultUserAgent: defaultUserAgent(name, version),
-${3L@client_additional_runtime_configuration}
+${customizations}
 };

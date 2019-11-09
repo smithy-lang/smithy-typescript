@@ -68,29 +68,28 @@ public final class ApplicationProtocol {
         return new ApplicationProtocol(
                 "http",
                 SymbolReference.builder()
-                        .symbol(Symbol.builder()
-                                        .namespace("@aws-sdk/types", "/")
-                                        .name("HttpOptions")
-                                        .build())
+                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_TYPES, "HttpOptions"))
                         .alias("__HttpOptions")
                         .build(),
                 SymbolReference.builder()
-                        .symbol(Symbol.builder()
-                                        .namespace("@aws-sdk/protocol-http", "/")
-                                        .name("HttpRequest")
-                                        .addDependency(TypeScriptDependencies.HTTP_PROTOCOL)
-                                        .build())
+                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP, "HttpRequest"))
                         .alias("__HttpRequest")
                         .build(),
                 SymbolReference.builder()
-                        .symbol(Symbol.builder()
-                                        .namespace("@aws-sdk/protocol-http", "/")
-                                        .name("HttpResponse")
-                                        .addDependency(TypeScriptDependencies.HTTP_PROTOCOL)
-                                        .build())
+                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP, "HttpResponse"))
                         .alias("__HttpResponse")
                         .build()
         );
+    }
+
+    private static Symbol createHttpSymbol(TypeScriptDependency dependency, String symbolName) {
+        return Symbol.builder()
+                .namespace(dependency.packageName, "/")
+                .name(symbolName)
+                .addDependency(dependency)
+                .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)
+                .addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER)
+                .build();
     }
 
     static ApplicationProtocol resolve(
@@ -98,7 +97,6 @@ public final class ApplicationProtocol {
             ServiceShape service,
             Collection<TypeScriptIntegration> integrations
     ) {
-        // TODO If we're going to need to resolve this more than once, store it.
         List<String> resolvedProtocols = settings.resolveServiceProtocols(service);
         // Get the list of protocol generators that have implementations from the service.
         List<ProtocolGenerator> generators = integrations.stream()
