@@ -52,7 +52,6 @@ final class CommandGenerator implements Runnable {
     CommandGenerator(
             TypeScriptSettings settings,
             Model model,
-            ServiceShape service,
             OperationShape operation,
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
@@ -61,7 +60,7 @@ final class CommandGenerator implements Runnable {
     ) {
         this.settings = settings;
         this.model = model;
-        this.service = service;
+        this.service = settings.getService(model);
         this.operation = operation;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
@@ -128,11 +127,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandMiddlewareResolver(String configType) {
-        Symbol serde = Symbol.builder()
-                .name("getSerdePlugin")
-                .namespace("@aws-sdk/middleware-serde", "/")
-                .addDependency(TypeScriptDependencies.MIDDLEWARE_SERDE)
-                .build();
+        Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
 
         writer.write("resolveMiddleware(")
                 .indent()

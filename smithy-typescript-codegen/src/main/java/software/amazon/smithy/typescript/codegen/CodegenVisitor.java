@@ -115,12 +115,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
         // environment.
-        String defaultProtocolName = getDefaultGenerator()
-                .map(ProtocolGenerator::getName)
-                .orElse(null);
+        String defaultProtocolName = getDefaultGenerator().map(ProtocolGenerator::getName).orElse(null);
         LOGGER.fine("Resolved the default protocol of the client to " + defaultProtocolName);
-        generateRuntimeConfig("runtimeConfig.ts.template", defaultProtocolName);
-        generateRuntimeConfig("runtimeConfig.browser.ts.template", defaultProtocolName);
+
+        // Generate each runtime config file for targeted platforms.
+        RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
+                settings, model, symbolProvider, defaultProtocolName, writers, integrations);
+        for (LanguageTarget target : LanguageTarget.values()) {
+            LOGGER.fine("Generating " + target + " runtime configuration");
+            configGenerator.generate(target);
+        }
 
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");
@@ -144,22 +148,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 .filter(generators::containsKey)
                 .map(generators::get)
                 .findFirst();
-    }
-
-    private void generateRuntimeConfig(String templateName, String defaultProtocolName) {
-        String template = TypeScriptUtils.loadResourceAsString(templateName);
-        String target = templateName.replace(".template", "");
-        writers.useFileWriter(target, writer -> {
-            String clientModule = symbolProvider.toSymbol(service).getNamespace();
-            // Set to undefined if no default protocol can be resolved. This is typically
-            // only the case when testing out code generators. The runtime code is expected
-            // to throw an exception when a user tries to send a request but the default
-            // protocol is undedfined.
-            String defaultProtocolValue = defaultProtocolName == null
-                    ? "undefined"
-                    : "\"" + defaultProtocolName + "\"";
-            writer.write(template, clientModule, defaultProtocolValue, "");
-        });
     }
 
     @Override
@@ -413,14 +401,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Generate the service client itself.
         writers.useShapeWriter(shape, writer -> new ServiceGenerator(
-                settings, model, service, symbolProvider, writer, runtimePlugins, applicationProtocol).run());
+                settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
-                    settings, model, service, operation, symbolProvider,
-                    commandWriter, runtimePlugins, applicationProtocol).run());
+                    settings, model, operation, symbolProvider, commandWriter,
+                    runtimePlugins, applicationProtocol).run());
         }
 
         // Generate each protocol.

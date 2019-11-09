@@ -1,7 +1,6 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -36,6 +35,18 @@ public class TypeScriptDelegatorTest {
     }
 
     @Test
+    public void addsBuiltinDependencies() {
+        Model model = createModel();
+        SymbolProvider provider = createProvider();
+        MockManifest manifest = new MockManifest();
+        TypeScriptSettings settings = new TypeScriptSettings();
+        TypeScriptDelegator delegator = new TypeScriptDelegator(
+                settings, model, manifest, provider, ListUtils.of());
+
+        assertThat(delegator.getDependencies(), equalTo(TypeScriptDependency.getUnconditionalDependencies()));
+    }
+
+    @Test
     public void appendsToOpenedWriterWithNewline() {
         Model model = createModel();
         Shape fooShape = model.getShapeIndex().getShape(ShapeId.from("smithy.example#Foo")).get();
@@ -59,21 +70,9 @@ public class TypeScriptDelegatorTest {
         SymbolProvider provider = createProvider();
         MockManifest manifest = new MockManifest();
         List<Pair<TypeScriptWriter, Shape>> before = new ArrayList<>();
-        List<Pair<TypeScriptWriter, String>> created = new ArrayList<>();
         TypeScriptSettings settings = new TypeScriptSettings();
 
         TypeScriptIntegration integration = new TypeScriptIntegration() {
-            @Override
-            public void onWriterCreated(
-                    TypeScriptSettings settings,
-                    Model model,
-                    SymbolProvider symbolProvider,
-                    TypeScriptWriter writer,
-                    String filename
-            ) {
-                created.add(Pair.of(writer, filename));
-            }
-
             @Override
             public void onShapeWriterUse(
                     TypeScriptSettings settings,
@@ -93,7 +92,6 @@ public class TypeScriptDelegatorTest {
             writer.write("Hello!");
             delegator.flushWriters();
             assertThat(before, containsInAnyOrder(Pair.of(writer, fooShape)));
-            assertThat(created, contains(Pair.of(writer, "Foo.txt")));
         });
     }
 

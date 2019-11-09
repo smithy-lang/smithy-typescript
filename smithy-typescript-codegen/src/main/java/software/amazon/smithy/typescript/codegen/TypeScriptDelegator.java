@@ -16,11 +16,11 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
@@ -68,7 +68,10 @@ final class TypeScriptDelegator {
      * @return Returns all the dependencies.
      */
     List<SymbolDependency> getDependencies() {
-        return writers.values().stream().flatMap(s -> s.getDependencies().stream()).collect(Collectors.toList());
+        // Always add unconditional dependencies.
+        List<SymbolDependency> resolved = new ArrayList<>(TypeScriptDependency.getUnconditionalDependencies());
+        writers.values().forEach(s -> resolved.addAll(s.getDependencies()));
+        return resolved;
     }
 
     /**
@@ -118,15 +121,7 @@ final class TypeScriptDelegator {
 
         TypeScriptWriter writer = writers.computeIfAbsent(formattedFilename, f -> {
             String moduleName = filename.endsWith(".ts") ? filename.substring(0, filename.length() - 3) : filename;
-            TypeScriptWriter createdWriter = new TypeScriptWriter(moduleName);
-
-            // Allow integrations to do things like add onSection callbacks
-            // or add things like license headers.
-            for (TypeScriptIntegration integration : integrations) {
-                integration.onWriterCreated(settings, model, symbolProvider, createdWriter, formattedFilename);
-            }
-
-            return createdWriter;
+            return new TypeScriptWriter(moduleName);
         });
 
         // Add newlines/separators between types in the same file.

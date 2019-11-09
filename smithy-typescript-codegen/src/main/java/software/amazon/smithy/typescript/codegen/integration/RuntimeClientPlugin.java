@@ -20,11 +20,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.typescript.codegen.TypeScriptDependencies;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.StringUtils;
 import software.amazon.smithy.utils.ToSmithyBuilder;
@@ -515,6 +516,24 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * {@link Convention#HAS_CONFIG} and {@link Convention#HAS_MIDDLEWARE}
          * is used.
          *
+         * @param dependency Dependency to pull the package name and version from.
+         * @param pluginName The name of the plugin that is used when generating
+         *   symbol names for each {@code convention}. (for example, "Foo").
+         * @param conventions Conventions to use when configuring the builder.
+         * @return Returns the builder.
+         */
+        public Builder withConventions(SymbolDependency dependency, String pluginName, Convention... conventions) {
+            return withConventions(dependency.getPackageName(), dependency.getVersion(), pluginName, conventions);
+        }
+
+        /**
+         * Configures various aspects of the builder based on naming conventions
+         * defined by the provided {@link Convention} values.
+         *
+         * <p>If no {@code conventions} are provided, a default value of
+         * {@link Convention#HAS_CONFIG} and {@link Convention#HAS_MIDDLEWARE}
+         * is used.
+         *
          * @param packageName The name of the package to use as an import and
          *   add as a dependency for each generated symbol
          *   (for example, "foo/baz").
@@ -614,7 +633,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             return Symbol.builder()
                     .namespace(packageName, "/")
                     .name(name)
-                    .addDependency(TypeScriptDependencies.NORMAL_DEPENDENCY, packageName, version)
+                    .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
                     .build();
         }
     }
