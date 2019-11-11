@@ -430,7 +430,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
                     if (protocolsTrait.hasProtocol(generator.getName())) {
                         LOGGER.info("Generating serde for protocol " + generator.getName() + " on " + shape.getId());
-                        String fileRoot = "protocol/" + ProtocolGenerator.getSanitizedName(generator.getName());
+                        String fileRoot = "protocols/" + ProtocolGenerator.getSanitizedName(generator.getName());
                         String namespace = "./" + fileRoot;
                         TypeScriptWriter writer = new TypeScriptWriter(namespace);
                         ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
