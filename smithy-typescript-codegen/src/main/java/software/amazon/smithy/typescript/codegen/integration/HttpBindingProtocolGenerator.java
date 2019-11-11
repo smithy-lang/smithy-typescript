@@ -415,7 +415,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case DOCUMENT:
             case QUERY:
                 // Encode these to base64.
-                return "context.base64Encoder.toBase64(" + dataSource + ")";
+                return "context.base64Encoder(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected blob binding location `" + bindingType + "`");
         }
@@ -778,7 +778,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case HEADER:
             case DOCUMENT:
                 // Decode these from base64.
-                return "context.base64Decoder.fromBase64(" + dataSource + ")";
+                return "context.base64Decoder(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected blob binding location `" + bindingType + "`");
         }
