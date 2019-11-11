@@ -129,7 +129,7 @@ final class CommandGenerator implements Runnable {
 
     private void generateCommandMiddlewareResolver(String configType) {
         Symbol serde = Symbol.builder()
-                .name("serdePlugin")
+                .name("getSerdePlugin")
                 .namespace("@aws-sdk/middleware-serde", "/")
                 .addDependency(TypeScriptDependencies.MIDDLEWARE_SERDE)
                 .build();
