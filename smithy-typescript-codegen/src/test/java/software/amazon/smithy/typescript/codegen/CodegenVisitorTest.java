@@ -107,6 +107,31 @@ public class CodegenVisitorTest {
     }
 
     @Test
+    public void decoratesSymbolProvider() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+                .model(model)
+                .fileManifest(manifest)
+                .pluginClassLoader(getClass().getClassLoader())
+                .settings(Node.objectNodeBuilder()
+                        .withMember("service", Node.from("smithy.example#Example"))
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("__customServiceName", "Foo")
+                        .build())
+                .build();
+
+        new TypeScriptCodegenPlugin().execute(context);
+
+        Assertions.assertTrue(manifest.hasFile("Foo.ts"));
+        assertThat(manifest.getFileString("Foo.ts").get(), containsString("export class Foo"));
+    }
+
+    @Test
     public void generatesServiceAndCommandShapes() {
         // TODO
     }

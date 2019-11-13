@@ -80,7 +80,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         model = context.getModel();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        symbolProvider = SymbolProvider.cache(TypeScriptCodegenPlugin.createSymbolProvider(model));
         LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
 
         // Load all integrations.
@@ -95,6 +94,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         runtimePlugins.add(runtimePlugin);
                     });
                 });
+
+        // Decorate the symbol provider using integrations.
+        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        for (TypeScriptIntegration integration : integrations) {
+            resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
+        }
+        symbolProvider = SymbolProvider.cache(resolvedProvider);
 
         writers = new TypeScriptDelegator(settings, model, fileManifest, symbolProvider, integrations);
         applicationProtocol = ApplicationProtocol.resolve(settings, service, integrations);
