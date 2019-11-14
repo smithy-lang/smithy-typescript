@@ -17,9 +17,9 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -57,7 +57,6 @@ import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -68,11 +67,12 @@ import software.amazon.smithy.utils.StringUtils;
  */
 final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
+    static final String IMPLEMENTS_INTERFACE_PROPERTY = "implementsInterface";
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
     private final Model model;
     private final ReservedWordSymbolProvider.Escaper escaper;
-    private final Set<StructureShape> outputShapes;
+    private final Set<StructureShape> outputShapes = new HashSet<>();
 
     SymbolVisitor(Model model) {
         this.model = model;
@@ -89,11 +89,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getDefinitionFile()))
                 .buildEscaper();
 
-        // Get each structure that's used as output.
+        // Get each structure that's used as output or errors.
         OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
-        outputShapes = model.getShapeIndex().shapes(OperationShape.class)
-                .flatMap(operationShape -> OptionalUtils.stream(operationIndex.getOutput(operationShape)))
-                .collect(Collectors.toSet());
+        model.getShapeIndex().shapes(OperationShape.class).forEach(operationShape -> {
+            operationIndex.getOutput(operationShape).ifPresent(outputShapes::add);
+            outputShapes.addAll(operationIndex.getErrors(operationShape));
+        });
     }
 
     @Override
@@ -255,7 +256,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                     .options(SymbolReference.ContextOption.DECLARE)
                     .alias("$MetadataBearer")
                     .symbol(TypeScriptDependency.AWS_SDK_TYPES.createSymbol("MetadataBearer"))
-                    .putProperty("extends", true)
+                    .putProperty(IMPLEMENTS_INTERFACE_PROPERTY, true)
                     .build();
             builder.addReference(reference);
             builder.putProperty("isOutput", true);

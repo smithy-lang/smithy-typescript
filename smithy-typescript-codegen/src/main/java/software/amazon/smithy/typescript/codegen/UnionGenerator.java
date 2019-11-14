@@ -145,7 +145,6 @@ final class UnionGenerator implements Runnable {
 
         // Write out the namespace that contains each variant and visitor.
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-            writer.write("export const ID = $S", shape.getId());
             writeUnionMemberInterfaces();
             writeVisitorType();
             writeVisitorFunction();

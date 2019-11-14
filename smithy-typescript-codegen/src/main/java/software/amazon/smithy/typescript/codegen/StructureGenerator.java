@@ -33,12 +33,7 @@ final class StructureGenerator implements Runnable {
     private final TypeScriptWriter writer;
     private final StructureShape shape;
 
-    StructureGenerator(
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
-            StructureShape shape
-    ) {
+    StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
@@ -94,7 +89,7 @@ final class StructureGenerator implements Runnable {
 
         // Find symbol references with the "extends" property.
         String extendsFrom = symbol.getReferences().stream()
-                .filter(ref -> ref.getProperty("extends").isPresent())
+                .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
                 .map(SymbolReference::getAlias)
                 .collect(Collectors.joining(", "));
 
