@@ -14,8 +14,7 @@ public class StructureGeneratorTest {
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
                                   "export interface Err extends _smithy.SmithyException {\n"
-                                  + "  __type: \"smithy.example#Err\";\n"
-                                  + "  $name: \"Err\";\n"
+                                  + "  __type: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "}");
     }
@@ -24,8 +23,7 @@ public class StructureGeneratorTest {
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
                                   "export interface Err extends _smithy.SmithyException {\n"
-                                  + "  __type: \"smithy.example#Err\";\n"
-                                  + "  $name: \"Err\";\n"
+                                  + "  __type: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  message?: string;\n"
                                   + "}");
@@ -35,8 +33,7 @@ public class StructureGeneratorTest {
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
                                   "export interface Err extends _smithy.SmithyException {\n"
-                                  + "  __type: \"smithy.example#Err\";\n"
-                                  + "  $name: \"Err\";\n"
+                                  + "  __type: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  message: string | undefined;\n"
                                   + "}");
@@ -63,9 +60,8 @@ public class StructureGeneratorTest {
 
         assertThat(contents, containsString(expectedType));
         assertThat(contents, containsString("namespace Err {\n"
-                                            + "  export const ID = \"smithy.example#Err\";\n"
                                             + "  export function isa(o: any): o is Err {\n"
-                                            + "    return _smithy.isa(o, ID);\n"
+                                            + "    return _smithy.isa(o, \"Err\");\n"
                                             + "  }\n"
                                             + "}"));
     }

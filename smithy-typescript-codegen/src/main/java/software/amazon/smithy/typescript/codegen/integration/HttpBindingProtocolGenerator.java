@@ -617,7 +617,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("let data: any = await parseBody(output.body, context)");
             writer.openBlock("let contents: $L = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
-                writer.write("__type: $S,", operation.getOutput().get().toString());
+                writer.write("__type: $S,", operation.getOutput().get().getName());
             });
             readHeaders(context, operation, bindingIndex);
             readResponseBody(context, operation, bindingIndex);
@@ -718,8 +718,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "): $T => {", "};", methodName, symbol, () -> {
             // Initial contents of the error.
             writer.openBlock("let contents: $T = {", "};", symbol, () -> {
-                writer.write("__type: $S,", shape.getId().toString());
-                writer.write("$$name: $S,", shape.getId().getName());
+                writer.write("__type: $S,", shape.getId().getName());
                 writer.write("$$fault: $S,", shape.getTrait(ErrorTrait.class).get().getValue());
             });
             // Read additional modeled content.
@@ -830,7 +829,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *       break;
      *     default:
      *       response = {
-     *         __type: "com.smithy.example#UnknownError",
+     *         __type: "UnknownError",
      *         $name: "UnknownError",
      *         $fault: "client",
      *       };
