@@ -7,7 +7,11 @@ import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.node.Node;
+import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 
 public class StructureGeneratorTest {
     @Test
@@ -64,5 +68,49 @@ public class StructureGeneratorTest {
                                             + "    return _smithy.isa(o, \"Err\");\n"
                                             + "  }\n"
                                             + "}"));
+    }
+
+    @Test
+    public void generatesNonErrorStructures() {
+        StructureShape struct = createNonErrorStructure();
+        ModelAssembler assembler = Model.assembler().addShape(struct);
+        struct.getAllMembers().values().forEach(assembler::addShape);
+        Model model = assembler.assemble().unwrap();
+
+        TypeScriptWriter writer = new TypeScriptWriter("./foo");
+        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
+        String output = writer.toString();
+
+        assertThat(output, containsString("export interface Bar {"));
+        assertThat(output, containsString("__type?: \"Bar\";"));
+        assertThat(output, containsString("foo?: string;"));
+        assertThat(output, containsString("export namespace Bar {"));
+        assertThat(output, containsString(
+                "export function isa(o: any): o is Bar {\n"
+                + "    return _smithy.isa(o, \"Bar\");\n"
+                + "  }"));
+    }
+
+    private StructureShape createNonErrorStructure() {
+        return StructureShape.builder()
+                .id("com.foo#Bar")
+                .addMember(MemberShape.builder().id("com.foo#Bar$foo").target("smithy.api#String").build())
+                .build();
+    }
+
+    @Test
+    public void generatesNonErrorStructuresThatExtendOtherInterfaces() {
+        StructureShape struct = createNonErrorStructure();
+        ModelAssembler assembler = Model.assembler().addShape(struct);
+        struct.getAllMembers().values().forEach(assembler::addShape);
+        OperationShape operation = OperationShape.builder().id("com.foo#Operation").output(struct).build();
+        assembler.addShape(operation);
+        Model model = assembler.assemble().unwrap();
+
+        TypeScriptWriter writer = new TypeScriptWriter("./foo");
+        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
+        String output = writer.toString();
+
+        assertThat(output, containsString("export interface Bar extends $MetadataBearer {"));
     }
 }

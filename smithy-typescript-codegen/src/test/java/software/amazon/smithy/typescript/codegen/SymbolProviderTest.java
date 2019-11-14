@@ -122,7 +122,7 @@ public class SymbolProviderTest {
 
         // Output uses MetadataBearer
         assertThat(outputSymbol.getReferences().stream()
-                .filter(ref -> ref.getProperty("extends").isPresent())
+                .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
                 .count(), greaterThan(0L));
         assertThat(outputSymbol.getReferences().stream()
                  .filter(ref -> ref.getAlias().equals("$MetadataBearer"))
