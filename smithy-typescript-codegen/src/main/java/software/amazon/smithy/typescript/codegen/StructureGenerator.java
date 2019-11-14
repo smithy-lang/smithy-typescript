@@ -75,7 +75,7 @@ final class StructureGenerator implements Runnable {
      * import * as _smithy from "../lib/smithy";
      *
      * export interface Person {
-     *   __type?: "smithy.example#Person";
+     *   __type?: "Person";
      *   name: string | undefined;
      *   age?: number | null;
      * }
@@ -104,7 +104,7 @@ final class StructureGenerator implements Runnable {
             writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         }
 
-        writer.write("__type?: $S;", shape.getId());
+        writer.write("__type?: $S;", shape.getId().getName());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
         config.writeMembers(writer, shape);
@@ -135,16 +135,14 @@ final class StructureGenerator implements Runnable {
      * import * as _smithy from "../lib/smithy";
      *
      * export interface NoSuchResource extends _smithy.SmithyException {
-     *   __type: "smithy.example#NoSuchResource";
-     *   $name: "NoSuchResource";
+     *   __type: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
      * }
      *
      * export namespace Person {
-     *   export const ID = "smithy.example#NoSuchResource";
      *   export function isa(o: any): o is NoSuchResource {
-     *     return _smithy.isa(o, ID);
+     *     return _smithy.isa(o, "NoSuchResource");
      *   }
      * }
      * }</pre>
@@ -154,8 +152,7 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.writeShapeDocs(shape);
         writer.openBlock("export interface $L extends _smithy.SmithyException {", symbol.getName());
-        writer.write("__type: $S;", shape.getId());
-        writer.write("$$name: $S;", shape.getId().getName());
+        writer.write("__type: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
@@ -168,9 +165,8 @@ final class StructureGenerator implements Runnable {
     private void renderStructureNamespace() {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-            writer.write("export const ID = $S;", shape.getId());
             writer.openBlock("export function isa(o: any): o is $L {", "}", symbol.getName(), () -> {
-                writer.write("return _smithy.isa(o, ID);");
+                writer.write("return _smithy.isa(o, $S);", shape.getId().getName());
             });
         });
     }

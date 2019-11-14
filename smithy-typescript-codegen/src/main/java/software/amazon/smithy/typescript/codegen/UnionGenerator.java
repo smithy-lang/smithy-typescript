@@ -61,7 +61,7 @@ import software.amazon.smithy.utils.StringUtils;
  * export namespace Attacker {
  *   export const ID = "smithy.example#Attacker";
  *   interface $Base {
- *     __type?: "smithy.example#Attacker",
+ *     __type?: "Attacker",
  *   }
  *   export interface LionMember extends $Base {
  *     lion: Lion;
@@ -154,7 +154,7 @@ final class UnionGenerator implements Runnable {
 
     private void writeUnionMemberInterfaces() {
         writer.openBlock("interface $$Base {", "}", () -> {
-            writer.write("__type?: $S;", shape.getId());
+            writer.write("__type?: $S;", shape.getId().getName());
         });
 
         for (MemberShape member : shape.getAllMembers().values()) {
