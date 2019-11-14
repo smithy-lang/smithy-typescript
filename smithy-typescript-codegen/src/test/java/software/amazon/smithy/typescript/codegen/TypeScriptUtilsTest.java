@@ -19,8 +19,8 @@ public class TypeScriptUtilsTest {
 
     @Test
     public void createsEnumVariantsFromString() {
-        assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo", "bar")), equalTo("\"foo\" | \"bar\""));
+        assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo", "bar")), equalTo("\"bar\" | \"foo\""));
         assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo!!")), equalTo("\"foo!!\""));
-        assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo\"", "bar")), equalTo("\"foo\\\"\" | \"bar\""));
+        assertThat(TypeScriptUtils.getEnumVariants(Arrays.asList("foo\"", "bar")), equalTo("\"bar\" | \"foo\\\"\""));
     }
 }
