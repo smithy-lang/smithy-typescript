@@ -206,60 +206,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         return null;
     }
 
-    /**
-     * Named enums are rendered as TypeScript enums.
-     *
-     * <p>For example, given the following Smithy model:
-     *
-     * <pre>{@code
-     * @enum("YES": {name: "YEP"}, "NO": {name: "NOPE"})
-     * string TypedYesNo
-     * }</pre>
-     *
-     * <p>We will generate the following:
-     *
-     * <pre>{@code
-     * export enum TypedYesNo {
-     *   YES: "YEP",
-     *   NO: "NOPE",
-     * }
-     * }</pre>
-     *
-     * <p>Shapes that refer to this string as a member will use the following
-     * generated code:
-     *
-     * <pre>{@code
-     * import { TypedYesNo } from "./TypedYesNo";
-     *
-     * interface MyStructure {
-     *   "yesNo": TypedYesNo | string;
-     * }
-     * }</pre>
-     *
-     * @param shape Shape to generate.
-     */
     @Override
     public Void stringShape(StringShape shape) {
-        shape.getTrait(EnumTrait.class).ifPresent(trait -> {
+        if (shape.hasTrait(EnumTrait.class)) {
             Symbol symbol = symbolProvider.toSymbol(shape);
-            writers.useShapeWriter(shape, writer -> {
-                // Unnamed enums generate a union of string literals.
-                if (!trait.hasNames()) {
-                    writer.write("export type $L = $L",
-                                 symbol.getName(), TypeScriptUtils.getEnumVariants(trait.getValues().keySet()));
-                } else {
-                    // Named enums generate an actual enum type.
-                    writer.openBlock("export enum $L {", symbol.getName());
-                    trait.getValues().forEach((value, body) -> body.getName().ifPresent(name -> {
-                        body.getDocumentation().ifPresent(writer::writeDocs);
-                        writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), value);
-                    }));
-                    writer.closeBlock("};");
-                }
-            });
-        });
+            writers.useShapeWriter(shape, writer -> new EnumGenerator(shape, symbol, writer).run());
+        }
 
-        // Normal string shapes don't generate any code on their own.
         return null;
     }
 

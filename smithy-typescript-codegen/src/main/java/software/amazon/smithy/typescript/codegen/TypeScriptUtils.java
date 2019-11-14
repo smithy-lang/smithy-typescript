@@ -62,7 +62,7 @@ final class TypeScriptUtils {
     }
 
     /**
-     * Creates a list of pipe separated enum variants as a union.
+     * Creates a list of sorted, pipe separated enum variants as a union.
      *
      * <p>For example, `"foo" | "baz" | string`. Note: special characters
      * and quotes are escaped as needed.
@@ -72,6 +72,7 @@ final class TypeScriptUtils {
      */
     static String getEnumVariants(Collection<String> values) {
         return values.stream()
+                .sorted()
                 .map(value -> StringUtils.escapeJavaString(value, ""))
                 .collect(Collectors.joining(" | "));
     }
