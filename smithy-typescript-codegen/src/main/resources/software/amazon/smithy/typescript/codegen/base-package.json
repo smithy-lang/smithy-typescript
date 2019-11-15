@@ -16,9 +16,7 @@
   },
   "main": "./index.js",
   "types": "./index.d.ts",
-  "dependencies": {
-    "tslib": "^1.10.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "rimraf": "^3.0.0",
     "typedoc": "^0.15.0",
