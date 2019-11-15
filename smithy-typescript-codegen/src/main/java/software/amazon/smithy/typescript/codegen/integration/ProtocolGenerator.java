@@ -182,6 +182,7 @@ public interface ProtocolGenerator {
         private SymbolProvider symbolProvider;
         private TypeScriptWriter writer;
         private List<TypeScriptIntegration> integrations;
+        private String protocolName;
 
         public TypeScriptSettings getSettings() {
             return settings;
@@ -229,6 +230,14 @@ public interface ProtocolGenerator {
 
         public void setIntegrations(List<TypeScriptIntegration> integrations) {
             this.integrations = integrations;
+        }
+
+        public String getProtocolName() {
+            return protocolName;
+        }
+
+        public void setProtocolName(String protocolName) {
+            this.protocolName = protocolName;
         }
     }
 }
