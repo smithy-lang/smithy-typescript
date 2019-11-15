@@ -21,38 +21,25 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
-import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.DocumentShape;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeIndex;
-import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
-import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
@@ -66,6 +53,9 @@ import software.amazon.smithy.utils.OptionalUtils;
 public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
+
+    private final Set<Shape> documentSerializingShapes = new TreeSet<>();
+    private final Set<Shape> documentDeserializingShapes = new TreeSet<>();
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -86,8 +76,33 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     protected abstract String getDocumentContentType();
 
+    /**
+     * Generates serialization functions for shapes in the passed set. These functions
+     * should return a value that can then be serialized by the implementation of
+     * {@code serializeDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
+     * are provided to reduce the effort of this implementation.
+     *
+     * @param context The generation context.
+     * @param shapes The shapes to generate serialization for.
+     */
+    protected abstract void generateDocumentShapeSerializers(GenerationContext context, Set<Shape> shapes);
+
+    /**
+     * Generates deserialization functions for shapes in the passed set. These functions
+     * should return a value that can then be deserialized by the implementation of
+     * {@code deserializeDocument}. The {@link DocumentShapeDeserVisitor} and
+     * {@link DocumentMemberDeserVisitor} are provided to reduce the effort of this implementation.
+     *
+     * @param context The generation context.
+     * @param shapes The shapes to generate deserialization for.
+     */
+    protected abstract void generateDocumentShapeDeserializers(GenerationContext context, Set<Shape> shapes);
+
     @Override
     public void generateSharedComponents(GenerationContext context) {
+        generateDocumentShapeSerializers(context, documentSerializingShapes);
+        generateDocumentShapeDeserializers(context, documentDeserializingShapes);
+
         TypeScriptWriter writer = context.getWriter();
 
         SymbolReference responseType = getApplicationProtocol().getResponseType();
@@ -101,14 +116,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("");
     }
 
+    /**
+     * Detects if the target shape is expressed as a native simple type.
+     *
+     * @param target The shape of the value being provided.
+     * @return Returns if the shape is a native simple type.
+     */
+    private boolean isNativeSimpleType(Shape target) {
+        return target instanceof BooleanShape || target instanceof DocumentShape
+                       || target instanceof NumberShape || target instanceof StringShape;
+    }
+
     @Override
     public void generateRequestSerializers(GenerationContext context) {
         TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
-        OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
-        Walker shapeWalker = new Walker(context.getModel().getKnowledge(NeighborProviderIndex.class).getProvider());
 
-        // Track the shapes we need to generate sub-serializers for.
-        Set<Shape> serializingShapes = new TreeSet<>();
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
         for (OperationShape operation : containedOperations) {
@@ -118,28 +140,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol request bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
-
-            operationIndex.getInput(operation)
-                    .ifPresent(input -> serializingShapes.addAll(shapeWalker.walkShapes(input).stream()
-                            // Don't generate a sub-serializer for the actual input shape.
-                            // One is generated for it separately in generateOperationSerializer.
-                            .filter(s -> !input.equals(s))
-                            .collect(Collectors.toSet())));
         }
-
-        // Generate the serializers for shapes within the operation closure.
-        serializingShapes.forEach(shape -> shape.accept(new ShapeSerializingVisitor(context, true)));
     }
 
     @Override
     public void generateResponseDeserializers(GenerationContext context) {
         TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
-        OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
-        Walker shapeWalker = new Walker(context.getModel().getKnowledge(NeighborProviderIndex.class).getProvider());
 
-        // Track the shapes we need to generate sub-serializers for.
-        Set<Shape> deserializingShapes = new TreeSet<>();
-        Set<StructureShape> deserializingErrors = new TreeSet<>();
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
         for (OperationShape operation : containedOperations) {
@@ -149,29 +156,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
-
-            operationIndex.getOutput(operation)
-                    .ifPresent(output -> shapeWalker.walkShapes(output).stream()
-                            // Don't generate a sub-serializer for the actual output shape.
-                            // One is generated for it separately in generateOperationDeserializer.
-                            .filter(s -> !output.equals(s))
-                            .forEach(deserializingShapes::add));
-            operationIndex.getErrors(operation)
-                    .forEach(error -> {
-                        // Error shapes will have their own specific serializers generated.
-                        // Add them to their own list and avoid including them in the main list.
-                        deserializingErrors.add(error);
-                        shapeWalker.walkShapes(error).stream()
-                                .filter(s -> !error.equals(s))
-                                .forEach(deserializingShapes::add);
-                    });
         }
-
-        // Generate the serializers for error shapes.
-        deserializingErrors.forEach(shape -> readErrorBody(context, shape));
-
-        // Generate the serializers for shapes within the operation closure.
-        deserializingShapes.forEach(shape -> shape.accept(new ShapeSerializingVisitor(context, false)));
     }
 
     private void generateOperationSerializer(
@@ -215,6 +200,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 writer.write("headers: headers,");
                 if (!documentBindings.isEmpty()) {
+                    // Track all shapes bound to the document so their serializers may be generated.
+                    documentBindings.stream()
+                            .map(HttpBinding::getMember)
+                            .map(member -> context.getModel().getShapeIndex().getShape(member.getTarget()).get())
+                            .forEach(documentSerializingShapes::add);
                     writer.write("body: body,");
                 }
                 if (!queryBindings.isEmpty()) {
@@ -245,7 +235,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     Shape target = index.getShape(binding.getMember().getTarget()).get();
                     String labelValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                             binding.getMember(), target);
-                    writer.write("resolvedPath = resolvedPath.replace('{$1S}', $L);", labelValue);
+                    writer.write("resolvedPath = resolvedPath.replace('{$S}', $L);", memberName, labelValue);
                 });
             }
         }
@@ -264,7 +254,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!queryBindings.isEmpty()) {
             ShapeIndex index = context.getModel().getShapeIndex();
-            writer.write("let query = {};");
+            writer.write("let query: any = {};");
             for (HttpBinding binding : queryBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
@@ -334,10 +324,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!documentBindings.isEmpty()) {
             // Write the default `body` property.
             context.getWriter().write("let body: any = undefined;");
-            serializeDocument(context, operation, documentBindings);
+            serializeInputDocument(context, operation, documentBindings);
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
+            // TODO Validate payload structures are handled correctly.
             SymbolProvider symbolProvider = context.getSymbolProvider();
             // There can only be one payload binding.
             HttpBinding binding = payloadBindings.get(0);
@@ -365,15 +356,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the input value.
      */
-    protected String getInputValue(
+    private String getInputValue(
             GenerationContext context,
             Location bindingType,
             String dataSource,
             MemberShape member,
             Shape target
     ) {
-        SymbolProvider symbolProvider = context.getSymbolProvider();
-
         if (isNativeSimpleType(target)) {
             return dataSource;
         } else if (target instanceof TimestampShape) {
@@ -381,12 +370,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
             return getTimestampInputParam(dataSource, member, format);
         } else if (target instanceof BlobShape) {
-            return getBlobInputParam(dataSource, bindingType);
+            return getBlobInputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
-            return getCollectionInputParam(context, bindingType, dataSource, target);
-        } else if (target instanceof StructureShape || target instanceof UnionShape || target instanceof MapShape) {
-            Symbol symbol = symbolProvider.toSymbol(target);
-            return ProtocolGenerator.getSerFunctionName(symbol, getName()) + "(" + dataSource + ", context)";
+            return getCollectionInputParam(bindingType, dataSource);
         }
 
         throw new CodegenException(String.format(
@@ -394,6 +380,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bindingType, member.getMemberName(), target.getType(), member.getContainer(), getName()));
     }
 
+    /**
+     * Given a format and a source of data, generate an input value provider for the
+     * timestamp.
+     *
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param member The member that points to the value being provided.
+     * @param format The timestamp format to provide.
+     * @return Returns a value or expression of the input timestamp.
+     */
     private String getTimestampInputParam(String dataSource, MemberShape member, Format format) {
         switch (format) {
             case DATE_TIME:
@@ -407,12 +403,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private String getBlobInputParam(String dataSource, Location bindingType) {
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * blob. By default, this base64 encodes content in headers and query strings,
+     * and passes through for payloads.
+     *
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param bindingType How this value is bound to the operation input.
+     * @return Returns a value or expression of the input blob.
+     */
+    private String getBlobInputParam(Location bindingType, String dataSource) {
         switch (bindingType) {
             case PAYLOAD:
                 return dataSource;
             case HEADER:
-            case DOCUMENT:
             case QUERY:
                 // Encode these to base64.
                 return "context.base64Encoder(" + dataSource + ")";
@@ -421,21 +426,24 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * collection. By default, this separates the list with commas in headers, and
+     * relies on the HTTP implementation for query strings.
+     *
+     * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the input collection.
+     */
     private String getCollectionInputParam(
-            GenerationContext context,
             Location bindingType,
-            String dataSource,
-            Shape target
+            String dataSource
     ) {
         switch (bindingType) {
             case HEADER:
                 // Join these values with commas.
                 return "(" + dataSource + " || []).toString()";
-            case DOCUMENT:
-                SymbolProvider symbolProvider = context.getSymbolProvider();
-                Symbol symbol = symbolProvider.toSymbol(target);
-
-                return ProtocolGenerator.getSerFunctionName(symbol, getName()) + "(" + dataSource + ", context)";
             case QUERY:
                 return dataSource;
             default:
@@ -464,123 +472,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param operation The operation being generated.
      * @param documentBindings The bindings to place in the document.
      */
-    protected abstract void serializeDocument(
+    protected abstract void serializeInputDocument(
             GenerationContext context,
             OperationShape operation,
             List<HttpBinding> documentBindings
     );
-
-    /**
-     * Writes the code needed to serialize a structure in the document of a request.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns a value representing the StructureShape {@code shape} parameter that is
-     * serializable by {@code serializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code input}: the type generated for the StructureShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   let bodyParams: any = {}
-     *   if (input.fooValue !== undefined) {
-     *     bodyParams['fooValue'] = serializeAws_restJson1_1Foo(input.fooValue, context);
-     *   }
-     *   if (input.barValue !== undefined) {
-     *     bodyParams['barValue'] = input.barValue;
-     *   }
-     *   return bodyParams;
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The structure shape being generated.
-     */
-    protected abstract void serializeDocumentStructure(GenerationContext context, StructureShape shape);
-
-    /**
-     * Writes the code needed to serialize a union in the document of a request.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns a value representing the UnionShape {@code shape} parameter that is
-     * serializable by {@code serializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code input}: the type generated for the UnionShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     * <pre>{@code
-     *   return Field.visit(input, {
-     *     fooValue: value => serializeAws_restJson1_1Foo(value, context),
-     *     barValue: value => value,
-     *     _: value => value
-     *   });
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The union shape being generated.
-     */
-    protected abstract void serializeDocumentUnion(GenerationContext context, UnionShape shape);
-
-    /**
-     * Writes the code needed to serialize a collection in the document of a request.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns a value representing the CollectionShape {@code shape} parameter that is
-     * serializable by {@code serializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code input}: the type generated for the CollectionShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   return (input || []).map(entry =>
-     *     serializeAws_restJson1_1Parameter(entry, context)
-     *   );
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The collection shape being generated.
-     */
-    protected abstract void serializeDocumentCollection(GenerationContext context, CollectionShape shape);
-
-    /**
-     * Writes the code needed to serialize a map in the document of a request.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns a value representing the MapShape {@code shape} parameter that is
-     * serializable by {@code serializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code input}: the type generated for the MapShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   let mapParams: any = {};
-     *   Object.keys(input).forEach(key => {
-     *     mapParams[key] = serializeAws_restJson1_1Field(input[key], context);
-     *   });
-     *   return mapParams;
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The map shape being generated.
-     */
-    protected abstract void serializeDocumentMap(GenerationContext context, MapShape shape);
 
     private void generateOperationDeserializer(
             GenerationContext context,
@@ -591,6 +487,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol symbol = symbolProvider.toSymbol(operation);
         SymbolReference responseType = getApplicationProtocol().getResponseType();
         HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        ShapeIndex shapeIndex = context.getModel().getShapeIndex();
         TypeScriptWriter writer = context.getWriter();
 
         // Ensure that the response type is imported.
@@ -617,7 +514,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("let data: any = await parseBody(output.body, context)");
             writer.openBlock("let contents: $L = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
-                writer.write("__type: $S,", operation.getOutput().get().getName());
+
+                // Only set a type and the members if we have output.
+                operation.getOutput().ifPresent(outputId -> {
+                    writer.write("__type: $S,", outputId.getName());
+                    List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operation, Location.DOCUMENT);
+                    // Track all shapes bound to the document so their deserializers may be generated.
+                    documentBindings.forEach(binding -> {
+                        // Set all the members to undefined to meet type constraints.
+                        writer.write("$L: undefined,", binding.getLocationName());
+                        Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
+                        documentDeserializingShapes.add(target);
+                    });
+                });
             });
             readHeaders(context, operation, bindingIndex);
             readResponseBody(context, operation, bindingIndex);
@@ -632,7 +541,31 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "): Promise<$L> {", "}", errorMethodName, responseType, outputType, () -> {
             writer.write("let data: any = await parseBody(output.body, context);");
             writer.write("let response: any;");
-            writeErrorDeserializationDispatcher(context, operation.getErrors(), operation.getId().getNamespace());
+            writer.write("let errorCode: String;");
+            writeErrorCodeParser(context);
+            writer.openBlock("switch (errorCode) {", "}", () -> {
+                // Generate the case statement for each error, invoking the specific deserializer.
+                operation.getErrors().forEach(errorId -> {
+                    Shape error = context.getModel().getShapeIndex().getShape(errorId).get();
+                    // Track errors bound to the operation so their deserializers may be generated.
+                    documentDeserializingShapes.add(error);
+                    Symbol errorSymbol = symbolProvider.toSymbol(error);
+                    String errorSerdeMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol, getName());
+                    writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
+                        // Dispatch to the error deserialization function.
+                        writer.write("response = $L(data, context);", errorSerdeMethodName);
+                    });
+                });
+
+                // Build a generic error the best we can for ones we don't know about.
+                writer.write("default:").indent()
+                        .write("errorCode = errorCode || \"UnknownError\";")
+                        .openBlock("response = {", "};", () -> {
+                            writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
+                            writer.write("$$name: errorCode,");
+                            writer.write("$$fault: \"client\",");
+                        }).dedent();
+            });
             writer.write("return Promise.reject(response);");
         });
         writer.write("");
@@ -684,7 +617,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private void readResponseBody(
+    private List<HttpBinding> readResponseBody(
             GenerationContext context,
             OperationShape operation,
             HttpBindingIndex bindingIndex
@@ -695,37 +628,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operation, Location.PAYLOAD);
 
         if (!documentBindings.isEmpty()) {
-            deserializeDocument(context, operation, documentBindings);
+            deserializeOutputDocument(context, operation, documentBindings);
+            return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
+            // TODO Validate payload structures are handled correctly.
             // There can only be one payload binding.
             HttpBinding binding = payloadBindings.get(0);
             Shape target = context.getModel().getShapeIndex().getShape(binding.getMember().getTarget()).get();
-            writer.write("output.$L = $L;", binding.getMemberName(), getOutputValue(
-                    context, Location.PAYLOAD, "data", binding.getMember(), target));
+            writer.write("output.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                    Location.PAYLOAD, "data", binding.getMember(), target));
+            return payloadBindings;
         }
-    }
-
-    private void readErrorBody(GenerationContext context, StructureShape shape) {
-        TypeScriptWriter writer = context.getWriter();
-        SymbolProvider symbolProvider = context.getSymbolProvider();
-        Symbol symbol = symbolProvider.toSymbol(shape);
-        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
-
-        writer.openBlock("const $L = (\n"
-                       + "  output: any,\n"
-                       + "  context: SerdeContext\n"
-                       + "): $T => {", "};", methodName, symbol, () -> {
-            // Initial contents of the error.
-            writer.openBlock("let contents: $T = {", "};", symbol, () -> {
-                writer.write("__type: $S,", shape.getId().getName());
-                writer.write("$$fault: $S,", shape.getTrait(ErrorTrait.class).get().getValue());
-            });
-            // Read additional modeled content.
-            deserializeError(context, shape);
-            writer.write("return contents;");
-        });
-        writer.write("");
+        return ListUtils.of();
     }
 
     /**
@@ -742,27 +657,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output value.
      */
-    protected String getOutputValue(
+    private String getOutputValue(
             GenerationContext context,
             Location bindingType,
             String dataSource,
             MemberShape member,
             Shape target
     ) {
-        SymbolProvider symbolProvider = context.getSymbolProvider();
-
         if (isNativeSimpleType(target)) {
             return dataSource;
         } else if (target instanceof TimestampShape) {
-            // The Date class handles all of the input formats without needing to distinguish.
-            return "new Date(" + dataSource + ")";
+            HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+            Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
+            return getTimestampOutputParam(dataSource, member, format);
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
-            return getCollectionOutputParam(context, bindingType, dataSource, target);
-        } else if (target instanceof StructureShape || target instanceof UnionShape || target instanceof MapShape) {
-            Symbol symbol = symbolProvider.toSymbol(target);
-            return ProtocolGenerator.getDeserFunctionName(symbol, getName()) + "(" + dataSource + ", context)";
+            return getCollectionOutputParam(bindingType, dataSource);
         }
 
         throw new CodegenException(String.format(
@@ -770,12 +681,49 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bindingType, member.getMemberName(), target.getType(), member.getContainer(), getName()));
     }
 
+    /**
+     * Given a format and a source of data, generate an output value provider for the
+     * timestamp.
+     *
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param member The member that points to the value being provided.
+     * @param format The timestamp format to provide.
+     * @return Returns a value or expression of the output timestamp.
+     */
+    private String getTimestampOutputParam(String dataSource, MemberShape member, Format format) {
+        String modifiedSource;
+        switch (format) {
+            case DATE_TIME:
+            case HTTP_DATE:
+                modifiedSource = dataSource;
+                break;
+            case EPOCH_SECONDS:
+                // Account for seconds being sent over the wire in some cases where milliseconds are required.
+                modifiedSource = dataSource + " % 1 != 0 ? Math.round(" + dataSource + " * 1000) : " + dataSource;
+                break;
+            default:
+                throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + member);
+        }
+
+        return "new Date(" + modifiedSource + ")";
+    }
+
+    /**
+     * Given context and a source of data, generate an output value provider for the
+     * blob. By default, this base64 decodes content in headers and passes through
+     * for payloads.
+     *
+     * @param bindingType How this value is bound to the operation output.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the output blob.
+     */
     private String getBlobOutputParam(Location bindingType, String dataSource) {
         switch (bindingType) {
             case PAYLOAD:
                 return dataSource;
             case HEADER:
-            case DOCUMENT:
                 // Decode these from base64.
                 return "context.base64Decoder(" + dataSource + ")";
             default:
@@ -783,94 +731,48 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
+    /**
+     * Given context and a source of data, generate an output value provider for the
+     * collection. By default, this splits a comma separated string in headers.
+     *
+     * @param bindingType How this value is bound to the operation output.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the output collection.
+     */
     private String getCollectionOutputParam(
-            GenerationContext context,
             Location bindingType,
-            String dataSource,
-            Shape target
+            String dataSource
     ) {
         switch (bindingType) {
             case HEADER:
                 // Split these values on commas.
                 return "(" + dataSource + " || \"\").split(',')";
-            case DOCUMENT:
-                SymbolProvider symbolProvider = context.getSymbolProvider();
-                Symbol symbol = symbolProvider.toSymbol(target);
-
-                return ProtocolGenerator.getDeserFunctionName(symbol, getName()) + "(" + dataSource +  ", context)";
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
         }
     }
 
     /**
-     * Writes the code that dispatches to individual error deserializers. This should
-     * also generate a default of an UnknownError using the passed namespace.
+     * Writes the code that loads an {@code errorCode} String with the content used
+     * to dispatch errors to specific serializers.
      *
-     * <p>Implementations of this method are expected to determine the type of error,
-     * dispatch to a function generated by {@code deserializeError}, and set that value
-     * in the {@code response} variable. This variable will already be defined in scope.
-     *
-     * <p>If the error type is not able to be determined, a default
-     * error should be generated with the given {@code unknownErrorNamespace}.
-     *
-     * <p>Two variables will be in scope:
+     * <p>Three variables will be in scope:
      *   <ul>
      *       <li>{@code output}: a value of the HttpResponse type.</li>
      *       <li>{@code data}: the contents of the response body.</li>
+     *       <li>{@code context}: the SerdeContext.</li>
      *   </ul>
      *
-     * <p>For example, this function would generate:
+     * <p>For example:
      *
      * <pre>{@code
-     *   switch (output.statusCode) {
-     *     case 500:
-     *       response = deserializeAws_restJson1_1ServiceUnavailableError(data, context);
-     *       break;
-     *     default:
-     *       response = {
-     *         __type: "UnknownError",
-     *         $name: "UnknownError",
-     *         $fault: "client",
-     *       };
-     *   }
+     * errorCode = output.headers["x-amzn-errortype"].split(':')[0];
      * }</pre>
      *
      * @param context The generation context.
-     * @param errors The list of errors to dispatch to.
-     * @param unknownErrorNamespace The namespace to use for the default error.
      */
-    protected abstract void writeErrorDeserializationDispatcher(
-            GenerationContext context,
-            List<ShapeId> errors,
-            String unknownErrorNamespace
-    );
-
-    /**
-     * Writes the code needed to deserialize an error structure when received.
-     *
-     * <p>Implementations of this method are expected to generate a function body
-     * that populates a {@code contents} variable that represents the error
-     * generated from the response. This variable will already be defined in scope.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code output}: a value representing the StructureShape error parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   if (output.message !== undefined) {
-     *     contents.message = output.message;
-     *   }
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param error The error shape being generated.
-     */
-    protected abstract void deserializeError(GenerationContext context, StructureShape error);
+    protected abstract void writeErrorCodeParser(GenerationContext context);
 
     /**
      * Writes the code needed to deserialize the output document of a response.
@@ -893,477 +795,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param operation The operation being generated.
      * @param documentBindings The bindings to read from the document.
      */
-    protected abstract void deserializeDocument(
+    protected abstract void deserializeOutputDocument(
             GenerationContext context,
             OperationShape operation,
             List<HttpBinding> documentBindings
     );
-
-    /**
-     * Writes the code needed to deserialize a structure in the document of a response.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns the type generated for the StructureShape {@code shape} parameter from an input
-     * deserialized by {@code deserializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code output}: a value representing the StructureShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   let contents: any = {
-     *     $namespace: "com.smithy.example",
-     *     $name: "Field"
-     *   };
-     *   if (output.fooValue !== undefined) {
-     *     contents.fooValue = deserializeAws_restJson1_1Foo(output.fooValue, context);
-     *   }
-     *   if (output.barValue !== undefined) {
-     *     contents.barValue = output.barValue;
-     *   }
-     *   return contents;
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The structure shape being generated.
-     */
-    protected abstract void deserializeDocumentStructure(GenerationContext context, StructureShape shape);
-
-    /**
-     * Writes the code needed to deserialize a union in the document of a response.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns the type generated for the StructureShape {@code shape} parameter from an input
-     * deserialized by {@code deserializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code output}: a value representing the StructureShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   if (output.fooValue !== undefined) {
-     *     return {
-     *       fooValue: deserializeAws_restJson1_1Foo(output.fooValue, context)
-     *     };
-     *   }
-     *   if (output.barValue !== undefined) {
-     *     return {
-     *       barValue: output.barValue
-     *     };
-     *   }
-     *   return { $unknown: output[Object.keys(output)[0]] };
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The union shape being generated.
-     */
-    protected abstract void deserializeDocumentUnion(GenerationContext context, UnionShape shape);
-
-    /**
-     * Writes the code needed to deserialize a collection in the document of a response.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns the type generated for the StructureShape {@code shape} parameter from an input
-     * deserialized by {@code deserializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code output}: a value representing the StructureShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   return (output || []).map((entry: any) =>
-     *     deserializeAws_restJson1_1Parameter(entry, context)
-     *   );
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The collection shape being generated.
-     */
-    protected abstract void deserializeDocumentCollection(GenerationContext context, CollectionShape shape);
-
-    /**
-     * Writes the code needed to deserialize a map in the document of a response.
-     *
-     * <p>Implementations of this method are expected to generate a function body that
-     * returns the type generated for the StructureShape {@code shape} parameter from an input
-     * deserialized by {@code deserializeDocument}.
-     *
-     * <p>The function signature for this body will have two parameters:
-     *   <ul>
-     *     <li>{@code output}: a value representing the StructureShape shape parameter.</li>
-     *     <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example, this function would generate the following:
-     *
-     * <pre>{@code
-     *   let mapParams: any = {};
-     *   Object.keys(output).forEach(key => {
-     *     mapParams[key] = deserializeAws_restJson1_1Field(output[key], context);
-     *   });
-     *   return mapParams;
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param shape The map shape being generated.
-     */
-    protected abstract void deserializeDocumentMap(GenerationContext context, MapShape shape);
-
-    private boolean isNativeSimpleType(Shape target) {
-        return target instanceof BooleanShape || target instanceof DocumentShape
-                || target instanceof NumberShape || target instanceof StringShape;
-    }
-
-    private final class ShapeSerializingVisitor extends ShapeVisitor.Default<Void> {
-        private GenerationContext context;
-        private boolean isInput;
-
-        ShapeSerializingVisitor(GenerationContext context, boolean isInput) {
-            this.context = context;
-            this.isInput = isInput;
-        }
-
-        @Override
-        protected Void getDefault(Shape shape) {
-            return null;
-        }
-
-        private Void generateFunctionSignature(Shape shape, BiConsumer<GenerationContext, Shape> functionBody) {
-            SymbolProvider symbolProvider = context.getSymbolProvider();
-            TypeScriptWriter writer = context.getWriter();
-
-            // Handle the various symbol naming and positional toggling needed.
-            String varName = isInput ? "input" : "output";
-            Symbol symbol = symbolProvider.toSymbol(shape);
-            String parameterType = isInput ? symbol.getName() : "any";
-            String responseType = isInput ? "any" : symbol.getName();
-            // Use the shape name for the function name.
-            String methodName = isInput
-                    ? ProtocolGenerator.getSerFunctionName(symbol, getName())
-                    : ProtocolGenerator.getDeserFunctionName(symbol, getName());
-
-            writer.addImport(symbol, symbol.getName());
-            writer.openBlock("const $L = (\n"
-                           + "  $L: $L,\n"
-                           + "  context: SerdeContext\n"
-                           + "): $L => {", "}", methodName, varName, parameterType, responseType, () -> {
-                functionBody.accept(context, shape);
-            });
-            writer.write("");
-            return null;
-        }
-
-        /**
-         * Dispatches to create the body of list shape serde functions.
-         * The function signature will be generated.
-         *
-         * <p>For example, given the following Smithy model:
-         *
-         * <pre>{@code
-         * list ParameterList {
-         *     member: Parameter
-         * }
-         * }</pre>
-         *
-         * <p>The following code is generated for a serializer:
-         *
-         * <pre>{@code
-         * const serializeAws_restJson1_1ParametersList = (
-         *   input: Array<Parameter>,
-         *   context: SerdeContext
-         * ): any => {
-         *   return (input || []).map(entry =>
-         *     serializeAws_restJson1_1Parameter(entry, context)
-         *   );
-         * }
-         * }</pre>
-         *
-         *
-         * <p>And the following code is generated for a deserializer</p>
-         *
-         * <pre>{@code
-         * const deserializeAws_restJson1_1ParameterList = (
-         *   output: any,
-         *   context: SerdeContext
-         * ): Array<Parameter> => {
-         *   return (output || []).map((entry: any) =>
-         *     deserializeAws_restJson1_1Parameter(entry, context)
-         *   );
-         * }
-         * }</pre>
-         *
-         * @param shape The list shape to generate serde for.
-         * @return Null.
-         */
-        @Override
-        public Void listShape(ListShape shape) {
-            generateFunctionSignature(shape, (c, s) -> {
-                if (isInput) {
-                    serializeDocumentCollection(c, s.asListShape().get());
-                } else {
-                    deserializeDocumentCollection(c, s.asListShape().get());
-                }
-            });
-            return shape.getMember().accept(this);
-        }
-
-        /**
-         * Dispatches to create the body of set shape serde functions.
-         * The function signature will be generated.
-         *
-         * <p>For example, given the following Smithy model:
-         *
-         * <pre>{@code
-         * set ParameterSet {
-         *     member: Parameter
-         * }
-         * }</pre>
-         *
-         * <p>The following code is generated for a serializer:
-         *
-         * <pre>{@code
-         * const serializeAws_restJson1_1ParametersSet = (
-         *   input: Set<Parameter>,
-         *   context: SerdeContext
-         * ): any => {
-         *   return (input || []).map(entry =>
-         *     serializeAws_restJson1_1Parameter(entry, context)
-         *   );
-         * }
-         * }</pre>
-         *
-         *
-         * <p>And the following code is generated for a deserializer</p>
-         *
-         * <pre>{@code
-         * const deserializeAws_restJson1_1ParameterSet = (
-         *   output: any,
-         *   context: SerdeContext
-         * ): Set<Parameter> => {
-         *   return (output || []).map((entry: any) =>
-         *     deserializeAws_restJson1_1Parameter(entry, context)
-         *   );
-         * }
-         * }</pre>
-         *
-         * @param shape The set shape to generate serde for.
-         * @return Null.
-         */
-        @Override
-        public Void setShape(SetShape shape) {
-            generateFunctionSignature(shape, (c, s) -> {
-                if (isInput) {
-                    serializeDocumentCollection(c, s.asSetShape().get());
-                } else {
-                    deserializeDocumentCollection(c, s.asSetShape().get());
-                }
-            });
-            return shape.getMember().accept(this);
-        }
-
-        /**
-         * Dispatches to create the body of map shape serde functions.
-         * The function signature will be generated.
-         *
-         * <p>For example, given the following Smithy model:
-         *
-         * <pre>{@code
-         * map FieldMap {
-         *     key: String,
-         *     value: Field
-         * }
-         * }</pre>
-         *
-         * <p>The following code is generated for a serializer:
-         *
-         * <pre>{@code
-         * const serializeAws_restJson1_1FieldMap = (
-         *   input: { [key: string]: Field },
-         *   context: SerdeContext
-         * ): any => {
-         *   let mapParams: any = {};
-         *   Object.keys(input).forEach(key => {
-         *     mapParams[key] = serializeAws_restJson1_1Field(input[key], context);
-         *   });
-         *   return mapParams;
-         * }
-         * }</pre>
-         *
-         *
-         * <p>And the following code is generated for a deserializer</p>
-         *
-         * <pre>{@code
-         * const deserializeAws_restJson1_1FieldMap = (
-         *   output: any,
-         *   context: SerdeContext
-         * ): { [key: string]: Field } => {
-         *   let mapParams: any = {};
-         *   Object.keys(output).forEach(key => {
-         *     mapParams[key] = deserializeAws_restJson1_1Field(output[key], context);
-         *   });
-         *   return mapParams;
-         * }
-         * }</pre>
-         * @param shape The map shape to generate serde for.
-         * @return Null.
-         */
-        @Override
-        public Void mapShape(MapShape shape) {
-            generateFunctionSignature(shape, (c, s) -> {
-                if (isInput) {
-                    serializeDocumentMap(c, s.asMapShape().get());
-                } else {
-                    deserializeDocumentMap(c, s.asMapShape().get());
-                }
-            });
-            return shape.getValue().accept(this);
-        }
-
-        /**
-         * Dispatches to create the body of structure shape serde functions.
-         * The function signature will be generated.
-         *
-         * <p>For example, given the following Smithy model:
-         *
-         * <pre>{@code
-         * structure Field {
-         *     fooValue: Foo,
-         *     barValue: String,
-         * }
-         * }</pre>
-         *
-         * <p>The following code is generated for a serializer:
-         *
-         * <pre>{@code
-         * const serializeAws_restJson1_1Field = (
-         *   input: Field,
-         *   context: SerdeContext
-         * ): any => {
-         *   let bodyParams: any = {}
-         *   if (input.fooValue !== undefined) {
-         *     bodyParams['fooValue'] = serializeAws_restJson1_1Foo(input.fooValue, context);
-         *   }
-         *   if (input.barValue !== undefined) {
-         *     bodyParams['barValue'] = input.barValue;
-         *   }
-         *   return bodyParams;
-         * }
-         * }</pre>
-         *
-         *
-         * <p>And the following code is generated for a deserializer</p>
-         *
-         * <pre>{@code
-         * const deserializeAws_restJson1_1Field = (
-         *   output: any,
-         *   context: SerdeContext
-         * ): Field => {
-         *   let field: any = {
-         *     $namespace: "com.smithy.example",
-         *     $name: "Field"
-         *   };
-         *   if (output.fooValue !== undefined) {
-         *     field.fooValue = deserializeAws_restJson1_1Foo(output.fooValue, context);
-         *   }
-         *   if (output.barValue !== undefined) {
-         *     field.barValue = output.barValue;
-         *   }
-         *   return field;
-         * }
-         * }</pre>
-         *
-         * @param shape The structure shape to generate serde for.
-         * @return Null.
-         */
-        @Override
-        public Void structureShape(StructureShape shape) {
-            generateFunctionSignature(shape, (c, s) -> {
-                if (isInput) {
-                    serializeDocumentStructure(c, s.asStructureShape().get());
-                } else {
-                    deserializeDocumentStructure(c, s.asStructureShape().get());
-                }
-            });
-            shape.getAllMembers().values().forEach(member -> member.accept(this));
-            return null;
-        }
-
-        /**
-         * Dispatches to create the body of union shape serde functions.
-         * The function signature will be generated.
-         *
-         * <p>For example, given the following Smithy model:
-         *
-         * <pre>{@code
-         * union Field {
-         *     fooValue: Foo,
-         *     barValue: String,
-         * }
-         * }</pre>
-         *
-         * <p>The following code is generated for a serializer:
-         *
-         * <pre>{@code
-         * const serializeAws_restJson1_1Field = (
-         *   input: Field,
-         *   context: SerdeContext
-         * ): any => {
-         *   return Field.visit(input, {
-         *     fooValue: value => serializeAws_restJson1_1Foo(value, context),
-         *     barValue: value => value,
-         *     _: value => value
-         *   });
-         * }
-         * }</pre>
-         *
-         *
-         * <p>And the following code is generated for a deserializer</p>
-         *
-         * <pre>{@code
-         * const deserializeAws_restJson1_1Field = (
-         *   output: any,
-         *   context: SerdeContext
-         * ): Field => {
-         *   if (output.fooValue !== undefined) {
-         *     return {
-         *       fooValue: deserializeAws_restJson1_1Foo(output.fooValue, context)
-         *     };
-         *   }
-         *   if (output.barValue !== undefined) {
-         *     return {
-         *       barValue: output.barValue
-         *     };
-         *   }
-         *   return { $unknown: output[Object.keys(output)[0]] };
-         * }
-         * }</pre>
-         *
-         * @param shape The union shape to generate serde for.
-         * @return Null.
-         */
-        @Override
-        public Void unionShape(UnionShape shape) {
-            generateFunctionSignature(shape, (c, s) -> {
-                if (isInput) {
-                    serializeDocumentUnion(c, s.asUnionShape().get());
-                } else {
-                    deserializeDocumentUnion(c, s.asUnionShape().get());
-                }
-            });
-            shape.getAllMembers().values().forEach(member -> member.accept(this));
-            return null;
-        }
-    }
 }

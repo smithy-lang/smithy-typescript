@@ -246,6 +246,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         String namespace = "./" + fileRoot;
                         TypeScriptWriter writer = new TypeScriptWriter(namespace);
                         ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+                        context.setProtocolName(generator.getName());
                         context.setIntegrations(integrations);
                         context.setModel(model);
                         context.setService(shape);
