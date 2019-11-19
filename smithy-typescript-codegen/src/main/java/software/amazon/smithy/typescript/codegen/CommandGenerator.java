@@ -152,10 +152,10 @@ final class CommandGenerator implements Runnable {
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
             });
-            writer.write("const { httpHandler } = configuration;");
+            writer.write("const { requestHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
                 writer.write("(request: FinalizeHandlerArguments<any>) => ");
-                writer.write("  httpHandler.handle(request.request as $T, options || {}),",
+                writer.write("  requestHandler.handle(request.request as $T, options || {}),",
                              applicationProtocol.getRequestType());
                 writer.write("handlerExecutionContext");
             });

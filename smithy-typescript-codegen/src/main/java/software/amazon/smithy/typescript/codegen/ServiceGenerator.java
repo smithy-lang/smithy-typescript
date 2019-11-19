@@ -176,7 +176,7 @@ final class ServiceGenerator implements Runnable {
             if (applicationProtocol.isHttpProtocol()) {
                 writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
                 writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
-                writer.write("httpHandler?: __HttpHandler;\n");
+                writer.write("requestHandler?: __HttpHandler;\n");
             } else {
                 throw new UnsupportedOperationException(
                         "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
