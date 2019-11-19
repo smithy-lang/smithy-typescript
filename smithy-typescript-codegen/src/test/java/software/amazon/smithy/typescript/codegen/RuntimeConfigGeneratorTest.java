@@ -33,7 +33,7 @@ public class RuntimeConfigGeneratorTest {
             }
         });
 
-        TypeScriptSettings settings = TypeScriptSettings.from(Node.objectNodeBuilder()
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
                 .withMember("service", Node.from("smithy.example#Example"))
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
