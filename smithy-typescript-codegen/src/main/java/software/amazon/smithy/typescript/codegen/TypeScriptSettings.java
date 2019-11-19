@@ -20,12 +20,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ProtocolsTrait;
 
@@ -55,14 +57,20 @@ public final class TypeScriptSettings {
     /**
      * Create a settings object from a configuration object node.
      *
+     * @param model Model to infer the service to generate if not explicitly provided.
      * @param config Config object to load.
      * @return Returns the extracted settings.
      */
-    public static TypeScriptSettings from(ObjectNode config) {
+    public static TypeScriptSettings from(Model model, ObjectNode config) {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(
                 PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE, TARGET_NAMESPACE));
-        settings.setService(config.expectStringMember(SERVICE).expectShapeId());
+
+        // Get the service from the settings or infer one from the given model.
+        settings.setService(config.getStringMember(SERVICE)
+                .map(StringNode::expectShapeId)
+                .orElseGet(() -> inferService(model)));
+
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
         settings.setPackageVersion(config.expectStringMember(PACKAGE_VERSION).getValue());
         settings.setPackageDescription(config.getStringMemberOrDefault(
@@ -74,6 +82,26 @@ public final class TypeScriptSettings {
 
         settings.setPluginSettings(config);
         return settings;
+    }
+
+    // TODO: this seems reusable across generators.
+    private static ShapeId inferService(Model model) {
+        List<ShapeId> services = model.getShapeIndex()
+                .shapes(ServiceShape.class)
+                .map(Shape::getId)
+                .sorted()
+                .collect(Collectors.toList());
+
+        if (services.isEmpty()) {
+            throw new CodegenException("Cannot infer a service to generate because the model does not "
+                                       + "contain any service shapes");
+        } else if (services.size() > 1) {
+            throw new CodegenException("Cannot infer a service to generate because the model contains "
+                                       + "multiple service shapes: " + services);
+        } else {
+            LOGGER.info("Inferring service to generate as " + services.get(0));
+            return services.get(0);
+        }
     }
 
     /**

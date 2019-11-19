@@ -73,7 +73,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ApplicationProtocol applicationProtocol;
 
     CodegenVisitor(PluginContext context) {
-        settings = TypeScriptSettings.from(context.getSettings());
+        settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
         nonTraits = context.getNonTraitShapes();
         model = context.getModel();
         service = settings.getService(model);
