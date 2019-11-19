@@ -47,6 +47,8 @@ final class CommandGenerator implements Runnable {
     private final OperationIndex operationIndex;
     private final String inputType;
     private final String outputType;
+    private final String serviceInputTypes;
+    private final String serviceOutputTypes;
     private final ApplicationProtocol applicationProtocol;
 
     CommandGenerator(
@@ -73,6 +75,8 @@ final class CommandGenerator implements Runnable {
         operationIndex = model.getKnowledge(OperationIndex.class);
         inputType = symbol.getName() + "Input";
         outputType = symbol.getName() + "Output";
+        serviceInputTypes = "ServiceInputTypes";
+        serviceOutputTypes = "ServiceOutputTypes";
     }
 
     @Override
@@ -82,8 +86,8 @@ final class CommandGenerator implements Runnable {
 
         // Add required imports.
         writer.addImport(configType, configType, serviceSymbol.getNamespace());
-        writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbol.getNamespace());
-        writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbol.getNamespace());
+        writer.addImport(serviceInputTypes, serviceInputTypes, serviceSymbol.getNamespace());
+        writer.addImport(serviceOutputTypes, serviceOutputTypes, serviceSymbol.getNamespace());
         writer.addImport("Command", "$Command", "@aws-sdk/smithy-client");
         writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", "@aws-sdk/types");
         writer.addImport("Handler", "Handler", "@aws-sdk/types");
@@ -94,7 +98,8 @@ final class CommandGenerator implements Runnable {
         addInputAndOutputTypes();
 
         String name = symbol.getName();
-        writer.openBlock("export class $L extends $$Command<$L, $L> {", "}", name, inputType, outputType, () -> {
+        Object[] params = {name, serviceInputTypes, inputType, serviceOutputTypes, outputType, configType};
+        writer.openBlock("export class $L extends $$Command<$L, $L, $L, $L, $L> {", "}", params, () -> {
 
             // Section for adding custom command properties.
             writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
