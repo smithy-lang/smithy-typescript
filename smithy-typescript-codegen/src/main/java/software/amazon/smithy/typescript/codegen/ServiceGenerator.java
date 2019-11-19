@@ -135,7 +135,7 @@ final class ServiceGenerator implements Runnable {
 
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
-        writer.write("export type $L = __SmithyConfiguration<$T>", configType, applicationProtocol.getOptionsType());
+        writer.write("export type $L = Partial<__SmithyConfiguration<$T>>", configType, applicationProtocol.getOptionsType());
         writer.write("  & ClientRuntimeDependencies");
 
         // Get the configuration symbol types to reference in code. These are
@@ -183,7 +183,7 @@ final class ServiceGenerator implements Runnable {
             }
 
             writer.writeDocs("The protocol to use for all requests.");
-            writer.write("protocol: string;\n");
+            writer.write("protocol?: string;\n");
 
             writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
             writer.writeDocs("A constructor for a class implementing the @aws-sdk/types.Hash interface \n"
@@ -234,7 +234,7 @@ final class ServiceGenerator implements Runnable {
                          + "  ServiceInputTypes,\n"
                          + "  ServiceOutputTypes,\n"
                          + "  $L"
-                         + "> {", "}", symbol.getName(), applicationProtocol.getOptionsType(), configType, () -> {
+                         + "> {", "}", symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
             generateClientProperties();
             generateConstructor();
             writer.write("");
