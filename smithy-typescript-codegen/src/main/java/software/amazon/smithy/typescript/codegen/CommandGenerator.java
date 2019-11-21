@@ -94,7 +94,8 @@ final class CommandGenerator implements Runnable {
         addInputAndOutputTypes();
 
         String name = symbol.getName();
-        writer.openBlock("export class $L extends $$Command<$L, $L> {", "}", name, inputType, outputType, () -> {
+        writer.openBlock("export class $L extends $$Command<$L, $L, $L> {", "}", name, inputType, outputType,
+                configType, () -> {
 
             // Section for adding custom command properties.
             writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
@@ -147,10 +148,10 @@ final class CommandGenerator implements Runnable {
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
             });
-            writer.write("const { httpHandler } = configuration;");
+            writer.write("const { requestHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
                 writer.write("(request: FinalizeHandlerArguments<any>) => ");
-                writer.write("  httpHandler.handle(request.request as $T, options || {}),",
+                writer.write("  requestHandler.handle(request.request as $T, options || {}),",
                              applicationProtocol.getRequestType());
                 writer.write("handlerExecutionContext");
             });

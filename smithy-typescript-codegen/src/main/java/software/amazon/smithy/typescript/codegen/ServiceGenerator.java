@@ -135,7 +135,8 @@ final class ServiceGenerator implements Runnable {
 
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
-        writer.write("export type $L = __SmithyConfiguration<$T>", configType, applicationProtocol.getOptionsType());
+        writer.write("export type $L = Partial<__SmithyConfiguration<$T>>", configType,
+                applicationProtocol.getOptionsType());
         writer.write("  & ClientRuntimeDependencies");
 
         // Get the configuration symbol types to reference in code. These are
@@ -174,17 +175,16 @@ final class ServiceGenerator implements Runnable {
     private void generateClientRuntimeDependencies() {
         writer.openBlock("export interface ClientRuntimeDependencies {", "}", () -> {
             if (applicationProtocol.isHttpProtocol()) {
-                writer.addImport("Protocol", "__Protocol", "@aws-sdk/types");
                 writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
                 writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
-                writer.write("httpHandler?: __HttpHandler;\n");
+                writer.write("requestHandler?: __HttpHandler;\n");
             } else {
                 throw new UnsupportedOperationException(
                         "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
             }
 
             writer.writeDocs("The protocol to use for all requests.");
-            writer.write("protocol: string | undefined;\n");
+            writer.write("protocol?: string;\n");
 
             writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
             writer.writeDocs("A constructor for a class implementing the @aws-sdk/types.Hash interface \n"
@@ -233,8 +233,10 @@ final class ServiceGenerator implements Runnable {
         writer.openBlock("export class $L extends __Client<\n"
                          + "  $T,\n"
                          + "  ServiceInputTypes,\n"
-                         + "  ServiceOutputTypes\n"
-                         + "> {", "}", symbol.getName(), applicationProtocol.getOptionsType(), () -> {
+                         + "  ServiceOutputTypes,\n"
+                         + "  $L"
+                         + "> {", "}",
+                symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
             generateClientProperties();
             generateConstructor();
             writer.write("");
@@ -257,11 +259,10 @@ final class ServiceGenerator implements Runnable {
             writer.pushState(CLIENT_CONSTRUCTOR_SECTION);
 
             int configVariable = 0;
-            writer.addImport("resolveClientProtocolConfig", "resolveClientProtocolConfig", "@aws-sdk/config-resolver");
-            writer.write("let $L = resolveClientProtocolConfig({\n"
+            writer.write("let $L = {\n"
                          + "  ...__ClientRuntimeConfiguration,\n"
                          + "  ...configuration\n"
-                         + "});", generateConfigVariable(configVariable));
+                         + "};", generateConfigVariable(configVariable));
 
             // Add runtime plugin "resolve" method calls. These are invoked one
             // after the other until all of the runtime plugins have been called.

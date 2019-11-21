@@ -11,7 +11,7 @@ import { ClientRuntimeDependencies } from "${clientModuleName}";
 
 export const ClientRuntimeConfiguration: Required<ClientRuntimeDependencies> = {
   protocol: "${protocol}",
-  httpHandler: new FetchHttpHandler(),
+  requestHandler: new FetchHttpHandler(),
   sha256: Sha256,
   urlParser: parseUrl,
   bodyLengthChecker: calculateBodyLength,
