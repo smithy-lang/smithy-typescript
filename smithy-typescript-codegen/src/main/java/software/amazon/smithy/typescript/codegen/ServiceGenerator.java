@@ -135,10 +135,8 @@ final class ServiceGenerator implements Runnable {
 
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
-        writer.write("export type $L = Partial<__SmithyConfiguration<$T>>",
-                configType,
-                applicationProtocol.getOptionsType()
-        );
+        writer.write("export type $L = Partial<__SmithyConfiguration<$T>>", configType,
+                applicationProtocol.getOptionsType());
         writer.write("  & ClientRuntimeDependencies");
 
         // Get the configuration symbol types to reference in code. These are
@@ -238,10 +236,7 @@ final class ServiceGenerator implements Runnable {
                          + "  ServiceOutputTypes,\n"
                          + "  $L"
                          + "> {", "}",
-                symbol.getName(),
-                applicationProtocol.getOptionsType(),
-                resolvedConfigType,
-                () -> {
+                symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
             generateClientProperties();
             generateConstructor();
             writer.write("");

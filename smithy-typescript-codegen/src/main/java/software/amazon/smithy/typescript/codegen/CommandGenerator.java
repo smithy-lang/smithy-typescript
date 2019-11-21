@@ -94,14 +94,8 @@ final class CommandGenerator implements Runnable {
         addInputAndOutputTypes();
 
         String name = symbol.getName();
-        writer.openBlock(
-                "export class $L extends $$Command<$L, $L, $L> {",
-                "}",
-                name,
-                inputType,
-                outputType,
-                configType,
-                () -> {
+        writer.openBlock("export class $L extends $$Command<$L, $L, $L> {", "}", name, inputType, outputType,
+                configType, () -> {
 
             // Section for adding custom command properties.
             writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
