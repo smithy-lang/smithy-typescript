@@ -72,8 +72,29 @@ public class CodegenVisitorTest {
     }
 
     @Test
-    public void generatesServiceAndCommandShapes() {
-        // TODO
+    public void generatesServiceClients() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+                .model(model)
+                .fileManifest(manifest)
+                .pluginClassLoader(getClass().getClassLoader())
+                .settings(Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build())
+                .build();
+        new TypeScriptCodegenPlugin().execute(context);
+
+        Assertions.assertTrue(manifest.hasFile("Example.ts"));
+        assertThat(manifest.getFileString("Example.ts").get(),
+                   containsString("export class Example extends ExampleClient"));
+
+        Assertions.assertTrue(manifest.hasFile("ExampleClient.ts"));
+        assertThat(manifest.getFileString("ExampleClient.ts").get(), containsString("export class ExampleClient"));
     }
 
     @Test

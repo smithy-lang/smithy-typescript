@@ -219,7 +219,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol operationShape(OperationShape shape) {
         String commandName = flattenShapeName(shape) + "Command";
         String moduleName = formatModuleName(shape.getType(), commandName);
-        return createGeneratedSymbolBuilder(shape, commandName, moduleName).build();
+        Symbol intermediate = createGeneratedSymbolBuilder(shape, commandName, moduleName).build();
+        Symbol.Builder builder = intermediate.toBuilder();
+        // Add input and output type symbols (XCommandInput / XCommandOutput).
+        builder.putProperty("inputType", intermediate.toBuilder().name(commandName + "Input").build());
+        builder.putProperty("outputType", intermediate.toBuilder().name(commandName + "Output").build());
+        return builder.build();
     }
 
     @Override
@@ -243,7 +248,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol serviceShape(ServiceShape shape) {
-        return createObjectSymbolBuilder(shape).build();
+        String name = StringUtils.capitalize(shape.getId().getName()) + "Client";
+        String moduleName = formatModuleName(shape.getType(), name);
+        return createGeneratedSymbolBuilder(shape, name, moduleName).build();
     }
 
     @Override
@@ -338,7 +345,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private String formatModuleName(ShapeType shapeType, String name) {
         // All shapes except for the service and operations are stored in models.
         if (shapeType == ShapeType.SERVICE) {
-            return "./" + name + "Client";
+            return "./" + name;
         } else if (shapeType == ShapeType.OPERATION) {
             return "./commands/" + name;
         } else {

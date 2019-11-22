@@ -230,6 +230,7 @@ final class ServiceGenerator implements Runnable {
 
     private void generateService() {
         // Write out the service.
+        writer.writeShapeDocs(service);
         writer.openBlock("export class $L extends __Client<\n"
                          + "  $T,\n"
                          + "  ServiceInputTypes,\n"

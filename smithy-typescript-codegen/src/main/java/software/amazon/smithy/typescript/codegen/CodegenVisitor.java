@@ -223,9 +223,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             return null;
         }
 
-        // Generate the service client itself.
+        // Generate the modular service client.
         writers.useShapeWriter(shape, writer -> new ServiceGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
+
+        // Generate the non-modular service client.
+        Symbol serviceSymbol = symbolProvider.toSymbol(shape);
+        String nonModularName = serviceSymbol.getName().replace("Client", "");
+        String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
+        writers.useFileWriter(filename, writer -> new NonModularServiceGenerator(
+                settings, model, symbolProvider, nonModularName, writer).run());
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
