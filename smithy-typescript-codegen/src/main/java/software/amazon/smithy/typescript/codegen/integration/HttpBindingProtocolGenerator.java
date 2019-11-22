@@ -177,11 +177,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
         // Add the normalized input type.
-        String inputType = symbol.getName() + "Input";
-        writer.addImport(inputType, inputType, symbol.getNamespace());
+        Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
 
         writer.openBlock("export function $L(\n"
-                       + "  input: $L,\n"
+                       + "  input: $T,\n"
                        + "  context: SerdeContext\n"
                        + "): $T {", "}", methodName, inputType, requestType, () -> {
             List<HttpBinding> labelBindings = writeRequestLabels(context, operation, bindingIndex, trait);
@@ -497,14 +496,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
-        String outputType = symbol.getName() + "Output";
-        writer.addImport(outputType, outputType, symbol.getNamespace());
+        Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
 
         // Handle the general response.
         writer.openBlock("export async function $L(\n"
                        + "  output: $T,\n"
                        + "  context: SerdeContext\n"
-                       + "): Promise<$L> {", "}", methodName, responseType, outputType, () -> {
+                       + "): Promise<$T> {", "}", methodName, responseType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode !== $L) {", "}", trait.getCode(), () -> {
                 writer.write("return $L(output, context);", errorMethodName);
@@ -512,7 +510,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
             // Start deserializing the response.
             writer.write("let data: any = await parseBody(output.body, context)");
-            writer.openBlock("let contents: $L = {", "};", outputType, () -> {
+            writer.openBlock("let contents: $T = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
 
                 // Only set a type and the members if we have output.

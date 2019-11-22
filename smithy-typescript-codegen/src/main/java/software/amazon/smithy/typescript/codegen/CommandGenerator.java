@@ -45,8 +45,8 @@ final class CommandGenerator implements Runnable {
     private final Symbol symbol;
     private final List<RuntimeClientPlugin> runtimePlugins;
     private final OperationIndex operationIndex;
-    private final String inputType;
-    private final String outputType;
+    private final Symbol inputType;
+    private final Symbol outputType;
     private final ApplicationProtocol applicationProtocol;
 
     CommandGenerator(
@@ -71,8 +71,8 @@ final class CommandGenerator implements Runnable {
 
         symbol = symbolProvider.toSymbol(operation);
         operationIndex = model.getKnowledge(OperationIndex.class);
-        inputType = symbol.getName() + "Input";
-        outputType = symbol.getName() + "Output";
+        inputType = symbol.expectProperty("inputType", Symbol.class);
+        outputType = symbol.expectProperty("outputType", Symbol.class);
     }
 
     @Override
@@ -94,7 +94,7 @@ final class CommandGenerator implements Runnable {
         addInputAndOutputTypes();
 
         String name = symbol.getName();
-        writer.openBlock("export class $L extends $$Command<$L, $L, $L> {", "}", name, inputType, outputType,
+        writer.openBlock("export class $L extends $$Command<$T, $T, $L> {", "}", name, inputType, outputType,
                 configType, () -> {
 
             // Section for adding custom command properties.
@@ -117,7 +117,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandConstructor() {
-        writer.openBlock("constructor(readonly input: $L) {", "}", inputType, () -> {
+        writer.openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
             // The constructor can be intercepted and changed.
             writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
                     .pushState(COMMAND_CONSTRUCTOR_SECTION)
@@ -132,11 +132,11 @@ final class CommandGenerator implements Runnable {
 
         writer.write("resolveMiddleware(")
                 .indent()
-                .write("clientStack: MiddlewareStack<$L, $L>,", inputType, outputType)
+                .write("clientStack: MiddlewareStack<$T, $T>,", inputType, outputType)
                 .write("configuration: $L,", configType)
                 .write("options?: $T", applicationProtocol.getOptionsType())
                 .dedent();
-        writer.openBlock("): Handler<$L, $L> {", "}", inputType, outputType, () -> {
+        writer.openBlock("): Handler<$T, $T> {", "}", inputType, outputType, () -> {
             // Add serialization and deserialization plugin.
             writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
 
@@ -159,8 +159,8 @@ final class CommandGenerator implements Runnable {
     }
 
     private void addInputAndOutputTypes() {
-        writeInputOrOutputType(inputType, operationIndex.getInput(operation).orElse(null));
-        writeInputOrOutputType(outputType, operationIndex.getOutput(operation).orElse(null));
+        writeInputOrOutputType(inputType.getName(), operationIndex.getInput(operation).orElse(null));
+        writeInputOrOutputType(outputType.getName(), operationIndex.getOutput(operation).orElse(null));
         writer.write("");
     }
 
@@ -189,7 +189,7 @@ final class CommandGenerator implements Runnable {
         writer.write("")
                 .write("private serialize(")
                 .indent()
-                    .write("input: $L,", inputType)
+                    .write("input: $T,", inputType)
                     .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
@@ -202,7 +202,7 @@ final class CommandGenerator implements Runnable {
                     .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
-                .openBlock("): Promise<$L> {", "}", outputType, () -> writeSerdeDispatcher(false))
+                .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
                 .write("");
     }
 
