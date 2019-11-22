@@ -62,6 +62,6 @@ final class IndexGenerator implements Runnable {
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
         }
-        fileManifest.writeFile("index.tx", writer.toString());
+        fileManifest.writeFile("index.ts", writer.toString());
     }
 }
