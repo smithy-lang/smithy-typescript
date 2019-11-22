@@ -88,6 +88,16 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
         this.defaultTimestampFormat = defaultTimestampFormat;
     }
 
+    /**
+     * Gets the in-code location of the data to provide an input of
+     * ({@code input.foo}, {@code entry}, etc.).
+     *
+     * @return The data source.
+     */
+    protected String getDataSource() {
+        return dataSource;
+    }
+
     @Override
     public String blobShape(BlobShape shape) {
         return "context.base64Encoder(" + dataSource + ")";
