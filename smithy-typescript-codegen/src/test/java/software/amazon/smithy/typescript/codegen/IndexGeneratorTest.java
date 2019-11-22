@@ -13,7 +13,7 @@ public class IndexGeneratorTest {
 
     @Test
     public void writesIndex() {
-        Model model = Model.assembler().addImport(getClass().getResource("testmodel.smithy")).assemble().unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
         TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
                 .withMember("service", Node.from("smithy.example#Example"))
                 .withMember("package", Node.from("example"))
@@ -25,7 +25,7 @@ public class IndexGeneratorTest {
         IndexGenerator.writeIndex(settings, model, symbolProvider, manifest);
 
         String contents = manifest.getFileString("index.ts").get();
-        
-        assertThat(contents, containsString("export"));
+        assertThat(contents, containsString("export * from \"./Example\";"));
+        // TODO test index contains command exports
     }
 }
