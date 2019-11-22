@@ -26,37 +26,19 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 /**
  * Generates an index to export the service client and each command.
  */
-final class IndexGenerator implements Runnable {
+final class IndexGenerator {
 
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final ServiceShape service;
-    private final SymbolProvider symbolProvider;
-    private final TypeScriptWriter writer;
-    private final Symbol symbol;
-    private final FileManifest fileManifest;
+    private IndexGenerator() {}
 
-    IndexGenerator(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            FileManifest fileManifest
+    static void writeIndex(
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        FileManifest fileManifest
     ) {
-        this.settings = settings;
-        this.model = model;
-        this.service = settings.getService(model);
-        this.symbolProvider = symbolProvider;
-        this.writer = new TypeScriptWriter("");
-        this.fileManifest = fileManifest;
-        symbol = symbolProvider.toSymbol(service);
-    }
-
-    @Override
-    public void run() {
-        generateIndex();
-    }
-
-    private void generateIndex() {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+        ServiceShape service = settings.getService(model);
+        Symbol symbol = symbolProvider.toSymbol(service);
         writer.write("export * from \"./" + symbol.getName() + "\";");
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {

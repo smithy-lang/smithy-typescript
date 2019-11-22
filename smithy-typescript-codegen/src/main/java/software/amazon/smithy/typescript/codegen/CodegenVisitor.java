@@ -130,6 +130,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             configGenerator.generate(target);
         }
 
+        // Generate index for client.
+        IndexGenerator.writeIndex(
+                settings, model, symbolProvider, fileManifest);
+
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");
         List<SymbolDependency> dependencies = writers.getDependencies();
@@ -233,9 +237,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
         writers.useFileWriter(filename, writer -> new NonModularServiceGenerator(
                 settings, model, symbolProvider, nonModularName, writer).run());
-
-        // Generate index for client.
-        new IndexGenerator(settings, model, symbolProvider, fileManifest).run();
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
