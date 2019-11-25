@@ -230,7 +230,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate the modular service client.
         writers.useShapeWriter(shape, writer -> new ServiceGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
-        
+
         // Generate the non-modular service client.
         Symbol serviceSymbol = symbolProvider.toSymbol(shape);
         String nonModularName = serviceSymbol.getName().replace("Client", "");

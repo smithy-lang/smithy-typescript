@@ -27,6 +27,7 @@ public class IndexGeneratorTest {
 
         String contents = manifest.getFileString("index.ts").get();
         assertThat(contents, containsString("export * from \"./Example\";"));
+        assertThat(contents, containsString("export * from \"./ExampleClient\";"));
         assertThat(contents, containsString("export * from \"./commands/GetFooCommand\";"));
     }
 }

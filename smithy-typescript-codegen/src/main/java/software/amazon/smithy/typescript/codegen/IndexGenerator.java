@@ -39,7 +39,15 @@ final class IndexGenerator {
         TypeScriptWriter writer = new TypeScriptWriter("");
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
+
+        // Write export statement for modular client
         writer.write("export * from \"./" + symbol.getName() + "\";");
+
+        // Get non-modular client and write its export statement
+        String nonModularName = symbol.getName().replace("Client", "");
+        writer.write("export * from \"./" + nonModularName + "\";");
+
+        // write export statements for each command in /commands directory
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
