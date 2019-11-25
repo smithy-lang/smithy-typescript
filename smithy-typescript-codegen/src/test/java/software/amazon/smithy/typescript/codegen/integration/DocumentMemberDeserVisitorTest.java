@@ -11,7 +11,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.ByteShape;
@@ -68,7 +67,6 @@ public class DocumentMemberDeserVisitorTest {
 
         return ListUtils.of(new Object[][]{
                 {BooleanShape.builder().id(id).build(), DATA_SOURCE},
-                {BigIntegerShape.builder().id(id).build(), "BigInt(" + DATA_SOURCE + ")"},
                 {ByteShape.builder().id(id).build(), DATA_SOURCE},
                 {DoubleShape.builder().id(id).build(), DATA_SOURCE},
                 {FloatShape.builder().id(id).build(), DATA_SOURCE},

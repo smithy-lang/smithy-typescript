@@ -536,7 +536,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("async function $L(\n"
                        + "  output: $T,\n"
                        + "  context: SerdeContext,\n"
-                       + "): Promise<$L> {", "}", errorMethodName, responseType, outputType, () -> {
+                       + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
             writer.write("let data: any = await parseBody(output.body, context);");
             writer.write("let response: any;");
             writer.write("let errorCode: String;");

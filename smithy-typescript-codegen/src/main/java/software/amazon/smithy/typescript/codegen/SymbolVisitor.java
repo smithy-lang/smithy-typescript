@@ -199,11 +199,16 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol bigIntegerShape(BigIntegerShape shape) {
-        return createSymbolBuilder(shape, "BigInt").build();
+        // BigInt is not supported across all environments, use big.js instead.
+        return createBigJsSymbol(shape);
     }
 
     @Override
     public Symbol bigDecimalShape(BigDecimalShape shape) {
+        return createBigJsSymbol(shape);
+    }
+
+    private Symbol createBigJsSymbol(Shape shape) {
         return createSymbolBuilder(shape, "Big", TypeScriptDependency.TYPES_BIG_JS.packageName)
                 .addDependency(TypeScriptDependency.TYPES_BIG_JS)
                 .addDependency(TypeScriptDependency.BIG_JS)
