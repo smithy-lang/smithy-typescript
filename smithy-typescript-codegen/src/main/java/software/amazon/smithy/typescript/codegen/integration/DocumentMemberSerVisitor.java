@@ -147,18 +147,18 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
         return dataSource;
     }
 
-    private String serializeBigNumber() {
-        return dataSource + ".toString()";
-    }
-
     @Override
     public String bigIntegerShape(BigIntegerShape shape) {
-        return serializeBigNumber();
+        return serializeFromBigJs();
     }
 
     @Override
     public String bigDecimalShape(BigDecimalShape shape) {
-        return serializeBigNumber();
+        return serializeFromBigJs();
+    }
+
+    private String serializeFromBigJs() {
+        return dataSource + ".toJSON()";
     }
 
     @Override

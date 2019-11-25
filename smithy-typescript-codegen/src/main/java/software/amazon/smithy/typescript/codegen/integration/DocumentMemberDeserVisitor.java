@@ -148,11 +148,16 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String bigIntegerShape(BigIntegerShape shape) {
-        return "BigInt(" + dataSource + ")";
+        // BigInt is not supported across all environments, use big.js instead.
+        return deserializeToBigJs();
     }
 
     @Override
     public String bigDecimalShape(BigDecimalShape shape) {
+        return deserializeToBigJs();
+    }
+
+    private String deserializeToBigJs() {
         context.getWriter().addImport("Big", "__Big", "big.js");
         return "__Big(" + dataSource + ")";
     }
