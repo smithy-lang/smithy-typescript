@@ -130,6 +130,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             configGenerator.generate(target);
         }
 
+        // Generate index for client.
+        IndexGenerator.writeIndex(
+                settings, model, symbolProvider, fileManifest);
+
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");
         List<SymbolDependency> dependencies = writers.getDependencies();

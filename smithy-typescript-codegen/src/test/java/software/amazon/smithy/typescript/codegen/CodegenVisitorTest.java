@@ -38,6 +38,7 @@ public class CodegenVisitorTest {
         Assertions.assertTrue(manifest.hasFile("package.json"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.browser.ts"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.ts"));
+        Assertions.assertTrue(manifest.hasFile("index.ts"));
 
         // Does the package.json file point to the runtime config?
         String packageJsonContents = manifest.getFileString("package.json").get();
