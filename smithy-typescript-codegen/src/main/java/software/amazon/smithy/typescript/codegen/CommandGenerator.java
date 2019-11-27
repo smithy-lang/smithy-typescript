@@ -193,7 +193,11 @@ final class CommandGenerator implements Runnable {
                     .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
-                .openBlock("): $T {", "}", applicationProtocol.getRequestType(), () -> writeSerdeDispatcher(true));
+                .openBlock(
+                        "): Promise<$T> {", "}",
+                        applicationProtocol.getRequestType(),
+                        () -> writeSerdeDispatcher(true)
+                );
 
         writer.write("")
                 .write("private deserialize(")
