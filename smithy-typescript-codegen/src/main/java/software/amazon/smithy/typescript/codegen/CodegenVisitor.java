@@ -130,6 +130,12 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             configGenerator.generate(target);
         }
 
+        // Write each custom file.
+        for (TypeScriptIntegration integration : integrations) {
+            LOGGER.finer(() -> "Calling writeAdditionalFiles on " + integration.getClass().getCanonicalName());
+            integration.writeAdditionalFiles(settings, model, symbolProvider, writers::useFileWriter);
+        }
+
         // Generate index for client.
         IndexGenerator.writeIndex(
                 settings, model, symbolProvider, fileManifest);
