@@ -79,7 +79,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Generates serialization functions for shapes in the passed set. These functions
      * should return a value that can then be serialized by the implementation of
-     * {@code serializeDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
+     * {@code serializeInputDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
      * are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
@@ -90,7 +90,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Generates deserialization functions for shapes in the passed set. These functions
      * should return a value that can then be deserialized by the implementation of
-     * {@code deserializeDocument}. The {@link DocumentShapeDeserVisitor} and
+     * {@code deserializeOutputDocument}. The {@link DocumentShapeDeserVisitor} and
      * {@link DocumentMemberDeserVisitor} are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
@@ -102,18 +102,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     public void generateSharedComponents(GenerationContext context) {
         generateDocumentShapeSerializers(context, documentSerializingShapes);
         generateDocumentShapeDeserializers(context, documentDeserializingShapes);
-
-        TypeScriptWriter writer = context.getWriter();
-
-        SymbolReference responseType = getApplicationProtocol().getResponseType();
-        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
-        writer.openBlock("const deserializeMetadata = (output: $T): __ResponseMetadata => ({", "});", responseType,
-                () -> {
-                    writer.write("httpStatusCode: output.statusCode,");
-                    writer.write("httpHeaders: output.headers,");
-                    writer.write("requestId: output.headers[\"x-amzn-requestid\"]");
-                });
-        writer.write("");
+        HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
     }
 
     /**
@@ -367,7 +356,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return getTimestampInputParam(dataSource, member, format);
+            return HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, member, format);
         } else if (target instanceof BlobShape) {
             return getBlobInputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
@@ -377,29 +366,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         throw new CodegenException(String.format(
                 "Unsupported %s binding of %s to %s in %s using the %s protocol",
                 bindingType, member.getMemberName(), target.getType(), member.getContainer(), getName()));
-    }
-
-    /**
-     * Given a format and a source of data, generate an input value provider for the
-     * timestamp.
-     *
-     * @param dataSource The in-code location of the data to provide an input of
-     *                   ({@code input.foo}, {@code entry}, etc.)
-     * @param member The member that points to the value being provided.
-     * @param format The timestamp format to provide.
-     * @return Returns a value or expression of the input timestamp.
-     */
-    private String getTimestampInputParam(String dataSource, MemberShape member, Format format) {
-        switch (format) {
-            case DATE_TIME:
-                return dataSource + ".toISOString()";
-            case EPOCH_SECONDS:
-                return "Math.round(" + dataSource + ".getTime() / 1000)";
-            case HTTP_DATE:
-                return dataSource + ".toUTCString()";
-            default:
-                throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + member);
-        }
     }
 
     /**
@@ -453,7 +419,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Writes the code needed to serialize the input document of a request.
      *
-     * Implementations of this method are expected to set a value to the
+     * <p>Implementations of this method are expected to set a value to the
      * {@code body} variable that will be serialized as the request body.
      * This variable will already be defined in scope.
      *
@@ -520,7 +486,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     // Track all shapes bound to the document so their deserializers may be generated.
                     documentBindings.forEach(binding -> {
                         // Set all the members to undefined to meet type constraints.
-                        writer.write("$L: undefined,", binding.getLocationName());
+                        writer.write("$L: undefined,", binding.getMemberName());
                         Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
                         documentDeserializingShapes.add(target);
                     });
@@ -533,40 +499,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("");
 
         // Write out the error deserialization dispatcher.
-        writer.openBlock("async function $L(\n"
-                       + "  output: $T,\n"
-                       + "  context: SerdeContext,\n"
-                       + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
-            writer.write("let data: any = await parseBody(output.body, context);");
-            writer.write("let response: any;");
-            writer.write("let errorCode: String;");
-            writeErrorCodeParser(context);
-            writer.openBlock("switch (errorCode) {", "}", () -> {
-                // Generate the case statement for each error, invoking the specific deserializer.
-                operation.getErrors().forEach(errorId -> {
-                    Shape error = context.getModel().getShapeIndex().getShape(errorId).get();
-                    // Track errors bound to the operation so their deserializers may be generated.
-                    documentDeserializingShapes.add(error);
-                    Symbol errorSymbol = symbolProvider.toSymbol(error);
-                    String errorSerdeMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol, getName());
-                    writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
-                        // Dispatch to the error deserialization function.
-                        writer.write("response = $L(data, context);", errorSerdeMethodName);
-                    });
-                });
-
-                // Build a generic error the best we can for ones we don't know about.
-                writer.write("default:").indent()
-                        .write("errorCode = errorCode || \"UnknownError\";")
-                        .openBlock("response = {", "};", () -> {
-                            writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
-                            writer.write("$$name: errorCode,");
-                            writer.write("$$fault: \"client\",");
-                        }).dedent();
-            });
-            writer.write("return Promise.reject(response);");
-        });
-        writer.write("");
+        documentDeserializingShapes.addAll(HttpProtocolGeneratorUtils.generateErrorDispatcher(
+                context, operation, responseType, this::writeErrorCodeParser));
     }
 
     private void readHeaders(
@@ -667,7 +601,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return getTimestampOutputParam(dataSource, member, format);
+            return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, member, format);
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
@@ -677,34 +611,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         throw new CodegenException(String.format(
                 "Unsupported %s binding of %s to %s in %s using the %s protocol",
                 bindingType, member.getMemberName(), target.getType(), member.getContainer(), getName()));
-    }
-
-    /**
-     * Given a format and a source of data, generate an output value provider for the
-     * timestamp.
-     *
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param member The member that points to the value being provided.
-     * @param format The timestamp format to provide.
-     * @return Returns a value or expression of the output timestamp.
-     */
-    private String getTimestampOutputParam(String dataSource, MemberShape member, Format format) {
-        String modifiedSource;
-        switch (format) {
-            case DATE_TIME:
-            case HTTP_DATE:
-                modifiedSource = dataSource;
-                break;
-            case EPOCH_SECONDS:
-                // Account for seconds being sent over the wire in some cases where milliseconds are required.
-                modifiedSource = dataSource + " % 1 != 0 ? Math.round(" + dataSource + " * 1000) : " + dataSource;
-                break;
-            default:
-                throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + member);
-        }
-
-        return "new Date(" + modifiedSource + ")";
     }
 
     /**
@@ -779,7 +685,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * {@code contents} variable that represents the type generated for the
      * response. This variable will already be defined in scope.
      *
-     * The contents of the response body will be available in a {@code data} variable.
+     * <p>The contents of the response body will be available in a {@code data} variable.
      *
      * <p>For example:
      *

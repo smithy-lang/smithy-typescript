@@ -33,6 +33,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.ListUtils;
@@ -101,20 +102,6 @@ public class DocumentMemberDeserVisitorTest {
         Assertions.assertThrows(CodegenException.class, () -> {
             MemberShape.builder().target(id + "Target").id(id + "$member").build().accept(visitor);
         });
-    }
-
-    @Test
-    public void givesCorrectTimestampDeserialization() {
-        TimestampShape shape = TimestampShape.builder().id("com.smithy.example#Foo").build();
-        DocumentMemberDeserVisitor visitor = new DocumentMemberDeserVisitor(mockContext, DATA_SOURCE, FORMAT);
-
-        assertThat("new Date(" + DATA_SOURCE + ")",
-                equalTo(visitor.getTimestampDeserializedWithFormat(shape, Format.DATE_TIME)));
-        assertThat("new Date(" + DATA_SOURCE + " % 1 != 0 ? Math.round("
-                           + DATA_SOURCE + " * 1000) : " + DATA_SOURCE + ")",
-                equalTo(visitor.getTimestampDeserializedWithFormat(shape, Format.EPOCH_SECONDS)));
-        assertThat("new Date(" + DATA_SOURCE + ")",
-                equalTo(visitor.getTimestampDeserializedWithFormat(shape, Format.HTTP_DATE)));
     }
 
     private static final class MockProvider implements SymbolProvider {

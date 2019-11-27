@@ -17,6 +17,8 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.knowledge.HttpBinding.Location;
+import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -184,25 +186,9 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-        return getTimestampDeserializedWithFormat(shape, defaultTimestampFormat);
-    }
-
-    public String getTimestampDeserializedWithFormat(TimestampShape shape, Format format) {
-        String modifiedSource;
-        switch (format) {
-            case DATE_TIME:
-            case HTTP_DATE:
-                modifiedSource = dataSource;
-                break;
-            case EPOCH_SECONDS:
-                // Account for seconds being sent over the wire in some cases where milliseconds are required.
-                modifiedSource = dataSource + " % 1 != 0 ? Math.round(" + dataSource + " * 1000) : " + dataSource;
-                break;
-            default:
-                throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
-        }
-
-        return "new Date(" + modifiedSource + ")";
+        HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        Format format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
+        return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, shape, format);
     }
 
     @Override
