@@ -17,6 +17,8 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
@@ -102,6 +104,41 @@ public interface TypeScriptIntegration {
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
             Shape definedShape
+    ) {
+        // pass
+    }
+
+    /**
+     * Writes additional files.
+     *
+     * <pre>
+     * {@code
+     * public final class MyIntegration implements TypeScriptIntegration {
+     *     public writeAdditionalFiles(
+     *             TypeScriptSettings settings,
+     *             Model model,
+     *             SymbolProvider symbolProvider,
+     *             BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
+     *     ) {
+     *         writerFactory.accept("foo.ts", writer -> {
+     *             writer.write("// Hello!");
+     *         });
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param settings Settings used to generate.
+     * @param model Model to generate from.
+     * @param symbolProvider Symbol provider used for codegen.
+     * @param writerFactory A factory function that takes the name of a file
+     *   to write and a {@code Consumer} that receives a
+     *   {@link TypeScriptWriter} to perform the actual writing to the file.
+     */
+    default void writeAdditionalFiles(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
     ) {
         // pass
     }
