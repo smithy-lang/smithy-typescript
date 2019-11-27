@@ -119,10 +119,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
 
-        writer.openBlock("export function $L(\n"
+        writer.openBlock("export async function $L(\n"
                                  + "  input: $T,\n"
                                  + "  context: SerdeContext\n"
-                                 + "): $T {", "}", methodName, inputType, requestType, () -> {
+                                 + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
             writeRequestHeaders(context);
             boolean hasRequestBody = writeRequestBody(context, operation);
 
