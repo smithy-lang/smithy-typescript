@@ -107,19 +107,6 @@ public class DocumentMemberSerVisitorTest {
         });
     }
 
-    @Test
-    public void givesCorrectTimestampSerialization() {
-        TimestampShape shape = TimestampShape.builder().id("com.smithy.example#Foo").build();
-        DocumentMemberSerVisitor visitor = new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT);
-
-        assertThat(DATA_SOURCE + ".toISOString()",
-                equalTo(visitor.getTimestampSerializedWithFormat(shape, Format.DATE_TIME)));
-        assertThat("Math.round(" + DATA_SOURCE + ".getTime() / 1000)",
-                equalTo(visitor.getTimestampSerializedWithFormat(shape, Format.EPOCH_SECONDS)));
-        assertThat(DATA_SOURCE + ".toUTCString()",
-                equalTo(visitor.getTimestampSerializedWithFormat(shape, Format.HTTP_DATE)));
-    }
-
     private static final class MockProvider implements SymbolProvider {
         private final String id = "com.smithy.example#Foo";
         private Symbol mock = Symbol.builder()

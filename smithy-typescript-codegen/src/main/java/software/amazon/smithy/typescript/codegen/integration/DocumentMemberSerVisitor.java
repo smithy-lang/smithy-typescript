@@ -185,20 +185,7 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     public String timestampShape(TimestampShape shape) {
         HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
         Format format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
-        return getTimestampSerializedWithFormat(shape, format);
-    }
-
-    public String getTimestampSerializedWithFormat(TimestampShape shape, Format format) {
-        switch (format) {
-            case DATE_TIME:
-                return dataSource + ".toISOString()";
-            case EPOCH_SECONDS:
-                return "Math.round(" + dataSource + ".getTime() / 1000)";
-            case HTTP_DATE:
-                return dataSource + ".toUTCString()";
-            default:
-                throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
-        }
+        return HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, shape, format);
     }
 
     @Override
