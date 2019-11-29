@@ -191,6 +191,10 @@ final class ServiceGenerator implements Runnable {
                              + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.");
             writer.write("sha256?: __HashConstructor;\n");
 
+            writer.writeDocs("A constructor for a class implementing the @aws-sdk/types.Hash interface \n"
+                             + "that computes md5 checksums");
+            writer.write("md5?: __HashConstructor;\n");
+
             writer.addImport("UrlParser", "__UrlParser", "@aws-sdk/types");
             writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.");
             writer.write("urlParser?: __UrlParser;\n");

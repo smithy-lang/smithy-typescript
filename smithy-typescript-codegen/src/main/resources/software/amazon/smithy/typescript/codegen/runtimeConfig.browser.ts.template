@@ -1,4 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-browser";
+import { Md5 } from "@aws-sdk/md5-js"
 import { FetchHttpHandler } from "@aws-sdk/fetch-http-handler";
 import { parseUrl } from "@aws-sdk/url-parser-browser";
 import { calculateBodyLength } from "@aws-sdk/util-body-length-browser";
@@ -13,6 +14,7 @@ export const ClientRuntimeConfiguration: Required<ClientRuntimeDependencies> = {
   protocol: "${protocol}",
   requestHandler: new FetchHttpHandler(),
   sha256: Sha256,
+  md5: Md5,
   urlParser: parseUrl,
   bodyLengthChecker: calculateBodyLength,
   streamCollector,

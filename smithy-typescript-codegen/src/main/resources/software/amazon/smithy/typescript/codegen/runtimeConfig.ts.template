@@ -13,6 +13,7 @@ export const ClientRuntimeConfiguration: Required<ClientRuntimeDependencies> = {
   protocol: "${protocol}",
   requestHandler: new NodeHttpHandler(),
   sha256: Hash.bind(null, "sha256"),
+  md5: Hash.bind(null, "md5"),
   urlParser: parseUrl,
   bodyLengthChecker: calculateBodyLength,
   streamCollector,
