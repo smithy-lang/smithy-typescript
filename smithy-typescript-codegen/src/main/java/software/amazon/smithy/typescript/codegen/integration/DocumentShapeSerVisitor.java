@@ -299,9 +299,9 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
 
         writer.addImport(symbol, symbol.getName());
         writer.openBlock("const $L = (\n"
-                       + "  input: $L,\n"
+                       + "  input: $T,\n"
                        + "  context: SerdeContext\n"
-                       + "): any => {", "}", methodName, symbol.getName(), () -> functionBody.accept(context, shape));
+                       + "): any => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
         writer.write("");
     }
 

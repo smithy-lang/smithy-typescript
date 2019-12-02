@@ -306,7 +306,7 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
         writer.openBlock("const $L = (\n"
                        + "  output: any,\n"
                        + "  context: SerdeContext\n"
-                       + "): $L => {", "}", methodName, symbol.getName(), () -> functionBody.accept(context, shape));
+                       + "): $T => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
         writer.write("");
     }
 
