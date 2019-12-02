@@ -20,6 +20,7 @@ import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -39,6 +40,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeIndex;
 import software.amazon.smithy.model.shapes.StringShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -352,7 +354,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Shape target
     ) {
         if (isNativeSimpleType(target)) {
-            return dataSource;
+            return dataSource + ".toString()";
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
@@ -373,9 +375,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * blob. By default, this base64 encodes content in headers and query strings,
      * and passes through for payloads.
      *
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
      * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the input blob.
      */
     private String getBlobInputParam(Location bindingType, String dataSource) {
@@ -397,8 +399,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * relies on the HTTP implementation for query strings.
      *
      * @param bindingType How this value is bound to the operation input.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the input collection.
      */
     private String getCollectionInputParam(
@@ -482,18 +484,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // Only set a type and the members if we have output.
                 operation.getOutput().ifPresent(outputId -> {
                     writer.write("__type: $S,", outputId.getName());
-                    List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operation, Location.DOCUMENT);
-                    // Track all shapes bound to the document so their deserializers may be generated.
-                    documentBindings.forEach(binding -> {
-                        // Set all the members to undefined to meet type constraints.
-                        writer.write("$L: undefined,", binding.getMemberName());
-                        Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
-                        documentDeserializingShapes.add(target);
-                    });
+                    // Set all the members to undefined to meet type constraints.
+                    StructureShape target = shapeIndex.getShape(outputId).get().asStructureShape().get();
+                    new TreeMap<>(target.getAllMembers())
+                            .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
                 });
             });
             readHeaders(context, operation, bindingIndex);
-            readResponseBody(context, operation, bindingIndex);
+            List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
+                documentDeserializingShapes.add(target);
+            });
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
