@@ -34,6 +34,8 @@ import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.DocumentShape;
+import software.amazon.smithy.model.shapes.DoubleShape;
+import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -42,6 +44,7 @@ import software.amazon.smithy.model.shapes.ShapeIndex;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
@@ -280,7 +283,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     Shape target = index.getShape(binding.getMember().getTarget()).get();
                     String headerValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                             binding.getMember(), target);
-                    writer.write("headers['$L'] = $L;", binding.getLocationName(), headerValue);
+                    writer.write("headers[$S] = $L;", binding.getLocationName(), headerValue);
                 });
             }
 
@@ -294,7 +297,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         String headerValue = getInputValue(context, binding.getLocation(),
                                 "input." + memberName + "[suffix]", binding.getMember(), target);
                         // Append the suffix to the defined prefix and serialize the value in to that key.
-                        writer.write("headers['$L' + suffix] = $L;", binding.getLocationName(), headerValue);
+                        writer.write("headers[$S + suffix] = $L;", binding.getLocationName(), headerValue);
                     });
                 });
             }
@@ -318,14 +321,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
-            // TODO Validate payload structures are handled correctly.
             SymbolProvider symbolProvider = context.getSymbolProvider();
             // There can only be one payload binding.
             HttpBinding binding = payloadBindings.get(0);
             String memberName = symbolProvider.toMemberName(binding.getMember());
-            Shape target = context.getModel().getShapeIndex().getShape(binding.getMember().getTarget()).get();
-            writer.write("let body: any = $L;", getInputValue(
-                    context, Location.PAYLOAD, "input." + memberName, binding.getMember(), target));
+
+            // Write the default `body` property.
+            writer.write("let body: any = {};");
+            writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
+                Shape target = context.getModel().getShapeIndex().getShape(binding.getMember().getTarget()).get();
+                writer.write("body = $L;", getInputValue(
+                        context, Location.PAYLOAD, "input." + memberName, binding.getMember(), target));
+            });
             return payloadBindings;
         }
 
@@ -363,6 +370,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return getBlobInputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
             return getCollectionInputParam(bindingType, dataSource);
+        } else if (target instanceof StructureShape || target instanceof UnionShape) {
+            return getNamedMembersInputParam(context, bindingType, dataSource, target);
         }
 
         throw new CodegenException(String.format(
@@ -415,6 +424,35 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 return dataSource;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
+        }
+    }
+
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * shape. This redirects to a serialization function for payloads,
+     * and fails otherwise.
+     *
+     * @param context The generation context.
+     * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
+     * @return Returns a value or expression of the input shape.
+     */
+    private String getNamedMembersInputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            Shape target
+    ) {
+        switch (bindingType) {
+            case PAYLOAD:
+                // Redirect to a serialization function.
+                Symbol symbol = context.getSymbolProvider().toSymbol(target);
+                return ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName())
+                               + "(" + dataSource + ", context)";
+            default:
+                throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
     }
 
@@ -517,10 +555,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         ShapeIndex index = context.getModel().getShapeIndex();
         for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
-            writer.openBlock("if (output.headers[$L] !== undefined) {", "}", binding.getLocationName(), () -> {
+            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", binding.getLocationName(), () -> {
                 Shape target = index.getShape(binding.getMember().getTarget()).get();
                 String headerValue = getOutputValue(context, binding.getLocation(),
-                        "output.headers[" + binding.getLocationName() + "]", binding.getMember(), target);
+                        "output.headers['" + binding.getLocationName() + "']", binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, headerValue);
             });
         }
@@ -567,11 +605,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
-            // TODO Validate payload structures are handled correctly.
             // There can only be one payload binding.
             HttpBinding binding = payloadBindings.get(0);
             Shape target = context.getModel().getShapeIndex().getShape(binding.getMember().getTarget()).get();
-            writer.write("output.$L = $L;", binding.getMemberName(), getOutputValue(context,
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                     Location.PAYLOAD, "data", binding.getMember(), target));
             return payloadBindings;
         }
@@ -599,7 +636,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             MemberShape member,
             Shape target
     ) {
-        if (isNativeSimpleType(target)) {
+        if (target instanceof NumberShape) {
+            return getNumberOutputParam(bindingType, dataSource, target);
+        } else if (target instanceof BooleanShape) {
+            return getBooleanOutputParam(bindingType, dataSource);
+        } else if (target instanceof StringShape || target instanceof DocumentShape) {
             return dataSource;
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
@@ -609,11 +650,32 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
             return getCollectionOutputParam(bindingType, dataSource);
+        } else if (target instanceof StructureShape || target instanceof UnionShape) {
+            return getNamedMembersOutputParam(context, bindingType, dataSource, target);
         }
 
         throw new CodegenException(String.format(
                 "Unsupported %s binding of %s to %s in %s using the %s protocol",
                 bindingType, member.getMemberName(), target.getType(), member.getContainer(), getName()));
+    }
+
+    /**
+     * Given context and a source of data, generate an output value provider for the
+     * boolean. By default, this checks strict equality to 'true'in headers and passes
+     * through for documents.
+     *
+     * @param bindingType How this value is bound to the operation output.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the output boolean.
+     */
+    private String getBooleanOutputParam(Location bindingType, String dataSource) {
+        switch (bindingType) {
+            case HEADER:
+                return dataSource + " === 'true'";
+            default:
+                throw new CodegenException("Unexpected blob binding location `" + bindingType + "`");
+        }
     }
 
     /**
@@ -657,6 +719,58 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 return "(" + dataSource + " || \"\").split(',')";
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
+        }
+    }
+
+    /**
+     * Given context and a source of data, generate an output value provider for the
+     * shape. This redirects to a deserialization function for documents and payloads,
+     * and fails otherwise.
+     *
+     * @param context The generation context.
+     * @param bindingType How this value is bound to the operation output.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
+     * @return Returns a value or expression of the output shape.
+     */
+    private String getNamedMembersOutputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            Shape target
+    ) {
+        switch (bindingType) {
+            case PAYLOAD:
+                // Redirect to a deserialization function.
+                Symbol symbol = context.getSymbolProvider().toSymbol(target);
+                return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
+                               + "(" + dataSource + ", context)";
+            default:
+                throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
+        }
+    }
+
+    /**
+     * Given context and a source of data, generate an output value provider for the
+     * number. By default, invokes parseInt on byte/short/integer/long types in headers,
+     * invokes parseFloat on float/double types in headers, and fails otherwise.
+     *
+     * @param bindingType How this value is bound to the operation output.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
+     * @return Returns a value or expression of the output number.
+     */
+    private String getNumberOutputParam(Location bindingType, String dataSource, Shape target) {
+        switch (bindingType) {
+            case HEADER:
+                if (target instanceof FloatShape || target instanceof DoubleShape) {
+                    return "parseFloat(" + dataSource + ", 10)";
+                }
+                return "parseInt(" + dataSource + ", 10)";
+            default:
+                throw new CodegenException("Unexpected number binding location `" + bindingType + "`");
         }
     }
 
