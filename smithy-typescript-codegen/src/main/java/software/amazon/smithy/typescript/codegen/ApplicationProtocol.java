@@ -68,8 +68,8 @@ public final class ApplicationProtocol {
         return new ApplicationProtocol(
                 "http",
                 SymbolReference.builder()
-                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_TYPES, "HttpOptions"))
-                        .alias("__HttpOptions")
+                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_TYPES, "HttpHandlerOptions"))
+                        .alias("__HttpHandlerOptions")
                         .build(),
                 SymbolReference.builder()
                         .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP, "HttpRequest"))
