@@ -165,7 +165,7 @@ public interface TypeScriptIntegration {
      * Adds additional client config interface fields.
      *
      * <p>Implementations of this method are expected to add fields to the
-     * client dependency interface of a generated client. This interface
+     * "ClientDefaults" interface of a generated client. This interface
      * contains fields that are either statically generated from
      * a model or are dependent on the runtime that a client is running in.
      * Implementations are expected to write interface field names and
@@ -211,12 +211,12 @@ public interface TypeScriptIntegration {
     }
 
     /**
-     * Adds additional runtime-specific client config values.
+     * Adds additional runtime-specific or shared client config values.
      *
      * <p>Implementations of this method are expected to add values to
-     * a runtime-specific configuration object that is used to provide
-     * values for a client dependency interface. This method is invoked
-     * for every supported {@link LanguageTarget}. Implementations are
+     * a runtime-specific or shared configuration object that is used to
+     * provide values for a "ClientDefaults" interface. This method is
+     * invoked for every supported {@link LanguageTarget}. Implementations are
      * expected to branch on the provided {@code LanguageTarget} and add
      * the appropriate default values and imports, each followed by a
      * (,). Any number of key-value pairs can be added, and any {@link Symbol}
@@ -226,7 +226,7 @@ public interface TypeScriptIntegration {
      * generated {@code package.json} file.
      *
      * <p>For example, the following code adds two values for both the
-     * node and browser targets:
+     * node and browser targets and ignores the SHARED target:
      *
      * <pre>
      * {@code
@@ -252,8 +252,37 @@ public interface TypeScriptIntegration {
      *             case BROWSER:
      *                 writer.write("bar: someBrowserValue,");
      *                 break;
+     *             case SHARED:
+     *                 break;
      *             default:
      *                 LOGGER.warn("Unknown target: " + target);
+     *         }
+     *     }
+     * }
+     * }</pre>
+     *
+     * <p>The following code adds a value to the runtimeConfig.shared.ts file
+     * so that it used on all platforms. It pulls a trait value from the
+     * service being generated and adds it to the client configuration. Note
+     * that a corresponding entry needs to be added to
+     * {@link #addConfigInterfaceFields} to make TypeScript aware of the
+     * property.
+     *
+     * <pre>
+     * {@code
+     * public final class MyIntegration2 implements TypeScriptIntegration {
+     *     public void addRuntimeConfigValues(
+     *             TypeScriptSettings settings,
+     *             Model model,
+     *             SymbolProvider symbolProvider,
+     *             TypeScriptWriter writer,
+     *             LanguageTarget target
+     *     ) {
+     *         if (target == LanguageTarget.SHARED) {
+     *             String someTraitValue = settings.getModel(model).getTrait(SomeTrait.class)
+     *                          .map(SomeTrait::getValue)
+     *                          .orElse("");
+     *             writer.write("someTraitValue: $S,", someTraitValue);
      *         }
      *     }
      * }

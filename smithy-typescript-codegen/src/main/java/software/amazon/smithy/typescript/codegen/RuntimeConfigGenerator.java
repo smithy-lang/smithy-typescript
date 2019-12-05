@@ -57,6 +57,7 @@ final class RuntimeConfigGenerator {
         String template = TypeScriptUtils.loadResourceAsString(target.getTemplateFileName());
         String contents = template
                 .replace("${clientModuleName}", symbolProvider.toSymbol(service).getNamespace())
+                .replace("${apiVersion}", service.getVersion())
                 // Set the protocol to "undefined" if no default protocol can be resolved.
                 // This should only be the case when testing out code generators. The runtime
                 // code is expected to throw an exception when this value is encountered.

@@ -19,16 +19,38 @@ package software.amazon.smithy.typescript.codegen;
  * Represents a possible language target that can be generated.
  */
 public enum LanguageTarget {
-    NODE,
-    BROWSER;
-
-    String getTemplateFileName() {
-        if (this == NODE) {
+    /**
+     * Node-specific language target.
+     */
+    NODE {
+        @Override
+        String getTemplateFileName() {
             return "runtimeConfig.ts.template";
-        } else {
+        }
+    },
+
+    /**
+     * Browser-specific language target.
+     */
+    BROWSER {
+        @Override
+        String getTemplateFileName() {
             return "runtimeConfig.browser.ts.template";
         }
-    }
+    },
+
+    /**
+     * A language target that shares configuration that is shared across all
+     * runtimes.
+     */
+    SHARED {
+        @Override
+        String getTemplateFileName() {
+            return "runtimeConfig.shared.ts.template";
+        }
+    };
+
+    abstract String getTemplateFileName();
 
     String getTargetFilename() {
         return getTemplateFileName().replace(".template", "");
