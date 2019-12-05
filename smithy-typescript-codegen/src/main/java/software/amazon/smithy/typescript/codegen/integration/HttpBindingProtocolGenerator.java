@@ -45,6 +45,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
@@ -59,8 +60,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
 
-    private final Set<Shape> documentSerializingShapes = new TreeSet<>();
-    private final Set<Shape> documentDeserializingShapes = new TreeSet<>();
+    private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
+    private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
+    private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -105,8 +107,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
-        generateDocumentShapeSerializers(context, documentSerializingShapes);
-        generateDocumentShapeDeserializers(context, documentDeserializingShapes);
+        deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
+        generateDocumentShapeSerializers(context, serializingDocumentShapes);
+        generateDocumentShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
     }
 
@@ -197,7 +200,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     documentBindings.stream()
                             .map(HttpBinding::getMember)
                             .map(member -> context.getModel().getShapeIndex().getShape(member.getTarget()).get())
-                            .forEach(documentSerializingShapes::add);
+                            .forEach(serializingDocumentShapes::add);
                     writer.write("body: body,");
                 }
                 if (!queryBindings.isEmpty()) {
@@ -221,7 +224,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!labelBindings.isEmpty()) {
             ShapeIndex index = context.getModel().getShapeIndex();
-            writer.write("let resolvedPath = $S;", trait.getUri());
+            writer.write("const resolvedPath = $S;", trait.getUri());
             for (HttpBinding binding : labelBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
@@ -247,7 +250,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!queryBindings.isEmpty()) {
             ShapeIndex index = context.getModel().getShapeIndex();
-            writer.write("let query: any = {};");
+            writer.write("const query: any = {};");
             for (HttpBinding binding : queryBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
@@ -271,7 +274,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         // Headers are always present either from the default document or the payload.
-        writer.write("let headers: any = {};");
+        writer.write("const headers: any = {};");
         writer.write("headers['Content-Type'] = $S;", bindingIndex.determineRequestContentType(
                 operation, getDocumentContentType()));
 
@@ -316,7 +319,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!documentBindings.isEmpty()) {
             // Write the default `body` property.
-            context.getWriter().write("let body: any = undefined;");
+            context.getWriter().write("let body: any = {};");
             serializeInputDocument(context, operation, documentBindings);
             return documentBindings;
         }
@@ -466,7 +469,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * <p>For example:
      *
      * <pre>{@code
-     * let bodyParams: any = {};
+     * const bodyParams: any = {};
      * if (input.barValue !== undefined) {
      *   bodyParams['barValue'] = input.barValue;
      * }
@@ -515,8 +518,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             // Start deserializing the response.
-            writer.write("let data: any = await parseBody(output.body, context)");
-            writer.openBlock("let contents: $T = {", "};", outputType, () -> {
+            writer.write("const data: any = await parseBody(output.body, context)");
+            writer.openBlock("const contents: $T = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
 
                 // Only set a type and the members if we have output.
@@ -533,27 +536,65 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
-                documentDeserializingShapes.add(target);
+                deserializingDocumentShapes.add(target);
             });
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
 
         // Write out the error deserialization dispatcher.
-        documentDeserializingShapes.addAll(HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser));
+        Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
+                context, operation, responseType, this::writeErrorCodeParser);
+        deserializingErrorShapes.addAll(errorShapes);
+    }
+
+    private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        ShapeIndex shapeIndex = context.getModel().getShapeIndex();
+        Symbol errorSymbol = symbolProvider.toSymbol(error);
+        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
+                context.getProtocolName()) + "Response";
+
+        writer.openBlock("const $L = (\n"
+                       + "  output: any,\n"
+                       + "  context: SerdeContext\n"
+                       + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
+            writer.write("const data: any = output.body;");
+
+            writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
+                writer.write("__type: $S,", error.getId().getName());
+                writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
+                writer.write("$$metadata: deserializeMetadata(output),");
+                // Set all the members to undefined to meet type constraints.
+                new TreeMap<>(error.getAllMembers())
+                        .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
+            });
+
+            readHeaders(context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readResponseBody(context, error, bindingIndex);
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
+                deserializingDocumentShapes.add(target);
+            });
+            writer.write("return contents;");
+        });
+
+        writer.write("");
     }
 
     private void readHeaders(
             GenerationContext context,
-            OperationShape operation,
+            Shape operationOrError,
             HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         ShapeIndex index = context.getModel().getShapeIndex();
-        for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
+        for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
             writer.openBlock("if (output.headers[$S] !== undefined) {", "}", binding.getLocationName(), () -> {
                 Shape target = index.getShape(binding.getMember().getTarget()).get();
@@ -564,7 +605,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
 
         // Handle loading up prefix headers.
-        List<HttpBinding> prefixHeaderBindings = bindingIndex.getResponseBindings(operation, Location.PREFIX_HEADERS);
+        List<HttpBinding> prefixHeaderBindings =
+                bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
         if (!prefixHeaderBindings.isEmpty()) {
             // Run through the headers one time, matching any prefix groups.
             writer.openBlock("Object.keys(output.headers).forEach(header -> {", "});", () -> {
@@ -592,16 +634,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private List<HttpBinding> readResponseBody(
             GenerationContext context,
-            OperationShape operation,
+            Shape operationOrError,
             HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
-        List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operation, Location.DOCUMENT);
+        List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
-        List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operation, Location.PAYLOAD);
+        List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
         if (!documentBindings.isEmpty()) {
-            deserializeOutputDocument(context, operation, documentBindings);
+            deserializeOutputDocument(context, operationOrError, documentBindings);
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
@@ -813,12 +855,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }</pre>
      *
      * @param context The generation context.
-     * @param operation The operation being generated.
+     * @param operationOrError The operation or error with a document being deserialized.
      * @param documentBindings The bindings to read from the document.
      */
     protected abstract void deserializeOutputDocument(
             GenerationContext context,
-            OperationShape operation,
+            Shape operationOrError,
             List<HttpBinding> documentBindings
     );
 }
