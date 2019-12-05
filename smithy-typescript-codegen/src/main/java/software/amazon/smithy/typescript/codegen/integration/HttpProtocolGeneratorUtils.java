@@ -24,6 +24,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -116,9 +117,9 @@ final class HttpProtocolGeneratorUtils {
      * @param operation The operation to generate for.
      * @param responseType The response type for the HTTP protocol.
      * @param errorCodeGenerator A consumer
-     * @return A set of all error shapes for the operation that were dispatched to.
+     * @return A set of all error structure shapes for the operation that were dispatched to.
      */
-    static Set<Shape> generateErrorDispatcher(
+    static Set<StructureShape> generateErrorDispatcher(
             GenerationContext context,
             OperationShape operation,
             SymbolReference responseType,
@@ -126,7 +127,7 @@ final class HttpProtocolGeneratorUtils {
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
-        Set<Shape> errorShapes = new TreeSet<>();
+        Set<StructureShape> errorShapes = new TreeSet<>();
 
         Symbol symbol = symbolProvider.toSymbol(operation);
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
@@ -136,22 +137,28 @@ final class HttpProtocolGeneratorUtils {
                        + "  output: $T,\n"
                        + "  context: SerdeContext,\n"
                        + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
-            writer.write("let data: any = await parseBody(output.body, context);");
+            writer.write("const data: any = await parseBody(output.body, context);");
+            // Create a holding object since we have already parsed the body, but retain the rest of the output.
+            writer.openBlock("const parsedOutput: any = {", "};", () -> {
+                writer.write("...output,");
+                writer.write("body: data,");
+            });
             writer.write("let response: any;");
             writer.write("let errorCode: String;");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
                 new TreeSet<>(operation.getErrors()).forEach(errorId -> {
-                    Shape error = context.getModel().getShapeIndex().getShape(errorId).get();
+                    StructureShape error = context.getModel().getShapeIndex().getShape(errorId)
+                            .get().asStructureShape().get();
                     // Track errors bound to the operation so their deserializers may be generated.
                     errorShapes.add(error);
                     Symbol errorSymbol = symbolProvider.toSymbol(error);
                     String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
-                            context.getProtocolName());
+                            context.getProtocolName()) + "Response";
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
-                        writer.write("response = $L(data, context);", errorDeserMethodName);
+                        writer.write("response = $L(parsedOutput, context);", errorDeserMethodName);
                     });
                 });
 
@@ -164,7 +171,7 @@ final class HttpProtocolGeneratorUtils {
                             writer.write("$$fault: \"client\",");
                         }).dedent();
             });
-            writer.write("return Promise.reject(response);");
+            writer.write("return Promise.reject(Object.assign(new Error(response.__type), response));");
         });
         writer.write("");
 

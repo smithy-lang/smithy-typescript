@@ -24,6 +24,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.StringUtils;
@@ -33,8 +34,9 @@ import software.amazon.smithy.utils.StringUtils;
  */
 public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
-    private final Set<Shape> documentSerializingShapes = new TreeSet<>();
-    private final Set<Shape> documentDeserializingShapes = new TreeSet<>();
+    private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
+    private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
+    private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -51,10 +53,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     /**
      * Generates serialization functions for shapes in the passed set. These functions
      * should return a value that can then be serialized by the implementation of
-     * {@code serializeDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
-     * are provided to reduce the effort of this implementation.
-     *
-     * TODO.
+     * {@code serializeInputDocument}. The {@link DocumentShapeSerVisitor} and
+     * {@link DocumentMemberSerVisitor} are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
      * @param shapes The shapes to generate serialization for.
@@ -64,10 +64,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     /**
      * Generates deserialization functions for shapes in the passed set. These functions
      * should return a value that can then be deserialized by the implementation of
-     * {@code deserializeDocument}. The {@link DocumentShapeDeserVisitor} and
+     * {@code deserializeOutputDocument}. The {@link DocumentShapeDeserVisitor} and
      * {@link DocumentMemberDeserVisitor} are provided to reduce the effort of this implementation.
-     *
-     * TODO.
      *
      * @param context The generation context.
      * @param shapes The shapes to generate deserialization for.
@@ -76,8 +74,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
-        generateDocumentShapeSerializers(context, documentSerializingShapes);
-        generateDocumentShapeDeserializers(context, documentDeserializingShapes);
+        deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
+        generateDocumentShapeSerializers(context, serializingDocumentShapes);
+        generateDocumentShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
     }
 
@@ -115,7 +114,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
-        // TODO Do we need to handle optional input everywhere?
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
 
@@ -145,7 +143,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         TypeScriptWriter writer = context.getWriter();
 
         // The Content-Type header is always present.
-        writer.write("let headers: any = {};");
+        writer.write("const headers: any = {};");
         writer.write("headers['Content-Type'] = $S;", getDocumentContentType());
     }
 
@@ -156,10 +154,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     .get().asStructureShape().get();
 
             // Track input shapes so their serializers may be generated.
-            documentSerializingShapes.add(inputShape);
+            serializingDocumentShapes.add(inputShape);
 
             // Write the default `body` property.
-            context.getWriter().write("let body: any = undefined;");
+            context.getWriter().write("let body: any = {};");
             serializeInputDocument(context, operation, inputShape);
             return true;
         }
@@ -177,7 +175,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * <p>For example:
      *
      * <pre>{@code
-     * let wrappedBody: any = {
+     * const wrappedBody: any = {
      *   OperationRequest: serializeAws_json1_1OperationRequest(input, context),
      * };
      * body = JSON.stringify(wrappedBody);
@@ -205,7 +203,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
-        // TODO Do we need to handle optional outputs everywhere?
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
 
@@ -220,12 +217,12 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             });
 
             // Start deserializing the response.
-            writer.write("let data: any = await parseBody(output.body, context)");
+            writer.write("const data: any = await parseBody(output.body, context)");
             writer.write("let contents: any = {};");
             readResponseBody(context, operation);
 
             // Build the response with typing and metadata.
-            writer.openBlock("let response: $T = {", "};", outputType, () -> {
+            writer.openBlock("const response: $T = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
                 operation.getOutput().ifPresent(outputId -> {
                     writer.write("__type: $S,", outputId.getName());
@@ -237,8 +234,41 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
 
         // Write out the error deserialization dispatcher.
-        documentDeserializingShapes.addAll(HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser));
+        Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
+                context, operation, responseType, this::writeErrorCodeParser);
+        deserializingErrorShapes.addAll(errorShapes);
+    }
+
+    private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol errorSymbol = symbolProvider.toSymbol(error);
+        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
+                context.getProtocolName()) + "Response";
+
+        // Add the error shape to the list to generate functions for, since we'll use that.
+        deserializingDocumentShapes.add(error);
+
+        writer.openBlock("const $L = (\n"
+                       + "  output: any,\n"
+                       + "  context: SerdeContext\n"
+                       + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
+            // First deserialize the body properly.
+            writer.write("const deserialized: any = $L(output.body, context);",
+                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
+
+            // Then load it into the object with additional error and response properties.
+            writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
+                writer.write("__type: $S,", error.getId().getName());
+                writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
+                writer.write("$$metadata: deserializeMetadata(output),");
+                writer.write("...deserialized,");
+            });
+
+            writer.write("return contents;");
+        });
+
+        writer.write("");
     }
 
     private void readResponseBody(GenerationContext context, OperationShape operation) {
@@ -248,7 +278,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     .get().asStructureShape().get();
 
             // Track output shapes so their deserializers may be generated.
-            documentDeserializingShapes.add(outputShape);
+            deserializingDocumentShapes.add(outputShape);
 
             deserializeOutputDocument(context, operation, outputShape);
         });
