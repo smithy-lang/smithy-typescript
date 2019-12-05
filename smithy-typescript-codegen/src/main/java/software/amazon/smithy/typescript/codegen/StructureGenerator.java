@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -129,7 +130,7 @@ final class StructureGenerator implements Runnable {
      * <pre>{@code
      * import * as _smithy from "../lib/smithy";
      *
-     * export interface NoSuchResource extends _smithy.SmithyException {
+     * export interface NoSuchResource extends _smithy.SmithyException, $MetadataBearer {
      *   __type: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
@@ -146,7 +147,16 @@ final class StructureGenerator implements Runnable {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.writeShapeDocs(shape);
-        writer.openBlock("export interface $L extends _smithy.SmithyException {", symbol.getName());
+
+        // Find symbol references with the "extends" property, and add SmithyException.
+        String extendsFrom = Stream.concat(
+                Stream.of("_smithy.SmithyException"),
+                symbol.getReferences().stream()
+                        .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
+                        .map(SymbolReference::getAlias)
+                ).collect(Collectors.joining(", "));
+
+        writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         writer.write("__type: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
         StructuredMemberWriter config = new StructuredMemberWriter(
