@@ -45,23 +45,29 @@ public class RuntimeConfigGeneratorTest {
                 settings, model, symbolProvider, "undefined", delegator, integrations);
         generator.generate(LanguageTarget.NODE);
         generator.generate(LanguageTarget.BROWSER);
+        generator.generate(LanguageTarget.SHARED);
         delegator.flushWriters();
 
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.ts"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.browser.ts"));
+        Assertions.assertTrue(manifest.hasFile("runtimeConfig.shared.ts"));
+
+        // Does the runtimeConfig.shared.ts file expand the template properties properly?
+        String runtimeConfigSharedContents = manifest.getFileString("runtimeConfig.shared.ts").get();
+        assertThat(runtimeConfigSharedContents, containsString("protocol: \"undefined\","));
+        assertThat(runtimeConfigSharedContents, containsString("apiVersion: \"1.0.0\","));
+        assertThat(runtimeConfigSharedContents, containsString("syn: 'ack',"));
 
         // Does the runtimeConfig.ts file expand the template properties properly?
         String runtimeConfigContents = manifest.getFileString("runtimeConfig.ts").get();
         assertThat(runtimeConfigContents,
-                   containsString("import { ClientRuntimeDependencies } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigContents, containsString("protocol: \"undefined\","));
+                   containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
 
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
         String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.ts").get();
         assertThat(runtimeConfigBrowserContents,
-                   containsString("import { ClientRuntimeDependencies } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigBrowserContents, containsString("protocol: \"undefined\","));
+                   containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
     }
 }

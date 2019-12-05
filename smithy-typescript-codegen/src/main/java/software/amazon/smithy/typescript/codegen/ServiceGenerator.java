@@ -90,7 +90,7 @@ final class ServiceGenerator implements Runnable {
     public void run() {
         OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
         writer.addImport("Client", "__Client", "@aws-sdk/smithy-client");
-        writer.addImport("ClientRuntimeConfiguration", "__ClientRuntimeConfiguration", "./runtimeConfig");
+        writer.addImport("ClientDefaultValues", "__ClientDefaultValues", "./runtimeConfig");
 
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any
@@ -131,13 +131,13 @@ final class ServiceGenerator implements Runnable {
         // Hook for intercepting the client configuration.
         writer.pushState(CLIENT_CONFIG_SECTION);
 
-        generateClientRuntimeDependencies();
+        generateClientDefaults();
 
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
         writer.write("export type $L = Partial<__SmithyConfiguration<$T>>", configType,
                 applicationProtocol.getOptionsType());
-        writer.write("  & ClientRuntimeDependencies");
+        writer.write("  & ClientDefaults");
 
         // Get the configuration symbol types to reference in code. These are
         // all "&"'d together to create a big configuration type that aggregates
@@ -159,7 +159,7 @@ final class ServiceGenerator implements Runnable {
         writer.write("");
         writer.write("export type $L = __SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
-        writer.write("  & Required<ClientRuntimeDependencies>");
+        writer.write("  & Required<ClientDefaults>");
 
         if (!inputTypes.isEmpty()) {
             writer.indent();
@@ -172,19 +172,17 @@ final class ServiceGenerator implements Runnable {
         writer.popState();
     }
 
-    private void generateClientRuntimeDependencies() {
-        writer.openBlock("export interface ClientRuntimeDependencies {", "}", () -> {
-            if (applicationProtocol.isHttpProtocol()) {
-                writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
-                writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
-                writer.write("requestHandler?: __HttpHandler;\n");
-            } else {
-                throw new UnsupportedOperationException(
-                        "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
-            }
+    private void generateClientDefaults() {
+        if (!applicationProtocol.isHttpProtocol()) {
+            throw new UnsupportedOperationException(
+                    "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
+        }
 
-            writer.writeDocs("The protocol to use for all requests.");
-            writer.write("protocol?: string;\n");
+        writer.openBlock("export interface ClientDefaults\n"
+                         + "  extends Partial<SmithyResolvedConfiguration<__HttpOptions>> {", "}", () -> {
+            writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
+            writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
+            writer.write("requestHandler?: __HttpHandler;\n");
 
             writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
             writer.writeDocs("A constructor for a class implementing the @aws-sdk/types.Hash interface \n"
@@ -235,7 +233,7 @@ final class ServiceGenerator implements Runnable {
                          + "  $T,\n"
                          + "  ServiceInputTypes,\n"
                          + "  ServiceOutputTypes,\n"
-                         + "  $L"
+                         + "  $L\n"
                          + "> {", "}",
                 symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
             generateClientProperties();
@@ -261,7 +259,7 @@ final class ServiceGenerator implements Runnable {
 
             int configVariable = 0;
             writer.write("let $L = {\n"
-                         + "  ...__ClientRuntimeConfiguration,\n"
+                         + "  ...__ClientDefaultValues,\n"
                          + "  ...configuration\n"
                          + "};", generateConfigVariable(configVariable));
 
