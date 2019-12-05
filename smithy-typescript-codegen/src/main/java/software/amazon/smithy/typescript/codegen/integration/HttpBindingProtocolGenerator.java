@@ -277,6 +277,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("const headers: any = {};");
         writer.write("headers['Content-Type'] = $S;", bindingIndex.determineRequestContentType(
                 operation, getDocumentContentType()));
+        writeDefaultHeaders(context, operation);
 
         operation.getInput().ifPresent(outputId -> {
             ShapeIndex index = context.getModel().getShapeIndex();
@@ -458,6 +459,26 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
     }
+
+    /**
+     * Writes any additional HTTP headers required by the protocol implementation.
+     *
+     * <p>Two parameters will be available in scope:
+     * <ul>
+     *   <li>{@code input: <T>}: the type generated for the operation's input.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     * </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * headers['foo'] = "This is a custom header";
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param operation The operation being generated.
+     */
+    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {}
 
     /**
      * Writes the code needed to serialize the input document of a request.
