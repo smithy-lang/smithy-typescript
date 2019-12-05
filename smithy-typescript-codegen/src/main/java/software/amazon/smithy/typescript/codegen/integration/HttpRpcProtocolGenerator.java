@@ -121,7 +121,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                                  + "  input: $T,\n"
                                  + "  context: SerdeContext\n"
                                  + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
-            writeRequestHeaders(context);
+            writeRequestHeaders(context, operation);
             boolean hasRequestBody = writeRequestBody(context, operation);
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
@@ -139,12 +139,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
     }
 
-    private void writeRequestHeaders(GenerationContext context) {
+    private void writeRequestHeaders(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
 
         // The Content-Type header is always present.
         writer.write("const headers: any = {};");
         writer.write("headers['Content-Type'] = $S;", getDocumentContentType());
+        writeDefaultHeaders(context, operation);
     }
 
     private boolean writeRequestBody(GenerationContext context, OperationShape operation) {
@@ -164,6 +165,26 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         return false;
     }
+
+    /**
+     * Writes any additional HTTP headers required by the protocol implementation.
+     *
+     * <p>Two parameters will be available in scope:
+     * <ul>
+     *   <li>{@code input: <T>}: the type generated for the operation's input.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     * </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * headers['foo'] = "This is a custom header";
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param operation The operation being generated.
+     */
+    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {}
 
     /**
      * Writes the code needed to serialize the input document of a request.
