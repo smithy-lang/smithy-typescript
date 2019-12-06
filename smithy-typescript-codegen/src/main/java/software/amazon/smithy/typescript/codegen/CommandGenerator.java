@@ -85,8 +85,6 @@ final class CommandGenerator implements Runnable {
 
         // Add required imports.
         writer.addImport(configType, configType, serviceSymbol.getNamespace());
-        writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbol.getNamespace());
-        writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbol.getNamespace());
         writer.addImport("Command", "$Command", "@aws-sdk/smithy-client");
         writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", "@aws-sdk/types");
         writer.addImport("Handler", "Handler", "@aws-sdk/types");
