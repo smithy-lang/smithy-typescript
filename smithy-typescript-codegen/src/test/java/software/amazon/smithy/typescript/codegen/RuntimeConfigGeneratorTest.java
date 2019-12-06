@@ -42,7 +42,7 @@ public class RuntimeConfigGeneratorTest {
         TypeScriptDelegator delegator = new TypeScriptDelegator(
                 settings, model, manifest, symbolProvider, integrations);
         RuntimeConfigGenerator generator = new RuntimeConfigGenerator(
-                settings, model, symbolProvider, "undefined", delegator, integrations);
+                settings, model, symbolProvider, delegator, integrations);
         generator.generate(LanguageTarget.NODE);
         generator.generate(LanguageTarget.BROWSER);
         generator.generate(LanguageTarget.SHARED);
@@ -54,7 +54,6 @@ public class RuntimeConfigGeneratorTest {
 
         // Does the runtimeConfig.shared.ts file expand the template properties properly?
         String runtimeConfigSharedContents = manifest.getFileString("runtimeConfig.shared.ts").get();
-        assertThat(runtimeConfigSharedContents, containsString("protocol: \"undefined\","));
         assertThat(runtimeConfigSharedContents, containsString("apiVersion: \"1.0.0\","));
         assertThat(runtimeConfigSharedContents, containsString("syn: 'ack',"));
 

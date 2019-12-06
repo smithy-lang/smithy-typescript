@@ -47,6 +47,7 @@ final class CommandGenerator implements Runnable {
     private final OperationIndex operationIndex;
     private final Symbol inputType;
     private final Symbol outputType;
+    private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
     CommandGenerator(
@@ -56,6 +57,7 @@ final class CommandGenerator implements Runnable {
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
             List<RuntimeClientPlugin> runtimePlugins,
+            ProtocolGenerator protocolGenerator,
             ApplicationProtocol applicationProtocol
     ) {
         this.settings = settings;
@@ -67,6 +69,7 @@ final class CommandGenerator implements Runnable {
         this.runtimePlugins = runtimePlugins.stream()
                 .filter(plugin -> plugin.matchesOperation(model, service, operation))
                 .collect(Collectors.toList());
+        this.protocolGenerator = protocolGenerator;
         this.applicationProtocol = applicationProtocol;
 
         symbol = symbolProvider.toSymbol(operation);
@@ -190,7 +193,6 @@ final class CommandGenerator implements Runnable {
                 .write("private serialize(")
                 .indent()
                     .write("input: $T,", inputType)
-                    .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
                 .openBlock(
@@ -203,7 +205,6 @@ final class CommandGenerator implements Runnable {
                 .write("private deserialize(")
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
-                    .write("protocol: string,")
                     .write("context: SerdeContext")
                 .dedent()
                 .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
@@ -211,25 +212,17 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeSerdeDispatcher(boolean isInput) {
-        writer.openBlock("switch (protocol) {", "}", () -> {
-            // Generate case statements for each supported protocol.
-            // For example:
-            // case 'aws.rest-json-1.1':
-            //   return getFooCommandAws_RestJson1_1Serialize(input, utils);
-            // TODO Validate this is the right set of protocols; settings.protocols was empty here.
-            for (String protocol : settings.resolveServiceProtocols(service)) {
-                String serdeFunctionName = isInput
-                        ? ProtocolGenerator.getSerFunctionName(symbol, protocol)
-                        : ProtocolGenerator.getDeserFunctionName(symbol, protocol);
-                writer.addImport(serdeFunctionName, serdeFunctionName,
-                        "./protocols/" + ProtocolGenerator.getSanitizedName(protocol));
-                writer.write("case '$L':", protocol)
-                        .write("  return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
-            }
-
-            writer.write("default:")
-                    .write("  throw new Error(\"Unknown protocol, \" + protocol + \". Expected one of: $L\");",
-                           settings.getProtocols());
-        });
+        // For example:
+        // return getFooCommandAws_RestJson1_1Serialize(input, utils);
+        if (protocolGenerator == null) {
+            writer.write("throw new Error(\"No supported protocol was found\");");
+        } else {
+            String serdeFunctionName = isInput
+                    ? ProtocolGenerator.getSerFunctionName(symbol, protocolGenerator.getName())
+                    : ProtocolGenerator.getDeserFunctionName(symbol, protocolGenerator.getName());
+            writer.addImport(serdeFunctionName, serdeFunctionName,
+                             "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+            writer.write("return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
+        }
     }
 }

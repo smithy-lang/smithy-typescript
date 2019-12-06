@@ -15,10 +15,10 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -44,7 +44,7 @@ public final class TypeScriptSettings {
     private static final String PACKAGE_VERSION = "packageVersion";
     private static final String PACKAGE_JSON = "packageJson";
     private static final String SERVICE = "service";
-    private static final String PROTOCOLS = "protocols";
+    private static final String PROTOCOL = "protocol";
 
     private String packageName;
     private String packageDescription = "";
@@ -52,7 +52,7 @@ public final class TypeScriptSettings {
     private ObjectNode packageJson = Node.objectNode();
     private ShapeId service;
     private ObjectNode pluginSettings = Node.objectNode();
-    private List<String> protocols = new ArrayList<>();
+    private String protocol = "";
 
     /**
      * Create a settings object from a configuration object node.
@@ -76,9 +76,7 @@ public final class TypeScriptSettings {
         settings.setPackageDescription(config.getStringMemberOrDefault(
                 PACKAGE_DESCRIPTION, settings.getPackageName() + " client"));
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
-
-        config.getArrayMember(PROTOCOLS)
-                .ifPresent(value -> settings.setProtocols(value.getElementsAs(StringNode::getValue)));
+        config.getStringMember(PROTOCOL).map(StringNode::getValue).ifPresent(settings::setProtocol);
 
         settings.setPluginSettings(config);
         return settings;
@@ -215,54 +213,50 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Gets the explicitly configured list of protocols to generate.
+     * Gets the configured protocol to generate.
      *
-     * <p>Every returned protocol must utilize compatible application protocols.
-     *
-     * @return Returns the configured list of protocols or an empty list.
+     * @return Returns the configured protocol.
      */
-    public List<String> getProtocols() {
-        return protocols;
+    public String getProtocol() {
+        return protocol;
     }
 
     /**
-     * Gets the list of protocols from the "protocols" setting or from the
-     * service object.
-     *
-     * <p>Every returned protocol must utilize compatibke application
-     * protocols. You will need to explicitly set the "protocols" setting
-     * to a coherent list of protocols if one or more protocols are
-     * incompatible on the service.
+     * Resolves the highest priority protocol from a service shape that is
+     * supported by the generator.
      *
      * @param service Service to get the protocols from if "protocols" is not set.
-     * @return Returns the possibly empty list of protocols.
-     * TODO: This could be moved into a shared codegen feature.
+     * @param supportedProtocols The set of protocol names supported by the generator.
+     * @return Returns the resolved protocol name.
+     * @throws UnresolvableProtocolException if no protocol could be resolved.
      */
-    public List<String> resolveServiceProtocols(ServiceShape service) {
-        if (!protocols.isEmpty()) {
-            return protocols;
+    public String resolveServiceProtocol(ServiceShape service, Set<String> supportedProtocols) {
+        if (!protocol.isEmpty()) {
+            return protocol;
         }
 
         List<String> resolvedProtocols = service.getTrait(ProtocolsTrait.class)
-                .orElseThrow(() -> new CodegenException(
-                        "Unable to derive the protocols setting of the service `" + service.getId() + "` because no "
-                        + "`@protocols` trait was set. You need to set an explicit list of `protocols` to generate "
-                        + "in smithy-build.json to generate this service."))
+                .orElseThrow(() -> new UnresolvableProtocolException(
+                        "Unable to derive the protocol setting of the service `" + service.getId() + "` because no "
+                        + "`@protocols` trait was set. You need to set an explicit `protocol` to generate in "
+                        + "smithy-build.json to generate this service."))
                 .getProtocolNames();
 
-        if (resolvedProtocols.isEmpty()) {
-            LOGGER.warning("Service `protocols` trait defines no protocols: " + service.getId());
-        }
-
-        return resolvedProtocols;
+        return resolvedProtocols.stream()
+                .filter(supportedProtocols::contains)
+                .findFirst()
+                .orElseThrow(() -> new UnresolvableProtocolException(String.format(
+                        "The %s service supports the following unsupported protocols %s. The following protocol "
+                        + "generators were found on the class path: %s",
+                        service.getId(), resolvedProtocols, supportedProtocols)));
     }
 
     /**
-     * Sets the list of supported protocols.
+     * Sets the protocol to generate.
      *
-     * @param protocols Protocols to support.
+     * @param protocol Protocols to generate.
      */
-    public void setProtocols(List<String> protocols) {
-        this.protocols = protocols;
+    public void setProtocol(String protocol) {
+        this.protocol = Objects.requireNonNull(protocol);
     }
 }

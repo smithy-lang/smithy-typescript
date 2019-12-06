@@ -15,24 +15,15 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 
 /**
  * Represents the resolves {@link Symbol}s and references for an
  * application protocol (e.g., "http", "mqtt", etc).
  */
 public final class ApplicationProtocol {
-
-    private static final Logger LOGGER = Logger.getLogger(ApplicationProtocol.class.getName());
 
     private final String name;
     private final SymbolReference optionsType;
@@ -90,36 +81,6 @@ public final class ApplicationProtocol {
                 .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)
                 .addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER)
                 .build();
-    }
-
-    static ApplicationProtocol resolve(
-            TypeScriptSettings settings,
-            ServiceShape service,
-            Collection<TypeScriptIntegration> integrations
-    ) {
-        List<String> resolvedProtocols = settings.resolveServiceProtocols(service);
-        // Get the list of protocol generators that have implementations from the service.
-        List<ProtocolGenerator> generators = integrations.stream()
-                .flatMap(integration -> integration.getProtocolGenerators().stream())
-                .filter(generator -> resolvedProtocols.contains(generator.getName()))
-                .collect(Collectors.toList());
-
-        if (generators.isEmpty()) {
-            // Default to "http" if no protocols are configured.
-            LOGGER.warning(String.format(
-                    "No protocol generators could be found for the protocols supported by this service "
-                    + "`%s`: %s. Assuming an HTTP-based protocol.", service.getId(), resolvedProtocols));
-            return createDefaultHttpApplicationProtocol();
-        }
-
-        // Ensure each protocol is compatible. If not, then an explicit list must be provided.
-        ApplicationProtocol applicationProtocol = generators.get(0).getApplicationProtocol();
-        for (int i = 1; i < generators.size(); i++) {
-            ProtocolGenerator generator = generators.get(i);
-            applicationProtocol = generator.resolveApplicationProtocol(service, generators, applicationProtocol);
-        }
-
-        return applicationProtocol;
     }
 
     /**
