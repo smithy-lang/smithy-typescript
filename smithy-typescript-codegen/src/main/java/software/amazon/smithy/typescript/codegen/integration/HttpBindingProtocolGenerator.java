@@ -224,15 +224,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!labelBindings.isEmpty()) {
             ShapeIndex index = context.getModel().getShapeIndex();
-            writer.write("const resolvedPath = $S;", trait.getUri());
+            writer.write("let resolvedPath = $S;", trait.getUri());
             for (HttpBinding binding : labelBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
-                writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                    Shape target = index.getShape(binding.getMember().getTarget()).get();
-                    String labelValue = getInputValue(context, binding.getLocation(), "input." + memberName,
-                            binding.getMember(), target);
-                    writer.write("resolvedPath = resolvedPath.replace('{$S}', $L);", memberName, labelValue);
-                });
+                Shape target = index.getShape(binding.getMember().getTarget()).get();
+                String labelValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                        binding.getMember(), target);
+
+                // Set the label's value and throw a clear error if empty or undefined.
+                writer.write("if (input.$L !== undefined) {", memberName).indent()
+                    .write("const labelValue: any = $L;", labelValue)
+                    .openBlock("if (labelValue.length <= 0) {", "}", () -> {
+                        writer.write("throw new Error('Empty value provided for input HTTP label: $L.');", memberName);
+                    })
+                    .write("resolvedPath = resolvedPath.replace('{$L}', labelValue);", memberName).dedent()
+                .write("} else {").indent()
+                    .write("throw new Error('No value provided for input HTTP label: $L.');", memberName).dedent()
+                .write("}");
             }
         }
 
