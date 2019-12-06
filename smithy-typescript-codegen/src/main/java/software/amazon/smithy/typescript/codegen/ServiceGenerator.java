@@ -179,7 +179,8 @@ final class ServiceGenerator implements Runnable {
         }
 
         writer.openBlock("export interface ClientDefaults\n"
-                         + "  extends Partial<SmithyResolvedConfiguration<__HttpOptions>> {", "}", () -> {
+                         + "  extends Partial<__SmithyResolvedConfiguration<$T>> {", "}",
+                applicationProtocol.getOptionsType(), () -> {
             writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
             writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
             writer.write("requestHandler?: __HttpHandler;\n");
