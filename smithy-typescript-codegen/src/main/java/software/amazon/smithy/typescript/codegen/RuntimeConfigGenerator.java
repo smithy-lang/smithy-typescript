@@ -32,7 +32,6 @@ final class RuntimeConfigGenerator {
     private final Model model;
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
-    private final String protocolName;
     private final TypeScriptDelegator delegator;
     private final List<TypeScriptIntegration> integrations;
 
@@ -40,7 +39,6 @@ final class RuntimeConfigGenerator {
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            String protocolName,
             TypeScriptDelegator delegator,
             List<TypeScriptIntegration> integrations
     ) {
@@ -48,7 +46,6 @@ final class RuntimeConfigGenerator {
         this.model = model;
         this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
-        this.protocolName = protocolName;
         this.delegator = delegator;
         this.integrations = integrations;
     }
@@ -58,10 +55,6 @@ final class RuntimeConfigGenerator {
         String contents = template
                 .replace("${clientModuleName}", symbolProvider.toSymbol(service).getNamespace())
                 .replace("${apiVersion}", service.getVersion())
-                // Set the protocol to "undefined" if no default protocol can be resolved.
-                // This should only be the case when testing out code generators. The runtime
-                // code is expected to throw an exception when this value is encountered.
-                .replace("${protocol}", protocolName == null ? "undefined" : protocolName)
                 .replace("$", "$$") // sanitize template place holders.
                 .replace("$${customizations}", "${L@customizations}");
 

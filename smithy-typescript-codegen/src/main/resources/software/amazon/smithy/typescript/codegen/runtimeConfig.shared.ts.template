@@ -1,5 +1,4 @@
 export const ClientSharedValues = {
-  protocol: "${protocol}",
   apiVersion: "${apiVersion}",
 ${customizations}
 };

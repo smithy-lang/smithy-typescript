@@ -16,16 +16,15 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -43,7 +42,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ProtocolsTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -70,6 +68,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final TypeScriptDelegator writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
     private final List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
+    private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
     CodegenVisitor(PluginContext context) {
@@ -100,8 +99,37 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
         symbolProvider = SymbolProvider.cache(resolvedProvider);
 
+        // Resolve the nullable protocol generator and application protocol.
+        protocolGenerator = resolveProtocolGenerator(integrations, service, settings);
+        applicationProtocol = protocolGenerator == null
+                ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
+                : protocolGenerator.getApplicationProtocol();
+
         writers = new TypeScriptDelegator(settings, model, fileManifest, symbolProvider, integrations);
-        applicationProtocol = ApplicationProtocol.resolve(settings, service, integrations);
+    }
+
+    private static ProtocolGenerator resolveProtocolGenerator(
+            Collection<TypeScriptIntegration> integrations,
+            ServiceShape service,
+            TypeScriptSettings settings
+    ) {
+        // Collect all of the supported protocol generators.
+        Map<String, ProtocolGenerator> generators = new HashMap<>();
+        for (TypeScriptIntegration integration : integrations) {
+            for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
+                generators.put(generator.getName(), generator);
+            }
+        }
+
+        String protocolName;
+        try {
+            protocolName = settings.resolveServiceProtocol(service, generators.keySet());
+        } catch (UnresolvableProtocolException e) {
+            LOGGER.warning("Unable to find a protocol generator for " + service.getId() + ": " + e.getMessage());
+            protocolName = null;
+        }
+
+        return protocolName != null ? generators.get(protocolName) : null;
     }
 
     void execute() {
@@ -119,12 +147,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
         // environment.
-        String defaultProtocolName = getDefaultGenerator().map(ProtocolGenerator::getName).orElse(null);
-        LOGGER.fine("Resolved the default protocol of the client to " + defaultProtocolName);
-
-        // Generate each runtime config file for targeted platforms.
         RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
-                settings, model, symbolProvider, defaultProtocolName, writers, integrations);
+                settings, model, symbolProvider, writers, integrations);
         for (LanguageTarget target : LanguageTarget.values()) {
             LOGGER.fine("Generating " + target + " runtime configuration");
             configGenerator.generate(target);
@@ -149,19 +173,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         LOGGER.fine("Generating package.json files");
         PackageJsonGenerator.writePackageJson(
                 settings, fileManifest, SymbolDependency.gatherDependencies(dependencies.stream()));
-    }
-
-    // Finds the first listed protocol from the service that has a
-    // discovered protocol generator that matches the name.
-    private Optional<ProtocolGenerator> getDefaultGenerator() {
-        List<String> protocols = settings.resolveServiceProtocols(service);
-        Map<String, ProtocolGenerator> generators = integrations.stream()
-                .flatMap(integration -> integration.getProtocolGenerators().stream())
-                .collect(Collectors.toMap(ProtocolGenerator::getName, Function.identity()));
-        return protocols.stream()
-                .filter(generators::containsKey)
-                .map(generators::get)
-                .findFirst();
     }
 
     @Override
@@ -249,35 +260,27 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
-                    runtimePlugins, applicationProtocol).run());
+                    runtimePlugins, protocolGenerator, applicationProtocol).run());
         }
 
-        // Generate each protocol.
-        shape.getTrait(ProtocolsTrait.class).ifPresent(protocolsTrait -> {
-            LOGGER.info("Looking for protocol generators for protocols: " + protocolsTrait.getProtocolNames());
-            for (TypeScriptIntegration integration : integrations) {
-                for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
-                    if (protocolsTrait.hasProtocol(generator.getName())) {
-                        LOGGER.info("Generating serde for protocol " + generator.getName() + " on " + shape.getId());
-                        String fileRoot = "protocols/" + ProtocolGenerator.getSanitizedName(generator.getName());
-                        String namespace = "./" + fileRoot;
-                        TypeScriptWriter writer = new TypeScriptWriter(namespace);
-                        ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-                        context.setProtocolName(generator.getName());
-                        context.setIntegrations(integrations);
-                        context.setModel(model);
-                        context.setService(shape);
-                        context.setSettings(settings);
-                        context.setSymbolProvider(symbolProvider);
-                        context.setWriter(writer);
-                        generator.generateRequestSerializers(context);
-                        generator.generateResponseDeserializers(context);
-                        generator.generateSharedComponents(context);
-                        fileManifest.writeFile(fileRoot + ".ts", writer.toString());
-                    }
-                }
-            }
-        });
+        if (protocolGenerator != null) {
+            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
+            String fileRoot = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName());
+            String namespace = "./" + fileRoot;
+            TypeScriptWriter writer = new TypeScriptWriter(namespace);
+            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+            context.setProtocolName(protocolGenerator.getName());
+            context.setIntegrations(integrations);
+            context.setModel(model);
+            context.setService(shape);
+            context.setSettings(settings);
+            context.setSymbolProvider(symbolProvider);
+            context.setWriter(writer);
+            protocolGenerator.generateRequestSerializers(context);
+            protocolGenerator.generateResponseDeserializers(context);
+            protocolGenerator.generateSharedComponents(context);
+            fileManifest.writeFile(fileRoot + ".ts", writer.toString());
+        }
 
         return null;
     }
