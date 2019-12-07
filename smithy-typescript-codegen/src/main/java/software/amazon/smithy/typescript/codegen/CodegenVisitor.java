@@ -253,7 +253,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         String nonModularName = serviceSymbol.getName().replace("Client", "");
         String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
         writers.useFileWriter(filename, writer -> new NonModularServiceGenerator(
-                settings, model, symbolProvider, nonModularName, writer).run());
+                settings, model, symbolProvider, nonModularName, writer, applicationProtocol).run());
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
