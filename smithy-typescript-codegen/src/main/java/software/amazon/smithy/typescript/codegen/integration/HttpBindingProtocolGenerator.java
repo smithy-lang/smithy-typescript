@@ -47,6 +47,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -547,7 +548,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             // Start deserializing the response.
-            writer.write("const data: any = await parseBody(output.body, context)");
             writer.openBlock("const contents: $T = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
 
@@ -590,7 +590,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  output: any,\n"
                        + "  context: SerdeContext\n"
                        + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
-            writer.write("const data: any = output.body;");
 
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
@@ -670,6 +669,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
+
+        if (operationOrError.isOperationShape() && !payloadBindings.get(0).getMember().hasTrait(StreamingTrait.class)) {
+            writer.write("const data: any = await parseBody(output.body, context)");
+        } else {
+            // Don't collect stream for errors and streaming payload
+            writer.write("const data: any = output.body;");
+        }
 
         if (!documentBindings.isEmpty()) {
             deserializeOutputDocument(context, operationOrError, documentBindings);

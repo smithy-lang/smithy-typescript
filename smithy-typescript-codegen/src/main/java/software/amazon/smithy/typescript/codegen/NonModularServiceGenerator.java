@@ -40,13 +40,15 @@ final class NonModularServiceGenerator implements Runnable {
     private final TypeScriptWriter writer;
     private final String nonModularName;
     private final Symbol serviceSymbol;
+    private final ApplicationProtocol applicationProtocol;
 
     NonModularServiceGenerator(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
             String nonModularName,
-            TypeScriptWriter writer
+            TypeScriptWriter writer,
+            ApplicationProtocol applicationProtocol
     ) {
         this.settings = settings;
         this.model = model;
@@ -54,6 +56,7 @@ final class NonModularServiceGenerator implements Runnable {
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.nonModularName = nonModularName;
+        this.applicationProtocol = applicationProtocol;
         serviceSymbol = symbolProvider.toSymbol(service);
     }
 
@@ -70,24 +73,44 @@ final class NonModularServiceGenerator implements Runnable {
                 Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);
 
                 writer.addUseImports(operationSymbol);
-                String methodName = StringUtils.uncapitalize(operationSymbol.getName());
+                String methodName = StringUtils.uncapitalize(
+                        operationSymbol.getName().replaceAll("Command$", "")
+                );
 
                 // Generate a multiple overloaded methods for each command.
                 writer.writeShapeDocs(operation);
-                writer.write("public $L(args: $T): Promise<$T>;", methodName, input, output);
+                writer.write("public $L(\n"
+                            + "  args: $T,\n"
+                            + "  options?: $T,\n"
+                            + "): Promise<$T>;", methodName, input, applicationProtocol.getOptionsType(), output);
                 writer.write("public $L(\n"
                              + "  args: $T,\n"
                              + "  cb: (err: any, data?: $T) => void\n"
                              + "): void;", methodName, input, output);
+                writer.write("public $L(\n"
+                            + "  args: $T,\n"
+                            + "  options: $T,\n"
+                            + "  cb: (err: any, data?: $T) => void\n"
+                            + "): void;", methodName, input, applicationProtocol.getOptionsType(), output);
                 writer.openBlock("public $1L(\n"
                                  + "  args: $2T,\n"
-                                 + "  cb?: (err: any, data?: $3T) => void\n"
-                                 + "): Promise<$3T> | void { ", "}", methodName, input, output, () -> {
+                                 + "  optionsOrCb?: $3T | ((err: any, data?: $4T) => void),\n"
+                                 + "  cb?: (err: any, data?: $4T) => void\n"
+                                 + "): Promise<$4T> | void { ", "}",
+                        methodName,
+                        input,
+                        applicationProtocol.getOptionsType(),
+                        output,
+                        () -> {
                     writer.write("const command = new $T(args);\n"
-                                 + "if (typeof cb === \"function\") {\n"
-                                 + "  this.send(command, cb);\n"
+                                 + "if (typeof optionsOrCb === \"function\") {\n"
+                                 + "  this.send(command, optionsOrCb)\n"
+                                 + "} else if (typeof cb === \"function\") {\n"
+                                 + "  if (typeof optionsOrCb !== \"object\")\n"
+                                 + "    throw new Error(`Expect http options but get $${typeof optionsOrCb}`)\n"
+                                 + "  this.send(command, optionsOrCb || {}, cb)\n"
                                  + "} else {\n"
-                                 + "  return this.send(command);\n"
+                                 + "  return this.send(command, optionsOrCb);\n"
                                  + "}", operationSymbol);
                 });
                 writer.write("");
