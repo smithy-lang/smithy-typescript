@@ -19,16 +19,19 @@ import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
@@ -670,11 +673,20 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
-        if (operationOrError.isOperationShape() && !payloadBindings.get(0).getMember().hasTrait(StreamingTrait.class)) {
-            writer.write("const data: any = await parseBody(output.body, context)");
-        } else {
-            // Don't collect stream for errors and streaming payload
+        // Prepare response body for deserializing.
+        OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
+        StructureShape operationOutputOrError = operationOrError.asStructureShape()
+                .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
+        boolean hasStreamingComponent = Optional.ofNullable(operationOutputOrError)
+                .map(structure -> structure.getAllMembers().values().stream()
+                        .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
+                .orElse(false);
+        if (hasStreamingComponent) {
+            // For operations with streaming output or errors with streaming body we keep the body intact.
             writer.write("const data: any = output.body;");
+        } else {
+            // Otherwise, we collect the response body to structured object with parseBody().
+            writer.write("const data: any = await parseBody(output.body, context);");
         }
 
         if (!documentBindings.isEmpty()) {
