@@ -92,6 +92,7 @@ Blob
 Boolean
 ConstructorParameters
 Date
+Error
 Exclude
 Extract
 Infinity
