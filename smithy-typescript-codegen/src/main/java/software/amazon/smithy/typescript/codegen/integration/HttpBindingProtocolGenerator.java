@@ -39,6 +39,7 @@ import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.DocumentShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -173,7 +174,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
@@ -182,7 +183,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("export async function $L(\n"
                        + "  input: $T,\n"
-                       + "  context: SerdeContext\n"
+                       + "  context: __SerdeContext\n"
                        + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
             List<HttpBinding> labelBindings = writeRequestLabels(context, operation, bindingIndex, trait);
             List<HttpBinding> queryBindings = writeRequestQueryString(context, operation, bindingIndex);
@@ -307,11 +308,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                    Shape target = index.getShape(binding.getMember().getTarget()).get();
+                    MapShape prefixMap = index.getShape(binding.getMember().getTarget()).get().asMapShape().get();
+                    Shape target = index.getShape(prefixMap.getValue().getTarget()).get();
                     // Iterate through each entry in the member.
-                    writer.openBlock("Object.keys(input.$L).forEach(suffix -> {", "});", memberName, () -> {
+                    writer.openBlock("Object.keys(input.$L).forEach(suffix => {", "});", memberName, () -> {
+                        // Use a ! since we already validated the input member is defined above.
                         String headerValue = getInputValue(context, binding.getLocation(),
-                                "input." + memberName + "[suffix]", binding.getMember(), target);
+                                "input." + memberName + "![suffix]", binding.getMember(), target);
                         // Append the suffix to the defined prefix and serialize the value in to that key.
                         writer.write("headers[$S + suffix] = $L;", binding.getLocationName(), headerValue);
                     });
@@ -533,7 +536,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the response type is imported.
         writer.addUseImports(responseType);
-        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
@@ -543,7 +546,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Handle the general response.
         writer.openBlock("export async function $L(\n"
                        + "  output: $T,\n"
-                       + "  context: SerdeContext\n"
+                       + "  context: __SerdeContext\n"
                        + "): Promise<$T> {", "}", methodName, responseType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode !== $L) {", "}", trait.getCode(), () -> {
@@ -591,7 +594,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("const $L = (\n"
                        + "  output: any,\n"
-                       + "  context: SerdeContext\n"
+                       + "  context: __SerdeContext\n"
                        + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
 
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
@@ -640,23 +643,24 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
         if (!prefixHeaderBindings.isEmpty()) {
             // Run through the headers one time, matching any prefix groups.
-            writer.openBlock("Object.keys(output.headers).forEach(header -> {", "});", () -> {
+            writer.openBlock("Object.keys(output.headers).forEach(header => {", "});", () -> {
                 for (HttpBinding binding : prefixHeaderBindings) {
                     // Generate a single block for each group of prefix headers.
-                    writer.openBlock("if (header.startsWith($L)) {", binding.getLocationName(), "}", () -> {
+                    writer.openBlock("if (header.startsWith($S)) {", "}", binding.getLocationName(), () -> {
                         String memberName = symbolProvider.toMemberName(binding.getMember());
-                        Shape target = context.getModel().getShapeIndex()
-                                .getShape(binding.getMember().getTarget()).get();
+                        MapShape prefixMap = index.getShape(binding.getMember().getTarget()).get().asMapShape().get();
+                        Shape target = index.getShape(prefixMap.getValue().getTarget()).get();
                         String headerValue = getOutputValue(context, binding.getLocation(),
                                 "output.headers[header]", binding.getMember(), target);
 
                         // Prepare a grab bag for these headers if necessary
                         writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
-                            writer.write("contents.$L: any = {};", memberName);
+                            writer.write("contents.$L = {};", memberName);
                         });
 
                         // Extract the non-prefix portion as the key.
-                        writer.write("contents.$L[header.substring(header.length)] = $L;", memberName, headerValue);
+                        writer.write("contents.$L[header.substring($L)] = $L;",
+                                memberName, binding.getLocationName().length(), headerValue);
                     });
                 }
             });

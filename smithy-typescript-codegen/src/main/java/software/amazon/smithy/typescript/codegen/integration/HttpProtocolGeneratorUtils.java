@@ -135,14 +135,17 @@ final class HttpProtocolGeneratorUtils {
 
         writer.openBlock("async function $L(\n"
                        + "  output: $T,\n"
-                       + "  context: SerdeContext,\n"
+                       + "  context: __SerdeContext,\n"
                        + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
             writer.write("const data: any = await parseBody(output.body, context);");
-            // Create a holding object since we have already parsed the body, but retain the rest of the output.
-            writer.openBlock("const parsedOutput: any = {", "};", () -> {
-                writer.write("...output,");
-                writer.write("body: data,");
-            });
+            // We only consume the parsedOutput if we're dispatching, so only generate if we will.
+            if (!operation.getErrors().isEmpty()) {
+                // Create a holding object since we have already parsed the body, but retain the rest of the output.
+                writer.openBlock("const parsedOutput: any = {", "};", () -> {
+                    writer.write("...output,");
+                    writer.write("body: data,");
+                });
+            }
             writer.write("let response: any;");
             writer.write("let errorCode: String;");
             errorCodeGenerator.accept(context);

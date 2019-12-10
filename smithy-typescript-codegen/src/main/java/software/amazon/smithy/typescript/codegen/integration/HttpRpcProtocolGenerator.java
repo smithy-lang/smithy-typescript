@@ -110,7 +110,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
@@ -118,9 +118,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
 
         writer.openBlock("export async function $L(\n"
-                                 + "  input: $T,\n"
-                                 + "  context: SerdeContext\n"
-                                 + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
+                       + "  input: $T,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
             writeRequestHeaders(context, operation);
             boolean hasRequestBody = writeRequestBody(context, operation);
 
@@ -220,7 +220,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Ensure that the response type is imported.
         writer.addUseImports(responseType);
-        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
@@ -230,7 +230,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Handle the general response.
         writer.openBlock("export async function $L(\n"
                        + "  output: $T,\n"
-                       + "  context: SerdeContext\n"
+                       + "  context: __SerdeContext\n"
                        + "): Promise<$T> {", "}", methodName, responseType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode >= 400) {", "}", () -> {
@@ -272,7 +272,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         writer.openBlock("const $L = (\n"
                        + "  output: any,\n"
-                       + "  context: SerdeContext\n"
+                       + "  context: __SerdeContext\n"
                        + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
             // First deserialize the body properly.
             writer.write("const deserialized: any = $L(output.body, context);",
