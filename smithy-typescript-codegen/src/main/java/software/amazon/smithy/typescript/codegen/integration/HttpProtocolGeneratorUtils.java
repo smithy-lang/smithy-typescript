@@ -152,8 +152,7 @@ final class HttpProtocolGeneratorUtils {
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
                 new TreeSet<>(operation.getErrors()).forEach(errorId -> {
-                    StructureShape error = context.getModel().getShapeIndex().getShape(errorId)
-                            .get().asStructureShape().get();
+                    StructureShape error = context.getModel().expectShape(errorId).asStructureShape().get();
                     // Track errors bound to the operation so their deserializers may be generated.
                     errorShapes.add(error);
                     Symbol errorSymbol = symbolProvider.toSymbol(error);

@@ -210,7 +210,7 @@ public final class TypeScriptWriter extends CodeWriter {
      * @return Returns true if docs were written.
      */
     boolean writeMemberDocs(Model model, MemberShape member) {
-        return member.getMemberTrait(model.getShapeIndex(), DocumentationTrait.class)
+        return member.getMemberTrait(model, DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
                     writeDocs(docs);

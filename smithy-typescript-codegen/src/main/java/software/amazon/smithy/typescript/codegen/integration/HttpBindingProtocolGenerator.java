@@ -29,6 +29,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
@@ -44,7 +45,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeIndex;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
@@ -204,7 +204,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     // Track all shapes bound to the document so their serializers may be generated.
                     documentBindings.stream()
                             .map(HttpBinding::getMember)
-                            .map(member -> context.getModel().getShapeIndex().getShape(member.getTarget()).get())
+                            .map(member -> context.getModel().expectShape(member.getTarget()))
                             .forEach(serializingDocumentShapes::add);
                     writer.write("body: body,");
                 }
@@ -228,11 +228,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> labelBindings = bindingIndex.getRequestBindings(operation, Location.LABEL);
 
         if (!labelBindings.isEmpty()) {
-            ShapeIndex index = context.getModel().getShapeIndex();
+            Model model = context.getModel();
             writer.write("let resolvedPath = $S;", trait.getUri());
             for (HttpBinding binding : labelBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
-                Shape target = index.getShape(binding.getMember().getTarget()).get();
+                Shape target = model.expectShape(binding.getMember().getTarget());
                 String labelValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                         binding.getMember(), target);
 
@@ -262,12 +262,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
 
         if (!queryBindings.isEmpty()) {
-            ShapeIndex index = context.getModel().getShapeIndex();
+            Model model = context.getModel();
             writer.write("const query: any = {};");
             for (HttpBinding binding : queryBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                    Shape target = index.getShape(binding.getMember().getTarget()).get();
+                    Shape target = model.expectShape(binding.getMember().getTarget());
                     String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                             binding.getMember(), target);
                     writer.write("query['$L'] = $L;", binding.getLocationName(), queryValue);
@@ -293,11 +293,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writeDefaultHeaders(context, operation);
 
         operation.getInput().ifPresent(outputId -> {
-            ShapeIndex index = context.getModel().getShapeIndex();
+            Model model = context.getModel();
             for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                    Shape target = index.getShape(binding.getMember().getTarget()).get();
+                    Shape target = model.expectShape(binding.getMember().getTarget());
                     String headerValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                             binding.getMember(), target);
                     writer.write("headers[$S] = $L;", binding.getLocationName(), headerValue);
@@ -308,8 +308,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                    MapShape prefixMap = index.getShape(binding.getMember().getTarget()).get().asMapShape().get();
-                    Shape target = index.getShape(prefixMap.getValue().getTarget()).get();
+                    MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
+                    Shape target = model.expectShape(prefixMap.getValue().getTarget());
                     // Iterate through each entry in the member.
                     writer.openBlock("Object.keys(input.$L).forEach(suffix => {", "});", memberName, () -> {
                         // Use a ! since we already validated the input member is defined above.
@@ -348,7 +348,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Write the default `body` property.
             writer.write("let body: any = {};");
             writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                Shape target = context.getModel().getShapeIndex().getShape(binding.getMember().getTarget()).get();
+                Shape target = context.getModel().expectShape(binding.getMember().getTarget());
                 writer.write("body = $L;", getInputValue(
                         context, Location.PAYLOAD, "input." + memberName, binding.getMember(), target));
             });
@@ -531,7 +531,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol symbol = symbolProvider.toSymbol(operation);
         SymbolReference responseType = getApplicationProtocol().getResponseType();
         HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
-        ShapeIndex shapeIndex = context.getModel().getShapeIndex();
+        Model model = context.getModel();
         TypeScriptWriter writer = context.getWriter();
 
         // Ensure that the response type is imported.
@@ -561,7 +561,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 operation.getOutput().ifPresent(outputId -> {
                     writer.write("__type: $S,", outputId.getName());
                     // Set all the members to undefined to meet type constraints.
-                    StructureShape target = shapeIndex.getShape(outputId).get().asStructureShape().get();
+                    StructureShape target = model.expectShape(outputId).asStructureShape().get();
                     new TreeMap<>(target.getAllMembers())
                             .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
                 });
@@ -570,7 +570,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
-                Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
+                Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
             writer.write("return Promise.resolve(contents);");
@@ -587,7 +587,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
-        ShapeIndex shapeIndex = context.getModel().getShapeIndex();
+        Model model = context.getModel();
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
@@ -610,7 +610,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             List<HttpBinding> documentBindings = readResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
-                Shape target = shapeIndex.getShape(binding.getMember().getTarget()).get();
+                Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
             writer.write("return contents;");
@@ -627,11 +627,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
-        ShapeIndex index = context.getModel().getShapeIndex();
+        Model model = context.getModel();
         for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
             writer.openBlock("if (output.headers[$S] !== undefined) {", "}", binding.getLocationName(), () -> {
-                Shape target = index.getShape(binding.getMember().getTarget()).get();
+                Shape target = model.expectShape(binding.getMember().getTarget());
                 String headerValue = getOutputValue(context, binding.getLocation(),
                         "output.headers['" + binding.getLocationName() + "']", binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, headerValue);
@@ -648,8 +648,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     // Generate a single block for each group of prefix headers.
                     writer.openBlock("if (header.startsWith($S)) {", "}", binding.getLocationName(), () -> {
                         String memberName = symbolProvider.toMemberName(binding.getMember());
-                        MapShape prefixMap = index.getShape(binding.getMember().getTarget()).get().asMapShape().get();
-                        Shape target = index.getShape(prefixMap.getValue().getTarget()).get();
+                        MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
+                        Shape target = model.expectShape(prefixMap.getValue().getTarget());
                         String headerValue = getOutputValue(context, binding.getLocation(),
                                 "output.headers[header]", binding.getMember(), target);
 
@@ -700,7 +700,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!payloadBindings.isEmpty()) {
             // There can only be one payload binding.
             HttpBinding binding = payloadBindings.get(0);
-            Shape target = context.getModel().getShapeIndex().getShape(binding.getMember().getTarget()).get();
+            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
             writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                     Location.PAYLOAD, "data", binding.getMember(), target));
             return payloadBindings;
