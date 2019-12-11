@@ -91,7 +91,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         // Get each structure that's used as output or errors.
         OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
-        model.getShapeIndex().shapes(OperationShape.class).forEach(operationShape -> {
+        model.shapes(OperationShape.class).forEach(operationShape -> {
             operationIndex.getOutput(operationShape).ifPresent(outputShapes::add);
             outputShapes.addAll(operationIndex.getErrors(operationShape));
         });
@@ -297,7 +297,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol memberShape(MemberShape shape) {
-        Shape targetShape = model.getShapeIndex().getShape(shape.getTarget())
+        Shape targetShape = model.getShape(shape.getTarget())
                 .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
         Symbol targetSymbol = targetShape.accept(this);
 

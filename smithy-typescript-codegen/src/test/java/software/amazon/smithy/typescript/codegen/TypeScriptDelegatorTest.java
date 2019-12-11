@@ -21,7 +21,7 @@ public class TypeScriptDelegatorTest {
     @Test
     public void vendsWritersForShapes() {
         Model model = createModel();
-        Shape fooShape = model.getShapeIndex().getShape(ShapeId.from("smithy.example#Foo")).get();
+        Shape fooShape = model.expectShape(ShapeId.from("smithy.example#Foo"));
         SymbolProvider provider = createProvider();
         MockManifest manifest = new MockManifest();
         TypeScriptSettings settings = new TypeScriptSettings();
@@ -49,7 +49,7 @@ public class TypeScriptDelegatorTest {
     @Test
     public void appendsToOpenedWriterWithNewline() {
         Model model = createModel();
-        Shape fooShape = model.getShapeIndex().getShape(ShapeId.from("smithy.example#Foo")).get();
+        Shape fooShape = model.expectShape(ShapeId.from("smithy.example#Foo"));
         SymbolProvider provider = createProvider();
         MockManifest manifest = new MockManifest();
         TypeScriptSettings settings = new TypeScriptSettings();
@@ -66,7 +66,7 @@ public class TypeScriptDelegatorTest {
     @Test
     public void emitsBeforeWritingAndWhenCreated() {
         Model model = createModel();
-        Shape fooShape = model.getShapeIndex().getShape(ShapeId.from("smithy.example#Foo")).get();
+        Shape fooShape = model.expectShape(ShapeId.from("smithy.example#Foo"));
         SymbolProvider provider = createProvider();
         MockManifest manifest = new MockManifest();
         List<Pair<TypeScriptWriter, Shape>> before = new ArrayList<>();

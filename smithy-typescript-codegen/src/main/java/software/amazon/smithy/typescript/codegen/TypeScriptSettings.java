@@ -84,7 +84,7 @@ public final class TypeScriptSettings {
 
     // TODO: this seems reusable across generators.
     private static ShapeId inferService(Model model) {
-        List<ShapeId> services = model.getShapeIndex()
+        List<ShapeId> services = model
                 .shapes(ServiceShape.class)
                 .map(Shape::getId)
                 .sorted()
@@ -205,7 +205,7 @@ public final class TypeScriptSettings {
      * @throws CodegenException if the service is invalid or not found.
      */
     public ServiceShape getService(Model model) {
-        return model.getShapeIndex()
+        return model
                 .getShape(getService())
                 .orElseThrow(() -> new CodegenException("Service shape not found: " + getService()))
                 .asServiceShape()

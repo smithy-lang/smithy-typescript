@@ -109,8 +109,8 @@ public class SymbolProviderTest {
                 .assemble()
                 .unwrap();
 
-        Shape input = model.getShapeIndex().getShape(ShapeId.from("smithy.example#GetFooInput")).get();
-        Shape output = model.getShapeIndex().getShape(ShapeId.from("smithy.example#GetFooOutput")).get();
+        Shape input = model.expectShape(ShapeId.from("smithy.example#GetFooInput"));
+        Shape output = model.expectShape(ShapeId.from("smithy.example#GetFooOutput"));
         SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol inputSymbol = provider.toSymbol(input);
         Symbol outputSymbol = provider.toSymbol(output);
@@ -136,7 +136,7 @@ public class SymbolProviderTest {
                 .assemble()
                 .unwrap();
 
-        Shape command = model.getShapeIndex().getShape(ShapeId.from("smithy.example#GetFoo")).get();
+        Shape command = model.expectShape(ShapeId.from("smithy.example#GetFoo"));
         SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol commandSymbol = provider.toSymbol(command);
 

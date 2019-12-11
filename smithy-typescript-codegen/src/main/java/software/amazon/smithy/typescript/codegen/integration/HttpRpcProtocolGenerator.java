@@ -151,8 +151,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     private boolean writeRequestBody(GenerationContext context, OperationShape operation) {
         if (operation.getInput().isPresent()) {
             // If there's an input present, we know it's a structure.
-            StructureShape inputShape = context.getModel().getShapeIndex().getShape(operation.getInput().get())
-                    .get().asStructureShape().get();
+            StructureShape inputShape = context.getModel().expectShape(operation.getInput().get())
+                    .asStructureShape().get();
 
             // Track input shapes so their serializers may be generated.
             serializingDocumentShapes.add(inputShape);
@@ -295,8 +295,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     private void readResponseBody(GenerationContext context, OperationShape operation) {
         operation.getOutput().ifPresent(outputId -> {
             // If there's an output present, we know it's a structure.
-            StructureShape outputShape = context.getModel().getShapeIndex().getShape(outputId)
-                    .get().asStructureShape().get();
+            StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
 
             // Track output shapes so their deserializers may be generated.
             deserializingDocumentShapes.add(outputShape);

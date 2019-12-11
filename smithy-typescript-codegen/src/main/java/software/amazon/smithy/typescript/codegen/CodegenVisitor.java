@@ -36,7 +36,6 @@ import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeIndex;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -64,7 +63,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ServiceShape service;
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
-    private final ShapeIndex nonTraits;
+    private final Model nonTraits;
     private final TypeScriptDelegator writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
     private final List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
@@ -73,7 +72,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     CodegenVisitor(PluginContext context) {
         settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
-        nonTraits = context.getNonTraitShapes();
+        nonTraits = context.getModelWithoutTraitShapes();
         model = context.getModel();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
