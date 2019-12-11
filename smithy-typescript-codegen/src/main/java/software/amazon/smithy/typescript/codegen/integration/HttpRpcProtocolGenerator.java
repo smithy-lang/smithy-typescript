@@ -59,7 +59,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @param context The generation context.
      * @param shapes The shapes to generate serialization for.
      */
-    protected abstract void generateDocumentShapeSerializers(GenerationContext context, Set<Shape> shapes);
+    protected abstract void generateDocumentBodyShapeSerializers(GenerationContext context, Set<Shape> shapes);
 
     /**
      * Generates deserialization functions for shapes in the passed set. These functions
@@ -70,13 +70,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @param context The generation context.
      * @param shapes The shapes to generate deserialization for.
      */
-    protected abstract void generateDocumentShapeDeserializers(GenerationContext context, Set<Shape> shapes);
+    protected abstract void generateDocumentBodyShapeDeserializers(GenerationContext context, Set<Shape> shapes);
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
-        generateDocumentShapeSerializers(context, serializingDocumentShapes);
-        generateDocumentShapeDeserializers(context, deserializingDocumentShapes);
+        generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
+        generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
     }
 

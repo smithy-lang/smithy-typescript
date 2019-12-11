@@ -175,9 +175,9 @@ structure GetCityImageInput {
 }
 
 structure GetCityImageOutput {
+    @streaming
     @httpPayload
     image: CityImageData,
 }
 
-@streaming
 blob CityImageData
