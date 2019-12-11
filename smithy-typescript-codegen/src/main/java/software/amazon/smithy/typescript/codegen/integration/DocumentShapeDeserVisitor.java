@@ -48,7 +48,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  * more complex deserialization strategies for those types.
  *
  * This class reduces the effort necessary to build protocol implementations, specifically when
- * implementing {@link HttpBindingProtocolGenerator#generateDocumentShapeDeserializers(GenerationContext, Set)}.
+ * implementing {@link HttpBindingProtocolGenerator#generateDocumentBodyShapeDeserializers(GenerationContext, Set)}.
  *
  * Implementations of this class independent of protocol documents are also possible.
  *
