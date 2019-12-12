@@ -26,6 +26,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 
@@ -146,7 +147,13 @@ final class HttpProtocolGeneratorUtils {
                     writer.write("body: data,");
                 });
             }
-            writer.write("let response: any;");
+
+            // Error responses must be at least SmithyException and MetadataBearer implementations.
+            writer.addImport("SmithyException", "__SmithyException",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.addImport("MetadataBearer", "__MetadataBearer",
+                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            writer.write("let response: __SmithyException & __MetadataBearer;");
             writer.write("let errorCode: String;");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
@@ -160,7 +167,7 @@ final class HttpProtocolGeneratorUtils {
                             context.getProtocolName()) + "Response";
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
-                        writer.write("response = $L(parsedOutput, context);", errorDeserMethodName);
+                        writer.write("response = await $L(parsedOutput, context);", errorDeserMethodName);
                     });
                 });
 
@@ -169,8 +176,8 @@ final class HttpProtocolGeneratorUtils {
                         .write("errorCode = errorCode || \"UnknownError\";")
                         .openBlock("response = {", "};", () -> {
                             writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
-                            writer.write("$$name: errorCode,");
                             writer.write("$$fault: \"client\",");
+                            writer.write("$$metadata: deserializeMetadata(output),");
                         }).dedent();
             });
             writer.write("return Promise.reject(Object.assign(new Error(response.__type), response));");
