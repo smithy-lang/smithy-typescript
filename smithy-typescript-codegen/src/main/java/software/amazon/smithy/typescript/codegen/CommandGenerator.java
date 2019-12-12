@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
@@ -162,18 +162,19 @@ final class CommandGenerator implements Runnable {
     }
 
     private void addInputAndOutputTypes() {
-        writeInputOrOutputType(inputType.getName(), operationIndex.getInput(operation).orElse(null));
-        writeInputOrOutputType(outputType.getName(), operationIndex.getOutput(operation).orElse(null));
+        //generate export statement for command input interface
+        writer.write("export type $L = $T;", inputType.getName(),
+                operationIndex.getInput(operation)
+                        .map(input -> symbolProvider.toSymbol(input))
+                        .orElse(Symbol.builder().name("{}").build()));
+        //generate export statement for command output interface, default to MetadataBear if no output
+        writer.write("export type $L = $T;", outputType.getName(),
+                operationIndex.getOutput(operation)
+                        .map(output -> symbolProvider.toSymbol(output))
+                        .orElse(SymbolReference.builder()
+                                .symbol(TypeScriptDependency.AWS_SDK_TYPES.createSymbol("MetadataBearer"))
+                                .alias("__MetadataBearer").build().getSymbol()));
         writer.write("");
-    }
-
-    private void writeInputOrOutputType(String typeName, StructureShape struct) {
-        // If the input or output are non-existent, then use an empty object.
-        if (struct == null) {
-            writer.write("export type $L = {};", typeName);
-        } else {
-            writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(struct));
-        }
     }
 
     private void addCommandSpecificPlugins() {
