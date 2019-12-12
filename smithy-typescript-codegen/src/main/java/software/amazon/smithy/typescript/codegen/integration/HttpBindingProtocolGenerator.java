@@ -592,11 +592,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
 
-        writer.openBlock("const $L = (\n"
+        writer.openBlock("const $L = async (\n"
                        + "  output: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
-
+                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
@@ -677,6 +676,25 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
+        if (!documentBindings.isEmpty()) {
+            readReponseBodyData(context, operationOrError);
+            deserializeOutputDocument(context, operationOrError, documentBindings);
+            return documentBindings;
+        }
+        if (!payloadBindings.isEmpty()) {
+            readReponseBodyData(context, operationOrError);
+            // There can only be one payload binding.
+            HttpBinding binding = payloadBindings.get(0);
+            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                    Location.PAYLOAD, "data", binding.getMember(), target));
+            return payloadBindings;
+        }
+        return ListUtils.of();
+    }
+
+    private void readReponseBodyData(GenerationContext context, Shape operationOrError) {
+        TypeScriptWriter writer = context.getWriter();
         // Prepare response body for deserializing.
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
@@ -692,20 +710,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Otherwise, we collect the response body to structured object with parseBody().
             writer.write("const data: any = await parseBody(output.body, context);");
         }
-
-        if (!documentBindings.isEmpty()) {
-            deserializeOutputDocument(context, operationOrError, documentBindings);
-            return documentBindings;
-        }
-        if (!payloadBindings.isEmpty()) {
-            // There can only be one payload binding.
-            HttpBinding binding = payloadBindings.get(0);
-            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
-                    Location.PAYLOAD, "data", binding.getMember(), target));
-            return payloadBindings;
-        }
-        return ListUtils.of();
     }
 
     /**

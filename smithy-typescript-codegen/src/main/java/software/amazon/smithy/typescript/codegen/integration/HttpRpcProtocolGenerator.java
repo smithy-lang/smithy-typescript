@@ -238,8 +238,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             });
 
             // Start deserializing the response.
-            writer.write("const data: any = await parseBody(output.body, context)");
-            writer.write("let contents: any = {};");
             readResponseBody(context, operation);
 
             // Build the response with typing and metadata.
@@ -270,10 +268,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Add the error shape to the list to generate functions for, since we'll use that.
         deserializingDocumentShapes.add(error);
 
-        writer.openBlock("const $L = (\n"
+        writer.openBlock("const $L = async (\n"
                        + "  output: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): $T => {", "};", errorDeserMethodName, errorSymbol, () -> {
+                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
             // First deserialize the body properly.
             writer.write("const deserialized: any = $L(output.body, context);",
                     ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
@@ -294,6 +292,11 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     private void readResponseBody(GenerationContext context, OperationShape operation) {
         operation.getOutput().ifPresent(outputId -> {
+            // We only need to load the body and prepare a contents object if there is a response.
+            TypeScriptWriter writer = context.getWriter();
+            writer.write("const data: any = await parseBody(output.body, context)");
+            writer.write("let contents: any = {};");
+
             // If there's an output present, we know it's a structure.
             StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
 
