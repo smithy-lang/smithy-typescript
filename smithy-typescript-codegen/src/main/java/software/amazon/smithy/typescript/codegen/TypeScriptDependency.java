@@ -30,7 +30,6 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     TS_LIB("devDependencies", "tslib", "^1.8.0", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", "^0.1.0-preview.5", true),
     AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", "^0.1.0-preview.1", true),
-    AWS_SMITHY_CORE("dependencies", "@aws-sdk/smithy-core", "^0.1.0-preview.1", true),
     INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", "^0.1.0-preview.1", true),
     CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", "^0.1.0-preview.5", true),
     TYPES_NODE("devDependencies", "@types/node", "^12.7.5", true),
