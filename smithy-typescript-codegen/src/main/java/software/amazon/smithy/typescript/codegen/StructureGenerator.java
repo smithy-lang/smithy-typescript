@@ -68,7 +68,7 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is rendered:
      *
      * <pre>{@code
-     * import * as _smithy from "@aws-sdk/smithy-core";
+     * import * as _smithy from "@aws-sdk/smithy-client";
      *
      * export interface Person {
      *   __type?: "Person";
@@ -128,7 +128,7 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is generated:
      *
      * <pre>{@code
-     * import * as _smithy from "@aws-sdk/smithy-core";
+     * import * as _smithy from "@aws-sdk/smithy-client";
      *
      * export interface NoSuchResource extends _smithy.SmithyException, $MetadataBearer {
      *   __type: "NoSuchResource";

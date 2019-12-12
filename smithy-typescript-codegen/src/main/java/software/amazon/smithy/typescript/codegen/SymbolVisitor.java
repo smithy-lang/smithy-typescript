@@ -280,7 +280,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private Symbol.Builder addSmithyImport(Symbol.Builder builder) {
         Symbol importSymbol = Symbol.builder()
                 .name("*")
-                .namespace("@aws-sdk/smithy-core", "/")
+                .namespace("@aws-sdk/smithy-client", "/")
                 .build();
         SymbolReference reference = SymbolReference.builder()
                 .symbol(importSymbol)
