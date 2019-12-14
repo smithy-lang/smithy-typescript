@@ -16,14 +16,15 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
@@ -162,19 +163,28 @@ final class CommandGenerator implements Runnable {
     }
 
     private void addInputAndOutputTypes() {
-        //generate export statement for command input interface
-        writer.write("export type $L = $T;", inputType.getName(),
-                operationIndex.getInput(operation)
-                        .map(input -> symbolProvider.toSymbol(input))
-                        .orElse(Symbol.builder().name("{}").build()));
-        //generate export statement for command output interface, default to MetadataBear if no output
-        writer.write("export type $L = $T;", outputType.getName(),
-                operationIndex.getOutput(operation)
-                        .map(output -> symbolProvider.toSymbol(output))
-                        .orElse(SymbolReference.builder()
-                                .symbol(TypeScriptDependency.AWS_SDK_TYPES.createSymbol("MetadataBearer"))
-                                .alias("__MetadataBearer").build().getSymbol()));
+        writeInputType(inputType.getName(), operationIndex.getInput(operation));
+        writeOutputType(outputType.getName(), operationIndex.getOutput(operation));
         writer.write("");
+    }
+
+    private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
+        if (inputShape.isPresent()) {
+            writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(inputShape.get()));
+        } else {
+            // If the input is non-existent, then use an empty object.
+            writer.write("export type $L = {}", typeName);
+        }
+    }
+
+    private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
+        if (outputShape.isPresent()) {
+            writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(outputShape.get()));
+        } else {
+            // A command output should be at least a MetadataBearer
+            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            writer.write("export type $L = __MetadataBearer", typeName);
+        }
     }
 
     private void addCommandSpecificPlugins() {
