@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "alwaysStrict": true,
     "target": "es2017",
     "module": "commonjs",
     "declaration": true,
@@ -11,7 +12,8 @@
     "incremental": true,
     "resolveJsonModule": true,
     "noUnusedLocals": true,
-    "declarationDir": "./types"
+    "declarationDir": "./types",
+    "outDir": "dist/cjs"
   },
   "typedocOptions": {
     "exclude": "**/node_modules/**",
