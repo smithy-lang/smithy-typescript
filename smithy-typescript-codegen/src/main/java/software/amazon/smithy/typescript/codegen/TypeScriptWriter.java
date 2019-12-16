@@ -179,11 +179,14 @@ public final class TypeScriptWriter extends CodeWriter {
     /**
      * Writes documentation comments from a string.
      *
+     * <p>This function escapes "$" characters so formatters are not run.
+     *
      * @param docs Documentation to write.
      * @return Returns the writer.
      */
     public TypeScriptWriter writeDocs(String docs) {
-        writeDocs(() -> write(docs));
+        // Docs can have valid $ characters that shouldn't run through formatters.
+        writeDocs(() -> write(docs.replace("$", "$$")));
         return this;
     }
 

@@ -26,6 +26,17 @@ public class TypeScriptWriterTest {
     }
 
     @Test
+    public void escapesDollarInDocStrings() {
+        String docs = "This is $ valid documentation.";
+
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeDocs(docs);
+        String result = writer.toString();
+
+        assertThat(result, equalTo("/**\n * " + docs + "\n */\n"));
+    }
+
+    @Test
     public void addsFormatterForSymbols() {
         // TODO
     }
