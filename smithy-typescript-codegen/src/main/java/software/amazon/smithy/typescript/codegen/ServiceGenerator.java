@@ -18,6 +18,8 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -95,8 +97,15 @@ final class ServiceGenerator implements Runnable {
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any
         // input, adding output, naming differences between services, etc.
-        writeInputOutputTypeUnion("ServiceInputTypes", writer, operationIndex::getInput);
-        writeInputOutputTypeUnion("ServiceOutputTypes", writer, operationIndex::getOutput);
+        writeInputOutputTypeUnion("ServiceInputTypes", writer, operationIndex::getInput, writer -> {
+            // Use an empty object if an operation doesn't define input.
+            writer.write("| {}");
+        });
+        writeInputOutputTypeUnion("ServiceOutputTypes", writer, operationIndex::getOutput, writer -> {
+            // Use a MetadataBearer if an operation doesn't define output.
+            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            writer.write("| __MetadataBearer");
+        });
 
         generateConfig();
         writer.write("");
@@ -106,10 +115,12 @@ final class ServiceGenerator implements Runnable {
     private void writeInputOutputTypeUnion(
             String typeName,
             TypeScriptWriter writer,
-            Function<OperationShape, Optional<StructureShape>> mapper
+            Function<OperationShape, Optional<StructureShape>> mapper,
+            Consumer<TypeScriptWriter> defaultTypeGenerator
     ) {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
-        List<Symbol> symbols = topDownIndex.getContainedOperations(service).stream()
+        Set<OperationShape> containedOperations = topDownIndex.getContainedOperations(service);
+        List<Symbol> symbols = containedOperations.stream()
                 .flatMap(operation -> OptionalUtils.stream(mapper.apply(operation)))
                 .map(symbolProvider::toSymbol)
                 .sorted(Comparator.comparing(Symbol::getName))
@@ -117,6 +128,10 @@ final class ServiceGenerator implements Runnable {
 
         writer.write("export type $L = ", typeName);
         writer.indent();
+        // If we have less symbols than operations, at least one doesn't have a type, so add the default.
+        if (containedOperations.size() != symbols.size()) {
+            defaultTypeGenerator.accept(writer);
+        }
         for (int i = 0; i < symbols.size(); i++) {
             writer.write("| $T$L", symbols.get(i), i == symbols.size() - 1 ? ";" : "");
         }
