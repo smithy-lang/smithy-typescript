@@ -17,8 +17,8 @@
     "build:es": "tsc -p tsconfig.es.json",
     "build": "yarn pretest && yarn build:es"
   },
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "types": "./types/index.d.ts",
   "module": "./dist/es/index.js",
   "browser": {
     "./runtimeConfig": "./runtimeConfig.browser"
