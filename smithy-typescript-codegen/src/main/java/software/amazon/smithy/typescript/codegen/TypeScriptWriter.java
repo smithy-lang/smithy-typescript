@@ -47,6 +47,9 @@ import software.amazon.smithy.utils.StringUtils;
  * module paths against the moduleName of the writer. Module names that
  * start with anything other than "." (e.g., "@", "/", etc.) are never
  * relativized.
+ *
+ * <p>Dependencies introduced via a TypeScriptWriter are added to the package.json
+ * file if the writer is a part of the {@link TypeScriptDelegator} of the {@link CodegenVisitor}.
  */
 public final class TypeScriptWriter extends CodeWriter {
 
@@ -224,8 +227,8 @@ public final class TypeScriptWriter extends CodeWriter {
     /**
      * Adds one or more dependencies to the generated code.
      *
-     * <p>The dependencies of all writers are merged together to eventually generate
-     * a package.json file.
+     * <p>The dependencies of all writers created by the {@link TypeScriptDelegator}
+     * are merged together to eventually generate a package.json file.
      *
      * @param dependencies TypeScriptDependency to add.
      * @return Returns the writer.

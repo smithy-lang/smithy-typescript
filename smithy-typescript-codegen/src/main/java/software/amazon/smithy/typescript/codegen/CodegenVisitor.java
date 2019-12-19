@@ -262,21 +262,20 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
-            String fileRoot = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName());
-            String namespace = "./" + fileRoot;
-            TypeScriptWriter writer = new TypeScriptWriter(namespace);
-            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-            context.setProtocolName(protocolGenerator.getName());
-            context.setIntegrations(integrations);
-            context.setModel(model);
-            context.setService(shape);
-            context.setSettings(settings);
-            context.setSymbolProvider(symbolProvider);
-            context.setWriter(writer);
-            protocolGenerator.generateRequestSerializers(context);
-            protocolGenerator.generateResponseDeserializers(context);
-            protocolGenerator.generateSharedComponents(context);
-            fileManifest.writeFile(fileRoot + ".ts", writer.toString());
+            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
+            writers.useFileWriter(fileName, writer -> {
+                ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+                context.setProtocolName(protocolGenerator.getName());
+                context.setIntegrations(integrations);
+                context.setModel(model);
+                context.setService(shape);
+                context.setSettings(settings);
+                context.setSymbolProvider(symbolProvider);
+                context.setWriter(writer);
+                protocolGenerator.generateRequestSerializers(context);
+                protocolGenerator.generateResponseDeserializers(context);
+                protocolGenerator.generateSharedComponents(context);
+            });
         }
 
         return null;
