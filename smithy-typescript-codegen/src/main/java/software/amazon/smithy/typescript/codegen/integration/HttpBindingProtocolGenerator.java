@@ -19,12 +19,14 @@ import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -34,6 +36,7 @@ import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.pattern.Pattern.Segment;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.CollectionShape;
@@ -185,21 +188,20 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  input: $T,\n"
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
-            List<HttpBinding> labelBindings = writeRequestLabels(context, operation, bindingIndex, trait);
-            List<HttpBinding> queryBindings = writeRequestQueryString(context, operation, bindingIndex);
             writeHeaders(context, operation, bindingIndex);
+            writeResolvedPath(context, operation, bindingIndex, trait);
+            boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
             List<HttpBinding> documentBindings = writeRequestBody(context, operation, bindingIndex);
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 writer.write("...context.endpoint,");
                 writer.write("protocol: \"https\",");
                 writer.write("method: $S,", trait.getMethod());
-                if (labelBindings.isEmpty()) {
-                    writer.write("path: $S,", trait.getUri());
-                } else {
-                    writer.write("path: resolvedPath,");
-                }
                 writer.write("headers: headers,");
+                writer.write("path: resolvedPath,");
+                if (hasQueryComponents) {
+                    writer.write("query: query,");
+                }
                 if (!documentBindings.isEmpty()) {
                     // Track all shapes bound to the document so their serializers may be generated.
                     documentBindings.stream()
@@ -208,16 +210,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             .forEach(serializingDocumentShapes::add);
                     writer.write("body: body,");
                 }
-                if (!queryBindings.isEmpty()) {
-                    writer.write("query: query,");
-                }
             });
         });
 
         writer.write("");
     }
 
-    private List<HttpBinding> writeRequestLabels(
+    private void writeResolvedPath(
             GenerationContext context,
             OperationShape operation,
             HttpBindingIndex bindingIndex,
@@ -227,9 +226,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> labelBindings = bindingIndex.getRequestBindings(operation, Location.LABEL);
 
+        // Always write the bound path, but only the actual segments.
+        writer.write("let resolvedPath = $S;", "/" + trait.getUri().getSegments().stream()
+                .map(Segment::toString)
+                .collect(Collectors.joining("/")));
+
+        // Handle any label bindings.
         if (!labelBindings.isEmpty()) {
             Model model = context.getModel();
-            writer.write("let resolvedPath = $S;", trait.getUri());
             for (HttpBinding binding : labelBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -248,22 +252,31 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .write("}");
             }
         }
-
-        return labelBindings;
     }
 
-    private List<HttpBinding> writeRequestQueryString(
+    private boolean writeRequestQueryString(
             GenerationContext context,
             OperationShape operation,
-            HttpBindingIndex bindingIndex
+            HttpBindingIndex bindingIndex,
+            HttpTrait trait
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
 
+        // Build the initial query bag.
+        Map<String, String> queryLiterals = trait.getUri().getQueryLiterals();
+        if (!queryLiterals.isEmpty()) {
+            // Write any query literals present in the uri.
+            writer.openBlock("const query: any = {", "};",
+                    () -> queryLiterals.forEach((k, v) -> writer.write("$S: $S,", k, v)));
+        } else if (!queryBindings.isEmpty()) {
+            writer.write("const query: any = {};");
+        }
+
+        // Handle any additional query bindings.
         if (!queryBindings.isEmpty()) {
             Model model = context.getModel();
-            writer.write("const query: any = {};");
             for (HttpBinding binding : queryBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
@@ -275,7 +288,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             }
         }
 
-        return queryBindings;
+        // Any binding or literal means we generated a query bag.
+        return !queryBindings.isEmpty() || !queryLiterals.isEmpty();
     }
 
     private void writeHeaders(
