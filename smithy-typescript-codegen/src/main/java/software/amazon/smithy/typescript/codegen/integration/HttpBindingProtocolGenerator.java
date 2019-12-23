@@ -119,6 +119,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
+        HttpProtocolGeneratorUtils.generateCollectBody(context);
+        HttpProtocolGeneratorUtils.generateCollectBodyString(context);
     }
 
     /**
@@ -689,27 +691,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
-
-        if (!documentBindings.isEmpty()) {
-            readReponseBodyData(context, operationOrError);
-            deserializeOutputDocument(context, operationOrError, documentBindings);
-            return documentBindings;
-        }
-        if (!payloadBindings.isEmpty()) {
-            readReponseBodyData(context, operationOrError);
-            // There can only be one payload binding.
-            HttpBinding binding = payloadBindings.get(0);
-            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
-                    Location.PAYLOAD, "data", binding.getMember(), target));
-            return payloadBindings;
-        }
-        return ListUtils.of();
-    }
-
-    private void readReponseBodyData(GenerationContext context, Shape operationOrError) {
-        TypeScriptWriter writer = context.getWriter();
-        // Prepare response body for deserializing.
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
                 .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
@@ -717,13 +698,35 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .map(structure -> structure.getAllMembers().values().stream()
                         .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
                 .orElse(false);
-        if (hasStreamingComponent) {
-            // For operations with streaming output or errors with streaming body we keep the body intact.
-            writer.write("const data: any = output.body;");
-        } else {
-            // Otherwise, we collect the response body to structured object with parseBody().
+
+        if (!documentBindings.isEmpty()) {
             writer.write("const data: any = await parseBody(output.body, context);");
+            deserializeOutputDocument(context, operationOrError, documentBindings);
+            return documentBindings;
         }
+        if (!payloadBindings.isEmpty()) {
+            // There can only be one payload binding.
+            HttpBinding binding = payloadBindings.get(0);
+            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+            if (hasStreamingComponent) {
+                // If payload is streaming, return raw low-level stream directly.
+                writer.write("const data: any = output.body;");
+            } else if (target instanceof BlobShape) {
+                // If payload is blob, only need to collect stream to binary data(Uint8Array).
+                writer.write("const data: any = await collectBody(output.body, context);");
+            } else if (target instanceof CollectionShape || target instanceof StructureShape) {
+                // If body is Collection or Structure, they we need to parse the string into JavaScript object.
+                writer.write("const data: any = await parseBody(output.body, context);");
+            } else {
+                // If payload is other scalar types(not Collection or Structure), because payload will be values in
+                // string instead of valid JSON or XML. So we need to collect body and encode binary to string.
+                writer.write("const data: any = await collectBodyString(output.body, context);");
+            }
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                    Location.PAYLOAD, "data", binding.getMember(), target));
+            return payloadBindings;
+        }
+        return ListUtils.of();
     }
 
     /**

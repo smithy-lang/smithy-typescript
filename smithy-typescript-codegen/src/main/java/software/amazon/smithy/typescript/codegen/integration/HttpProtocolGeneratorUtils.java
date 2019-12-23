@@ -108,6 +108,30 @@ final class HttpProtocolGeneratorUtils {
         writer.write("");
     }
 
+    static void generateCollectBody(GenerationContext context) {
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
+                "};", () -> {
+            writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
+        });
+
+        writer.write("");
+    }
+
+    static void generateCollectBodyString(GenerationContext context) {
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.openBlock("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => {",
+                "};", () -> {
+            writer.write("return collectBody(streamBody, context).then(body => context.utf8Encoder(body));");
+        });
+
+        writer.write("");
+    }
+
     /**
      * Writes a function used to dispatch to the proper error deserializer
      * for each error that the operation can return. The generated function
