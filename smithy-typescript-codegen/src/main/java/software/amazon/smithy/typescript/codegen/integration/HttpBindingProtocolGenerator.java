@@ -596,7 +596,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser);
+                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody());
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -608,11 +608,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
+        boolean isBodyParsed = this.isErrorCodeInBody();
 
         writer.openBlock("const $L = async (\n"
-                       + "  output: any,\n"
+                       + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
+                       + "): Promise<$T> => {", "};",
+                errorDeserMethodName, isBodyParsed ? "parsedOutput" : "output", errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
@@ -623,7 +625,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             readHeaders(context, error, bindingIndex);
-            List<HttpBinding> documentBindings = readResponseBody(context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex, isBodyParsed);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -633,6 +635,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
 
         writer.write("");
+    }
+
+    private List<HttpBinding> readErrorResponseBody(
+            GenerationContext context,
+            Shape error,
+            HttpBindingIndex bindingIndex,
+            boolean isBodyParsed
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        if (isBodyParsed) {
+            // Body is already parsed in error dispatcher, simply assign body to data.
+            writer.write("const data: any = output.body;");
+            return ListUtils.of();
+        } else {
+            // Deserialize response body just like in normal response.
+            return readResponseBody(context, error, bindingIndex);
+        }
     }
 
     private void readHeaders(
@@ -692,6 +711,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
+
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
                 .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
@@ -909,6 +929,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
+
+    /**
+     * A boolean indicates whether body is collected and parsed in error code parser.
+     * If so, each error shape deserializer should not parse body again.
+     *
+     * @return returns whether the error code exists in response body
+     */
+    protected abstract boolean isErrorCodeInBody();
 
     /**
      * Writes the code needed to deserialize the output document of a response.

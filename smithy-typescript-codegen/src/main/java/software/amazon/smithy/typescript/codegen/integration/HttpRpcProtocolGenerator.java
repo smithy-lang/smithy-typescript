@@ -254,7 +254,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser);
+                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody());
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -311,10 +311,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * Writes the code that loads an {@code errorCode} String with the content used
      * to dispatch errors to specific serializers.
      *
-     * <p>Three variables will be in scope:
+     * <p>Two variables will be in scope:
      *   <ul>
-     *       <li>{@code output}: a value of the HttpResponse type.</li>
-     *       <li>{@code data}: the contents of the response body.</li>
+     *       <li>{@code errorOutput} or {@code parsedOutput}: a value of the HttpResponse type.
+     *          {@code errorOutput} is a raw HttpResponse whereas {@code parsedOutput} is a HttpResponse type with
+     *          body parsed to JavaScript object.
+     *          The actual value available is determined by {@link #isErrorCodeInBody}
+     *       </li>
      *       <li>{@code context}: the SerdeContext.</li>
      *   </ul>
      *
@@ -327,6 +330,17 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
+
+    /**
+     * Indicates whether body is collected and parsed in error dispatcher.
+     *
+     * <p>If returns true, {@link #writeErrorCodeParser} will have {@code parsedOutput} in scope
+     *
+     * <P>If returns false, {@link #writeErrorCodeParser} will have {@code errorOutput} in scope
+     *
+     * @return returns whether the error code exists in response body
+     */
+    protected abstract boolean isErrorCodeInBody();
 
     /**
      * Writes the code needed to deserialize the output document of a response.
