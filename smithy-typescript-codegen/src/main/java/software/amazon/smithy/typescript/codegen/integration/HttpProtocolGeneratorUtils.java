@@ -108,10 +108,17 @@ final class HttpProtocolGeneratorUtils {
         writer.write("");
     }
 
+    /**
+     * Writes a response body stream collector. This function converts the low-level response body stream to
+     * Uint8Array binary data.
+     *
+     * @param context The generation context.
+     */
     static void generateCollectBody(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
 
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.write("// Collect low-level response body stream to Uint8Array.");
         writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
                 "};", () -> {
             writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
@@ -120,10 +127,17 @@ final class HttpProtocolGeneratorUtils {
         writer.write("");
     }
 
+    /**
+     * Writes a function converting the low-level response body stream to utf-8 encoded string. It depends on
+     * response body stream collector{@link #generateCollectBody(GenerationContext)}.
+     *
+     * @param context The generation context
+     */
     static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
 
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.write("// Encode Uint8Array data into string with utf-8.");
         writer.openBlock("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => {",
                 "};", () -> {
             writer.write("return collectBody(streamBody, context).then(body => context.utf8Encoder(body));");
@@ -167,11 +181,12 @@ final class HttpProtocolGeneratorUtils {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
             writer.openBlock(
-                    "const $L: any = {", "};", shouldParseErrorBody ? "parsedOutput" : "errorOutput", () -> {
-                writer.write("...output,");
-                writer.write("body: $L,",
-                        shouldParseErrorBody ? "await parseBody(output.body, context)" : "output.body");
-            });
+                    "const $L: any = {", "};", shouldParseErrorBody ? "parsedOutput" : "errorOutput",
+                    () -> {
+                        writer.write("...output,");
+                        writer.write("body: $L,",
+                                shouldParseErrorBody ? "await parseBody(output.body, context)" : "output.body");
+                    });
 
             // Error responses must be at least SmithyException and MetadataBearer implementations.
             writer.addImport("SmithyException", "__SmithyException",

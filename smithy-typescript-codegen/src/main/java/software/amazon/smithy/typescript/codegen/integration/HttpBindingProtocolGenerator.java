@@ -48,7 +48,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
@@ -721,6 +720,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .orElse(false);
 
         if (!documentBindings.isEmpty()) {
+            // If response has document binding, the body can be parsed to JavaScript object.
             writer.write("const data: any = await parseBody(output.body, context);");
             deserializeOutputDocument(context, operationOrError, documentBindings);
             return documentBindings;
@@ -735,12 +735,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             } else if (target instanceof BlobShape) {
                 // If payload is blob, only need to collect stream to binary data(Uint8Array).
                 writer.write("const data: any = await collectBody(output.body, context);");
-            } else if (target instanceof CollectionShape || target instanceof StructureShape) {
-                // If body is Collection or Structure, they we need to parse the string into JavaScript object.
+            } else if (target instanceof StructureShape || target instanceof UnionShape) {
+                // If body is Structure or Union, they we need to parse the string into JavaScript object.
                 writer.write("const data: any = await parseBody(output.body, context);");
             } else {
-                // If payload is other scalar types(not Collection or Structure), because payload will be values in
-                // string instead of valid JSON or XML. So we need to collect body and encode binary to string.
+                // If payload is string, we need to collect body and encode binary to string.
                 writer.write("const data: any = await collectBodyString(output.body, context);");
             }
             writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
