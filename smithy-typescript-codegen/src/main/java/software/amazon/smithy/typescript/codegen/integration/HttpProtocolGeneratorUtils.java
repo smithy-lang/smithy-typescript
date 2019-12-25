@@ -215,10 +215,11 @@ final class HttpProtocolGeneratorUtils {
                 // Build a generic error the best we can for ones we don't know about.
                 writer.write("default:").indent()
                         .write("errorCode = errorCode || \"UnknownError\";")
-                        .openBlock("response = {", "};", () -> {
+                        .openBlock("response = {", "} as any;", () -> {
                             writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output),");
+                            writer.write("message: await collectBodyString(output.body, context)");
                         }).dedent();
             });
             writer.write("return Promise.reject(Object.assign(new Error(response.__type), response));");
