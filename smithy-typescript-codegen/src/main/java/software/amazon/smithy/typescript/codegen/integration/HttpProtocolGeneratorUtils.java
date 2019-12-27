@@ -109,44 +109,6 @@ final class HttpProtocolGeneratorUtils {
     }
 
     /**
-     * Writes a response body stream collector. This function converts the low-level response body stream to
-     * Uint8Array binary data.
-     *
-     * @param context The generation context.
-     */
-    static void generateCollectBody(GenerationContext context) {
-        TypeScriptWriter writer = context.getWriter();
-
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
-        writer.write("// Collect low-level response body stream to Uint8Array.");
-        writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
-                "};", () -> {
-            writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
-        });
-
-        writer.write("");
-    }
-
-    /**
-     * Writes a function converting the low-level response body stream to utf-8 encoded string. It depends on
-     * response body stream collector{@link #generateCollectBody(GenerationContext)}.
-     *
-     * @param context The generation context
-     */
-    static void generateCollectBodyString(GenerationContext context) {
-        TypeScriptWriter writer = context.getWriter();
-
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
-        writer.write("// Encode Uint8Array data into string with utf-8.");
-        writer.openBlock("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => {",
-                "};", () -> {
-            writer.write("return collectBody(streamBody, context).then(body => context.utf8Encoder(body));");
-        });
-
-        writer.write("");
-    }
-
-    /**
      * Writes a function used to dispatch to the proper error deserializer
      * for each error that the operation can return. The generated function
      * assumes a deserialization function is generated for the structures
@@ -156,15 +118,13 @@ final class HttpProtocolGeneratorUtils {
      * @param operation The operation to generate for.
      * @param responseType The response type for the HTTP protocol.
      * @param errorCodeGenerator A consumer
-     * @param shouldParseErrorBody Flag indicating whether need to parse response body
      * @return A set of all error structure shapes for the operation that were dispatched to.
      */
     static Set<StructureShape> generateErrorDispatcher(
             GenerationContext context,
             OperationShape operation,
             SymbolReference responseType,
-            Consumer<GenerationContext> errorCodeGenerator,
-            boolean shouldParseErrorBody
+            Consumer<GenerationContext> errorCodeGenerator
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -178,15 +138,15 @@ final class HttpProtocolGeneratorUtils {
                        + "  output: $T,\n"
                        + "  context: __SerdeContext,\n"
                        + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
-            // Prepare error response for parsing error code. If error code needs to be parsed from response body
-            // then we collect body and parse it to JS object, otherwise leave the response body as is.
-            writer.openBlock(
-                    "const $L: any = {", "};", shouldParseErrorBody ? "parsedOutput" : "errorOutput",
-                    () -> {
-                        writer.write("...output,");
-                        writer.write("body: $L,",
-                                shouldParseErrorBody ? "await parseBody(output.body, context)" : "output.body");
-                    });
+            writer.write("const data: any = await parseBody(output.body, context);");
+            // We only consume the parsedOutput if we're dispatching, so only generate if we will.
+            if (!operation.getErrors().isEmpty()) {
+                // Create a holding object since we have already parsed the body, but retain the rest of the output.
+                writer.openBlock("const parsedOutput: any = {", "};", () -> {
+                    writer.write("...output,");
+                    writer.write("body: data,");
+                });
+            }
 
             // Error responses must be at least SmithyException and MetadataBearer implementations.
             writer.addImport("SmithyException", "__SmithyException",
@@ -207,19 +167,17 @@ final class HttpProtocolGeneratorUtils {
                             context.getProtocolName()) + "Response";
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
-                        writer.write("response = await $L($L, context);",
-                                errorDeserMethodName, shouldParseErrorBody ? "parsedOutput" : "errorOutput");
+                        writer.write("response = await $L(parsedOutput, context);", errorDeserMethodName);
                     });
                 });
 
                 // Build a generic error the best we can for ones we don't know about.
                 writer.write("default:").indent()
                         .write("errorCode = errorCode || \"UnknownError\";")
-                        .openBlock("response = {", "} as any;", () -> {
+                        .openBlock("response = {", "};", () -> {
                             writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output),");
-                            writer.write("message: await collectBodyString(output.body, context)");
                         }).dedent();
             });
             writer.write("return Promise.reject(Object.assign(new Error(response.__type), response));");
