@@ -119,6 +119,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
+        HttpProtocolGeneratorUtils.generateCollectBody(context);
+        HttpProtocolGeneratorUtils.generateCollectBodyString(context);
     }
 
     /**
@@ -593,7 +595,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser);
+                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody());
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -605,11 +607,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
+        boolean isBodyParsed = this.isErrorCodeInBody();
 
         writer.openBlock("const $L = async (\n"
-                       + "  output: any,\n"
+                       + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
+                       + "): Promise<$T> => {", "};",
+                errorDeserMethodName, isBodyParsed ? "parsedOutput" : "output", errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
@@ -620,7 +624,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             readHeaders(context, error, bindingIndex);
-            List<HttpBinding> documentBindings = readResponseBody(context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex, isBodyParsed);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -630,6 +634,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
 
         writer.write("");
+    }
+
+    private List<HttpBinding> readErrorResponseBody(
+            GenerationContext context,
+            Shape error,
+            HttpBindingIndex bindingIndex,
+            boolean isBodyParsed
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        if (isBodyParsed) {
+            // Body is already parsed in error dispatcher, simply assign body to data.
+            writer.write("const data: any = output.body;");
+            return ListUtils.of();
+        } else {
+            // Deserialize response body just like in normal response.
+            return readResponseBody(context, error, bindingIndex);
+        }
     }
 
     private void readHeaders(
@@ -690,26 +711,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
-        if (!documentBindings.isEmpty()) {
-            readReponseBodyData(context, operationOrError);
-            deserializeOutputDocument(context, operationOrError, documentBindings);
-            return documentBindings;
-        }
-        if (!payloadBindings.isEmpty()) {
-            readReponseBodyData(context, operationOrError);
-            // There can only be one payload binding.
-            HttpBinding binding = payloadBindings.get(0);
-            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
-                    Location.PAYLOAD, "data", binding.getMember(), target));
-            return payloadBindings;
-        }
-        return ListUtils.of();
-    }
-
-    private void readReponseBodyData(GenerationContext context, Shape operationOrError) {
-        TypeScriptWriter writer = context.getWriter();
-        // Prepare response body for deserializing.
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
                 .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
@@ -717,13 +718,35 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .map(structure -> structure.getAllMembers().values().stream()
                         .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
                 .orElse(false);
-        if (hasStreamingComponent) {
-            // For operations with streaming output or errors with streaming body we keep the body intact.
-            writer.write("const data: any = output.body;");
-        } else {
-            // Otherwise, we collect the response body to structured object with parseBody().
+
+        if (!documentBindings.isEmpty()) {
+            // If response has document binding, the body can be parsed to JavaScript object.
             writer.write("const data: any = await parseBody(output.body, context);");
+            deserializeOutputDocument(context, operationOrError, documentBindings);
+            return documentBindings;
         }
+        if (!payloadBindings.isEmpty()) {
+            // There can only be one payload binding.
+            HttpBinding binding = payloadBindings.get(0);
+            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+            if (hasStreamingComponent) {
+                // If payload is streaming, return raw low-level stream directly.
+                writer.write("const data: any = output.body;");
+            } else if (target instanceof BlobShape) {
+                // If payload is blob, only need to collect stream to binary data(Uint8Array).
+                writer.write("const data: any = await collectBody(output.body, context);");
+            } else if (target instanceof StructureShape || target instanceof UnionShape) {
+                // If body is Structure or Union, they we need to parse the string into JavaScript object.
+                writer.write("const data: any = await parseBody(output.body, context);");
+            } else {
+                // If payload is string, we need to collect body and encode binary to string.
+                writer.write("const data: any = await collectBodyString(output.body, context);");
+            }
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                    Location.PAYLOAD, "data", binding.getMember(), target));
+            return payloadBindings;
+        }
+        return ListUtils.of();
     }
 
     /**
@@ -905,6 +928,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
+
+    /**
+     * A boolean indicates whether body is collected and parsed in error code parser.
+     * If so, each error shape deserializer should not parse body again.
+     *
+     * @return returns whether the error code exists in response body
+     */
+    protected abstract boolean isErrorCodeInBody();
 
     /**
      * Writes the code needed to deserialize the output document of a response.
