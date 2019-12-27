@@ -77,7 +77,6 @@ to Maven local:
 - `cd ..`
 - `git clone https://github.com/awslabs/smithy-typescript.git`
 - `cd smithy-typescript`
-- `git checkout develop`
 - `./gradlew build`
 
 You can find the build artifacts of the test package at:
