@@ -299,7 +299,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol memberShape(MemberShape shape) {
         Shape targetShape = model.getShape(shape.getTarget())
                 .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
-        Symbol targetSymbol = targetShape.accept(this);
+        Symbol targetSymbol = toSymbol(targetShape);
 
         if (targetSymbol.getProperties().containsKey(EnumTrait.class.getName())) {
             return createMemberSymbolWithEnumTarget(targetSymbol);
