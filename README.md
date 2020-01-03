@@ -73,11 +73,14 @@ to Maven local:
 
 - `git clone https://github.com/awslabs/smithy.git`
 - `cd smithy`
-- `./gradlew publishToMavenLocal`
+- `./gradlew clean build publishToMavenLocal`
 - `cd ..`
 - `git clone https://github.com/awslabs/smithy-typescript.git`
 - `cd smithy-typescript`
 - `./gradlew build`
+
+If you're consuming smithy-typescript locally in other project, run the following command instead:
+- `./gradlew clean build publishToMavenLocal`
 
 You can find the build artifacts of the test package at:
 `build/smithyprojections/smithy-typescript-codegen-test/source/typescript-codegen`
