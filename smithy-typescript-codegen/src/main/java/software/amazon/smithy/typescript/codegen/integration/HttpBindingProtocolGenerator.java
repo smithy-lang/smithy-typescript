@@ -48,6 +48,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
@@ -717,7 +718,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .map(structure -> structure.getAllMembers().values().stream()
                         .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
                 .orElse(false);
-        if (hasStreamingComponent) {
+        if (hasStreamingComponent || operationOrError.getType().equals(ShapeType.STRUCTURE)) {
             // For operations with streaming output or errors with streaming body we keep the body intact.
             writer.write("const data: any = output.body;");
         } else {
