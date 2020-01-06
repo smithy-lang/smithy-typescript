@@ -189,7 +189,8 @@ public final class TypeScriptWriter extends CodeWriter {
      */
     public TypeScriptWriter writeDocs(String docs) {
         // Docs can have valid $ characters that shouldn't run through formatters.
-        writeDocs(() -> write(docs.replace("$", "$$")));
+        // Escapes multi-line comment closings.
+        writeDocs(() -> write(docs.replace("$", "$$").replace("*/", "*\\/")));
         return this;
     }
 
