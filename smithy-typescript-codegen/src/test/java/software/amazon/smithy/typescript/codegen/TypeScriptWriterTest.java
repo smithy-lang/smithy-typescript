@@ -37,6 +37,17 @@ public class TypeScriptWriterTest {
     }
 
     @Test
+    public void escapesMultiLineCloseInDocStrings() {
+        String docs = "This is */ valid documentation.";
+
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeDocs(docs);
+        String result = writer.toString();
+
+        assertThat(result, equalTo("/**\n * This is *\\/ valid documentation.\n */\n"));
+    }
+
+    @Test
     public void addsFormatterForSymbols() {
         // TODO
     }
