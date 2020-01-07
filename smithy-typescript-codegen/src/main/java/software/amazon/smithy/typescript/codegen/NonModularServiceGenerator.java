@@ -70,7 +70,7 @@ final class NonModularServiceGenerator implements Runnable {
         writer.writeShapeDocs(service);
         writer.openBlock("export class $L extends $T {", "}", nonModularName, serviceSymbol, () -> {
             Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-            containedOperations.forEach(operation -> {
+            for (OperationShape operation : containedOperations) {
                 Symbol operationSymbol = symbolProvider.toSymbol(operation);
                 Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
                 Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);
@@ -117,7 +117,7 @@ final class NonModularServiceGenerator implements Runnable {
                                  + "}", operationSymbol);
                 });
                 writer.write("");
-            });
+            }
         });
     }
 }

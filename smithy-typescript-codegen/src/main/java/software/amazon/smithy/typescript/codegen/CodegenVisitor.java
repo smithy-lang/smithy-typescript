@@ -255,11 +255,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        containedOperations.forEach(operation -> {
+        for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
-        });
+        }
 
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());

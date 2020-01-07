@@ -52,9 +52,9 @@ final class IndexGenerator {
         // write export statements for each command in /commands directory
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        containedOperations.forEach(operation -> {
+        for (OperationShape operation : containedOperations) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
-        });
+        }
         fileManifest.writeFile("index.ts", writer.toString());
     }
 }
