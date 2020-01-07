@@ -15,6 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Set;
+import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -67,7 +69,8 @@ final class NonModularServiceGenerator implements Runnable {
         // Generate the client and extend from the modular client.
         writer.writeShapeDocs(service);
         writer.openBlock("export class $L extends $T {", "}", nonModularName, serviceSymbol, () -> {
-            for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
+            Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+            for (OperationShape operation : containedOperations) {
                 Symbol operationSymbol = symbolProvider.toSymbol(operation);
                 Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
                 Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);

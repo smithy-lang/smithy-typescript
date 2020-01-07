@@ -15,6 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Set;
+import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -49,7 +51,8 @@ final class IndexGenerator {
 
         // write export statements for each command in /commands directory
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
-        for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        for (OperationShape operation : containedOperations) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
         }
         fileManifest.writeFile("index.ts", writer.toString());
