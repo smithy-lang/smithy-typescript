@@ -154,7 +154,7 @@ final class HttpProtocolGeneratorUtils {
             writer.addImport("MetadataBearer", "__MetadataBearer",
                     TypeScriptDependency.AWS_SDK_TYPES.packageName);
             writer.write("let response: __SmithyException & __MetadataBearer;");
-            writer.write("let errorCode: String;");
+            writer.write("let errorCode: String = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
@@ -173,7 +173,6 @@ final class HttpProtocolGeneratorUtils {
 
                 // Build a generic error the best we can for ones we don't know about.
                 writer.write("default:").indent()
-                        .write("errorCode = errorCode || \"UnknownError\";")
                         .openBlock("response = {", "};", () -> {
                             writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
                             writer.write("$$fault: \"client\",");
