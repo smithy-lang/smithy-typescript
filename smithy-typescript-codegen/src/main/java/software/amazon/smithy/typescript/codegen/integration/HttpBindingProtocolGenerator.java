@@ -71,6 +71,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    private final boolean isErrorCodeInBody;
+
+    /**
+     * Creates a Http binding protocol generator.
+     *
+     * @param isErrorCodeInBody A boolean indicates whether error code is located in error response body.
+     */
+    public HttpBindingProtocolGenerator(boolean isErrorCodeInBody) {
+        this.isErrorCodeInBody = isErrorCodeInBody;
+    }
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -595,7 +605,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody());
+                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -607,13 +617,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
-        boolean isBodyParsed = this.isErrorCodeInBody();
 
         writer.openBlock("const $L = async (\n"
                        + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};",
-                errorDeserMethodName, isBodyParsed ? "parsedOutput" : "output", errorSymbol, () -> {
+                errorDeserMethodName, this.isErrorCodeInBody ? "parsedOutput" : "output", errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
@@ -624,7 +633,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             readHeaders(context, error, bindingIndex);
-            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex, isBodyParsed);
+            List<HttpBinding> documentBindings = readErrorResponseBody(
+                    context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -639,11 +649,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private List<HttpBinding> readErrorResponseBody(
             GenerationContext context,
             Shape error,
-            HttpBindingIndex bindingIndex,
-            boolean isBodyParsed
+            HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
-        if (isBodyParsed) {
+        if (this.isErrorCodeInBody) {
             // Body is already parsed in error dispatcher, simply assign body to data.
             writer.write("const data: any = output.body;");
             return ListUtils.of();
@@ -912,10 +921,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Writes the code that loads an {@code errorCode} String with the content used
      * to dispatch errors to specific serializers.
      *
-     * <p>Three variables will be in scope:
+     * <p>Two variables will be in scope:
      *   <ul>
-     *       <li>{@code output}: a value of the HttpResponse type.</li>
-     *       <li>{@code data}: the contents of the response body.</li>
+     *       <li>{@code errorOutput} or {@code parsedOutput}: a value of the HttpResponse type.
+     *          <ul>
+     *              <li>{@code errorOutput} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              {@code false}</li>
+     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
+     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
+     *          </ul>
+     *       </li>
      *       <li>{@code context}: the SerdeContext.</li>
      *   </ul>
      *
@@ -928,14 +943,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
-
-    /**
-     * A boolean indicates whether body is collected and parsed in error code parser.
-     * If so, each error shape deserializer should not parse body again.
-     *
-     * @return returns whether the error code exists in response body
-     */
-    protected abstract boolean isErrorCodeInBody();
 
     /**
      * Writes the code needed to deserialize the output document of a response.

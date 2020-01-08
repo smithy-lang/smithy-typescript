@@ -37,6 +37,16 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    private final boolean isErrorCodeInBody;
+
+    /**
+     * Creates a Http RPC protocol generator.
+     *
+     * @param isErrorCodeInBody A boolean indicates whether error code is located in error response body.
+     */
+    public HttpRpcProtocolGenerator(boolean isErrorCodeInBody) {
+        this.isErrorCodeInBody = isErrorCodeInBody;
+    }
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -254,7 +264,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody());
+                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -314,9 +324,12 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * <p>Two variables will be in scope:
      *   <ul>
      *       <li>{@code errorOutput} or {@code parsedOutput}: a value of the HttpResponse type.
-     *          {@code errorOutput} is a raw HttpResponse whereas {@code parsedOutput} is a HttpResponse type with
-     *          body parsed to JavaScript object.
-     *          The actual value available is determined by {@link #isErrorCodeInBody}
+     *          <ul>
+     *              <li>{@code errorOutput} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              {@code false}</li>
+     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
+     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
+     *          </ul>
      *       </li>
      *       <li>{@code context}: the SerdeContext.</li>
      *   </ul>
@@ -330,17 +343,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
-
-    /**
-     * Indicates whether body is collected and parsed in error dispatcher.
-     *
-     * <p>If returns true, {@link #writeErrorCodeParser} will have {@code parsedOutput} in scope
-     *
-     * <P>If returns false, {@link #writeErrorCodeParser} will have {@code errorOutput} in scope
-     *
-     * @return returns whether the error code exists in response body
-     */
-    protected abstract boolean isErrorCodeInBody();
 
     /**
      * Writes the code needed to deserialize the output document of a response.
