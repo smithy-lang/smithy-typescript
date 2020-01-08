@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.Set;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
@@ -45,6 +46,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.utils.SetUtils;
 
 /**
  * Visitor to generate member values for aggregate types deserialized from documents.
@@ -59,16 +61,17 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  *   <li>Timestamp: converted to JS Date.</li>
  *   <li>Service, Operation, Resource, Member: not deserializable from documents. <b>Not overridable.</b></li>
  *   <li>Document, List, Map, Set, Structure, Union: delegated to a deserialization function.
- *     <b>Not overridable.</b></li>
+ *     <b>Not overridable.</b> These delegations respect the {@code additionalParams} property.</li>
  *   <li>All other types: unmodified.</li>
  * </ul>
  *
  * TODO: Update this with a mechanism to handle String and Blob shapes with the @mediatype trait.
  */
 public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
-    private final Format defaultTimestampFormat;
     private final GenerationContext context;
     private final String dataSource;
+    private final Format defaultTimestampFormat;
+    private final Set<String> additionalParams;
 
     /**
      * Constructor.
@@ -84,9 +87,39 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
             String dataSource,
             Format defaultTimestampFormat
     ) {
+        this(context, dataSource, defaultTimestampFormat, SetUtils.of());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param context The generation context.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param defaultTimestampFormat The default timestamp format used in absence
+     *                               of a TimestampFormat trait.
+     * @param additionalParams A set of variable names to be passed as additional
+     *                         parameters to any delegate deserializers.
+     */
+    public DocumentMemberDeserVisitor(
+            GenerationContext context,
+            String dataSource,
+            Format defaultTimestampFormat,
+            Set<String> additionalParams
+    ) {
         this.context = context;
         this.dataSource = dataSource;
         this.defaultTimestampFormat = defaultTimestampFormat;
+        this.additionalParams = additionalParams;
+    }
+
+    /**
+     * Gets the generation context.
+     *
+     * @return The generation context.
+     */
+    protected final GenerationContext getContext() {
+        return context;
     }
 
     /**
@@ -95,8 +128,27 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
      *
      * @return The data source.
      */
-    protected String getDataSource() {
+    protected final String getDataSource() {
         return dataSource;
+    }
+
+    /**
+     * Gets the default timestamp format used in absence of a TimestampFormat trait.
+     *
+     * @return The default timestamp format.
+     */
+    protected final Format getDefaultTimestampFormat() {
+        return defaultTimestampFormat;
+    }
+
+    /**
+     * Gets a set of variable names to be passed as additional parameters
+     * to any delegate deserializers.
+     *
+     * @return The additional parameters.
+     */
+    protected final Set<String> getAdditionalParams() {
+        return additionalParams;
     }
 
     @Override
@@ -224,7 +276,18 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
     private String getDelegateDeserializer(Shape shape) {
         // Use the shape for the function name.
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
-        return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
-                + "(" + dataSource + ", context)";
+        StringBuilder delegateInvoke = new StringBuilder(
+                ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()));
+        delegateInvoke.append("(")
+                .append(dataSource)
+                .append(", context");
+
+        // Write any additional parameters to the invocation.
+        for (String additionalParam : additionalParams) {
+            delegateInvoke.append(", ")
+                    .append(additionalParam);
+        }
+        delegateInvoke.append(")");
+        return delegateInvoke.toString();
     }
 }

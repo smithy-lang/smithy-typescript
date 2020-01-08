@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -34,6 +35,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.utils.MapUtils;
 
 /**
  * Visitor to generate deserialization functions for shapes in protocol document bodies.
@@ -58,15 +60,33 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  * <ul>
  *   <li>Service, Operation, Resource: no function generated. <b>Not overridable.</b></li>
  *   <li>Document, List, Map, Set, Structure, Union: generates a deserialization function.
- *     <b>Not overridable.</b></li>
+ *     <b>Not overridable.</b> These function signatures respect the {@code additionalParams} property.</li>
  *   <li>All other types: no function generated. <b>May be overridden.</b></li>
  * </ul>
  */
 public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Void> {
     private final GenerationContext context;
+    private final Map<String, String> additionalParams;
 
+    /**
+     * Constructor.
+     *
+     * @param context The generation context.
+     */
     public DocumentShapeDeserVisitor(GenerationContext context) {
+        this(context, MapUtils.of());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param context The generation context.
+     * @param additionalParams The parameter name to type map of additional parameters
+     *                         for any delegate deserializer function signatures.
+     */
+    public DocumentShapeDeserVisitor(GenerationContext context, Map<String, String> additionalParams) {
         this.context = context;
+        this.additionalParams = additionalParams;
     }
 
     /**
@@ -76,6 +96,16 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      */
     protected final GenerationContext getContext() {
         return context;
+    }
+
+    /**
+     * Gets the parameter name to type map of additional parameters for
+     * any delegate deserializer function signatures.
+     *
+     * @return The additional parameters.
+     */
+    protected final Map<String, String> getAdditionalParams() {
+        return additionalParams;
     }
 
     @Override
@@ -103,6 +133,8 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   <li>{@code output: any}: a value for the CollectionShape shape parameter deserialized from the document.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
+     *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
      *
      * <p>The function signature specifies an {@code Array&lt;Parameter&gt;} return type.
      *
@@ -140,6 +172,8 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
+     *
      * <p>The function signature specifies a {@code FooDocument} return type.
      *
      * <p>This function would generate the following:
@@ -174,6 +208,8 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   <li>{@code output: any}: a value for the MapShape shape parameter deserialized from the document.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
+     *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
      *
      * <p>The function signature specifies a {@code { [key: string]: Field }} return type.
      *
@@ -213,6 +249,8 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   <li>{@code output: any}: a value for the StructureShape shape parameter deserialized from the document.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
+     *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
      *
      * <p>The function signature specifies a {@code Field} return.
      *
@@ -260,6 +298,8 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
+     *
      * <p>The function signature specifies a {@code Field} return type.
      *
      * <p>This function would generate the following:
@@ -284,12 +324,13 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
     protected abstract void deserializeUnion(GenerationContext context, UnionShape shape);
 
     /**
-     * Generates a function for serializing the input shape, dispatching the body generation
-     * to the supplied function.
+     * Generates a function for deserializing the input shape, dispatching the body generation
+     * to the supplied function. These function signatures respect the {@code additionalParams}
+     * property.
      *
-     * @param shape The shape to generate a serializer for.
+     * @param shape The shape to generate a deserializer for.
      * @param functionBody An implementation that will generate a function body to
-     *                     serialize the shape.
+     *                     deserialize the shape.
      */
     protected final void generateDeserFunction(
             Shape shape,
@@ -301,12 +342,24 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
         Symbol symbol = symbolProvider.toSymbol(shape);
         // Use the shape name for the function name.
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+        StringBuilder functionSignature =  new StringBuilder(
+                "const $L = (\n"
+              + "  output: any,\n"
+              + "  context: __SerdeContext,\n");
+
+        // Write any additional parameters to the function signature.
+        for (Map.Entry<String, String> additionalParam : additionalParams.entrySet()) {
+            functionSignature.append("  ")
+                    .append(additionalParam.getKey())
+                    .append(": ")
+                    .append(additionalParam.getValue())
+                    .append(",\n");
+        }
+        functionSignature.append("): $T => {");
 
         writer.addImport(symbol, symbol.getName());
-        writer.openBlock("const $L = (\n"
-                       + "  output: any,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): $T => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
+        writer.openBlock(functionSignature.toString(), "}", methodName, symbol,
+                () -> functionBody.accept(context, shape));
         writer.write("");
     }
 

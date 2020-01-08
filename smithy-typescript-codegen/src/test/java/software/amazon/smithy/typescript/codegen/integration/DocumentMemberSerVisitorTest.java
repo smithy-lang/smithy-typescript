@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,7 +35,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -105,6 +106,20 @@ public class DocumentMemberSerVisitorTest {
         Assertions.assertThrows(CodegenException.class, () -> {
             MemberShape.builder().target(id + "Target").id(id + "$member").build().accept(visitor);
         });
+    }
+
+    @Test
+    public void generatesAdditionalParameters() {
+        String id = "com.smithy.example#Foo";
+        Set<String> additionalParams = new LinkedHashSet<>();
+        additionalParams.add("foo");
+        additionalParams.add("bar");
+        DocumentMemberSerVisitor visitor = new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT,
+                additionalParams);
+
+        String expected = "serialize" + ProtocolGenerator.getSanitizedName(PROTOCOL) + "Foo"
+                + "(" + DATA_SOURCE + ", context, foo, bar)";
+        assertThat(expected, equalTo(StructureShape.builder().id(id).build().accept(visitor)));
     }
 
     private static final class MockProvider implements SymbolProvider {

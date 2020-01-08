@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -34,6 +35,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.utils.MapUtils;
 
 /**
  * Visitor to generate serialization functions for shapes in protocol document bodies.
@@ -58,15 +60,33 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  * <ul>
  *   <li>Service, Operation, Resource: no function generated. <b>Not overridable.</b></li>
  *   <li>Document, List, Map, Set, Structure, Union: generates a serialization function.
- *     <b>Not overridable.</b></li>
+ *     <b>Not overridable.</b> These function signatures respect the {@code additionalParams} property.</li>
  *   <li>All other types: no function generated. <b>May be overridden.</b></li>
  * </ul>
  */
 public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void> {
     private final GenerationContext context;
+    private final Map<String, String> additionalParams;
 
+    /**
+     * Constructor.
+     *
+     * @param context The generation context.
+     */
     public DocumentShapeSerVisitor(GenerationContext context) {
+        this(context, MapUtils.of());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param context The generation context.
+     * @param additionalParams The parameter name to type map of additional parameters
+     *                         for any delegate serializer function signatures.
+     */
+    public DocumentShapeSerVisitor(GenerationContext context, Map<String, String> additionalParams) {
         this.context = context;
+        this.additionalParams = additionalParams;
     }
 
     /**
@@ -76,6 +96,16 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      */
     protected final GenerationContext getContext() {
         return context;
+    }
+
+    /**
+     * Gets the parameter name to type map of additional parameters for
+     * any delegate serializer function signatures.
+     *
+     * @return The additional parameters.
+     */
+    protected final Map<String, String> getAdditionalParams() {
+        return additionalParams;
     }
 
     @Override
@@ -103,6 +133,8 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *   <li>{@code input: Array&lt;Parameter&gt;}: the type generated for the CollectionShape shape parameter.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
+     *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
      *
      * <p>The function signature specifies an {@code any} return type; the function body
      * should return a value serializable by {@code serializeInputDocument}.
@@ -141,6 +173,8 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
+     *
      * <p>The function signature specifies an {@code any} return type; the function body
      * should return a value serializable by {@code serializeInputDocument}.
      *
@@ -176,6 +210,8 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *   <li>{@code input: { [key: string]: Field }}: the type generated for the MapShape shape parameter.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
+     *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
      *
      * <p>The function signature specifies an {@code any} return type; the function body
      * should return a value serializable by {@code serializeInputDocument}.
@@ -216,6 +252,8 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *   <li>{@code input: Field}: the type generated for the StructureShape shape parameter.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
+     *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
      *
      * <p>The function signature specifies an {@code any} return type; the function body
      * should return a value serializable by {@code serializeInputDocument}.
@@ -260,6 +298,8 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
+     * <p>Any entries in the {@code additionalParams} of this visitor will be available in scope as well.
+     *
      * <p>The function signature specifies an {@code any} return type; the function body
      * should return a value serializable by {@code serializeInputDocument}.
      *
@@ -280,7 +320,8 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
 
     /**
      * Generates a function for serializing the input shape, dispatching the body generation
-     * to the supplied function.
+     * to the supplied function. These function signatures respect the {@code additionalParams}
+     * property.
      *
      * @param shape The shape to generate a serializer for.
      * @param functionBody An implementation that will generate a function body to
@@ -296,12 +337,24 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
         Symbol symbol = symbolProvider.toSymbol(shape);
         // Use the shape name for the function name.
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
+        StringBuilder functionSignature =  new StringBuilder(
+                "const $L = (\n"
+              + "  input: $T,\n"
+              + "  context: __SerdeContext,\n");
+
+        // Write any additional parameters to the function signature.
+        for (Map.Entry<String, String> additionalParam : additionalParams.entrySet()) {
+            functionSignature.append("  ")
+                    .append(additionalParam.getKey())
+                    .append(": ")
+                    .append(additionalParam.getValue())
+                    .append(",\n");
+        }
+        functionSignature.append("): any => {");
 
         writer.addImport(symbol, symbol.getName());
-        writer.openBlock("const $L = (\n"
-                       + "  input: $T,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): any => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
+        writer.openBlock(functionSignature.toString(), "}", methodName, symbol,
+                () -> functionBody.accept(context, shape));
         writer.write("");
     }
 
