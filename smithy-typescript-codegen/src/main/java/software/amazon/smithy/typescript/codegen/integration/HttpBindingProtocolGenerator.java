@@ -76,7 +76,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Creates a Http binding protocol generator.
      *
-     * @param isErrorCodeInBody A boolean indicates whether error code is located in error response body.
+     * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
+     *                          the error response body, meaning this generator will parse the body before attempting
+     *                          to load an error code.
      */
     public HttpBindingProtocolGenerator(boolean isErrorCodeInBody) {
         this.isErrorCodeInBody = isErrorCodeInBody;
@@ -605,7 +607,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody);
+                context, operation, responseType, this::writeErrorCodeParser, isErrorCodeInBody);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -622,7 +624,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};",
-                errorDeserMethodName, this.isErrorCodeInBody ? "parsedOutput" : "output", errorSymbol, () -> {
+                errorDeserMethodName, isErrorCodeInBody ? "parsedOutput" : "output", errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
@@ -633,8 +635,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             readHeaders(context, error, bindingIndex);
-            List<HttpBinding> documentBindings = readErrorResponseBody(
-                    context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -652,10 +653,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
-        if (this.isErrorCodeInBody) {
+        if (isErrorCodeInBody) {
             // Body is already parsed in error dispatcher, simply assign body to data.
             writer.write("const data: any = output.body;");
-            return ListUtils.of();
+            List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error).values()
+                    .stream().collect(Collectors.toList());
+            responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
+            return responseBindings;
         } else {
             // Deserialize response body just like in normal response.
             return readResponseBody(context, error, bindingIndex);

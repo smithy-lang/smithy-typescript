@@ -42,7 +42,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     /**
      * Creates a Http RPC protocol generator.
      *
-     * @param isErrorCodeInBody A boolean indicates whether error code is located in error response body.
+     * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
+     *                          the error response body, meaning this generator will parse the body before attempting
+     *                          to load an error code.
      */
     public HttpRpcProtocolGenerator(boolean isErrorCodeInBody) {
         this.isErrorCodeInBody = isErrorCodeInBody;
@@ -264,7 +266,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser, this.isErrorCodeInBody);
+                context, operation, responseType, this::writeErrorCodeParser, isErrorCodeInBody);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -277,14 +279,14 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Add the error shape to the list to generate functions for, since we'll use that.
         deserializingDocumentShapes.add(error);
-
+        String outputReference = isErrorCodeInBody ? "parsedOutput" : "output";
         writer.openBlock("const $L = async (\n"
-                       + "  output: any,\n"
+                       + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
+                       + "): Promise<$T> => {", "};", errorDeserMethodName, outputReference, errorSymbol, () -> {
             // First deserialize the body properly.
-            writer.write("const deserialized: any = $L(output.body, context);",
-                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
+            writer.write("const deserialized: any = $L($L.body, context);",
+                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()), outputReference);
 
             // Then load it into the object with additional error and response properties.
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {

@@ -156,7 +156,7 @@ final class HttpProtocolGeneratorUtils {
      * @param operation The operation to generate for.
      * @param responseType The response type for the HTTP protocol.
      * @param errorCodeGenerator A consumer
-     * @param shouldParseErrorBody Flag indicating whether need to parse response body
+     * @param shouldParseErrorBody Flag indicating whether need to parse response body in this dispatcher function
      * @return A set of all error structure shapes for the operation that were dispatched to.
      */
     static Set<StructureShape> generateErrorDispatcher(
@@ -180,8 +180,9 @@ final class HttpProtocolGeneratorUtils {
                        + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
+            String outputReference = shouldParseErrorBody ? "parsedOutput" : "errorOutput";
             writer.openBlock(
-                    "const $L: any = {", "};", shouldParseErrorBody ? "parsedOutput" : "errorOutput",
+                    "const $L: any = {", "};", outputReference,
                     () -> {
                         writer.write("...output,");
                         writer.write("body: $L,",
@@ -208,7 +209,7 @@ final class HttpProtocolGeneratorUtils {
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
                         writer.write("response = await $L($L, context);",
-                                errorDeserMethodName, shouldParseErrorBody ? "parsedOutput" : "errorOutput");
+                                errorDeserMethodName, outputReference);
                     });
                 });
 
