@@ -65,9 +65,9 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  * TODO: Update this with a mechanism to handle String and Blob shapes with the @mediatype trait.
  */
 public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
-    private final Format defaultTimestampFormat;
     private final GenerationContext context;
     private final String dataSource;
+    private final Format defaultTimestampFormat;
 
     /**
      * Constructor.
@@ -89,13 +89,31 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     }
 
     /**
+     * Gets the generation context.
+     *
+     * @return The generation context.
+     */
+    protected final GenerationContext getContext() {
+        return context;
+    }
+
+    /**
      * Gets the in-code location of the data to provide an input of
      * ({@code input.foo}, {@code entry}, etc.).
      *
      * @return The data source.
      */
-    protected String getDataSource() {
+    protected final String getDataSource() {
         return dataSource;
+    }
+
+    /**
+     * Gets the default timestamp format used in absence of a TimestampFormat trait.
+     *
+     * @return The default timestamp format.
+     */
+    protected final Format getDefaultTimestampFormat() {
+        return defaultTimestampFormat;
     }
 
     @Override
