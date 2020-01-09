@@ -73,7 +73,7 @@ to Maven local:
 
 - `git clone https://github.com/awslabs/smithy.git`
 - `cd smithy`
-- `./gradlew clean build publishToMavenLocal`
+- `./gradlew publishToMavenLocal`
 - `cd ..`
 - `git clone https://github.com/awslabs/smithy-typescript.git`
 - `cd smithy-typescript`
