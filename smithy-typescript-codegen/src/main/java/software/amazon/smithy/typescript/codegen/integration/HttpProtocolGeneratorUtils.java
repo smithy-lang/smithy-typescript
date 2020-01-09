@@ -129,7 +129,7 @@ final class HttpProtocolGeneratorUtils {
 
     /**
      * Writes a function converting the low-level response body stream to utf-8 encoded string. It depends on
-     * response body stream collector{@link #generateCollectBody(GenerationContext)}.
+     * response body stream collector {@link #generateCollectBody(GenerationContext)}.
      *
      * @param context The generation context
      */
@@ -180,14 +180,14 @@ final class HttpProtocolGeneratorUtils {
                        + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
-            String outputReference = shouldParseErrorBody ? "parsedOutput" : "errorOutput";
-            writer.openBlock(
-                    "const $L: any = {", "};", outputReference,
-                    () -> {
-                        writer.write("...output,");
-                        writer.write("body: $L,",
-                                shouldParseErrorBody ? "await parseBody(output.body, context)" : "output.body");
-                    });
+            if (shouldParseErrorBody) {
+                writer.openBlock(
+                        "const parsedOutput: any = {", "};",
+                        () -> {
+                            writer.write("...output,");
+                            writer.write("body: await parseBody(output.body, context)");
+                        });
+            }
 
             // Error responses must be at least SmithyException and MetadataBearer implementations.
             writer.addImport("SmithyException", "__SmithyException",
@@ -209,7 +209,7 @@ final class HttpProtocolGeneratorUtils {
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
                         writer.write("response = await $L($L, context);",
-                                errorDeserMethodName, outputReference);
+                                errorDeserMethodName, shouldParseErrorBody ? "parsedOutput" : "output");
                     });
                 });
 

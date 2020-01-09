@@ -291,7 +291,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.write("const body = $L.body", outputReference);
             } else {
                 // If error node not in body, error body is not parsed in dispatcher.
-                writer.write("const body = parsedBody($L.body, context);", outputReference);
+                writer.write("const body = parseBody($L.body, context);", outputReference);
             }
             writer.write("const deserialized: any = $L(body, context);",
                     ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
@@ -333,9 +333,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      *
      * <p>Two variables will be in scope:
      *   <ul>
-     *       <li>{@code errorOutput} or {@code parsedOutput}: a value of the HttpResponse type.
+     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
      *          <ul>
-     *              <li>{@code errorOutput} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
      *              {@code false}</li>
      *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
      *              when {@code isErrorCodeInBody} is set to {@code true}</li>

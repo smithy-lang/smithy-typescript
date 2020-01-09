@@ -926,9 +926,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *
      * <p>Two variables will be in scope:
      *   <ul>
-     *       <li>{@code errorOutput} or {@code parsedOutput}: a value of the HttpResponse type.
+     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
      *          <ul>
-     *              <li>{@code errorOutput} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
      *              {@code false}</li>
      *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
      *              when {@code isErrorCodeInBody} is set to {@code true}</li>
