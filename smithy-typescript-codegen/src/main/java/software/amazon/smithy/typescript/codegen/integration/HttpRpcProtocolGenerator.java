@@ -90,6 +90,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
+        HttpProtocolGeneratorUtils.generateCollectBody(context);
+        HttpProtocolGeneratorUtils.generateCollectBodyString(context);
     }
 
     @Override
@@ -285,14 +287,20 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};", errorDeserMethodName, outputReference, errorSymbol, () -> {
             // First deserialize the body properly.
-            writer.write("const deserialized: any = $L($L.body, context);",
-                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()), outputReference);
+            if (isErrorCodeInBody) {
+                writer.write("const body = $L.body", outputReference);
+            } else {
+                // If error node not in body, error body is not parsed in dispatcher.
+                writer.write("const body = parsedBody($L.body, context);", outputReference);
+            }
+            writer.write("const deserialized: any = $L(body, context);",
+                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
 
             // Then load it into the object with additional error and response properties.
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                writer.write("$$metadata: deserializeMetadata(output),");
+                writer.write("$$metadata: deserializeMetadata($L),", outputReference);
                 writer.write("...deserialized,");
             });
 

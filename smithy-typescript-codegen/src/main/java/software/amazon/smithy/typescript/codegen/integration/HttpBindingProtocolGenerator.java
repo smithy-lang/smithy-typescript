@@ -656,8 +656,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (isErrorCodeInBody) {
             // Body is already parsed in error dispatcher, simply assign body to data.
             writer.write("const data: any = output.body;");
-            List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error).values()
-                    .stream().collect(Collectors.toList());
+            List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
             responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
             return responseBindings;
         } else {
