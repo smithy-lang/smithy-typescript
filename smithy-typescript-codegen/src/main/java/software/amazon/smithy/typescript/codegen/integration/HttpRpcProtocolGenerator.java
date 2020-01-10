@@ -37,6 +37,17 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    private final boolean isErrorCodeInBody;
+
+    /**
+     * Creates a Http RPC protocol generator.
+     *
+     * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
+     *   the error response body, meaning this generator will parse the body before attempting to load an error code.
+     */
+    public HttpRpcProtocolGenerator(boolean isErrorCodeInBody) {
+        this.isErrorCodeInBody = isErrorCodeInBody;
+    }
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -78,6 +89,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
+        HttpProtocolGeneratorUtils.generateCollectBody(context);
+        HttpProtocolGeneratorUtils.generateCollectBodyString(context);
     }
 
     @Override
@@ -254,7 +267,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser);
+                context, operation, responseType, this::writeErrorCodeParser, isErrorCodeInBody);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -267,20 +280,27 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Add the error shape to the list to generate functions for, since we'll use that.
         deserializingDocumentShapes.add(error);
-
+        String outputReference = isErrorCodeInBody ? "parsedOutput" : "output";
         writer.openBlock("const $L = async (\n"
-                       + "  output: any,\n"
+                       + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
+                       + "): Promise<$T> => {", "};", errorDeserMethodName, outputReference, errorSymbol, () -> {
             // First deserialize the body properly.
-            writer.write("const deserialized: any = $L(output.body, context);",
+            if (isErrorCodeInBody) {
+                // Body is already parsed in error dispatcher, simply assign body to data.
+                writer.write("const body = $L.body", outputReference);
+            } else {
+                // If error node not in body, error body is not parsed in dispatcher.
+                writer.write("const body = parseBody($L.body, context);", outputReference);
+            }
+            writer.write("const deserialized: any = $L(body, context);",
                     ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
 
             // Then load it into the object with additional error and response properties.
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                writer.write("$$metadata: deserializeMetadata(output),");
+                writer.write("$$metadata: deserializeMetadata($L),", outputReference);
                 writer.write("...deserialized,");
             });
 
@@ -311,10 +331,16 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * Writes the code that loads an {@code errorCode} String with the content used
      * to dispatch errors to specific serializers.
      *
-     * <p>Three variables will be in scope:
+     * <p>Two variables will be in scope:
      *   <ul>
-     *       <li>{@code output}: a value of the HttpResponse type.</li>
-     *       <li>{@code data}: the contents of the response body.</li>
+     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
+     *          <ul>
+     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              {@code false}</li>
+     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
+     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
+     *          </ul>
+     *       </li>
      *       <li>{@code context}: the SerdeContext.</li>
      *   </ul>
      *

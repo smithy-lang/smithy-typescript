@@ -48,7 +48,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
@@ -72,6 +71,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    private final boolean isErrorCodeInBody;
+
+    /**
+     * Creates a Http binding protocol generator.
+     *
+     * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
+     *   the error response body, meaning this generator will parse the body before attempting to load an error code.
+     */
+    public HttpBindingProtocolGenerator(boolean isErrorCodeInBody) {
+        this.isErrorCodeInBody = isErrorCodeInBody;
+    }
 
     @Override
     public ApplicationProtocol getApplicationProtocol() {
@@ -120,6 +130,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
+        HttpProtocolGeneratorUtils.generateCollectBody(context);
+        HttpProtocolGeneratorUtils.generateCollectBodyString(context);
     }
 
     /**
@@ -594,7 +606,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser);
+                context, operation, responseType, this::writeErrorCodeParser, isErrorCodeInBody);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -608,9 +620,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 context.getProtocolName()) + "Response";
 
         writer.openBlock("const $L = async (\n"
-                       + "  output: any,\n"
+                       + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> => {", "};", errorDeserMethodName, errorSymbol, () -> {
+                       + "): Promise<$T> => {", "};",
+                errorDeserMethodName, isErrorCodeInBody ? "parsedOutput" : "output", errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
@@ -621,7 +634,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             readHeaders(context, error, bindingIndex);
-            List<HttpBinding> documentBindings = readResponseBody(context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -631,6 +644,24 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
 
         writer.write("");
+    }
+
+    private List<HttpBinding> readErrorResponseBody(
+            GenerationContext context,
+            Shape error,
+            HttpBindingIndex bindingIndex
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        if (isErrorCodeInBody) {
+            // Body is already parsed in error dispatcher, simply assign body to data.
+            writer.write("const data: any = output.body;");
+            List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
+            responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
+            return responseBindings;
+        } else {
+            // Deserialize response body just like in normal response.
+            return readResponseBody(context, error, bindingIndex);
+        }
     }
 
     private void readHeaders(
@@ -691,26 +722,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
-        if (!documentBindings.isEmpty()) {
-            readReponseBodyData(context, operationOrError);
-            deserializeOutputDocument(context, operationOrError, documentBindings);
-            return documentBindings;
-        }
-        if (!payloadBindings.isEmpty()) {
-            readReponseBodyData(context, operationOrError);
-            // There can only be one payload binding.
-            HttpBinding binding = payloadBindings.get(0);
-            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
-                    Location.PAYLOAD, "data", binding.getMember(), target));
-            return payloadBindings;
-        }
-        return ListUtils.of();
-    }
-
-    private void readReponseBodyData(GenerationContext context, Shape operationOrError) {
-        TypeScriptWriter writer = context.getWriter();
-        // Prepare response body for deserializing.
+        // Detect if operation output or error shape contains a streaming member.
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
                 .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
@@ -718,13 +730,38 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .map(structure -> structure.getAllMembers().values().stream()
                         .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
                 .orElse(false);
-        if (hasStreamingComponent || operationOrError.getType().equals(ShapeType.STRUCTURE)) {
-            // For operations with streaming output or errors with streaming body we keep the body intact.
-            writer.write("const data: any = output.body;");
-        } else {
-            // Otherwise, we collect the response body to structured object with parseBody().
+
+        if (!documentBindings.isEmpty()) {
+            // If response has document binding, the body can be parsed to JavaScript object.
             writer.write("const data: any = await parseBody(output.body, context);");
+            deserializeOutputDocument(context, operationOrError, documentBindings);
+            return documentBindings;
         }
+        if (!payloadBindings.isEmpty()) {
+            // There can only be one payload binding.
+            HttpBinding binding = payloadBindings.get(0);
+            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+            if (hasStreamingComponent) {
+                // If payload is streaming, return raw low-level stream directly.
+                writer.write("const data: any = output.body;");
+            } else if (target instanceof BlobShape) {
+                // If payload is non-streaming blob, only need to collect stream to binary data(Uint8Array).
+                writer.write("const data: any = await collectBody(output.body, context);");
+            } else if (target instanceof StructureShape || target instanceof UnionShape) {
+                // If body is Structure or Union, they we need to parse the string into JavaScript object.
+                writer.write("const data: any = await parseBody(output.body, context);");
+            } else if (target instanceof StringShape) {
+                // If payload is string, we need to collect body and encode binary to string.
+                writer.write("const data: any = await collectBodyString(output.body, context);");
+            } else {
+                throw new CodegenException(String.format("Unexpected shape type bound to payload: `%s`",
+                        target.getType()));
+            }
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                    Location.PAYLOAD, "data", binding.getMember(), target));
+            return payloadBindings;
+        }
+        return ListUtils.of();
     }
 
     /**
@@ -890,10 +927,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Writes the code that loads an {@code errorCode} String with the content used
      * to dispatch errors to specific serializers.
      *
-     * <p>Three variables will be in scope:
+     * <p>Two variables will be in scope:
      *   <ul>
-     *       <li>{@code output}: a value of the HttpResponse type.</li>
-     *       <li>{@code data}: the contents of the response body.</li>
+     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
+     *          <ul>
+     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              {@code false}</li>
+     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
+     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
+     *          </ul>
+     *       </li>
      *       <li>{@code context}: the SerdeContext.</li>
      *   </ul>
      *
