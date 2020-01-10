@@ -28,43 +28,43 @@ import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     TS_LIB("devDependencies", "tslib", "^1.8.0", true),
-    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", "^0.1.0-preview.5", true),
-    AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", "^0.1.0-preview.1", true),
-    INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", "^0.1.0-preview.1", true),
-    CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", "^0.1.0-preview.5", true),
+    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", "^1.0.0-alpha.1", true),
+    AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", "^1.0.0-alpha.1", true),
+    INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", "^1.0.0-alpha.1", true),
+    CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", "^1.0.0-alpha.1", true),
     TYPES_NODE("devDependencies", "@types/node", "^12.7.5", true),
 
-    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", "^0.1.0-preview.5", true),
-    MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", "^0.1.0-preview.1", true),
-    MIDDLEWARE_USER_AGENT("dependencies", "@aws-sdk/middleware-user-agent", "^0.1.0-preview.1", true),
-    MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", "^0.1.0-preview.5", true),
-    MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", "^0.1.0-preview.6", true),
+    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", "^1.0.0-alpha.1", true),
+    MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", "^1.0.0-alpha.1", true),
+    MIDDLEWARE_USER_AGENT("dependencies", "@aws-sdk/middleware-user-agent", "^1.0.0-alpha.1", true),
+    MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", "^1.0.0-alpha.1", true),
+    MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", "^1.0.0-alpha.1", true),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "^0.1.0-preview.1", true),
-    AWS_SDK_HASH_NODE("dependencies", "@aws-sdk/hash-node", "^0.1.0-preview.5", true),
+    AWS_SDK_HASH_NODE("dependencies", "@aws-sdk/hash-node", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_STREAM_COLLECTOR_NODE("dependencies", "@aws-sdk/stream-collector-node", "^0.1.0-preview.6", true),
-    AWS_SDK_STREAM_COLLECTOR_BROWSER("dependencies", "@aws-sdk/stream-collector-browser", "^0.1.0-preview.5", true),
+    AWS_SDK_STREAM_COLLECTOR_NODE("dependencies", "@aws-sdk/stream-collector-node", "^1.0.0-alpha.1", true),
+    AWS_SDK_STREAM_COLLECTOR_BROWSER("dependencies", "@aws-sdk/stream-collector-browser", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_URL_PARSER_BROWSER("dependencies", "@aws-sdk/url-parser-browser", "^0.1.0-preview.5", true),
-    AWS_SDK_URL_PARSER_NODE("dependencies", "@aws-sdk/url-parser-node", "^0.1.0-preview.5", true),
+    AWS_SDK_URL_PARSER_BROWSER("dependencies", "@aws-sdk/url-parser-browser", "^1.0.0-alpha.1", true),
+    AWS_SDK_URL_PARSER_NODE("dependencies", "@aws-sdk/url-parser-node", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", "^0.1.0-preview.3", true),
-    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", "^0.1.0-preview.3", true),
+    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", "^1.0.0-alpha.1", true),
+    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", "^0.1.0-preview.3", true),
-    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", "^0.1.0-preview.4", true),
+    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", "^1.0.0-alpha.1", true),
+    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_UTIL_USER_AGENT_BROWSER("dependencies", "@aws-sdk/util-user-agent-browser", "^0.1.0-preview.6", true),
-    AWS_SDK_UTIL_USER_AGENT_NODE("dependencies", "@aws-sdk/util-user-agent-node", "^0.1.0-preview.6", true),
+    AWS_SDK_UTIL_USER_AGENT_BROWSER("dependencies", "@aws-sdk/util-user-agent-browser", "^1.0.0-alpha.1", true),
+    AWS_SDK_UTIL_USER_AGENT_NODE("dependencies", "@aws-sdk/util-user-agent-node", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_UTIL_UTF8_BROWSER("dependencies", "@aws-sdk/util-utf8-browser", "^0.1.0-preview.3", true),
-    AWS_SDK_UTIL_UTF8_NODE("dependencies", "@aws-sdk/util-utf8-node", "^0.1.0-preview.3", true),
+    AWS_SDK_UTIL_UTF8_BROWSER("dependencies", "@aws-sdk/util-utf8-browser", "^1.0.0-alpha.1", true),
+    AWS_SDK_UTIL_UTF8_NODE("dependencies", "@aws-sdk/util-utf8-node", "^1.0.0-alpha.1", true),
 
     // Conditionally added when using an HTTP application protocol.
-    AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", "^0.1.0-preview.1", false),
-    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", "^0.1.0-preview.5", false),
-    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", "^0.1.0-preview.6", false),
+    AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", "^1.0.0-alpha.1", false),
+    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", "^1.0.0-alpha.1", false),
+    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", "^1.0.0-alpha.1", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),
