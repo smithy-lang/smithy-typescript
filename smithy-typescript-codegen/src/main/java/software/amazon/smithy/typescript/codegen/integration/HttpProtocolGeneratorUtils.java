@@ -181,8 +181,7 @@ final class HttpProtocolGeneratorUtils {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
             if (shouldParseErrorBody) {
-                writer.openBlock(
-                        "const parsedOutput: any = {", "};",
+                writer.openBlock("const parsedOutput: any = {", "};",
                         () -> {
                             writer.write("...output,");
                             writer.write("body: await parseBody(output.body, context)");

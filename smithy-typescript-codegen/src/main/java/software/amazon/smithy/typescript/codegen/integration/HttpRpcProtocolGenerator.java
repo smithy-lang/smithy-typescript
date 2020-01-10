@@ -43,8 +43,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * Creates a Http RPC protocol generator.
      *
      * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
-     *                          the error response body, meaning this generator will parse the body before attempting
-     *                          to load an error code.
+     *   the error response body, meaning this generator will parse the body before attempting to load an error code.
      */
     public HttpRpcProtocolGenerator(boolean isErrorCodeInBody) {
         this.isErrorCodeInBody = isErrorCodeInBody;
@@ -288,6 +287,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "): Promise<$T> => {", "};", errorDeserMethodName, outputReference, errorSymbol, () -> {
             // First deserialize the body properly.
             if (isErrorCodeInBody) {
+                // Body is already parsed in error dispatcher, simply assign body to data.
                 writer.write("const body = $L.body", outputReference);
             } else {
                 // If error node not in body, error body is not parsed in dispatcher.

@@ -77,8 +77,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Creates a Http binding protocol generator.
      *
      * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
-     *                          the error response body, meaning this generator will parse the body before attempting
-     *                          to load an error code.
+     *   the error response body, meaning this generator will parse the body before attempting to load an error code.
      */
     public HttpBindingProtocolGenerator(boolean isErrorCodeInBody) {
         this.isErrorCodeInBody = isErrorCodeInBody;
@@ -723,6 +722,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
+        // Detect if operation output or error shape contains a streaming member.
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
                 .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
@@ -745,14 +745,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // If payload is streaming, return raw low-level stream directly.
                 writer.write("const data: any = output.body;");
             } else if (target instanceof BlobShape) {
-                // If payload is blob, only need to collect stream to binary data(Uint8Array).
+                // If payload is non-streaming blob, only need to collect stream to binary data(Uint8Array).
                 writer.write("const data: any = await collectBody(output.body, context);");
             } else if (target instanceof StructureShape || target instanceof UnionShape) {
                 // If body is Structure or Union, they we need to parse the string into JavaScript object.
                 writer.write("const data: any = await parseBody(output.body, context);");
-            } else {
+            } else if (target instanceof StringShape) {
                 // If payload is string, we need to collect body and encode binary to string.
                 writer.write("const data: any = await collectBodyString(output.body, context);");
+            } else {
+                throw new CodegenException(String.format("Unexpected shape type bound to payload: `%s`",
+                        target.getType()));
             }
             writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                     Location.PAYLOAD, "data", binding.getMember(), target));
