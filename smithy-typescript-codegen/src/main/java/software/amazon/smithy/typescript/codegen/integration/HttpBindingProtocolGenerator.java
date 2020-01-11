@@ -362,23 +362,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!documentBindings.isEmpty()) {
             // Write the default `body` property.
-            context.getWriter().write("let body: any = {};");
+            writer.write("let body: any = {};");
             serializeInputDocument(context, operation, documentBindings);
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
-            SymbolProvider symbolProvider = context.getSymbolProvider();
-            // There can only be one payload binding.
-            HttpBinding binding = payloadBindings.get(0);
-            String memberName = symbolProvider.toMemberName(binding.getMember());
-
             // Write the default `body` property.
             writer.write("let body: any = {};");
-            writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-                writer.write("body = $L;", getInputValue(
-                        context, Location.PAYLOAD, "input." + memberName, binding.getMember(), target));
-            });
+            // There can only be one payload binding.
+            HttpBinding payloadBinding = payloadBindings.get(0);
+            serializeInputPayload(context, operation, payloadBinding);
             return payloadBindings;
         }
 
@@ -399,7 +392,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the input value.
      */
-    private String getInputValue(
+    protected String getInputValue(
             GenerationContext context,
             Location bindingType,
             String dataSource,
@@ -549,6 +542,41 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             List<HttpBinding> documentBindings
     );
 
+    /**
+     * Writes the code needed to serialize the input payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * {@code body} variable that will be serialized as the request body.
+     * This variable will already be defined in scope.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (input.body !== undefined) {
+     *   body = context.base64Encoder(input.body);
+     * }
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param operation The operation being generated.
+     * @param payloadBinding The payload binding to serialize.
+     */
+    protected void serializeInputPayload(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBinding payloadBinding
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        String memberName = symbolProvider.toMemberName(payloadBinding.getMember());
+
+        writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
+            Shape target = context.getModel().expectShape(payloadBinding.getMember().getTarget());
+            writer.write("body = $L;", getInputValue(
+                    context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
+        });
+    }
+
     private void generateOperationDeserializer(
             GenerationContext context,
             OperationShape operation,
@@ -575,10 +603,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  output: $T,\n"
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> {", "}", methodName, responseType, outputType, () -> {
-            // Redirect error deserialization to the dispatcher
-            writer.openBlock("if (output.statusCode !== $L) {", "}", trait.getCode(), () -> {
-                writer.write("return $L(output, context);", errorMethodName);
-            });
+            // Redirect error deserialization to the dispatcher if we receive an error range
+            // status code that's not the modeled code (400 or higher). This allows for
+            // returning other 2XX or 3XX codes that don't match the defined value.
+            writer.openBlock("if (output.statusCode !== $L && output.statusCode >= 400) {", "}", trait.getCode(),
+                    () -> writer.write("return $L(output, context);", errorMethodName));
 
             // Start deserializing the response.
             writer.openBlock("const contents: $T = {", "};", outputType, () -> {
@@ -618,17 +647,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
+        String outputName = isErrorCodeInBody ? "parsedOutput" : "output";
 
         writer.openBlock("const $L = async (\n"
                        + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};",
-                errorDeserMethodName, isErrorCodeInBody ? "parsedOutput" : "output", errorSymbol, () -> {
+                errorDeserMethodName, outputName, errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("name: $S,", error.getId().getName());
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                writer.write("$$metadata: deserializeMetadata(output),");
+                writer.write("$$metadata: deserializeMetadata($L),", outputName);
                 // Set all the members to undefined to meet type constraints.
                 new TreeMap<>(error.getAllMembers())
                         .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
@@ -655,7 +685,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         if (isErrorCodeInBody) {
             // Body is already parsed in error dispatcher, simply assign body to data.
-            writer.write("const data: any = output.body;");
+            writer.write("const data: any = parsedOutput.body;");
             List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
             responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
             return responseBindings;
