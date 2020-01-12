@@ -213,16 +213,25 @@ final class HttpProtocolGeneratorUtils {
                 });
 
                 // Build a generic error the best we can for ones we don't know about.
-                writer.write("default:").indent()
-                        .write("errorCode = errorCode || \"UnknownError\";")
+                writer.write("default:").indent();
+                        if (shouldParseErrorBody) {
+                            // Body is already parsed above
+                            writer.write("const parsedBody = parsedOutput.body;");
+                        } else {
+                            // Body is not parsed above, so parse it here
+                            writer.write("const parsedBody = await parseBody(output.body, context);");
+                        }
+                        writer.write("errorCode = errorCode || \"UnknownError\";")
                         .openBlock("response = {", "} as any;", () -> {
+                            writer.write("...parsedBody,");
+                            writer.write("name: `$${errorCode}`,");
+                            writer.write("message: parsedBody.message || parsedBody.Message || errorCode,");
                             writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
                             writer.write("$$fault: \"client\",");
-                            writer.write("$$metadata: deserializeMetadata(output),");
-                            writer.write("message: await collectBodyString(output.body, context)");
+                            writer.write("$$metadata: deserializeMetadata(output)");
                         }).dedent();
             });
-            writer.write("return Promise.reject(Object.assign(new Error(response.__type), response));");
+            writer.write("return Promise.reject(Object.assign(new Error(response.message), response));");
         });
         writer.write("");
 
