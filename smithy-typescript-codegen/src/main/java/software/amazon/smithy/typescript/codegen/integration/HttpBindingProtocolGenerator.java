@@ -625,6 +625,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "): Promise<$T> => {", "};",
                 errorDeserMethodName, isErrorCodeInBody ? "parsedOutput" : "output", errorSymbol, () -> {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
+                writer.write("name: $S,", error.getId().getName());
                 writer.write("__type: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
                 writer.write("$$metadata: deserializeMetadata(output),");
