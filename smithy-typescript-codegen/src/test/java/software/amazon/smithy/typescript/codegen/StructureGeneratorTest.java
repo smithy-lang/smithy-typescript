@@ -19,6 +19,7 @@ public class StructureGeneratorTest {
         testErrorStructureCodegen("error-test-empty.smithy",
                                   "export interface Err extends _smithy.SmithyException, $MetadataBearer {\n"
                                   + "  __type: \"Err\";\n"
+                                  + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "}");
     }
@@ -28,6 +29,7 @@ public class StructureGeneratorTest {
         testErrorStructureCodegen("error-test-optional-message.smithy",
                                   "export interface Err extends _smithy.SmithyException, $MetadataBearer {\n"
                                   + "  __type: \"Err\";\n"
+                                  + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  message?: string;\n"
                                   + "}");
@@ -38,6 +40,7 @@ public class StructureGeneratorTest {
         testErrorStructureCodegen("error-test-required-message.smithy",
                                   "export interface Err extends _smithy.SmithyException, $MetadataBearer {\n"
                                   + "  __type: \"Err\";\n"
+                                  + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  message: string | undefined;\n"
                                   + "}");
