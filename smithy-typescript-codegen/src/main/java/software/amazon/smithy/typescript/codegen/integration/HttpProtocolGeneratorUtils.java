@@ -221,8 +221,9 @@ final class HttpProtocolGeneratorUtils {
                             // Body is not parsed above, so parse it here
                             writer.write("const parsedBody = await parseBody(output.body, context);");
                         }
-                        writer.write("errorCode = errorCode || \"UnknownError\";")
-                        .openBlock("response = {", "} as any;", () -> {
+
+                        writer.write("errorCode = errorCode || \"UnknownError\";");
+                        writer.openBlock("response = {", "} as any;", () -> {
                             writer.write("...parsedBody,");
                             writer.write("name: `$${errorCode}`,");
                             writer.write("message: parsedBody.message || parsedBody.Message || errorCode,");
@@ -231,7 +232,7 @@ final class HttpProtocolGeneratorUtils {
                             writer.write("$$metadata: deserializeMetadata(output)");
                         }).dedent();
             });
-            writer.write("return Promise.reject(Object.assign(new Error(response.message), response));");
+            writer.write("return Promise.reject(Object.assign(new Error(), response));");
         });
         writer.write("");
 
