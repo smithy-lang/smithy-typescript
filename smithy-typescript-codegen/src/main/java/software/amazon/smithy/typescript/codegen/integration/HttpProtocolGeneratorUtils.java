@@ -125,7 +125,7 @@ final class HttpProtocolGeneratorUtils {
         writer.write("// Collect low-level response body stream to Uint8Array.");
         writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
                 "};", () -> {
-            writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
+            writer.write("return context.streamCollector(streamBody) || Promise.resolve(new Uint8Array());");
         });
 
         writer.write("");
