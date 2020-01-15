@@ -69,7 +69,12 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),
-    TYPES_BIG_JS("devDependencies", "@types/big.js", "^4.0.5", false);
+    TYPES_BIG_JS("devDependencies", "@types/big.js", "^4.0.5", false),
+
+    // Conditionally added if a event stream shape is found anywhere in the model
+    AWS_SDK_UTIL_EVENT_STREAM_NODE("dependencies", "@aws-sdk/util-eventstream-node", "^0.1.0-preview.1", false),
+    // Conditionally added if a event stream shape found in model's input
+    MIDDLEWARE_EVENT_STREAM("dependencies", "@aws-sdk/middleware-event-stream", "^0.1.0-preview.1", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

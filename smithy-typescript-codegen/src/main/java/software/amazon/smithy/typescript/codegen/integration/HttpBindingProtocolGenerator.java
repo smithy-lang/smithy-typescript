@@ -53,6 +53,8 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.EventPayloadTrait;
+import software.amazon.smithy.model.traits.EventStreamTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -593,8 +595,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
             Shape target = context.getModel().expectShape(payloadBinding.getMember().getTarget());
-            writer.write("body = $L;", getInputValue(
-                    context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
+            MemberShape member = payloadBinding.getMember();
+            if (member.getTrait(EventPayloadTrait.class).isPresent()) {
+                writer.openBlock("body = context.eventStreamMarshaller.serialize(", ");", () -> {
+                    writer.write("$L,", "input." + memberName);
+                    writer.write("event => $L", getNamedMembersInputParam(context, Location.PAYLOAD, "event", target));
+                });
+            } else {
+                writer.write("body = $L;", getInputValue(
+                        context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
+            }
         });
     }
 
@@ -808,7 +818,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // There can only be one payload binding.
         HttpBinding binding = payloadBindings.get(0);
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-        if (hasStreamingComponent) {
+        if (binding.getMember().hasTrait(EventStreamTrait.class)) {
+            // If payload is a event stream, return it after calling event stream deser function.
+            writer.write("const data: any = ");
+            eventStreamDeserializerWrapper(context, binding.getMember(), target);
+        } else if (hasStreamingComponent) {
             // If payload is streaming, return raw low-level stream directly.
             writer.write("const data: any = output.body;");
         } else if (target instanceof BlobShape) {
@@ -827,6 +841,31 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                 Location.PAYLOAD, "data", binding.getMember(), target));
         return payloadBindings;
+    }
+
+    private void eventStreamDeserializerWrapper(GenerationContext context, MemberShape member, Shape target) {
+        TypeScriptWriter writer = context.getWriter();
+        writer.openBlock("context.eventStreamMarshaller.deserialize(", ");", () -> {
+            writer.write("output.body,");
+            writer.openBlock("async event => {", "}", () -> {
+                writer.write("const eventName = Object.keys(event)[0];");
+                writer.write("const eventValue = event[eventName];");
+                writer.openBlock("const parsedEvent = {", "};", () -> {
+                    writer.openBlock("[eventName]: {", "}", () -> {
+                        writer.openBlock("headers: Object.entries(eventValue.headers).reduce(", "),", () -> {
+                            writer.write(
+                                    "(accummulator, curr) => "
+                                            + "{accummulator[curr[0]] = curr[1].value; return accummulator; },"
+                            );
+                            writer.write("{} as {[key: string]: any}");
+                        });
+                        writer.write("body: await parseBody(event[eventName].body, context)");
+                    });
+                });
+                writer.write("return $L;",
+                        getOutputValue(context, Location.PAYLOAD, "parsedEvent", member, target));
+            });
+        });
     }
 
     /**
