@@ -247,11 +247,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Handle any label bindings.
         if (!labelBindings.isEmpty()) {
             Model model = context.getModel();
+            List<Segment> uriLabels = trait.getUri().getLabels();
             for (HttpBinding binding : labelBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 String labelValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                         binding.getMember(), target);
+                // Get the correct label to use.
+                Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
 
                 // Set the label's value and throw a clear error if empty or undefined.
                 writer.write("if (input.$L !== undefined) {", memberName).indent()
@@ -259,7 +262,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     .openBlock("if (labelValue.length <= 0) {", "}", () -> {
                         writer.write("throw new Error('Empty value provided for input HTTP label: $L.');", memberName);
                     })
-                    .write("resolvedPath = resolvedPath.replace('{$L}', labelValue);", memberName).dedent()
+                    .write("resolvedPath = resolvedPath.replace($S, labelValue);", uriLabel.toString()).dedent()
                 .write("} else {").indent()
                     .write("throw new Error('No value provided for input HTTP label: $L.');", memberName).dedent()
                 .write("}");
