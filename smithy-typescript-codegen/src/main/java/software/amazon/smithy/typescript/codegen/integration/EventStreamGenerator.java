@@ -19,7 +19,6 @@ import static software.amazon.smithy.typescript.codegen.integration.RuntimeClien
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -38,37 +37,16 @@ import software.amazon.smithy.utils.ListUtils;
  */
 public class EventStreamGenerator implements TypeScriptIntegration {
 
-    static BiFunction<Model, OperationShape, Boolean> operationHasEventStreamOutput =
-            (model, operationShape) -> {
-                EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
-                return eventStreamIndex.getOutputInfo(operationShape).isPresent();
-            };
-
-    static BiFunction<Model, OperationShape, Boolean> operationHasEventStreamInput =
-            (model, operationShape) -> {
-                EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
-                return eventStreamIndex.getInputInfo(operationShape).isPresent();
-            };
-
-    static BiFunction<Model, OperationShape, Boolean> operationHasEventStream =
-            (model, operationShape) ->
-                    operationHasEventStreamInput.apply(model, operationShape)
-                            || operationHasEventStreamOutput.apply(model, operationShape);
-
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
-                RuntimeClientPlugin.builder()
-                        .withConventions(TypeScriptDependency.MIDDLEWARE_EVENT_STREAM.dependency, "EventStream")
-                        .operationPredicate((m, s, o) -> hasEventStream(m, s, operationHasEventStreamInput))
-                        .build(),
                 RuntimeClientPlugin.builder()
                         .withConventions(
                                 TypeScriptDependency.MIDDLEWARE_EVENT_STREAM.dependency,
                                 "EventStream",
                                 HAS_CONFIG
                         )
-                        .servicePredicate((m, s) -> hasEventStream(m, s, operationHasEventStream))
+                        .servicePredicate(EventStreamGenerator::hasEventStream)
                         .build()
         );
     }
@@ -80,7 +58,7 @@ public class EventStreamGenerator implements TypeScriptIntegration {
             SymbolProvider symbolProvider,
             TypeScriptWriter writer
     ) {
-        if (!hasEventStream(model, settings.getService(model), operationHasEventStream)) {
+        if (!hasEventStream(model, settings.getService(model))) {
             return;
         }
         writer.addImport(
@@ -100,7 +78,7 @@ public class EventStreamGenerator implements TypeScriptIntegration {
             TypeScriptWriter writer,
             LanguageTarget target
     ) {
-        if (!hasEventStream(model, settings.getService(model), operationHasEventStream)) {
+        if (!hasEventStream(model, settings.getService(model))) {
             return;
         }
 
@@ -129,17 +107,49 @@ public class EventStreamGenerator implements TypeScriptIntegration {
         }
     }
 
-    private static boolean hasEventStream(
+    public static final boolean hasEventStream(
             Model model,
-            ServiceShape service,
-            BiFunction<Model, OperationShape, Boolean> predicate
+            ServiceShape service
     ) {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         for (OperationShape operation : operations) {
-            if (predicate.apply(model, operation)) {
+            if (operationHasEventStream(model, service, operation)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    public static final boolean operationHasEventStream(
+            Model model,
+            ServiceShape service,
+            OperationShape operation
+    ) {
+        if (operationHasEventStreamInput(model, operation) || operationHasEventStreamOutput(model, operation)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static final boolean operationHasEventStreamInput(
+            Model model,
+            OperationShape operation
+    ) {
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        if (eventStreamIndex.getInputInfo(operation).isPresent()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static final boolean operationHasEventStreamOutput(
+            Model model,
+            OperationShape operation
+    ) {
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
+            return true;
         }
         return false;
     }

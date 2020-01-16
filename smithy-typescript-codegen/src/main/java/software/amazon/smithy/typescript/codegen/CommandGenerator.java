@@ -93,7 +93,6 @@ final class CommandGenerator implements Runnable {
         writer.addImport("Handler", "Handler", "@aws-sdk/types");
         writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", "@aws-sdk/types");
         writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
-        writer.addImport("SerdeContext", "SerdeContext", "@aws-sdk/types");
 
         addInputAndOutputTypes();
 
@@ -204,7 +203,7 @@ final class CommandGenerator implements Runnable {
                 .write("private serialize(")
                 .indent()
                     .write("input: $T,", inputType)
-                    .write("context: SerdeContext")
+                    .write("context: $L", CodegenUtils.getOperationSerializerContextType(writer, model, operation))
                 .dedent()
                 .openBlock(
                         "): Promise<$T> {", "}",
@@ -216,7 +215,7 @@ final class CommandGenerator implements Runnable {
                 .write("private deserialize(")
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
-                    .write("context: SerdeContext")
+                    .write("context: $L", CodegenUtils.getOperationDeserializerContextType(writer, model, operation))
                 .dedent()
                 .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
                 .write("");

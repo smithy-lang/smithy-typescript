@@ -15,6 +15,13 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.typescript.codegen.integration.EventStreamGenerator;
+
 /**
  * Utility methods needed across Java packages.
  */
@@ -30,5 +37,40 @@ public final class CodegenUtils {
      */
     public static boolean isJsonMediaType(String mediaType) {
         return mediaType.equals("application/json") || mediaType.endsWith("+json");
+    }
+
+
+    public static String getOperationSerializerContextType(
+            TypeScriptWriter writer, Model model, OperationShape operation) {
+        // add default SerdeContext
+        List<String> contextInterfaceList = new ArrayList<>();
+        contextInterfaceList.add(getDefaultOperationSerdeContextTypes(writer));
+        //check if event stream trait exists
+        if (EventStreamGenerator.operationHasEventStreamInput(model, operation)
+        ) {
+            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
+            contextInterfaceList.add("__EventStreamSerdeContext");
+        }
+        return String.join(" & ", contextInterfaceList);
+    }
+
+    public static String getOperationDeserializerContextType(
+            TypeScriptWriter writer, Model model, OperationShape operation) {
+        // add default SerdeContext
+        List<String> contextInterfaceList = new ArrayList<>();
+        contextInterfaceList.add(getDefaultOperationSerdeContextTypes(writer));
+        //check if event stream trait exists
+        if (EventStreamGenerator.operationHasEventStreamOutput(model, operation)
+        ) {
+            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
+            contextInterfaceList.add("__EventStreamSerdeContext");
+        }
+        return String.join(" & ", contextInterfaceList);
+    }
+
+    private static String getDefaultOperationSerdeContextTypes(TypeScriptWriter writer) {
+        // add default SerdeContext
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        return "__SerdeContext";
     }
 }

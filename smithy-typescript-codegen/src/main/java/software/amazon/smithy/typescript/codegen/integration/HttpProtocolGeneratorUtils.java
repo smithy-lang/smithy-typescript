@@ -33,6 +33,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -348,5 +350,42 @@ final class HttpProtocolGeneratorUtils {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
             });
         });
+    }
+
+    static Set<StructureShape> generateSerializingEventUnion(
+            GenerationContext context,
+            UnionShape events
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(events);
+        String protocolName = context.getProtocolName();
+        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, protocolName) + "_event";
+        Model model = context.getModel();
+        Set<StructureShape> targets = new TreeSet<>();
+        writer.openBlock("const $L = (\n"
+                + "  output: any,\n"
+                + "  context: __SerdeContext\n"
+                + "): $T => {", "}", methodName, symbol, () -> {
+            events.getAllMembers().forEach((name, member) -> {
+                Shape target = model.expectShape(member.getTarget());
+                targets.add(target.asStructureShape().orElseThrow(
+                        () -> new CodegenException("Expect event to be structure shape, got " + target.getType())));
+                // In shape deser, Unions are indexed by local name. But event name in event stream has different
+                // meaning than actual unions index, which may have local name. Here assume event union is indexed by
+                // member name
+                writer.openBlock("if (output['$L'] !== undefined) {", "}", name, () -> {
+                    writer.openBlock("return {", "};", () -> {
+                        // Dispatch to special event deserialize function
+                        Symbol eventSymbol = symbolProvider.toSymbol(target);
+                        String eventDeserMethodName =
+                                ProtocolGenerator.getDeserFunctionName(eventSymbol, protocolName) + "_event";
+                        String statement = eventDeserMethodName + "(output['" + name + "'], context)";
+                        writer.write("$L: $L", name, statement);
+                    });
+                });
+            });
+        });
+        return targets;
     }
 }
