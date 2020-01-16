@@ -27,7 +27,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Abstract implementation useful for all HTTP protocols without bindings.
@@ -141,7 +140,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.write("...context.endpoint,");
                 writer.write("protocol: \"https\",");
                 writer.write("method: \"POST\",");
-                writer.write("path: \"/$L\",", StringUtils.capitalize(operation.getId().getName()));
+                writer.write("path: $S,", getOperationPath(context, operation));
                 writer.write("headers: headers,");
                 if (hasRequestBody) {
                     writer.write("body: body,");
@@ -178,6 +177,15 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         return false;
     }
+
+    /**
+     * Provides the request path for the operation.
+     *
+     * @param context The generation context.
+     * @param operation The operation being generated.
+     * @return The path to send HTTP requests to.
+     */
+    protected abstract String getOperationPath(GenerationContext context, OperationShape operation);
 
     /**
      * Writes any additional HTTP headers required by the protocol implementation.
