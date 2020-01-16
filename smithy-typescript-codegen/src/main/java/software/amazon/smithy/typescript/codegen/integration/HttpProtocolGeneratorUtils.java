@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -191,7 +192,10 @@ final class HttpProtocolGeneratorUtils {
         writer.write("// Collect low-level response body stream to Uint8Array.");
         writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
                 "};", () -> {
-            writer.write("return context.streamCollector(streamBody) || Promise.resolve(new Uint8Array());");
+            writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
+                writer.write("return Promise.resolve(streamBody);");
+            });
+            writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
         });
 
         writer.write("");
@@ -352,7 +356,7 @@ final class HttpProtocolGeneratorUtils {
         });
     }
 
-    static Set<StructureShape> generateSerializingEventUnion(
+    static Set<StructureShape> generateDeserializingEventUnion(
             GenerationContext context,
             UnionShape events
     ) {
@@ -363,10 +367,10 @@ final class HttpProtocolGeneratorUtils {
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, protocolName) + "_event";
         Model model = context.getModel();
         Set<StructureShape> targets = new TreeSet<>();
-        writer.openBlock("const $L = (\n"
+        writer.openBlock("const $L = async (\n"
                 + "  output: any,\n"
                 + "  context: __SerdeContext\n"
-                + "): $T => {", "}", methodName, symbol, () -> {
+                + "): Promise<$T> => {", "}", methodName, symbol, () -> {
             events.getAllMembers().forEach((name, member) -> {
                 Shape target = model.expectShape(member.getTarget());
                 targets.add(target.asStructureShape().orElseThrow(
@@ -381,10 +385,11 @@ final class HttpProtocolGeneratorUtils {
                         String eventDeserMethodName =
                                 ProtocolGenerator.getDeserFunctionName(eventSymbol, protocolName) + "_event";
                         String statement = eventDeserMethodName + "(output['" + name + "'], context)";
-                        writer.write("$L: $L", name, statement);
+                        writer.write("$L: await $L", name, statement);
                     });
                 });
             });
+            writer.write("return {$$unknown: output}");
         });
         return targets;
     }
