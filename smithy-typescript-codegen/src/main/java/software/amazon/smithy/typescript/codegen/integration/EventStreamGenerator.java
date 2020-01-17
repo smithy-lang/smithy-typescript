@@ -111,7 +111,12 @@ public class EventStreamGenerator implements TypeScriptIntegration {
                                 RuntimeClientPlugin.Convention.HAS_CONFIG
                         )
                         .servicePredicate(EventStreamGenerator::hasEventStream)
-                        .build()
+                        .build(),
+                RuntimeClientPlugin.builder()
+                        .withConventions(
+                                TypeScriptDependency.MIDDLEWARE_EVENT_STREAM.dependency,
+                                "EventStream"
+                        ).operationPredicate((m, s, o) -> operationHasEventStreamInput(m, o)).build()
         );
     }
 
