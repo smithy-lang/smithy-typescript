@@ -15,8 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
-import static software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention.HAS_CONFIG;
-
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +24,7 @@ import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -37,6 +36,71 @@ import software.amazon.smithy.utils.ListUtils;
  */
 public class EventStreamGenerator implements TypeScriptIntegration {
 
+    public static final boolean hasEventStream(
+            Model model,
+            ServiceShape service
+    ) {
+        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
+        for (OperationShape operation : operations) {
+            if (operationHasEventStream(model, service, operation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static final boolean operationHasEventStream(
+            Model model,
+            ServiceShape service,
+            OperationShape operation
+    ) {
+        if (operationHasEventStreamInput(model, operation) || operationHasEventStreamOutput(model, operation)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static final boolean operationHasEventStreamInput(
+            Model model,
+            OperationShape operation
+    ) {
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        if (eventStreamIndex.getInputInfo(operation).isPresent()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static final boolean operationHasEventStreamOutput(
+            Model model,
+            OperationShape operation
+    ) {
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static String getEventHeaderType(Shape shape) {
+        switch (shape.getType()) {
+            case BOOLEAN:
+            case BYTE:
+            case SHORT:
+            case INTEGER:
+            case LONG:
+            case STRING:
+            case TIMESTAMP:
+                return shape.getType().toString();
+            case BLOB:
+                return "binary";
+            default:
+                return "binary";
+        }
+
+    }
+
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
@@ -44,7 +108,7 @@ public class EventStreamGenerator implements TypeScriptIntegration {
                         .withConventions(
                                 TypeScriptDependency.MIDDLEWARE_EVENT_STREAM.dependency,
                                 "EventStream",
-                                HAS_CONFIG
+                                RuntimeClientPlugin.Convention.HAS_CONFIG
                         )
                         .servicePredicate(EventStreamGenerator::hasEventStream)
                         .build()
@@ -105,52 +169,5 @@ public class EventStreamGenerator implements TypeScriptIntegration {
             default:
                 // do nothing
         }
-    }
-
-    public static final boolean hasEventStream(
-            Model model,
-            ServiceShape service
-    ) {
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
-        Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
-        for (OperationShape operation : operations) {
-            if (operationHasEventStream(model, service, operation)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static final boolean operationHasEventStream(
-            Model model,
-            ServiceShape service,
-            OperationShape operation
-    ) {
-        if (operationHasEventStreamInput(model, operation) || operationHasEventStreamOutput(model, operation)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static final boolean operationHasEventStreamInput(
-            Model model,
-            OperationShape operation
-    ) {
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
-        if (eventStreamIndex.getInputInfo(operation).isPresent()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static final boolean operationHasEventStreamOutput(
-            Model model,
-            OperationShape operation
-    ) {
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
-        if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-            return true;
-        }
-        return false;
     }
 }

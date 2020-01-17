@@ -27,6 +27,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.pattern.Pattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -36,6 +37,7 @@ import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -390,6 +392,42 @@ final class HttpProtocolGeneratorUtils {
                 });
             });
             writer.write("return {$$unknown: output}");
+        });
+        return targets;
+    }
+
+    static Set<StructureShape> generateSerializingEvnetUnion(
+            GenerationContext context,
+            UnionShape events
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(events);
+        String protocolName = context.getProtocolName();
+        String methodName = ProtocolGenerator.getSerFunctionName(symbol, protocolName) + "_event";
+        Model model = context.getModel();
+        Set<StructureShape> targets = new TreeSet<>();
+        writer.addImport("Message", "__Message", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.openBlock("const $L = (\n"
+                + "  input: any,\n"
+                + "  context: __SerdeContext\n"
+                + "): __Message => {", "}", methodName, () -> {
+            // Visit over the union type, then get the right serialization for the member.
+            writer.openBlock("return $T.visit(input, {", "});", symbol, () -> {
+                events.getAllMembers().forEach((memberName, memberShape) -> {
+                    Shape target = model.expectShape(memberShape.getTarget());
+                    targets.add(target.asStructureShape().orElseThrow(
+                            () -> new CodegenException("Expect event to be structure shape, got " + target.getType())));
+                    // Dispatch to special event deserialize function
+                    Symbol eventSymbol = symbolProvider.toSymbol(target);
+                    String eventSerMethodName =
+                            ProtocolGenerator.getSerFunctionName(eventSymbol, protocolName) + "_event";
+                    writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
+                });
+
+                // Handle the unknown property.
+                writer.write("_: value => value as any");
+            });
         });
         return targets;
     }
