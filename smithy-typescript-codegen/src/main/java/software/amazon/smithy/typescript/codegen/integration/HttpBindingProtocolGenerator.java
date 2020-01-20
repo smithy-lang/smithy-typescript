@@ -52,6 +52,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -205,9 +206,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
             List<HttpBinding> documentBindings = writeRequestBody(context, operation, bindingIndex);
+            boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
+
+            if (hasHostPrefix) {
+                HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+            }
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 writer.write("...context.endpoint,");
+                if (hasHostPrefix) {
+                    writer.write("hostname: resolvedHostname,");
+                }
                 writer.write("protocol: \"https\",");
                 writer.write("method: $S,", trait.getMethod());
                 writer.write("headers: headers,");

@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -22,9 +23,12 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.pattern.Pattern;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -237,5 +241,35 @@ final class HttpProtocolGeneratorUtils {
         writer.write("");
 
         return errorShapes;
+    }
+
+    /**
+     * Writes resolved hostname, prepending existing hostname with hostPrefix and replacing each hostLabel with
+     * the corresponding top-level input member value.
+     *
+     * @param context The generation context.
+     * @param operation The operation to generate for.
+     */
+    static void writeHostPrefix(
+            GenerationContext context,
+            OperationShape operation
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        EndpointTrait trait = operation.getTrait(EndpointTrait.class).get();
+        writer.write("let resolvedHostname = (context.endpoint as any).hostname;");
+        // Check if disableHostPrefixInjection has been set to true at runtime
+        writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
+            writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
+            List<Pattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
+            Shape inputShape = context.getModel().expectShape(operation.getInput().get());
+            for (Pattern.Segment label : prefixLabels) {
+                MemberShape target = inputShape.members().stream().filter(s -> s.getMemberName().equals(
+                        label.getContent())).findFirst().get();
+                String memberName = symbolProvider.toMemberName(target);
+                writer.write("resolvedHostname = resolvedHostname.replace($S, input.$L)",
+                        "{" + label.getContent() + "}", memberName);
+            }
+        });
     }
 }
