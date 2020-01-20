@@ -270,6 +270,10 @@ final class HttpProtocolGeneratorUtils {
                 writer.write("resolvedHostname = resolvedHostname.replace($S, input.$L)",
                         "{" + label.getContent() + "}", memberName);
             }
+            writer.write("const hostPattern = /^[a-zA-Z0-9]{1}$$|^[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]$$/;");
+            writer.openBlock("if (!hostPattern.test(resolvedHostname)) {", "}", () -> {
+                writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
+            });
         });
     }
 }

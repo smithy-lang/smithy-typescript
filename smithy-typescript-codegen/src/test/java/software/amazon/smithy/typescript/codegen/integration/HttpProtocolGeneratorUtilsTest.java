@@ -65,6 +65,12 @@ public class HttpProtocolGeneratorUtilsTest {
         assertThat(writer.toString(), containsString("if (context.disableHostPrefix !== true) {"));
         assertThat(writer.toString(), containsString("resolvedHostname = \"{foo}.data.\" + resolvedHostname;"));
         assertThat(writer.toString(), containsString("resolvedHostname = resolvedHostname.replace(\"{foo}\", input.foo)"));
+        assertThat(writer.toString(), containsString(
+                "const hostPattern = /^[a-zA-Z0-9]{1}$|^[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]$/;"));
+        assertThat(writer.toString(), containsString("if (!hostPattern.test(resolvedHostname)) {"));
+        assertThat(writer.toString(), containsString(
+                "throw new Error(\"ValidationError: prefixed hostname must be hostname compatible."));
+
     }
 
     private static final class MockProvider implements SymbolProvider {
