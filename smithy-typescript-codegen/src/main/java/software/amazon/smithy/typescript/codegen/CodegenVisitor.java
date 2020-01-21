@@ -23,24 +23,29 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -139,7 +144,26 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate models that are connected to the service being generated.
         LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
         Set<Shape> serviceShapes = new TreeSet<>(new Walker(nonTraits).walkShapes(service));
-        serviceShapes.forEach(shape -> shape.accept(this));
+        Map<String, Shape> shapeMap = new TreeMap<>();
+
+        // Check for colliding shapes generating models and prune non-unique shapes
+        for (Shape shape : serviceShapes) {
+            String shapeReference = shape.getType().toString() + shape.getId().asRelativeReference();
+
+            if (shapeMap.containsKey(shapeReference)) {
+                Shape knownShape = shapeMap.get(shapeReference);
+                if (!shapesMatch(shape, knownShape)) {
+                    throw new CodegenException(("Shape Collision: cannot condense " + shape.toString() + " and "
+                            + knownShape.toString()));
+                }
+            } else {
+                shapeMap.put(shapeReference, shape);
+            }
+        }
+        // Generate models from pruned shapes
+        for (Shape shape : shapeMap.values()) {
+            shape.accept(this);
+        }
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
@@ -280,5 +304,49 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         return null;
+    }
+
+    private boolean shapesMatch(Shape shape, Shape otherShape) {
+        // Check names match.
+        if (!shape.getId().getName().equals(otherShape.getId().getName())) {
+            return false;
+        }
+
+        // Check types match.
+        if (!shape.getType().equals(otherShape.getType())) {
+            return false;
+        }
+
+        // Check traits match.
+        Map<ShapeId, Trait> traits = shape.getAllTraits();
+        Map<ShapeId, Trait> otherTraits = otherShape.getAllTraits();
+        for (ShapeId trait : traits.keySet()) {
+            // Ignore box trait when comparing.
+            if (!otherTraits.containsKey(trait) && !trait.getName().equals("box")) {
+                return false;
+            }
+        }
+        for (ShapeId trait : otherTraits.keySet()) {
+            // Ignore box trait when comparing.
+            if (!traits.containsKey(trait) && !trait.getName().equals("box")) {
+                return false;
+            }
+        }
+
+        // Check members match.
+        Collection<MemberShape> memberShapes = shape.members();
+        Collection<MemberShape> otherMemberShapes = otherShape.members();
+        for (MemberShape memberShape : memberShapes) {
+            if (!otherMemberShapes.stream().anyMatch(s -> s.getMemberName().contains(memberShape.getMemberName()))) {
+                return false;
+            }
+        }
+        for (MemberShape otherMemberShape : otherMemberShapes) {
+            if (!memberShapes.stream().anyMatch(s -> s.getMemberName().contains(otherMemberShape.getMemberName()))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
