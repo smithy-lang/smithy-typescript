@@ -146,7 +146,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Set<Shape> serviceShapes = new TreeSet<>(new Walker(nonTraits).walkShapes(service));
         Map<String, Shape> shapeMap = new TreeMap<>();
 
-        // Check for colliding shapes generating models and prune non-unique shapes
+        // Check for colliding shapes and prune non-unique shapes
         for (Shape shape : serviceShapes) {
             String shapeReference = shape.getType().toString() + shape.getId().asRelativeReference();
 
@@ -309,11 +309,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private boolean shapesMatch(Shape shape, Shape otherShape) {
         // Check names match.
         if (!shape.getId().getName().equals(otherShape.getId().getName())) {
-            return false;
-        }
-
-        // Check types match.
-        if (!shape.getType().equals(otherShape.getType())) {
             return false;
         }
 
