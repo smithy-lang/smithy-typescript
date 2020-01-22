@@ -257,7 +257,7 @@ final class HttpProtocolGeneratorUtils {
         writer.write("let resolvedHostname = (context.endpoint as any).hostname;");
         // Check if disableHostPrefixInjection has been set to true at runtime
         writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
-            writer.addImport("validHostname", "__validHostname",
+            writer.addImport("isValidHostname", "__isValidHostname",
                     TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP.packageName);
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
             List<Pattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
@@ -269,7 +269,7 @@ final class HttpProtocolGeneratorUtils {
                 writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L)",
                         label.getContent(), memberName);
             }
-            writer.openBlock("if (!__validHostname(resolvedHostname)) {", "}", () -> {
+            writer.openBlock("if (!__isValidHostname(resolvedHostname)) {", "}", () -> {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
             });
         });
