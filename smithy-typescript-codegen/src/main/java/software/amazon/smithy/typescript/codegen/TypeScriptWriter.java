@@ -60,7 +60,7 @@ public final class TypeScriptWriter extends CodeWriter {
     private final ImportDeclarations imports;
     private final List<SymbolDependency> dependencies = new ArrayList<>();
 
-    TypeScriptWriter(String moduleName) {
+    public TypeScriptWriter(String moduleName) {
         this.moduleName = Paths.get(moduleName);
         moduleNameString = moduleName;
         imports = new ImportDeclarations(moduleName);

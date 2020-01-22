@@ -238,6 +238,10 @@ final class ServiceGenerator implements Runnable {
             writer.writeDocs("The runtime environment");
             writer.write("runtime?: string;\n");
 
+            writer.writeDocs("Disable dyanamically changing the endpoint of the client based on the hostPrefix \n"
+                    + "trait of an operation.");
+            writer.write("disableHostPrefix?: boolean;\n");
+
             // Write custom configuration dependencies.
             for (TypeScriptIntegration integration : integrations) {
                 integration.addConfigInterfaceFields(settings, model, symbolProvider, writer);

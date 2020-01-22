@@ -24,6 +24,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -135,9 +136,17 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
             writeRequestHeaders(context, operation);
             boolean hasRequestBody = writeRequestBody(context, operation);
+            boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
+
+            if (hasHostPrefix) {
+                HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+            }
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 writer.write("...context.endpoint,");
+                if (hasHostPrefix) {
+                    writer.write("hostname: resolvedHostname,");
+                }
                 writer.write("protocol: \"https\",");
                 writer.write("method: \"POST\",");
                 writer.write("path: $S,", getOperationPath(context, operation));
