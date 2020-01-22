@@ -66,9 +66,6 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", "^1.0.0-alpha.1", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", "^1.0.0-alpha.1", false),
 
-    // Conditionally added when doing hostname validation
-    AWS_VALID_HOSTNAME("dependencies", "@aws-sdk/util-valid-hostname", "^1.0.0-alpha.0", false),
-
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),
     TYPES_BIG_JS("devDependencies", "@types/big.js", "^4.0.5", false);
