@@ -70,7 +70,6 @@ public class HttpProtocolGeneratorUtilsTest {
         assertThat(writer.toString(), containsString("if (!hostPattern.test(resolvedHostname)) {"));
         assertThat(writer.toString(), containsString(
                 "throw new Error(\"ValidationError: prefixed hostname must be hostname compatible."));
-
     }
 
     private static final class MockProvider implements SymbolProvider {

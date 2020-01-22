@@ -250,10 +250,7 @@ final class HttpProtocolGeneratorUtils {
      * @param context The generation context.
      * @param operation The operation to generate for.
      */
-    static void writeHostPrefix(
-            GenerationContext context,
-            OperationShape operation
-    ) {
+    static void writeHostPrefix(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         EndpointTrait trait = operation.getTrait(EndpointTrait.class).get();
@@ -262,13 +259,13 @@ final class HttpProtocolGeneratorUtils {
         writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
             List<Pattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
-            Shape inputShape = context.getModel().expectShape(operation.getInput().get());
+            StructureShape inputShape = context.getModel().expectShape(operation.getInput()
+                    .get(), StructureShape.class);
             for (Pattern.Segment label : prefixLabels) {
-                MemberShape target = inputShape.members().stream().filter(s -> s.getMemberName().equals(
-                        label.getContent())).findFirst().get();
-                String memberName = symbolProvider.toMemberName(target);
-                writer.write("resolvedHostname = resolvedHostname.replace($S, input.$L)",
-                        "{" + label.getContent() + "}", memberName);
+                MemberShape member = inputShape.getMember(label.getContent()).get();
+                String memberName = symbolProvider.toMemberName(member);
+                writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L)",
+                        label.getContent(), memberName);
             }
             writer.write("const hostPattern = /^[a-zA-Z0-9]{1}$$|^[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]$$/;");
             writer.openBlock("if (!hostPattern.test(resolvedHostname)) {", "}", () -> {
