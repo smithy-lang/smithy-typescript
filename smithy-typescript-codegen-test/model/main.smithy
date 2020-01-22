@@ -33,7 +33,11 @@ string CityId
 
 @readonly
 @http(method: "GET", uri: "/cities/{cityId}")
-operation GetCity(GetCityInput) -> GetCityOutput errors [NoSuchResource]
+operation GetCity {
+    input: GetCityInput,
+    output: GetCityOutput,
+    errors: [NoSuchResource]
+}
 
 /// The input used to get a city.
 structure GetCityInput {
@@ -81,7 +85,10 @@ structure NoSuchResource {
 @readonly
 @paginated(items: "items")
 @http(method: "GET", uri: "/cities")
-operation ListCities(ListCitiesInput) -> ListCitiesOutput
+operation ListCities {
+    input: ListCitiesInput,
+    output: ListCitiesOutput
+}
 
 structure ListCitiesInput {
     @httpQuery("nextToken")
@@ -118,7 +125,9 @@ structure CitySummary {
 
 @readonly
 @http(method: "GET", uri: "/current-time")
-operation GetCurrentTime() -> GetCurrentTimeOutput
+operation GetCurrentTime {
+    output: GetCurrentTimeOutput
+}
 
 structure GetCurrentTimeOutput {
     @required
@@ -127,7 +136,10 @@ structure GetCurrentTimeOutput {
 
 @readonly
 @http(method: "GET", uri: "/cities/{cityId}/forecast")
-operation GetForecast(GetForecastInput) -> GetForecastOutput
+operation GetForecast {
+    input: GetForecastInput,
+    output: GetForecastOutput
+}
 
 // "cityId" provides the only identifier for the resource since
 // a Forecast doesn't have its own.
@@ -167,7 +179,11 @@ map StringMap {
 
 @readonly
 @http(method: "GET", uri: "/cities/{cityId}/image")
-operation GetCityImage(GetCityImageInput) -> GetCityImageOutput errors [NoSuchResource]
+operation GetCityImage {
+    input: GetCityImageInput,
+    output: GetCityImageOutput,
+    errors: [NoSuchResource]
+}
 
 structure GetCityImageInput {
     @required @httpLabel
