@@ -44,6 +44,7 @@ import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -314,38 +315,32 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         return shapeMap;
     }
 
-    private boolean isShapeCollision(Shape shape, Shape otherShape) {
+    private boolean isShapeCollision(Shape shapeA, Shape shapeB) {
         // Check names match.
-        if (!shape.getId().getName().equals(otherShape.getId().getName())) {
+        if (!shapeA.getId().getName().equals(shapeB.getId().getName())) {
             return true;
         }
 
         // Check traits match.
-        Map<ShapeId, Trait> traits = shape.getAllTraits();
-        Map<ShapeId, Trait> otherTraits = otherShape.getAllTraits();
-        for (ShapeId trait : traits.keySet()) {
-            // Ignore box trait when comparing.
-            if (!otherTraits.containsKey(trait) && !trait.getName().equals("box")) {
-                return true;
-            }
-        }
-        for (ShapeId trait : otherTraits.keySet()) {
-            // Ignore box trait when comparing.
-            if (!traits.containsKey(trait) && !trait.getName().equals("box")) {
-                return true;
-            }
+        Map<ShapeId, Trait> traitsA = new HashMap<>(shapeA.getAllTraits());
+        Map<ShapeId, Trait> traitsB = new HashMap<>(shapeB.getAllTraits());
+        // Ignore the box trait since it has no effect in JavaScript.
+        traitsA.remove(BoxTrait.ID);
+        traitsB.remove(BoxTrait.ID);
+        if (!traitsA.equals(traitsB)) {
+            return false;
         }
 
         // Check members match.
-        Collection<MemberShape> memberShapes = shape.members();
-        Collection<MemberShape> otherMemberShapes = otherShape.members();
-        for (MemberShape memberShape : memberShapes) {
-            if (!otherMemberShapes.stream().anyMatch(s -> s.getMemberName().contains(memberShape.getMemberName()))) {
+        Collection<MemberShape> memberShapesA = shapeA.members();
+        Collection<MemberShape> memberShapesB = shapeB.members();
+        for (MemberShape memberShape : memberShapesA) {
+            if (!memberShapesB.stream().anyMatch(s -> s.getMemberName().contains(memberShape.getMemberName()))) {
                 return true;
             }
         }
-        for (MemberShape otherMemberShape : otherMemberShapes) {
-            if (!memberShapes.stream().anyMatch(s -> s.getMemberName().contains(otherMemberShape.getMemberName()))) {
+        for (MemberShape otherMemberShape : memberShapesB) {
+            if (!memberShapesA.stream().anyMatch(s -> s.getMemberName().contains(otherMemberShape.getMemberName()))) {
                 return true;
             }
         }
