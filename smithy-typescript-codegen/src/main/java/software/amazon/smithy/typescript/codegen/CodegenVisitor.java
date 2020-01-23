@@ -18,12 +18,12 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
@@ -296,7 +296,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     private Map<String, Shape> condenseShapes(Set<Shape> shapes) {
-        Map<String, Shape> shapeMap = new TreeMap<>();
+        Map<String, Shape> shapeMap = new LinkedHashMap<>();
 
         // Check for colliding shapes and prune non-unique shapes
         for (Shape shape : shapes) {
