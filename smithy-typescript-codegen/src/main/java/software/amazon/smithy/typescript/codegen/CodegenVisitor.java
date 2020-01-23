@@ -144,23 +144,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate models that are connected to the service being generated.
         LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
         Set<Shape> serviceShapes = new TreeSet<>(new Walker(nonTraits).walkShapes(service));
-        Map<String, Shape> shapeMap = new TreeMap<>();
 
-        // Check for colliding shapes and prune non-unique shapes
-        for (Shape shape : serviceShapes) {
-            String shapeReference = shape.getType().toString() + shape.getId().asRelativeReference();
+        // Condense duplicate shapes
+        Map<String, Shape> shapeMap = condenseShapes(serviceShapes);
 
-            if (shapeMap.containsKey(shapeReference)) {
-                Shape knownShape = shapeMap.get(shapeReference);
-                if (!shapesMatch(shape, knownShape)) {
-                    throw new CodegenException(("Shape Collision: cannot condense " + shape.toString() + " and "
-                            + knownShape.toString()));
-                }
-            } else {
-                shapeMap.put(shapeReference, shape);
-            }
-        }
-        // Generate models from pruned shapes
+        // Generate models from condensed shapes
         for (Shape shape : shapeMap.values()) {
             shape.accept(this);
         }
@@ -306,10 +294,30 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         return null;
     }
 
-    private boolean shapesMatch(Shape shape, Shape otherShape) {
+    private Map<String, Shape> condenseShapes(Set<Shape> shapes) {
+        Map<String, Shape> shapeMap = new TreeMap<>();
+
+        // Check for colliding shapes and prune non-unique shapes
+        for (Shape shape : shapes) {
+            String shapeReference = shape.getType().toString() + shape.getId().asRelativeReference();
+
+            if (shapeMap.containsKey(shapeReference)) {
+                Shape knownShape = shapeMap.get(shapeReference);
+                if (isShapeCollision(shape, knownShape)) {
+                    throw new CodegenException(("Shape Collision: cannot condense " + shape + " and " + knownShape));
+                }
+            } else {
+                shapeMap.put(shapeReference, shape);
+            }
+        }
+
+        return shapeMap;
+    }
+
+    private boolean isShapeCollision(Shape shape, Shape otherShape) {
         // Check names match.
         if (!shape.getId().getName().equals(otherShape.getId().getName())) {
-            return false;
+            return true;
         }
 
         // Check traits match.
@@ -318,13 +326,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         for (ShapeId trait : traits.keySet()) {
             // Ignore box trait when comparing.
             if (!otherTraits.containsKey(trait) && !trait.getName().equals("box")) {
-                return false;
+                return true;
             }
         }
         for (ShapeId trait : otherTraits.keySet()) {
             // Ignore box trait when comparing.
             if (!traits.containsKey(trait) && !trait.getName().equals("box")) {
-                return false;
+                return true;
             }
         }
 
@@ -333,15 +341,15 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Collection<MemberShape> otherMemberShapes = otherShape.members();
         for (MemberShape memberShape : memberShapes) {
             if (!otherMemberShapes.stream().anyMatch(s -> s.getMemberName().contains(memberShape.getMemberName()))) {
-                return false;
+                return true;
             }
         }
         for (MemberShape otherMemberShape : otherMemberShapes) {
             if (!memberShapes.stream().anyMatch(s -> s.getMemberName().contains(otherMemberShape.getMemberName()))) {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 }

@@ -145,7 +145,6 @@ public class CodegenVisitorTest {
                         "}"));
     }
 
-
     @Test
     public void invokesOnWriterCustomizations() {
         // TODO
