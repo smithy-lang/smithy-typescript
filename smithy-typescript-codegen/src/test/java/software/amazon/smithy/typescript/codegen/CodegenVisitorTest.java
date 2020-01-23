@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
 public class CodegenVisitorTest {
     @Test
@@ -96,6 +98,51 @@ public class CodegenVisitorTest {
 
         Assertions.assertTrue(manifest.hasFile("ExampleClient.ts"));
         assertThat(manifest.getFileString("ExampleClient.ts").get(), containsString("export class ExampleClient"));
+    }
+
+    @Test void throwsOnShapesThatCannotBeCondensed() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service-with-shape-conflict.smithy"))
+                .assemble()
+                .unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+                .model(model)
+                .fileManifest(manifest)
+                .pluginClassLoader(getClass().getClassLoader())
+                .settings(Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build())
+                .build();
+
+        Assertions.assertThrows(CodegenException.class, () -> new TypeScriptCodegenPlugin().execute(context));
+    }
+
+    @Test void successfullyCondensesShapesThatMatch() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service-with-condensible-shapes.smithy"))
+                .assemble()
+                .unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+                .model(model)
+                .fileManifest(manifest)
+                .pluginClassLoader(getClass().getClassLoader())
+                .settings(Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build())
+                .build();
+
+        new TypeScriptCodegenPlugin().execute(context);
+
+        Assertions.assertTrue(manifest.hasFile("models/index.ts"));
+        assertThat(manifest.getFileString("models/index.ts").get(),
+                containsString("export interface Bar {\n" +
+                        "  __type?: \"Bar\";\n" +
+                        "  baz: string | undefined;\n" +
+                        "}"));
     }
 
     @Test
