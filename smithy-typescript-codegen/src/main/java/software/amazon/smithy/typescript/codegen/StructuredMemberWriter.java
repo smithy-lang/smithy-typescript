@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 
 /**
  * Generates objects, interfaces, enums, etc.
@@ -53,8 +54,8 @@ final class StructuredMemberWriter {
             position++;
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
-            String optionalSuffix = shape.isUnionShape() || !member.isRequired() ? "?" : "";
-            String typeSuffix = member.isRequired() ? " | undefined" : "";
+            String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
+            String typeSuffix = isRequiredMember(member) ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                          symbolProvider.toSymbol(member), typeSuffix);
 
@@ -62,5 +63,23 @@ final class StructuredMemberWriter {
                 writer.write("");
             }
         }
+    }
+
+    /**
+     * Identifies if a member should be required on the generated interface.
+     *
+     * Members that are idempotency tokens should have their required state
+     * relaxed so the token can be auto-filled for end users. From docs:
+     *
+     * "Client implementations MAY automatically provide a value for a request
+     * token member if and only if the member is not explicitly provided."
+     *
+     * @param member The member being generated for.
+     * @return If the interface member should be treated as required.
+     *
+     * @see <a href="https://awslabs.github.io/smithy/spec/core.html#idempotencytoken-trait">Smithy idempotencyToken trait.</a>
+     */
+    private boolean isRequiredMember(MemberShape member) {
+        return member.isRequired() && !member.hasTrait(IdempotencyTokenTrait.class);
     }
 }
