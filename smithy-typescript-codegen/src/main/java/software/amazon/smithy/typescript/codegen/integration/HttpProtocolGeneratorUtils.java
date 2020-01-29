@@ -82,8 +82,8 @@ final class HttpProtocolGeneratorUtils {
                 modifiedSource = dataSource;
                 break;
             case EPOCH_SECONDS:
-                // Account for seconds being sent over the wire in some cases where milliseconds are required.
-                modifiedSource = dataSource + " % 1 != 0 ? Math.round(" + dataSource + " * 1000) : " + dataSource;
+                // Convert whole and decimal numbers to milliseconds.
+                modifiedSource = "Math.round(" + dataSource + " * 1000)";
                 break;
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
