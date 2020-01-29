@@ -38,8 +38,7 @@ public class HttpProtocolGeneratorUtilsTest {
 
         assertThat("new Date(" + DATA_SOURCE + ")",
                 equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, shape, Format.DATE_TIME)));
-        assertThat("new Date(" + DATA_SOURCE + " % 1 != 0 ? Math.round("
-                        + DATA_SOURCE + " * 1000) : " + DATA_SOURCE + ")",
+        assertThat("new Date(Math.round(" + DATA_SOURCE + " * 1000))",
                 equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, shape, Format.EPOCH_SECONDS)));
         assertThat("new Date(" + DATA_SOURCE + ")",
                 equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, shape, Format.HTTP_DATE)));
