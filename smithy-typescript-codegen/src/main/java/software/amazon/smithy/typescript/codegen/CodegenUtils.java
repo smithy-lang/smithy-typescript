@@ -43,8 +43,7 @@ public final class CodegenUtils {
     public static String getOperationSerializerContextType(
             TypeScriptWriter writer, Model model, OperationShape operation) {
         // add default SerdeContext
-        List<String> contextInterfaceList = new ArrayList<>();
-        contextInterfaceList.add(getDefaultOperationSerdeContextTypes(writer));
+        List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         //check if event stream trait exists
         if (EventStreamGenerator.operationHasEventStreamInput(model, operation)
         ) {
@@ -57,8 +56,7 @@ public final class CodegenUtils {
     public static String getOperationDeserializerContextType(
             TypeScriptWriter writer, Model model, OperationShape operation) {
         // add default SerdeContext
-        List<String> contextInterfaceList = new ArrayList<>();
-        contextInterfaceList.add(getDefaultOperationSerdeContextTypes(writer));
+        List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         //check if event stream trait exists
         if (EventStreamGenerator.operationHasEventStreamOutput(model, operation)
         ) {
@@ -68,9 +66,11 @@ public final class CodegenUtils {
         return String.join(" & ", contextInterfaceList);
     }
 
-    private static String getDefaultOperationSerdeContextTypes(TypeScriptWriter writer) {
+    private static List<String> getDefaultOperationSerdeContextTypes(TypeScriptWriter writer) {
+        List<String> contextInterfaceList = new ArrayList<>();
         // add default SerdeContext
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
-        return "__SerdeContext";
+        contextInterfaceList.add("__SerdeContext");
+        return contextInterfaceList;
     }
 }

@@ -59,8 +59,8 @@ final class HttpProtocolGeneratorUtils {
      *
      * @param dataSource The in-code location of the data to provide an input of
      *                   ({@code input.foo}, {@code entry}, etc.)
-     * @param shape The shape that represents the value being provided.
-     * @param format The timestamp format to provide.
+     * @param shape      The shape that represents the value being provided.
+     * @param format     The timestamp format to provide.
      * @return Returns a value or expression of the input timestamp.
      */
     static String getTimestampInputParam(String dataSource, Shape shape, Format format) {
@@ -82,8 +82,8 @@ final class HttpProtocolGeneratorUtils {
      *
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param shape The shape that represents the value being received.
-     * @param format The timestamp format to provide.
+     * @param shape      The shape that represents the value being received.
+     * @param format     The timestamp format to provide.
      * @return Returns a value or expression of the output timestamp.
      */
     static String getTimestampOutputParam(String dataSource, Shape shape, Format format) {
@@ -165,7 +165,7 @@ final class HttpProtocolGeneratorUtils {
      * Writes a response metadata deserializer function for HTTP protocols. This
      * will load things like the status code, headers, and more.
      *
-     * @param context The generation context.
+     * @param context      The generation context.
      * @param responseType The response type for the HTTP protocol.
      */
     static void generateMetadataDeserializer(GenerationContext context, SymbolReference responseType) {
@@ -194,11 +194,11 @@ final class HttpProtocolGeneratorUtils {
         writer.write("// Collect low-level response body stream to Uint8Array.");
         writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
                 "};", () -> {
-            writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
-                writer.write("return Promise.resolve(streamBody);");
-            });
-            writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
-        });
+                    writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
+                        writer.write("return Promise.resolve(streamBody);");
+                    });
+                    writer.write("return context.streamCollector(streamBody) || new Uint8Array();");
+                });
 
         writer.write("");
     }
@@ -228,10 +228,10 @@ final class HttpProtocolGeneratorUtils {
      * assumes a deserialization function is generated for the structures
      * returned.
      *
-     * @param context The generation context.
-     * @param operation The operation to generate for.
-     * @param responseType The response type for the HTTP protocol.
-     * @param errorCodeGenerator A consumer
+     * @param context              The generation context.
+     * @param operation            The operation to generate for.
+     * @param responseType         The response type for the HTTP protocol.
+     * @param errorCodeGenerator   A consumer
      * @param shouldParseErrorBody Flag indicating whether need to parse response body in this dispatcher function
      * @param bodyErrorLocationModifier A function that returns the location of an error in a body given a data source.
      * @return A set of all error structure shapes for the operation that were dispatched to.
@@ -330,7 +330,7 @@ final class HttpProtocolGeneratorUtils {
      * Writes resolved hostname, prepending existing hostname with hostPrefix and replacing each hostLabel with
      * the corresponding top-level input member value.
      *
-     * @param context The generation context.
+     * @param context   The generation context.
      * @param operation The operation to generate for.
      */
     static void writeHostPrefix(GenerationContext context, OperationShape operation) {
@@ -358,6 +358,15 @@ final class HttpProtocolGeneratorUtils {
         });
     }
 
+    /**
+     * Writes a function used to dispatch event to corresponding event deserializers.
+     * This function assumes a event-specific deserialization function is generated
+     * for each returned structures.
+     *
+     * @param context The generation context.
+     * @param events  The union of of events bond to an event stream
+     * @return A list of all event structure shapes for the event stream that were dispatched to.
+     */
     static Set<StructureShape> generateDeserializingEventUnion(
             GenerationContext context,
             UnionShape events
@@ -396,6 +405,15 @@ final class HttpProtocolGeneratorUtils {
         return targets;
     }
 
+    /**
+     * Writes a function used to dispatch event to corresponding event serializer.
+     * This function assumes a event-specific serializer function is generated
+     * for each returned structures.
+     *
+     * @param context The generation context.
+     * @param events  The union of of events bond to an event stream
+     * @return A list of all event structure shapes for the event stream that were dispatched to.
+     */
     static Set<StructureShape> generateSerializingEvnetUnion(
             GenerationContext context,
             UnionShape events

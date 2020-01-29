@@ -36,6 +36,76 @@ import software.amazon.smithy.utils.ListUtils;
  */
 public class EventStreamGenerator implements TypeScriptIntegration {
 
+    @Override
+    public List<RuntimeClientPlugin> getClientPlugins() {
+        return ListUtils.of(
+                RuntimeClientPlugin.builder()
+                        .withConventions(
+                                TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
+                                "EventStream",
+                                RuntimeClientPlugin.Convention.HAS_CONFIG
+                        )
+                        .servicePredicate(EventStreamGenerator::hasEventStream)
+                        .build()
+        );
+    }
+
+    @Override
+    public void addConfigInterfaceFields(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
+    ) {
+        if (!hasEventStream(model, settings.getService(model))) {
+            return;
+        }
+        writer.addImport(
+                "EventStreamSerdeProvider",
+                "EventStreamSerdeProvider",
+                TypeScriptDependency.AWS_SDK_TYPES.packageName
+        );
+        writer.writeDocs("The function that provides necessary utilities for generating and signing event stream");
+        writer.write("eventStreamSerdeProvider?: EventStreamSerdeProvider;");
+    }
+
+    @Override
+    public void addRuntimeConfigValues(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer,
+            LanguageTarget target
+    ) {
+        if (!hasEventStream(model, settings.getService(model))) {
+            return;
+        }
+
+        switch (target) {
+            case NODE:
+                writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
+                writer.addImport(
+                        "eventStreamSerdeProvider",
+                        "eventStreamSerdeProvider",
+                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName
+                );
+                writer.write("eventStreamSerdeProvider");
+                break;
+            case BROWSER:
+                writer.addImport(
+                        "invalidFunction",
+                        "invalidFunction",
+                        TypeScriptDependency.INVALID_DEPENDENCY.packageName
+                );
+                writer.openBlock("eventStreamSerdeProvider: invalidFunction(", ")", () -> {
+                    writer.write("\"event stream serde for browser is not available\"");
+                });
+                break;
+            default:
+                // do nothing
+        }
+    }
+
     public static final boolean hasEventStream(
             Model model,
             ServiceShape service
@@ -83,6 +153,9 @@ public class EventStreamGenerator implements TypeScriptIntegration {
         return false;
     }
 
+    /**
+     * The value of event header 'type' property of given shape.
+     */
     public static String getEventHeaderType(Shape shape) {
         switch (shape.getType()) {
             case BOOLEAN:
@@ -97,82 +170,6 @@ public class EventStreamGenerator implements TypeScriptIntegration {
                 return "binary";
             default:
                 return "binary";
-        }
-
-    }
-
-    @Override
-    public List<RuntimeClientPlugin> getClientPlugins() {
-        return ListUtils.of(
-                RuntimeClientPlugin.builder()
-                        .withConventions(
-                                TypeScriptDependency.MIDDLEWARE_EVENT_STREAM.dependency,
-                                "EventStream",
-                                RuntimeClientPlugin.Convention.HAS_CONFIG
-                        )
-                        .servicePredicate(EventStreamGenerator::hasEventStream)
-                        .build(),
-                RuntimeClientPlugin.builder()
-                        .withConventions(
-                                TypeScriptDependency.MIDDLEWARE_EVENT_STREAM.dependency,
-                                "EventStream"
-                        ).operationPredicate((m, s, o) -> operationHasEventStreamInput(m, o)).build()
-        );
-    }
-
-    @Override
-    public void addConfigInterfaceFields(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer
-    ) {
-        if (!hasEventStream(model, settings.getService(model))) {
-            return;
-        }
-        writer.addImport(
-                "EventStreamSerdeProvider",
-                "EventStreamSerdeProvider",
-                TypeScriptDependency.AWS_SDK_TYPES.packageName
-        );
-        writer.writeDocs("The function that provides necessary utilities for generating and signing event stream");
-        writer.write("eventStreamSerdeProvider?: EventStreamSerdeProvider;");
-    }
-
-    @Override
-    public void addRuntimeConfigValues(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
-            LanguageTarget target
-    ) {
-        if (!hasEventStream(model, settings.getService(model))) {
-            return;
-        }
-
-        switch (target) {
-            case NODE:
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_EVENT_STREAM_NODE);
-                writer.addImport(
-                        "eventStreamSerdeProvider",
-                        "eventStreamSerdeProvider",
-                        TypeScriptDependency.AWS_SDK_UTIL_EVENT_STREAM_NODE.packageName
-                );
-                writer.write("eventStreamSerdeProvider");
-                break;
-            case BROWSER:
-                writer.addImport(
-                        "invalidFunction",
-                        "invalidFunction",
-                        TypeScriptDependency.INVALID_DEPENDENCY.packageName
-                );
-                writer.openBlock("eventStreamSerdeProvider: invalidFunction(", ")", () -> {
-                    writer.write("\"event stream serde for browser is not available\"");
-                });
-                break;
-            default:
-                // do nothing
         }
     }
 }
