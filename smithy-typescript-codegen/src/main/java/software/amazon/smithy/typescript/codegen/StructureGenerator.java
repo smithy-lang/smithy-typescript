@@ -157,7 +157,6 @@ final class StructureGenerator implements Runnable {
                 ).collect(Collectors.joining(", "));
 
         writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
-        writer.write("__type: $S;", shape.getId().getName());
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
         StructuredMemberWriter config = new StructuredMemberWriter(
