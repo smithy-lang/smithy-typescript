@@ -197,7 +197,8 @@ final class HttpProtocolGeneratorUtils {
                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
             writer.addImport("MetadataBearer", "__MetadataBearer",
                     TypeScriptDependency.AWS_SDK_TYPES.packageName);
-            writer.write("let response: __SmithyException & __MetadataBearer;");
+            // These responses will also have additional properties, so enable that on the interface.
+            writer.write("let response: __SmithyException & __MetadataBearer & {[key: string]: any};");
             writer.write("let errorCode: String = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
@@ -235,7 +236,14 @@ final class HttpProtocolGeneratorUtils {
                             writer.write("$$metadata: deserializeMetadata(output)");
                         }).dedent();
             });
-            writer.write("return Promise.reject(Object.assign(new Error(), response));");
+
+            // Attempt to pull out the exception message for clearer JS errors,
+            // and then clean up the response object.
+            writer.write("const message = response.message || response.Message || errorCode;");
+            writer.write("response.message = message;");
+            writer.write("delete response.Message;");
+
+            writer.write("return Promise.reject(Object.assign(new Error(message), response));");
         });
         writer.write("");
 
