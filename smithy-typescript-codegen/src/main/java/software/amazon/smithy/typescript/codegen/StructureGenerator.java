@@ -131,7 +131,7 @@ final class StructureGenerator implements Runnable {
      * import * as _smithy from "@aws-sdk/smithy-client";
      *
      * export interface NoSuchResource extends _smithy.SmithyException, $MetadataBearer {
-     *   __type: "NoSuchResource";
+     *   name: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
      * }
