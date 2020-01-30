@@ -231,7 +231,6 @@ final class HttpProtocolGeneratorUtils {
                             writer.write("...parsedBody,");
                             writer.write("name: `$${errorCode}`,");
                             writer.write("message: parsedBody.message || parsedBody.Message || errorCode,");
-                            writer.write("__type: `$L#$${errorCode}`,", operation.getId().getNamespace());
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output)");
                         }).dedent();
