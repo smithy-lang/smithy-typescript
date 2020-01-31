@@ -42,7 +42,7 @@ public class EventStreamGenerator implements TypeScriptIntegration {
                 RuntimeClientPlugin.builder()
                         .withConventions(
                                 TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
-                                "EventStream",
+                                "EventStreamSerde",
                                 RuntimeClientPlugin.Convention.HAS_CONFIG
                         )
                         .servicePredicate(EventStreamGenerator::hasEventStream)
@@ -92,14 +92,13 @@ public class EventStreamGenerator implements TypeScriptIntegration {
                 writer.write("eventStreamSerdeProvider");
                 break;
             case BROWSER:
+                writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
                 writer.addImport(
-                        "invalidFunction",
-                        "invalidFunction",
-                        TypeScriptDependency.INVALID_DEPENDENCY.packageName
+                        "eventStreamSerdeProvider",
+                        "eventStreamSerdeProvider",
+                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName
                 );
-                writer.openBlock("eventStreamSerdeProvider: invalidFunction(", ")", () -> {
-                    writer.write("\"event stream serde for browser is not available\"");
-                });
+                writer.write("eventStreamSerdeProvider");
                 break;
             default:
                 // do nothing
@@ -155,6 +154,9 @@ public class EventStreamGenerator implements TypeScriptIntegration {
 
     /**
      * The value of event header 'type' property of given shape.
+     *
+     * @param shape shape bond to event header
+     * @return string literal for the event message header type
      */
     public static String getEventHeaderType(Shape shape) {
         switch (shape.getType()) {
