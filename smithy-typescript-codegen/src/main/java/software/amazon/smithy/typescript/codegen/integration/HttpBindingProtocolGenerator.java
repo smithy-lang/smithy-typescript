@@ -717,10 +717,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Model model = context.getModel();
         for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
-            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", binding.getLocationName(), () -> {
+            String headerName = binding.getLocationName().toLowerCase();
+            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", headerName, () -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 String headerValue = getOutputValue(context, binding.getLocation(),
-                        "output.headers['" + binding.getLocationName() + "']", binding.getMember(), target);
+                        "output.headers['" + headerName + "']", binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, headerValue);
             });
         }
