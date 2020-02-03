@@ -91,6 +91,35 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
         HttpProtocolGeneratorUtils.generateCollectBody(context);
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
+
+        TypeScriptWriter writer = context.getWriter();
+
+        // Write a function to generate HTTP requests since they're so similar.
+        SymbolReference requestType = getApplicationProtocol().getRequestType();
+        writer.addUseImports(requestType);
+        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
+        writer.openBlock("const buildHttpRpcRequest = (\n"
+                       + "  context: __SerdeContext,\n"
+                       + "  headers: __HeaderBag,\n"
+                       + "  resolvedHostname: string | undefined,\n"
+                       + "  body: any,\n"
+                       + "): $T => {", "};", requestType, () -> {
+            writer.openBlock("const contents: any = {", "};", () -> {
+                writer.write("...context.endpoint,");
+                writer.write("protocol: \"https\",");
+                writer.write("method: \"POST\",");
+                writer.write("path: \"/\",");
+                writer.write("headers: headers,");
+            });
+            writer.openBlock("if (resolvedHostname !== undefined) {", "}", () -> {
+                writer.write("contents.hostname = resolvedHostname;");
+            });
+            writer.openBlock("if (body !== undefined) {", "}", () -> {
+                writer.write("contents.body = body;");
+            });
+            writer.write("return new $T(contents);", requestType);
+        });
     }
 
     @Override
@@ -142,19 +171,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
             }
 
-            writer.openBlock("return new $T({", "});", requestType, () -> {
-                writer.write("...context.endpoint,");
-                if (hasHostPrefix) {
-                    writer.write("hostname: resolvedHostname,");
-                }
-                writer.write("protocol: \"https\",");
-                writer.write("method: \"POST\",");
-                writer.write("path: $S,", getOperationPath(context, operation));
-                writer.write("headers: headers,");
-                if (hasRequestBody) {
-                    writer.write("body: body,");
-                }
-            });
+            writer.write("return buildHttpRpcRequest(context, headers, $L, $L);",
+                    hasHostPrefix ? "resolvedHostname" : "undefined",
+                    hasRequestBody ? "body" : "undefined");
         });
 
         writer.write("");
@@ -164,7 +183,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         TypeScriptWriter writer = context.getWriter();
 
         // The Content-Type header is always present.
-        writer.write("const headers: any = {};");
+        writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
+        writer.write("const headers: __HeaderBag = {};");
         writer.write("headers['Content-Type'] = $S;", getDocumentContentType());
         writeDefaultHeaders(context, operation);
     }
@@ -186,15 +206,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         return false;
     }
-
-    /**
-     * Provides the request path for the operation.
-     *
-     * @param context The generation context.
-     * @param operation The operation being generated.
-     * @return The path to send HTTP requests to.
-     */
-    protected abstract String getOperationPath(GenerationContext context, OperationShape operation);
 
     /**
      * Writes any additional HTTP headers required by the protocol implementation.
