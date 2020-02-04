@@ -121,6 +121,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             });
             writer.write("return new $T(contents);", requestType);
         });
+        writer.write("");
     }
 
     @Override
@@ -307,7 +308,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser, isErrorCodeInBody);
+                context, operation, responseType, this::writeErrorCodeParser,
+                isErrorCodeInBody, this::getErrorBodyLocation);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -327,14 +329,17 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "): Promise<$T> => {", "};", errorDeserMethodName, outputReference, errorSymbol, () -> {
             // First deserialize the body properly.
             if (isErrorCodeInBody) {
-                // Body is already parsed in error dispatcher, simply assign body to data.
+                // Body is already parsed in the error dispatcher, simply assign the body.
                 writer.write("const body = $L.body", outputReference);
             } else {
-                // If error node not in body, error body is not parsed in dispatcher.
+                // The dispatcher defers parsing the body in cases where protocols do not have
+                // their error code in the body, so we handle that parsing before deserializing
+                // the error shape here.
                 writer.write("const body = parseBody($L.body, context);", outputReference);
             }
-            writer.write("const deserialized: any = $L(body, context);",
-                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()));
+            writer.write("const deserialized: any = $L($L, context);",
+                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()),
+                    getErrorBodyLocation(context, "body"));
 
             // Then load it into the object with additional error and response properties.
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
@@ -393,6 +398,18 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
+
+    /**
+     * Provides where within the passed output variable the actual error resides. This is useful
+     * for protocols that wrap the specific error in additional elements within the body.
+     *
+     * @param context The generation context.
+     * @param outputLocation The name of the variable containing the output body.
+     * @return A string of the variable containing the error body within the output body.
+     */
+    protected String getErrorBodyLocation(GenerationContext context, String outputLocation) {
+        return outputLocation;
+    }
 
     /**
      * Writes the code needed to deserialize the output document of a response.
