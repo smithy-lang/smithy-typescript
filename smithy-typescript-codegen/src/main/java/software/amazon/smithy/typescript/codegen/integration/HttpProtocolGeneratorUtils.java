@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -161,6 +162,7 @@ final class HttpProtocolGeneratorUtils {
      * @param responseType The response type for the HTTP protocol.
      * @param errorCodeGenerator A consumer
      * @param shouldParseErrorBody Flag indicating whether need to parse response body in this dispatcher function
+     * @param bodyErrorLocationModifier A function that returns the location of an error in a body given a data source.
      * @return A set of all error structure shapes for the operation that were dispatched to.
      */
     static Set<StructureShape> generateErrorDispatcher(
@@ -168,7 +170,8 @@ final class HttpProtocolGeneratorUtils {
             OperationShape operation,
             SymbolReference responseType,
             Consumer<GenerationContext> errorCodeGenerator,
-            boolean shouldParseErrorBody
+            boolean shouldParseErrorBody,
+            BiFunction<GenerationContext, String, String> bodyErrorLocationModifier
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -227,11 +230,13 @@ final class HttpProtocolGeneratorUtils {
                             writer.write("const parsedBody = await parseBody(output.body, context);");
                         }
 
+                        // Get the protocol specific error location for retrieving contents.
+                        String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
                         writer.write("errorCode = errorCode || \"UnknownError\";");
                         writer.openBlock("response = {", "} as any;", () -> {
-                            writer.write("...parsedBody,");
+                            writer.write("...$L,", errorLocation);
                             writer.write("name: `$${errorCode}`,");
-                            writer.write("message: parsedBody.message || parsedBody.Message || errorCode,");
+                            writer.write("message: $1L.message || $1L.Message || errorCode,", errorLocation);
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output)");
                         }).dedent();

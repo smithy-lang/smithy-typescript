@@ -647,7 +647,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser, isErrorCodeInBody);
+                context, operation, responseType, this::writeErrorCodeParser,
+                isErrorCodeInBody, this::getErrorBodyLocation);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
@@ -695,13 +696,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         TypeScriptWriter writer = context.getWriter();
         if (isErrorCodeInBody) {
-            // Body is already parsed in error dispatcher, simply assign body to data.
-            writer.write("const data: any = parsedOutput.body;");
+            // Body is already parsed in the error dispatcher, simply assign the body.
+            writer.write("const data: any = $L;", getErrorBodyLocation(context, "parsedOutput.body"));
             List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
             responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
             return responseBindings;
         } else {
-            // Deserialize response body just like in normal response.
+            // Deserialize response body just like in a normal response.
             return readResponseBody(context, error, bindingIndex);
         }
     }
@@ -765,6 +766,27 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
 
+        if (!documentBindings.isEmpty()) {
+            // If the response has document bindings, the body can be parsed to a JavaScript object.
+            // Use the protocol specific error location for retrieving contents.
+            writer.write("const data: any = $L;",
+                    getErrorBodyLocation(context, "(await parseBody(output.body, context))"));
+
+            deserializeOutputDocument(context, operationOrError, documentBindings);
+            return documentBindings;
+        }
+        if (!payloadBindings.isEmpty()) {
+            return readResponsePayload(context, operationOrError, payloadBindings);
+        }
+        return ListUtils.of();
+    }
+
+    private List<HttpBinding> readResponsePayload(
+            GenerationContext context,
+            Shape operationOrError,
+            List<HttpBinding> payloadBindings
+    ) {
+        TypeScriptWriter writer = context.getWriter();
         // Detect if operation output or error shape contains a streaming member.
         OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
         StructureShape operationOutputOrError = operationOrError.asStructureShape()
@@ -774,37 +796,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
                 .orElse(false);
 
-        if (!documentBindings.isEmpty()) {
-            // If response has document binding, the body can be parsed to JavaScript object.
+        // There can only be one payload binding.
+        HttpBinding binding = payloadBindings.get(0);
+        Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+        if (hasStreamingComponent) {
+            // If payload is streaming, return raw low-level stream directly.
+            writer.write("const data: any = output.body;");
+        } else if (target instanceof BlobShape) {
+            // If payload is non-streaming blob, only need to collect stream to binary data(Uint8Array).
+            writer.write("const data: any = await collectBody(output.body, context);");
+        } else if (target instanceof StructureShape || target instanceof UnionShape) {
+            // If body is Structure or Union, they we need to parse the string into JavaScript object.
             writer.write("const data: any = await parseBody(output.body, context);");
-            deserializeOutputDocument(context, operationOrError, documentBindings);
-            return documentBindings;
+        } else if (target instanceof StringShape) {
+            // If payload is string, we need to collect body and encode binary to string.
+            writer.write("const data: any = await collectBodyString(output.body, context);");
+        } else {
+            throw new CodegenException(String.format("Unexpected shape type bound to payload: `%s`",
+                    target.getType()));
         }
-        if (!payloadBindings.isEmpty()) {
-            // There can only be one payload binding.
-            HttpBinding binding = payloadBindings.get(0);
-            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-            if (hasStreamingComponent) {
-                // If payload is streaming, return raw low-level stream directly.
-                writer.write("const data: any = output.body;");
-            } else if (target instanceof BlobShape) {
-                // If payload is non-streaming blob, only need to collect stream to binary data(Uint8Array).
-                writer.write("const data: any = await collectBody(output.body, context);");
-            } else if (target instanceof StructureShape || target instanceof UnionShape) {
-                // If body is Structure or Union, they we need to parse the string into JavaScript object.
-                writer.write("const data: any = await parseBody(output.body, context);");
-            } else if (target instanceof StringShape) {
-                // If payload is string, we need to collect body and encode binary to string.
-                writer.write("const data: any = await collectBodyString(output.body, context);");
-            } else {
-                throw new CodegenException(String.format("Unexpected shape type bound to payload: `%s`",
-                        target.getType()));
-            }
-            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
-                    Location.PAYLOAD, "data", binding.getMember(), target));
-            return payloadBindings;
-        }
-        return ListUtils.of();
+        writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                Location.PAYLOAD, "data", binding.getMember(), target));
+        return payloadBindings;
     }
 
     /**
@@ -992,6 +1005,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param context The generation context.
      */
     protected abstract void writeErrorCodeParser(GenerationContext context);
+
+    /**
+     * Provides where within the passed output variable the actual error resides. This is useful
+     * for protocols that wrap the specific error in additional elements within the body.
+     *
+     * @param context The generation context.
+     * @param outputLocation The name of the variable containing the output body.
+     * @return A string of the variable containing the error body within the output.
+     */
+    protected String getErrorBodyLocation(GenerationContext context, String outputLocation) {
+        return outputLocation;
+    }
 
     /**
      * Writes the code needed to deserialize the output document of a response.
