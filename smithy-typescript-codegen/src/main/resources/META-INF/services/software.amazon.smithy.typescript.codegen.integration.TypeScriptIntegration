@@ -1,1 +1,1 @@
-software.amazon.smithy.typescript.codegen.integration.EventStreamGenerator
+software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency

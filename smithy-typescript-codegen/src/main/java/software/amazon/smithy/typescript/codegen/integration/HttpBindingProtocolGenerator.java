@@ -117,7 +117,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
-     * @param shapes  The shapes to generate serialization for.
+     * @param shapes The shapes to generate serialization for.
      */
     protected abstract void generateDocumentBodyShapeSerializers(GenerationContext context, Set<Shape> shapes);
 
@@ -128,14 +128,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * {@link DocumentMemberDeserVisitor} are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
-     * @param shapes  The shapes to generate deserialization for.
+     * @param shapes The shapes to generate deserialization for.
      */
     protected abstract void generateDocumentBodyShapeDeserializers(GenerationContext context, Set<Shape> shapes);
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
         serializeEventUnions.forEach(eventUnion -> {
-            Set<StructureShape> events = HttpProtocolGeneratorUtils.generateSerializingEvnetUnion(context, eventUnion);
+            Set<StructureShape> events = HttpProtocolGeneratorUtils.generateSerializingEventUnion(context, eventUnion);
             serializeEventShapes.addAll(events);
         });
         deserializeEventUnions.forEach(eventUnion -> {
@@ -161,7 +161,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     private boolean isNativeSimpleType(Shape target) {
         return target instanceof BooleanShape || target instanceof DocumentShape
-                || target instanceof NumberShape || target instanceof StringShape;
+                       || target instanceof NumberShape || target instanceof StringShape;
     }
 
     @Override
@@ -176,7 +176,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     httpTrait -> generateOperationSerializer(context, operation, httpTrait),
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol request bindings for %s because it does not have an "
-                                    + "http binding trait", getName(), operation.getId())));
+                            + "http binding trait", getName(), operation.getId())));
         }
     }
 
@@ -192,7 +192,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     httpTrait -> generateOperationDeserializer(context, operation, httpTrait),
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
-                                    + "http binding trait", getName(), operation.getId())));
+                            + "http binding trait", getName(), operation.getId())));
         }
     }
 
@@ -214,47 +214,45 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
+        String contextType =
+                CodegenUtils.getOperationSerializerContextType(context.getWriter(), context.getModel(), operation);
 
         writer.openBlock("export async function $L(\n"
-                + "  input: $T,\n"
-                + "  context: $L\n"
-                + "): Promise<$T> {", "}",
-            methodName,
-            inputType,
-            CodegenUtils.getOperationSerializerContextType(context.getWriter(), context.getModel(), operation),
-            requestType, () -> {
-                writeHeaders(context, operation, bindingIndex);
-                writeResolvedPath(context, operation, bindingIndex, trait);
-                boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
-                List<HttpBinding> documentBindings = writeRequestBody(context, operation, bindingIndex);
-                boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
+                       + "  input: $T,\n"
+                       + "  context: $L\n"
+                       + "): Promise<$T> {", "}", methodName, inputType, contextType, requestType, () -> {
+            writeHeaders(context, operation, bindingIndex);
+            writeResolvedPath(context, operation, bindingIndex, trait);
+            boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
+            List<HttpBinding> documentBindings = writeRequestBody(context, operation, bindingIndex);
+            boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
 
+            if (hasHostPrefix) {
+                HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+            }
+
+
+            writer.openBlock("return new $T({", "});", requestType, () -> {
+                writer.write("...context.endpoint,");
                 if (hasHostPrefix) {
-                    HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+                    writer.write("hostname: resolvedHostname,");
                 }
-
-
-                writer.openBlock("return new $T({", "});", requestType, () -> {
-                    writer.write("...context.endpoint,");
-                    if (hasHostPrefix) {
-                        writer.write("hostname: resolvedHostname,");
-                    }
-                    writer.write("protocol: \"https\",");
-                    writer.write("method: $S,", trait.getMethod());
-                    writer.write("headers: headers,");
-                    writer.write("path: resolvedPath,");
-                    if (hasQueryComponents) {
-                        writer.write("query: query,");
-                    }
-                    if (!documentBindings.isEmpty()) {
-                        // Track all shapes bound to the document so their serializers may be generated.
-                        documentBindings.stream()
-                                .map(HttpBinding::getMember)
-                                .map(member -> context.getModel().expectShape(member.getTarget()))
-                                .forEach(serializingDocumentShapes::add);
-                        writer.write("body: body,");
-                    }
-                });
+                writer.write("protocol: \"https\",");
+                writer.write("method: $S,", trait.getMethod());
+                writer.write("headers: headers,");
+                writer.write("path: resolvedPath,");
+                if (hasQueryComponents) {
+                    writer.write("query: query,");
+                }
+                if (!documentBindings.isEmpty()) {
+                    // Track all shapes bound to the document so their serializers may be generated.
+                    documentBindings.stream()
+                            .map(HttpBinding::getMember)
+                            .map(member -> context.getModel().expectShape(member.getTarget()))
+                            .forEach(serializingDocumentShapes::add);
+                    writer.write("body: body,");
+                }
+            });
         });
 
         writer.write("");
@@ -426,12 +424,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * converters (like a base64Encoder,) or invoke complex type serializers to
      * manipulate the dataSource into the proper input content.
      *
-     * @param context     The generation context.
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation input.
-     * @param dataSource  The in-code location of the data to provide an input of
-     *                    ({@code input.foo}, {@code entry}, etc.)
-     * @param member      The member that points to the value being provided.
-     * @param target      The shape of the value being provided.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param member The member that points to the value being provided.
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the input value.
      */
     protected String getInputValue(
@@ -468,8 +466,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * and passes through for payloads.
      *
      * @param bindingType How this value is bound to the operation input.
-     * @param dataSource  The in-code location of the data to provide an input of
-     *                    ({@code input.foo}, {@code entry}, etc.)
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the input blob.
      */
     private String getBlobInputParam(Location bindingType, String dataSource) {
@@ -491,8 +489,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * relies on the HTTP implementation for query strings.
      *
      * @param bindingType How this value is bound to the operation input.
-     * @param dataSource  The in-code location of the data to provide an input of
-     *                    ({@code input.foo}, {@code entry}, etc.)
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the input collection.
      */
     private String getCollectionInputParam(
@@ -515,11 +513,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * shape. This redirects to a serialization function for payloads,
      * and fails otherwise.
      *
-     * @param context     The generation context.
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation input.
-     * @param dataSource  The in-code location of the data to provide an input of
-     *                    ({@code input.foo}, {@code entry}, etc.)
-     * @param target      The shape of the value being provided.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the input shape.
      */
     private String getNamedMembersInputParam(
@@ -544,8 +542,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *
      * <p>Two parameters will be available in scope:
      * <ul>
-     * <li>{@code input: <T>}: the type generated for the operation's input.</li>
-     * <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     *   <li>{@code input: <T>}: the type generated for the operation's input.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
      * <p>For example:
@@ -554,11 +552,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * headers['foo'] = "This is a custom header";
      * }</pre>
      *
-     * @param context   The generation context.
+     * @param context The generation context.
      * @param operation The operation being generated.
      */
-    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {
-    }
+    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {}
 
     /**
      * Writes the code needed to serialize the input document of a request.
@@ -577,8 +574,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * body = JSON.stringify(bodyParams);
      * }</pre>
      *
-     * @param context          The generation context.
-     * @param operation        The operation being generated.
+     * @param context The generation context.
+     * @param operation The operation being generated.
      * @param documentBindings The bindings to place in the document.
      */
     protected abstract void serializeInputDocument(
@@ -602,8 +599,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }
      * }</pre>
      *
-     * @param context        The generation context.
-     * @param operation      The operation being generated.
+     * @param context The generation context.
+     * @param operation The operation being generated.
      * @param payloadBinding The payload binding to serialize.
      */
     protected void serializeInputPayload(
@@ -685,7 +682,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         Shape target = model.expectShape(headerMember.getTarget());
                         writer.openBlock("if (input.$L) {", "}", memberName, () -> {
                             writer.write("message.headers[\"$L\"] = { type: \"$L\", value: $L }", memberName,
-                                    EventStreamGenerator.getEventHeaderType(headerMember), getOutputValue(
+                                    AddEventStreamDependency.getEventHeaderType(headerMember), getOutputValue(
                                         context, Location.HEADER, "input." + memberName, headerMember, target
                                     ));
                         });
@@ -735,45 +732,43 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
+        String contextType =
+                CodegenUtils.getOperationDeserializerContextType(context.getWriter(), context.getModel(), operation);
 
         // Handle the general response.
         writer.openBlock("export async function $L(\n"
-                        + "  output: $T,\n"
-                        + "  context: $L\n"
-                        + "): Promise<$T> {", "}",
-                methodName,
-                responseType,
-                CodegenUtils.getOperationDeserializerContextType(context.getWriter(), context.getModel(), operation),
-                outputType, () -> {
-                    // Redirect error deserialization to the dispatcher if we receive an error range
-                    // status code that's not the modeled code (400 or higher). This allows for
-                    // returning other 2XX or 3XX codes that don't match the defined value.
-                    writer.openBlock("if (output.statusCode !== $L && output.statusCode >= 400) {", "}",
-                            trait.getCode(), () -> writer.write("return $L(output, context);", errorMethodName));
+                       + "  output: $T,\n"
+                       + "  context: $L\n"
+                       + "): Promise<$T> {", "}", methodName, responseType, contextType, outputType, () -> {
+            // Redirect error deserialization to the dispatcher if we receive an error range
+            // status code that's not the modeled code (400 or higher). This allows for
+            // returning other 2XX or 3XX codes that don't match the defined value.
+            writer.openBlock("if (output.statusCode !== $L && output.statusCode >= 400) {", "}", trait.getCode(),
+                    () -> writer.write("return $L(output, context);", errorMethodName));
 
-                    // Start deserializing the response.
-                    writer.openBlock("const contents: $T = {", "};", outputType, () -> {
-                        writer.write("$$metadata: deserializeMetadata(output),");
+            // Start deserializing the response.
+            writer.openBlock("const contents: $T = {", "};", outputType, () -> {
+                writer.write("$$metadata: deserializeMetadata(output),");
 
-                        // Only set a type and the members if we have output.
-                        operation.getOutput().ifPresent(outputId -> {
-                            writer.write("__type: $S,", outputId.getName());
-                            // Set all the members to undefined to meet type constraints.
-                            StructureShape target = model.expectShape(outputId).asStructureShape().get();
-                            new TreeMap<>(target.getAllMembers())
-                                    .forEach((memberName, memberShape) -> writer.write(
-                                            "$L: undefined,", memberName));
-                        });
-                    });
-                    readHeaders(context, operation, bindingIndex);
-                    List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
-                    // Track all shapes bound to the document so their deserializers may be generated.
-                    documentBindings.forEach(binding -> {
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        deserializingDocumentShapes.add(target);
-                    });
-                    writer.write("return Promise.resolve(contents);");
+                // Only set a type and the members if we have output.
+                operation.getOutput().ifPresent(outputId -> {
+                    writer.write("__type: $S,", outputId.getName());
+                    // Set all the members to undefined to meet type constraints.
+                    StructureShape target = model.expectShape(outputId).asStructureShape().get();
+                    new TreeMap<>(target.getAllMembers())
+                            .forEach((memberName, memberShape) -> writer.write(
+                                    "$L: undefined,", memberName));
                 });
+            });
+            readHeaders(context, operation, bindingIndex);
+            List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = model.expectShape(binding.getMember().getTarget());
+                deserializingDocumentShapes.add(target);
+            });
+            writer.write("return Promise.resolve(contents);");
+        });
         writer.write("");
 
         // Write out the error deserialization dispatcher.
@@ -794,28 +789,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String outputName = isErrorCodeInBody ? "parsedOutput" : "output";
 
         writer.openBlock("const $L = async (\n"
-                        + "  $L: any,\n"
-                        + "  context: __SerdeContext\n"
-                        + "): Promise<$T> => {", "};",
+                       + "  $L: any,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> => {", "};",
                 errorDeserMethodName, outputName, errorSymbol, () -> {
-                    writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
-                        writer.write("name: $S,", error.getId().getName());
-                        writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                        writer.write("$$metadata: deserializeMetadata($L),", outputName);
-                        // Set all the members to undefined to meet type constraints.
-                        new TreeMap<>(error.getAllMembers())
-                                .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
-                    });
+            writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
+                writer.write("name: $S,", error.getId().getName());
+                writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
+                writer.write("$$metadata: deserializeMetadata($L),", outputName);
+                // Set all the members to undefined to meet type constraints.
+                new TreeMap<>(error.getAllMembers())
+                        .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
+            });
 
-                    readHeaders(context, error, bindingIndex);
-                    List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
-                    // Track all shapes bound to the document so their deserializers may be generated.
-                    documentBindings.forEach(binding -> {
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        deserializingDocumentShapes.add(target);
-                    });
-                    writer.write("return contents;");
-                });
+            readHeaders(context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = model.expectShape(binding.getMember().getTarget());
+                deserializingDocumentShapes.add(target);
+            });
+            writer.write("return contents;");
+        });
 
         writer.write("");
     }
@@ -1083,12 +1078,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * converters (like a base64Decoder,) or invoke complex type deserializers to
      * manipulate the dataSource into the proper output content.
      *
-     * @param context     The generation context.
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation output.
-     * @param dataSource  The in-code location of the data to provide an output of
-     *                    ({@code output.foo}, {@code entry}, etc.)
-     * @param member      The member that points to the value being provided.
-     * @param target      The shape of the value being provided.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param member The member that points to the value being provided.
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output value.
      */
     private String getOutputValue(
@@ -1129,8 +1124,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * through for documents.
      *
      * @param bindingType How this value is bound to the operation output.
-     * @param dataSource  The in-code location of the data to provide an output of
-     *                    ({@code output.foo}, {@code entry}, etc.)
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output boolean.
      */
     private String getBooleanOutputParam(Location bindingType, String dataSource) {
@@ -1148,8 +1143,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * for payloads.
      *
      * @param bindingType How this value is bound to the operation output.
-     * @param dataSource  The in-code location of the data to provide an output of
-     *                    ({@code output.foo}, {@code entry}, etc.)
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output blob.
      */
     private String getBlobOutputParam(Location bindingType, String dataSource) {
@@ -1169,8 +1164,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * collection. By default, this splits a comma separated string in headers.
      *
      * @param bindingType How this value is bound to the operation output.
-     * @param dataSource  The in-code location of the data to provide an output of
-     *                    ({@code output.foo}, {@code entry}, etc.)
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output collection.
      */
     private String getCollectionOutputParam(
@@ -1191,11 +1186,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * shape. This redirects to a deserialization function for documents and payloads,
      * and fails otherwise.
      *
-     * @param context     The generation context.
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation output.
-     * @param dataSource  The in-code location of the data to provide an output of
-     *                    ({@code output.foo}, {@code entry}, etc.)
-     * @param target      The shape of the value being provided.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output shape.
      */
     private String getNamedMembersOutputParam(
@@ -1209,7 +1204,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // Redirect to a deserialization function.
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
                 return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
-                        + "(" + dataSource + ", context)";
+                               + "(" + dataSource + ", context)";
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
@@ -1221,9 +1216,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * invokes parseFloat on float/double types in headers, and fails otherwise.
      *
      * @param bindingType How this value is bound to the operation output.
-     * @param dataSource  The in-code location of the data to provide an output of
-     *                    ({@code output.foo}, {@code entry}, etc.)
-     * @param target      The shape of the value being provided.
+     * @param dataSource The in-code location of the data to provide an output of
+     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output number.
      */
     private String getNumberOutputParam(Location bindingType, String dataSource, Shape target) {
@@ -1243,17 +1238,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * to dispatch errors to specific serializers.
      *
      * <p>Two variables will be in scope:
-     * <ul>
-     * <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
-     * <ul>
-     * <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
-     * {@code false}</li>
-     * <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
-     * when {@code isErrorCodeInBody} is set to {@code true}</li>
-     * </ul>
-     * </li>
-     * <li>{@code context}: the SerdeContext.</li>
-     * </ul>
+     *   <ul>
+     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
+     *          <ul>
+     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              {@code false}</li>
+     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
+     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
+     *          </ul>
+     *       </li>
+     *       <li>{@code context}: the SerdeContext.</li>
+     *   </ul>
      *
      * <p>For example:
      *
@@ -1294,7 +1289,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }
      * }</pre>
      *
-     * @param context          The generation context.
+     * @param context The generation context.
      * @param operationOrError The operation or error with a document being deserialized.
      * @param documentBindings The bindings to read from the document.
      */

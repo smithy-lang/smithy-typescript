@@ -20,7 +20,7 @@ import java.util.List;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.typescript.codegen.integration.EventStreamGenerator;
+import software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency;
 
 /**
  * Utility methods needed across Java packages.
@@ -45,7 +45,7 @@ public final class CodegenUtils {
         // add default SerdeContext
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         //check if event stream trait exists
-        if (EventStreamGenerator.operationHasEventStreamInput(model, operation)
+        if (AddEventStreamDependency.operationHasEventStreamInput(model, operation)
         ) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
             contextInterfaceList.add("__EventStreamSerdeContext");
@@ -58,7 +58,7 @@ public final class CodegenUtils {
         // add default SerdeContext
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         //check if event stream trait exists
-        if (EventStreamGenerator.operationHasEventStreamOutput(model, operation)
+        if (AddEventStreamDependency.operationHasEventStreamOutput(model, operation)
         ) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
             contextInterfaceList.add("__EventStreamSerdeContext");

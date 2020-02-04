@@ -34,18 +34,15 @@ import software.amazon.smithy.utils.ListUtils;
 /**
  * Adds event streams if needed.
  */
-public class EventStreamGenerator implements TypeScriptIntegration {
+public class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
                 RuntimeClientPlugin.builder()
-                        .withConventions(
-                                TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
-                                "EventStreamSerde",
-                                RuntimeClientPlugin.Convention.HAS_CONFIG
-                        )
-                        .servicePredicate(EventStreamGenerator::hasEventStream)
+                        .withConventions(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
+                                "EventStreamSerde", RuntimeClientPlugin.Convention.HAS_CONFIG)
+                        .servicePredicate(AddEventStreamDependency::hasEventStream)
                         .build()
         );
     }
@@ -60,13 +57,11 @@ public class EventStreamGenerator implements TypeScriptIntegration {
         if (!hasEventStream(model, settings.getService(model))) {
             return;
         }
-        writer.addImport(
-                "EventStreamSerdeProvider",
-                "EventStreamSerdeProvider",
-                TypeScriptDependency.AWS_SDK_TYPES.packageName
-        );
+        writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
+        writer.addImport("EventStreamSerdeProvider", "__EventStreamSerdeProvider",
+                TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.writeDocs("The function that provides necessary utilities for generating and signing event stream");
-        writer.write("eventStreamSerdeProvider?: EventStreamSerdeProvider;");
+        writer.write("eventStreamSerdeProvider?: __EventStreamSerdeProvider;\n");
     }
 
     @Override
@@ -84,20 +79,14 @@ public class EventStreamGenerator implements TypeScriptIntegration {
         switch (target) {
             case NODE:
                 writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
-                writer.addImport(
-                        "eventStreamSerdeProvider",
-                        "eventStreamSerdeProvider",
-                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName
-                );
+                writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
+                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName);
                 writer.write("eventStreamSerdeProvider");
                 break;
             case BROWSER:
                 writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
-                writer.addImport(
-                        "eventStreamSerdeProvider",
-                        "eventStreamSerdeProvider",
-                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName
-                );
+                writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
+                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
                 writer.write("eventStreamSerdeProvider");
                 break;
             default:
@@ -105,7 +94,7 @@ public class EventStreamGenerator implements TypeScriptIntegration {
         }
     }
 
-    public static final boolean hasEventStream(
+    private static boolean hasEventStream(
             Model model,
             ServiceShape service
     ) {
