@@ -374,13 +374,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!documentBindings.isEmpty()) {
             // Write the default `body` property.
-            writer.write("let body: any = {};");
+            writer.write("let body: any;");
             serializeInputDocument(context, operation, documentBindings);
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
             // Write the default `body` property.
-            writer.write("let body: any = {};");
+            writer.write("let body: any;");
             // There can only be one payload binding.
             HttpBinding payloadBinding = payloadBindings.get(0);
             serializeInputPayload(context, operation, payloadBinding);

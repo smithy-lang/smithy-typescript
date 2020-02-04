@@ -203,7 +203,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             serializingDocumentShapes.add(inputShape);
 
             // Write the default `body` property.
-            context.getWriter().write("let body: any = {};");
+            context.getWriter().write("let body: any;");
             serializeInputDocument(context, operation, inputShape);
             return true;
         }
