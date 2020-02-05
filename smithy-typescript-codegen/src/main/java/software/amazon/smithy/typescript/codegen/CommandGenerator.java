@@ -143,12 +143,12 @@ final class CommandGenerator implements Runnable {
         writer.openBlock("): Handler<$T, $T> {", "}", inputType, outputType, () -> {
             // Add serialization and deserialization plugin.
             writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
+            writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
 
             // Add customizations.
             addCommandSpecificPlugins();
 
             // Resolve the middleware stack.
-            writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
             });
@@ -194,7 +194,7 @@ final class CommandGenerator implements Runnable {
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
             plugin.getPluginFunction().ifPresent(symbol -> {
-                writer.write("this.middlewareStack.use($T(configuration));", symbol);
+                writer.write("stack.use($T(configuration));", symbol);
             });
         }
     }
