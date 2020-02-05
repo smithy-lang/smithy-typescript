@@ -55,6 +55,9 @@ final class IndexGenerator {
         for (OperationShape operation : containedOperations) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
         }
+
+        // write export statement for models
+        writer.write("export * from \"./models/index\";");
         fileManifest.writeFile("index.ts", writer.toString());
     }
 }
