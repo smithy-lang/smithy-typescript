@@ -24,7 +24,6 @@ import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -34,7 +33,7 @@ import software.amazon.smithy.utils.ListUtils;
 /**
  * Adds event streams if needed.
  */
-public class AddEventStreamDependency implements TypeScriptIntegration {
+public final class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
@@ -100,67 +99,13 @@ public class AddEventStreamDependency implements TypeScriptIntegration {
     ) {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
         for (OperationShape operation : operations) {
-            if (operationHasEventStream(model, service, operation)) {
+            if (eventStreamIndex.getInputInfo(operation).isPresent()
+                    || eventStreamIndex.getOutputInfo(operation).isPresent()) {
                 return true;
             }
         }
         return false;
-    }
-
-    public static final boolean operationHasEventStream(
-            Model model,
-            ServiceShape service,
-            OperationShape operation
-    ) {
-        if (operationHasEventStreamInput(model, operation) || operationHasEventStreamOutput(model, operation)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static final boolean operationHasEventStreamInput(
-            Model model,
-            OperationShape operation
-    ) {
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
-        if (eventStreamIndex.getInputInfo(operation).isPresent()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static final boolean operationHasEventStreamOutput(
-            Model model,
-            OperationShape operation
-    ) {
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
-        if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * The value of event header 'type' property of given shape.
-     *
-     * @param shape shape bond to event header
-     * @return string literal for the event message header type
-     */
-    public static String getEventHeaderType(Shape shape) {
-        switch (shape.getType()) {
-            case BOOLEAN:
-            case BYTE:
-            case SHORT:
-            case INTEGER:
-            case LONG:
-            case STRING:
-            case TIMESTAMP:
-                return shape.getType().toString();
-            case BLOB:
-                return "binary";
-            default:
-                return "binary";
-        }
     }
 }

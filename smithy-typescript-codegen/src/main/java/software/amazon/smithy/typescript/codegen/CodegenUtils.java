@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency;
 
 /**
  * Utility methods needed across Java packages.
@@ -39,27 +39,40 @@ public final class CodegenUtils {
         return mediaType.equals("application/json") || mediaType.endsWith("+json");
     }
 
-
+    /**
+     * Get context type for command serializer functions.
+     * @param writer The code writer.
+     * @param model The model for the service containing the given command.
+     * @param operation The operation shape for given command.
+     * @return The TypeScript type for the serializer context
+     */
     public static String getOperationSerializerContextType(
             TypeScriptWriter writer, Model model, OperationShape operation) {
         // add default SerdeContext
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         //check if event stream trait exists
-        if (AddEventStreamDependency.operationHasEventStreamInput(model, operation)
-        ) {
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        if (eventStreamIndex.getInputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
     }
 
+    /**
+     * Get context type for command deserializer function.
+     * @param writer The code writer.
+     * @param model The model for the service containing the given command.
+     * @param operation The operation shape for given command.
+     * @return The TypeScript type for the deserializer context
+     */
     public static String getOperationDeserializerContextType(
             TypeScriptWriter writer, Model model, OperationShape operation) {
         // add default SerdeContext
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         //check if event stream trait exists
-        if (AddEventStreamDependency.operationHasEventStreamOutput(model, operation)
-        ) {
+        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
