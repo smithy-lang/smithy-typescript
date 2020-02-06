@@ -61,8 +61,6 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_UTIL_UTF8_BROWSER("dependencies", "@aws-sdk/util-utf8-browser", "^1.0.0-alpha.1", true),
     AWS_SDK_UTIL_UTF8_NODE("dependencies", "@aws-sdk/util-utf8-node", "^1.0.0-alpha.1", true),
 
-    AWS_SDK_UTIL_URI_ESCAPE("dependencies", "@aws-sdk/util-uri-excape", "^1.0.0-alpha.2", true),
-
     // Conditionally added when using an HTTP application protocol.
     AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", "^1.0.0-alpha.1", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", "^1.0.0-alpha.1", false),
