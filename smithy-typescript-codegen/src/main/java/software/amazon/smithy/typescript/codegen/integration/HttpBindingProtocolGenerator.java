@@ -58,6 +58,7 @@ import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -255,6 +256,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Handle any label bindings.
         if (!labelBindings.isEmpty()) {
+            writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_URI_ESCAPE);
             Model model = context.getModel();
             List<Segment> uriLabels = trait.getUri().getLabels();
             for (HttpBinding binding : labelBindings) {
@@ -263,7 +265,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String labelValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                         binding.getMember(), target);
                 // Get the correct label to use.
-                Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
+                String uriLabelString = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst()
+                                                .get().toString();
+                String encodedSegment;
+                if (uriLabelString.endsWith("+}")) {
+                    writer.addImport("escapeUriPath", "__escapeUriPath", "@aws-sdk/util-uri-escape");
+                    encodedSegment = "__escapeUriPath(labelValue)";
+                } else {
+                    writer.addImport("escapeUri", "__escapeUri", "@aws-sdk/util-uri-escape");
+                    encodedSegment = "__escapeUri(labelValue)";
+                }
 
                 // Set the label's value and throw a clear error if empty or undefined.
                 writer.write("if (input.$L !== undefined) {", memberName).indent()
@@ -271,7 +282,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     .openBlock("if (labelValue.length <= 0) {", "}", () -> {
                         writer.write("throw new Error('Empty value provided for input HTTP label: $L.');", memberName);
                     })
-                    .write("resolvedPath = resolvedPath.replace($S, labelValue);", uriLabel.toString()).dedent()
+                    .write("resolvedPath = resolvedPath.replace($S, $L);", uriLabelString, encodedSegment).dedent()
                 .write("} else {").indent()
                     .write("throw new Error('No value provided for input HTTP label: $L.');", memberName).dedent()
                 .write("}");
