@@ -248,7 +248,7 @@ final class HttpProtocolGeneratorUtils {
             writer.write("response.message = message;");
             writer.write("delete response.Message;");
 
-            writer.write("return Promise.reject(Object.assign(new Error(message), response));");
+            writer.write("return Promise.reject({...new Error(message), response}));");
         });
         writer.write("");
 
