@@ -1,0 +1,9 @@
+import { parseUrl } from "@aws-sdk/url-parser-node";
+import { ClientDefaults } from "${clientModuleName}";
+import { ClientSharedValues as BrowserDefaults } from "./runtimeConfig.browser";
+
+export const ClientDefaultValues: Required<ClientDefaults> = {
+  ...BrowserDefaults,
+  urlParser: parseUrl,
+${customizations}
+};

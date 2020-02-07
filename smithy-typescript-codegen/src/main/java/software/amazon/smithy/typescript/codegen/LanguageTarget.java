@@ -40,6 +40,16 @@ public enum LanguageTarget {
     },
 
     /**
+     * ReactNative-specific language target.
+     */
+    REACT_NATIVE {
+        @Override
+        String getTemplateFileName() {
+            return "runtimeConfig.rn.ts.template";
+        }
+    },
+
+    /**
      * A language target that shares configuration that is shared across all
      * runtimes.
      */
