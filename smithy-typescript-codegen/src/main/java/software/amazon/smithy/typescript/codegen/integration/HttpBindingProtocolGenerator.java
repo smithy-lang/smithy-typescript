@@ -265,8 +265,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // Get the correct label to use.
                 Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
                 String encodedSegment = uriLabel.isGreedyLabel()
-                        ? "encodeURIComponent(labelValue)"
-                        : "labelValue.split(\"/\").map(segment => encodeURIComponent(segment)).join(\"/\")";
+                        ? "labelValue.split(\"/\").map(segment => encodeURIComponent(segment)).join(\"/\")"
+                        : "encodeURIComponent(labelValue)";
 
                 // Set the label's value and throw a clear error if empty or undefined.
                 writer.write("if (input.$L !== undefined) {", memberName).indent()
