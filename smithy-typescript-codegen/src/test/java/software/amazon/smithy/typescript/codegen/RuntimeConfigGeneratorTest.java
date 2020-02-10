@@ -45,11 +45,13 @@ public class RuntimeConfigGeneratorTest {
                 settings, model, symbolProvider, delegator, integrations);
         generator.generate(LanguageTarget.NODE);
         generator.generate(LanguageTarget.BROWSER);
+        generator.generate(LanguageTarget.REACT_NATIVE);
         generator.generate(LanguageTarget.SHARED);
         delegator.flushWriters();
 
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.ts"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.browser.ts"));
+        Assertions.assertTrue(manifest.hasFile("runtimeConfig.rn.ts"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.shared.ts"));
 
         // Does the runtimeConfig.shared.ts file expand the template properties properly?
@@ -64,9 +66,17 @@ public class RuntimeConfigGeneratorTest {
         assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
 
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
-        String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.ts").get();
+        String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.browser.ts").get();
         assertThat(runtimeConfigBrowserContents,
                    containsString("import { ClientDefaults } from \"./ExampleClient\";"));
+        assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
+
+        // Does the runtimeConfig.rn.ts file expand the browser template properties properly?
+        String runtimeConfigRNContents = manifest.getFileString("runtimeConfig.rn.ts").get();
+        assertThat(runtimeConfigRNContents,
+                containsString("import { ClientDefaults } from \"./ExampleClient\";"));
+        assertThat(runtimeConfigRNContents,
+                containsString("import { ClientDefaultValues as BrowserDefaults } from \"./runtimeConfig.browser\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
     }
 }
