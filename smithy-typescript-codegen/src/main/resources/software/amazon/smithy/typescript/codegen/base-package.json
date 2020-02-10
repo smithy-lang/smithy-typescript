@@ -23,6 +23,9 @@
   "browser": {
     "./runtimeConfig": "./runtimeConfig.browser"
   },
+  "react-native": {
+    "./runtimeConfig": "./runtimeConfig.rn"
+  },
   "sideEffects": false,
   "dependencies": {
     "tslib": "^1.8.0"
