@@ -35,7 +35,9 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.ListUtils;
 
@@ -49,6 +51,7 @@ public class DocumentMemberSerVisitorTest {
         mockContext = new GenerationContext();
         mockContext.setProtocolName(PROTOCOL);
         mockContext.setSymbolProvider(new MockProvider());
+        mockContext.setWriter(new TypeScriptWriter("foo"));
     }
 
     @ParameterizedTest
@@ -78,6 +81,10 @@ public class DocumentMemberSerVisitorTest {
                 {LongShape.builder().id(id).build(), DATA_SOURCE},
                 {ShortShape.builder().id(id).build(), DATA_SOURCE},
                 {StringShape.builder().id(id).build(), DATA_SOURCE},
+                {
+                    StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
+                    "__LazyJsonString.fromObject(" + DATA_SOURCE + ")"
+                },
                 {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
                 {DocumentShape.builder().id(id).build(), delegate},
                 {ListShape.builder().id(id).member(member).build(), delegate},

@@ -62,8 +62,6 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  *     <b>Not overridable.</b></li>
  *   <li>All other types: unmodified.</li>
  * </ul>
- *
- * TODO: Update this with a mechanism to handle String and Blob shapes with the @mediatype trait.
  */
 public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
     private final GenerationContext context;
@@ -159,7 +157,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String stringShape(StringShape shape) {
-        return deserializeUnmodified();
+        return HttpProtocolGeneratorUtils.getStringOutputParam(context, shape, deserializeUnmodified());
     }
 
     private String deserializeUnmodified() {
