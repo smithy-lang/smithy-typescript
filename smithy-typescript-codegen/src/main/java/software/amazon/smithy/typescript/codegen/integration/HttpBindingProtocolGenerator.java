@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -414,7 +413,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             MemberShape member,
             Shape target
     ) {
-        if (isNativeSimpleType(target)) {
+        if (target instanceof StringShape) {
+            return HttpProtocolGeneratorUtils.getStringInputParam(context, target, dataSource);
+        } else if (isNativeSimpleType(target)) {
             return dataSource + ".toString()";
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
@@ -848,7 +849,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return getNumberOutputParam(bindingType, dataSource, target);
         } else if (target instanceof BooleanShape) {
             return getBooleanOutputParam(bindingType, dataSource);
-        } else if (target instanceof StringShape || target instanceof DocumentShape) {
+        } else if (target instanceof StringShape) {
+            return HttpProtocolGeneratorUtils.getStringOutputParam(context, target, dataSource);
+        } else if (target instanceof DocumentShape) {
             return dataSource;
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);

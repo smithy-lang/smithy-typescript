@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static java.lang.String.format;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -56,6 +57,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -235,9 +237,23 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol stringShape(StringShape shape) {
         // Enums that provide a name for each variant create an actual enum type.
-        return shape.getTrait(EnumTrait.class)
-                .map(enumTrait -> createEnumSymbol(shape, enumTrait))
-                .orElseGet(() -> createSymbolBuilder(shape, "string").build());
+        Optional<EnumTrait> enumTrait = shape.getTrait(EnumTrait.class);
+        if (enumTrait.isPresent()) {
+            return createEnumSymbol(shape, enumTrait.get());
+        }
+
+        // Handle media type generation, defaulting to a string.
+        Optional<MediaTypeTrait> mediaTypeTrait = shape.getTrait(MediaTypeTrait.class);
+        if (mediaTypeTrait.isPresent()) {
+            String mediaType = mediaTypeTrait.get().getValue();
+            if (CodegenUtils.isJsonMediaType(mediaType)) {
+                return addSmithyImport(createSymbolBuilder(shape, "_smithy.LazyJsonString | string")).build();
+            } else {
+                LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
+            }
+        }
+
+        return createSymbolBuilder(shape, "string").build();
     }
 
     private Symbol createEnumSymbol(StringShape shape, EnumTrait enumTrait) {

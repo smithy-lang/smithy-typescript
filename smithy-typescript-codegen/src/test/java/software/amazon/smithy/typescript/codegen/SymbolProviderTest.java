@@ -12,7 +12,9 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 
 public class SymbolProviderTest {
     @Test
@@ -142,5 +144,25 @@ public class SymbolProviderTest {
 
         assertThat(commandSymbol.getName(), equalTo("GetFooCommand"));
         assertThat(commandSymbol.getNamespace(), equalTo("./commands/GetFooCommand"));
+    }
+
+    @Test
+    public void usesLazyJsonStringForJsonMediaType() {
+        StringShape jsonString = StringShape.builder().id("foo.bar#jsonString")
+                .addTrait(new MediaTypeTrait("application/json")).build();
+        MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(jsonString).build();
+        StructureShape struct = StructureShape.builder()
+                .id("foo.bar#test")
+                .addMember(member)
+                .build();
+        Model model = Model.assembler()
+                .addShapes(struct, member, jsonString)
+                .assemble()
+                .unwrap();
+
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        Symbol memberSymbol = provider.toSymbol(member);
+
+        assertThat(memberSymbol.getName(), equalTo("_smithy.LazyJsonString | string"));
     }
 }

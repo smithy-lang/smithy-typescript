@@ -16,10 +16,12 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -30,7 +32,9 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -39,6 +43,8 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  * Utility methods for generating HTTP protocols.
  */
 final class HttpProtocolGeneratorUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
 
     private HttpProtocolGeneratorUtils() {}
 
@@ -91,6 +97,63 @@ final class HttpProtocolGeneratorUtils {
         }
 
         return "new Date(" + modifiedSource + ")";
+    }
+
+    /**
+     * Given a String input, determine its media type and generate an input value
+     * provider for it.
+     *
+     * <p>This currently only supports using the LazyJsonString for {@code "application/json"}.
+     *
+     * @param context The generation context.
+     * @param shape The shape that represents the value being provided.
+     * @param dataSource The in-code location of the data to provide an input of
+     *   ({@code input.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the input string.
+     */
+    static String getStringInputParam(GenerationContext context, Shape shape, String dataSource) {
+        // Handle media type generation, defaulting to the dataSource.
+        Optional<MediaTypeTrait> mediaTypeTrait = shape.getTrait(MediaTypeTrait.class);
+        if (mediaTypeTrait.isPresent()) {
+            String mediaType = mediaTypeTrait.get().getValue();
+            if (CodegenUtils.isJsonMediaType(mediaType)) {
+                TypeScriptWriter writer = context.getWriter();
+                writer.addImport("LazyJsonString", "__LazyJsonString", "@aws-sdk/smithy-client");
+                return "__LazyJsonString.fromObject(" + dataSource + ")";
+            } else {
+                LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
+            }
+        }
+
+        return dataSource;
+    }
+
+    /**
+     * Given a String output, determine its media type and generate an output value
+     * provider for it.
+     *
+     * <p>This currently only supports using the LazyJsonString for {@code "application/json"}.
+     *
+     * @param context The generation context.
+     * @param shape The shape that represents the value being received.
+     * @param dataSource The in-code location of the data to provide an output of
+     *   ({@code output.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the output string.
+     */
+    static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource) {
+        // Handle media type generation, defaulting to a standard String.
+        Optional<MediaTypeTrait> mediaTypeTrait = shape.getTrait(MediaTypeTrait.class);
+        if (mediaTypeTrait.isPresent()) {
+            String mediaType = mediaTypeTrait.get().getValue();
+            if (CodegenUtils.isJsonMediaType(mediaType)) {
+                TypeScriptWriter writer = context.getWriter();
+                writer.addImport("LazyJsonString", "__LazyJsonString", "@aws-sdk/smithy-client");
+                return "new __LazyJsonString(" + dataSource + ")";
+            } else {
+                LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
+            }
+        }
+        return dataSource;
     }
 
     /**
