@@ -40,6 +40,18 @@ public enum LanguageTarget {
     },
 
     /**
+     * ReactNative-specific language target.
+     * Note: ReactNative target extends from Browser target. You only need to add
+     * ReactNative dependencies if they are different to Browser dependencies.
+     */
+    REACT_NATIVE {
+        @Override
+        String getTemplateFileName() {
+            return "runtimeConfig.rn.ts.template";
+        }
+    },
+
+    /**
      * A language target that shares configuration that is shared across all
      * runtimes.
      */
