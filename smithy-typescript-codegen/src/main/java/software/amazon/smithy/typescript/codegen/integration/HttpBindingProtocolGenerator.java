@@ -308,11 +308,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Model model = context.getModel();
             for (HttpBinding binding : queryBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
+                writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                        "@aws-sdk/smithy-client");
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
                     Shape target = model.expectShape(binding.getMember().getTarget());
-                    String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
-                            binding.getMember(), target);
-                    writer.write("query['$L'] = $L;", binding.getLocationName(), queryValue);
+                    String encodedQueryValue = "__extendedEncodeURIComponent(" + getInputValue(context,
+                            binding.getLocation(), "input." + memberName, binding.getMember(), target) + ")";
+                    writer.write("query['$L'] = $L;", binding.getLocationName(), encodedQueryValue);
                 });
             }
         }
