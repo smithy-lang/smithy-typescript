@@ -312,9 +312,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         "@aws-sdk/smithy-client");
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
                     Shape target = model.expectShape(binding.getMember().getTarget());
-                    String encodedQueryValue = "__extendedEncodeURIComponent(" + getInputValue(context,
-                            binding.getLocation(), "input." + memberName, binding.getMember(), target) + ")";
-                    writer.write("query['$L'] = $L;", binding.getLocationName(), encodedQueryValue);
+                    String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                            binding.getMember(), target);
+                    writer.write("query[__extendedEncodeURIComponent($S)] = __extendedEncodeURIComponent($L);",
+                            binding.getLocationName(), queryValue);
                 });
             }
         }
