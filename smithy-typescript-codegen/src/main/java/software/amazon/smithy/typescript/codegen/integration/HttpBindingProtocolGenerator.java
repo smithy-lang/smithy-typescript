@@ -263,7 +263,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         binding.getMember(), target);
                 // Get the correct label to use.
                 Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
-                writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent", "@aws-sdk/smithy-client");
+                writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                        "@aws-sdk/smithy-client");
                 String encodedSegment = uriLabel.isGreedyLabel()
                         ? "labelValue.split(\"/\").map(segment => __extendedEncodeURIComponent(segment)).join(\"/\")"
                         : "__extendedEncodeURIComponent(labelValue)";
