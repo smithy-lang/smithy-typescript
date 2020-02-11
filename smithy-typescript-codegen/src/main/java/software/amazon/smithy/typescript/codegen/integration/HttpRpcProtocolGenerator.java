@@ -208,7 +208,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             return true;
         }
 
-        return false;
+        return writeUndefinedInputBody(context, operation);
     }
 
     /**
@@ -265,6 +265,32 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             OperationShape operation,
             StructureShape inputStructure
     );
+
+    /**
+     * Writes any default body contents when an operation has an undefined input.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * {@code body} variable that will be serialized as the request body.
+     * This variable will NOT be defined in scope and should be defined by
+     * implementations if they wish to set it.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * const body = "{}";
+     * }</pre>
+     *
+     * <p>Implementations should return true if they define a body variable, and
+     * false otherwise.
+     *
+     * @param context The generation context.
+     * @param operation The operation being generated.
+     * @return If a body variable was defined.
+     */
+    protected boolean writeUndefinedInputBody(GenerationContext context, OperationShape operation) {
+        // Pass
+        return false;
+    }
 
     private void generateOperationDeserializer(GenerationContext context, OperationShape operation) {
         SymbolProvider symbolProvider = context.getSymbolProvider();
