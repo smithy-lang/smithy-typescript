@@ -263,9 +263,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         binding.getMember(), target);
                 // Get the correct label to use.
                 Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
+                writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                        "@aws-sdk/smithy-client");
                 String encodedSegment = uriLabel.isGreedyLabel()
-                        ? "labelValue.split(\"/\").map(segment => encodeURIComponent(segment)).join(\"/\")"
-                        : "encodeURIComponent(labelValue)";
+                        ? "labelValue.split(\"/\").map(segment => __extendedEncodeURIComponent(segment)).join(\"/\")"
+                        : "__extendedEncodeURIComponent(labelValue)";
 
                 // Set the label's value and throw a clear error if empty or undefined.
                 writer.write("if (input.$L !== undefined) {", memberName).indent()
@@ -306,11 +308,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Model model = context.getModel();
             for (HttpBinding binding : queryBindings) {
                 String memberName = symbolProvider.toMemberName(binding.getMember());
+                writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                        "@aws-sdk/smithy-client");
                 writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
                     Shape target = model.expectShape(binding.getMember().getTarget());
                     String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                             binding.getMember(), target);
-                    writer.write("query['$L'] = $L;", binding.getLocationName(), queryValue);
+                    writer.write("query[__extendedEncodeURIComponent($S)] = __extendedEncodeURIComponent($L);",
+                            binding.getLocationName(), queryValue);
                 });
             }
         }
