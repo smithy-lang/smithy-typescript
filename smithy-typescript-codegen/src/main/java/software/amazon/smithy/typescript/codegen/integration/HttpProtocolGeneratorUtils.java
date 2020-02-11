@@ -34,9 +34,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -193,11 +190,11 @@ final class HttpProtocolGeneratorUtils {
         writer.write("// Collect low-level response body stream to Uint8Array.");
         writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
                 "};", () -> {
-                    writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
-                        writer.write("return Promise.resolve(streamBody);");
-                    });
-                    writer.write("return context.streamCollector(streamBody) || Promise.resolve(new Uint8Array());");
-                });
+            writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
+                writer.write("return Promise.resolve(streamBody);");
+            });
+            writer.write("return context.streamCollector(streamBody) || Promise.resolve(new Uint8Array());");
+        });
 
         writer.write("");
     }

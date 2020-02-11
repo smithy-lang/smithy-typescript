@@ -15,6 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,6 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.HttpBinding;
-import software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -69,6 +70,7 @@ import software.amazon.smithy.utils.OptionalUtils;
 /**
  * Abstract implementation useful for all protocols that use HTTP bindings.
  */
+//TODO: check ending ;
 public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
@@ -135,14 +137,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
-        serializeEventUnions.forEach(eventUnion -> {
-            Set<StructureShape> events = generateSerializingEventUnion(context, eventUnion);
-            serializeEventShapes.addAll(events);
-        });
-        deserializeEventUnions.forEach(eventUnion -> {
-            Set<StructureShape> events = generateDeserializingEventUnion(context, eventUnion);
-            deserializingEventShapes.addAll(events);
-        });
+        serializeEventUnions.forEach(eventUnion -> generateSerializingEventUnion(context, eventUnion));
+        deserializeEventUnions.forEach(eventUnion -> generateDeserializingEventUnion(context, eventUnion));
         serializeEventShapes.forEach(event -> generateEventSerializer(context, event));
         deserializingEventShapes.forEach(event -> generateEventDeserializer(context, event));
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
@@ -214,8 +210,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
-        String contextType =
-                CodegenUtils.getOperationSerializerContextType(context.getWriter(), context.getModel(), operation);
+        String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
         writer.openBlock("export async function $L(\n"
                        + "  input: $T,\n"
@@ -230,7 +225,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (hasHostPrefix) {
                 HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
             }
-
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 writer.write("...context.endpoint,");
@@ -616,9 +610,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Shape target = context.getModel().expectShape(payloadBinding.getMember().getTarget());
             MemberShape member = payloadBinding.getMember();
             if (member.getTrait(EventStreamTrait.class).isPresent()) {
-                writer.openBlock("body = ", "", () -> {
-                        generateEventStreamSerializer(context, member, target);
-                });
+                generateEventStreamSerializer(context, member, target);
             } else {
                 writer.write("body = $L;", getInputValue(
                         context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
@@ -643,7 +635,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             throw new CodegenException(String.format("Unexpected shape type with eventstream trait: `%s`",
                     target.getType()));
         }
-        writer.openBlock("context.eventStreamMarshaller.serialize(", ");", () -> {
+        writer.openBlock("body = context.eventStreamMarshaller.serialize(", ");", () -> {
             writer.write("input.$L,", member.getMemberName());
             writer.write("event => $L", serializingFunctionBuilder.toString());
         });
@@ -651,7 +643,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     // Writes a function used to dispatch event to corresponding event serializer if given event stream is
     // a multi-event event stream.
-    private Set<StructureShape> generateSerializingEventUnion(
+    private void generateSerializingEventUnion(
             GenerationContext context,
             UnionShape events
     ) {
@@ -661,7 +653,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String protocolName = context.getProtocolName();
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, protocolName) + "_event";
         Model model = context.getModel();
-        Set<StructureShape> targets = new TreeSet<>();
         writer.addImport("Message", "__Message", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.openBlock("const $L = (\n"
                 + "  input: any,\n"
@@ -670,9 +661,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Visit over the union type, then get the right serialization for the member.
             writer.openBlock("return $T.visit(input, {", "});", symbol, () -> {
                 events.getAllMembers().forEach((memberName, memberShape) -> {
-                    Shape target = model.expectShape(memberShape.getTarget());
-                    targets.add(target.asStructureShape().orElseThrow(
-                            () -> new CodegenException("Expect event to be structure shape, got " + target.getType())));
+                    StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
+                    // Prepare event shapes to generate event serializers.
+                    serializeEventShapes.add(target);
                     // Dispatch to special event deserialize function
                     Symbol eventSymbol = symbolProvider.toSymbol(target);
                     String eventSerMethodName =
@@ -684,7 +675,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writer.write("_: value => value as any");
             });
         });
-        return targets;
     }
 
     // Writes a function serializing event input into event messages.
@@ -694,24 +684,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol symbol = symbolProvider.toSymbol(event);
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName()) + "_event";
         writer.openBlock("const $L = (\n"
-                        + "  input: $L,\n"
-                        + "  context: __SerdeContext\n"
-                        + "): __Message => {", "}",
-                methodName,
-                symbol.getName(),
-                () -> {
-                    writer.openBlock("const message: __Message = {", "}", () -> {
-                        writer.openBlock("headers: {", "},", () -> {
-                            //fix headers required by event stream
-                            writer.write("\":event-type\": { type: \"string\", value: $S },", symbol.getName());
-                            writer.write("\":message-type\": { type: \"string\", value: \"event\" }");
-                        });
-                        writer.write("body: new Uint8Array()");
-                    });
-                    writeEventHeaders(context, event);
-                    writeEventBody(context, event);
-                    writer.write("return message;");
+                       + "  input: $L,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): __Message => {", "}", methodName, symbol.getName(), () -> {
+            writer.openBlock("const message: __Message = {", "}", () -> {
+                writer.openBlock("headers: {", "},", () -> {
+                    //fix headers required by event stream
+                    writer.write("\":event-type\": { type: \"string\", value: $S },", symbol.getName());
+                    writer.write("\":message-type\": { type: \"string\", value: \"event\" }");
                 });
+                writer.write("body: new Uint8Array()");
+            });
+            writeEventHeaders(context, event);
+            writeEventBody(context, event);
+            writer.write("return message;");
+        });
     }
 
     private void writeEventHeaders(GenerationContext context, StructureShape event) {
@@ -723,10 +710,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             String memberName = headerMember.getMemberName();
             Shape target = model.expectShape(headerMember.getTarget());
             writer.openBlock("if (input.$L) {", "}", memberName, () -> {
-                writer.write("message.headers[\"$L\"] = { type: \"$L\", value: $L }", memberName,
+                writer.write("message.headers[$S] = { type: $S, value: $L }", memberName,
                         getEventHeaderType(headerMember),
-                        getOutputValue(
-                                context, Location.HEADER, "input." + memberName, headerMember, target));
+                        getOutputValue(context, Location.HEADER, "input." + memberName, headerMember, target));
             });
         }
     }
@@ -764,7 +750,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Write event payload if exists. There is at most 1 payload member.
             MemberShape payloadMember = payloadMembers.get(0);
             String memberName = payloadMember.getMemberName();
-            writer.write("message.body = $L!;",
+            writer.write("message.body = $L || message.body;",
                     getInputValue(context, Location.PAYLOAD, "input." + memberName, payloadMember,
                             model.expectShape(payloadMember.getTarget())));
         } else if (!documentMembers.isEmpty()) {
@@ -796,8 +782,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
-        String contextType =
-                CodegenUtils.getOperationDeserializerContextType(context.getWriter(), context.getModel(), operation);
+        String contextType = CodegenUtils.getOperationDeserializerContextType(writer, context.getModel(), operation);
 
         // Handle the general response.
         writer.openBlock("export async function $L(\n"
@@ -991,9 +976,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
         if (binding.getMember().hasTrait(EventStreamTrait.class)) {
             // If payload is a event stream, return it after calling event stream deser function.
-            writer.openBlock("const data: any = ", "", () -> {
-                generateEventStreamDeserializer(context, binding.getMember(), target);
-            });
+            generateEventStreamDeserializer(context, binding.getMember(), target);
             writer.write("contents.$L = data;", binding.getMemberName());
             //Not to generate non-eventstream payload shape again
             return ListUtils.of();
@@ -1021,18 +1004,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     // Writes a function deserializing response payload to stream of event messages
     private void generateEventStreamDeserializer(GenerationContext context, MemberShape member, Shape target) {
         TypeScriptWriter writer = context.getWriter();
-        writer.openBlock("context.eventStreamMarshaller.deserialize(", ");", () -> {
+        writer.openBlock("const data: any = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
             writer.openBlock("async event => {", "}", () -> {
                 writer.write("const eventName = Object.keys(event)[0];");
-                writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(",
-                        ");", () -> {
-                            writer.write(
-                                    "(accummulator, curr) => "
-                                            + "{accummulator[curr[0]] = curr[1].value; return accummulator; },"
-                            );
-                            writer.write("{} as {[key: string]: any}");
-                        });
+                writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
+                    writer.write(
+                            "(accummulator, curr) => {accummulator[curr[0]] = curr[1].value; return accummulator; },");
+                    writer.write("{} as {[key: string]: any}");
+                });
                 writer.openBlock("const eventMessage = {", "};", () -> {
                     writer.write("headers: eventHeaders,");
                     writer.write("body: event[eventName].body");
@@ -1067,7 +1047,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Writes a function used to dispatch event to corresponding event deserializers if given
      * event stream is a multi-event event stream.
      */
-    private Set<StructureShape> generateDeserializingEventUnion(
+    private void generateDeserializingEventUnion(
             GenerationContext context,
             UnionShape events
     ) {
@@ -1077,16 +1057,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String protocolName = context.getProtocolName();
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, protocolName) + "_event";
         Model model = context.getModel();
-        Set<StructureShape> targets = new TreeSet<>();
         writer.openBlock("const $L = async (\n"
-                + "  output: any,\n"
-                + "  context: __SerdeContext\n"
-                + "): Promise<$T> => {", "}", methodName, symbol, () -> {
+                       + "  output: any,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> => {", "}", methodName, symbol, () -> {
             events.getAllMembers().forEach((name, member) -> {
-                Shape target = model.expectShape(member.getTarget());
-                targets.add(target.asStructureShape().orElseThrow(
-                        () -> new CodegenException("Expect event to be structure shape, got " + target.getType())));
-                writer.openBlock("if (output['$L'] !== undefined) {", "}", name, () -> {
+                StructureShape target = model.expectShape(member.getTarget(), StructureShape.class);
+                // Prepare event for generating event deserializers.
+                deserializingEventShapes.add(target);
+                writer.openBlock("if (output[$S] !== undefined) {", "}", name, () -> {
                     writer.openBlock("return {", "};", () -> {
                         // Dispatch to special event deserialize function
                         Symbol eventSymbol = symbolProvider.toSymbol(target);
@@ -1097,9 +1076,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     });
                 });
             });
-            writer.write("return {$$unknown: output}");
+            writer.write("return {$$unknown: output};");
         });
-        return targets;
     }
 
     // Writes a function deserializing event message to event output.
@@ -1110,20 +1088,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()) + "_event";
         // Handle the general response.
         writer.openBlock("const $L = async (\n"
-                        + "  output: any,\n"
-                        + "  context: __SerdeContext\n"
-                        + "): Promise<$T> => {", "}",
-                methodName,
-                symbol, () -> {
-                    writer.openBlock("let contents: $L = {", "} as any;", symbol.getName(), () -> {
-                        if (!event.getAllMembers().values().isEmpty()) {
-                            writer.write("__type: $S,", event.getId().getName());
-                        }
-                    });
-                    readEventHeaders(context, event);
-                    readEventBody(context, event);
-                    writer.write("return contents;");
-                });
+                       + "  output: any,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> => {", "}", methodName, symbol, () -> {
+            writer.openBlock("let contents: $L = {", "} as any;", symbol.getName(), () -> {
+                if (!event.getAllMembers().values().isEmpty()) {
+                    writer.write("__type: $S,", event.getId().getName());
+                }
+            });
+            readEventHeaders(context, event);
+            readEventBody(context, event);
+            writer.write("return contents;");
+        });
     }
 
     // Parse members from event headers.
@@ -1155,8 +1131,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!payloadMembers.isEmpty()) {
             //There's only one event payload member
             MemberShape payloadMember = payloadMembers.get(0);
-            writeEventPayload(context, payloadMember);
-            writer.write("contents.$L = data", payloadMember.getMemberName());
+            readEventPayload(context, payloadMember);
+            writer.write("contents.$L = data;", payloadMember.getMemberName());
         } else if (!documentMembers.isEmpty()) {
             // Parse member from event body using original event structure deser.
             SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -1164,7 +1140,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // If response has document binding, the body can be parsed to JavaScript object.
             writer.write("const data: any = await parseBody(output.body, context);");
             // Deser the event document with the original event(structure) shape deser function
-            writer.openBlock("contents = {", "} as any", () -> {
+            writer.openBlock("contents = {", "} as any;", () -> {
                 writer.write("...contents,");
                 writer.write("...$L(data, context)",
                         ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()));
@@ -1174,13 +1150,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private void writeEventPayload(GenerationContext context, MemberShape payloadMember) {
+    private void readEventPayload(GenerationContext context, MemberShape payloadMember) {
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         Shape payloadTarget = model.expectShape(payloadMember.getTarget());
         if (payloadTarget instanceof BlobShape) {
             // If event payload is a blob, only need to collect stream to binary data(Uint8Array).
-            writer.write("const data: any = output.body");
+            writer.write("const data: any = output.body;");
         } else if (payloadTarget instanceof StructureShape || payloadTarget instanceof UnionShape) {
             // If body is Structure or Union, they we need to parse the string into JavaScript object.
             writer.write("const data: any = await parseBody(output.body, context);");

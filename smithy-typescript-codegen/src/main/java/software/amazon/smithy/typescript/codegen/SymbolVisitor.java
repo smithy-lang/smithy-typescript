@@ -57,8 +57,8 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.EventStreamTrait;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.StringUtils;
 

@@ -47,10 +47,13 @@ public final class CodegenUtils {
      * @return The TypeScript type for the serializer context
      */
     public static String getOperationSerializerContextType(
-            TypeScriptWriter writer, Model model, OperationShape operation) {
-        // add default SerdeContext
+            TypeScriptWriter writer,
+            Model model,
+            OperationShape operation
+    ) {
+        // Get default SerdeContext.
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
-        //check if event stream trait exists
+        // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
         if (eventStreamIndex.getInputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
@@ -67,10 +70,13 @@ public final class CodegenUtils {
      * @return The TypeScript type for the deserializer context
      */
     public static String getOperationDeserializerContextType(
-            TypeScriptWriter writer, Model model, OperationShape operation) {
-        // add default SerdeContext
+            TypeScriptWriter writer,
+            Model model,
+            OperationShape operation
+    ) {
+        // Get default SerdeContext.
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
-        //check if event stream trait exists
+        // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
@@ -81,7 +87,7 @@ public final class CodegenUtils {
 
     private static List<String> getDefaultOperationSerdeContextTypes(TypeScriptWriter writer) {
         List<String> contextInterfaceList = new ArrayList<>();
-        // add default SerdeContext
+        // Get default SerdeContext.
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         contextInterfaceList.add("__SerdeContext");
         return contextInterfaceList;

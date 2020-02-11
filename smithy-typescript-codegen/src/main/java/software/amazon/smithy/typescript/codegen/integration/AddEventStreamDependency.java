@@ -56,6 +56,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         if (!hasEventStream(model, settings.getService(model))) {
             return;
         }
+
         writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
         writer.addImport("EventStreamSerdeProvider", "__EventStreamSerdeProvider",
                 TypeScriptDependency.AWS_SDK_TYPES.packageName);
@@ -88,6 +89,14 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                         TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
                 writer.write("eventStreamSerdeProvider");
                 break;
+            case REACT_NATIVE:
+                // TODO: add ReactNative eventstream support
+                writer.addDependency(TypeScriptDependency.INVALID_DEPENDENCY);
+                writer.addImport("invalidFunction", "invalidFunction",
+                        TypeScriptDependency.INVALID_DEPENDENCY.packageName);
+                writer.write("eventStreamSerdeProvider: invalidFunction(\"event stream is not supported in "
+                                + "ReactNative\") as any,");
+                break;
             default:
                 // do nothing
         }
@@ -102,7 +111,8 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
         for (OperationShape operation : operations) {
             if (eventStreamIndex.getInputInfo(operation).isPresent()
-                    || eventStreamIndex.getOutputInfo(operation).isPresent()) {
+                    || eventStreamIndex.getOutputInfo(operation).isPresent()
+            ) {
                 return true;
             }
         }
