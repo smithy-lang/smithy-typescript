@@ -247,7 +247,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         if (mediaTypeTrait.isPresent()) {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
-                return addSmithyImport(createSymbolBuilder(shape, "_smithy.LazyJsonString | string")).build();
+                return addSmithyImport(createSymbolBuilder(shape, "__LazyJsonString | string")).build();
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
             }
