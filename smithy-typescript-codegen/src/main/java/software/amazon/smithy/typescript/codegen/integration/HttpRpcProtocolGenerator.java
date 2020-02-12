@@ -382,9 +382,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     private void readResponseBody(GenerationContext context, OperationShape operation) {
+        TypeScriptWriter writer = context.getWriter();
         operation.getOutput().ifPresent(outputId -> {
             // We only need to load the body and prepare a contents object if there is a response.
-            TypeScriptWriter writer = context.getWriter();
             writer.write("const data: any = await parseBody(output.body, context)");
             writer.write("let contents: any = {};");
 
@@ -396,6 +396,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
             deserializeOutputDocument(context, operation, outputShape);
         });
+        if (!operation.getOutput().isPresent()) {
+            // If there is no output, the body still needs to be collected so the process can exit.
+            writer.write("await collectBody(output.body, context);");
+        }
     }
 
     /**
