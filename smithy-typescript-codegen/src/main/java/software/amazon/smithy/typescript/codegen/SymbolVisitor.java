@@ -114,14 +114,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol blobShape(BlobShape shape) {
-        if (!shape.hasTrait(StreamingTrait.class)) {
-            return createSymbolBuilder(shape, "Uint8Array").build();
-        }
-
-        // Note: `Readable` needs an import and a dependency.
-        return createSymbolBuilder(shape, "ArrayBuffer | ArrayBufferView | string | Readable | Blob", null)
-                .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
-                .build();
+        return createSymbolBuilder(shape, "Uint8Array").build();
     }
 
     @Override
@@ -327,6 +320,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return createMemberSymbolWithEventStream(targetSymbol);
         }
 
+        if (shape.hasTrait(StreamingTrait.class)) {
+            return createMemberSymbolWithStreaming(targetSymbol);
+        }
+
         return targetSymbol;
     }
 
@@ -343,6 +340,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .namespace(null, "/")
                 .name(String.format("AsyncIterable<%s>", targetSymbol.getName()))
                 .addReference(targetSymbol)
+                .build();
+    }
+
+    private Symbol createMemberSymbolWithStreaming(Symbol targetSymbol) {
+        // Note: `Readable` needs an import and a dependency.
+        return targetSymbol.toBuilder()
+                .namespace(null, "/")
+                .name("Readable | ReadableStream | Blob")
+                .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
                 .build();
     }
 
