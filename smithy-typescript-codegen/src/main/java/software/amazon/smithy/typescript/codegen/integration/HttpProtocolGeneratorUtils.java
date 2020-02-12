@@ -295,7 +295,7 @@ final class HttpProtocolGeneratorUtils {
 
                         // Get the protocol specific error location for retrieving contents.
                         String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.write("errorCode = errorCode || \"UnknownError\";");
+                        writer.write("errorCode = $1L.code || $1L.Code || errorCode;", errorLocation);
                         writer.openBlock("response = {", "} as any;", () -> {
                             writer.write("...$L,", errorLocation);
                             writer.write("name: `$${errorCode}`,");
