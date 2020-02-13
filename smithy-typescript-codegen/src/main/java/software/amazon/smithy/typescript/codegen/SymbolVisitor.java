@@ -219,7 +219,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol documentShape(DocumentShape shape) {
-        return addSmithyImport(createSymbolBuilder(shape, "_smithy.DocumentType.Value")).build();
+        Symbol.Builder builder = createSymbolBuilder(shape, "__DocumentType.Value");
+        return addSmithyUseImport(builder, "DocumentType", "__DocumentType").build();
     }
 
     @Override
@@ -247,7 +248,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         if (mediaTypeTrait.isPresent()) {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
-                return addSmithyImport(createSymbolBuilder(shape, "_smithy.LazyJsonString | string")).build();
+                Symbol.Builder builder = createSymbolBuilder(shape, "__LazyJsonString | string");
+                return addSmithyUseImport(builder, "LazyJsonString", "__LazyJsonString").build();
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
             }
@@ -277,7 +279,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol structureShape(StructureShape shape) {
         Symbol.Builder builder = createObjectSymbolBuilder(shape);
-        addSmithyImport(builder);
 
         if (outputShapes.contains(shape)) {
             SymbolReference reference = SymbolReference.builder()
@@ -293,15 +294,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return builder.build();
     }
 
-    private Symbol.Builder addSmithyImport(Symbol.Builder builder) {
+    private Symbol.Builder addSmithyUseImport(Symbol.Builder builder, String name, String as) {
         Symbol importSymbol = Symbol.builder()
-                .name("*")
+                .name(name)
                 .namespace("@aws-sdk/smithy-client", "/")
                 .build();
         SymbolReference reference = SymbolReference.builder()
                 .symbol(importSymbol)
-                .alias("_smithy")
-                .options(SymbolReference.ContextOption.DECLARE)
+                .alias(as)
+                .options(SymbolReference.ContextOption.USE)
                 .build();
         return builder.addReference(reference);
     }

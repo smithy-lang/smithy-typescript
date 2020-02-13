@@ -17,7 +17,7 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
-                                  "export interface Err extends _smithy.SmithyException, $MetadataBearer {\n"
+                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "}");
@@ -26,7 +26,7 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
-                                  "export interface Err extends _smithy.SmithyException, $MetadataBearer {\n"
+                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  message?: string;\n"
@@ -36,7 +36,7 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
-                                  "export interface Err extends _smithy.SmithyException, $MetadataBearer {\n"
+                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  message: string | undefined;\n"
@@ -62,10 +62,12 @@ public class StructureGeneratorTest {
         new TypeScriptCodegenPlugin().execute(context);
         String contents = manifest.getFileString("/models/index.ts").get();
 
+        assertThat(contents, containsString("as __isa"));
+        assertThat(contents, containsString("as __SmithyException"));
         assertThat(contents, containsString(expectedType));
         assertThat(contents, containsString("namespace Err {\n"
                                             + "  export function isa(o: any): o is Err {\n"
-                                            + "    return _smithy.isa(o, \"Err\");\n"
+                                            + "    return __isa(o, \"Err\");\n"
                                             + "  }\n"
                                             + "}"));
     }
@@ -81,13 +83,14 @@ public class StructureGeneratorTest {
         new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
         String output = writer.toString();
 
+        assertThat(output, containsString("as __isa"));
         assertThat(output, containsString("export interface Bar {"));
         assertThat(output, containsString("__type?: \"Bar\";"));
         assertThat(output, containsString("foo?: string;"));
         assertThat(output, containsString("export namespace Bar {"));
         assertThat(output, containsString(
                 "export function isa(o: any): o is Bar {\n"
-                + "    return _smithy.isa(o, \"Bar\");\n"
+                + "    return __isa(o, \"Bar\");\n"
                 + "  }"));
     }
 
