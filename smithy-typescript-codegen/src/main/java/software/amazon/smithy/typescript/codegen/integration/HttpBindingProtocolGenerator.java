@@ -1091,15 +1091,42 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  output: any,\n"
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "}", methodName, symbol, () -> {
-            writer.openBlock("let contents: $L = {", "} as any;", symbol.getName(), () -> {
-                if (!event.getAllMembers().values().isEmpty()) {
-                    writer.write("__type: $S,", event.getId().getName());
-                }
-            });
-            readEventHeaders(context, event);
-            readEventBody(context, event);
-            writer.write("return contents;");
+            if (event.hasTrait(ErrorTrait.class)) {
+                generateErrorEventDeserializer(context, event);
+            } else {
+                writer.openBlock("let contents: $L = {", "} as any;", symbol.getName(), () -> {
+                    if (!event.getAllMembers().values().isEmpty()) {
+                        writer.write("__type: $S,", event.getId().getName());
+                    }
+                });
+                readEventHeaders(context, event);
+                readEventBody(context, event);
+                writer.write("return contents;");
+            }
         });
+    }
+
+    // Writes function content that deserialize error event with error deserializer
+    private void generateErrorEventDeserializer(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        // If this is an error event, we need to generate the error deserializer.
+        deserializingErrorShapes.add(event);
+        Symbol errorSymbol = symbolProvider.toSymbol(event);
+        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
+                context.getProtocolName()) + "Response";
+        if (isErrorCodeInBody) {
+            // If error code is in body, parseBody() won't be called inside error deser. So we parse body here.
+            // It's ok to parse body here because body won't be streaming if 'isErrorCodeInBody' is set.
+            writer.openBlock("const parsedOutput: any = {", "};",
+                    () -> {
+                        writer.write("...output,");
+                        writer.write("body: await parseBody(output.body, context)");
+                    });
+            writer.write("return $L(parsedOutput, context);", errorDeserMethodName);
+        } else {
+            writer.write("return $L(output, context);", errorDeserMethodName);
+        }
     }
 
     // Parse members from event headers.
