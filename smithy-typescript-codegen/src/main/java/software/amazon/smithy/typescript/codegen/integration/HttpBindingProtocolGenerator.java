@@ -787,6 +787,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!payloadBindings.isEmpty()) {
             return readResponsePayload(context, operationOrError, payloadBindings);
         }
+
+        // If there are no payload or document bindings, the body still needs collected so the process can exit.
+        writer.write("await collectBody(output.body, context);");
         return ListUtils.of();
     }
 

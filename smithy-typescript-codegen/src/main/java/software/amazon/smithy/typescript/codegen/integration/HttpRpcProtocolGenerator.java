@@ -28,6 +28,7 @@ import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.utils.OptionalUtils;
 
 /**
  * Abstract implementation useful for all HTTP protocols without bindings.
@@ -382,20 +383,26 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     private void readResponseBody(GenerationContext context, OperationShape operation) {
-        operation.getOutput().ifPresent(outputId -> {
-            // We only need to load the body and prepare a contents object if there is a response.
-            TypeScriptWriter writer = context.getWriter();
-            writer.write("const data: any = await parseBody(output.body, context)");
-            writer.write("let contents: any = {};");
+        TypeScriptWriter writer = context.getWriter();
+        OptionalUtils.ifPresentOrElse(
+                operation.getOutput(),
+                outputId -> {
+                    // We only need to load the body and prepare a contents object if there is a response.
+                    writer.write("const data: any = await parseBody(output.body, context)");
+                    writer.write("let contents: any = {};");
 
-            // If there's an output present, we know it's a structure.
-            StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
+                    // If there's an output present, we know it's a structure.
+                    StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
 
-            // Track output shapes so their deserializers may be generated.
-            deserializingDocumentShapes.add(outputShape);
+                    // Track output shapes so their deserializers may be generated.
+                    deserializingDocumentShapes.add(outputShape);
 
-            deserializeOutputDocument(context, operation, outputShape);
-        });
+                    deserializeOutputDocument(context, operation, outputShape);
+                },
+                () -> {
+                    // If there is no output, the body still needs to be collected so the process can exit.
+                    writer.write("await collectBody(output.body, context);");
+                });
     }
 
     /**
