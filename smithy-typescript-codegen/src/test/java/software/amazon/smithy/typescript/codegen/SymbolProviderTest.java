@@ -163,6 +163,6 @@ public class SymbolProviderTest {
         SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol memberSymbol = provider.toSymbol(member);
 
-        assertThat(memberSymbol.getName(), equalTo("_smithy.LazyJsonString | string"));
+        assertThat(memberSymbol.getName(), equalTo("__LazyJsonString | string"));
     }
 }

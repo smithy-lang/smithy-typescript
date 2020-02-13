@@ -68,7 +68,7 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is rendered:
      *
      * <pre>{@code
-     * import * as _smithy from "@aws-sdk/smithy-client";
+     * import { isa as __isa } from "@aws-sdk/smithy-client";
      *
      * export interface Person {
      *   __type?: "Person";
@@ -79,7 +79,7 @@ final class StructureGenerator implements Runnable {
      * export namespace Person {
      *   export const ID = "smithy.example#Person";
      *   export function isa(o: any): o is Person {
-     *     return _smithy.isa(o, ID);
+     *     return __isa(o, ID);
      *   }
      * }
      * }</pre>
@@ -128,9 +128,12 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is generated:
      *
      * <pre>{@code
-     * import * as _smithy from "@aws-sdk/smithy-client";
+     * import {
+     *     SmithyException as __SmithyException,
+     *     isa as __isa
+     * } from "@aws-sdk/smithy-client";
      *
-     * export interface NoSuchResource extends _smithy.SmithyException, $MetadataBearer {
+     * export interface NoSuchResource extends __SmithyException, $MetadataBearer {
      *   name: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
@@ -138,7 +141,7 @@ final class StructureGenerator implements Runnable {
      *
      * export namespace Person {
      *   export function isa(o: any): o is NoSuchResource {
-     *     return _smithy.isa(o, "NoSuchResource");
+     *     return __isa(o, "NoSuchResource");
      *   }
      * }
      * }</pre>
@@ -149,8 +152,9 @@ final class StructureGenerator implements Runnable {
         writer.writeShapeDocs(shape);
 
         // Find symbol references with the "extends" property, and add SmithyException.
+        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
         String extendsFrom = Stream.concat(
-                Stream.of("_smithy.SmithyException"),
+                Stream.of("__SmithyException"),
                 symbol.getReferences().stream()
                         .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
                         .map(SymbolReference::getAlias)
@@ -168,10 +172,11 @@ final class StructureGenerator implements Runnable {
     }
 
     private void renderStructureNamespace() {
+        writer.addImport("isa", "__isa", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             writer.openBlock("export function isa(o: any): o is $L {", "}", symbol.getName(), () -> {
-                writer.write("return _smithy.isa(o, $S);", shape.getId().getName());
+                writer.write("return __isa(o, $S);", shape.getId().getName());
             });
         });
     }
