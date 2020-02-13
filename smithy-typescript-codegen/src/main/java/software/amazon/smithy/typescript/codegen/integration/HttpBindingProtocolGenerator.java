@@ -1071,8 +1071,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         Symbol eventSymbol = symbolProvider.toSymbol(target);
                         String eventDeserMethodName =
                                 ProtocolGenerator.getDeserFunctionName(eventSymbol, protocolName) + "_event";
-                        String statement = eventDeserMethodName + "(output['" + name + "'], context)";
-                        writer.write("$L: await $L", name, statement);
+                        writer.write("$1L: await $2L(output[$1S], context)", name, eventDeserMethodName);
                     });
                 });
             });
@@ -1159,7 +1158,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             //There's only one event payload member
             MemberShape payloadMember = payloadMembers.get(0);
             readEventPayload(context, payloadMember);
-            writer.write("contents.$L = data;", payloadMember.getMemberName());
         } else if (!documentMembers.isEmpty()) {
             // Parse member from event body using original event structure deser.
             SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -1181,17 +1179,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         Shape payloadTarget = model.expectShape(payloadMember.getTarget());
+        String memberName = payloadMember.getMemberName();
         if (payloadTarget instanceof BlobShape) {
             // If event payload is a blob, only need to collect stream to binary data(Uint8Array).
-            writer.write("const data: any = output.body;");
+            writer.write("contents.$L = output.body;", memberName);
         } else if (payloadTarget instanceof StructureShape || payloadTarget instanceof UnionShape) {
             // If body is Structure or Union, they we need to parse the string into JavaScript object.
-            writer.write("const data: any = await parseBody(output.body, context);");
+            writer.write("contents.$L = await parseBody(output.body, context);", memberName);
         } else if (payloadTarget instanceof StringShape) {
             // If payload is string, we need to collect body and encode binary to string.
-            writer.write("const data: any = await collectBodyString(output.body, context);");
+            writer.write("contents.$L = await collectBodyString(output.body, context);", memberName);
         } else {
-            throw new CodegenException(String.format("Unexpected shape type bound to payload: `%s`",
+            throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
                     payloadTarget.getType()));
         }
     }
