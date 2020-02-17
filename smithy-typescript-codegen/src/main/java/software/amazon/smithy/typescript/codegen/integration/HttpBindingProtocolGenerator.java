@@ -329,7 +329,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     Shape target = model.expectShape(binding.getMember().getTarget());
                     String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                             binding.getMember(), target);
-                    writer.write("query['$L'] = $L;", binding.getLocationName(), queryValue);
+                    writer.write("query[$S] = $L;", binding.getLocationName(), queryValue);
                 });
             }
         }
