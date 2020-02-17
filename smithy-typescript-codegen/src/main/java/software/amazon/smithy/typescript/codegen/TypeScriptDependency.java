@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
@@ -66,6 +67,12 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", "^1.0.0-alpha.1", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", "^1.0.0-alpha.1", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", "^1.0.0-alpha.1", false),
+
+    // Conditionally added if a event stream shape is found anywhere in the model
+    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@aws-sdk/eventstream-serde-config-resolver",
+            "^1.0.0-alpha.0", false),
+    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@aws-sdk/eventstream-serde-node", "^1.0.0-alpha.0", false),
+    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@aws-sdk/eventstream-serde-browser", "^1.0.0-alpha.0", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),

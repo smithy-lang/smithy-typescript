@@ -26,6 +26,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -53,10 +54,15 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.EventHeaderTrait;
+import software.amazon.smithy.model.traits.EventPayloadTrait;
+import software.amazon.smithy.model.traits.EventStreamTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
+import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -64,6 +70,7 @@ import software.amazon.smithy.utils.OptionalUtils;
 /**
  * Abstract implementation useful for all protocols that use HTTP bindings.
  */
+//TODO: check ending ;
 public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
@@ -71,6 +78,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    private final Set<StructureShape> serializeEventShapes = new TreeSet<>();
+    private final Set<StructureShape> deserializingEventShapes = new TreeSet<>();
+    private final Set<UnionShape> serializeEventUnions = new TreeSet<>();
+    private final Set<UnionShape> deserializeEventUnions = new TreeSet<>();
     private final boolean isErrorCodeInBody;
 
     /**
@@ -126,6 +137,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
+        serializeEventUnions.forEach(eventUnion -> generateSerializingEventUnion(context, eventUnion));
+        deserializeEventUnions.forEach(eventUnion -> generateDeserializingEventUnion(context, eventUnion));
+        serializeEventShapes.forEach(event -> generateEventSerializer(context, event));
+        deserializingEventShapes.forEach(event -> generateEventDeserializer(context, event));
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
@@ -190,17 +205,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
+        String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
         writer.openBlock("export async function $L(\n"
                        + "  input: $T,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
+                       + "  context: $L\n"
+                       + "): Promise<$T> {", "}", methodName, inputType, contextType, requestType, () -> {
             writeHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
@@ -598,9 +613,159 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
             Shape target = context.getModel().expectShape(payloadBinding.getMember().getTarget());
-            writer.write("body = $L;", getInputValue(
-                    context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
+            MemberShape member = payloadBinding.getMember();
+            if (member.getTrait(EventStreamTrait.class).isPresent()) {
+                generateEventStreamSerializer(context, member, target);
+            } else {
+                writer.write("body = $L;", getInputValue(
+                        context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
+            }
         });
+    }
+
+    // Writes a function serializing event stream member.
+    private void generateEventStreamSerializer(GenerationContext context, MemberShape member, Shape target) {
+        TypeScriptWriter writer = context.getWriter();
+        Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+        StringBuilder serializingFunctionBuilder = new StringBuilder(
+                ProtocolGenerator.getSerFunctionName(targetSymbol, context.getProtocolName())).append("_event");
+        if (target instanceof StructureShape) {
+            // Single-event event stream. Supply event itself instead of event key-value pair to event deserializer
+            serializingFunctionBuilder.append("(event[Object.keys(event)[0]], context)");
+        } else if (target instanceof UnionShape) {
+            // Multi-event event stream. Save the dispatcher
+            serializingFunctionBuilder.append("(event, context)");
+            this.serializeEventUnions.add(target.asUnionShape().get());
+        } else {
+            throw new CodegenException(String.format("Unexpected shape type with eventstream trait: `%s`",
+                    target.getType()));
+        }
+        writer.openBlock("body = context.eventStreamMarshaller.serialize(", ");", () -> {
+            writer.write("input.$L,", member.getMemberName());
+            writer.write("event => $L", serializingFunctionBuilder.toString());
+        });
+    }
+
+    // Writes a function used to dispatch event to corresponding event serializer if given event stream is
+    // a multi-event event stream.
+    private void generateSerializingEventUnion(
+            GenerationContext context,
+            UnionShape events
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(events);
+        String protocolName = context.getProtocolName();
+        String methodName = ProtocolGenerator.getSerFunctionName(symbol, protocolName) + "_event";
+        Model model = context.getModel();
+        writer.addImport("Message", "__Message", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.openBlock("const $L = (\n"
+                + "  input: any,\n"
+                + "  context: __SerdeContext\n"
+                + "): __Message => {", "}", methodName, () -> {
+            // Visit over the union type, then get the right serialization for the member.
+            writer.openBlock("return $T.visit(input, {", "});", symbol, () -> {
+                events.getAllMembers().forEach((memberName, memberShape) -> {
+                    StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
+                    // Prepare event shapes to generate event serializers.
+                    serializeEventShapes.add(target);
+                    // Dispatch to special event deserialize function
+                    Symbol eventSymbol = symbolProvider.toSymbol(target);
+                    String eventSerMethodName =
+                            ProtocolGenerator.getSerFunctionName(eventSymbol, protocolName) + "_event";
+                    writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
+                });
+
+                // Handle the unknown property.
+                writer.write("_: value => value as any");
+            });
+        });
+    }
+
+    // Writes a function serializing event input into event messages.
+    private void generateEventSerializer(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(event);
+        String methodName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName()) + "_event";
+        writer.openBlock("const $L = (\n"
+                       + "  input: $L,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): __Message => {", "}", methodName, symbol.getName(), () -> {
+            writer.openBlock("const message: __Message = {", "}", () -> {
+                writer.openBlock("headers: {", "},", () -> {
+                    //fix headers required by event stream
+                    writer.write("\":event-type\": { type: \"string\", value: $S },", symbol.getName());
+                    writer.write("\":message-type\": { type: \"string\", value: \"event\" }");
+                });
+                writer.write("body: new Uint8Array()");
+            });
+            writeEventHeaders(context, event);
+            writeEventBody(context, event);
+            writer.write("return message;");
+        });
+    }
+
+    private void writeEventHeaders(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        Model model = context.getModel();
+        List<MemberShape> headerMembers = event.getAllMembers().values().stream()
+                .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
+        for (MemberShape headerMember : headerMembers) {
+            String memberName = headerMember.getMemberName();
+            Shape target = model.expectShape(headerMember.getTarget());
+            writer.openBlock("if (input.$L) {", "}", memberName, () -> {
+                writer.write("message.headers[$S] = { type: $S, value: $L }", memberName,
+                        getEventHeaderType(headerMember),
+                        getOutputValue(context, Location.HEADER, "input." + memberName, headerMember, target));
+            });
+        }
+    }
+
+    /**
+     * The value of event header 'type' property of given shape.
+     */
+    private String getEventHeaderType(Shape shape) {
+        switch (shape.getType()) {
+            case BOOLEAN:
+            case BYTE:
+            case SHORT:
+            case INTEGER:
+            case LONG:
+            case STRING:
+            case TIMESTAMP:
+                return shape.getType().toString();
+            case BLOB:
+                return "binary";
+            default:
+                return "binary";
+        }
+    }
+
+    private void writeEventBody(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        Model model = context.getModel();
+        List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
+                .filter(member -> member.hasTrait(EventPayloadTrait.class)).collect(Collectors.toList());
+        List<MemberShape> documentMembers = event.getAllMembers().values().stream()
+                .filter(member -> !member.hasTrait(EventHeaderTrait.class)
+                        && !member.hasTrait(EventPayloadTrait.class))
+                .collect(Collectors.toList());
+        if (!payloadMembers.isEmpty()) {
+            // Write event payload if exists. There is at most 1 payload member.
+            MemberShape payloadMember = payloadMembers.get(0);
+            String memberName = payloadMember.getMemberName();
+            writer.write("message.body = $L || message.body;",
+                    getInputValue(context, Location.PAYLOAD, "input." + memberName, payloadMember,
+                            model.expectShape(payloadMember.getTarget())));
+        } else if (!documentMembers.isEmpty()) {
+            // Write event document bindings if exist.
+            SymbolProvider symbolProvider = context.getSymbolProvider();
+            Symbol symbol = symbolProvider.toSymbol(event);
+            // Use normal structure deserializer instead of event deserializer to deserialize document body.
+            String serFunctionName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+            writer.write("message.body = $L(input, context);", serFunctionName);
+        }
     }
 
     private void generateOperationDeserializer(
@@ -617,18 +782,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the response type is imported.
         writer.addUseImports(responseType);
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
+        String contextType = CodegenUtils.getOperationDeserializerContextType(writer, context.getModel(), operation);
 
         // Handle the general response.
         writer.openBlock("export async function $L(\n"
                        + "  output: $T,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): Promise<$T> {", "}", methodName, responseType, outputType, () -> {
+                       + "  context: $L\n"
+                       + "): Promise<$T> {", "}", methodName, responseType, contextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher if we receive an error range
             // status code that's not the modeled code (400 or higher). This allows for
             // returning other 2XX or 3XX codes that don't match the defined value.
@@ -645,7 +810,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     // Set all the members to undefined to meet type constraints.
                     StructureShape target = model.expectShape(outputId).asStructureShape().get();
                     new TreeMap<>(target.getAllMembers())
-                            .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
+                            .forEach((memberName, memberShape) -> writer.write(
+                                    "$L: undefined,", memberName));
                 });
             });
             readHeaders(context, operation, bindingIndex);
@@ -816,7 +982,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // There can only be one payload binding.
         HttpBinding binding = payloadBindings.get(0);
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-        if (hasStreamingComponent) {
+        if (binding.getMember().hasTrait(EventStreamTrait.class)) {
+            // If payload is a event stream, return it after calling event stream deser function.
+            generateEventStreamDeserializer(context, binding.getMember(), target);
+            writer.write("contents.$L = data;", binding.getMemberName());
+            //Not to generate non-eventstream payload shape again
+            return ListUtils.of();
+        } else if (hasStreamingComponent) {
             // If payload is streaming, return raw low-level stream directly.
             writer.write("const data: any = output.body;");
         } else if (target instanceof BlobShape) {
@@ -835,6 +1007,200 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                 Location.PAYLOAD, "data", binding.getMember(), target));
         return payloadBindings;
+    }
+
+    // Writes a function deserializing response payload to stream of event messages
+    private void generateEventStreamDeserializer(GenerationContext context, MemberShape member, Shape target) {
+        TypeScriptWriter writer = context.getWriter();
+        writer.openBlock("const data: any = context.eventStreamMarshaller.deserialize(", ");", () -> {
+            writer.write("output.body,");
+            writer.openBlock("async event => {", "}", () -> {
+                writer.write("const eventName = Object.keys(event)[0];");
+                writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
+                    writer.write(
+                            "(accummulator, curr) => {accummulator[curr[0]] = curr[1].value; return accummulator; },");
+                    writer.write("{} as {[key: string]: any}");
+                });
+                writer.openBlock("const eventMessage = {", "};", () -> {
+                    writer.write("headers: eventHeaders,");
+                    writer.write("body: event[eventName].body");
+                });
+                writer.openBlock("const parsedEvent = {", "};", () -> {
+                    writer.write("[eventName]: eventMessage");
+                });
+                Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+                StringBuilder deserFunctionBuilder = new StringBuilder(ProtocolGenerator.getDeserFunctionName(
+                        targetSymbol, context.getProtocolName())).append("_event");
+                if (target instanceof StructureShape) {
+                    // Single-event stream. Save the structure and generate event-specific deser later.
+                    this.deserializingEventShapes.add(target.asStructureShape().get());
+                    // For single-event stream, supply event message to corresponding event structure deser.
+                    deserFunctionBuilder.append("(eventMessage, context)");
+                } else if (target instanceof UnionShape) {
+                    // Multi-event stream. Save the union and generate dispatcher later.
+                    this.deserializeEventUnions.add(target.asUnionShape().get());
+                    // For multi-event stream, supply event name to event pairs to the events union deser.
+                    deserFunctionBuilder.append("(parsedEvent, context)");
+                } else {
+                    throw new CodegenException(String.format("Unexpected shape targeted by eventstream: `%s`",
+                            target.getType()));
+                }
+                writer.write("return await $L;", deserFunctionBuilder.toString());
+
+            });
+        });
+    }
+
+    /**
+     * Writes a function used to dispatch event to corresponding event deserializers if given
+     * event stream is a multi-event event stream.
+     */
+    private void generateDeserializingEventUnion(
+            GenerationContext context,
+            UnionShape events
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(events);
+        String protocolName = context.getProtocolName();
+        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, protocolName) + "_event";
+        Model model = context.getModel();
+        writer.openBlock("const $L = async (\n"
+                       + "  output: any,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> => {", "}", methodName, symbol, () -> {
+            events.getAllMembers().forEach((name, member) -> {
+                StructureShape target = model.expectShape(member.getTarget(), StructureShape.class);
+                // Prepare event for generating event deserializers.
+                deserializingEventShapes.add(target);
+                writer.openBlock("if (output[$S] !== undefined) {", "}", name, () -> {
+                    writer.openBlock("return {", "};", () -> {
+                        // Dispatch to special event deserialize function
+                        Symbol eventSymbol = symbolProvider.toSymbol(target);
+                        String eventDeserMethodName =
+                                ProtocolGenerator.getDeserFunctionName(eventSymbol, protocolName) + "_event";
+                        writer.write("$1L: await $2L(output[$1S], context)", name, eventDeserMethodName);
+                    });
+                });
+            });
+            writer.write("return {$$unknown: output};");
+        });
+    }
+
+    // Writes a function deserializing event message to event output.
+    private void generateEventDeserializer(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(event);
+        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()) + "_event";
+        // Handle the general response.
+        writer.openBlock("const $L = async (\n"
+                       + "  output: any,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> => {", "}", methodName, symbol, () -> {
+            if (event.hasTrait(ErrorTrait.class)) {
+                generateErrorEventDeserializer(context, event);
+            } else {
+                writer.openBlock("let contents: $L = {", "} as any;", symbol.getName(), () -> {
+                    if (!event.getAllMembers().values().isEmpty()) {
+                        writer.write("__type: $S,", event.getId().getName());
+                    }
+                });
+                readEventHeaders(context, event);
+                readEventBody(context, event);
+                writer.write("return contents;");
+            }
+        });
+    }
+
+    // Writes function content that deserialize error event with error deserializer
+    private void generateErrorEventDeserializer(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        // If this is an error event, we need to generate the error deserializer.
+        deserializingErrorShapes.add(event);
+        Symbol errorSymbol = symbolProvider.toSymbol(event);
+        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
+                context.getProtocolName()) + "Response";
+        if (isErrorCodeInBody) {
+            // If error code is in body, parseBody() won't be called inside error deser. So we parse body here.
+            // It's ok to parse body here because body won't be streaming if 'isErrorCodeInBody' is set.
+            writer.openBlock("const parsedOutput: any = {", "};",
+                    () -> {
+                        writer.write("...output,");
+                        writer.write("body: await parseBody(output.body, context)");
+                    });
+            writer.write("return $L(parsedOutput, context);", errorDeserMethodName);
+        } else {
+            writer.write("return $L(output, context);", errorDeserMethodName);
+        }
+    }
+
+    // Parse members from event headers.
+    private void readEventHeaders(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        Model model = context.getModel();
+        List<MemberShape> headerMembers = event.getAllMembers().values().stream()
+                .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
+        for (MemberShape headerMember : headerMembers) {
+            String memberName = headerMember.getMemberName();
+            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", memberName, () -> {
+                Shape target = model.expectShape(headerMember.getTarget());
+                String headerValue = getOutputValue(context, Location.HEADER,
+                        "output.headers['" + memberName + "']", headerMember, target);
+                writer.write("contents.$L = $L;", memberName, headerValue);
+            });
+        }
+    }
+
+    private void readEventBody(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        // Parse members from event payload.
+        List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
+                .filter(member -> member.hasTrait(EventPayloadTrait.class)).collect(Collectors.toList());
+        List<MemberShape> documentMembers = event.getAllMembers().values().stream()
+                .filter(member -> !member.hasTrait(EventHeaderTrait.class)
+                        && !member.hasTrait(EventPayloadTrait.class))
+                .collect(Collectors.toList());
+        if (!payloadMembers.isEmpty()) {
+            //There's only one event payload member
+            MemberShape payloadMember = payloadMembers.get(0);
+            readEventPayload(context, payloadMember);
+        } else if (!documentMembers.isEmpty()) {
+            // Parse member from event body using original event structure deser.
+            SymbolProvider symbolProvider = context.getSymbolProvider();
+            Symbol symbol = symbolProvider.toSymbol(event);
+            // If response has document binding, the body can be parsed to JavaScript object.
+            writer.write("const data: any = await parseBody(output.body, context);");
+            // Deser the event document with the original event(structure) shape deser function
+            writer.openBlock("contents = {", "} as any;", () -> {
+                writer.write("...contents,");
+                writer.write("...$L(data, context)",
+                        ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()));
+            });
+            //need original structure shape deserializer to deserialize event body.
+            deserializingDocumentShapes.add(event);
+        }
+    }
+
+    private void readEventPayload(GenerationContext context, MemberShape payloadMember) {
+        TypeScriptWriter writer = context.getWriter();
+        Model model = context.getModel();
+        Shape payloadTarget = model.expectShape(payloadMember.getTarget());
+        String memberName = payloadMember.getMemberName();
+        if (payloadTarget instanceof BlobShape) {
+            // If event payload is a blob, only need to collect stream to binary data(Uint8Array).
+            writer.write("contents.$L = output.body;", memberName);
+        } else if (payloadTarget instanceof StructureShape || payloadTarget instanceof UnionShape) {
+            // If body is Structure or Union, they we need to parse the string into JavaScript object.
+            writer.write("contents.$L = await parseBody(output.body, context);", memberName);
+        } else if (payloadTarget instanceof StringShape) {
+            // If payload is string, we need to collect body and encode binary to string.
+            writer.write("contents.$L = await collectBodyString(output.body, context);", memberName);
+        } else {
+            throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
+                    payloadTarget.getType()));
+        }
     }
 
     /**
