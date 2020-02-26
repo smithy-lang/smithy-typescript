@@ -942,9 +942,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!documentBindings.isEmpty()) {
             // If the response has document bindings, the body can be parsed to a JavaScript object.
+            String bodyLocation = "(await parseBody(output.body, context))";
             // Use the protocol specific error location for retrieving contents.
-            writer.write("const data: any = $L;",
-                    getErrorBodyLocation(context, "(await parseBody(output.body, context))"));
+            if (operationOrError instanceof StructureShape) {
+                bodyLocation = getErrorBodyLocation(context, bodyLocation);
+            }
+            writer.write("const data: any = $L;", bodyLocation);
 
             deserializeOutputDocument(context, operationOrError, documentBindings);
             return documentBindings;
