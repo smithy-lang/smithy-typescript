@@ -874,6 +874,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("const data: any = $L;", getErrorBodyLocation(context, "parsedOutput.body"));
             List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
             responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
+            deserializeOutputDocument(context, error, responseBindings);
             return responseBindings;
         } else {
             // Deserialize response body just like in a normal response.
