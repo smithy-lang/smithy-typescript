@@ -172,11 +172,11 @@ final class CommandGenerator implements Runnable {
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
-            List<MemberShape> streamingMembers = getStramingMembers(input);
-            if (!streamingMembers.isEmpty()) {
-                writeStreamingInputType(typeName, inputShape, streamingMembers.get(0));
-            } else {
+            List<MemberShape> streamingMembers = getStreamingMembers(input);
+            if (streamingMembers.isEmpty()) {
                 writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(input));
+            } else {
+                writeStreamingInputType(typeName, input, streamingMembers.get(0));
             }
         } else {
             // If the input is non-existent, then use an empty object.
@@ -194,7 +194,7 @@ final class CommandGenerator implements Runnable {
         }
     }
 
-    private List<MemberShape> getStramingMembers(StructureShape shape) {
+    private List<MemberShape> getStreamingMembers(StructureShape shape) {
         return shape.getAllMembers().values().stream().filter(memberShape -> memberShape.hasTrait(StreamingTrait.class))
                 .collect(Collectors.toList());
     }
@@ -205,12 +205,8 @@ final class CommandGenerator implements Runnable {
      * for the same member.
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
-    private void writeStreamingInputType(
-            String typeName,
-            Optional<StructureShape> inputShape,
-            MemberShape streamingMember
-    ) {
-        Symbol inputSymbol = symbolProvider.toSymbol(inputShape.get());
+    private void writeStreamingInputType(String typeName, StructureShape inputShape, MemberShape streamingMember) {
+        Symbol inputSymbol = symbolProvider.toSymbol(inputShape);
         writer.openBlock("export type $L = Omit<$T, $S> & {", "};", typeName, inputSymbol,
                 streamingMember.getMemberName(), () -> {
             writer.write("$1L?: $2T[$1S]|string|Uint8Array|Buffer;", streamingMember.getMemberName(), inputSymbol);
