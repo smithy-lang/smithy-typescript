@@ -22,9 +22,11 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
@@ -169,7 +171,13 @@ final class CommandGenerator implements Runnable {
 
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
-            writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(inputShape.get()));
+            StructureShape input = inputShape.get();
+            List<MemberShape> streamingMembers = getStreamingMembers(input);
+            if (streamingMembers.isEmpty()) {
+                writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(input));
+            } else {
+                writeStreamingInputType(typeName, input, streamingMembers.get(0));
+            }
         } else {
             // If the input is non-existent, then use an empty object.
             writer.write("export type $L = {}", typeName);
@@ -184,6 +192,25 @@ final class CommandGenerator implements Runnable {
             writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
             writer.write("export type $L = __MetadataBearer", typeName);
         }
+    }
+
+    private List<MemberShape> getStreamingMembers(StructureShape shape) {
+        return shape.getAllMembers().values().stream().filter(memberShape -> memberShape.hasTrait(StreamingTrait.class))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
+     * This type decoration is allowed in Smithy because it makes input type more permissive than output type
+     * for the same member.
+     * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
+     */
+    private void writeStreamingInputType(String typeName, StructureShape inputShape, MemberShape streamingMember) {
+        Symbol inputSymbol = symbolProvider.toSymbol(inputShape);
+        writer.openBlock("export type $L = Omit<$T, $S> & {", "};", typeName, inputSymbol,
+                streamingMember.getMemberName(), () -> {
+            writer.write("$1L?: $2T[$1S]|string|Uint8Array|Buffer;", streamingMember.getMemberName(), inputSymbol);
+        });
     }
 
     private void addCommandSpecificPlugins() {
