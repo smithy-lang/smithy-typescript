@@ -26,11 +26,9 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -90,33 +88,23 @@ final class ServiceGenerator implements Runnable {
 
     @Override
     public void run() {
-        OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
         writer.addImport("Client", "__Client", "@aws-sdk/smithy-client");
         writer.addImport("ClientDefaultValues", "__ClientDefaultValues", "./runtimeConfig");
 
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any
         // input, adding output, naming differences between services, etc.
-        writeInputOutputTypeUnion("ServiceInputTypes", writer, operationIndex::getInput,
-                writer -> {
-                    // Use an empty object if an operation doesn't define input.
-                    writer.write("| {}");
-                },
-                // Input types don't need modification.
-                Function.identity());
-        writeInputOutputTypeUnion("ServiceOutputTypes", writer, operationIndex::getOutput,
-                writer -> {
-                    // Use a MetadataBearer if an operation doesn't define output.
-                    writer.addImport("MetadataBearer", "__MetadataBearer",
-                            TypeScriptDependency.AWS_SDK_TYPES.packageName);
-                    writer.write("| __MetadataBearer");
-                },
-                // Command output shape types should be MetadataBearers in the output union.
-                type -> {
-                    writer.addImport("MetadataBearer", "__MetadataBearer",
-                            TypeScriptDependency.AWS_SDK_TYPES.packageName);
-                    return type + " & __MetadataBearer";
-                });
+        writeInputOutputTypeUnion("ServiceInputTypes", writer,
+                operationSymbol -> operationSymbol.getProperty("inputType", Symbol.class), writer -> {
+            // Use an empty object if an operation doesn't define input.
+            writer.write("| {}");
+        });
+        writeInputOutputTypeUnion("ServiceOutputTypes", writer,
+                operationSymbol -> operationSymbol.getProperty("outputType", Symbol.class), writer -> {
+            // Use a MetadataBearer if an operation doesn't define output.
+            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            writer.write("| __MetadataBearer");
+        });
 
         generateConfig();
         writer.write("");
@@ -126,15 +114,15 @@ final class ServiceGenerator implements Runnable {
     private void writeInputOutputTypeUnion(
             String typeName,
             TypeScriptWriter writer,
-            Function<OperationShape, Optional<StructureShape>> mapper,
-            Consumer<TypeScriptWriter> defaultTypeGenerator,
-            Function<String, String> typeModifier
+            Function<Symbol, Optional<Symbol>> mapper,
+            Consumer<TypeScriptWriter> defaultTypeGenerator
     ) {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = topDownIndex.getContainedOperations(service);
+
         List<Symbol> symbols = containedOperations.stream()
-                .flatMap(operation -> OptionalUtils.stream(mapper.apply(operation)))
                 .map(symbolProvider::toSymbol)
+                .flatMap(operation -> OptionalUtils.stream(mapper.apply(operation)))
                 .sorted(Comparator.comparing(Symbol::getName))
                 .collect(Collectors.toList());
 
@@ -145,8 +133,7 @@ final class ServiceGenerator implements Runnable {
             defaultTypeGenerator.accept(writer);
         }
         for (int i = 0; i < symbols.size(); i++) {
-            String lineEnding = (i == symbols.size() - 1) ? ";" : "";
-            writer.write("| " + typeModifier.apply("$T") + "$L", symbols.get(i), lineEnding);
+            writer.write("| $T$L", symbols.get(i), i == symbols.size() - 1 ? ";" : "");
         }
         writer.dedent();
         writer.write("");
