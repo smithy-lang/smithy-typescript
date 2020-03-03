@@ -437,9 +437,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (isNativeSimpleType(target)) {
             return dataSource + ".toString()";
         } else if (target instanceof TimestampShape) {
-            HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
-            Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, member, format);
+            return getTimestampInputParam(context, bindingType, dataSource, member);
         } else if (target instanceof BlobShape) {
             return getBlobInputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
@@ -525,6 +523,38 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
                 return ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName())
                                + "(" + dataSource + ", context)";
+            default:
+                throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
+        }
+    }
+
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * shape. This uses the format specified, converting to strings when in a header,
+     * label, or query string.
+     *
+     * @param context The generation context.
+     * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param member The member that points to the value being provided.
+     * @return Returns a value or expression of the input shape.
+     */
+    private String getTimestampInputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            MemberShape member
+    ) {
+        HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
+        String baseParam = HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, member, format);
+
+        switch (bindingType) {
+            case HEADER:
+            case LABEL:
+            case QUERY:
+                return baseParam + ".toString()";
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
@@ -1233,7 +1263,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, member, format);
+            return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, bindingType, member, format);
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {

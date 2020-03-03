@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -37,11 +38,11 @@ public class HttpProtocolGeneratorUtilsTest {
         TimestampShape shape = TimestampShape.builder().id("com.smithy.example#Foo").build();
 
         assertThat("new Date(" + DATA_SOURCE + ")",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, shape, Format.DATE_TIME)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, Location.DOCUMENT, shape, Format.DATE_TIME)));
         assertThat("new Date(Math.round(" + DATA_SOURCE + " * 1000))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, shape, Format.EPOCH_SECONDS)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS)));
         assertThat("new Date(" + DATA_SOURCE + ")",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, shape, Format.HTTP_DATE)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, Location.DOCUMENT, shape, Format.HTTP_DATE)));
     }
 
     @Test
