@@ -1384,7 +1384,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case HEADER:
                 if (target instanceof FloatShape || target instanceof DoubleShape) {
-                    return "parseFloat(" + dataSource + ", 10)";
+                    return "parseFloat(" + dataSource + ")";
                 }
                 return "parseInt(" + dataSource + ", 10)";
             default:
