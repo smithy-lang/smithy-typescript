@@ -289,8 +289,11 @@ final class HttpProtocolGeneratorUtils {
                             context.getProtocolName()) + "Response";
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
-                        writer.write("response = await $L($L, context);",
-                                errorDeserMethodName, shouldParseErrorBody ? "parsedOutput" : "output");
+                        String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
+                        writer.openBlock("response = {", "}", () -> {
+                            writer.write("...await $L($L, context),", errorDeserMethodName, outputParam);
+                            writer.write("$$metadata: deserializeMetadata(output),");
+                        });
                     });
                 });
 
