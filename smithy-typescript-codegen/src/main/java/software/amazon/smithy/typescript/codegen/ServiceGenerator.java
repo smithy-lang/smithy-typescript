@@ -97,15 +97,26 @@ final class ServiceGenerator implements Runnable {
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any
         // input, adding output, naming differences between services, etc.
-        writeInputOutputTypeUnion("ServiceInputTypes", writer, operationIndex::getInput, writer -> {
-            // Use an empty object if an operation doesn't define input.
-            writer.write("| {}");
-        });
-        writeInputOutputTypeUnion("ServiceOutputTypes", writer, operationIndex::getOutput, writer -> {
-            // Use a MetadataBearer if an operation doesn't define output.
-            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-            writer.write("| __MetadataBearer");
-        });
+        writeInputOutputTypeUnion("ServiceInputTypes", writer, operationIndex::getInput,
+                writer -> {
+                    // Use an empty object if an operation doesn't define input.
+                    writer.write("| {}");
+                },
+                // Input types don't need modification.
+                Function.identity());
+        writeInputOutputTypeUnion("ServiceOutputTypes", writer, operationIndex::getOutput,
+                writer -> {
+                    // Use a MetadataBearer if an operation doesn't define output.
+                    writer.addImport("MetadataBearer", "__MetadataBearer",
+                            TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                    writer.write("| __MetadataBearer");
+                },
+                // Command output shape types should be MetadataBearers in the output union.
+                type -> {
+                    writer.addImport("MetadataBearer", "__MetadataBearer",
+                            TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                    return type + " & __MetadataBearer";
+                });
 
         generateConfig();
         writer.write("");
@@ -116,7 +127,8 @@ final class ServiceGenerator implements Runnable {
             String typeName,
             TypeScriptWriter writer,
             Function<OperationShape, Optional<StructureShape>> mapper,
-            Consumer<TypeScriptWriter> defaultTypeGenerator
+            Consumer<TypeScriptWriter> defaultTypeGenerator,
+            Function<String, String> typeModifier
     ) {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = topDownIndex.getContainedOperations(service);
@@ -133,7 +145,8 @@ final class ServiceGenerator implements Runnable {
             defaultTypeGenerator.accept(writer);
         }
         for (int i = 0; i < symbols.size(); i++) {
-            writer.write("| $T$L", symbols.get(i), i == symbols.size() - 1 ? ";" : "");
+            String lineEnding = (i == symbols.size() - 1) ? ";" : "";
+            writer.write("| " + typeModifier.apply("$T") + "$L", symbols.get(i), lineEnding);
         }
         writer.dedent();
         writer.write("");

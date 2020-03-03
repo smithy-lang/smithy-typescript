@@ -114,6 +114,6 @@ public class StructureGeneratorTest {
         new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
         String output = writer.toString();
 
-        assertThat(output, containsString("export interface Bar extends $MetadataBearer {"));
+        assertThat(output, containsString("export interface Bar {"));
     }
 }

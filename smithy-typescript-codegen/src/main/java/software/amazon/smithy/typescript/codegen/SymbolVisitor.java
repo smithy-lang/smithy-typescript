@@ -75,7 +75,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private final Model model;
     private final ReservedWordSymbolProvider.Escaper escaper;
-    private final Set<StructureShape> outputShapes = new HashSet<>();
+    private final Set<StructureShape> errorShapes = new HashSet<>();
 
     SymbolVisitor(Model model) {
         this.model = model;
@@ -92,11 +92,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getDefinitionFile()))
                 .buildEscaper();
 
-        // Get each structure that's used as output or errors.
+        // Get each structure that's used an error.
         OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
         model.shapes(OperationShape.class).forEach(operationShape -> {
-            operationIndex.getOutput(operationShape).ifPresent(outputShapes::add);
-            outputShapes.addAll(operationIndex.getErrors(operationShape));
+            errorShapes.addAll(operationIndex.getErrors(operationShape));
         });
     }
 
@@ -274,7 +273,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol structureShape(StructureShape shape) {
         Symbol.Builder builder = createObjectSymbolBuilder(shape);
 
-        if (outputShapes.contains(shape)) {
+        // Errors won't be re-used in locations where being a MetadataBearer is an issue.
+        if (errorShapes.contains(shape)) {
             SymbolReference reference = SymbolReference.builder()
                     .options(SymbolReference.ContextOption.DECLARE)
                     .alias("$MetadataBearer")
@@ -282,7 +282,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                     .putProperty(IMPLEMENTS_INTERFACE_PROPERTY, true)
                     .build();
             builder.addReference(reference);
-            builder.putProperty("isOutput", true);
         }
 
         return builder.build();
