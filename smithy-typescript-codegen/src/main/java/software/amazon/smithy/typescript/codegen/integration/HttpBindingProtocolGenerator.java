@@ -1267,7 +1267,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
-            return getCollectionOutputParam(bindingType, dataSource);
+            return getCollectionOutputParam(context, bindingType, dataSource, (CollectionShape) target);
         } else if (target instanceof StructureShape || target instanceof UnionShape) {
             return getNamedMembersOutputParam(context, bindingType, dataSource, target);
         }
@@ -1322,19 +1322,31 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Given context and a source of data, generate an output value provider for the
      * collection. By default, this splits a comma separated string in headers.
      *
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation output.
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output collection.
      */
     private String getCollectionOutputParam(
+            GenerationContext context,
             Location bindingType,
-            String dataSource
+            String dataSource,
+            CollectionShape target
     ) {
+        MemberShape targetMember = target.getMember();
+        Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
+        String collectionTargetValue = getOutputValue(context, bindingType, "_entry", targetMember, collectionTarget);
         switch (bindingType) {
             case HEADER:
                 // Split these values on commas.
-                return "(" + dataSource + " || \"\").split(',')";
+                String outputParam = "(" + dataSource + " || \"\").split(',').map(_entry => "
+                        + collectionTargetValue + ")";
+                if (target.isSetShape()) {
+                    outputParam = "new Set(" + outputParam + ")";
+                }
+                return outputParam;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
         }
