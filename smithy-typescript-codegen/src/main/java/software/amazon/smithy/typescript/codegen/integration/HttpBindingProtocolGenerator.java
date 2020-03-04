@@ -838,7 +838,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                     "$L: undefined,", memberName));
                 });
             });
-            readHeaders(context, operation, bindingIndex);
+            readHeaders(context, operation, bindingIndex, "output");
             List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
@@ -880,7 +880,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
             });
 
-            readHeaders(context, error, bindingIndex);
+            readHeaders(context, error, bindingIndex, outputName);
             List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
@@ -915,7 +915,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private void readHeaders(
             GenerationContext context,
             Shape operationOrError,
-            HttpBindingIndex bindingIndex
+            HttpBindingIndex bindingIndex,
+            String outputName
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -924,10 +925,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
             String headerName = binding.getLocationName().toLowerCase();
-            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", headerName, () -> {
+            writer.openBlock("if ($L.headers[$S] !== undefined) {", "}", outputName, headerName, () -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 String headerValue = getOutputValue(context, binding.getLocation(),
-                        "output.headers['" + headerName + "']", binding.getMember(), target);
+                        outputName + ".headers['" + headerName + "']", binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, headerValue);
             });
         }
@@ -937,7 +938,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
         if (!prefixHeaderBindings.isEmpty()) {
             // Run through the headers one time, matching any prefix groups.
-            writer.openBlock("Object.keys(output.headers).forEach(header => {", "});", () -> {
+            writer.openBlock("Object.keys($L.headers).forEach(header => {", "});", outputName, () -> {
                 for (HttpBinding binding : prefixHeaderBindings) {
                     // Generate a single block for each group of prefix headers.
                     writer.openBlock("if (header.startsWith($S)) {", "}", binding.getLocationName(), () -> {
@@ -945,7 +946,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                         Shape target = model.expectShape(prefixMap.getValue().getTarget());
                         String headerValue = getOutputValue(context, binding.getLocation(),
-                                "output.headers[header]", binding.getMember(), target);
+                                outputName + ".headers[header]", binding.getMember(), target);
 
                         // Prepare a grab bag for these headers if necessary
                         writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
