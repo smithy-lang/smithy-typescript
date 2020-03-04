@@ -19,4 +19,5 @@ extra["moduleName"] = "software.amazon.smithy.typescript.codegen"
 
 dependencies {
     api("software.amazon.smithy:smithy-codegen-core:0.9.7")
+    implementation("software.amazon.smithy:smithy-protocol-test-traits:0.9.7")
 }
