@@ -105,7 +105,7 @@ public class SymbolProviderTest {
     }
 
     @Test
-    public void outputStructuresAreMetadataBearers() {
+    public void errorStructuresAreMetadataBearers() {
         Model model = Model.assembler()
                 .addImport(getClass().getResource("output-structure.smithy"))
                 .assemble()
@@ -113,20 +113,25 @@ public class SymbolProviderTest {
 
         Shape input = model.expectShape(ShapeId.from("smithy.example#GetFooInput"));
         Shape output = model.expectShape(ShapeId.from("smithy.example#GetFooOutput"));
+        Shape error = model.expectShape(ShapeId.from("smithy.example#GetFooError"));
         SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol inputSymbol = provider.toSymbol(input);
         Symbol outputSymbol = provider.toSymbol(output);
+        Symbol errorSymbol = provider.toSymbol(error);
 
-        // Input does not use MetadataBearer
+        // Input and Output does not use MetadataBearer
         assertThat(inputSymbol.getReferences().stream()
                 .filter(ref -> ref.getProperty("extends").isPresent())
                 .count(), equalTo(0L));
+        assertThat(outputSymbol.getReferences().stream()
+                 .filter(ref -> ref.getAlias().equals("$MetadataBearer"))
+                 .count(), equalTo(0L));
 
         // Output uses MetadataBearer
-        assertThat(outputSymbol.getReferences().stream()
+        assertThat(errorSymbol.getReferences().stream()
                 .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
                 .count(), greaterThan(0L));
-        assertThat(outputSymbol.getReferences().stream()
+        assertThat(errorSymbol.getReferences().stream()
                  .filter(ref -> ref.getAlias().equals("$MetadataBearer"))
                  .count(), greaterThan(0L));
     }

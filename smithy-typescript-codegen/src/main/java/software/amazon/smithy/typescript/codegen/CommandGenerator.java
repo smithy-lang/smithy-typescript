@@ -185,11 +185,13 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
+        // Output types should always be MetadataBearers, possibly in addition
+        // to a defined output shape.
+        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         if (outputShape.isPresent()) {
-            writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(outputShape.get()));
+            writer.write("export type $L = $T & __MetadataBearer;",
+                    typeName, symbolProvider.toSymbol(outputShape.get()));
         } else {
-            // A command output should be at least a MetadataBearer
-            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
             writer.write("export type $L = __MetadataBearer", typeName);
         }
     }

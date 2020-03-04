@@ -27,6 +27,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import software.amazon.smithy.model.pattern.Pattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -78,11 +79,12 @@ final class HttpProtocolGeneratorUtils {
      *
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param bindingType How this value is bound to the operation output.
      * @param shape The shape that represents the value being received.
      * @param format The timestamp format to provide.
      * @return Returns a value or expression of the output timestamp.
      */
-    static String getTimestampOutputParam(String dataSource, Shape shape, Format format) {
+    static String getTimestampOutputParam(String dataSource, Location bindingType, Shape shape, Format format) {
         String modifiedSource;
         switch (format) {
             case DATE_TIME:
@@ -90,8 +92,13 @@ final class HttpProtocolGeneratorUtils {
                 modifiedSource = dataSource;
                 break;
             case EPOCH_SECONDS:
+                modifiedSource = dataSource;
+                // Make sure we turn a header's forced string into a number.
+                if (bindingType.equals(Location.HEADER)) {
+                    modifiedSource = "parseInt(" + modifiedSource + ", 10)";
+                }
                 // Convert whole and decimal numbers to milliseconds.
-                modifiedSource = "Math.round(" + dataSource + " * 1000)";
+                modifiedSource = "Math.round(" + modifiedSource + " * 1000)";
                 break;
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
@@ -282,8 +289,11 @@ final class HttpProtocolGeneratorUtils {
                             context.getProtocolName()) + "Response";
                     writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
-                        writer.write("response = await $L($L, context);",
-                                errorDeserMethodName, shouldParseErrorBody ? "parsedOutput" : "output");
+                        String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
+                        writer.openBlock("response = {", "}", () -> {
+                            writer.write("...await $L($L, context),", errorDeserMethodName, outputParam);
+                            writer.write("$$metadata: deserializeMetadata(output),");
+                        });
                     });
                 });
 

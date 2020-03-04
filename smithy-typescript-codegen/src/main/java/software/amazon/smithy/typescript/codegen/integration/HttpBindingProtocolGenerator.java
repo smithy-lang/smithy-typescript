@@ -437,9 +437,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (isNativeSimpleType(target)) {
             return dataSource + ".toString()";
         } else if (target instanceof TimestampShape) {
-            HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
-            Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, member, format);
+            return getTimestampInputParam(context, bindingType, dataSource, member);
         } else if (target instanceof BlobShape) {
             return getBlobInputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
@@ -525,6 +523,38 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
                 return ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName())
                                + "(" + dataSource + ", context)";
+            default:
+                throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
+        }
+    }
+
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * shape. This uses the format specified, converting to strings when in a header,
+     * label, or query string.
+     *
+     * @param context The generation context.
+     * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param member The member that points to the value being provided.
+     * @return Returns a value or expression of the input shape.
+     */
+    private String getTimestampInputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            MemberShape member
+    ) {
+        HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
+        String baseParam = HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, member, format);
+
+        switch (bindingType) {
+            case HEADER:
+            case LABEL:
+            case QUERY:
+                return baseParam + ".toString()";
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
@@ -808,7 +838,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                     "$L: undefined,", memberName));
                 });
             });
-            readHeaders(context, operation, bindingIndex);
+            readHeaders(context, operation, bindingIndex, "output");
             List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
@@ -850,7 +880,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
             });
 
-            readHeaders(context, error, bindingIndex);
+            readHeaders(context, error, bindingIndex, outputName);
             List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
@@ -885,7 +915,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private void readHeaders(
             GenerationContext context,
             Shape operationOrError,
-            HttpBindingIndex bindingIndex
+            HttpBindingIndex bindingIndex,
+            String outputName
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -894,10 +925,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
             String headerName = binding.getLocationName().toLowerCase();
-            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", headerName, () -> {
+            writer.openBlock("if ($L.headers[$S] !== undefined) {", "}", outputName, headerName, () -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 String headerValue = getOutputValue(context, binding.getLocation(),
-                        "output.headers['" + headerName + "']", binding.getMember(), target);
+                        outputName + ".headers['" + headerName + "']", binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, headerValue);
             });
         }
@@ -907,7 +938,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
         if (!prefixHeaderBindings.isEmpty()) {
             // Run through the headers one time, matching any prefix groups.
-            writer.openBlock("Object.keys(output.headers).forEach(header => {", "});", () -> {
+            writer.openBlock("Object.keys($L.headers).forEach(header => {", "});", outputName, () -> {
                 for (HttpBinding binding : prefixHeaderBindings) {
                     // Generate a single block for each group of prefix headers.
                     writer.openBlock("if (header.startsWith($S)) {", "}", binding.getLocationName(), () -> {
@@ -915,7 +946,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                         Shape target = model.expectShape(prefixMap.getValue().getTarget());
                         String headerValue = getOutputValue(context, binding.getLocation(),
-                                "output.headers[header]", binding.getMember(), target);
+                                outputName + ".headers[header]", binding.getMember(), target);
 
                         // Prepare a grab bag for these headers if necessary
                         writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
@@ -1233,11 +1264,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, member, format);
+            return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, bindingType, member, format);
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
-            return getCollectionOutputParam(bindingType, dataSource);
+            return getCollectionOutputParam(context, bindingType, dataSource, (CollectionShape) target);
         } else if (target instanceof StructureShape || target instanceof UnionShape) {
             return getNamedMembersOutputParam(context, bindingType, dataSource, target);
         }
@@ -1292,19 +1323,31 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Given context and a source of data, generate an output value provider for the
      * collection. By default, this splits a comma separated string in headers.
      *
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation output.
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output collection.
      */
     private String getCollectionOutputParam(
+            GenerationContext context,
             Location bindingType,
-            String dataSource
+            String dataSource,
+            CollectionShape target
     ) {
+        MemberShape targetMember = target.getMember();
+        Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
+        String collectionTargetValue = getOutputValue(context, bindingType, "_entry", targetMember, collectionTarget);
         switch (bindingType) {
             case HEADER:
                 // Split these values on commas.
-                return "(" + dataSource + " || \"\").split(',')";
+                String outputParam = "(" + dataSource + " || \"\").split(',').map(_entry => "
+                        + collectionTargetValue + ")";
+                if (target.isSetShape()) {
+                    outputParam = "new Set(" + outputParam + ")";
+                }
+                return outputParam;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
         }
@@ -1354,7 +1397,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case HEADER:
                 if (target instanceof FloatShape || target instanceof DoubleShape) {
-                    return "parseFloat(" + dataSource + ", 10)";
+                    return "parseFloat(" + dataSource + ")";
                 }
                 return "parseInt(" + dataSource + ", 10)";
             default:
