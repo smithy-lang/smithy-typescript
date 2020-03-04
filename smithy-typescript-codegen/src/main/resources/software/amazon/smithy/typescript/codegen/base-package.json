@@ -12,7 +12,7 @@
     "remove-documentation": "rimraf ./docs",
     "remove-js": "rimraf *.js && rimraf ./commands/*.js && rimraf ./models/*.js && rimraf ./protocols/*.js",
     "remove-maps": "rimraf *.js.map && rimraf ./commands/*.js.map && rimraf ./models/*.js.map && rimraf ./protocols/*.js.map",
-    "test": "exit 0",
+    "test": "yarn build && jest --coverage --passWithNoTests",
     "smoke-test": "npm run pretest && node ./test/smoke/index.spec.js",
     "build:es": "tsc -p tsconfig.es.json",
     "build": "yarn pretest && yarn build:es"
@@ -31,6 +31,7 @@
     "tslib": "^1.8.0"
   },
   "devDependencies": {
+    "jest": "^24.7.1",
     "rimraf": "^3.0.0",
     "typedoc": "^0.15.0",
     "typescript": "^3.6.3"

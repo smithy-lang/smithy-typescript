@@ -76,7 +76,11 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),
-    TYPES_BIG_JS("devDependencies", "@types/big.js", "^4.0.5", false);
+    TYPES_BIG_JS("devDependencies", "@types/big.js", "^4.0.5", false),
+
+    // Conditionally added when interacting with specific protocol test bodyMediaType values.
+    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", "^1.0.0-alpha.1", false),
+    XML_PARSER("dependencies", "fast-xml-parser", "^3.16.0", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

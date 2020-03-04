@@ -171,8 +171,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         // Generate index for client.
-        IndexGenerator.writeIndex(
-                settings, model, symbolProvider, fileManifest);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest);
+
+        // Generate protocol tests IFF found in the model.
+        new HttpProtocolTestGenerator(settings, model, symbolProvider, writers).run();
 
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");
