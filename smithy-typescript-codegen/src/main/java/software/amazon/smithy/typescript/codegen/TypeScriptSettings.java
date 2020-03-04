@@ -64,7 +64,7 @@ public final class TypeScriptSettings {
     public static TypeScriptSettings from(Model model, ObjectNode config) {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(
-                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE, TARGET_NAMESPACE));
+                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE, PROTOCOL, TARGET_NAMESPACE));
 
         // Get the service from the settings or infer one from the given model.
         settings.setService(config.getStringMember(SERVICE)
