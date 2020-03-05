@@ -211,7 +211,8 @@ final class CommandGenerator implements Runnable {
         Symbol inputSymbol = symbolProvider.toSymbol(inputShape);
         writer.openBlock("export type $L = Omit<$T, $S> & {", "};", typeName, inputSymbol,
                 streamingMember.getMemberName(), () -> {
-            writer.write("$1L?: $2T[$1S]|string|Uint8Array|Buffer;", streamingMember.getMemberName(), inputSymbol);
+            writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", streamingMember.getMemberName(),
+                    streamingMember.isRequired() ? "" : "?", inputSymbol);
         });
     }
 
