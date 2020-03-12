@@ -94,8 +94,10 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                 writer.addDependency(TypeScriptDependency.INVALID_DEPENDENCY);
                 writer.addImport("invalidFunction", "invalidFunction",
                         TypeScriptDependency.INVALID_DEPENDENCY.packageName);
-                writer.write("eventStreamSerdeProvider: invalidFunction(\"event stream is not supported in "
-                                + "ReactNative\") as any,");
+                writer.openBlock("eventStreamSerdeProvider: () => ({", "})", () -> {
+                    writer.write("serialize: invalidFunction(\"event stream is not supported in ReactNative.\"),");
+                    writer.write("deserialize: invalidFunction(\"event stream is not supported in ReactNative.\")");
+                });
                 break;
             default:
                 // do nothing
