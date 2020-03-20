@@ -1,6 +1,6 @@
 import { FetchHttpHandler } from "@aws-sdk/fetch-http-handler";
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { streamCollector } from "@aws-sdk/stream-collector-rn";
+import { streamCollector } from "@aws-sdk/stream-collector-native";
 import { parseUrl } from "@aws-sdk/url-parser-node";
 import { name, version } from "./package.json";
 import { ClientDefaults } from "${clientModuleName}";

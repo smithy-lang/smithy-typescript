@@ -51,7 +51,7 @@ public class RuntimeConfigGeneratorTest {
 
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.ts"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.browser.ts"));
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.rn.ts"));
+        Assertions.assertTrue(manifest.hasFile("runtimeConfig.native.ts"));
         Assertions.assertTrue(manifest.hasFile("runtimeConfig.shared.ts"));
 
         // Does the runtimeConfig.shared.ts file expand the template properties properly?
@@ -71,11 +71,11 @@ public class RuntimeConfigGeneratorTest {
                    containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
 
-        // Does the runtimeConfig.rn.ts file expand the browser template properties properly?
-        String runtimeConfigRNContents = manifest.getFileString("runtimeConfig.rn.ts").get();
-        assertThat(runtimeConfigRNContents,
+        // Does the runtimeConfig.native.ts file expand the browser template properties properly?
+        String runtimeConfigNativeContents = manifest.getFileString("runtimeConfig.native.ts").get();
+        assertThat(runtimeConfigNativeContents,
                 containsString("import { ClientDefaults } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigRNContents,
+        assertThat(runtimeConfigNativeContents,
                 containsString("import { ClientDefaultValues as BrowserDefaults } from \"./runtimeConfig.browser\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
     }
