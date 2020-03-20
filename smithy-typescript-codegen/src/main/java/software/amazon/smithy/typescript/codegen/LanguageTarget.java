@@ -47,7 +47,7 @@ public enum LanguageTarget {
     REACT_NATIVE {
         @Override
         String getTemplateFileName() {
-            return "runtimeConfig.rn.ts.template";
+            return "runtimeConfig.native.ts.template";
         }
     },
 

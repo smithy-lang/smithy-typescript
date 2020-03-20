@@ -56,7 +56,7 @@ final class PackageJsonGenerator {
                 .withMember("./runtimeConfig", "./runtimeConfig.browser"));
         // Add the ReactNative hook.
         node = node.withMember("react-native", Node.objectNode()
-                .withMember("./runtimeConfig", "./runtimeConfig.rn"));
+                .withMember("./runtimeConfig", "./runtimeConfig.native"));
 
         // Expand template parameters.
         String template = Node.prettyPrintJson(node);
