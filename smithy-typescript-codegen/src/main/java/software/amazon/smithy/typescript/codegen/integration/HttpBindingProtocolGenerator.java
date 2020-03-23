@@ -948,18 +948,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Run through the headers one time, matching any prefix groups.
             writer.openBlock("Object.keys($L.headers).forEach(header => {", "});", outputName, () -> {
                 for (HttpBinding binding : prefixHeaderBindings) {
+                    // Prepare a grab bag for these headers if necessary
+                    String memberName = symbolProvider.toMemberName(binding.getMember());
+                    writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
+                        writer.write("contents.$L = {};", memberName);
+                    });
+
                     // Generate a single block for each group of prefix headers.
                     writer.openBlock("if (header.startsWith($S)) {", "}", binding.getLocationName(), () -> {
-                        String memberName = symbolProvider.toMemberName(binding.getMember());
                         MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                         Shape target = model.expectShape(prefixMap.getValue().getTarget());
                         String headerValue = getOutputValue(context, binding.getLocation(),
                                 outputName + ".headers[header]", binding.getMember(), target);
-
-                        // Prepare a grab bag for these headers if necessary
-                        writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
-                            writer.write("contents.$L = {};", memberName);
-                        });
 
                         // Extract the non-prefix portion as the key.
                         writer.write("contents.$L[header.substring($L)] = $L;",
