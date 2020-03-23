@@ -28,6 +28,8 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.HttpBinding;
+import software.amazon.smithy.model.knowledge.HttpBinding.Location;
+import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.node.ArrayNode;
@@ -193,20 +195,20 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  }\n"
                        + "  const r = err.request;")
                     .indent()
-                    .call(() -> writeRequestAssertions(testCase))
+                    .call(() -> writeRequestAssertions(operation, testCase))
                     .dedent()
                     .write("}");
         });
     }
 
     // Ensure that the serialized request matches the expected request.
-    private void writeRequestAssertions(HttpRequestTestCase testCase) {
+    private void writeRequestAssertions(OperationShape operation, HttpRequestTestCase testCase) {
         writer.write("expect(r.method).toBe($S);", testCase.getMethod());
         writer.write("expect(r.path).toBe($S);", testCase.getUri());
 
         writeRequestHeaderAssertions(testCase);
         writeRequestQueryAssertions(testCase);
-        writeRequestBodyAssertions(testCase);
+        writeRequestBodyAssertions(operation, testCase);
     }
 
     private void writeRequestQueryAssertions(HttpRequestTestCase testCase) {
@@ -247,25 +249,44 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeRequestBodyAssertions(HttpRequestTestCase testCase) {
+    private void writeRequestBodyAssertions(OperationShape operation, HttpRequestTestCase testCase) {
         testCase.getBody().ifPresent(body -> {
+            // If we expect an empty body, expect it to be falsy.
+            if (body.isEmpty()) {
+                writer.write("expect(r.body).toBeFalsy();");
+                return;
+            }
+
             // Fast fail if we don't have a body.
             writer.write("expect(r.body).toBeDefined();");
 
             // Otherwise load a media type specific comparator and do a comparison.
             String mediaType = testCase.getBodyMediaType().orElse(null);
 
-            // Fast check if we expect an empty body, or we have an undescribed or plain text body.
-            if (body.isEmpty() || mediaType == null || mediaType.equals("text/plain")) {
-                writer.write("expect(r.body).toBe($S);", body);
+            // Fast check if we have an undescribed or plain text body.
+            if (mediaType == null || mediaType.equals("text/plain")) {
+                // Handle converting to the right comparison format for blob payloads.
+                HttpBindingIndex httpBindingIndex = model.getKnowledge(HttpBindingIndex.class);
+                List<HttpBinding> payloadBindings = httpBindingIndex.getRequestBindings(operation, Location.PAYLOAD);
+                if (!payloadBindings.isEmpty() && hasBlobBinding(payloadBindings)) {
+                    writer.write("expect(r.body).toMatchObject(Uint8Array.from($S, c => c.charCodeAt(0)));", body);
+                } else {
+                    writer.write("expect(r.body).toBe($S);", body);
+                }
                 return;
             }
             registerBodyComparatorStub(mediaType);
 
-            writer.write("const bodyString = `$L`;", body);
+            // Handle escaping strings with quotes inside them.
+            writer.write("const bodyString = `$L`;", body.replace("\"", "\\\""));
             writer.write("const unequalParts: any = compareEquivalentBodies(bodyString, r.body.toString());");
             writer.write("expect(unequalParts).toBeUndefined();");
         });
+    }
+
+    private boolean hasBlobBinding(List<HttpBinding> payloadBindings) {
+        // Can only have one payload binding at a time.
+        return model.expectShape(payloadBindings.get(0).getMember().getTarget()).isBlobShape();
     }
 
     private void registerBodyComparatorStub(String mediaType) {
@@ -505,9 +526,8 @@ final class HttpProtocolTestGenerator implements Runnable {
         @Override
         public Void stringNode(StringNode node) {
             // Handle blobs needing to be converted from strings to their input type of UInt8Array.
-            // TODO Update this methodology?
             if (workingShape.isBlobShape()) {
-                writer.write("new TextEncoder().encode($S),", node.getValue());
+                writer.write("Uint8Array.from($S, c => c.charCodeAt(0)),", node.getValue());
             } else {
                 writer.write("$S,", node.getValue());
             }
