@@ -1346,7 +1346,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         MemberShape targetMember = target.getMember();
         Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
-        String collectionTargetValue = getOutputValue(context, bindingType, "_entry", targetMember, collectionTarget);
+        String collectionTargetValue = getOutputValue(context, bindingType, "_entry.trim()",
+                targetMember, collectionTarget);
         switch (bindingType) {
             case HEADER:
                 // Split these values on commas.
