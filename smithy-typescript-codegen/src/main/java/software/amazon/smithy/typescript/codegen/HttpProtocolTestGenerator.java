@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -47,6 +48,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.protocoltests.traits.HttpMessageTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestCase;
@@ -325,7 +327,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  fail('Expected a valid response to be returned, got err.');\n"
                        + "  return;\n"
                        + "}");
-            writeResponseAssertions(testCase);
+            writeResponseAssertions(operation, testCase);
         });
     }
 
@@ -356,7 +358,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  }\n"
                        + "  const r: any = err;", errorSymbol, error.getId().getName())
                     .indent()
-                    .call(() -> writeResponseAssertions(testCase))
+                    .call(() -> writeResponseAssertions(error, testCase))
                     .write("return;")
                     .dedent()
                     .write("}");
@@ -393,17 +395,29 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     // Ensure that the serialized response matches the expected response.
-    private void writeResponseAssertions(HttpResponseTestCase testCase) {
+    private void writeResponseAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         writer.write("expect(r['$$metadata'].httpStatusCode).toBe($L);", testCase.getCode());
 
-        writeParamAssertions(testCase);
+        writeParamAssertions(operationOrError, testCase);
     }
 
-    private void writeParamAssertions(HttpResponseTestCase testCase) {
+    private void writeParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         ObjectNode params = testCase.getParams();
         if (!params.isEmpty()) {
-            String jsonParameters = Node.prettyPrintJson(params);
-            writer.write("const paramsToValidate: any = $L;", jsonParameters);
+            StructureShape testOutputShape;
+            if (operationOrError.isStructureShape()) {
+                testOutputShape = operationOrError.asStructureShape().get();
+            } else {
+                testOutputShape = model.expectShape(
+                        operationOrError.asOperationShape().get().getOutput()
+                                .orElseThrow(() -> new CodegenException("Foo")),
+                        StructureShape.class);
+            }
+
+            // Use this trick wrapper to not need more complex trailing comma handling.
+            writer.write("const paramsToValidate: any = [")
+                    .call(() -> params.accept(new CommandOutputNodeVisitor(testOutputShape)))
+                    .write("][0];");
 
             writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
                 writer.write("expect(r[param]).toBeDefined();");
@@ -518,6 +532,113 @@ final class HttpProtocolTestGenerator implements Runnable {
                         }
                     }
                 }
+                this.workingShape = wrapperShape;
+            });
+            return null;
+        }
+
+        @Override
+        public Void stringNode(StringNode node) {
+            // Handle blobs needing to be converted from strings to their input type of UInt8Array.
+            if (workingShape.isBlobShape()) {
+                writer.write("Uint8Array.from($S, c => c.charCodeAt(0)),", node.getValue());
+            } else {
+                writer.write("$S,", node.getValue());
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Supports writing out TS specific output types in the generated code
+     * through visiting the target shape at the same time as the node. If
+     * instead we just printed out the node, many values would not match on
+     * type signatures.
+     *
+     * This handles properly generating Date types for numbers that are
+     * Timestamp shapes, "undefined" for nulls, boolean values, and Uint8Array
+     * types for blobs, and error Message field standardization.
+     */
+    private final class CommandOutputNodeVisitor implements NodeVisitor<Void> {
+        private final StructureShape outputShape;
+        private Shape workingShape;
+
+        private CommandOutputNodeVisitor(StructureShape outputShape) {
+            this.outputShape = outputShape;
+            this.workingShape = outputShape;
+        }
+
+        @Override
+        public Void arrayNode(ArrayNode node) {
+            String openElement = "[";
+            String closeElement = "]";
+
+            // Write the value out directly.
+            writer.openBlock("$L\n", closeElement + ",\n", openElement, () -> {
+                Shape wrapperShape = this.workingShape;
+                node.getElements().forEach(element -> {
+                    // Swap the working shape to the member of the collection.
+                    this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    writer.call(() -> element.accept(this)).write("\n");
+                });
+                this.workingShape = wrapperShape;
+            });
+            return null;
+        }
+
+        @Override
+        public Void booleanNode(BooleanNode node) {
+            // Handle needing to write the boolean's value properly.
+            writer.write(node.getValue() ? "true," : "false,");
+            return null;
+        }
+
+        @Override
+        public Void nullNode(NullNode node) {
+            // Handle nulls being literal "undefined" in JS.
+            writer.write("undefined,");
+            return null;
+        }
+
+        @Override
+        public Void numberNode(NumberNode node) {
+            // Handle timestamps needing to be converted from numbers to their input type of Date.
+            // Also handle that a Date in TS takes milliseconds, so add 000 to the end.
+            if (workingShape.isTimestampShape()) {
+                writer.write("new Date($L000),", node.getValue());
+            } else {
+                writer.write("$L,", node.getValue().toString());
+            }
+            return null;
+        }
+
+        @Override
+        public Void objectNode(ObjectNode node) {
+            // Both objects and maps can use a majority of the same logic.
+            // Use "as any" to have TS complain less about undefined entries.
+            writer.openBlock("{", "},\n", () -> {
+                Shape wrapperShape = this.workingShape;
+                node.getMembers().forEach((keyNode, valueNode) -> {
+                    // Grab the correct member related to the node member we have.
+                    MemberShape memberShape;
+                    if (wrapperShape.isStructureShape()) {
+                        memberShape = wrapperShape.asStructureShape().get().getMember(keyNode.getValue()).get();
+                    } else {
+                        memberShape = wrapperShape.asMapShape().get().getValue();
+                    }
+
+                    // Handle error standardization to the down-cased "message".
+                    String validationName = keyNode.getValue();
+                    if (wrapperShape.hasTrait(ErrorTrait.class) && validationName.equals("Message")) {
+                        validationName = "message";
+                    }
+                    writer.write("$S: ", validationName);
+
+                    this.workingShape = model.expectShape(memberShape.getTarget());
+                    // TODO Alter valueNode to downcase keys if it's a map for prefixHeaders?
+                    writer.call(() -> valueNode.accept(this));
+                    writer.write("\n");
+                });
                 this.workingShape = wrapperShape;
             });
             return null;
