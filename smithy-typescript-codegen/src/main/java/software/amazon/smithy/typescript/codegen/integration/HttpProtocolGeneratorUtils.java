@@ -284,7 +284,7 @@ public final class HttpProtocolGeneratorUtils {
                     TypeScriptDependency.AWS_SDK_TYPES.packageName);
             // These responses will also have additional properties, so enable that on the interface.
             writer.write("let response: __SmithyException & __MetadataBearer & {[key: string]: any};");
-            writer.write("let errorCode: String = \"UnknownError\";");
+            writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
@@ -300,6 +300,7 @@ public final class HttpProtocolGeneratorUtils {
                         String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
                         writer.openBlock("response = {", "}", () -> {
                             writer.write("...await $L($L, context),", errorDeserMethodName, outputParam);
+                            writer.write("name: errorCode,");
                             writer.write("$$metadata: deserializeMetadata(output),");
                         });
                     });
