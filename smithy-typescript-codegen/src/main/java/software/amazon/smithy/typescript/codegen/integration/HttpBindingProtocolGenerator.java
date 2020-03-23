@@ -443,7 +443,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof BlobShape) {
             return getBlobInputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
-            return getCollectionInputParam(bindingType, dataSource);
+            return getCollectionInputParam(context, bindingType, dataSource, (CollectionShape) target);
         } else if (target instanceof StructureShape || target instanceof UnionShape) {
             return getNamedMembersInputParam(context, bindingType, dataSource, target);
         }
@@ -481,21 +481,32 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * collection. By default, this separates the list with commas in headers, and
      * relies on the HTTP implementation for query strings.
      *
+     * @param context The generation context.
      * @param bindingType How this value is bound to the operation input.
      * @param dataSource The in-code location of the data to provide an input of
      *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
      * @return Returns a value or expression of the input collection.
      */
     private String getCollectionInputParam(
+            GenerationContext context,
             Location bindingType,
-            String dataSource
+            String dataSource,
+            CollectionShape target
     ) {
+        MemberShape targetMember = target.getMember();
+        Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
+        // Use a basic array to serialize this more easily.
+        if (target.isSetShape()) {
+            dataSource = "Array.from(" + dataSource + ".values())";
+        }
+        String collectionTargetValue = getInputValue(context, bindingType, "_entry", targetMember, collectionTarget);
+        String iteratedParam = "(" + dataSource + " || []).map(_entry => " + collectionTargetValue + ")";
         switch (bindingType) {
             case HEADER:
-                // Join these values with commas.
-                return "(" + dataSource + " || []).toString()";
+                return iteratedParam + ".join(', ')";
             case QUERY:
-                return dataSource;
+                return iteratedParam;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
         }
