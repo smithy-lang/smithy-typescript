@@ -159,8 +159,9 @@ final class HttpProtocolTestGenerator implements Runnable {
     private void generateRequestTest(OperationShape operation, HttpRequestTestCase testCase) {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
 
+        String testName = testCase.getId() + ":Request";
         testCase.getDocumentation().ifPresent(writer::writeDocs);
-        writer.openBlock("it($S, async () => {", "});\n", testCase.getId(), () -> {
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             // Create a client with a custom request handler that intercepts requests.
             writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () ->
                     writer.write("requestHandler: new RequestSerializationTestHandler()"));
@@ -181,9 +182,11 @@ final class HttpProtocolTestGenerator implements Runnable {
             writer.write("try {\n"
                        + "  await client.send(command);\n"
                        + "  fail('Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown');\n"
+                       + "  return;\n"
                        + "} catch (err) {\n"
                        + "  if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {\n"
                        + "    fail(err);\n"
+                       + "    return;\n"
                        + "  }\n"
                        + "  const r = err.request;")
                     .indent()
@@ -286,7 +289,8 @@ final class HttpProtocolTestGenerator implements Runnable {
 
     private void generateResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
         testCase.getDocumentation().ifPresent(writer::writeDocs);
-        writer.openBlock("it($S, async () => {", "});\n", testCase.getId(), () -> {
+        String testName = testCase.getId() + ":Response";
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             writeResponseTestSetup(operation, testCase, true);
 
             // Invoke the handler and look for the expected response to then perform assertions.
@@ -295,6 +299,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  r = await client.send(command);\n"
                        + "} catch (err) {\n"
                        + "  fail('Expected a valid response to be returned, got err.');\n"
+                       + "  return;\n"
                        + "}");
             writeResponseAssertions(testCase);
         });
@@ -307,11 +312,11 @@ final class HttpProtocolTestGenerator implements Runnable {
     ) {
         Symbol errorSymbol = symbolProvider.toSymbol(error);
 
-        // Use a compound operation:test_case name so we generate unique tests
+        // Use a compound test_case name so we generate unique tests
         // for each error on each operation safely. This is useful in validating
         // that operation parsers are all correctly identifying errors and that
         // we can test for any operation specific values properly.
-        String testName = operation.getId().getName() + ":" + testCase.getId();
+        String testName = testCase.getId() + ":Error:" + operation.getId().getName();
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             writeResponseTestSetup(operation, testCase, false);
@@ -323,6 +328,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  if (!$T.isa(err)) {\n"
                        + "    console.log(err);\n"
                        + "    fail(`Expected a $L to be thrown, got $${err.name} instead`);\n"
+                       + "    return;\n"
                        + "  }\n"
                        + "  const r: any = err;", errorSymbol, error.getId().getName())
                     .indent()
@@ -377,7 +383,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     /**
-     * Supports writing out TS specific output types in the generated code
+     * Supports writing out TS specific input types in the generated code
      * through visiting the target shape at the same time as the node. If
      * instead we just printed out the node, many values would not match on
      * type signatures.
