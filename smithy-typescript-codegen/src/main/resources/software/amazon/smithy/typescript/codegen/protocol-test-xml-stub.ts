@@ -19,8 +19,20 @@ const compareEquivalentBodies = (expectedBody: string, generatedBody: string): O
     tagValueProcessor: (val: any, tagName: any) => decodeEscapedXml(val)
   };
 
-  const expectedParts = xmlParse(expectedBody, parseConfig);
-  const generatedParts = xmlParse(generatedBody, parseConfig);
+  const parseXmlBody = (body: string) => {
+    const parsedObj = xmlParse(body, parseConfig);
+    const textNodeName = "#text";
+    const key = Object.keys(parsedObj)[0];
+    const parsedObjToReturn = parsedObj[key];
+    if (parsedObjToReturn[textNodeName]) {
+      parsedObjToReturn[key] = parsedObjToReturn[textNodeName];
+      delete parsedObjToReturn[textNodeName];
+    }
+    return parsedObjToReturn;
+  };
+
+  const expectedParts = parseXmlBody(expectedBody);
+  const generatedParts = parseXmlBody(generatedBody);
 
   return compareParts(expectedParts, generatedParts);
 }
