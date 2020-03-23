@@ -377,7 +377,7 @@ final class HttpProtocolTestGenerator implements Runnable {
 
             writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
                 writer.write("expect(r[param]).toBeDefined();");
-                writer.write("expect(r[param]).toBe(paramsToValidate[param]);");
+                writer.write("expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);");
             });
         }
     }
