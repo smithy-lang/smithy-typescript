@@ -76,7 +76,7 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
   Object.keys(expectedParts).forEach(key => {
     if (generatedParts[key] === undefined) {
       unequalParts[key] = { exp: expectedParts[key], gen: undefined };
-    } else if (generatedParts[key] !== expectedParts[key]) {
+    } else if (!equivalentContents(expectedParts[key], generatedParts[key])) {
       unequalParts[key] = { exp: expectedParts[key], gen: generatedParts[key] };
     }
   });
@@ -84,8 +84,6 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
   Object.keys(generatedParts).forEach(key => {
     if (expectedParts[key] === undefined) {
       unequalParts[key] = { exp: undefined, gen: generatedParts[key] };
-    } else if (expectedParts[key] !== generatedParts[key]) {
-      unequalParts[key] = { exp: expectedParts[key], gen: generatedParts[key] };
     }
   });
 
@@ -94,3 +92,49 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
   }
   return undefined;
 };
+
+/**
+ * Compares all types for equivalent contents, doing nested
+ * equality checks based on non-'__type', non-`$$metadata`
+ * properties that have defined values.
+ */
+const equivalentContents = (expected: any, generated: any): boolean => {
+  let localExpected = expected;
+  // Handle comparing sets to arrays properly.
+  if (expected instanceof Set) {
+    localExpected = Array.from(expected);
+  }
+
+  // Short circuit on equality.
+  if (localExpected == generated) {
+    return true;
+  }
+
+  // If a test fails with an issue in the below 6 lines, it's likely
+  // due to an issue in the nestedness or existence of the property
+  // being compared.
+  delete localExpected['__type'];
+  delete generated['__type'];
+  delete localExpected['$$metadata'];
+  delete generated['$$metadata'];
+  Object.keys(localExpected).forEach(key => localExpected[key] === undefined && delete localExpected[key])
+  Object.keys(generated).forEach(key => generated[key] === undefined && delete generated[key])
+
+  const expectedProperties = Object.getOwnPropertyNames(localExpected);
+  const generatedProperties = Object.getOwnPropertyNames(generated);
+
+  // Short circuit on different property counts.
+  if (expectedProperties.length != generatedProperties.length) {
+    return false;
+  }
+
+  // Compare properties directly.
+  for (var index = 0; index < expectedProperties.length; index++) {
+    const propertyName = expectedProperties[index];
+    if (!equivalentContents(localExpected[propertyName], generated[propertyName])) {
+      return false;
+    }
+  }
+
+  return true;
+}
