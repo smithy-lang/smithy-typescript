@@ -26,7 +26,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -547,17 +546,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             MemberShape member
     ) {
         HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
-        Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-        String baseParam = HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, member, format);
-
+        Format format;
         switch (bindingType) {
             case HEADER:
+                format = httpIndex.determineTimestampFormat(member, bindingType, Format.HTTP_DATE);
+                break;
             case LABEL:
+                format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
+                break;
             case QUERY:
-                return baseParam + ".toString()";
+                format = httpIndex.determineTimestampFormat(member, bindingType, Format.DATE_TIME);
+                break;
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
+
+        String baseParam = HttpProtocolGeneratorUtils.getTimestampInputParam(context, dataSource, member, format);
+        return baseParam + ".toString()";
     }
 
     /**
