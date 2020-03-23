@@ -477,6 +477,17 @@ final class HttpProtocolTestGenerator implements Runnable {
                     }
                     writer.write("\n");
                 });
+                // Check for setting a potentially unspecified member value for the
+                // idempotency token.
+                // TODO Move a check to validation instead of filling here?
+                if (node.getMembers().isEmpty() && wrapperShape.isStructureShape()) {
+                    StructureShape structureShape = wrapperShape.asStructureShape().get();
+                    for (Map.Entry<String, MemberShape> entry : structureShape.getAllMembers().entrySet()) {
+                        if (entry.getValue().hasTrait(IdempotencyTokenTrait.class)) {
+                            writer.write("$L: \"00000000-0000-4000-8000-000000000000\",", entry.getKey());
+                        }
+                    }
+                }
                 this.workingShape = wrapperShape;
             });
             return null;
