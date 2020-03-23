@@ -29,7 +29,7 @@ class ResponseDeserializationTestHandler implements HttpHandler {
     isSuccess: boolean;
     code: number;
     headers: HeaderBag;
-    body: Readable;
+    body: String;
 
     constructor(
         isSuccess: boolean,
@@ -45,9 +45,9 @@ class ResponseDeserializationTestHandler implements HttpHandler {
             this.headers = headers;
         }
         if (body === undefined) {
-          body = "";
+            body = "";
         }
-        this.body = Readable.from([body]);
+        this.body = body;
     }
 
     handle(
@@ -58,7 +58,7 @@ class ResponseDeserializationTestHandler implements HttpHandler {
             response: {
                 statusCode: this.code,
                 headers: this.headers,
-                body: this.body
+                body: Readable.from([this.body])
             }
         });
     }
