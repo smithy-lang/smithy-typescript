@@ -201,7 +201,7 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     public String timestampShape(TimestampShape shape) {
         HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
         Format format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
-        return HttpProtocolGeneratorUtils.getTimestampInputParam(dataSource, shape, format);
+        return HttpProtocolGeneratorUtils.getTimestampInputParam(context, dataSource, shape, format);
     }
 
     @Override

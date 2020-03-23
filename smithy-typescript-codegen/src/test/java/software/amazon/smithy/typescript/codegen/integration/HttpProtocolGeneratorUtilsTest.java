@@ -23,14 +23,17 @@ public class HttpProtocolGeneratorUtilsTest {
 
     @Test
     public void givesCorrectTimestampSerialization() {
+        GenerationContext mockContext = new GenerationContext();
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        mockContext.setWriter(writer);
         TimestampShape shape = TimestampShape.builder().id("com.smithy.example#Foo").build();
 
-        assertThat(DATA_SOURCE + ".toISOString()",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(DATA_SOURCE, shape, Format.DATE_TIME)));
+        assertThat("(" + DATA_SOURCE + ".toISOString().split('.')[0]+\"Z\")",
+                equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.DATE_TIME)));
         assertThat("Math.round(" + DATA_SOURCE + ".getTime() / 1000)",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(DATA_SOURCE, shape, Format.EPOCH_SECONDS)));
-        assertThat(DATA_SOURCE + ".toUTCString()",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(DATA_SOURCE, shape, Format.HTTP_DATE)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.EPOCH_SECONDS)));
+        assertThat("__dateToUtcString(" + DATA_SOURCE + ")",
+                equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.HTTP_DATE)));
     }
 
     @Test

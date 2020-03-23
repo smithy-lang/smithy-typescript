@@ -44,7 +44,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
 /**
  * Utility methods for generating HTTP protocols.
  */
-final class HttpProtocolGeneratorUtils {
+public final class HttpProtocolGeneratorUtils {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
 
@@ -54,20 +54,28 @@ final class HttpProtocolGeneratorUtils {
      * Given a format and a source of data, generate an input value provider for the
      * timestamp.
      *
+     * @param context The generation context.
      * @param dataSource The in-code location of the data to provide an input of
      *                   ({@code input.foo}, {@code entry}, etc.)
      * @param shape The shape that represents the value being provided.
      * @param format The timestamp format to provide.
      * @return Returns a value or expression of the input timestamp.
      */
-    static String getTimestampInputParam(String dataSource, Shape shape, Format format) {
+    public static String getTimestampInputParam(
+            GenerationContext context,
+            String dataSource,
+            Shape shape,
+            Format format
+    ) {
         switch (format) {
             case DATE_TIME:
-                return dataSource + ".toISOString()";
+                // Use the split to not serialize milliseconds.
+                return "(" + dataSource + ".toISOString().split('.')[0]+\"Z\")";
             case EPOCH_SECONDS:
                 return "Math.round(" + dataSource + ".getTime() / 1000)";
             case HTTP_DATE:
-                return dataSource + ".toUTCString()";
+                context.getWriter().addImport("dateToUtcString", "__dateToUtcString", "@aws-sdk/smithy-client");
+                return "__dateToUtcString(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
         }
@@ -84,7 +92,7 @@ final class HttpProtocolGeneratorUtils {
      * @param format The timestamp format to provide.
      * @return Returns a value or expression of the output timestamp.
      */
-    static String getTimestampOutputParam(String dataSource, Location bindingType, Shape shape, Format format) {
+    public static String getTimestampOutputParam(String dataSource, Location bindingType, Shape shape, Format format) {
         String modifiedSource;
         switch (format) {
             case DATE_TIME:
