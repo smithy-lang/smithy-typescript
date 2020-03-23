@@ -433,6 +433,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         if (target instanceof StringShape) {
             return HttpProtocolGeneratorUtils.getStringInputParam(context, target, dataSource);
+        } else if (target instanceof FloatShape || target instanceof DoubleShape) {
+            // Handle decimal numbers needing to have .0 in their value when whole numbers.
+            return "((" + dataSource + " % 1 == 0) ? " + dataSource + " + \".0\" : " + dataSource + ".toString())";
         } else if (isNativeSimpleType(target)) {
             return dataSource + ".toString()";
         } else if (target instanceof TimestampShape) {
