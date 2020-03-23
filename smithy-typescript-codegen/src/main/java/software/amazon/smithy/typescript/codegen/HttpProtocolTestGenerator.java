@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.node.ArrayNode;
@@ -51,6 +52,8 @@ import software.amazon.smithy.protocoltests.traits.HttpRequestTestsTrait;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestsTrait;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.MapUtils;
+import software.amazon.smithy.utils.Pair;
 
 /**
  * Generates HTTP protocol test cases to be run using Jest.
@@ -343,16 +346,22 @@ final class HttpProtocolTestGenerator implements Runnable {
     private void writeResponseTestSetup(OperationShape operation, HttpResponseTestCase testCase, boolean isSuccess) {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
 
-        // Create a client with a custom request handler that intercepts requests.
-        Map<String, String> headers = testCase.getHeaders();
+        // Lowercase all the headers we're expecting as this is what we'll get.
+        Map<String, String> headers = testCase.getHeaders().entrySet().stream()
+                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
         String headerParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(headers));
-        String body = testCase.getBody().orElse("undefined");
+        String body = testCase.getBody().orElse(null);
+
+        // Create a client with a custom request handler that intercepts requests.
         writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () ->
                 writer.openBlock("requestHandler: new ResponseDeserializationTestHandler(", ")", () -> {
                     writer.write("$L,", isSuccess);
                     writer.write("$L,", testCase.getCode());
                     writer.write("$L,", headers.isEmpty() ? "undefined" : headerParameters);
-                    writer.write("`$L`,", body);
+                    if (body != null) {
+                        writer.write("`$L`,", body);
+                    }
                 }));
 
         // Set the command's parameters to empty, using the any type to
