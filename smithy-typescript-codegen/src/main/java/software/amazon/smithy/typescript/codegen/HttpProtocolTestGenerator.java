@@ -454,7 +454,8 @@ final class HttpProtocolTestGenerator implements Runnable {
         @Override
         public Void objectNode(ObjectNode node) {
             // Both objects and maps can use a majority of the same logic.
-            writer.openBlock("{", "},\n", () -> {
+            // Use "as any" to have TS complain less about undefined entries.
+            writer.openBlock("{", "} as any,\n", () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getMembers().forEach((keyNode, valueNode) -> {
                     writer.write("$L: ", keyNode.getValue());
