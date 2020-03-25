@@ -218,7 +218,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
-            List<HttpBinding> documentBindings = writeRequestBody(context, operation, bindingIndex);
+            List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex);
             boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
 
             if (hasHostPrefix) {
@@ -237,14 +237,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 if (hasQueryComponents) {
                     writer.write("query: query,");
                 }
-                if (!documentBindings.isEmpty()) {
-                    // Track all shapes bound to the document so their serializers may be generated.
-                    documentBindings.stream()
+                if (!bodyBindings.isEmpty()) {
+                    // Track all shapes bound to the body so their serializers may be generated.
+                    bodyBindings.stream()
                             .map(HttpBinding::getMember)
                             .map(member -> context.getModel().expectShape(member.getTarget()))
                             .forEach(serializingDocumentShapes::add);
-                    writer.write("body: body,");
                 }
+                // Always set the body,
+                writer.write("body: body,");
             });
         });
 
@@ -388,25 +389,29 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
-        List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
-        documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
-        List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
+        // Write the default `body` property.
+        writer.write("let body: any;");
 
-        if (!documentBindings.isEmpty()) {
-            // Write the default `body` property.
-            writer.write("let body: any;");
-            serializeInputDocument(context, operation, documentBindings);
-            return documentBindings;
-        }
+        // Handle a payload binding explicitly.
+        List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
         if (!payloadBindings.isEmpty()) {
-            // Write the default `body` property.
-            writer.write("let body: any;");
             // There can only be one payload binding.
             HttpBinding payloadBinding = payloadBindings.get(0);
             serializeInputPayload(context, operation, payloadBinding);
             return payloadBindings;
         }
 
+        // If we have document bindings or need a defaulted request body,
+        // use the input document serialization.
+        List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
+        if (!documentBindings.isEmpty() || bindingIndex.getRequestBindings(operation).isEmpty()) {
+            documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
+
+            serializeInputDocument(context, operation, documentBindings);
+            return documentBindings;
+        }
+
+        // Otherwise, we have no bindings to add shapes from.
         return ListUtils.of();
     }
 
@@ -605,6 +610,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * <p>Implementations of this method are expected to set a value to the
      * {@code body} variable that will be serialized as the request body.
      * This variable will already be defined in scope.
+     *
+     * Implementations MUST properly fill the body parameter even if no
+     * document bindings are present.
      *
      * <p>For example:
      *
