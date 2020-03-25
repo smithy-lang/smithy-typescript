@@ -108,7 +108,8 @@ final class HttpProtocolTestGenerator implements Runnable {
         OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
 
-        for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
+        // Use a TreeSet to have a fixed ordering of tests.
+        for (OperationShape operation : new TreeSet<>(topDownIndex.getContainedOperations(service))) {
             // 1. Generate test cases for each request.
             operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
                 for (HttpRequestTestCase testCase : trait.getTestCases()) {
