@@ -74,8 +74,6 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
             "^1.0.0-beta.0", false),
     AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@aws-sdk/eventstream-serde-node", "^1.0.0-beta.0", false),
     AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@aws-sdk/eventstream-serde-browser", "^1.0.0-beta.0", false),
-    AWS_SDK_EVENTSTREAM_SIGNER_NODE("dependencies", "@aws-sdk/eventstream-signer-node","^1.0.0-alpha.0", false),
-    MIDDLEWARE_EVENTSTREAM_SIGNING("dependencies", "@aws-sdk/middleware-eventstream-signing", "^1.0.0-alpha.0", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),
