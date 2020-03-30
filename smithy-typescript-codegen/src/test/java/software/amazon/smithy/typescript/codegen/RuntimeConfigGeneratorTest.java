@@ -4,7 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
@@ -22,14 +26,17 @@ public class RuntimeConfigGeneratorTest {
         List<TypeScriptIntegration> integrations = new ArrayList<>();
         integrations.add(new TypeScriptIntegration() {
             @Override
-            public void addRuntimeConfigValues(
+            public Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
                     TypeScriptSettings settings,
                     Model model,
                     SymbolProvider symbolProvider,
-                    TypeScriptWriter writer,
                     LanguageTarget target
             ) {
-                writer.write("syn: 'ack',");
+                Map<String, Consumer<TypeScriptWriter>> config = new HashMap<>();
+                config.put("syn", writer -> {
+                    writer.write("'ack'");
+                });
+                return config;
             }
         });
 

@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.build.PluginContext;
@@ -234,29 +235,36 @@ public interface TypeScriptIntegration {
      *
      *     private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
      *
-     *     public void addRuntimeConfigValues(
+     *     public Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
      *             TypeScriptSettings settings,
      *             Model model,
      *             SymbolProvider symbolProvider,
-     *             TypeScriptWriter writer,
      *             LanguageTarget target
      *     ) {
      *         // This is a static value that is added to every generated
      *         // runtimeConfig file.
-     *         writer.write("foo: 'some-static-value',"); // Note the trailing comma!
+     *         Map<String, Consumer<TypeScriptWriter>> config = new HashMap<>();
+     *         config.put("foo", writer -> {
+     *            writer.write("some static value");
+     *         });
      *
      *         switch (target) {
      *             case NODE:
-     *                 writer.write("bar: someNodeValue,");
+     *                 config.put("bar", writer -> {
+     *                     writer.write("someNodeValue");
+     *                 });
      *                 break;
      *             case BROWSER:
-     *                 writer.write("bar: someBrowserValue,");
+     *                 config.put("bar", writer -> {
+     *                     writer.write("someBrowserValue");
+     *                 });
      *                 break;
      *             case SHARED:
      *                 break;
      *             default:
      *                 LOGGER.warn("Unknown target: " + target);
      *         }
+     *         return config;
      *     }
      * }
      * }</pre>
@@ -271,18 +279,19 @@ public interface TypeScriptIntegration {
      * <pre>
      * {@code
      * public final class MyIntegration2 implements TypeScriptIntegration {
-     *     public void addRuntimeConfigValues(
+     *     public Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
      *             TypeScriptSettings settings,
      *             Model model,
      *             SymbolProvider symbolProvider,
-     *             TypeScriptWriter writer,
      *             LanguageTarget target
      *     ) {
      *         if (target == LanguageTarget.SHARED) {
-     *             String someTraitValue = settings.getModel(model).getTrait(SomeTrait.class)
-     *                          .map(SomeTrait::getValue)
-     *                          .orElse("");
-     *             writer.write("someTraitValue: $S,", someTraitValue);
+     *             return MapUtils.of("someTraitValue", writer -> {
+     *                 String someTraitValue = settings.getModel(model).getTrait(SomeTrait.class)
+     *                             .map(SomeTrait::getValue)
+     *                             .orElse("");
+     *                 writer.write("someTraitValue: $S,", someTraitValue);
+     *             });
      *         }
      *     }
      * }
@@ -291,16 +300,15 @@ public interface TypeScriptIntegration {
      * @param settings Settings used to generate.
      * @param model Model to generate from.
      * @param symbolProvider Symbol provider used for codegen.
-     * @param writer TypeScript writer to write to.
      * @param target The TypeScript language target.
+     * @return Returns a map of config property name and a consumer function with TypeScriptWriter parameter.
      */
-    default void addRuntimeConfigValues(
+    default Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
             LanguageTarget target
     ) {
-        // pass
+        return Collections.emptyMap();
     }
 }
