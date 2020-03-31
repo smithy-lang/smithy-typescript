@@ -49,6 +49,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.HttpPrefixHeadersTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.protocoltests.traits.HttpMessageTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestCase;
@@ -557,7 +558,7 @@ final class HttpProtocolTestGenerator implements Runnable {
      * type signatures.
      *
      * This handles properly generating Date types for numbers that are
-     * Timestamp shapes, "undefined" for nulls, boolean values, and Uint8Array
+     * Timestamp shapes, downcasing prefix headers, boolean values, Uint8Array
      * types for blobs, and error Message field standardization.
      */
     private final class CommandOutputNodeVisitor implements NodeVisitor<Void> {
@@ -596,8 +597,8 @@ final class HttpProtocolTestGenerator implements Runnable {
 
         @Override
         public Void nullNode(NullNode node) {
-            // Handle nulls being literal "undefined" in JS.
-            writer.write("undefined,");
+            // Nulls on the wire are nulls in parsed content.
+            writer.write("null,");
             return null;
         }
 
@@ -636,13 +637,26 @@ final class HttpProtocolTestGenerator implements Runnable {
                     writer.write("$S: ", validationName);
 
                     this.workingShape = model.expectShape(memberShape.getTarget());
-                    // TODO Alter valueNode to downcase keys if it's a map for prefixHeaders?
-                    writer.call(() -> valueNode.accept(this));
+                    // Alter valueNode to downcase keys if it's a map for prefixHeaders.
+                    // This is an enforced behavior of the fetch handler.
+                    Node renderNode = memberShape.hasTrait(HttpPrefixHeadersTrait.class)
+                            ? downcaseNodeKeys(valueNode.expectObjectNode())
+                            : valueNode;
+                    writer.call(() -> renderNode.accept(this));
                     writer.write("\n");
                 });
                 this.workingShape = wrapperShape;
             });
             return null;
+        }
+
+        private ObjectNode downcaseNodeKeys(ObjectNode startingNode) {
+            ObjectNode downcasedNode = Node.objectNode();
+            for (Map.Entry<StringNode, Node> entry : startingNode.getMembers().entrySet()) {
+                downcasedNode = downcasedNode.withMember(entry.getKey().getValue().toLowerCase(Locale.US),
+                        entry.getValue());
+            }
+            return downcasedNode;
         }
 
         @Override
