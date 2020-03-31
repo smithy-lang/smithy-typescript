@@ -261,18 +261,18 @@ public interface TypeScriptIntegration {
      *         // runtimeConfig file.
      *         Map<String, Consumer<TypeScriptWriter>> config = new HashMap<>();
      *         config.put("foo", writer -> {
-     *            writer.write("some static value");
+     *            writer.write("foo: some static value,");
      *         });
      *
      *         switch (target) {
      *             case NODE:
      *                 config.put("bar", writer -> {
-     *                     writer.write("someNodeValue");
+     *                     writer.write("bar: someNodeValue,");
      *                 });
      *                 break;
      *             case BROWSER:
      *                 config.put("bar", writer -> {
-     *                     writer.write("someBrowserValue");
+     *                     writer.write("bar: someBrowserValue,");
      *                 });
      *                 break;
      *             case SHARED:

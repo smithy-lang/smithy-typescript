@@ -15,10 +15,9 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 import software.amazon.smithy.build.SmithyBuildException;
@@ -233,21 +232,14 @@ final class RuntimeConfigGenerator {
             // Inject customizations into the ~template.
             writer.onSection("customizations", original -> {
                 writer.indent();
-                Map<String, Consumer<TypeScriptWriter>> defaultConfigs =
-                        new HashMap(getDefaultRuntimeConfigs(target));
-                Map<String, Consumer<TypeScriptWriter>> aggregatedConfigs = integrations.stream()
-                        .sorted(Comparator.comparingInt(TypeScriptIntegration::getOrder))
-                        .map(integration -> integration.getRuntimeConfigWriters(
-                                settings, model, symbolProvider, target))
-                        .reduce(defaultConfigs, (aggregated, configMap) -> {
-                            aggregated.putAll(configMap);
-                            return aggregated;
-                        });
-                aggregatedConfigs.entrySet().stream()
-                        .sorted(Comparator.comparing(Map.Entry::getKey))
-                        .forEach(entry -> {
-                            entry.getValue().accept(writer);
-                        });
+                // Start with defaults, use a TreeMap for keeping entries sorted.
+                Map<String, Consumer<TypeScriptWriter>> configs =
+                        new TreeMap<>(getDefaultRuntimeConfigs(target));
+                // Add any integration supplied runtime config writers.
+                for (TypeScriptIntegration integration : integrations) {
+                    configs.putAll(integration.getRuntimeConfigWriters(settings, model, symbolProvider, target));
+                }
+                configs.values().forEach(value -> value.accept(writer));
                 writer.dedent();
             });
             writer.write(contents, "");
