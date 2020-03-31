@@ -19,6 +19,7 @@ import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -146,6 +147,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
         HttpProtocolGeneratorUtils.generateCollectBody(context);
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
+        HttpProtocolGeneratorUtils.generateHttpBindingUtils(context);
     }
 
     /**
@@ -355,10 +357,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         operation.getInput().ifPresent(outputId -> {
             Model model = context.getModel();
             for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
-                String memberName = symbolProvider.toMemberName(binding.getMember());
-                writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
+                String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
+                writer.openBlock("if (isSerializableHeaderValue($1L)) {", "}", memberLocation, () -> {
                     Shape target = model.expectShape(binding.getMember().getTarget());
-                    String headerValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                    String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
                             binding.getMember(), target);
                     writer.write("headers[$S] = $L;", binding.getLocationName(), headerValue);
                 });
@@ -366,15 +368,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
             // Handle assembling prefix headers.
             for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
-                String memberName = symbolProvider.toMemberName(binding.getMember());
-                writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
+                String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
+                writer.openBlock("if ($L !== undefined) {", "}", memberLocation, () -> {
                     MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                     Shape target = model.expectShape(prefixMap.getValue().getTarget());
                     // Iterate through each entry in the member.
-                    writer.openBlock("Object.keys(input.$L).forEach(suffix => {", "});", memberName, () -> {
+                    writer.openBlock("Object.keys($L).forEach(suffix => {", "});", memberLocation, () -> {
                         // Use a ! since we already validated the input member is defined above.
                         String headerValue = getInputValue(context, binding.getLocation(),
-                                "input." + memberName + "![suffix]", binding.getMember(), target);
+                                memberLocation + "![suffix]", binding.getMember(), target);
                         // Append the suffix to the defined prefix and serialize the value in to that key.
                         writer.write("headers[$S + suffix] = $L;", binding.getLocationName(), headerValue);
                     });
@@ -951,7 +953,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Model model = context.getModel();
         for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
             String memberName = symbolProvider.toMemberName(binding.getMember());
-            String headerName = binding.getLocationName().toLowerCase();
+            String headerName = binding.getLocationName().toLowerCase(Locale.US);
             writer.openBlock("if ($L.headers[$S] !== undefined) {", "}", outputName, headerName, () -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 String headerValue = getOutputValue(context, binding.getLocation(),
@@ -973,8 +975,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         writer.write("contents.$L = {};", memberName);
                     });
 
-                    // Generate a single block for each group of prefix headers.
-                    writer.openBlock("if (header.startsWith($S)) {", "}", binding.getLocationName(), () -> {
+                    // Generate a single block for each group of lower-cased prefix headers.
+                    String headerLocation = binding.getLocationName().toLowerCase(Locale.US);
+                    writer.openBlock("if (header.startsWith($S)) {", "}", headerLocation, () -> {
                         MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                         Shape target = model.expectShape(prefixMap.getValue().getTarget());
                         String headerValue = getOutputValue(context, binding.getLocation(),
@@ -982,7 +985,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
                         // Extract the non-prefix portion as the key.
                         writer.write("contents.$L[header.substring($L)] = $L;",
-                                memberName, binding.getLocationName().length(), headerValue);
+                                memberName, headerLocation.length(), headerValue);
                     });
                 }
             });
