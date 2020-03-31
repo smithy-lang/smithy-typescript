@@ -38,6 +38,22 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
  */
 public interface TypeScriptIntegration {
     /**
+     * Gets the sort order of the customization from -128 to 127.
+     *
+     * <p>Customizations are applied according to this sort order. Lower values
+     * are executed before higher values (for example, -128 comes before 0,
+     * comes before 127). Customizations default to 0, which is the middle point
+     * between the minimum and maximum order values. The customization
+     * applied later can override the runtime configurations that provided
+     * by customizations applied earlier.
+     *
+     * @return Returns the sort order, defaulting to 0.
+     */
+    default byte getOrder() {
+        return 0;
+    }
+
+    /**
      * Preprocess the model before code generation.
      *
      * <p>This can be used to remove unsupported features, remove traits
@@ -235,7 +251,7 @@ public interface TypeScriptIntegration {
      *
      *     private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
      *
-     *     public Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
+     *     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
      *             TypeScriptSettings settings,
      *             Model model,
      *             SymbolProvider symbolProvider,
@@ -279,7 +295,7 @@ public interface TypeScriptIntegration {
      * <pre>
      * {@code
      * public final class MyIntegration2 implements TypeScriptIntegration {
-     *     public Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
+     *     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
      *             TypeScriptSettings settings,
      *             Model model,
      *             SymbolProvider symbolProvider,
@@ -303,7 +319,7 @@ public interface TypeScriptIntegration {
      * @param target The TypeScript language target.
      * @return Returns a map of config property name and a consumer function with TypeScriptWriter parameter.
      */
-    default Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
+    default Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,

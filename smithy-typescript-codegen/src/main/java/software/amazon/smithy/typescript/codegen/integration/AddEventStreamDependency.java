@@ -69,7 +69,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
     }
 
     @Override
-    public Map<String, Consumer<TypeScriptWriter>> addRuntimeConfigValues(
+    public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
@@ -84,14 +84,14 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
                     writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
                             TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName);
-                    writer.write("eventStreamSerdeProvider");
+                    writer.write("eventStreamSerdeProvider,");
                 });
             case BROWSER:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
                     writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
                             TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
-                    writer.write("eventStreamSerdeProvider");
+                    writer.write("eventStreamSerdeProvider,");
                 });
             case REACT_NATIVE:
                 // TODO: add ReactNative eventstream support
@@ -99,7 +99,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                     writer.addDependency(TypeScriptDependency.INVALID_DEPENDENCY);
                     writer.addImport("invalidFunction", "invalidFunction",
                             TypeScriptDependency.INVALID_DEPENDENCY.packageName);
-                    writer.openBlock("eventStreamSerdeProvider: () => ({", "})", () -> {
+                    writer.openBlock("eventStreamSerdeProvider: () => ({", "}),", () -> {
                         writer.write("serialize: invalidFunction(\"event stream is not supported in ReactNative.\"),");
                         writer.write("deserialize: invalidFunction(\"event stream is not supported in ReactNative.\")");
                     });
