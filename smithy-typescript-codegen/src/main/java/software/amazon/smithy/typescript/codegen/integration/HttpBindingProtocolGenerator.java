@@ -1372,9 +1372,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 targetMember, collectionTarget);
         switch (bindingType) {
             case HEADER:
+                dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on commas.
-                String outputParam = "(" + dataSource + " || \"\").split(',').map(_entry => "
-                        + collectionTargetValue + ")";
+                String outputParam = "" + dataSource + ".split(',')";
+
+                // Headers that have HTTP_DATE formatted timestamps already contain a ","
+                // in their formatted entry, so split on every other "," instead.
+                if (collectionTarget.isTimestampShape()) {
+                    // Check if our member resolves to the HTTP_DATE format.
+                    HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+                    Format format = httpIndex.determineTimestampFormat(targetMember, bindingType, Format.HTTP_DATE);
+
+                    if (format == Format.HTTP_DATE) {
+                        TypeScriptWriter writer = context.getWriter();
+                        writer.addImport("splitEvery", "__splitEvery", "@aws-sdk/smithy-client");
+                        outputParam = "__splitEvery(" + dataSource + ", ',', 2)";
+                    }
+                }
+
+                // Iterate over each entry and do deser work.
+                outputParam += ".map(_entry => " + collectionTargetValue + ")";
+
+                // Make sets when necessary.
                 if (target.isSetShape()) {
                     outputParam = "new Set(" + outputParam + ")";
                 }
