@@ -515,7 +515,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                     }
 
                     // Handle auto-filling idempotency token values to the explicit value.
-                    if (memberShape.hasTrait(IdempotencyTokenTrait.class)) {
+                    if (isIdempotencyTokenWithoutValue(memberShape, valueNode)) {
                         writer.write("\"00000000-0000-4000-8000-000000000000\",");
                     } else {
                         this.workingShape = model.expectShape(memberShape.getTarget());
@@ -525,7 +525,6 @@ final class HttpProtocolTestGenerator implements Runnable {
                 });
                 // Check for setting a potentially unspecified member value for the
                 // idempotency token.
-                // TODO Move a check to validation instead of filling here?
                 if (node.getMembers().isEmpty() && wrapperShape.isStructureShape()) {
                     StructureShape structureShape = wrapperShape.asStructureShape().get();
                     for (Map.Entry<String, MemberShape> entry : structureShape.getAllMembers().entrySet()) {
@@ -537,6 +536,16 @@ final class HttpProtocolTestGenerator implements Runnable {
                 this.workingShape = wrapperShape;
             });
             return null;
+        }
+
+        private boolean isIdempotencyTokenWithoutValue(MemberShape memberShape, Node valueNode) {
+            // Short circuit non-tokens.
+            if (!memberShape.hasTrait(IdempotencyTokenTrait.class)) {
+                return false;
+            }
+
+            // Return if the token has a test-specific value.
+            return valueNode.expectStringNode().getValue().isEmpty();
         }
 
         @Override
