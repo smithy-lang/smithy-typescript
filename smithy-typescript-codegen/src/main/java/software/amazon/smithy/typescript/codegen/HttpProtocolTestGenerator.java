@@ -111,25 +111,30 @@ final class HttpProtocolTestGenerator implements Runnable {
 
         // Use a TreeSet to have a fixed ordering of tests.
         for (OperationShape operation : new TreeSet<>(topDownIndex.getContainedOperations(service))) {
-            // 1. Generate test cases for each request.
-            operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
-                for (HttpRequestTestCase testCase : trait.getTestCases()) {
-                    onlyIfProtocolMatches(testCase, () -> generateRequestTest(operation, testCase));
-                }
-            });
-            // 2. Generate test cases for each response.
-            operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
-                for (HttpResponseTestCase testCase : trait.getTestCases()) {
-                    onlyIfProtocolMatches(testCase, () -> generateResponseTest(operation, testCase));
-                }
-            });
-            // 3. Generate test cases for each error on each operation.
-            for (StructureShape error : operationIndex.getErrors(operation)) {
-                error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
-                    for (HttpResponseTestCase testCase : trait.getTestCases()) {
-                        onlyIfProtocolMatches(testCase, () -> generateErrorResponseTest(operation, error, testCase));
+            if (!operation.hasTag("server-only")) {
+                // 1. Generate test cases for each request.
+                operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
+                    for (HttpRequestTestCase testCase : trait.getTestCases()) {
+                        onlyIfProtocolMatches(testCase, () -> generateRequestTest(operation, testCase));
                     }
                 });
+                // 2. Generate test cases for each response.
+                operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                    for (HttpResponseTestCase testCase : trait.getTestCases()) {
+                        onlyIfProtocolMatches(testCase, () -> generateResponseTest(operation, testCase));
+                    }
+                });
+                // 3. Generate test cases for each error on each operation.
+                for (StructureShape error : operationIndex.getErrors(operation)) {
+                    if (!error.hasTag("server-only")) {
+                        error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                            for (HttpResponseTestCase testCase : trait.getTestCases()) {
+                                onlyIfProtocolMatches(testCase,
+                                        () -> generateErrorResponseTest(operation, error, testCase));
+                            }
+                        });
+                    }
+                }
             }
         }
 
