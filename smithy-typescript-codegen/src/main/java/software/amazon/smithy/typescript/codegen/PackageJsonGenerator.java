@@ -58,6 +58,11 @@ final class PackageJsonGenerator {
         node = node.withMember("react-native", Node.objectNode()
                 .withMember("./runtimeConfig", "./runtimeConfig.native"));
 
+        // Set the package to private if required.
+        if (settings.isPrivate()) {
+            node = node.withMember("private", true);
+        }
+
         // Expand template parameters.
         String template = Node.prettyPrintJson(node);
         template = template.replace("${package}", settings.getPackageName());

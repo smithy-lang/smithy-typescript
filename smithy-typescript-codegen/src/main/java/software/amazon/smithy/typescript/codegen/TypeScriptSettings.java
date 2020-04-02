@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.BooleanNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
@@ -45,6 +46,7 @@ public final class TypeScriptSettings {
     private static final String PACKAGE_JSON = "packageJson";
     private static final String SERVICE = "service";
     private static final String PROTOCOL = "protocol";
+    private static final String PRIVATE = "private";
 
     private String packageName;
     private String packageDescription = "";
@@ -53,6 +55,7 @@ public final class TypeScriptSettings {
     private ShapeId service;
     private ObjectNode pluginSettings = Node.objectNode();
     private String protocol = "";
+    private boolean isPrivate;
 
     /**
      * Create a settings object from a configuration object node.
@@ -64,7 +67,8 @@ public final class TypeScriptSettings {
     public static TypeScriptSettings from(Model model, ObjectNode config) {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(
-                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, SERVICE, PROTOCOL, TARGET_NAMESPACE));
+                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
+                SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE));
 
         // Get the service from the settings or infer one from the given model.
         settings.setService(config.getStringMember(SERVICE)
@@ -77,6 +81,7 @@ public final class TypeScriptSettings {
                 PACKAGE_DESCRIPTION, settings.getPackageName() + " client"));
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).ifPresent(settings::setProtocol);
+        settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
 
         settings.setPluginSettings(config);
         return settings;
@@ -194,6 +199,19 @@ public final class TypeScriptSettings {
 
     public void setPluginSettings(ObjectNode pluginSettings) {
         this.pluginSettings = Objects.requireNonNull(pluginSettings);
+    }
+
+    /**
+     * Returns if the generated package will be made private.
+     *
+     * @return If the package will be private.
+     */
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 
     /**
