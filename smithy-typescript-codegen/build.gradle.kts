@@ -18,6 +18,6 @@ extra["displayName"] = "Smithy :: Typescript :: Codegen"
 extra["moduleName"] = "software.amazon.smithy.typescript.codegen"
 
 dependencies {
-    api("software.amazon.smithy:smithy-codegen-core:0.9.8")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:0.9.8")
+    api("software.amazon.smithy:smithy-codegen-core:0.9.9")
+    implementation("software.amazon.smithy:smithy-protocol-test-traits:0.9.9")
 }
