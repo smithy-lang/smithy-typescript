@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,6 +96,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         runtimePlugins.add(runtimePlugin);
                     });
                 });
+        // Sort the integrations in specified order.
+        integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
 
         // Decorate the symbol provider using integrations.
         SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);

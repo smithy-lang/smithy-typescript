@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.build.PluginContext;
@@ -36,6 +37,22 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
  * adding custom code, etc.
  */
 public interface TypeScriptIntegration {
+    /**
+     * Gets the sort order of the customization from -128 to 127.
+     *
+     * <p>Customizations are applied according to this sort order. Lower values
+     * are executed before higher values (for example, -128 comes before 0,
+     * comes before 127). Customizations default to 0, which is the middle point
+     * between the minimum and maximum order values. The customization
+     * applied later can override the runtime configurations that provided
+     * by customizations applied earlier.
+     *
+     * @return Returns the sort order, defaulting to 0.
+     */
+    default byte getOrder() {
+        return 0;
+    }
+
     /**
      * Preprocess the model before code generation.
      *
@@ -234,29 +251,36 @@ public interface TypeScriptIntegration {
      *
      *     private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
      *
-     *     public void addRuntimeConfigValues(
+     *     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
      *             TypeScriptSettings settings,
      *             Model model,
      *             SymbolProvider symbolProvider,
-     *             TypeScriptWriter writer,
      *             LanguageTarget target
      *     ) {
      *         // This is a static value that is added to every generated
      *         // runtimeConfig file.
-     *         writer.write("foo: 'some-static-value',"); // Note the trailing comma!
+     *         Map<String, Consumer<TypeScriptWriter>> config = new HashMap<>();
+     *         config.put("foo", writer -> {
+     *            writer.write("foo: some static value,"); // Note the trailing comma!
+     *         });
      *
      *         switch (target) {
      *             case NODE:
-     *                 writer.write("bar: someNodeValue,");
+     *                 config.put("bar", writer -> {
+     *                     writer.write("bar: someNodeValue,");
+     *                 });
      *                 break;
      *             case BROWSER:
-     *                 writer.write("bar: someBrowserValue,");
+     *                 config.put("bar", writer -> {
+     *                     writer.write("bar: someBrowserValue,");
+     *                 });
      *                 break;
      *             case SHARED:
      *                 break;
      *             default:
      *                 LOGGER.warn("Unknown target: " + target);
      *         }
+     *         return config;
      *     }
      * }
      * }</pre>
@@ -271,18 +295,19 @@ public interface TypeScriptIntegration {
      * <pre>
      * {@code
      * public final class MyIntegration2 implements TypeScriptIntegration {
-     *     public void addRuntimeConfigValues(
+     *     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
      *             TypeScriptSettings settings,
      *             Model model,
      *             SymbolProvider symbolProvider,
-     *             TypeScriptWriter writer,
      *             LanguageTarget target
      *     ) {
      *         if (target == LanguageTarget.SHARED) {
-     *             String someTraitValue = settings.getModel(model).getTrait(SomeTrait.class)
-     *                          .map(SomeTrait::getValue)
-     *                          .orElse("");
-     *             writer.write("someTraitValue: $S,", someTraitValue);
+     *             return MapUtils.of("someTraitValue", writer -> {
+     *                 String someTraitValue = settings.getModel(model).getTrait(SomeTrait.class)
+     *                             .map(SomeTrait::getValue)
+     *                             .orElse("");
+     *                 writer.write("someTraitValue: $S,", someTraitValue);
+     *             });
      *         }
      *     }
      * }
@@ -291,16 +316,15 @@ public interface TypeScriptIntegration {
      * @param settings Settings used to generate.
      * @param model Model to generate from.
      * @param symbolProvider Symbol provider used for codegen.
-     * @param writer TypeScript writer to write to.
      * @param target The TypeScript language target.
+     * @return Returns a map of config property name and a consumer function with TypeScriptWriter parameter.
      */
-    default void addRuntimeConfigValues(
+    default Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
             LanguageTarget target
     ) {
-        // pass
+        return Collections.emptyMap();
     }
 }

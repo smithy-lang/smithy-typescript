@@ -15,8 +15,11 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -29,6 +32,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
+import software.amazon.smithy.utils.MapUtils;
 
 /**
  * Adds event streams if needed.
@@ -65,42 +69,43 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
     }
 
     @Override
-    public void addRuntimeConfigValues(
+    public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
             LanguageTarget target
     ) {
         if (!hasEventStream(model, settings.getService(model))) {
-            return;
+            return Collections.emptyMap();
         }
-
         switch (target) {
             case NODE:
-                writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
-                writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
-                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName);
-                writer.write("eventStreamSerdeProvider");
-                break;
+                return MapUtils.of("eventStreamSerdeProvider", writer -> {
+                    writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
+                    writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
+                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName);
+                    writer.write("eventStreamSerdeProvider,");
+                });
             case BROWSER:
-                writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
-                writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
-                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
-                writer.write("eventStreamSerdeProvider");
-                break;
+                return MapUtils.of("eventStreamSerdeProvider", writer -> {
+                    writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
+                    writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
+                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
+                    writer.write("eventStreamSerdeProvider,");
+                });
             case REACT_NATIVE:
                 // TODO: add ReactNative eventstream support
-                writer.addDependency(TypeScriptDependency.INVALID_DEPENDENCY);
-                writer.addImport("invalidFunction", "invalidFunction",
-                        TypeScriptDependency.INVALID_DEPENDENCY.packageName);
-                writer.openBlock("eventStreamSerdeProvider: () => ({", "})", () -> {
-                    writer.write("serialize: invalidFunction(\"event stream is not supported in ReactNative.\"),");
-                    writer.write("deserialize: invalidFunction(\"event stream is not supported in ReactNative.\")");
+                return MapUtils.of("eventStreamSerdeProvider", writer -> {
+                    writer.addDependency(TypeScriptDependency.INVALID_DEPENDENCY);
+                    writer.addImport("invalidFunction", "invalidFunction",
+                            TypeScriptDependency.INVALID_DEPENDENCY.packageName);
+                    writer.openBlock("eventStreamSerdeProvider: () => ({", "}),", () -> {
+                        writer.write("serialize: invalidFunction(\"event stream is not supported in ReactNative.\"),");
+                        writer.write("deserialize: invalidFunction(\"event stream is not supported in ReactNative.\")");
+                    });
                 });
-                break;
             default:
-                // do nothing
+                return Collections.emptyMap();
         }
     }
 

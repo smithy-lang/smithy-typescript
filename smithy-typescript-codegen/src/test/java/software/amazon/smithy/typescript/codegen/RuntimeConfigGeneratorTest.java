@@ -4,7 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
@@ -22,14 +26,40 @@ public class RuntimeConfigGeneratorTest {
         List<TypeScriptIntegration> integrations = new ArrayList<>();
         integrations.add(new TypeScriptIntegration() {
             @Override
-            public void addRuntimeConfigValues(
+            public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
                     TypeScriptSettings settings,
                     Model model,
                     SymbolProvider symbolProvider,
-                    TypeScriptWriter writer,
                     LanguageTarget target
             ) {
-                writer.write("syn: 'ack',");
+                Map<String, Consumer<TypeScriptWriter>> config = new HashMap<>();
+                config.put("syn", writer -> {
+                    writer.write("syn: 'ack1',");
+                });
+                config.put("foo", writer -> {
+                    writer.write("foo: 'bar',");
+                });
+                return config;
+            }
+        });
+
+        integrations.add(new TypeScriptIntegration() {
+            @Override
+            public byte getOrder() {
+                return 1;
+            }
+            @Override
+            public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
+                    TypeScriptSettings settings,
+                    Model model,
+                    SymbolProvider symbolProvider,
+                    LanguageTarget target
+            ) {
+                Map<String, Consumer<TypeScriptWriter>> config = new HashMap<>();
+                config.put("syn", writer -> {
+                    writer.write("syn: 'ack2',");
+                });
+                return config;
             }
         });
 
@@ -57,19 +87,22 @@ public class RuntimeConfigGeneratorTest {
         // Does the runtimeConfig.shared.ts file expand the template properties properly?
         String runtimeConfigSharedContents = manifest.getFileString("runtimeConfig.shared.ts").get();
         assertThat(runtimeConfigSharedContents, containsString("apiVersion: \"1.0.0\","));
-        assertThat(runtimeConfigSharedContents, containsString("syn: 'ack',"));
+        assertThat(runtimeConfigSharedContents, containsString("syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
 
         // Does the runtimeConfig.ts file expand the template properties properly?
         String runtimeConfigContents = manifest.getFileString("runtimeConfig.ts").get();
         assertThat(runtimeConfigContents,
                    containsString("import { ClientDefaults } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
+        assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
 
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
         String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.browser.ts").get();
         assertThat(runtimeConfigBrowserContents,
                    containsString("import { ClientDefaults } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
+        assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
 
         // Does the runtimeConfig.native.ts file expand the browser template properties properly?
         String runtimeConfigNativeContents = manifest.getFileString("runtimeConfig.native.ts").get();
@@ -77,6 +110,7 @@ public class RuntimeConfigGeneratorTest {
                 containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigNativeContents,
                 containsString("import { ClientDefaultValues as BrowserDefaults } from \"./runtimeConfig.browser\";"));
-        assertThat(runtimeConfigContents, containsString("syn: 'ack',"));
+        assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
     }
 }
