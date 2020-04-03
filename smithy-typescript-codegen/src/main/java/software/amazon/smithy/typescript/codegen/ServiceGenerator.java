@@ -324,6 +324,8 @@ final class ServiceGenerator implements Runnable {
         // Generates the destroy() method, and calls the destroy() method of
         // any runtime plugin that claims to have a destroy method.
         writer.openBlock("destroy(): void {", "}", () -> {
+            // Always call destroy() in SmithyClient class. By default, it's optional.
+            writer.write("super.destroy();");
             writer.pushState(CLIENT_DESTROY_SECTION);
             for (RuntimeClientPlugin plugin : runtimePlugins) {
                 plugin.getDestroyFunction().ifPresent(destroy -> {
