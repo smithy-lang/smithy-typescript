@@ -64,7 +64,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
         writer.addImport("EventStreamSerdeProvider", "__EventStreamSerdeProvider",
                 TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        writer.writeDocs("The function that provides necessary utilities for generating and signing event stream");
+        writer.writeDocs("The function that provides necessary utilities for generating and parsing event stream");
         writer.write("eventStreamSerdeProvider?: __EventStreamSerdeProvider;\n");
     }
 
