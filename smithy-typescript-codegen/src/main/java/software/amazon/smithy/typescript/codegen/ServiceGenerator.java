@@ -331,6 +331,8 @@ final class ServiceGenerator implements Runnable {
                 });
             }
             writer.popState();
+            // Always call destroy() in SmithyClient class. By default, it's optional.
+            writer.write("super.destroy();");
         });
     }
 }
