@@ -77,9 +77,8 @@ final class StructureGenerator implements Runnable {
      * }
      *
      * export namespace Person {
-     *   export const ID = "smithy.example#Person";
      *   export function isa(o: any): o is Person {
-     *     return __isa(o, ID);
+     *     return __isa(o, "Person");
      *   }
      * }
      * }</pre>
