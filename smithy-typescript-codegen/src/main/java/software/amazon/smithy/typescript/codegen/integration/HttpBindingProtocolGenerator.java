@@ -228,7 +228,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             }
 
             writer.openBlock("return new $T({", "});", requestType, () -> {
-                writer.write("...context.endpoint,");
                 if (hasHostPrefix) {
                     writer.write("hostname: resolvedHostname,");
                 }
@@ -248,6 +247,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 // Always set the body,
                 writer.write("body: body,");
+                writer.write("...context.endpoint,");
             });
         });
 
