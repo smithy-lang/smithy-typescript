@@ -107,12 +107,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "  resolvedHostname: string | undefined,\n"
                        + "  body: any,\n"
                        + "): $T => {", "};", requestType, () -> {
+            writer.write("const endpoint = {...context.endpoint, path: undefined, query: undefined};");
             writer.openBlock("const contents: any = {", "};", () -> {
                 writer.write("protocol: \"https\",");
                 writer.write("method: \"POST\",");
                 writer.write("path: path,");
                 writer.write("headers: headers,");
-                writer.write("...context.endpoint,");
+                writer.write("...endpoint,");
             });
             writer.openBlock("if (resolvedHostname !== undefined) {", "}", () -> {
                 writer.write("contents.hostname = resolvedHostname;");

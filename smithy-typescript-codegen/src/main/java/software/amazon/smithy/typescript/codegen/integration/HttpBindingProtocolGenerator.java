@@ -227,6 +227,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
             }
 
+            writer.write("const endpoint = {...context.endpoint, path: undefined, query: undefined};");
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 if (hasHostPrefix) {
                     writer.write("hostname: resolvedHostname,");
@@ -247,7 +248,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 // Always set the body,
                 writer.write("body: body,");
-                writer.write("...context.endpoint,");
+                writer.write("...endpoint,");
             });
         });
 
