@@ -227,16 +227,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
             }
 
+            writer.write("const {hostname, protocol = \"https\", port} = await context.endpoint();");
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 if (hasHostPrefix) {
                     writer.write("hostname: resolvedHostname,");
                 }
-                writer.write("protocol: \"https\",");
+                writer.write("protocol,");
+                writer.write("hostname,");
+                writer.write("port,");
                 writer.write("method: $S,", trait.getMethod());
-                writer.write("headers: headers,");
+                writer.write("headers,");
                 writer.write("path: resolvedPath,");
                 if (hasQueryComponents) {
-                    writer.write("query: query,");
+                    writer.write("query,");
                 }
                 if (!bodyBindings.isEmpty()) {
                     // Track all shapes bound to the body so their serializers may be generated.
@@ -246,8 +249,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             .forEach(serializingDocumentShapes::add);
                 }
                 // Always set the body,
-                writer.write("body: body,");
-                writer.write("...context.endpoint,");
+                writer.write("body,");
             });
         });
 
