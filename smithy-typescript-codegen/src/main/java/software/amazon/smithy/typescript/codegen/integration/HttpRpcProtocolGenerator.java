@@ -100,19 +100,23 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.addUseImports(requestType);
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
-        writer.openBlock("const buildHttpRpcRequest = (\n"
+        writer.openBlock("const buildHttpRpcRequest = async (\n"
                        + "  context: __SerdeContext,\n"
                        + "  headers: __HeaderBag,\n"
                        + "  path: string,\n"
                        + "  resolvedHostname: string | undefined,\n"
                        + "  body: any,\n"
-                       + "): $T => {", "};", requestType, () -> {
+                       + "): Promise<$T> => {", "};", requestType, () -> {
+            // Get the hostname, port, and scheme from client's resolved endpoint. Then construct the request from
+            // them. The client's resolved endpoint can be default one or supplied by users.
+            writer.write("const {hostname, protocol = \"https\", port} = await context.endpoint();");
             writer.openBlock("const contents: any = {", "};", () -> {
-                writer.write("protocol: \"https\",");
+                writer.write("protocol,");
+                writer.write("hostname,");
+                writer.write("port,");
                 writer.write("method: \"POST\",");
-                writer.write("path: path,");
-                writer.write("headers: headers,");
-                writer.write("...context.endpoint,");
+                writer.write("path,");
+                writer.write("headers,");
             });
             writer.openBlock("if (resolvedHostname !== undefined) {", "}", () -> {
                 writer.write("contents.hostname = resolvedHostname;");
