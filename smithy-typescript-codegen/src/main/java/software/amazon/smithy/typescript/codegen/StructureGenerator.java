@@ -170,6 +170,9 @@ final class StructureGenerator implements Runnable {
         writer.addImport("isa", "__isa", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+            writer.openBlock("export const toString = (obj: $L) => ({", "})", symbol.getName(), () -> {
+                writer.write("...obj,");
+            });
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
                 symbol.getName(), shape.getId().getName()
             );
