@@ -66,9 +66,8 @@ public class StructureGeneratorTest {
         assertThat(contents, containsString("as __SmithyException"));
         assertThat(contents, containsString(expectedType));
         assertThat(contents, containsString("namespace Err {\n"
-                                            + "  export function isa(o: any): o is Err {\n"
-                                            + "    return __isa(o, \"Err\");\n"
-                                            + "  }\n"
+                                            + "  export const isa = (o: any): o is Err => "
+                                            + "__isa(o, \"Err\");\n"
                                             + "}"));
     }
 
@@ -89,9 +88,7 @@ public class StructureGeneratorTest {
         assertThat(output, containsString("foo?: string;"));
         assertThat(output, containsString("export namespace Bar {"));
         assertThat(output, containsString(
-                "export function isa(o: any): o is Bar {\n"
-                + "    return __isa(o, \"Bar\");\n"
-                + "  }"));
+                "export const isa = (o: any): o is Bar => __isa(o, \"Bar\");"));
     }
 
     private StructureShape createNonErrorStructure() {
