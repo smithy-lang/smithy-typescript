@@ -77,9 +77,7 @@ final class StructureGenerator implements Runnable {
      * }
      *
      * export namespace Person {
-     *   export function isa(o: any): o is Person {
-     *     return __isa(o, "Person");
-     *   }
+     *   export const isa = (o: any): o is Person => __isa(o, "Person");
      * }
      * }</pre>
      */
@@ -138,10 +136,8 @@ final class StructureGenerator implements Runnable {
      *   resourceType: string | undefined;
      * }
      *
-     * export namespace Person {
-     *   export function isa(o: any): o is NoSuchResource {
-     *     return __isa(o, "NoSuchResource");
-     *   }
+     * export namespace NoSuchResource {
+     *   export const isa = (o: any): o is NoSuchResource => __isa(o, "NoSuchResource");
      * }
      * }</pre>
      */
