@@ -71,7 +71,11 @@ final class StructuredMemberWriter {
         for (MemberShape member : members) {
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                writer.write("${L}: SENSITIVE_STRING,", memberName);
+                if (shape.isUnionShape() || !isRequiredMember(member)) {
+                    writer.write("...(obj.${L} && { ${L}: SENSITIVE_STRING }),", memberName, memberName);
+                } else {
+                    writer.write("${L}: SENSITIVE_STRING,", memberName);
+                }
             }
         }
     }
