@@ -20,3 +20,6 @@ target/
 build/
 */out/
 */*/out/
+
+# Visual Studio Code
+.vscode/*
