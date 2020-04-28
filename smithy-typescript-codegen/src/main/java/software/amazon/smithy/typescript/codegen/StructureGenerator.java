@@ -21,8 +21,10 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.SensitiveTrait;
 
 /**
  * Generates normal structures and error structures.
@@ -172,6 +174,12 @@ final class StructureGenerator implements Runnable {
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             writer.openBlock("export const toString = (obj: $L) => ({", "})", symbol.getName(), () -> {
                 writer.write("...obj,");
+                for (MemberShape member : shape.getAllMembers().values()) {
+                    String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+                    if (member.hasTrait(SensitiveTrait.class)) {
+                        writer.write("${L}: \"REDACTED\",", memberName);
+                    }
+                }
             });
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
                 symbol.getName(), shape.getId().getName()
