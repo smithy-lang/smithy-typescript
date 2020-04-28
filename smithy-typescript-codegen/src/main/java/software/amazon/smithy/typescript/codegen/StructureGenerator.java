@@ -24,7 +24,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.SensitiveTrait;
 
 /**
  * Generates normal structures and error structures.
@@ -174,13 +173,9 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             writer.openBlock("export const toString = (obj: $L) => ({", "})", symbol.getName(), () -> {
-                writer.write("...obj,");
-                for (MemberShape member : shape.getAllMembers().values()) {
-                    String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
-                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                        writer.write("${L}: SENSITIVE_STRING,", memberName);
-                    }
-                }
+                StructuredMemberWriter config = new StructuredMemberWriter(
+                    model, symbolProvider, shape.getAllMembers().values());
+                config.writeMembersToString(writer, shape);
             });
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
                 symbol.getName(), shape.getId().getName()

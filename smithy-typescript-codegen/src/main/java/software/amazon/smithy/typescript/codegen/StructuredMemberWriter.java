@@ -23,6 +23,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
+import software.amazon.smithy.model.traits.SensitiveTrait;
 
 /**
  * Generates objects, interfaces, enums, etc.
@@ -61,6 +62,16 @@ final class StructuredMemberWriter {
 
             if (wroteDocs && position < members.size() - 1) {
                 writer.write("");
+            }
+        }
+    }
+
+    void writeMembersToString(TypeScriptWriter writer, Shape shape) {
+        writer.write("...obj,");
+        for (MemberShape member : members) {
+            String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+            if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                writer.write("${L}: SENSITIVE_STRING,", memberName);
             }
         }
     }
