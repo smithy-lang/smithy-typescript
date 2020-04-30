@@ -20,9 +20,12 @@ import java.util.HashSet;
 import java.util.Set;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 
@@ -76,6 +79,15 @@ final class StructuredMemberWriter {
             } else if (model.expectShape(member.getTarget()) instanceof StructureShape) {
                 writer.write("...(obj.${L} && { ${L}: ${T}.filterSensitiveLog(obj.${L})}),",
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
+            } else if (
+                model.expectShape(member.getTarget()) instanceof ListShape ||
+                model.expectShape(member.getTarget()) instanceof SetShape
+            ) {
+                MemberShape collectionMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
+                if (model.expectShape(collectionMember.getTarget()) instanceof StructureShape) {
+                    writer.write("...(obj.${L} && { ${L}: obj.${L}.map(${T}.filterSensitiveLog)}),",
+                        memberName, memberName, memberName, symbolProvider.toSymbol(collectionMember));
+                }
             }
         }
     }
