@@ -21,6 +21,7 @@ import java.util.Set;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
@@ -72,6 +73,9 @@ final class StructuredMemberWriter {
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                 writer.write("...(obj.${L} && { ${L}: SENSITIVE_STRING }),", memberName, memberName);
+            } else if (model.expectShape(member.getTarget()) instanceof StructureShape) {
+                writer.write("...(obj.${L} && { ${L}: ${T}.toString(obj.${L})}),",
+                    memberName, memberName, symbolProvider.toSymbol(member), memberName);
             }
         }
     }
