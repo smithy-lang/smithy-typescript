@@ -74,7 +74,7 @@ final class StructuredMemberWriter {
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                 writer.write("...(obj.${L} && { ${L}: SENSITIVE_STRING }),", memberName, memberName);
             } else if (model.expectShape(member.getTarget()) instanceof StructureShape) {
-                writer.write("...(obj.${L} && { ${L}: ${T}.toString(obj.${L})}),",
+                writer.write("...(obj.${L} && { ${L}: ${T}.filterSensitiveLog(obj.${L})}),",
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
             }
         }

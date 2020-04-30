@@ -172,11 +172,14 @@ final class StructureGenerator implements Runnable {
         writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-            writer.openBlock("export const toString = (obj: $L) => ({", "})", symbol.getName(), () -> {
-                StructuredMemberWriter config = new StructuredMemberWriter(
-                    model, symbolProvider, shape.getAllMembers().values());
-                config.writeMembersToString(writer, shape);
-            });
+            writer.openBlock("export const filterSensitiveLog = (obj: $L) => ({", "})",
+                symbol.getName(),
+                () -> {
+                    StructuredMemberWriter config = new StructuredMemberWriter(
+                        model, symbolProvider, shape.getAllMembers().values());
+                    config.writeMembersToString(writer, shape);
+                }
+            );
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
                 symbol.getName(), shape.getId().getName()
             );
