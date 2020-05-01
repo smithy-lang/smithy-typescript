@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -72,7 +73,7 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Recursively writes filterSensitiveLog for list members
+     * Recursively writes filterSensitiveLog for arrays (ListShape|SetShape)
      */
     void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape arrayMember) {
         Shape memberShape = model.expectShape(arrayMember.getTarget());
@@ -90,6 +91,24 @@ final class StructuredMemberWriter {
         } else {
             // Function is inside another function, so just return item in else case
             writer.write("item => item");
+        }
+    }
+
+    /**
+     * Recursively writes filterSensitiveLog for MapShape
+     */
+    void writeFilterSensitiveLogForMap(TypeScriptWriter writer, MemberShape mapMember) {
+        Shape memberShape = model.expectShape(mapMember.getTarget());
+        if (memberShape instanceof StructureShape) {
+            // Call filterSensitiveLog on Structure in reducer
+            writer.openBlock("(acc: any, [key, value]: [string, ${T}]) => {", "}, {}",
+                symbolProvider.toSymbol(mapMember),
+                () -> {
+                    writer.write("acc[key] = ${T}.filterSensitiveLog(value);",
+                        symbolProvider.toSymbol(mapMember));
+                    writer.write("return acc;");
+                }
+            );
         }
     }
 
@@ -113,7 +132,19 @@ final class StructuredMemberWriter {
                         memberName, memberName, memberName,
                         () -> {
                             writeFilterSensitiveLogForArray(writer, arrayMember);
-                        });
+                        }
+                    );
+                }
+            } else if (memberShape instanceof MapShape) {
+                MemberShape mapMember = ((MapShape) memberShape).getValue();
+                if (!(model.expectShape(mapMember.getTarget()) instanceof SimpleShape)) {
+                    // Iterate over Object entries, and call reduce to repopulate map
+                    writer.openBlock("...(obj.${L} && { ${L}: Object.entries(obj.${L}).reduce(", ")}),",
+                        memberName, memberName, memberName,
+                        () -> {
+                            writeFilterSensitiveLogForMap(writer, mapMember);
+                        }
+                    );
                 }
             }
         }
