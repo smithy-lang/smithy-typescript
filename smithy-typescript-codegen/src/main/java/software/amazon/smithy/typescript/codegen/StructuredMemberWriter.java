@@ -79,10 +79,11 @@ final class StructuredMemberWriter {
         if (memberShape instanceof StructureShape) {
             writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(arrayMember));
         } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
-            writer.write("item => item.map(");
-            MemberShape nestedArrayMember = ((CollectionShape) memberShape).getMember();
-            writeFilterSensitiveLogForArray(writer, nestedArrayMember);
-            writer.write(")");
+            writer.openBlock("item => item.map(", ")",
+                () -> {
+                    MemberShape nestedArrayMember = ((CollectionShape) memberShape).getMember();
+                    writeFilterSensitiveLogForArray(writer, nestedArrayMember);
+                });
         }
     }
 
@@ -99,10 +100,11 @@ final class StructuredMemberWriter {
             } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
                 MemberShape arrayMember = ((CollectionShape) memberShape).getMember();
                 if (!(model.expectShape(arrayMember.getTarget()) instanceof SimpleShape)) {
-                    writer.write("...(obj.${L} && { ${L}: obj.${L}.map(",
-                        memberName, memberName, memberName);
-                    writeFilterSensitiveLogForArray(writer, member);
-                    writer.write(")}),");
+                    writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
+                        memberName, memberName, memberName,
+                        () -> {
+                            writeFilterSensitiveLogForArray(writer, member);
+                        });
                 }
             }
         }
