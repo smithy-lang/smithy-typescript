@@ -132,7 +132,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol setShape(SetShape shape) {
         Symbol reference = toSymbol(shape.getMember());
-        return createSymbolBuilder(shape, format("Set<%s>", reference.getName()), null)
+        return createSymbolBuilder(shape, format("(%s)[]", reference.getName()), null)
                 .addReference(reference)
                 .build();
     }
