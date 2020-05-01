@@ -103,7 +103,7 @@ final class StructuredMemberWriter {
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
-                            writeFilterSensitiveLogForArray(writer, member);
+                            writeFilterSensitiveLogForArray(writer, arrayMember);
                         });
                 }
             }
