@@ -39,7 +39,7 @@ public class ProtocolGeneratorTest {
                 .member(member)
                 .build();
         Symbol symbol = Symbol.builder()
-                .name("Array<Foo>")
+                .name("Foo[]")
                 .namespace("com.smithy.example", ".")
                 .putProperty("shape", list)
                 .build();
@@ -72,7 +72,7 @@ public class ProtocolGeneratorTest {
                 .member(member)
                 .build();
         Symbol symbol = Symbol.builder()
-                .name("Array<Foo>")
+                .name("Foo[]")
                 .namespace("com.smithy.example", ".")
                 .putProperty("shape", list)
                 .build();
