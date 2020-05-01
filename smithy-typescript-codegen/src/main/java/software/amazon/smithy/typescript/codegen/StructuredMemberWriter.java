@@ -74,25 +74,17 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for list members
      */
-    void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape member) {
-        String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
-        MemberShape arrayMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
-        
-        if (model.expectShape(arrayMember.getTarget()) instanceof SimpleShape) {
-            return;
-        }
-        
-        writer.write("...(obj.${L} && { ${L}: obj.${L}.map(",
-            memberName, memberName, memberName);
+    void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape arrayMember) {
         if (model.expectShape(arrayMember.getTarget()) instanceof StructureShape) {
             writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(arrayMember));
         } else if (
             model.expectShape(arrayMember.getTarget()) instanceof ListShape ||
             model.expectShape(arrayMember.getTarget()) instanceof SetShape
         ) {
+            writer.write("item => item.map(");
             writeFilterSensitiveLogForArray(writer, arrayMember);
+            writer.write(")");
         }
-        writer.write(")}),");
     }
 
     void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape) {
@@ -108,7 +100,13 @@ final class StructuredMemberWriter {
                 model.expectShape(member.getTarget()) instanceof ListShape ||
                 model.expectShape(member.getTarget()) instanceof SetShape
             ) {
-                writeFilterSensitiveLogForArray(writer, member);  
+                MemberShape arrayMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
+                if (!(model.expectShape(arrayMember.getTarget()) instanceof SimpleShape)) {
+                    writer.write("...(obj.${L} && { ${L}: obj.${L}.map(",
+                        memberName, memberName, memberName);
+                    writeFilterSensitiveLogForArray(writer, member);
+                    writer.write(")}),");
+                }
             }
         }
     }
