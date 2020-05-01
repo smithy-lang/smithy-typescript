@@ -70,7 +70,24 @@ final class StructuredMemberWriter {
         }
     }
 
-    void writeMembersToString(TypeScriptWriter writer, Shape shape) {
+    /**
+     * Recursively writes filterSensitiveLog for list members
+     */
+    void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape member) {
+        String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+        MemberShape arrayMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
+        if (model.expectShape(arrayMember.getTarget()) instanceof StructureShape) {
+            writer.write("...(obj.${L} && { ${L}: obj.${L}.map(${T}.filterSensitiveLog)}),",
+                memberName, memberName, memberName, symbolProvider.toSymbol(arrayMember));
+        } else if (
+            model.expectShape(arrayMember.getTarget()) instanceof ListShape ||
+            model.expectShape(arrayMember.getTarget()) instanceof SetShape
+        ) {
+            writeFilterSensitiveLogForArray(writer, arrayMember);
+        }
+    }
+
+    void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape) {
         writer.write("...obj,");
         for (MemberShape member : members) {
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
@@ -83,11 +100,7 @@ final class StructuredMemberWriter {
                 model.expectShape(member.getTarget()) instanceof ListShape ||
                 model.expectShape(member.getTarget()) instanceof SetShape
             ) {
-                MemberShape collectionMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
-                if (model.expectShape(collectionMember.getTarget()) instanceof StructureShape) {
-                    writer.write("...(obj.${L} && { ${L}: obj.${L}.map(${T}.filterSensitiveLog)}),",
-                        memberName, memberName, memberName, symbolProvider.toSymbol(collectionMember));
-                }
+                writeFilterSensitiveLogForArray(writer, member);  
             }
         }
     }
