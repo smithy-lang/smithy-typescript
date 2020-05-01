@@ -121,6 +121,13 @@ final class StructuredMemberWriter {
                             writeFilterSensitiveLogForCollection(writer, collectionMember);
                         }
                     );
+                } else if (memberShape instanceof MapShape) {
+                    writer.openBlock("acc[key] = Object.entries(value).reduce(", "), {}",
+                        () -> {
+                            MemberShape nestedMapMember = ((MapShape) memberShape).getValue();
+                            writeFilterSensitiveLogForMap(writer, nestedMapMember);
+                        }
+                    );
                 } else {
                     // This path will never reach because of recursive isIterationRequired
                     // adding it to not break the code, if it does reach in future
