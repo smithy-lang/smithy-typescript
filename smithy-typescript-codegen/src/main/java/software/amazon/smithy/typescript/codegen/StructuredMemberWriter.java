@@ -82,7 +82,9 @@ final class StructuredMemberWriter {
             model.expectShape(arrayMember.getTarget()) instanceof SetShape
         ) {
             writer.write("item => item.map(");
-            writeFilterSensitiveLogForArray(writer, arrayMember);
+            MemberShape nestedArrayMember =
+                ((CollectionShape) model.expectShape(arrayMember.getTarget())).getMember();
+            writeFilterSensitiveLogForArray(writer, nestedArrayMember);
             writer.write(")");
         }
     }
