@@ -86,6 +86,14 @@ final class StructuredMemberWriter {
                     writeFilterSensitiveLogForCollection(writer, nestedCollectionMember);
                 }
             );
+        } else if (memberShape instanceof MapShape) {
+            // Iterate over Object entries, and call reduce to repopulate map
+            writer.openBlock("item => Object.entries(item).reduce(", ")",
+                () -> {
+                    MemberShape mapMember = ((MapShape) memberShape).getValue();
+                    writeFilterSensitiveLogForMap(writer, mapMember);
+                }
+            );
         } else {
             // This path will never reach because of recursive isIterationRequired
             // adding it to not break the code, if it does reach in future
