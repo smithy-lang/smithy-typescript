@@ -89,6 +89,7 @@ final class StructuredMemberWriter {
                 }
             );
         } else {
+            // ToDo: Call this function only for StructureShape|ListShape|SetShape|MapShape
             // Function is inside another function, so just return item in else case
             writer.write("item => item");
         }
@@ -98,18 +99,23 @@ final class StructuredMemberWriter {
      * Recursively writes filterSensitiveLog for MapShape
      */
     void writeFilterSensitiveLogForMap(TypeScriptWriter writer, MemberShape mapMember) {
-        Shape memberShape = model.expectShape(mapMember.getTarget());
-        if (memberShape instanceof StructureShape) {
-            // Call filterSensitiveLog on Structure in reducer
-            writer.openBlock("(acc: any, [key, value]: [string, ${T}]) => {", "}, {}",
-                symbolProvider.toSymbol(mapMember),
-                () -> {
+        // Reducer is common to all shapes
+        writer.openBlock("(acc: any, [key, value]: [string, ${T}]) => {", "}, {}",
+            symbolProvider.toSymbol(mapMember),
+            () -> {
+                Shape memberShape = model.expectShape(mapMember.getTarget());
+                if (memberShape instanceof StructureShape) {
+                    // Call filterSensitiveLog on Structure
                     writer.write("acc[key] = ${T}.filterSensitiveLog(value);",
                         symbolProvider.toSymbol(mapMember));
-                    writer.write("return acc;");
+                } else {
+                    // ToDo: Call this function only for StructureShape|ListShape|SetShape|MapShape
+                    // populate value in in acc[key]
+                    writer.write("acc[key] = value;");
                 }
-            );
-        }
+                writer.write("return acc;");
+            }
+        );
     }
 
     void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape) {
