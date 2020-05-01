@@ -25,6 +25,7 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
@@ -76,15 +77,22 @@ final class StructuredMemberWriter {
     void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape member) {
         String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
         MemberShape arrayMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
+        
+        if (model.expectShape(arrayMember.getTarget()) instanceof SimpleShape) {
+            return;
+        }
+        
+        writer.write("...(obj.${L} && { ${L}: obj.${L}.map(",
+            memberName, memberName, memberName);
         if (model.expectShape(arrayMember.getTarget()) instanceof StructureShape) {
-            writer.write("...(obj.${L} && { ${L}: obj.${L}.map(${T}.filterSensitiveLog)}),",
-                memberName, memberName, memberName, symbolProvider.toSymbol(arrayMember));
+            writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(arrayMember));
         } else if (
             model.expectShape(arrayMember.getTarget()) instanceof ListShape ||
             model.expectShape(arrayMember.getTarget()) instanceof SetShape
         ) {
             writeFilterSensitiveLogForArray(writer, arrayMember);
         }
+        writer.write(")}),");
     }
 
     void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape) {
