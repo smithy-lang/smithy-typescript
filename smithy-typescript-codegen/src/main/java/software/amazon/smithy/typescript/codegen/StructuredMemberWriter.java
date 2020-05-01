@@ -114,6 +114,13 @@ final class StructuredMemberWriter {
                     // Call filterSensitiveLog on Structure
                     writer.write("acc[key] = ${T}.filterSensitiveLog(value);",
                         symbolProvider.toSymbol(mapMember));
+                } else if (memberShape instanceof CollectionShape) {
+                    writer.openBlock("acc[key] = value.map(", ")",
+                        () -> {
+                            MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
+                            writeFilterSensitiveLogForCollection(writer, collectionMember);
+                        }
+                    );
                 } else {
                     // This path will never reach because of recursive isIterationRequired
                     // adding it to not break the code, if it does reach in future
