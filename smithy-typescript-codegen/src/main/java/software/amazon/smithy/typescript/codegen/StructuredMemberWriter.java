@@ -122,7 +122,7 @@ final class StructuredMemberWriter {
                         }
                     );
                 } else if (memberShape instanceof MapShape) {
-                    writer.openBlock("acc[key] = Object.entries(value).reduce(", "), {}",
+                    writer.openBlock("acc[key] = Object.entries(value).reduce(", ")",
                         () -> {
                             MemberShape nestedMapMember = ((MapShape) memberShape).getValue();
                             writeFilterSensitiveLogForMap(writer, nestedMapMember);
