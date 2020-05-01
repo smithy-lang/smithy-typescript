@@ -204,8 +204,8 @@ public final class HttpProtocolGeneratorUtils {
 
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         writer.write("// Collect low-level response body stream to Uint8Array.");
-        writer.openBlock("const collectBody = (streamBody: any, context: __SerdeContext): Promise<Uint8Array> => {",
-                "};", () -> {
+        writer.openBlock("const collectBody = (streamBody: any = new Uint8Array(), context: __SerdeContext): "
+                + "Promise<Uint8Array> => {", "};", () -> {
             writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
                 writer.write("return Promise.resolve(streamBody);");
             });
