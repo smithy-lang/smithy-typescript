@@ -77,13 +77,19 @@ final class StructuredMemberWriter {
     void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape arrayMember) {
         Shape memberShape = model.expectShape(arrayMember.getTarget());
         if (memberShape instanceof StructureShape) {
+            // Call filterSensitiveLog on Structure
             writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(arrayMember));
         } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
+            // Iterate over array items, and call array specific function on each member
             writer.openBlock("item => item.map(", ")",
                 () -> {
                     MemberShape nestedArrayMember = ((CollectionShape) memberShape).getMember();
                     writeFilterSensitiveLogForArray(writer, nestedArrayMember);
-                });
+                }
+            );
+        } else {
+            // Function is inside another function, so just return item in else case
+            writer.write("item => item");
         }
     }
 
@@ -93,13 +99,16 @@ final class StructuredMemberWriter {
             Shape memberShape = model.expectShape(member.getTarget());
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                // member is Sensitive, hide the value
                 writer.write("...(obj.${L} && { ${L}: SENSITIVE_STRING }),", memberName, memberName);
             } else if (memberShape instanceof StructureShape) {
+                // Call filterSensitiveLog on Structure
                 writer.write("...(obj.${L} && { ${L}: ${T}.filterSensitiveLog(obj.${L})}),",
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
             } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
                 MemberShape arrayMember = ((CollectionShape) memberShape).getMember();
                 if (!(model.expectShape(arrayMember.getTarget()) instanceof SimpleShape)) {
+                    // Iterate over array items, and call array specific function on each member
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
