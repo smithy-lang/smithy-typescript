@@ -89,7 +89,6 @@ final class StructuredMemberWriter {
                 }
             );
         } else {
-            // ToDo: Call this function only for StructureShape|ListShape|SetShape|MapShape
             // Function is inside another function, so just return item in else case
             writer.write("item => item");
         }
@@ -109,7 +108,6 @@ final class StructuredMemberWriter {
                     writer.write("acc[key] = ${T}.filterSensitiveLog(value);",
                         symbolProvider.toSymbol(mapMember));
                 } else {
-                    // ToDo: Call this function only for StructureShape|ListShape|SetShape|MapShape
                     // populate value in in acc[key]
                     writer.write("acc[key] = value;");
                 }
@@ -132,7 +130,7 @@ final class StructuredMemberWriter {
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
             } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
                 MemberShape arrayMember = ((CollectionShape) memberShape).getMember();
-                if (!(model.expectShape(arrayMember.getTarget()) instanceof SimpleShape)) {
+                if (isIterationRequired(model.expectShape(arrayMember.getTarget()))) {
                     // Iterate over array items, and call array specific function on each member
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
@@ -143,7 +141,7 @@ final class StructuredMemberWriter {
                 }
             } else if (memberShape instanceof MapShape) {
                 MemberShape mapMember = ((MapShape) memberShape).getValue();
-                if (!(model.expectShape(mapMember.getTarget()) instanceof SimpleShape)) {
+                if (isIterationRequired(model.expectShape(mapMember.getTarget()))) {
                     // Iterate over Object entries, and call reduce to repopulate map
                     writer.openBlock("...(obj.${L} && { ${L}: Object.entries(obj.${L}).reduce(", ")}),",
                         memberName, memberName, memberName,
@@ -154,6 +152,21 @@ final class StructuredMemberWriter {
                 }
             }
         }
+    }
+
+    /**
+     * Identified if iteration is required on shape
+     * 
+     * @param memberShape
+     * @return If the iteration is required on memberShape
+     */
+    private boolean isIterationRequired(Shape memberShape) {
+        return (
+            memberShape instanceof StructureShape ||
+            memberShape instanceof ListShape ||
+            memberShape instanceof SetShape ||
+            memberShape instanceof MapShape
+        );
     }
 
     /**
