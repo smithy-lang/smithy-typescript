@@ -75,15 +75,12 @@ final class StructuredMemberWriter {
      * Recursively writes filterSensitiveLog for list members
      */
     void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape arrayMember) {
-        if (model.expectShape(arrayMember.getTarget()) instanceof StructureShape) {
+        Shape memberShape = model.expectShape(arrayMember.getTarget());
+        if (memberShape instanceof StructureShape) {
             writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(arrayMember));
-        } else if (
-            model.expectShape(arrayMember.getTarget()) instanceof ListShape ||
-            model.expectShape(arrayMember.getTarget()) instanceof SetShape
-        ) {
+        } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
             writer.write("item => item.map(");
-            MemberShape nestedArrayMember =
-                ((CollectionShape) model.expectShape(arrayMember.getTarget())).getMember();
+            MemberShape nestedArrayMember = ((CollectionShape) memberShape).getMember();
             writeFilterSensitiveLogForArray(writer, nestedArrayMember);
             writer.write(")");
         }
@@ -92,17 +89,15 @@ final class StructuredMemberWriter {
     void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape) {
         writer.write("...obj,");
         for (MemberShape member : members) {
+            Shape memberShape = model.expectShape(member.getTarget());
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                 writer.write("...(obj.${L} && { ${L}: SENSITIVE_STRING }),", memberName, memberName);
-            } else if (model.expectShape(member.getTarget()) instanceof StructureShape) {
+            } else if (memberShape instanceof StructureShape) {
                 writer.write("...(obj.${L} && { ${L}: ${T}.filterSensitiveLog(obj.${L})}),",
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
-            } else if (
-                model.expectShape(member.getTarget()) instanceof ListShape ||
-                model.expectShape(member.getTarget()) instanceof SetShape
-            ) {
-                MemberShape arrayMember = ((CollectionShape) model.expectShape(member.getTarget())).getMember();
+            } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
+                MemberShape arrayMember = ((CollectionShape) memberShape).getMember();
                 if (!(model.expectShape(arrayMember.getTarget()) instanceof SimpleShape)) {
                     writer.write("...(obj.${L} && { ${L}: obj.${L}.map(",
                         memberName, memberName, memberName);
