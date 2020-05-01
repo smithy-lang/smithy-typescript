@@ -372,7 +372,7 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      * const deserializeAws_restJson1_1ParameterList = (
      *   output: any,
      *   context: SerdeContext
-     * ): Array<Parameter> => {
+     * ): Parameter[] => {
      *   return (output || []).map((entry: any) =>
      *     deserializeAws_restJson1_1Parameter(entry, context)
      *   );

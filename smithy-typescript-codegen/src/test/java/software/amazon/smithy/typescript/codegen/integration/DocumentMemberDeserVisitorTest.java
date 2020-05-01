@@ -118,7 +118,7 @@ public class DocumentMemberDeserVisitorTest {
                 .namespace("com.smithy.example", "/")
                 .build();
         private Symbol collectionMock = Symbol.builder()
-                .name("Array<Foo>")
+                .name("Foo[]")
                 .namespace("com.smithy.example", "/")
                 .build();
 
