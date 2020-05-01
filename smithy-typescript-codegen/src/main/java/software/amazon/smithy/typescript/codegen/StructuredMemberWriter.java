@@ -21,10 +21,8 @@ import java.util.Set;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
-import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -73,23 +71,24 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Recursively writes filterSensitiveLog for arrays (ListShape|SetShape)
+     * Recursively writes filterSensitiveLog for arrays (CollectionShape)
      */
-    void writeFilterSensitiveLogForArray(TypeScriptWriter writer, MemberShape arrayMember) {
-        Shape memberShape = model.expectShape(arrayMember.getTarget());
+    void writeFilterSensitiveLogForCollection(TypeScriptWriter writer, MemberShape collectionMember) {
+        Shape memberShape = model.expectShape(collectionMember.getTarget());
         if (memberShape instanceof StructureShape) {
             // Call filterSensitiveLog on Structure
-            writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(arrayMember));
-        } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
+            writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(collectionMember));
+        } else if (memberShape instanceof CollectionShape) {
             // Iterate over array items, and call array specific function on each member
             writer.openBlock("item => item.map(", ")",
                 () -> {
-                    MemberShape nestedArrayMember = ((CollectionShape) memberShape).getMember();
-                    writeFilterSensitiveLogForArray(writer, nestedArrayMember);
+                    MemberShape nestedCollectionMember = ((CollectionShape) memberShape).getMember();
+                    writeFilterSensitiveLogForCollection(writer, nestedCollectionMember);
                 }
             );
         } else {
-            // Function is inside another function, so just return item in else case
+            // This path will never reach because of recursive isIterationRequired
+            // adding it to not break the code, if it does reach in future
             writer.write("item => item");
         }
     }
@@ -108,7 +107,8 @@ final class StructuredMemberWriter {
                     writer.write("acc[key] = ${T}.filterSensitiveLog(value);",
                         symbolProvider.toSymbol(mapMember));
                 } else {
-                    // populate value in in acc[key]
+                    // This path will never reach because of recursive isIterationRequired
+                    // adding it to not break the code, if it does reach in future
                     writer.write("acc[key] = value;");
                 }
                 writer.write("return acc;");
@@ -128,14 +128,14 @@ final class StructuredMemberWriter {
                 // Call filterSensitiveLog on Structure
                 writer.write("...(obj.${L} && { ${L}: ${T}.filterSensitiveLog(obj.${L})}),",
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
-            } else if (memberShape instanceof ListShape || memberShape instanceof SetShape) {
-                MemberShape arrayMember = ((CollectionShape) memberShape).getMember();
-                if (isIterationRequired(model.expectShape(arrayMember.getTarget()))) {
+            } else if (memberShape instanceof CollectionShape) {
+                MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
+                if (isIterationRequired(model.expectShape(collectionMember.getTarget()))) {
                     // Iterate over array items, and call array specific function on each member
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
-                            writeFilterSensitiveLogForArray(writer, arrayMember);
+                            writeFilterSensitiveLogForCollection(writer, collectionMember);
                         }
                     );
                 }
@@ -161,12 +161,16 @@ final class StructuredMemberWriter {
      * @return If the iteration is required on memberShape
      */
     private boolean isIterationRequired(Shape memberShape) {
-        return (
-            memberShape instanceof StructureShape ||
-            memberShape instanceof ListShape ||
-            memberShape instanceof SetShape ||
-            memberShape instanceof MapShape
-        );
+        if (memberShape instanceof StructureShape) {
+            return true;
+        } if (memberShape instanceof CollectionShape) {
+            MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
+            return isIterationRequired(model.expectShape(collectionMember.getTarget()));
+        } else if (memberShape instanceof MapShape) {
+            MemberShape mapMember = ((MapShape) memberShape).getValue();
+            return isIterationRequired(model.expectShape(mapMember.getTarget()));
+        }
+        return false;
     }
 
     /**
