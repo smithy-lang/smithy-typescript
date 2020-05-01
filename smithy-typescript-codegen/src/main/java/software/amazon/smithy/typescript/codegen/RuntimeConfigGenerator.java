@@ -182,9 +182,9 @@ final class RuntimeConfigGenerator {
                 writer.write("sha256: Sha256,");
             },
             "urlParser", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_BROWSER);
+                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_NODE);
                 writer.addImport("parseUrl", "parseUrl",
-                        TypeScriptDependency.AWS_SDK_URL_PARSER_BROWSER.packageName);
+                        TypeScriptDependency.AWS_SDK_URL_PARSER_NODE.packageName);
                 writer.write("urlParser: parseUrl,");
             },
             "streamCollector", writer -> {
