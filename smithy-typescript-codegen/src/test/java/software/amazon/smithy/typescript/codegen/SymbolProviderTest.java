@@ -101,7 +101,7 @@ public class SymbolProviderTest {
         SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol listSymbol = provider.toSymbol(list);
 
-        assertThat(listSymbol.getName(), equalTo("Array<_Record>"));
+        assertThat(listSymbol.getName(), equalTo("(_Record)[]"));
     }
 
     @Test
