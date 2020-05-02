@@ -92,10 +92,10 @@ import software.amazon.smithy.utils.StringUtils;
  *     bear: (value: Bear) => T;
  *     _: (name: string, value: any) => T;
  *   }
- *   export function visit<T>(
+ *   export const visit = <T>(
  *     value: Attacker,
  *     visitor: Visitor<T>
- *   ): T {
+ *   ): T => {
  *     if (value.lion !== undefined) return visitor.lion(value.lion);
  *     if (value.tiger !== undefined) return visitor.tiger(value.tiger);
  *     if (value.bear !== undefined) return visitor.bear(value.bear);
@@ -193,10 +193,10 @@ final class UnionGenerator implements Runnable {
 
     private void writeVisitorFunction() {
         // Create the visitor dispatcher for the union.
-        writer.write("export function visit<T>(").indent();
+        writer.write("export const visit = <T>(").indent();
         writer.write("value: $L,", symbol.getName());
         writer.write("visitor: Visitor<T>");
-        writer.dedent().write("): T {").indent();
+        writer.dedent().write("): T => {").indent();
         for (MemberShape member : shape.getAllMembers().values()) {
             String memberName = symbolProvider.toMemberName(member);
             writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
