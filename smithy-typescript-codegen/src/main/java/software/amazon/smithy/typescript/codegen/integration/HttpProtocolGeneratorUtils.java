@@ -274,10 +274,10 @@ public final class HttpProtocolGeneratorUtils {
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         String errorMethodName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()) + "Error";
 
-        writer.openBlock("async function $L(\n"
+        writer.openBlock("const $L = async(\n"
                        + "  output: $T,\n"
                        + "  context: __SerdeContext,\n"
-                       + "): Promise<$T> {", "}", errorMethodName, responseType, outputType, () -> {
+                       + "): Promise<$T> => {", "}", errorMethodName, responseType, outputType, () -> {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
             if (shouldParseErrorBody) {

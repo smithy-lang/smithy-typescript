@@ -166,10 +166,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
 
-        writer.openBlock("export async function $L(\n"
+        writer.openBlock("export const $L = async(\n"
                        + "  input: $T,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> {", "}", methodName, inputType, requestType, () -> {
+                       + "): Promise<$T> => {", "}", methodName, inputType, requestType, () -> {
             writeRequestHeaders(context, operation);
             boolean hasRequestBody = writeRequestBody(context, operation);
             boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
@@ -313,10 +313,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
 
         // Handle the general response.
-        writer.openBlock("export async function $L(\n"
+        writer.openBlock("export const $L = async(\n"
                        + "  output: $T,\n"
                        + "  context: __SerdeContext\n"
-                       + "): Promise<$T> {", "}", methodName, responseType, outputType, () -> {
+                       + "): Promise<$T> => {", "}", methodName, responseType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode >= 400) {", "}", () -> {
                 writer.write("return $L(output, context);", errorMethodName);
