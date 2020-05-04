@@ -1397,10 +1397,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // Iterate over each entry and do deser work.
                 outputParam += ".map(_entry => " + collectionTargetValue + ")";
 
-                // Make sets when necessary.
-                if (target.isSetShape()) {
-                    outputParam = "new Set(" + outputParam + ")";
-                }
                 return outputParam;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
