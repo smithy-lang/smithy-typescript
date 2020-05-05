@@ -213,10 +213,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
-        writer.openBlock("export async function $L(\n"
+        writer.openBlock("export const $L = async(\n"
                        + "  input: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> {", "}", methodName, inputType, contextType, requestType, () -> {
+                       + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
             writeHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
@@ -847,10 +847,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String contextType = CodegenUtils.getOperationDeserializerContextType(writer, context.getModel(), operation);
 
         // Handle the general response.
-        writer.openBlock("export async function $L(\n"
+        writer.openBlock("export const $L = async(\n"
                        + "  output: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> {", "}", methodName, responseType, contextType, outputType, () -> {
+                       + "): Promise<$T> => {", "}", methodName, responseType, contextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher if we receive an error range
             // status code that's not the modeled code (400 or higher). This allows for
             // returning other 2XX or 3XX codes that don't match the defined value.
