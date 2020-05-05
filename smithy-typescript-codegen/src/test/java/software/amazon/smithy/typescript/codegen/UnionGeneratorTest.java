@@ -85,10 +85,10 @@ public class UnionGeneratorTest {
                                           + "  }"));
 
         // It generates the actual visitor function.
-        assertThat(output, containsString("export function visit<T>(\n"
+        assertThat(output, containsString("export const visit = <T>(\n"
                                           + "    value: Example,\n"
                                           + "    visitor: Visitor<T>\n"
-                                          + "  ): T {\n"
+                                          + "  ): T => {\n"
                                           + "    if (value.A !== undefined) return visitor.A(value.A);\n"
                                           + "    if (value.B !== undefined) return visitor.B(value.B);\n"
                                           + "    if (value.C !== undefined) return visitor.C(value.C);\n"
