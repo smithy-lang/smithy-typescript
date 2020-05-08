@@ -356,7 +356,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("const headers: any = {", "};",
             () -> {
                 writer.write("'Content-Type': $S,", bindingIndex.determineRequestContentType(
-                    operation, getDocumentContentType()));
+                        operation, getDocumentContentType()));
                 writeDefaultHeaders(context, operation);
 
                 operation.getInput().ifPresent(outputId -> {
@@ -365,9 +365,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
                         Shape target = model.expectShape(binding.getMember().getTarget());
                         String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
-                            binding.getMember(), target);
+                                binding.getMember(), target);
                         writer.write("...isSerializableHeaderValue($L) && { $S: $L },",
-                            memberLocation, binding.getLocationName(), headerValue);
+                                memberLocation, binding.getLocationName(), headerValue);
                     }
         
                     // Handle assembling prefix headers.
@@ -385,7 +385,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                     () -> {
                                         // Use a ! since we already validated the input member is defined above.
                                         String headerValue = getInputValue(context, binding.getLocation(),
-                                            memberLocation + "![suffix]", binding.getMember(), target);
+                                                memberLocation + "![suffix]", binding.getMember(), target);
                                         // Append the prefix to key.
                                         writer.write("acc[$S + suffix] = $L;", binding.getLocationName(), headerValue);
                                         writer.write("return acc;");
