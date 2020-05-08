@@ -240,7 +240,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * <p>For example:
      *
      * <pre>{@code
-     * headers['foo'] = "This is a custom header";
+     *   "foo": "This is a custom header",
      * }</pre>
      *
      * @param context The generation context.
