@@ -376,10 +376,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                         Shape target = model.expectShape(prefixMap.getValue().getTarget());
                         // Iterate through each entry in the member.
-                        writer.openBlock(
-                            "...($L !== undefined) && Object.keys($L).reduce(",
-                            "),",
-                            memberLocation, memberLocation,
+                        writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
                             () -> {
                                 writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
                                     () -> {
