@@ -457,12 +457,6 @@ final class HttpProtocolTestGenerator implements Runnable {
             String openElement = "[";
             String closeElement = "]";
 
-            // Handle sets needing to use the Set typing instead of standard array syntax.
-            if (workingShape.isSetShape()) {
-                openElement = "new Set(" + openElement;
-                closeElement = closeElement + ")";
-            }
-
             // Write the value out directly.
             writer.openBlock("$L\n", closeElement + ",\n", openElement, () -> {
                 Shape wrapperShape = this.workingShape;

@@ -100,10 +100,6 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
  */
 const equivalentContents = (expected: any, generated: any): boolean => {
   let localExpected = expected;
-  // Handle comparing sets to arrays properly.
-  if (expected instanceof Set) {
-    localExpected = Array.from(expected);
-  }
 
   // Short circuit on equality.
   if (localExpected == generated) {

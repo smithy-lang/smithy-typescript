@@ -437,7 +437,7 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *
      * <pre>{@code
      * const serializeAws_restJson1_1ParametersSet = (
-     *   input: Set<Parameter>,
+     *   input: Parameter[],
      *   context: SerdeContext
      * ): any => {
      *   return (input || []).map(entry =>
