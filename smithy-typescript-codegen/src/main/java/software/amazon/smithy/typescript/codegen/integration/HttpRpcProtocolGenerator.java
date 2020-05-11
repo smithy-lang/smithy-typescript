@@ -193,9 +193,12 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // The Content-Type header is always present.
         writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
-        writer.write("const headers: __HeaderBag = {};");
-        writer.write("headers['Content-Type'] = $S;", getDocumentContentType());
-        writeDefaultHeaders(context, operation);
+        writer.openBlock("const headers: __HeaderBag = {", "};",
+            () -> {
+                writer.write("'Content-Type': $S,", getDocumentContentType());
+                writeDefaultHeaders(context, operation);
+            }
+        );
     }
 
     private boolean writeRequestBody(GenerationContext context, OperationShape operation) {
@@ -237,7 +240,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * <p>For example:
      *
      * <pre>{@code
-     * headers['foo'] = "This is a custom header";
+     *   "foo": "This is a custom header",
      * }</pre>
      *
      * @param context The generation context.

@@ -352,40 +352,46 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         // Headers are always present either from the default document or the payload.
-        writer.write("const headers: any = {};");
-        writer.write("headers['Content-Type'] = $S;", bindingIndex.determineRequestContentType(
-                operation, getDocumentContentType()));
-        writeDefaultHeaders(context, operation);
+        writer.openBlock("const headers: any = {", "};",
+            () -> {
+                writer.write("'Content-Type': $S,", bindingIndex.determineRequestContentType(
+                        operation, getDocumentContentType()));
+                writeDefaultHeaders(context, operation);
 
-        operation.getInput().ifPresent(outputId -> {
-            Model model = context.getModel();
-            for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
-                String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
-                writer.openBlock("if (isSerializableHeaderValue($1L)) {", "}", memberLocation, () -> {
-                    Shape target = model.expectShape(binding.getMember().getTarget());
-                    String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
-                            binding.getMember(), target);
-                    writer.write("headers[$S] = $L;", binding.getLocationName(), headerValue);
+                operation.getInput().ifPresent(outputId -> {
+                    Model model = context.getModel();
+                    for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
+                        String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
+                        Shape target = model.expectShape(binding.getMember().getTarget());
+                        String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
+                                binding.getMember(), target);
+                        writer.write("...isSerializableHeaderValue($L) && { $S: $L },",
+                                memberLocation, binding.getLocationName(), headerValue);
+                    }
+        
+                    // Handle assembling prefix headers.
+                    for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
+                        String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
+                        MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
+                        Shape target = model.expectShape(prefixMap.getValue().getTarget());
+                        // Iterate through each entry in the member.
+                        writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
+                            () -> {
+                                writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
+                                    () -> {
+                                        // Use a ! since we already validated the input member is defined above.
+                                        String headerValue = getInputValue(context, binding.getLocation(),
+                                                memberLocation + "![suffix]", binding.getMember(), target);
+                                        // Append the prefix to key.
+                                        writer.write("acc[$S + suffix] = $L;", binding.getLocationName(), headerValue);
+                                        writer.write("return acc;");
+                                    });
+                            }
+                        );
+                    }
                 });
             }
-
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
-                String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
-                writer.openBlock("if ($L !== undefined) {", "}", memberLocation, () -> {
-                    MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
-                    Shape target = model.expectShape(prefixMap.getValue().getTarget());
-                    // Iterate through each entry in the member.
-                    writer.openBlock("Object.keys($L).forEach(suffix => {", "});", memberLocation, () -> {
-                        // Use a ! since we already validated the input member is defined above.
-                        String headerValue = getInputValue(context, binding.getLocation(),
-                                memberLocation + "![suffix]", binding.getMember(), target);
-                        // Append the suffix to the defined prefix and serialize the value in to that key.
-                        writer.write("headers[$S + suffix] = $L;", binding.getLocationName(), headerValue);
-                    });
-                });
-            }
-        });
+        );
     }
 
     private List<HttpBinding> writeRequestBody(
@@ -601,7 +607,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * <p>For example:
      *
      * <pre>{@code
-     * headers['foo'] = "This is a custom header";
+     *   "foo": "This is a custom header",
      * }</pre>
      *
      * @param context The generation context.
