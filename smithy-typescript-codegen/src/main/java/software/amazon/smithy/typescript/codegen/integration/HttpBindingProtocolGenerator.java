@@ -316,28 +316,27 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Build the initial query bag.
         Map<String, String> queryLiterals = trait.getUri().getQueryLiterals();
-        if (!queryLiterals.isEmpty()) {
-            // Write any query literals present in the uri.
-            writer.openBlock("const query: any = {", "};",
-                    () -> queryLiterals.forEach((k, v) -> writer.write("$S: $S,", k, v)));
-        } else if (!queryBindings.isEmpty()) {
-            writer.write("const query: any = {};");
-        }
-
-        // Handle any additional query bindings.
-        if (!queryBindings.isEmpty()) {
-            Model model = context.getModel();
-            for (HttpBinding binding : queryBindings) {
-                String memberName = symbolProvider.toMemberName(binding.getMember());
-                writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
-                        "@aws-sdk/smithy-client");
-                writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
-                    Shape target = model.expectShape(binding.getMember().getTarget());
-                    String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
-                            binding.getMember(), target);
-                    writer.write("query[$S] = $L;", binding.getLocationName(), queryValue);
-                });
-            }
+        if (!queryLiterals.isEmpty() || !queryBindings.isEmpty()) {
+            writer.openBlock("const query: any = {", "};", () -> {
+                if (!queryLiterals.isEmpty()) {
+                    // Write any query literals present in the uri.
+                    queryLiterals.forEach((k, v) -> writer.write("$S: $S,", k, v));
+                }
+                // Handle any additional query bindings.
+                if (!queryBindings.isEmpty()) {
+                    Model model = context.getModel();
+                    for (HttpBinding binding : queryBindings) {
+                        String memberName = symbolProvider.toMemberName(binding.getMember());
+                        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                                "@aws-sdk/smithy-client");
+                        Shape target = model.expectShape(binding.getMember().getTarget());
+                        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                                binding.getMember(), target);
+                        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
+                                binding.getLocationName(), queryValue);
+                    }
+                }
+            });
         }
 
         // Any binding or literal means we generated a query bag.
