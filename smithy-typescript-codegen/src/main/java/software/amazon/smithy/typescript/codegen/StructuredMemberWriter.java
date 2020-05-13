@@ -144,17 +144,16 @@ final class StructuredMemberWriter {
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                 // member is Sensitive, hide the value.
-                writer.write("...(obj.$L && { $L: SENSITIVE_STRING }),", memberName, memberName);
+                writer.write("...(obj.$1L && { $1L: SENSITIVE_STRING }),", memberName);
             } else if (memberShape instanceof StructureShape) {
                 // Call filterSensitiveLog on Structure.
-                writer.write("...(obj.$L && { $L: $T.filterSensitiveLog(obj.$L)}),",
-                    memberName, memberName, symbolProvider.toSymbol(member), memberName);
+                writer.write("...(obj.$1L && { $1L: $2T.filterSensitiveLog(obj.$1L)}),",
+                        memberName, symbolProvider.toSymbol(member));
             } else if (memberShape instanceof CollectionShape) {
                 MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
                 if (isIterationRequired(collectionMember)) {
                     // Iterate over array items, and call array specific function on each member.
-                    writer.openBlock("...(obj.$L && { $L: obj.$L.map(", ")}),",
-                        memberName, memberName, memberName,
+                    writer.openBlock("...(obj.$1L && { $1L: obj.$1L.map(", ")}),", memberName,
                         () -> {
                             writeCollectionFilterSensitiveLog(writer, collectionMember);
                         }
@@ -164,8 +163,7 @@ final class StructuredMemberWriter {
                 MemberShape mapMember = ((MapShape) memberShape).getValue();
                 if (isIterationRequired(mapMember)) {
                     // Iterate over Object entries, and call reduce to repopulate map.
-                    writer.openBlock("...(obj.$L && { $L: Object.entries(obj.$L).reduce(", ")}),",
-                        memberName, memberName, memberName,
+                    writer.openBlock("...(obj.$1L && { $1L: Object.entries(obj.$1L).reduce(", ")}),", memberName,
                         () -> {
                             writeMapFilterSensitiveLog(writer, mapMember);
                         }
