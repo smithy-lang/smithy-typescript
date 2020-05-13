@@ -152,7 +152,7 @@ final class StructuredMemberWriter {
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
             } else if (memberShape instanceof CollectionShape) {
                 MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-                if (isIterationRequired(model.expectShape(collectionMember.getTarget()))) {
+                if (isIterationRequired(collectionMember)) {
                     // Iterate over array items, and call array specific function on each member
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
@@ -163,7 +163,7 @@ final class StructuredMemberWriter {
                 }
             } else if (memberShape instanceof MapShape) {
                 MemberShape mapMember = ((MapShape) memberShape).getValue();
-                if (isIterationRequired(model.expectShape(mapMember.getTarget()))) {
+                if (isIterationRequired(mapMember)) {
                     // Iterate over Object entries, and call reduce to repopulate map
                     writer.openBlock("...(obj.${L} && { ${L}: Object.entries(obj.${L}).reduce(", ")}),",
                         memberName, memberName, memberName,
@@ -177,20 +177,21 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Identified if iteration is required on shape
+     * Identifies if iteration is required on MemberShape
      * 
-     * @param memberShape
-     * @return If the iteration is required on memberShape
+     * @param memberShape a {@link MemberShape} to check for iteration required
+     * @return Returns true if the iteration is required on memberShape
      */
-    private boolean isIterationRequired(Shape memberShape) {
-        if (memberShape instanceof StructureShape) {
+    private boolean isIterationRequired(MemberShape memberShape) {
+        Shape targetShape = model.expectShape(memberShape.getTarget());
+        if (targetShape instanceof StructureShape) {
             return true;
-        } if (memberShape instanceof CollectionShape) {
-            MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-            return isIterationRequired(model.expectShape(collectionMember.getTarget()));
-        } else if (memberShape instanceof MapShape) {
-            MemberShape mapMember = ((MapShape) memberShape).getValue();
-            return isIterationRequired(model.expectShape(mapMember.getTarget()));
+        } if (targetShape instanceof CollectionShape) {
+            MemberShape collectionMember = ((CollectionShape) targetShape).getMember();
+            return isIterationRequired(collectionMember);
+        } else if (targetShape instanceof MapShape) {
+            MemberShape mapMember = ((MapShape) targetShape).getValue();
+            return isIterationRequired(mapMember);
         }
         return false;
     }
