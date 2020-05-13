@@ -24,7 +24,6 @@ import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
@@ -71,15 +70,15 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Recursively writes filterSensitiveLog for arrays (CollectionShape)
+     * Recursively writes filterSensitiveLog for CollectionShape.
      */
     void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember) {
         Shape memberShape = model.expectShape(collectionMember.getTarget());
         if (memberShape instanceof StructureShape) {
-            // Call filterSensitiveLog on Structure
+            // Call filterSensitiveLog on Structure.
             writer.write("${T}.filterSensitiveLog", symbolProvider.toSymbol(collectionMember));
         } else if (memberShape instanceof CollectionShape) {
-            // Iterate over array items, and call array specific function on each member
+            // Iterate over array items, and call array specific function on each member.
             writer.openBlock("item => item.map(", ")",
                 () -> {
                     MemberShape nestedCollectionMember = ((CollectionShape) memberShape).getMember();
@@ -87,7 +86,7 @@ final class StructuredMemberWriter {
                 }
             );
         } else if (memberShape instanceof MapShape) {
-            // Iterate over Object entries, and call reduce to repopulate map
+            // Iterate over Object entries, and call reduce to repopulate map.
             writer.openBlock("item => Object.entries(item).reduce(", ")",
                 () -> {
                     MemberShape mapMember = ((MapShape) memberShape).getValue();
@@ -95,23 +94,23 @@ final class StructuredMemberWriter {
                 }
             );
         } else {
-            // This path will never reach because of recursive isIterationRequired
-            // adding it to not break the code, if it does reach in future
+            // This path will never reach because of recursive isIterationRequired.
+            // Adding it to not break the code, if it does reach in future.
             writer.write("item => item");
         }
     }
 
     /**
-     * Recursively writes filterSensitiveLog for MapShape
+     * Recursively writes filterSensitiveLog for MapShape.
      */
     void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember) {
-        // Reducer is common to all shapes
+        // Reducer is common to all shapes.
         writer.openBlock("(acc: any, [key, value]: [string, ${T}]) => {", "}, {}",
             symbolProvider.toSymbol(mapMember),
             () -> {
                 Shape memberShape = model.expectShape(mapMember.getTarget());
                 if (memberShape instanceof StructureShape) {
-                    // Call filterSensitiveLog on Structure
+                    // Call filterSensitiveLog on Structure.
                     writer.write("acc[key] = ${T}.filterSensitiveLog(value);",
                         symbolProvider.toSymbol(mapMember));
                 } else if (memberShape instanceof CollectionShape) {
@@ -129,8 +128,8 @@ final class StructuredMemberWriter {
                         }
                     );
                 } else {
-                    // This path will never reach because of recursive isIterationRequired
-                    // adding it to not break the code, if it does reach in future
+                    // This path will never reach because of recursive isIterationRequired.
+                    // Adding it to not break the code, if it does reach in future.
                     writer.write("acc[key] = value;");
                 }
                 writer.write("return acc;");
@@ -144,16 +143,16 @@ final class StructuredMemberWriter {
             Shape memberShape = model.expectShape(member.getTarget());
             String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
             if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                // member is Sensitive, hide the value
+                // member is Sensitive, hide the value.
                 writer.write("...(obj.${L} && { ${L}: SENSITIVE_STRING }),", memberName, memberName);
             } else if (memberShape instanceof StructureShape) {
-                // Call filterSensitiveLog on Structure
+                // Call filterSensitiveLog on Structure.
                 writer.write("...(obj.${L} && { ${L}: ${T}.filterSensitiveLog(obj.${L})}),",
                     memberName, memberName, symbolProvider.toSymbol(member), memberName);
             } else if (memberShape instanceof CollectionShape) {
                 MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
                 if (isIterationRequired(collectionMember)) {
-                    // Iterate over array items, and call array specific function on each member
+                    // Iterate over array items, and call array specific function on each member.
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
@@ -164,7 +163,7 @@ final class StructuredMemberWriter {
             } else if (memberShape instanceof MapShape) {
                 MemberShape mapMember = ((MapShape) memberShape).getValue();
                 if (isIterationRequired(mapMember)) {
-                    // Iterate over Object entries, and call reduce to repopulate map
+                    // Iterate over Object entries, and call reduce to repopulate map.
                     writer.openBlock("...(obj.${L} && { ${L}: Object.entries(obj.${L}).reduce(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
@@ -177,10 +176,10 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Identifies if iteration is required on MemberShape
+     * Identifies if iteration is required on MemberShape.
      * 
-     * @param memberShape a {@link MemberShape} to check for iteration required
-     * @return Returns true if the iteration is required on memberShape
+     * @param memberShape a {@link MemberShape} to check for iteration required.
+     * @return Returns true if the iteration is required on memberShape.
      */
     private boolean isIterationRequired(MemberShape memberShape) {
         Shape targetShape = model.expectShape(memberShape.getTarget());
