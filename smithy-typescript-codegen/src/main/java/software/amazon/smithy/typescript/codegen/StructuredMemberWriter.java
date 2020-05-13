@@ -73,7 +73,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for arrays (CollectionShape)
      */
-    void writeFilterSensitiveLogForCollection(TypeScriptWriter writer, MemberShape collectionMember) {
+    void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember) {
         Shape memberShape = model.expectShape(collectionMember.getTarget());
         if (memberShape instanceof StructureShape) {
             // Call filterSensitiveLog on Structure
@@ -83,7 +83,7 @@ final class StructuredMemberWriter {
             writer.openBlock("item => item.map(", ")",
                 () -> {
                     MemberShape nestedCollectionMember = ((CollectionShape) memberShape).getMember();
-                    writeFilterSensitiveLogForCollection(writer, nestedCollectionMember);
+                    writeCollectionFilterSensitiveLog(writer, nestedCollectionMember);
                 }
             );
         } else if (memberShape instanceof MapShape) {
@@ -91,7 +91,7 @@ final class StructuredMemberWriter {
             writer.openBlock("item => Object.entries(item).reduce(", ")",
                 () -> {
                     MemberShape mapMember = ((MapShape) memberShape).getValue();
-                    writeFilterSensitiveLogForMap(writer, mapMember);
+                    writeMapFilterSensitiveLog(writer, mapMember);
                 }
             );
         } else {
@@ -104,7 +104,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for MapShape
      */
-    void writeFilterSensitiveLogForMap(TypeScriptWriter writer, MemberShape mapMember) {
+    void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember) {
         // Reducer is common to all shapes
         writer.openBlock("(acc: any, [key, value]: [string, ${T}]) => {", "}, {}",
             symbolProvider.toSymbol(mapMember),
@@ -118,14 +118,14 @@ final class StructuredMemberWriter {
                     writer.openBlock("acc[key] = value.map(", ")",
                         () -> {
                             MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-                            writeFilterSensitiveLogForCollection(writer, collectionMember);
+                            writeCollectionFilterSensitiveLog(writer, collectionMember);
                         }
                     );
                 } else if (memberShape instanceof MapShape) {
                     writer.openBlock("acc[key] = Object.entries(value).reduce(", ")",
                         () -> {
                             MemberShape nestedMapMember = ((MapShape) memberShape).getValue();
-                            writeFilterSensitiveLogForMap(writer, nestedMapMember);
+                            writeMapFilterSensitiveLog(writer, nestedMapMember);
                         }
                     );
                 } else {
@@ -157,7 +157,7 @@ final class StructuredMemberWriter {
                     writer.openBlock("...(obj.${L} && { ${L}: obj.${L}.map(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
-                            writeFilterSensitiveLogForCollection(writer, collectionMember);
+                            writeCollectionFilterSensitiveLog(writer, collectionMember);
                         }
                     );
                 }
@@ -168,7 +168,7 @@ final class StructuredMemberWriter {
                     writer.openBlock("...(obj.${L} && { ${L}: Object.entries(obj.${L}).reduce(", ")}),",
                         memberName, memberName, memberName,
                         () -> {
-                            writeFilterSensitiveLogForMap(writer, mapMember);
+                            writeMapFilterSensitiveLog(writer, mapMember);
                         }
                     );
                 }
