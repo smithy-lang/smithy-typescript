@@ -105,23 +105,24 @@ final class StructuredMemberWriter {
      */
     void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember) {
         // Reducer is common to all shapes.
-        writer.openBlock("(acc: any, [key, value]: [string, $T]) => {", "}, {}",
+        writer.openBlock("(acc: any, [key, value]: [string, $T]) => ({", "}), {}",
             symbolProvider.toSymbol(mapMember),
             () -> {
+                writer.write("...acc,");
                 Shape memberShape = model.expectShape(mapMember.getTarget());
                 if (memberShape instanceof StructureShape) {
                     // Call filterSensitiveLog on Structure.
-                    writer.write("acc[key] = $T.filterSensitiveLog(value);",
+                    writer.write("[key]: $T.filterSensitiveLog(value),",
                         symbolProvider.toSymbol(mapMember));
                 } else if (memberShape instanceof CollectionShape) {
-                    writer.openBlock("acc[key] = value.map(", ")",
+                    writer.openBlock("[key]: value.map(", "),",
                         () -> {
                             MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
                             writeCollectionFilterSensitiveLog(writer, collectionMember);
                         }
                     );
                 } else if (memberShape instanceof MapShape) {
-                    writer.openBlock("acc[key] = Object.entries(value).reduce(", ")",
+                    writer.openBlock("[key]: Object.entries(value).reduce(", "),",
                         () -> {
                             MemberShape nestedMapMember = ((MapShape) memberShape).getValue();
                             writeMapFilterSensitiveLog(writer, nestedMapMember);
@@ -130,9 +131,8 @@ final class StructuredMemberWriter {
                 } else {
                     // This path will never reach because of recursive isIterationRequired.
                     // Adding it to not break the code, if it does reach in future.
-                    writer.write("acc[key] = value;");
+                    writer.write("[key]: value,");
                 }
-                writer.write("return acc;");
             }
         );
     }
