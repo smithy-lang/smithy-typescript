@@ -226,8 +226,8 @@ public final class HttpProtocolGeneratorUtils {
 
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         writer.write("// Encode Uint8Array data into string with utf-8.");
-        writer.write("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => " +
-            "collectBody(streamBody, context).then(body => context.utf8Encoder(body))");
+        writer.write("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => "
+                + "collectBody(streamBody, context).then(body => context.utf8Encoder(body))");
         writer.write("");
     }
 

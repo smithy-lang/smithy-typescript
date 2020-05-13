@@ -368,7 +368,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         writer.write("...isSerializableHeaderValue($L) && { $S: $L },",
                                 memberLocation, binding.getLocationName(), headerValue);
                     }
-        
+
                     // Handle assembling prefix headers.
                     for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
                         String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
