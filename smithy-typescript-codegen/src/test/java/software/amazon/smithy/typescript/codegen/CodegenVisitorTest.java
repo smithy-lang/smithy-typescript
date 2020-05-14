@@ -103,6 +103,8 @@ public class CodegenVisitorTest {
     @Test void throwsOnShapesThatCannotBeCondensed() {
         Model model = Model.assembler()
                 .addImport(getClass().getResource("simple-service-with-shape-conflict.smithy"))
+                .addImport(getClass().getResource("simple-service-with-shape-conflict-2.smithy"))
+                .addImport(getClass().getResource("simple-service-with-shape-conflict-3.smithy"))
                 .assemble()
                 .unwrap();
         MockManifest manifest = new MockManifest();
@@ -122,6 +124,8 @@ public class CodegenVisitorTest {
     @Test void successfullyCondensesShapesThatMatch() {
         Model model = Model.assembler()
                 .addImport(getClass().getResource("simple-service-with-condensible-shapes.smithy"))
+                .addImport(getClass().getResource("simple-service-with-condensible-shapes-2.smithy"))
+                .addImport(getClass().getResource("simple-service-with-condensible-shapes-3.smithy"))
                 .assemble()
                 .unwrap();
         MockManifest manifest = new MockManifest();

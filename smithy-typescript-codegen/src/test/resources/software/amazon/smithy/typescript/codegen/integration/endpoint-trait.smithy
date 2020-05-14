@@ -1,6 +1,5 @@
 namespace smithy.example
 
-@protocols([{name: "aws.rest-json-1.1"}])
 service Example {
     version: "1.0.0",
     operations: [GetFoo]
@@ -8,7 +7,11 @@ service Example {
 
 @readonly
 @endpoint(hostPrefix: "{foo}.data.")
-operation GetFoo(GetFooInput) -> GetFooOutput
+operation GetFoo {
+    input: GetFooInput,
+    output: GetFooOutput
+}
+
 structure GetFooInput {
     @required
     @hostLabel
