@@ -66,9 +66,9 @@ final class RuntimeConfigGenerator {
                 writer.write("bodyLengthChecker: calculateBodyLength,");
             },
             "streamCollector", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_NODE);
+                writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_NODE.packageName);
+                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
                 writer.write("streamCollector,");
             },
             "base64Decoder", writer -> {
@@ -130,9 +130,9 @@ final class RuntimeConfigGenerator {
                 writer.write("bodyLengthChecker: calculateBodyLength,");
             },
             "streamCollector", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_WEB);
+                writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_WEB.packageName);
+                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
                 writer.write("streamCollector,");
             },
             "base64Decoder", writer -> {
