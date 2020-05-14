@@ -115,22 +115,22 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         writers = new TypeScriptDelegator(settings, model, fileManifest, symbolProvider, integrations);
     }
 
-    private static ProtocolGenerator resolveProtocolGenerator(
+    private ProtocolGenerator resolveProtocolGenerator(
             Collection<TypeScriptIntegration> integrations,
             ServiceShape service,
             TypeScriptSettings settings
     ) {
         // Collect all of the supported protocol generators.
-        Map<String, ProtocolGenerator> generators = new HashMap<>();
+        Map<ShapeId, ProtocolGenerator> generators = new HashMap<>();
         for (TypeScriptIntegration integration : integrations) {
             for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
-                generators.put(generator.getName(), generator);
+                generators.put(generator.getProtocol(), generator);
             }
         }
 
-        String protocolName;
+        ShapeId protocolName;
         try {
-            protocolName = settings.resolveServiceProtocol(service, generators.keySet());
+            protocolName = settings.resolveServiceProtocol(model, service, generators.keySet());
         } catch (UnresolvableProtocolException e) {
             LOGGER.warning("Unable to find a protocol generator for " + service.getId() + ": " + e.getMessage());
             protocolName = null;
@@ -178,7 +178,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest);
 
         // Generate protocol tests IFF found in the model.
-        new HttpProtocolTestGenerator(settings, model, symbolProvider, writers).run();
+        if (protocolGenerator != null) {
+            ShapeId protocol = protocolGenerator.getProtocol();
+            new HttpProtocolTestGenerator(settings, model, protocol, symbolProvider, writers).run();
+        }
 
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");
@@ -256,7 +259,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     @Override
     public Void serviceShape(ServiceShape shape) {
         if (!Objects.equals(service, shape)) {
-            LOGGER.fine(() -> "Skipping `" + service.getId() + "` because it is not `" + service.getId() + "`");
+            LOGGER.fine(() -> "Skipping `" + shape.getId() + "` because it is not `" + service.getId() + "`");
             return null;
         }
 

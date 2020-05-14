@@ -25,7 +25,7 @@ plugins {
 
 allprojects {
     group = "software.amazon.smithy"
-    version = "0.1.0"
+    version = "0.2.0"
 }
 
 // The root project doesn't produce a JAR.
@@ -203,6 +203,19 @@ subprojects {
         apply(plugin = "checkstyle")
 
         tasks["checkstyleTest"].enabled = false
+
+        /*
+         * Tests
+         * ====================================================
+         *
+         * Configure the running of tests.
+         */
+        // Log on passed, skipped, and failed test events if the `-Plog-tests` property is set.
+        if (project.hasProperty("log-tests")) {
+            tasks.test {
+                testLogging.events("passed", "skipped", "failed")
+            }
+        }
 
         /*
          * Code coverage

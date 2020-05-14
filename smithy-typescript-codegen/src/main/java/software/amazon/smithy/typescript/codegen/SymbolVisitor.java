@@ -57,7 +57,6 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.EventStreamTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -113,6 +112,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol blobShape(BlobShape shape) {
+        if (shape.hasTrait(StreamingTrait.class)) {
+            // Note: `Readable` needs an import and a dependency.
+            return createSymbolBuilder(shape, "Readable | ReadableStream | Blob", null)
+                    .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
+                    .build();
+        }
+
         return createSymbolBuilder(shape, "Uint8Array").build();
     }
 
@@ -315,12 +321,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return createMemberSymbolWithEnumTarget(targetSymbol);
         }
 
-        if (shape.hasTrait(EventStreamTrait.class)) {
+        // While unions are targeted with the streaming trait to make them event streams,
+        // we don't want to generate a unique type for event streams but instead make
+        // member references to them AsyncIterable of the union we generate.
+        if (targetShape.hasTrait(StreamingTrait.class) && targetShape.isUnionShape()) {
             return createMemberSymbolWithEventStream(targetSymbol);
-        }
-
-        if (shape.hasTrait(StreamingTrait.class)) {
-            return createMemberSymbolWithStreaming(targetSymbol);
         }
 
         return targetSymbol;
@@ -339,15 +344,6 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .namespace(null, "/")
                 .name(String.format("AsyncIterable<%s>", targetSymbol.getName()))
                 .addReference(targetSymbol)
-                .build();
-    }
-
-    private Symbol createMemberSymbolWithStreaming(Symbol targetSymbol) {
-        // Note: `Readable` needs an import and a dependency.
-        return targetSymbol.toBuilder()
-                .namespace(null, "/")
-                .name("Readable | ReadableStream | Blob")
-                .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
                 .build();
     }
 
