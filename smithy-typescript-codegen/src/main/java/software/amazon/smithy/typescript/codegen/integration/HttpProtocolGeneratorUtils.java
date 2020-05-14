@@ -28,7 +28,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
-import software.amazon.smithy.model.pattern.Pattern;
+import software.amazon.smithy.model.pattern.SmithyPattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -386,10 +386,10 @@ public final class HttpProtocolGeneratorUtils {
             writer.addImport("isValidHostname", "__isValidHostname",
                     TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP.packageName);
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
-            List<Pattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
+            List<SmithyPattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
             StructureShape inputShape = context.getModel().expectShape(operation.getInput()
                     .get(), StructureShape.class);
-            for (Pattern.Segment label : prefixLabels) {
+            for (SmithyPattern.Segment label : prefixLabels) {
                 MemberShape member = inputShape.getMember(label.getContent()).get();
                 String memberName = symbolProvider.toMemberName(member);
                 writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L)",

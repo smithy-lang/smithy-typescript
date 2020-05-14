@@ -1,11 +1,11 @@
-$version: "0.4.0"
+$version: "1.0"
 namespace example.weather
 
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 
 /// Provides weather forecasts.
-@protocols([{name: "aws.rest-json-1.1"}])
+@fakeProtocol
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01",
@@ -18,6 +18,7 @@ resource City {
     read: GetCity,
     list: ListCities,
     resources: [Forecast, CityImage],
+    operations: [GetCityAnnouncements]
 }
 
 resource Forecast {
@@ -47,7 +48,7 @@ apply GetCity @httpRequestTests([
     {
         id: "WriteGetCityAssertions",
         documentation: "Does something",
-        protocol: "aws.rest-json-1.1",
+        protocol: "example.weather#fakeProtocol",
         method: "GET",
         uri: "/cities/123",
         body: "",
@@ -61,7 +62,7 @@ apply GetCity @httpResponseTests([
     {
         id: "WriteGetCityResponseAssertions",
         documentation: "Does something",
-        protocol: "aws.rest-json-1.1",
+        protocol: "example.weather#fakeProtocol",
         code: 200,
         body: """
             {
@@ -139,7 +140,7 @@ apply NoSuchResource @httpResponseTests([
     {
         id: "WriteNoSuchResourceAssertions",
         documentation: "Does something",
-        protocol: "aws.rest-json-1.1",
+        protocol: "example.weather#fakeProtocol",
         code: 404,
         body: """
             {
@@ -168,7 +169,7 @@ apply ListCities @httpRequestTests([
     {
         id: "WriteListCitiesAssertions",
         documentation: "Does something",
-        protocol: "aws.rest-json-1.1",
+        protocol: "example.weather#fakeProtocol",
         method: "GET",
         uri: "/cities",
         body: "",
@@ -241,6 +242,7 @@ structure GetForecastInput {
 
 structure GetForecastOutput {
     chanceOfRain: Float,
+    precipitation: Precipitation,
 }
 
 union Precipitation {
@@ -251,15 +253,16 @@ union Precipitation {
     mixed: TypedYesNo,
     other: OtherStructure,
     blob: Blob,
+    foo: example.weather.nested#Foo,
     baz: example.weather.nested.more#Baz,
 }
 
 structure OtherStructure {}
 
-@enum("YES": {}, "NO": {})
+@enum([{value: "YES"}, {value: "NO"}])
 string SimpleYesNo
 
-@enum("YES": {name: "YES"}, "NO": {name: "NO"})
+@enum([{value: "YES", name: "YES"}, {value: "NO", name: "NO"}])
 string TypedYesNo
 
 map StringMap {
@@ -281,9 +284,49 @@ structure GetCityImageInput {
 }
 
 structure GetCityImageOutput {
-    @streaming
     @httpPayload
     image: CityImageData,
 }
 
+@streaming
 blob CityImageData
+
+@readonly
+@http(method: "GET", uri: "/cities/{cityId}/announcements")
+operation GetCityAnnouncements {
+    input: GetCityAnnouncementsInput,
+    output: GetCityAnnouncementsOutput,
+    errors: [NoSuchResource]
+}
+
+
+structure GetCityAnnouncementsInput {
+    @required
+    @httpLabel
+    cityId: CityId,
+}
+
+structure GetCityAnnouncementsOutput {
+    @httpHeader("x-last-updated")
+    lastUpdated: Timestamp,
+
+    @httpPayload
+    announcements: Announcements
+}
+
+@streaming
+union Announcements {
+    police: Message,
+    fire: Message,
+    health: Message
+}
+
+structure Message {
+    message: String,
+    author: String
+}
+
+// Define a fake protocol trait for use.
+@trait
+@protocolDefinition
+structure fakeProtocol {}

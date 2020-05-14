@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.node.BooleanNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -30,7 +31,6 @@ import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.traits.ProtocolsTrait;
 
 /**
  * Settings used by {@link TypeScriptCodegenPlugin}.
@@ -54,7 +54,7 @@ public final class TypeScriptSettings {
     private ObjectNode packageJson = Node.objectNode();
     private ShapeId service;
     private ObjectNode pluginSettings = Node.objectNode();
-    private String protocol = "";
+    private ShapeId protocol;
     private boolean isPrivate;
 
     /**
@@ -80,7 +80,7 @@ public final class TypeScriptSettings {
         settings.setPackageDescription(config.getStringMemberOrDefault(
                 PACKAGE_DESCRIPTION, settings.getPackageName() + " client"));
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
-        config.getStringMember(PROTOCOL).map(StringNode::getValue).ifPresent(settings::setProtocol);
+        config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
 
         settings.setPluginSettings(config);
@@ -235,7 +235,7 @@ public final class TypeScriptSettings {
      *
      * @return Returns the configured protocol.
      */
-    public String getProtocol() {
+    public ShapeId getProtocol() {
         return protocol;
     }
 
@@ -243,22 +243,25 @@ public final class TypeScriptSettings {
      * Resolves the highest priority protocol from a service shape that is
      * supported by the generator.
      *
+     * @param model Model to enable finding protocols on the service.
      * @param service Service to get the protocols from if "protocols" is not set.
      * @param supportedProtocols The set of protocol names supported by the generator.
      * @return Returns the resolved protocol name.
      * @throws UnresolvableProtocolException if no protocol could be resolved.
      */
-    public String resolveServiceProtocol(ServiceShape service, Set<String> supportedProtocols) {
-        if (!protocol.isEmpty()) {
+    public ShapeId resolveServiceProtocol(Model model, ServiceShape service, Set<ShapeId> supportedProtocols) {
+        if (protocol != null) {
             return protocol;
         }
 
-        List<String> resolvedProtocols = service.getTrait(ProtocolsTrait.class)
-                .orElseThrow(() -> new UnresolvableProtocolException(
-                        "Unable to derive the protocol setting of the service `" + service.getId() + "` because no "
-                        + "`@protocols` trait was set. You need to set an explicit `protocol` to generate in "
-                        + "smithy-build.json to generate this service."))
-                .getProtocolNames();
+        ServiceIndex serviceIndex = model.getKnowledge(ServiceIndex.class);
+        Set<ShapeId> resolvedProtocols = serviceIndex.getProtocols(service).keySet();
+        if (resolvedProtocols.isEmpty()) {
+            throw new UnresolvableProtocolException(
+                    "Unable to derive the protocol setting of the service `" + service.getId() + "` because no "
+                    + "protocol definition traits were present. You need to set an explicit `protocol` to "
+                    + "generate in smithy-build.json to generate this service.");
+        }
 
         return resolvedProtocols.stream()
                 .filter(supportedProtocols::contains)
@@ -274,7 +277,7 @@ public final class TypeScriptSettings {
      *
      * @param protocol Protocols to generate.
      */
-    public void setProtocol(String protocol) {
+    public void setProtocol(ShapeId protocol) {
         this.protocol = Objects.requireNonNull(protocol);
     }
 }

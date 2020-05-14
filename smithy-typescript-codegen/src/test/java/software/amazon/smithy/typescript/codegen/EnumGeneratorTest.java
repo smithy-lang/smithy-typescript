@@ -7,15 +7,15 @@ import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.traits.EnumConstantBody;
+import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 public class EnumGeneratorTest {
     @Test
     public void generatesNamedEnums() {
         EnumTrait trait = EnumTrait.builder()
-                .addEnum("FOO", EnumConstantBody.builder().name("FOO").build())
-                .addEnum("BAR", EnumConstantBody.builder().name("BAR").build())
+                .addEnum(EnumDefinition.builder().value("FOO").name("FOO").build())
+                .addEnum(EnumDefinition.builder().value("BAR").name("BAR").build())
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
@@ -30,8 +30,8 @@ public class EnumGeneratorTest {
     @Test
     public void generatesUnnamedEnums() {
         EnumTrait trait = EnumTrait.builder()
-                .addEnum("FOO", EnumConstantBody.builder().build())
-                .addEnum("BAR", EnumConstantBody.builder().build())
+                .addEnum(EnumDefinition.builder().value("FOO").build())
+                .addEnum(EnumDefinition.builder().value("BAR").build())
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");

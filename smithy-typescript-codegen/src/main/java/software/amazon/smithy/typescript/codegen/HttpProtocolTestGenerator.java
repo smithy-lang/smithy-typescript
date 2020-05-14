@@ -79,6 +79,7 @@ final class HttpProtocolTestGenerator implements Runnable {
 
     private final TypeScriptSettings settings;
     private final Model model;
+    private final ShapeId protocol;
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final Symbol serviceSymbol;
@@ -93,11 +94,13 @@ final class HttpProtocolTestGenerator implements Runnable {
     HttpProtocolTestGenerator(
             TypeScriptSettings settings,
             Model model,
+            ShapeId protocol,
             SymbolProvider symbolProvider,
             TypeScriptDelegator delegator
     ) {
         this.settings = settings;
         this.model = model;
+        this.protocol = protocol;
         this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
         this.delegator = delegator;
@@ -146,7 +149,7 @@ final class HttpProtocolTestGenerator implements Runnable {
 
     // Only generate test cases when its protocol matches the target protocol.
     private <T extends HttpMessageTestCase> void onlyIfProtocolMatches(T testCase, Runnable runnable) {
-        if (testCase.getProtocol().equals(settings.getProtocol())) {
+        if (testCase.getProtocol().equals(protocol)) {
             LOGGER.fine(() -> format("Generating protocol test case for %s.%s", service.getId(), testCase.getId()));
             allocateWriterIfNeeded();
             runnable.run();
@@ -164,7 +167,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private String createTestCaseFilename() {
-        String baseName = settings.getProtocol().toLowerCase(Locale.ENGLISH)
+        String baseName = protocol.getName().toLowerCase(Locale.US)
                 .replace("-", "_")
                 .replace(".", "_");
         return TEST_CASE_FILE_TEMPLATE.replace("%s", baseName);

@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -34,9 +33,8 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.pattern.Pattern.Segment;
+import software.amazon.smithy.model.pattern.SmithyPattern.Segment;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.CollectionShape;
@@ -56,7 +54,6 @@ import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
-import software.amazon.smithy.model.traits.EventStreamTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -70,7 +67,6 @@ import software.amazon.smithy.utils.OptionalUtils;
 /**
  * Abstract implementation useful for all protocols that use HTTP bindings.
  */
-//TODO: check ending ;
 public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
@@ -548,10 +544,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         switch (bindingType) {
             case PAYLOAD:
+                if (target.isUnionShape() && target.hasTrait(StreamingTrait.class)) {
+                    this.serializeEventUnions.add(target.asUnionShape().get());
+                    Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+                    String eventSerializer = ProtocolGenerator.getSerFunctionName(targetSymbol,
+                            context.getProtocolName());
+                    return "context.eventStreamMarshaller.serialize(" + dataSource
+                            + ", event => " + eventSerializer + "_event(event, context))";
+                }
                 // Redirect to a serialization function.
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
                 return ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName())
-                               + "(" + dataSource + ", context)";
+                        + "(" + dataSource + ", context)";
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
@@ -675,36 +679,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("if (input.$L !== undefined) {", "}", memberName, () -> {
             Shape target = context.getModel().expectShape(payloadBinding.getMember().getTarget());
-            MemberShape member = payloadBinding.getMember();
-            if (member.getTrait(EventStreamTrait.class).isPresent()) {
-                generateEventStreamSerializer(context, member, target);
-            } else {
-                writer.write("body = $L;", getInputValue(
-                        context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
-            }
-        });
-    }
-
-    // Writes a function serializing event stream member.
-    private void generateEventStreamSerializer(GenerationContext context, MemberShape member, Shape target) {
-        TypeScriptWriter writer = context.getWriter();
-        Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
-        StringBuilder serializingFunctionBuilder = new StringBuilder(
-                ProtocolGenerator.getSerFunctionName(targetSymbol, context.getProtocolName())).append("_event");
-        if (target instanceof StructureShape) {
-            // Single-event event stream. Supply event itself instead of event key-value pair to event deserializer
-            serializingFunctionBuilder.append("(event[Object.keys(event)[0]], context)");
-        } else if (target instanceof UnionShape) {
-            // Multi-event event stream. Save the dispatcher
-            serializingFunctionBuilder.append("(event, context)");
-            this.serializeEventUnions.add(target.asUnionShape().get());
-        } else {
-            throw new CodegenException(String.format("Unexpected shape type with eventstream trait: `%s`",
-                    target.getType()));
-        }
-        writer.openBlock("body = context.eventStreamMarshaller.serialize(", ");", () -> {
-            writer.write("input.$L,", member.getMemberName());
-            writer.write("event => $L", serializingFunctionBuilder.toString());
+            writer.write("body = $L;", getInputValue(
+                    context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target));
         });
     }
 
@@ -1025,7 +1001,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return documentBindings;
         }
         if (!payloadBindings.isEmpty()) {
-            return readResponsePayload(context, operationOrError, payloadBindings);
+            return readResponsePayload(context, payloadBindings);
         }
 
         // If there are no payload or document bindings, the body still needs collected so the process can exit.
@@ -1035,29 +1011,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private List<HttpBinding> readResponsePayload(
             GenerationContext context,
-            Shape operationOrError,
             List<HttpBinding> payloadBindings
     ) {
         TypeScriptWriter writer = context.getWriter();
-        // Detect if operation output or error shape contains a streaming member.
-        OperationIndex operationIndex = context.getModel().getKnowledge(OperationIndex.class);
-        StructureShape operationOutputOrError = operationOrError.asStructureShape()
-                .orElseGet(() -> operationIndex.getOutput(operationOrError).orElse(null));
-        boolean hasStreamingComponent = Optional.ofNullable(operationOutputOrError)
-                .map(structure -> structure.getAllMembers().values().stream()
-                        .anyMatch(memberShape -> memberShape.hasTrait(StreamingTrait.class)))
-                .orElse(false);
 
         // There can only be one payload binding.
         HttpBinding binding = payloadBindings.get(0);
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-        if (binding.getMember().hasTrait(EventStreamTrait.class)) {
-            // If payload is a event stream, return it after calling event stream deser function.
-            generateEventStreamDeserializer(context, binding.getMember(), target);
-            writer.write("contents.$L = data;", binding.getMemberName());
-            //Not to generate non-eventstream payload shape again
-            return ListUtils.of();
-        } else if (hasStreamingComponent) {
+
+        // Handle streaming shapes differently.
+        if (target.hasTrait(StreamingTrait.class)) {
+            if (target instanceof UnionShape) {
+                // If payload is a event stream, return it after calling event stream deser function.
+                generateEventStreamDeserializer(context, binding.getMember(), target);
+                writer.write("contents.$L = data;", binding.getMemberName());
+                // Don't generate non-eventstream payload shape again.
+                return ListUtils.of();
+            }
             // If payload is streaming, return raw low-level stream directly.
             writer.write("const data: any = output.body;");
         } else if (target instanceof BlobShape) {

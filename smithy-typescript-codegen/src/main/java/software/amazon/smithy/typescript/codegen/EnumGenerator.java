@@ -18,7 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Comparator;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.traits.EnumConstantBody;
+import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 /**
@@ -78,7 +78,7 @@ final class EnumGenerator implements Runnable {
 
     // Unnamed enums generate a union of string literals.
     private void generateUnnamedEnum() {
-        String variants = TypeScriptUtils.getEnumVariants(enumTrait.getValues().keySet());
+        String variants = TypeScriptUtils.getEnumVariants(enumTrait.getEnumDefinitionValues());
         writer.write("export type $L = $L", symbol.getName(), variants);
     }
 
@@ -88,18 +88,17 @@ final class EnumGenerator implements Runnable {
             // Sort the named values to ensure a stable order and sane diffs.
             // TODO: Should we just sort these in the trait itself?
             enumTrait.getValues()
-                    .entrySet()
                     .stream()
-                    .sorted(Comparator.comparing(e -> e.getValue().getName().get()))
-                    .forEach(entry -> writeNamedEnumConstant(entry.getKey(), entry.getValue()));
+                    .sorted(Comparator.comparing(e -> e.getName().get()))
+                    .forEach(this::writeNamedEnumConstant);
         });
     }
 
-    private void writeNamedEnumConstant(String value, EnumConstantBody body) {
+    private void writeNamedEnumConstant(EnumDefinition body) {
         assert body.getName().isPresent();
 
         String name = body.getName().get();
         body.getDocumentation().ifPresent(writer::writeDocs);
-        writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), value);
+        writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), body.getValue());
     }
 }

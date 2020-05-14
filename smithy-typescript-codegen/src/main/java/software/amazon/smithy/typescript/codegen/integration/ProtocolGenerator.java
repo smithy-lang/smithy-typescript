@@ -24,6 +24,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -50,14 +51,23 @@ public interface ProtocolGenerator {
     }
 
     /**
+     * Gets the supported protocol {@link ShapeId}.
+     *
+     * @return Returns the protocol supported
+     */
+    ShapeId getProtocol();
+
+    /**
      * Gets the name of the protocol.
      *
-     * <p>This is the same name used in Smithy models on the "protocols"
-     * trait (e.g., "aws.rest-json-1.1").
+     * <p>The default implementation is the ShapeId name of the protocol trait in
+     * Smithy models (e.g., "aws.protocols#restJson1" would return "restJson1").
      *
      * @return Returns the protocol name.
      */
-    String getName();
+    default String getName() {
+        return getProtocol().getName();
+    }
 
     /**
      * Creates an application protocol for the generator.
@@ -92,14 +102,15 @@ public interface ProtocolGenerator {
     ) {
         if (!getApplicationProtocol().equals(other)) {
             String protocolNames = protocolGenerators.stream()
-                    .map(ProtocolGenerator::getName)
+                    .map(ProtocolGenerator::getProtocol)
+                    .map(ShapeId::getName)
                     .sorted()
                     .collect(Collectors.joining(", "));
             throw new CodegenException(String.format(
                     "All of the protocols generated for a service must be runtime compatible, but "
                     + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
                     + "set of compatible protocols using the `protocols` option when generating %s.",
-                    getName(), protocolNames, service.getId()));
+                    getProtocol().getName(), protocolNames, service.getId()));
         }
 
         return other;
