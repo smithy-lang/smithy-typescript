@@ -66,9 +66,9 @@ final class RuntimeConfigGenerator {
                 writer.write("bodyLengthChecker: calculateBodyLength,");
             },
             "streamCollector", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_NODE);
+                writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_NODE.packageName);
+                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
                 writer.write("streamCollector,");
             },
             "base64Decoder", writer -> {
@@ -130,9 +130,9 @@ final class RuntimeConfigGenerator {
                 writer.write("bodyLengthChecker: calculateBodyLength,");
             },
             "streamCollector", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_BROWSER);
+                writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_BROWSER.packageName);
+                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
                 writer.write("streamCollector,");
             },
             "base64Decoder", writer -> {
@@ -169,12 +169,6 @@ final class RuntimeConfigGenerator {
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
-            "requestHandler", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
-                writer.addImport("FetchHttpHandler", "FetchHttpHandler",
-                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
-                writer.write("requestHandler: new FetchHttpHandler({ bufferBody: true }),");
-            },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
                 writer.addImport("Sha256", "Sha256",
@@ -186,12 +180,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("parseUrl", "parseUrl",
                         TypeScriptDependency.AWS_SDK_URL_PARSER_NODE.packageName);
                 writer.write("urlParser: parseUrl,");
-            },
-            "streamCollector", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_RN);
-                writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_STREAM_COLLECTOR_RN.packageName);
-                writer.write("streamCollector,");
             },
             "defaultUserAgent", writer -> {
                 writer.addImport("name", "name", "./package.json");
