@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
@@ -94,9 +95,14 @@ final class StructuredMemberWriter {
                 }
             );
         } else {
-            // This path will never reach because of recursive isIterationRequired.
-            // Adding it to not break the code, if it does reach in future.
-            writer.write("item => item");
+            // This path should not reach because of recursive isIterationRequired.
+            throw new CodegenException(String.format(
+                "CollectionFilterSensitiveLog attempted for %s while it was not required",
+                memberShape.getType()
+            ));
+            // For quick-fix in case of high severity issue:
+            // comment out the exception above and uncomment the line below.
+            // writer.write("item => item");
         }
     }
 
@@ -129,9 +135,14 @@ final class StructuredMemberWriter {
                         }
                     );
                 } else {
-                    // This path will never reach because of recursive isIterationRequired.
-                    // Adding it to not break the code, if it does reach in future.
-                    writer.write("[key]: value,");
+                    // This path should not reach because of recursive isIterationRequired.
+                    throw new CodegenException(String.format(
+                        "MapFilterSensitiveLog attempted for %s while it was not required",
+                        memberShape.getType()
+                    ));
+                    // For quick-fix in case of high severity issue:
+                    // comment out the exception above and uncomment the line below.
+                    // writer.write("[key]: value,");
                 }
             }
         );
