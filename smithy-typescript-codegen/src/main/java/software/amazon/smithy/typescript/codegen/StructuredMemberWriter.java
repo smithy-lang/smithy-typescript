@@ -75,6 +75,7 @@ final class StructuredMemberWriter {
      */
     private void writeStructureFilterSensitiveLog(TypeScriptWriter writer, Shape structureShape, String param) {
         if (structureShape.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
         } else {
             // Call filterSensitiveLog on Structure.
@@ -85,38 +86,43 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for CollectionShape.
      */
-    private void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember) {
-        Shape memberShape = model.expectShape(collectionMember.getTarget());
-        if (memberShape instanceof StructureShape) {
-            // Call filterSensitiveLog on Structure.
-            writer.write("item => ");
-            writeStructureFilterSensitiveLog(writer, memberShape, "item");
-        } else if (memberShape instanceof CollectionShape) {
-            // Iterate over array items, and call array specific function on each member.
-            writer.openBlock("item => item.map(", ")",
-                () -> {
-                    MemberShape nestedCollectionMember = ((CollectionShape) memberShape).getMember();
-                    writeCollectionFilterSensitiveLog(writer, nestedCollectionMember);
-                }
-            );
-        } else if (memberShape instanceof MapShape) {
-            // Iterate over Object entries, and call reduce to repopulate map.
-            writer.openBlock("item => Object.entries(item).reduce(", ")",
-                () -> {
-                    MemberShape mapMember = ((MapShape) memberShape).getValue();
-                    writeMapFilterSensitiveLog(writer, mapMember);
-                }
-            );
-        } else {
-            // This path should not reach because of recursive isIterationRequired.
-            throw new CodegenException(String.format(
-                "CollectionFilterSensitiveLog attempted for %s while it was not required",
-                memberShape.getType()
-            ));
-            // For quick-fix in case of high severity issue:
-            // comment out the exception above and uncomment the line below.
-            // writer.write("item => item");
+    private void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember, String collectionParam) {
+        if (collectionMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            // member is Sensitive, hide the value.
+            writer.write("SENSITIVE_STRING");
+            return;
         }
+
+        writer.openBlock("$L.map(", ")", collectionParam, () -> {
+            Shape memberShape = model.expectShape(collectionMember.getTarget());
+            if (memberShape instanceof StructureShape) {
+                // Call filterSensitiveLog on Structure.
+                writer.write("item => ");
+                writeStructureFilterSensitiveLog(writer, memberShape, "item");
+            } else if (memberShape instanceof CollectionShape) {
+                // Iterate over array items, and call array specific function on each member.
+                writer.write("item => ");
+                MemberShape nestedCollectionMember = ((CollectionShape) memberShape).getMember();
+                writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, "item");
+            } else if (memberShape instanceof MapShape) {
+                // Iterate over Object entries, and call reduce to repopulate map.
+                writer.openBlock("item => Object.entries(item).reduce(", ")",
+                    () -> {
+                        MemberShape mapMember = ((MapShape) memberShape).getValue();
+                        writeMapFilterSensitiveLog(writer, mapMember);
+                    }
+                );
+            } else {
+                // This path should not reach because of recursive isIterationRequired.
+                throw new CodegenException(String.format(
+                    "CollectionFilterSensitiveLog attempted for %s while it was not required",
+                    memberShape.getType()
+                ));
+                // For quick-fix in case of high severity issue:
+                // comment out the exception above and uncomment the line below.
+                // writer.write("item => item");
+            }
+        });
     }
 
     /**
@@ -135,10 +141,10 @@ final class StructuredMemberWriter {
                         writeStructureFilterSensitiveLog(writer, memberShape, "value");
                     });
                 } else if (memberShape instanceof CollectionShape) {
-                    writer.openBlock("[key]: value.map(", "),",
+                    writer.openBlock("[key]: ", ",",
                         () -> {
                             MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-                            writeCollectionFilterSensitiveLog(writer, collectionMember);
+                            writeCollectionFilterSensitiveLog(writer, collectionMember, "value");
                         }
                     );
                 } else if (memberShape instanceof MapShape) {
@@ -180,9 +186,10 @@ final class StructuredMemberWriter {
                 MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
                 if (isIterationRequired(collectionMember)) {
                     // Iterate over array items, and call array specific function on each member.
-                    writer.openBlock("...(obj.$1L && { $1L: obj.$1L.map(", ")}),", memberName,
+                    writer.openBlock("...(obj.$1L && { $1L: ", "}),", memberName,
                         () -> {
-                            writeCollectionFilterSensitiveLog(writer, collectionMember);
+                            String collectionParam = String.format("obj.%s", memberName);
+                            writeCollectionFilterSensitiveLog(writer, collectionMember, collectionParam);
                         }
                     );
                 }
