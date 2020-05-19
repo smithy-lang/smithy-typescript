@@ -159,9 +159,9 @@ final class StructureGenerator implements Runnable {
         writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
-        StructuredMemberWriter config = new StructuredMemberWriter(
+        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
-        config.writeMembers(writer, shape);
+        structuredMemberWriter.writeMembers(writer, shape);
         writer.closeBlock("}"); // interface
         writer.write("");
         renderStructureNamespace();
@@ -176,9 +176,9 @@ final class StructureGenerator implements Runnable {
             writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
                 objectParam, symbol.getName(),
                 () -> {
-                    StructuredMemberWriter config = new StructuredMemberWriter(
+                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                         model, symbolProvider, shape.getAllMembers().values());
-                    config.writeFilterSensitiveLog(writer, shape, objectParam);
+                    structuredMemberWriter.writeFilterSensitiveLog(writer, shape, objectParam);
                 }
             );
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
