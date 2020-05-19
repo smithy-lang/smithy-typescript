@@ -58,7 +58,7 @@ final class StructuredMemberWriter {
 
             position++;
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
-            String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+            String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
             String typeSuffix = isRequiredMember(member) ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
@@ -75,7 +75,7 @@ final class StructuredMemberWriter {
         for (MemberShape member : members) {
             if (isMemberOverwriteRequired(member)) {
                 Shape memberTarget = model.expectShape(member.getTarget());
-                String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+                String memberName = getSanitizedMemberName(member);
                 String memberParam = String.format("%s.%s", objectParam, memberName);
                 writer.openBlock("...($1L.$2L && { $2L: ", "}),", objectParam, memberName, () -> {
                     if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
@@ -217,6 +217,15 @@ final class StructuredMemberWriter {
         return (
             member.getMemberTrait(model, SensitiveTrait.class).isPresent() || isIterationRequired(member)
         );
+    }
+
+    /**
+     * 
+     * @param member a {@link MemberShape} to be sanitized.
+     * @return Returns sanitized value of the member
+     */
+    private String getSanitizedMemberName(MemberShape member) {
+        return TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
     }
 
     /**
