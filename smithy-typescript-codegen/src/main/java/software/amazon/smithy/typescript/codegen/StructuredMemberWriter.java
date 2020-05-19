@@ -70,6 +70,31 @@ final class StructuredMemberWriter {
         }
     }
 
+    void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape, String objectParam) {
+        writer.write("...$L,", objectParam);
+        for (MemberShape member : members) {
+            if (isMemberOverwriteRequired(member)) {
+                Shape memberShape = model.expectShape(member.getTarget());
+                String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+                String memberParam = String.format("%s.%s", objectParam, memberName);
+                writer.openBlock("...($1L.$2L && { $2L: ", "}),", objectParam, memberName, () -> {
+                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                        // member is Sensitive, hide the value.
+                        writer.write("SENSITIVE_STRING");
+                    } else if (memberShape instanceof StructureShape) {
+                        writeStructureFilterSensitiveLog(writer, memberShape, memberParam);
+                    } else if (memberShape instanceof CollectionShape) {
+                        MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
+                        writeCollectionFilterSensitiveLog(writer, collectionMember, memberParam);
+                    } else if (memberShape instanceof MapShape) {
+                        MemberShape mapMember = ((MapShape) memberShape).getValue();
+                        writeMapFilterSensitiveLog(writer, mapMember, memberParam);
+                    }
+                });
+            }
+        }
+    }
+
     /**
      * Recursively writes filterSensitiveLog for StructureShape.
      */
@@ -160,31 +185,6 @@ final class StructuredMemberWriter {
                 });
             }
         );
-    }
-
-    void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape, String objectParam) {
-        writer.write("...$L,", objectParam);
-        for (MemberShape member : members) {
-            if (isMemberOverwriteRequired(member)) {
-                Shape memberShape = model.expectShape(member.getTarget());
-                String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
-                String memberParam = String.format("%s.%s", objectParam, memberName);
-                writer.openBlock("...($1L.$2L && { $2L: ", "}),", objectParam, memberName, () -> {
-                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                        // member is Sensitive, hide the value.
-                        writer.write("SENSITIVE_STRING");
-                    } else if (memberShape instanceof StructureShape) {
-                        writeStructureFilterSensitiveLog(writer, memberShape, memberParam);
-                    } else if (memberShape instanceof CollectionShape) {
-                        MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-                        writeCollectionFilterSensitiveLog(writer, collectionMember, memberParam);
-                    } else if (memberShape instanceof MapShape) {
-                        MemberShape mapMember = ((MapShape) memberShape).getValue();
-                        writeMapFilterSensitiveLog(writer, mapMember, memberParam);
-                    }
-                });
-            }
-        }
     }
 
     /**
