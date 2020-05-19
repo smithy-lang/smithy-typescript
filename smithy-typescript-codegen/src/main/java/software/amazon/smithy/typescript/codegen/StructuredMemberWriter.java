@@ -73,7 +73,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for CollectionShape.
      */
-    void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember) {
+    private void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember) {
         Shape memberShape = model.expectShape(collectionMember.getTarget());
         if (memberShape instanceof StructureShape) {
             // Call filterSensitiveLog on Structure.
@@ -109,7 +109,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for MapShape.
      */
-    void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember) {
+    private void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember) {
         // Reducer is common to all shapes.
         writer.openBlock("(acc: any, [key, value]: [string, $T]) => ({", "}), {}",
             symbolProvider.toSymbol(mapMember),
