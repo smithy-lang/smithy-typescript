@@ -71,13 +71,26 @@ final class StructuredMemberWriter {
     }
 
     /**
+     * Recursively writes filterSensitiveLog for StructureShape.
+     */
+    private void writeStructureFilterSensitiveLog(TypeScriptWriter writer, Shape structureShape, String param) {
+        if (structureShape.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            writer.write("SENSITIVE_STRING");
+        } else {
+            // Call filterSensitiveLog on Structure.
+            writer.openBlock("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureShape), param);
+        }
+    }
+
+    /**
      * Recursively writes filterSensitiveLog for CollectionShape.
      */
     private void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember) {
         Shape memberShape = model.expectShape(collectionMember.getTarget());
         if (memberShape instanceof StructureShape) {
             // Call filterSensitiveLog on Structure.
-            writer.write("$T.filterSensitiveLog", symbolProvider.toSymbol(collectionMember));
+            writer.write("item => ");
+            writeStructureFilterSensitiveLog(writer, memberShape, "item");
         } else if (memberShape instanceof CollectionShape) {
             // Iterate over array items, and call array specific function on each member.
             writer.openBlock("item => item.map(", ")",
@@ -118,8 +131,9 @@ final class StructuredMemberWriter {
                 Shape memberShape = model.expectShape(mapMember.getTarget());
                 if (memberShape instanceof StructureShape) {
                     // Call filterSensitiveLog on Structure.
-                    writer.write("[key]: $T.filterSensitiveLog(value),",
-                        symbolProvider.toSymbol(mapMember));
+                    writer.openBlock("[key]: ",",", () -> {
+                        writeStructureFilterSensitiveLog(writer, memberShape, "value");
+                    });
                 } else if (memberShape instanceof CollectionShape) {
                     writer.openBlock("[key]: value.map(", "),",
                         () -> {
@@ -158,8 +172,10 @@ final class StructuredMemberWriter {
                 writer.write("...(obj.$1L && { $1L: SENSITIVE_STRING }),", memberName);
             } else if (memberShape instanceof StructureShape) {
                 // Call filterSensitiveLog on Structure.
-                writer.write("...(obj.$1L && { $1L: $2T.filterSensitiveLog(obj.$1L)}),",
-                        memberName, symbolProvider.toSymbol(member));
+                writer.openBlock("...(obj.$1L && { $1L: ", "}),", memberName, () -> {
+                        String param = String.format("obj.%s", memberName);
+                        writeStructureFilterSensitiveLog(writer, memberShape, param);
+                });
             } else if (memberShape instanceof CollectionShape) {
                 MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
                 if (isIterationRequired(collectionMember)) {
