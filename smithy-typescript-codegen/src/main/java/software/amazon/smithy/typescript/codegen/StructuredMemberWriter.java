@@ -73,14 +73,14 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for StructureShape.
      */
-    private void writeStructureFilterSensitiveLog(TypeScriptWriter writer, Shape structureShape, String param) {
+    private void writeStructureFilterSensitiveLog(TypeScriptWriter writer, Shape structureShape, String structureParam) {
         if (structureShape.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
-        } else {
-            // Call filterSensitiveLog on Structure.
-            writer.openBlock("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureShape), param);
+            return;
         }
+        // Call filterSensitiveLog on Structure.
+        writer.openBlock("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureShape), structureParam);
     }
 
     /**
@@ -94,21 +94,17 @@ final class StructuredMemberWriter {
         }
 
         writer.openBlock("$L.map(", ")", collectionParam, () -> {
+            String itemParam = "item";
             Shape memberShape = model.expectShape(collectionMember.getTarget());
+            writer.write("$L => ", itemParam);
             if (memberShape instanceof StructureShape) {
-                // Call filterSensitiveLog on Structure.
-                writer.write("item => ");
-                writeStructureFilterSensitiveLog(writer, memberShape, "item");
+                writeStructureFilterSensitiveLog(writer, memberShape, itemParam);
             } else if (memberShape instanceof CollectionShape) {
-                // Iterate over array items, and call array specific function on each member.
-                writer.write("item => ");
                 MemberShape nestedCollectionMember = ((CollectionShape) memberShape).getMember();
-                writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, "item");
+                writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, itemParam);
             } else if (memberShape instanceof MapShape) {
-                // Iterate over Object entries, and call reduce to repopulate map.
-                writer.write("item => ");
                 MemberShape mapMember = ((MapShape) memberShape).getValue();
-                writeMapFilterSensitiveLog(writer, mapMember, "item");
+                writeMapFilterSensitiveLog(writer, mapMember, itemParam);
             } else {
                 // This path should not reach because of recursive isIterationRequired.
                 throw new CodegenException(String.format(
@@ -117,7 +113,7 @@ final class StructuredMemberWriter {
                 ));
                 // For quick-fix in case of high severity issue:
                 // comment out the exception above and uncomment the line below.
-                // writer.write("item => item");
+                // writer.write("$1L => $1L", itemParam);
             }
         });
     }
@@ -132,92 +128,73 @@ final class StructuredMemberWriter {
             return;
         }
 
+        String accParam = "acc"; // accumulator for the reducer
+        String keyParam = "key"; // key of the Object.entries() key-value pair
+        String valueParam = "value"; // value of the Object.entries() key-value pair
+
         // Reducer is common to all shapes.
-        writer.openBlock("Object.entries($L).reduce((acc: any, [key, value]: [string, $T]) => ({", "}), {})",
-            mapParam, symbolProvider.toSymbol(mapMember), () -> {
-                writer.write("...acc,");
+        writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
+            mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
+                writer.write("...$L,", accParam);
                 Shape memberShape = model.expectShape(mapMember.getTarget());
-                if (memberShape instanceof StructureShape) {
-                    // Call filterSensitiveLog on Structure.
-                    writer.openBlock("[key]: ",",", () -> {
-                        writeStructureFilterSensitiveLog(writer, memberShape, "value");
-                    });
-                } else if (memberShape instanceof CollectionShape) {
-                    writer.openBlock("[key]: ", ",",
-                        () -> {
-                            MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-                            writeCollectionFilterSensitiveLog(writer, collectionMember, "value");
-                        }
-                    );
-                } else if (memberShape instanceof MapShape) {
-                    writer.openBlock("[key]: ", ",",
-                        () -> {
-                            MemberShape nestedMapMember = ((MapShape) memberShape).getValue();
-                            writeMapFilterSensitiveLog(writer, nestedMapMember, "value");
-                        }
-                    );
-                } else {
-                    // This path should not reach because of recursive isIterationRequired.
-                    throw new CodegenException(String.format(
-                        "MapFilterSensitiveLog attempted for %s while it was not required",
-                        memberShape.getType()
-                    ));
-                    // For quick-fix in case of high severity issue:
-                    // comment out the exception above and uncomment the line below.
-                    // writer.write("[key]: value,");
-                }
+                writer.openBlock("[$L]: ",",", keyParam, () -> {
+                    if (memberShape instanceof StructureShape) {
+                        writeStructureFilterSensitiveLog(writer, memberShape, valueParam);
+                    } else if (memberShape instanceof CollectionShape) {
+                        MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
+                        writeCollectionFilterSensitiveLog(writer, collectionMember, valueParam);
+                    } else if (memberShape instanceof MapShape) {
+                        MemberShape nestedMapMember = ((MapShape) memberShape).getValue();
+                        writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
+                    } else {
+                        // This path should not reach because of recursive isIterationRequired.
+                        throw new CodegenException(String.format(
+                            "MapFilterSensitiveLog attempted for %s while it was not required",
+                            memberShape.getType()
+                        ));
+                        // For quick-fix in case of high severity issue:
+                        // comment out the exception above and uncomment the line below.
+                        // writer.write("$L", valueParam);
+                    }
+
+                });
             }
         );
     }
 
-    void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape) {
-        writer.write("...obj,");
+    void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape, String objectParam) {
+        writer.write("...$L,", objectParam);
         for (MemberShape member : members) {
-            Shape memberShape = model.expectShape(member.getTarget());
-            String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
-            if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                // member is Sensitive, hide the value.
-                writer.write("...(obj.$1L && { $1L: SENSITIVE_STRING }),", memberName);
-            } else if (memberShape instanceof StructureShape) {
-                // Call filterSensitiveLog on Structure.
-                writer.openBlock("...(obj.$1L && { $1L: ", "}),", memberName, () -> {
-                        String param = String.format("obj.%s", memberName);
-                        writeStructureFilterSensitiveLog(writer, memberShape, param);
+            if (isMemberOverwriteRequired(member)) {
+                Shape memberShape = model.expectShape(member.getTarget());
+                String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+                String memberParam = String.format("%s.%s", objectParam, memberName);
+                writer.openBlock("...($1L.$2L && { $2L: ", "}),", objectParam, memberName, () -> {
+                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                        // member is Sensitive, hide the value.
+                        writer.write("SENSITIVE_STRING");
+                    } else if (memberShape instanceof StructureShape) {
+                        writeStructureFilterSensitiveLog(writer, memberShape, memberParam);
+                    } else if (memberShape instanceof CollectionShape) {
+                        MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
+                        writeCollectionFilterSensitiveLog(writer, collectionMember, memberParam);
+                    } else if (memberShape instanceof MapShape) {
+                        MemberShape mapMember = ((MapShape) memberShape).getValue();
+                        writeMapFilterSensitiveLog(writer, mapMember, memberParam);
+                    }
                 });
-            } else if (memberShape instanceof CollectionShape) {
-                MemberShape collectionMember = ((CollectionShape) memberShape).getMember();
-                if (isIterationRequired(collectionMember)) {
-                    // Iterate over array items, and call array specific function on each member.
-                    writer.openBlock("...(obj.$1L && { $1L: ", "}),", memberName,
-                        () -> {
-                            String collectionParam = String.format("obj.%s", memberName);
-                            writeCollectionFilterSensitiveLog(writer, collectionMember, collectionParam);
-                        }
-                    );
-                }
-            } else if (memberShape instanceof MapShape) {
-                MemberShape mapMember = ((MapShape) memberShape).getValue();
-                if (isIterationRequired(mapMember)) {
-                    // Iterate over Object entries, and call reduce to repopulate map.
-                    writer.openBlock("...(obj.$1L && { $1L: ", "}),", memberName,
-                        () -> {
-                            String mapParam = String.format("obj.%s", memberName);
-                            writeMapFilterSensitiveLog(writer, mapMember, mapParam);
-                        }
-                    );
-                }
             }
         }
     }
 
     /**
-     * Identifies if iteration is required on MemberShape.
+     * Identifies if iteration is required on member.
      * 
-     * @param memberShape a {@link MemberShape} to check for iteration required.
-     * @return Returns true if the iteration is required on memberShape.
+     * @param member a {@link MemberShape} to check for iteration required.
+     * @return Returns true if the iteration is required on member.
      */
-    private boolean isIterationRequired(MemberShape memberShape) {
-        Shape targetShape = model.expectShape(memberShape.getTarget());
+    private boolean isIterationRequired(MemberShape member) {
+        Shape targetShape = model.expectShape(member.getTarget());
         if (targetShape instanceof StructureShape) {
             return true;
         } if (targetShape instanceof CollectionShape) {
@@ -228,6 +205,18 @@ final class StructuredMemberWriter {
             return isIterationRequired(mapMember);
         }
         return false;
+    }
+
+    /**
+     * Identifies if member needs to be overwritten in filterSensitiveLog.
+     * 
+     * @param member a {@link MemberShape} to check if overwrite is required.
+     * @return Returns true if the overwrite is required on member.
+     */
+    private boolean isMemberOverwriteRequired(MemberShape member) {
+        return (
+            member.getMemberTrait(model, SensitiveTrait.class).isPresent() || isIterationRequired(member)
+        );
     }
 
     /**
