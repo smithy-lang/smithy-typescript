@@ -178,7 +178,7 @@ final class StructureGenerator implements Runnable {
                 () -> {
                     StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                         model, symbolProvider, shape.getAllMembers().values());
-                    structuredMemberWriter.writeFilterSensitiveLog(writer, shape, objectParam);
+                    structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
                 }
             );
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",

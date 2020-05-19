@@ -70,7 +70,7 @@ final class StructuredMemberWriter {
         }
     }
 
-    void writeFilterSensitiveLog(TypeScriptWriter writer, Shape shape, String objectParam) {
+    void writeFilterSensitiveLog(TypeScriptWriter writer, String objectParam) {
         writer.write("...$L,", objectParam);
         for (MemberShape member : members) {
             if (isMemberOverwriteRequired(member)) {
