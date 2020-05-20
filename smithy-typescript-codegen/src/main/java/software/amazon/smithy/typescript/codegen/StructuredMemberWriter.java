@@ -98,7 +98,11 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for StructureShape.
      */
-    private void writeStructureFilterSensitiveLog(TypeScriptWriter writer, Shape structureTarget, String structureParam) {
+    private void writeStructureFilterSensitiveLog(
+            TypeScriptWriter writer,
+            Shape structureTarget,
+            String structureParam
+    ) {
         if (structureTarget.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
@@ -111,7 +115,11 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for CollectionShape.
      */
-    private void writeCollectionFilterSensitiveLog(TypeScriptWriter writer, MemberShape collectionMember, String collectionParam) {
+    private void writeCollectionFilterSensitiveLog(
+            TypeScriptWriter writer,
+            MemberShape collectionMember,
+            String collectionParam
+    ) {
         if (collectionMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
@@ -162,7 +170,7 @@ final class StructuredMemberWriter {
             mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
                 writer.write("...$L,", accParam);
                 Shape memberTarget = model.expectShape(mapMember.getTarget());
-                writer.openBlock("[$L]: ",",", keyParam, () -> {
+                writer.openBlock("[$L]: ", ",", keyParam, () -> {
                     if (memberTarget instanceof StructureShape) {
                         writeStructureFilterSensitiveLog(writer, memberTarget, valueParam);
                     } else if (memberTarget instanceof CollectionShape) {
@@ -189,7 +197,7 @@ final class StructuredMemberWriter {
 
     /**
      * Identifies if iteration is required on member.
-     * 
+     *
      * @param member a {@link MemberShape} to check for iteration required.
      * @return Returns true if the iteration is required on member.
      */
@@ -197,7 +205,7 @@ final class StructuredMemberWriter {
         Shape memberTarget = model.expectShape(member.getTarget());
         if (memberTarget instanceof StructureShape) {
             return true;
-        } if (memberTarget instanceof CollectionShape) {
+        } else if (memberTarget instanceof CollectionShape) {
             MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
             return isIterationRequired(collectionMember);
         } else if (memberTarget instanceof MapShape) {
@@ -209,7 +217,7 @@ final class StructuredMemberWriter {
 
     /**
      * Identifies if member needs to be overwritten in filterSensitiveLog.
-     * 
+     *
      * @param member a {@link MemberShape} to check if overwrite is required.
      * @return Returns true if the overwrite is required on member.
      */
@@ -220,7 +228,8 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * 
+     * Returns sanitized value of the member.
+     *
      * @param member a {@link MemberShape} to be sanitized.
      * @return Returns sanitized value of the member
      */

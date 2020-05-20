@@ -65,10 +65,9 @@ public class StructureGeneratorTest {
         assertThat(contents, containsString("as __isa"));
         assertThat(contents, containsString("as __SmithyException"));
         assertThat(contents, containsString(expectedType));
-        assertThat(contents, containsString("namespace Err {\n"
-                                            + "  export const isa = (o: any): o is Err => "
-                                            + "__isa(o, \"Err\");\n"
-                                            + "}"));
+        assertThat(contents, containsString("namespace Err {"));
+        assertThat(contents, containsString("  export const isa = (o: any): o is Err => "
+                                            + "__isa(o, \"Err\");\n"));
     }
 
     @Test
