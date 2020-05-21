@@ -109,7 +109,7 @@ final class StructuredMemberWriter {
             return;
         }
         // Call filterSensitiveLog on Structure.
-        writer.openBlock("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
+        writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
     }
 
     /**
