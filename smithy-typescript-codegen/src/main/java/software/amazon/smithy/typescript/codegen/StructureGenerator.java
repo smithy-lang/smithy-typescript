@@ -158,9 +158,9 @@ final class StructureGenerator implements Runnable {
         writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
-        StructuredMemberWriter config = new StructuredMemberWriter(
+        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
-        config.writeMembers(writer, shape);
+        structuredMemberWriter.writeMembers(writer, shape);
         writer.closeBlock("}"); // interface
         writer.write("");
         renderStructureNamespace();
@@ -168,8 +168,18 @@ final class StructureGenerator implements Runnable {
 
     private void renderStructureNamespace() {
         writer.addImport("isa", "__isa", "@aws-sdk/smithy-client");
+        writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+            String objectParam = "obj";
+            writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
+                objectParam, symbol.getName(),
+                () -> {
+                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                        model, symbolProvider, shape.getAllMembers().values());
+                    structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
+                }
+            );
             writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
                 symbol.getName(), shape.getId().getName()
             );

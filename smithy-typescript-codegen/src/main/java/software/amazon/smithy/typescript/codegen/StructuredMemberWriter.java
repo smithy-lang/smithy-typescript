@@ -18,11 +18,16 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
+import software.amazon.smithy.model.traits.SensitiveTrait;
 
 /**
  * Generates objects, interfaces, enums, etc.
@@ -53,7 +58,7 @@ final class StructuredMemberWriter {
 
             position++;
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
-            String memberName = TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
+            String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
             String typeSuffix = isRequiredMember(member) ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
@@ -63,6 +68,173 @@ final class StructuredMemberWriter {
                 writer.write("");
             }
         }
+    }
+
+    void writeFilterSensitiveLog(TypeScriptWriter writer, String objectParam) {
+        writer.write("...$L,", objectParam);
+        for (MemberShape member : members) {
+            if (isMemberOverwriteRequired(member)) {
+                Shape memberTarget = model.expectShape(member.getTarget());
+                String memberName = getSanitizedMemberName(member);
+                String memberParam = String.format("%s.%s", objectParam, memberName);
+                writer.openBlock("...($1L.$2L && { $2L: ", "}),", objectParam, memberName, () -> {
+                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                        // member is Sensitive, hide the value.
+                        writer.write("SENSITIVE_STRING");
+                    } else if (memberTarget instanceof StructureShape) {
+                        writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
+                    } else if (memberTarget instanceof CollectionShape) {
+                        MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
+                        writeCollectionFilterSensitiveLog(writer, collectionMember, memberParam);
+                    } else if (memberTarget instanceof MapShape) {
+                        MemberShape mapMember = ((MapShape) memberTarget).getValue();
+                        writeMapFilterSensitiveLog(writer, mapMember, memberParam);
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Recursively writes filterSensitiveLog for StructureShape.
+     */
+    private void writeStructureFilterSensitiveLog(
+            TypeScriptWriter writer,
+            Shape structureTarget,
+            String structureParam
+    ) {
+        if (structureTarget.hasTrait(SensitiveTrait.class)) {
+            // member is Sensitive, hide the value.
+            writer.write("SENSITIVE_STRING");
+            return;
+        }
+        // Call filterSensitiveLog on Structure.
+        writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
+    }
+
+    /**
+     * Recursively writes filterSensitiveLog for CollectionShape.
+     */
+    private void writeCollectionFilterSensitiveLog(
+            TypeScriptWriter writer,
+            MemberShape collectionMember,
+            String collectionParam
+    ) {
+        if (collectionMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            // member is Sensitive, hide the value.
+            writer.write("SENSITIVE_STRING");
+            return;
+        }
+
+        writer.openBlock("$L.map(", ")", collectionParam, () -> {
+            String itemParam = "item";
+            Shape collectionMemberTarget = model.expectShape(collectionMember.getTarget());
+            writer.write("$L => ", itemParam);
+            if (collectionMemberTarget instanceof StructureShape) {
+                writeStructureFilterSensitiveLog(writer, collectionMemberTarget, itemParam);
+            } else if (collectionMemberTarget instanceof CollectionShape) {
+                MemberShape nestedCollectionMember = ((CollectionShape) collectionMemberTarget).getMember();
+                writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, itemParam);
+            } else if (collectionMemberTarget instanceof MapShape) {
+                MemberShape mapMember = ((MapShape) collectionMemberTarget).getValue();
+                writeMapFilterSensitiveLog(writer, mapMember, itemParam);
+            } else {
+                // This path should not reach because of recursive isIterationRequired.
+                throw new CodegenException(String.format(
+                    "CollectionFilterSensitiveLog attempted for %s while it was not required",
+                    collectionMemberTarget.getType()
+                ));
+                // For quick-fix in case of high severity issue:
+                // comment out the exception above and uncomment the line below.
+                // writer.write("$1L => $1L", itemParam);
+            }
+        });
+    }
+
+    /**
+     * Recursively writes filterSensitiveLog for MapShape.
+     */
+    private void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember, String mapParam) {
+        if (mapMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            // member is Sensitive, hide the value.
+            writer.write("SENSITIVE_STRING");
+            return;
+        }
+
+        String accParam = "acc"; // accumulator for the reducer
+        String keyParam = "key"; // key of the Object.entries() key-value pair
+        String valueParam = "value"; // value of the Object.entries() key-value pair
+
+        // Reducer is common to all shapes.
+        writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
+            mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
+                writer.write("...$L,", accParam);
+                Shape mapMemberTarget = model.expectShape(mapMember.getTarget());
+                writer.openBlock("[$L]: ", ",", keyParam, () -> {
+                    if (mapMemberTarget instanceof StructureShape) {
+                        writeStructureFilterSensitiveLog(writer, mapMemberTarget, valueParam);
+                    } else if (mapMemberTarget instanceof CollectionShape) {
+                        MemberShape collectionMember = ((CollectionShape) mapMemberTarget).getMember();
+                        writeCollectionFilterSensitiveLog(writer, collectionMember, valueParam);
+                    } else if (mapMemberTarget instanceof MapShape) {
+                        MemberShape nestedMapMember = ((MapShape) mapMemberTarget).getValue();
+                        writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
+                    } else {
+                        // This path should not reach because of recursive isIterationRequired.
+                        throw new CodegenException(String.format(
+                            "MapFilterSensitiveLog attempted for %s while it was not required",
+                            mapMemberTarget.getType()
+                        ));
+                        // For quick-fix in case of high severity issue:
+                        // comment out the exception above and uncomment the line below.
+                        // writer.write("$L", valueParam);
+                    }
+
+                });
+            }
+        );
+    }
+
+    /**
+     * Identifies if iteration is required on member.
+     *
+     * @param member a {@link MemberShape} to check for iteration required.
+     * @return Returns true if the iteration is required on member.
+     */
+    private boolean isIterationRequired(MemberShape member) {
+        Shape memberTarget = model.expectShape(member.getTarget());
+        if (memberTarget instanceof StructureShape) {
+            return true;
+        } else if (memberTarget instanceof CollectionShape) {
+            MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
+            return isIterationRequired(collectionMember);
+        } else if (memberTarget instanceof MapShape) {
+            MemberShape mapMember = ((MapShape) memberTarget).getValue();
+            return isIterationRequired(mapMember);
+        }
+        return false;
+    }
+
+    /**
+     * Identifies if member needs to be overwritten in filterSensitiveLog.
+     *
+     * @param member a {@link MemberShape} to check if overwrite is required.
+     * @return Returns true if the overwrite is required on member.
+     */
+    private boolean isMemberOverwriteRequired(MemberShape member) {
+        return (
+            member.getMemberTrait(model, SensitiveTrait.class).isPresent() || isIterationRequired(member)
+        );
+    }
+
+    /**
+     * Returns the member name to be used in generation.
+     *
+     * @param member a {@link MemberShape} to be sanitized.
+     * @return Returns the member name to be used in generation.
+     */
+    private String getSanitizedMemberName(MemberShape member) {
+        return TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
     }
 
     /**

@@ -43,7 +43,158 @@ public class StructureGeneratorTest {
                                   + "}");
     }
 
-    public void testErrorStructureCodegen(String file, String expectedType) {
+    @Test
+    public void filtersSensitiveSimpleShape() {
+        testStructureCodegen("test-sensitive-simple-shape.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterForStructureWithSensitiveData() {
+        testStructureCodegen("test-structure-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      User.filterSensitiveLog(obj.foo)\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterInStructureWithSensitiveData() {
+        testStructureCodegen("test-structure-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveStructure() {
+        testStructureCodegen("test-sensitive-structure.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveMemberPointingToStructure() {
+        testStructureCodegen("test-sensitive-member-pointing-to-structure.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.sensitiveFoo && { sensitiveFoo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterForListWithSensitiveData() {
+        testStructureCodegen("test-list-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      obj.foo.map(\n"
+                                + "        item =>\n"
+                                + "        User.filterSensitiveLog(item)\n"
+                                + "      )\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterInListWithSensitiveData() {
+        testStructureCodegen("test-list-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveList() {
+        testStructureCodegen("test-sensitive-list.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveMemberPointingToList() {
+        testStructureCodegen("test-sensitive-member-pointing-to-list.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.sensitiveFoo && { sensitiveFoo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterForMapWithSensitiveData() {
+        testStructureCodegen("test-map-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterInMapWithSensitiveData() {
+        testStructureCodegen("test-map-with-sensitive-data.smithy",
+                            "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                            + "    ...obj,\n"
+                            + "    ...(obj.foo && { foo:\n"
+                            + "      Object.entries(obj.foo).reduce((acc: any, [key, value]: [string, User]) => ({\n"
+                            + "        ...acc,\n"
+                            + "        [key]:\n"
+                            + "          User.filterSensitiveLog(value)\n"
+                            + "        ,\n"
+                            + "      }), {})\n"
+                            + "    }),\n"
+                            + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveMap() {
+        testStructureCodegen("test-sensitive-map.smithy",
+                            "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                            + "    ...obj,\n"
+                            + "    ...(obj.foo && { foo:\n"
+                            + "      SENSITIVE_STRING\n"
+                            + "    }),\n"
+                            + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveMemberPointingToMap() {
+        testStructureCodegen("test-sensitive-member-pointing-to-map.smithy",
+                            "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                            + "    ...obj,\n"
+                            + "    ...(obj.sensitiveFoo && { sensitiveFoo:\n"
+                            + "      SENSITIVE_STRING\n"
+                            + "    }),\n"
+                            + "  })\n");
+    }
+
+    private String testStructureCodegen(String file, String expectedType) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource(file))
                 .assemble()
@@ -53,22 +204,27 @@ public class StructureGeneratorTest {
                 .model(model)
                 .fileManifest(manifest)
                 .settings(Node.objectNodeBuilder()
-                                  .withMember("service", Node.from("smithy.example#Example"))
-                                  .withMember("package", Node.from("example"))
-                                  .withMember("packageVersion", Node.from("1.0.0"))
-                                  .build())
+                        .withMember("service", Node.from("smithy.example#Example"))
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build())
                 .build();
 
         new TypeScriptCodegenPlugin().execute(context);
         String contents = manifest.getFileString("/models/index.ts").get();
 
+        assertThat(contents, containsString(expectedType));
+        return contents;
+    }
+
+    private void testErrorStructureCodegen(String file, String expectedType) {
+        String contents = testStructureCodegen(file, expectedType);
+
         assertThat(contents, containsString("as __isa"));
         assertThat(contents, containsString("as __SmithyException"));
-        assertThat(contents, containsString(expectedType));
-        assertThat(contents, containsString("namespace Err {\n"
-                                            + "  export const isa = (o: any): o is Err => "
-                                            + "__isa(o, \"Err\");\n"
-                                            + "}"));
+        assertThat(contents, containsString("namespace Err {"));
+        assertThat(contents, containsString("  export const isa = (o: any): o is Err => "
+                                            + "__isa(o, \"Err\");\n"));
     }
 
     @Test
