@@ -66,6 +66,17 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void callsFilterInStructureWithSensitiveData() {
+        testStructureCodegen("test-structure-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
     public void filtersSensitiveStructure() {
         testStructureCodegen("test-sensitive-structure.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
@@ -91,6 +102,17 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void callsFilterInListWithSensitiveData() {
+        testStructureCodegen("test-list-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+}
+
+    @Test
     public void filtersSensitiveList() {
         testStructureCodegen("test-sensitive-list.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
@@ -103,6 +125,17 @@ public class StructureGeneratorTest {
 
     @Test
     public void callsFilterForMapWithSensitiveData() {
+        testStructureCodegen("test-map-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterInMapWithSensitiveData() {
         testStructureCodegen("test-map-with-sensitive-data.smithy",
                             "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                             + "    ...obj,\n"
