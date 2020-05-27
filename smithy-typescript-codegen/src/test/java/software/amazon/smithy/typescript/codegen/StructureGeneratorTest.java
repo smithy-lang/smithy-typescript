@@ -88,6 +88,17 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void filtersSensitiveMemberPointingToStructure() {
+        testStructureCodegen("test-sensitive-member-pointing-to-structure.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.sensitiveFoo && { sensitiveFoo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
     public void callsFilterForListWithSensitiveData() {
         testStructureCodegen("test-list-with-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
@@ -110,7 +121,7 @@ public class StructureGeneratorTest {
                                 + "      SENSITIVE_STRING\n"
                                 + "    }),\n"
                                 + "  })\n");
-}
+    }
 
     @Test
     public void filtersSensitiveList() {
@@ -118,6 +129,17 @@ public class StructureGeneratorTest {
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                                 + "    ...obj,\n"
                                 + "    ...(obj.foo && { foo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveMemberPointingToList() {
+        testStructureCodegen("test-sensitive-member-pointing-to-list.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.sensitiveFoo && { sensitiveFoo:\n"
                                 + "      SENSITIVE_STRING\n"
                                 + "    }),\n"
                                 + "  })\n");
@@ -156,6 +178,17 @@ public class StructureGeneratorTest {
                             "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                             + "    ...obj,\n"
                             + "    ...(obj.foo && { foo:\n"
+                            + "      SENSITIVE_STRING\n"
+                            + "    }),\n"
+                            + "  })\n");
+    }
+
+    @Test
+    public void filtersSensitiveMemberPointingToMap() {
+        testStructureCodegen("test-sensitive-member-pointing-to-map.smithy",
+                            "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                            + "    ...obj,\n"
+                            + "    ...(obj.sensitiveFoo && { sensitiveFoo:\n"
                             + "      SENSITIVE_STRING\n"
                             + "    }),\n"
                             + "  })\n");
