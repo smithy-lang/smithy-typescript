@@ -9,18 +9,11 @@ service Example {
 operation GetFoo(GetFooInput)
 
 structure GetFooInput {
-    @sensitive
-    foo: UserMap
+    foo: SecretNamesMap
 }
 
-map UserMap {
+@sensitive
+map SecretNamesMap {
     key: String,
-    value: User
-}
-
-structure User {
-    username: String,
-
-    @sensitive
-    password: String
+    value: String
 }

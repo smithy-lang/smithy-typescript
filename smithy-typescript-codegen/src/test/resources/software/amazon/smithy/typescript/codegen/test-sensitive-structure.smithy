@@ -9,13 +9,11 @@ service Example {
 operation GetFoo(GetFooInput)
 
 structure GetFooInput {
-    @sensitive
-    foo: User
+    foo: SecretUser
 }
 
-structure User {
-    username: String,
-
-    @sensitive
-    password: String
+@sensitive
+structure SecretUser {
+    firstname: String,
+    lastname: String
 }
