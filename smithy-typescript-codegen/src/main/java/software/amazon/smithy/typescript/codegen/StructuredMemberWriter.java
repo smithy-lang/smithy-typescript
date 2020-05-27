@@ -228,10 +228,10 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Returns sanitized value of the member.
+     * Returns the member name to be used in generation.
      *
      * @param member a {@link MemberShape} to be sanitized.
-     * @return Returns sanitized value of the member
+     * @return Returns the member name to be used in generation.
      */
     private String getSanitizedMemberName(MemberShape member) {
         return TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
