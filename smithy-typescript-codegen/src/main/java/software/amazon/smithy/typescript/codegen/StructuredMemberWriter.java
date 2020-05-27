@@ -103,7 +103,7 @@ final class StructuredMemberWriter {
             Shape structureTarget,
             String structureParam
     ) {
-        if (structureTarget.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+        if (structureTarget.hasTrait(SensitiveTrait.class)) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
             return;
@@ -128,21 +128,21 @@ final class StructuredMemberWriter {
 
         writer.openBlock("$L.map(", ")", collectionParam, () -> {
             String itemParam = "item";
-            Shape memberTarget = model.expectShape(collectionMember.getTarget());
+            Shape collectionMemberTarget = model.expectShape(collectionMember.getTarget());
             writer.write("$L => ", itemParam);
-            if (memberTarget instanceof StructureShape) {
-                writeStructureFilterSensitiveLog(writer, memberTarget, itemParam);
-            } else if (memberTarget instanceof CollectionShape) {
-                MemberShape nestedCollectionMember = ((CollectionShape) memberTarget).getMember();
+            if (collectionMemberTarget instanceof StructureShape) {
+                writeStructureFilterSensitiveLog(writer, collectionMemberTarget, itemParam);
+            } else if (collectionMemberTarget instanceof CollectionShape) {
+                MemberShape nestedCollectionMember = ((CollectionShape) collectionMemberTarget).getMember();
                 writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, itemParam);
-            } else if (memberTarget instanceof MapShape) {
-                MemberShape mapMember = ((MapShape) memberTarget).getValue();
+            } else if (collectionMemberTarget instanceof MapShape) {
+                MemberShape mapMember = ((MapShape) collectionMemberTarget).getValue();
                 writeMapFilterSensitiveLog(writer, mapMember, itemParam);
             } else {
                 // This path should not reach because of recursive isIterationRequired.
                 throw new CodegenException(String.format(
                     "CollectionFilterSensitiveLog attempted for %s while it was not required",
-                    memberTarget.getType()
+                    collectionMemberTarget.getType()
                 ));
                 // For quick-fix in case of high severity issue:
                 // comment out the exception above and uncomment the line below.
@@ -169,21 +169,21 @@ final class StructuredMemberWriter {
         writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
             mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
                 writer.write("...$L,", accParam);
-                Shape memberTarget = model.expectShape(mapMember.getTarget());
+                Shape mapMemberTarget = model.expectShape(mapMember.getTarget());
                 writer.openBlock("[$L]: ", ",", keyParam, () -> {
-                    if (memberTarget instanceof StructureShape) {
-                        writeStructureFilterSensitiveLog(writer, memberTarget, valueParam);
-                    } else if (memberTarget instanceof CollectionShape) {
-                        MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
+                    if (mapMemberTarget instanceof StructureShape) {
+                        writeStructureFilterSensitiveLog(writer, mapMemberTarget, valueParam);
+                    } else if (mapMemberTarget instanceof CollectionShape) {
+                        MemberShape collectionMember = ((CollectionShape) mapMemberTarget).getMember();
                         writeCollectionFilterSensitiveLog(writer, collectionMember, valueParam);
-                    } else if (memberTarget instanceof MapShape) {
-                        MemberShape nestedMapMember = ((MapShape) memberTarget).getValue();
+                    } else if (mapMemberTarget instanceof MapShape) {
+                        MemberShape nestedMapMember = ((MapShape) mapMemberTarget).getValue();
                         writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
                     } else {
                         // This path should not reach because of recursive isIterationRequired.
                         throw new CodegenException(String.format(
                             "MapFilterSensitiveLog attempted for %s while it was not required",
-                            memberTarget.getType()
+                            mapMemberTarget.getType()
                         ));
                         // For quick-fix in case of high severity issue:
                         // comment out the exception above and uncomment the line below.
