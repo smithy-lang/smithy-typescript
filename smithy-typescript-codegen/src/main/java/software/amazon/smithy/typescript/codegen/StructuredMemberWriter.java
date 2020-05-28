@@ -73,7 +73,7 @@ final class StructuredMemberWriter {
     void writeFilterSensitiveLog(TypeScriptWriter writer, String objectParam) {
         writer.write("...$L,", objectParam);
         for (MemberShape member : members) {
-            if (isMemberOverwriteRequired(member)) {
+            if (isMemberOverwriteRequired(member, new HashSet<String>())) {
                 Shape memberTarget = model.expectShape(member.getTarget());
                 String memberName = getSanitizedMemberName(member);
                 String memberParam = String.format("%s.%s", objectParam, memberName);
@@ -139,7 +139,7 @@ final class StructuredMemberWriter {
                 MemberShape mapMember = ((MapShape) collectionMemberTarget).getValue();
                 writeMapFilterSensitiveLog(writer, mapMember, itemParam);
             } else {
-                // This path should not reach because of recursive isIterationRequired.
+                // This path should not reach because of recursive isMemberOverwriteRequired.
                 throw new CodegenException(String.format(
                     "CollectionFilterSensitiveLog attempted for %s while it was not required",
                     collectionMemberTarget.getType()
@@ -180,7 +180,7 @@ final class StructuredMemberWriter {
                         MemberShape nestedMapMember = ((MapShape) mapMemberTarget).getValue();
                         writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
                     } else {
-                        // This path should not reach because of recursive isIterationRequired.
+                        // This path should not reach because of recursive isMemberOverwriteRequired.
                         throw new CodegenException(String.format(
                             "MapFilterSensitiveLog attempted for %s while it was not required",
                             mapMemberTarget.getType()
@@ -196,35 +196,39 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Identifies if iteration is required on member.
-     *
-     * @param member a {@link MemberShape} to check for iteration required.
-     * @return Returns true if the iteration is required on member.
-     */
-    private boolean isIterationRequired(MemberShape member) {
-        Shape memberTarget = model.expectShape(member.getTarget());
-        if (memberTarget instanceof StructureShape) {
-            return true;
-        } else if (memberTarget instanceof CollectionShape) {
-            MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
-            return isIterationRequired(collectionMember);
-        } else if (memberTarget instanceof MapShape) {
-            MemberShape mapMember = ((MapShape) memberTarget).getValue();
-            return isIterationRequired(mapMember);
-        }
-        return false;
-    }
-
-    /**
      * Identifies if member needs to be overwritten in filterSensitiveLog.
      *
      * @param member a {@link MemberShape} to check if overwrite is required.
+     * @param parents a set of membernames which are parents of existing member to avoid unending recursion.
      * @return Returns true if the overwrite is required on member.
      */
-    private boolean isMemberOverwriteRequired(MemberShape member) {
-        return (
-            member.getMemberTrait(model, SensitiveTrait.class).isPresent() || isIterationRequired(member)
-        );
+    private boolean isMemberOverwriteRequired(MemberShape member, Set<String> parents) {
+        if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            return true;
+        }
+
+        Shape memberTarget = model.expectShape(member.getTarget());
+        parents.add(symbolProvider.toMemberName(member));
+        if (memberTarget instanceof StructureShape) {
+            Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
+            for (MemberShape structureMember: structureMemberList) {
+                if (!parents.contains(symbolProvider.toMemberName(structureMember))
+                        && isMemberOverwriteRequired(structureMember, parents)) {
+                    return true;
+                }
+            }
+        } else if (memberTarget instanceof CollectionShape) {
+            MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
+            if (!parents.contains(symbolProvider.toMemberName(collectionMember))) {
+                return isMemberOverwriteRequired(collectionMember, parents);
+            }
+        } else if (memberTarget instanceof MapShape) {
+            MemberShape mapMember = ((MapShape) memberTarget).getValue();
+            if (!parents.contains(symbolProvider.toMemberName(mapMember))) {
+                return isMemberOverwriteRequired(mapMember, parents);
+            }
+        }
+        return false;
     }
 
     /**
