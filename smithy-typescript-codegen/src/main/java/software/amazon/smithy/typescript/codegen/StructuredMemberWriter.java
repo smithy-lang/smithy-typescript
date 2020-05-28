@@ -208,7 +208,13 @@ final class StructuredMemberWriter {
 
         Shape memberTarget = model.expectShape(member.getTarget());
         if (memberTarget instanceof StructureShape) {
-            return true;
+            Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
+            for (MemberShape structureMember: structureMemberList) {
+                if (isMemberOverwriteRequired(structureMember)) {
+                    return true;
+                }
+            }
+            return false;
         } else if (memberTarget instanceof CollectionShape) {
             MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
             return isMemberOverwriteRequired(collectionMember);
