@@ -217,7 +217,6 @@ final class StructuredMemberWriter {
                     return true;
                 }
             }
-            return false;
         } else if (memberTarget instanceof CollectionShape) {
             MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
             if (!parents.contains(symbolProvider.toMemberName(collectionMember))) {
