@@ -93,17 +93,6 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                             TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
                     writer.write("eventStreamSerdeProvider,");
                 });
-            case REACT_NATIVE:
-                // TODO: add ReactNative eventstream support
-                return MapUtils.of("eventStreamSerdeProvider", writer -> {
-                    writer.addDependency(TypeScriptDependency.INVALID_DEPENDENCY);
-                    writer.addImport("invalidFunction", "invalidFunction",
-                            TypeScriptDependency.INVALID_DEPENDENCY.packageName);
-                    writer.openBlock("eventStreamSerdeProvider: () => ({", "}),", () -> {
-                        writer.write("serialize: invalidFunction(\"event stream is not supported in ReactNative.\"),");
-                        writer.write("deserialize: invalidFunction(\"event stream is not supported in ReactNative.\")");
-                    });
-                });
             default:
                 return Collections.emptyMap();
         }
