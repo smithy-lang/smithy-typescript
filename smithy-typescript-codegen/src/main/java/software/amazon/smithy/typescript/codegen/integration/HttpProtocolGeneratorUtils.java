@@ -35,6 +35,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.traits.RetryableTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -239,6 +240,23 @@ public final class HttpProtocolGeneratorUtils {
     static void generateHttpBindingUtils(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
         writer.write(IoUtils.readUtf8Resource(HttpProtocolGeneratorUtils.class, "http-binding-utils.ts"));
+    }
+
+    /**
+     * Writes $retryable key for error if it contains RetryableTrait.
+     *
+     * @param writer The code writer.
+     * @param error The error to write retryableTrait for.
+     */
+    public static void writeRetryableTrait(TypeScriptWriter writer, StructureShape error) {
+        Optional<RetryableTrait> retryableTrait = error.getTrait(RetryableTrait.class);
+        if (retryableTrait.isPresent()) {
+            writer.openBlock("$$retryable: {", "},", () -> {
+                if (retryableTrait.get().getThrottling()) {
+                    writer.write("throttling: true,");
+                }
+            });
+        }
     }
 
     /**
