@@ -44,6 +44,29 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void generatesEmptyRetryableTrait() {
+        testErrorStructureCodegen("error-test-retryable.smithy",
+                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
+                                  + "  name: \"Err\";\n"
+                                  + "  $fault: \"client\";\n"
+                                  + "  $retryable: {\n"
+                                  + "  };\n"
+                                  + "}");
+    }
+
+    @Test
+    public void generatesRetryableTraitWithThrottling() {
+        testErrorStructureCodegen("error-test-retryable-throttling.smithy",
+                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
+                                  + "  name: \"Err\";\n"
+                                  + "  $fault: \"client\";\n"
+                                  + "  $retryable: {\n"
+                                  + "    throttling: true,\n"
+                                  + "  };\n"
+                                  + "}");
+    }
+
+    @Test
     public void filtersSensitiveSimpleShape() {
         testStructureCodegen("test-sensitive-simple-shape.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"

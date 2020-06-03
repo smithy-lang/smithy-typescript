@@ -173,7 +173,7 @@ final class StructureGenerator implements Runnable {
 
         Optional<RetryableTrait> retryableTrait = shape.getTrait(RetryableTrait.class);
         if (retryableTrait.isPresent()) {
-            writer.openBlock("$$retryable: {", "},", () -> {
+            writer.openBlock("$$retryable: {", "};", () -> {
                 if (retryableTrait.get().getThrottling()) {
                     writer.write("throttling: true,");
                 }
