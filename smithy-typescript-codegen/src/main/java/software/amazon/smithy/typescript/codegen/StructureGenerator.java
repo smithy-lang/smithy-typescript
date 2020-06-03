@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -23,6 +24,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RetryableTrait;
 
 /**
  * Generates normal structures and error structures.
@@ -53,21 +55,26 @@ final class StructureGenerator implements Runnable {
     /**
      * Renders a normal, non-error structure.
      *
-     * <p>For example, given the following Smithy model:
+     * <p>
+     * For example, given the following Smithy model:
      *
-     * <pre>{@code
+     * <pre>
+     * {@code
      * namespace smithy.example
      *
      * structure Person {
-     *     @required
+     *     &#64;required
      *     name: String,
      *     age: Integer,
      * }
-     * }</pre>
+     * }
+     * </pre>
      *
-     * <p>The following TypeScript is rendered:
+     * <p>
+     * The following TypeScript is rendered:
      *
-     * <pre>{@code
+     * <pre>
+     * {@code
      * import { isa as __isa } from "@aws-sdk/smithy-client";
      *
      * export interface Person {
@@ -79,7 +86,8 @@ final class StructureGenerator implements Runnable {
      * export namespace Person {
      *   export const isa = (o: any): o is Person => __isa(o, "Person");
      * }
-     * }</pre>
+     * }
+     * </pre>
      */
     private void renderNonErrorStructure() {
         Symbol symbol = symbolProvider.toSymbol(shape);
@@ -88,8 +96,7 @@ final class StructureGenerator implements Runnable {
         // Find symbol references with the "extends" property.
         String extendsFrom = symbol.getReferences().stream()
                 .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
-                .map(SymbolReference::getAlias)
-                .collect(Collectors.joining(", "));
+                .map(SymbolReference::getAlias).collect(Collectors.joining(", "));
 
         if (extendsFrom.isEmpty()) {
             writer.openBlock("export interface $L {", symbol.getName());
@@ -98,8 +105,8 @@ final class StructureGenerator implements Runnable {
         }
 
         writer.write("__type?: $S;", shape.getId().getName());
-        StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
+        StructuredMemberWriter config = new StructuredMemberWriter(model, symbolProvider,
+                shape.getAllMembers().values());
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
@@ -107,24 +114,29 @@ final class StructureGenerator implements Runnable {
     }
 
     /**
-     * Error structures generate interfaces that extend from SmithyException
-     * and add the appropriate fault property.
+     * Error structures generate interfaces that extend from SmithyException and add
+     * the appropriate fault property.
      *
-     * <p>Given the following Smithy structure:
+     * <p>
+     * Given the following Smithy structure:
      *
-     * <pre>{@code
+     * <pre>
+     * {@code
      * namespace smithy.example
      *
-     * @error("client")
+     * &#64;error("client")
      * structure NoSuchResource {
-     *     @required
+     *     &#64;required
      *     resourceType: String
      * }
-     * }</pre>
+     * }
+     * </pre>
      *
-     * <p>The following TypeScript is generated:
+     * <p>
+     * The following TypeScript is generated:
      *
-     * <pre>{@code
+     * <pre>
+     * {@code
      * import {
      *     SmithyException as __SmithyException,
      *     isa as __isa
@@ -139,7 +151,8 @@ final class StructureGenerator implements Runnable {
      * export namespace NoSuchResource {
      *   export const isa = (o: any): o is NoSuchResource => __isa(o, "NoSuchResource");
      * }
-     * }</pre>
+     * }
+     * </pre>
      */
     private void renderErrorStructure() {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
@@ -148,18 +161,27 @@ final class StructureGenerator implements Runnable {
 
         // Find symbol references with the "extends" property, and add SmithyException.
         writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
-        String extendsFrom = Stream.concat(
-                Stream.of("__SmithyException"),
+        String extendsFrom = Stream.concat(Stream.of("__SmithyException"),
                 symbol.getReferences().stream()
                         .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
-                        .map(SymbolReference::getAlias)
-                ).collect(Collectors.joining(", "));
+                        .map(SymbolReference::getAlias))
+                .collect(Collectors.joining(", "));
 
         writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
-        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
+
+        Optional<RetryableTrait> retryableTrait = shape.getTrait(RetryableTrait.class);
+        if (retryableTrait.isPresent()) {
+            writer.openBlock("$$retryable: {", "};", () -> {
+                if (retryableTrait.get().getThrottling()) {
+                    writer.write("throttling: true,");
+                }
+            });
+        }
+
+        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
+                shape.getAllMembers().values());
         structuredMemberWriter.writeMembers(writer, shape);
         writer.closeBlock("}"); // interface
         writer.write("");
@@ -172,17 +194,14 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             String objectParam = "obj";
-            writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
-                objectParam, symbol.getName(),
-                () -> {
-                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                        model, symbolProvider, shape.getAllMembers().values());
-                    structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
-                }
-            );
-            writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
-                symbol.getName(), shape.getId().getName()
-            );
+            writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})", objectParam,
+                    symbol.getName(), () -> {
+                        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model,
+                                symbolProvider, shape.getAllMembers().values());
+                        structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
+                    });
+            writer.write("export const isa = (o: any): o is $L => __isa(o, $S);", symbol.getName(),
+                    shape.getId().getName());
         });
     }
 }
