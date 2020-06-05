@@ -15,7 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -24,7 +23,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.RetryableTrait;
+import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 
 /**
  * Generates normal structures and error structures.
@@ -160,16 +159,7 @@ final class StructureGenerator implements Runnable {
         writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
-
-        Optional<RetryableTrait> retryableTrait = shape.getTrait(RetryableTrait.class);
-        if (retryableTrait.isPresent()) {
-            writer.openBlock("$$retryable: {", "};", () -> {
-                if (retryableTrait.get().getThrottling()) {
-                    writer.write("throttling: true,");
-                }
-            });
-        }
-
+        HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
         structuredMemberWriter.writeMembers(writer, shape);

@@ -247,11 +247,13 @@ public final class HttpProtocolGeneratorUtils {
      *
      * @param writer The code writer.
      * @param error The error to write retryableTrait for.
+     * @param separator The string to be used after emitting key-value pair for retryableTrait.
      */
-    public static void writeRetryableTrait(TypeScriptWriter writer, StructureShape error) {
+    public static void writeRetryableTrait(TypeScriptWriter writer, StructureShape error, String separator) {
         Optional<RetryableTrait> retryableTrait = error.getTrait(RetryableTrait.class);
         if (retryableTrait.isPresent()) {
-            writer.openBlock("$$retryable: {", "},", () -> {
+            String textAfterBlock = String.format("}%s", separator);
+            writer.openBlock("$$retryable: {", textAfterBlock, () -> {
                 if (retryableTrait.get().getThrottling()) {
                     writer.write("throttling: true,");
                 }
