@@ -379,6 +379,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("name: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
+                HttpProtocolGeneratorUtils.writeRetryableTrait(writer, error, ",");
                 writer.write("$$metadata: deserializeMetadata($L),", outputReference);
                 writer.write("...deserialized,");
             });

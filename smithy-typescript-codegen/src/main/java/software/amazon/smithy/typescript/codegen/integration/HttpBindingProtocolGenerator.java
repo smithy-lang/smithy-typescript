@@ -912,6 +912,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
                 writer.write("name: $S,", error.getId().getName());
                 writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
+                HttpProtocolGeneratorUtils.writeRetryableTrait(writer, error, ",");
                 writer.write("$$metadata: deserializeMetadata($L),", outputName);
                 // Set all the members to undefined to meet type constraints.
                 new TreeMap<>(error.getAllMembers())
