@@ -13,7 +13,6 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
-import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
 public class CodegenVisitorTest {
     @Test
