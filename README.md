@@ -87,6 +87,9 @@ repository:
 You can find the build artifacts of the test package at:
 `build/smithyprojections/smithy-typescript-codegen-test/source/typescript-codegen`
 
+## Troubleshooting
+
+Most of the issues with Gradle can be fixed by stopping the daemon by running `./gradlew --stop`
 
 ## License
 
