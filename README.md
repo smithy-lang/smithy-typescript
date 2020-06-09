@@ -89,7 +89,7 @@ You can find the build artifacts of the test package at:
 
 ## Troubleshooting
 
-Most of the issues with Gradle can be fixed by stopping the daemon by running `./gradlew --stop`
+Many Gradle issues can be fixed by stopping the daemon by running `./gradlew --stop`
 
 ## License
 
