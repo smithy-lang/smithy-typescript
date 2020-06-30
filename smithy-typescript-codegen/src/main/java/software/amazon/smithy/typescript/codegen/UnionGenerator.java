@@ -209,7 +209,7 @@ final class UnionGenerator implements Runnable {
 
     private void writeFilterSensitiveLog() {
         String objectParam = "obj";
-        writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
+        writer.openBlock("export const filterSensitiveLog = ($L: $L): any => {", "}",
             objectParam, symbol.getName(),
             () -> {
                 for (MemberShape member : shape.getAllMembers().values()) {
@@ -218,10 +218,11 @@ final class UnionGenerator implements Runnable {
 
                     if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                         // member is Sensitive, hide the value.
-                        writer.write("if (${1L}.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
+                        writer.write("if ($L.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
                             objectParam, memberName);
                     }
                 }
+                writer.write("return Object.fromEntries([$L.$$unknown]);", objectParam);
             }
         );
     }
