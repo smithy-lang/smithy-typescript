@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -148,6 +149,7 @@ final class UnionGenerator implements Runnable {
             writeUnionMemberInterfaces();
             writeVisitorType();
             writeVisitorFunction();
+            writeFilterSensitiveLog();
         });
     }
 
@@ -203,5 +205,24 @@ final class UnionGenerator implements Runnable {
         }
         writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
         writer.dedent().write("}");
+    }
+
+    private void writeFilterSensitiveLog() {
+        String objectParam = "obj";
+        writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
+            objectParam, symbol.getName(),
+            () -> {
+                for (MemberShape member : shape.getAllMembers().values()) {
+                    // Shape memberTarget = model.expectShape(member.getTarget());
+                    String memberName = symbolProvider.toMemberName(member);
+
+                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                        // member is Sensitive, hide the value.
+                        writer.write("if (${1L}.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
+                            objectParam, memberName);
+                    }
+                }
+            }
+        );
     }
 }
