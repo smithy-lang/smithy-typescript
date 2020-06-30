@@ -191,6 +191,9 @@ final class UnionGenerator implements Runnable {
         });
     }
 
+    /**
+     * Inspired by Conjure’s unions: https://github.com/palantir/conjure-typescript#example-generated-objects
+     */
     private void writeVisitorFunction() {
         // Create the visitor dispatcher for the union.
         writer.write("export const visit = <T>(").indent();
