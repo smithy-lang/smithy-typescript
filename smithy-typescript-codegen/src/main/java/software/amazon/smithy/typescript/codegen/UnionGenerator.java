@@ -227,7 +227,8 @@ final class UnionGenerator implements Runnable {
                             objectParam, memberName);
                     }
                 }
-                writer.write("return {[$1L.$$unknown[0]]: $1L.$$unknown[1]};", objectParam);
+                writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: ${1L}.$$unknown[1]};",
+                    objectParam);
             }
         );
     }
