@@ -23,6 +23,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -225,6 +226,13 @@ final class UnionGenerator implements Runnable {
                     } else if (memberTarget instanceof SimpleShape) {
                         writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ${1L}.${2L}};",
                             objectParam, memberName);
+                    } else if (memberTarget instanceof StructureShape) {
+                        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                            model, symbolProvider, shape.getAllMembers().values());
+                        String structureParam = String.format("%s.%s", objectParam, memberName);
+                        writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ", objectParam, memberName);
+                        structuredMemberWriter.writeStructureFilterSensitiveLog(writer, memberTarget, structureParam);
+                        writer.write("};");
                     }
                 }
                 writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: ${1L}.$$unknown[1]};",

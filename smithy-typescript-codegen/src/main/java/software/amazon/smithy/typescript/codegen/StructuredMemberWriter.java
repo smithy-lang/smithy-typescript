@@ -98,7 +98,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for StructureShape.
      */
-    private void writeStructureFilterSensitiveLog(
+    void writeStructureFilterSensitiveLog(
             TypeScriptWriter writer,
             Shape structureTarget,
             String structureParam
