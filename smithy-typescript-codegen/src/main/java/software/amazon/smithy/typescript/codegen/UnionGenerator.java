@@ -222,7 +222,7 @@ final class UnionGenerator implements Runnable {
                             objectParam, memberName);
                     }
                 }
-                writer.write("return Object.fromEntries([$L.$$unknown]);", objectParam);
+                writer.write("return {[$1L.$$unknown[0]]: $1L.$$unknown[1]};", objectParam);
             }
         );
     }
