@@ -21,6 +21,8 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -213,12 +215,15 @@ final class UnionGenerator implements Runnable {
             objectParam, symbol.getName(),
             () -> {
                 for (MemberShape member : shape.getAllMembers().values()) {
-                    // Shape memberTarget = model.expectShape(member.getTarget());
+                    Shape memberTarget = model.expectShape(member.getTarget());
                     String memberName = symbolProvider.toMemberName(member);
 
                     if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                         // member is Sensitive, hide the value.
                         writer.write("if ($L.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
+                            objectParam, memberName);
+                    } else if (memberTarget instanceof SimpleShape) {
+                        writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ${1L}.${2L}};",
                             objectParam, memberName);
                     }
                 }
