@@ -20,6 +20,8 @@ import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
@@ -226,12 +228,30 @@ final class UnionGenerator implements Runnable {
                     } else if (memberTarget instanceof SimpleShape) {
                         writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ${1L}.${2L}};",
                             objectParam, memberName);
-                    } else if (memberTarget instanceof StructureShape) {
+                    } else {
                         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                             model, symbolProvider, shape.getAllMembers().values());
-                        String structureParam = String.format("%s.%s", objectParam, memberName);
+                        String memberParam = String.format("%s.%s", objectParam, memberName);
+                        
                         writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ", objectParam, memberName);
-                        structuredMemberWriter.writeStructureFilterSensitiveLog(writer, memberTarget, structureParam);
+                        if (memberTarget instanceof StructureShape || memberTarget instanceof UnionShape) {
+                            structuredMemberWriter.writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
+                        } else if (memberTarget instanceof CollectionShape) {
+                            MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
+                            if (model.expectShape(collectionMember.getTarget()) instanceof SimpleShape) {
+                                writer.write(memberParam);
+                            } else {
+                                structuredMemberWriter.writeCollectionFilterSensitiveLog(
+                                    writer, collectionMember, memberParam);
+                            }
+                        } else if (memberTarget instanceof MapShape) {
+                            MemberShape mapMember = ((MapShape) memberTarget).getValue();
+                            if (model.expectShape(mapMember.getTarget()) instanceof SimpleShape) {
+                                writer.write(memberParam);
+                            } else {
+                                structuredMemberWriter.writeMapFilterSensitiveLog(writer, mapMember, memberParam);
+                            }
+                        }
                         writer.write("};");
                     }
                 }
