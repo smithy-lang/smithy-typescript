@@ -172,6 +172,7 @@ final class UnionGenerator implements Runnable {
         writer.openBlock("interface $$Base {", "}", () -> {
             writer.write("__type?: $S;", shape.getId().getName());
         });
+        writer.write("");
 
         for (MemberShape member : shape.getAllMembers().values()) {
             String name = variantMap.get(member.getMemberName());
@@ -187,6 +188,7 @@ final class UnionGenerator implements Runnable {
                 }
                 writer.write("$$unknown?: never;");
             });
+            writer.write("");
         }
 
         // Write out the unknown variant.
@@ -196,6 +198,7 @@ final class UnionGenerator implements Runnable {
             }
             writer.write("$$unknown: [string, any];");
         });
+        writer.write("");
     }
 
     private void writeVisitorType() {
@@ -206,6 +209,7 @@ final class UnionGenerator implements Runnable {
             }
             writer.write("_: (name: string, value: any) => T;");
         });
+        writer.write("");
     }
 
     private void writeVisitorFunction() {
@@ -220,6 +224,7 @@ final class UnionGenerator implements Runnable {
         }
         writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
         writer.dedent().write("}");
+        writer.write("");
     }
 
     private void writeFilterSensitiveLog() {
