@@ -119,8 +119,8 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void skipsFilterForInsensitiveStructure() {
-        testStructureCodegen("test-insensitive-structure.smithy",
+    public void skipsFilterForStructureWithoutSensitiveData() {
+        testStructureCodegen("test-structure-without-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                                 + "    ...obj,\n"
                                 + "  })\n");
