@@ -202,8 +202,8 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void callsFilterForListWithSensitiveData() {
-        testStructureCodegen("test-list-with-sensitive-data.smithy",
+    public void callsFilterForListWithStructureWithSensitiveData() {
+        testStructureCodegen("test-list-with-structure-with-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                                 + "    ...obj,\n"
                                 + "    ...(obj.foo && { foo:\n"
@@ -216,12 +216,26 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void callsFilterInListWithSensitiveData() {
-        testStructureCodegen("test-list-with-sensitive-data.smithy",
+    public void callsFilterInListWithStructureWithSensitiveData() {
+        testStructureCodegen("test-list-with-structure-with-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: User): any => ({\n"
                                 + "    ...obj,\n"
                                 + "    ...(obj.password && { password:\n"
                                 + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterForListWithUnionWithSensitiveData() {
+        testStructureCodegen("test-list-with-union-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      obj.foo.map(\n"
+                                + "        item =>\n"
+                                + "        TestUnion.filterSensitiveLog(item)\n"
+                                + "      )\n"
                                 + "    }),\n"
                                 + "  })\n");
     }
