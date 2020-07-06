@@ -335,6 +335,17 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void callsFilterInMapWithUnionWithSensitiveData() {
+        testStructureCodegen("test-map-with-union-with-sensitive-data.smithy",
+                            "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
+                            + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
+                            + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
+                            + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: obj.$unknown[1]};\n"
+                            + "  }\n");
+    }
+
+
+    @Test
     public void callsFilterForMapWithSensitiveMember() {
         testStructureCodegen("test-map-with-sensitive-member.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
