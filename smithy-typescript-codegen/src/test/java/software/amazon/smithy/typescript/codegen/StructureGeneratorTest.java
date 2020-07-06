@@ -292,19 +292,8 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void callsFilterForMapWithSensitiveData() {
-        testStructureCodegen("test-map-with-sensitive-data.smithy",
-                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
-                                + "    ...obj,\n"
-                                + "    ...(obj.password && { password:\n"
-                                + "      SENSITIVE_STRING\n"
-                                + "    }),\n"
-                                + "  })\n");
-    }
-
-    @Test
-    public void callsFilterInMapWithSensitiveData() {
-        testStructureCodegen("test-map-with-sensitive-data.smithy",
+    public void callsFilterForMapWithStructureWithSensitiveData() {
+        testStructureCodegen("test-map-with-structure-with-sensitive-data.smithy",
                             "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                             + "    ...obj,\n"
                             + "    ...(obj.foo && { foo:\n"
@@ -316,6 +305,33 @@ public class StructureGeneratorTest {
                             + "      }), {})\n"
                             + "    }),\n"
                             + "  })\n");
+    }
+
+    @Test
+    public void callsFilterInMapWithStructureWithSensitiveData() {
+        testStructureCodegen("test-map-with-structure-with-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: User): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.password && { password:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
+    public void callsFilterForMapWithUnionWithSensitiveData() {
+        testStructureCodegen("test-map-with-union-with-sensitive-data.smithy",
+                        "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                        + "    ...obj,\n"
+                        + "    ...(obj.foo && { foo:\n"
+                        + "      Object.entries(obj.foo).reduce((acc: any, [key, value]: [string, TestUnion]) => ({\n"
+                        + "        ...acc,\n"
+                        + "        [key]:\n"
+                        + "          TestUnion.filterSensitiveLog(value)\n"
+                        + "        ,\n"
+                        + "      }), {})\n"
+                        + "    }),\n"
+                        + "  })\n");
     }
 
     @Test
