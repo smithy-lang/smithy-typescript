@@ -159,6 +159,17 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void filtersSensitiveUnion() {
+        testStructureCodegen("test-sensitive-union.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
     public void callsFilterForListWithSensitiveData() {
         testStructureCodegen("test-list-with-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
