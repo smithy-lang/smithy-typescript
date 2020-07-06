@@ -170,6 +170,16 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void callsFilterInUnionWithoutSensitiveData() {
+        testStructureCodegen("test-union-without-sensitive-data.smithy",
+                                "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
+                                + "    if (obj.barString !== undefined) return {barString: obj.barString};\n"
+                                + "    if (obj.fooString !== undefined) return {fooString: obj.fooString};\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: obj.$unknown[1]};\n"
+                                + "  }\n");
+    }
+
+    @Test
     public void filtersSensitiveUnion() {
         testStructureCodegen("test-sensitive-union.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
