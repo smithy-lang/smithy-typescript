@@ -238,7 +238,7 @@ final class UnionGenerator implements Runnable {
 
                     if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                         // member is Sensitive, hide the value.
-                        writer.write("if ($L.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
+                        writer.write("if (${1L}.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
                             objectParam, memberName);
                     } else if (memberTarget instanceof SimpleShape) {
                         writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ${1L}.${2L}};",
