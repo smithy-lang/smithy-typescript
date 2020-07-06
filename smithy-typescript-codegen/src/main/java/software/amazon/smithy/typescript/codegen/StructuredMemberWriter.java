@@ -218,7 +218,7 @@ final class StructuredMemberWriter {
                     return true;
                 }
             }
-        } if (memberTarget instanceof UnionShape) {
+        } else if (memberTarget instanceof UnionShape) {
             Collection<MemberShape> unionMemberList = ((UnionShape) memberTarget).getAllMembers().values();
             for (MemberShape unionMember: unionMemberList) {
                 if (!parents.contains(symbolProvider.toMemberName(unionMember))

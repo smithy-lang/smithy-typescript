@@ -247,7 +247,7 @@ final class UnionGenerator implements Runnable {
                         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                             model, symbolProvider, shape.getAllMembers().values());
                         String memberParam = String.format("%s.%s", objectParam, memberName);
-                        
+
                         writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ", objectParam, memberName);
                         if (memberTarget instanceof StructureShape || memberTarget instanceof UnionShape) {
                             structuredMemberWriter.writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
