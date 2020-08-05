@@ -29,5 +29,5 @@ repositories {
 
 dependencies {
     implementation(project(":smithy-typescript-codegen"))
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:1.0.5")
+    implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.8, 2.0[")
 }
