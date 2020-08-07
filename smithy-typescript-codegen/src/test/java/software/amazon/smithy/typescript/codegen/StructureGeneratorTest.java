@@ -1,8 +1,5 @@
 package software.amazon.smithy.typescript.codegen;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -13,14 +10,17 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+
 public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
-                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "}");
+                "export interface Err extends __SmithyException, $MetadataBearer {\n"
+                        + "  name: \"Err\";\n"
+                        + "  $fault: \"client\";\n"
+                        + "}");
     }
 
     @Test
@@ -320,7 +320,8 @@ public class StructureGeneratorTest {
         Model model = assembler.assemble().unwrap();
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
+        new StructureGenerator(model, TypeScriptCodegenPlugin
+                .createSymbolProvider(model, null), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("as __isa"));
@@ -349,7 +350,8 @@ public class StructureGeneratorTest {
         Model model = assembler.assemble().unwrap();
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
+        new StructureGenerator(model, TypeScriptCodegenPlugin
+                .createSymbolProvider(model, null), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));

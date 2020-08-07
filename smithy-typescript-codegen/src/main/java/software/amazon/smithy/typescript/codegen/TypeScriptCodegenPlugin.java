@@ -38,10 +38,12 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
     /**
      * Creates a TypeScript symbol provider.
      *
-     * @param model Model to generate symbols for.
+     * @param model       Model to generate symbols for.
+     * @param serviceShape Service shape associated with this SymbolProvider.
      * @return Returns the created provider.
      */
-    public static SymbolProvider createSymbolProvider(Model model) {
-        return new SymbolVisitor(model);
+    public static SymbolProvider createSymbolProvider(Model model, ServiceShape serviceShape) {
+        return new SymbolVisitor(model, serviceShape);
     }
+
 }

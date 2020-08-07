@@ -1,8 +1,5 @@
 package software.amazon.smithy.typescript.codegen;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +13,9 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class RuntimeConfigGeneratorTest {
     @Test
@@ -68,7 +68,8 @@ public class RuntimeConfigGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider symbolProvider = TypeScriptCodegenPlugin
+                .createSymbolProvider(model, null);
         TypeScriptDelegator delegator = new TypeScriptDelegator(
                 settings, model, manifest, symbolProvider, integrations);
         RuntimeConfigGenerator generator = new RuntimeConfigGenerator(

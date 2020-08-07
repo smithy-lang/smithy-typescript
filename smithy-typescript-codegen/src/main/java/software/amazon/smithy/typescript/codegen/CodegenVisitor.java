@@ -30,13 +30,16 @@ import java.util.logging.Logger;
 
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.codegen.core.ArtifactDefinitions;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.TracingSymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -100,21 +103,47 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         runtimePlugins.add(runtimePlugin);
                     });
                 });
+
         // Sort the integrations in specified order.
         integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
-
-        // Decorate the symbol provider using integrations.
-        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
-        for (TypeScriptIntegration integration : integrations) {
-            resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
-        }
-        symbolProvider = SymbolProvider.cache(resolvedProvider);
 
         // Resolve the nullable protocol generator and application protocol.
         protocolGenerator = resolveProtocolGenerator(integrations, service, settings);
         applicationProtocol = protocolGenerator == null
                 ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
                 : protocolGenerator.getApplicationProtocol();
+
+        // Decorate the symbol provider using integrations.
+        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin
+                .createSymbolProvider(model, service);
+        for (TypeScriptIntegration integration : integrations) {
+            resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
+        }
+
+        //Make the symbol provider a cachingSymbolProvider
+        SymbolProvider cachedProvider = SymbolProvider.cache(resolvedProvider);
+
+        // Defining Definitions for TraceFile Generation
+        ArtifactDefinitions artifactDefinitions = ArtifactDefinitions.builder()
+                .addType(TypeScriptShapeLinkProvider.FIELD_TYPE,
+                        "Field declaration (includes enum constants)")
+                .addType(TypeScriptShapeLinkProvider.METHOD_TYPE, "Method declaration")
+                .addType(TypeScriptShapeLinkProvider.TYPE_TYPE,
+                        "Class, interface (including annotation type), or enum declaration")
+                .addTag(TypeScriptShapeLinkProvider.SERVICE_TAG, "Service client")
+                .addTag(TypeScriptShapeLinkProvider.REQUEST_TAG, "AWS SDK request type")
+                .addTag(TypeScriptShapeLinkProvider.RESPONSE_TAG, "AWS SDK response type")
+                .addTag(TypeScriptShapeLinkProvider.SERIALIZER_TAG, "Command serializer")
+                .addTag(TypeScriptShapeLinkProvider.DESERIALIZER_TAG, "Command deserializer")
+                .build();
+
+        // Decorate the symbol provider using the trace file generator
+        symbolProvider = TracingSymbolProvider.builder()
+                .symbolProvider(cachedProvider)
+                .setArtifactMetadataAsDefault("TypeScript")
+                .artifactDefinitions(artifactDefinitions)
+                .shapeLinkCreator(new TypeScriptShapeLinkProvider())
+                .build();
 
         writers = new TypeScriptDelegator(settings, model, fileManifest, symbolProvider, integrations);
     }
@@ -186,6 +215,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             ShapeId protocol = protocolGenerator.getProtocol();
             new HttpProtocolTestGenerator(settings, model, protocol, symbolProvider, writers).run();
         }
+
+        // Write the TraceFile.
+        TracingSymbolProvider traceProvider = (TracingSymbolProvider) symbolProvider;
+        String traceName = symbolProvider.toSymbol(service).getName().replace("Client", "")
+                .toLowerCase() + ".trace.json";
+        fileManifest.writeFile(traceName,
+                Node.prettyPrintJson(traceProvider.buildTraceFile().toNode()));
 
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");

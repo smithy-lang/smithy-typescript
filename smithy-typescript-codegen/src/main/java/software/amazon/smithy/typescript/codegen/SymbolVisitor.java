@@ -73,11 +73,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
     private final Model model;
+    private final ServiceShape serviceShape;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> errorShapes = new HashSet<>();
 
-    SymbolVisitor(Model model) {
+    SymbolVisitor(Model model, ServiceShape serviceShape) {
         this.model = model;
+        this.serviceShape = serviceShape;
 
         // Load reserved words from a new-line delimited file.
         ReservedWords reservedWords = new ReservedWordsBuilder()
@@ -231,6 +233,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         // Add input and output type symbols (XCommandInput / XCommandOutput).
         builder.putProperty("inputType", intermediate.toBuilder().name(commandName + "Input").build());
         builder.putProperty("outputType", intermediate.toBuilder().name(commandName + "Output").build());
+        // Add properties for TraceFile generation
+        builder.putProperty("serviceShape", serviceShape);
+        builder.putProperty("SymbolProvider", this);
+
         return builder.build();
     }
 
@@ -308,14 +314,20 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol unionShape(UnionShape shape) {
-        return createObjectSymbolBuilder(shape).build();
+        return createObjectSymbolBuilder(shape)
+                .putProperty("SymbolProvider", this)
+                .build();
     }
 
     @Override
     public Symbol memberShape(MemberShape shape) {
         Shape targetShape = model.getShape(shape.getTarget())
                 .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
-        Symbol targetSymbol = toSymbol(targetShape);
+        Symbol targetSymbol = toSymbol(targetShape)
+                .toBuilder()
+                .putProperty("model", model)
+                .putProperty("SymbolProvider", this)
+                .build();
 
         if (targetSymbol.getProperties().containsKey(EnumTrait.class.getName())) {
             return createMemberSymbolWithEnumTarget(targetSymbol);
@@ -363,14 +375,20 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createSymbolBuilder(Shape shape, String typeName) {
-        return Symbol.builder().putProperty("shape", shape).name(typeName);
+        return Symbol.builder()
+                .putProperty("shape", shape)
+                .putProperty("traceFileNamespace", formatModuleName(shape.getType(), null))
+                .putProperty("traceFileNamespaceDelimiter", "/")
+                .name(typeName);
     }
 
     private Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
         return Symbol.builder()
                 .putProperty("shape", shape)
                 .name(typeName)
-                .namespace(namespace, "/");
+                .namespace(namespace, "/")
+                .putProperty("traceFileNamespace", formatModuleName(shape.getType(), null))
+                .putProperty("traceFileNamespaceDelimiter", "/");
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {

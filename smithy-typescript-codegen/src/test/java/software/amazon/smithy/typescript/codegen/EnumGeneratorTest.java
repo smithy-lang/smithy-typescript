@@ -1,14 +1,14 @@
 package software.amazon.smithy.typescript.codegen;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class EnumGeneratorTest {
     @Test
@@ -19,7 +19,8 @@ public class EnumGeneratorTest {
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
-        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(Model.builder().build()).toSymbol(shape);
+        Symbol symbol = TypeScriptCodegenPlugin
+                .createSymbolProvider(Model.builder().build(), null).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export enum Baz {"));
@@ -35,7 +36,8 @@ public class EnumGeneratorTest {
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
-        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(Model.builder().build()).toSymbol(shape);
+        Symbol symbol = TypeScriptCodegenPlugin
+                .createSymbolProvider(Model.builder().build(), null).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export type Baz = \"BAR\" | \"FOO\""));
