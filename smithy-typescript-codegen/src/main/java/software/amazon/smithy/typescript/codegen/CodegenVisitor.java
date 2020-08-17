@@ -289,8 +289,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 String outputFilename = "pagination/"+ operation.getId().getName() +"Paginator.ts";
                 paginatorLocations.add(outputFilename);
                 writers.useFileWriter(outputFilename, paginationWriter ->
-                        new PaginationGenerator(settings, model, operation, symbolProvider, paginationWriter,
-                                runtimePlugins, protocolGenerator, applicationProtocol, nonModularName, paginationInterfaceLocation).run());
+                        new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
+                                nonModularName, paginationInterfaceLocation).run());
             }
         }
 

@@ -4,35 +4,17 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.PaginatedIndex;
 import software.amazon.smithy.model.knowledge.PaginationInfo;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.traits.PaginatedTrait;
-import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 final class PaginationGenerator implements Runnable {
 
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final ServiceShape service;
-    private final OperationShape operation;
     private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
-    private final Symbol symbol;
-    private final List<RuntimeClientPlugin> runtimePlugins;
-    private final OperationIndex operationIndex;
-    private final Symbol inputType;
-    private final Symbol outputType;
-    private final ProtocolGenerator protocolGenerator;
-    private final ApplicationProtocol applicationProtocol;
     private final PaginationInfo paginatedInfo;
 
     private Symbol serviceSymbol;
@@ -45,58 +27,34 @@ final class PaginationGenerator implements Runnable {
     private String paginationType;
     private String interfaceLocation;
 
-    PaginationGenerator(TypeScriptSettings settings,
-                        Model model,
+    PaginationGenerator(Model model,
+                        ServiceShape service,
                         OperationShape operation,
                         SymbolProvider symbolProvider,
                         TypeScriptWriter writer,
-                        List<RuntimeClientPlugin> runtimePlugins,
-                        ProtocolGenerator protocolGenerator,
-                        ApplicationProtocol applicationProtocol,
                         String nonModularServiceName,
                         String interfaceLocation){
 
-        this.settings = settings;
-        this.model = model;
-        this.service = settings.getService(model);
-        this.operation = operation;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
-        this.runtimePlugins = runtimePlugins.stream()
-                .filter(plugin -> plugin.matchesOperation(model, service, operation))
-                .collect(Collectors.toList());
-        this.protocolGenerator = protocolGenerator;
-        this.applicationProtocol = applicationProtocol;
-
-        symbol = symbolProvider.toSymbol(operation);
-        operationIndex = model.getKnowledge(OperationIndex.class);
-        inputType = symbol.expectProperty("inputType", Symbol.class);
-        outputType = symbol.expectProperty("outputType", Symbol.class);
-
-        String operationName = operation.getId().getName();
 
         this.serviceSymbol = symbolProvider.toSymbol(service);
         this.operationSymbol = symbolProvider.toSymbol(operation);
         this.inputSymbol = symbolProvider.toSymbol(operation).expectProperty("inputType", Symbol.class);
         this.outputSymbol = symbolProvider.toSymbol(operation).expectProperty("outputType", Symbol.class);
 
-
+        String operationName = operation.getId().getName();
         this.nonModularServiceName = nonModularServiceName;
         this.methodName = Character.toLowerCase(operationName.charAt(0)) + operationName.substring(1); // e.g. listObjects
         this.paginationType = this.nonModularServiceName + "PaginationConfiguration";
         this.interfaceLocation = interfaceLocation;
 
-        Optional<PaginationInfo> paginationInfo = model.getKnowledge(PaginatedIndex.class).getPaginationInfo(this.service, this.operation);
+        Optional<PaginationInfo> paginationInfo = model.getKnowledge(PaginatedIndex.class).getPaginationInfo(service, operation);
         this.paginatedInfo = paginationInfo.orElseThrow(() -> {return new CodegenException("Expected Paginator to have pagination information.");});
     }
 
     @Override
     public void run() {
-        Symbol serviceSymbol = symbolProvider.toSymbol(service);
-        String configType = ServiceGenerator.getResolvedConfigTypeName(serviceSymbol);
-
-        writer.addImport(configType, configType, serviceSymbol.getNamespace());
-
         // Import Service Types
         writer.addImport(this.operationSymbol.getName(), this.operationSymbol.getName(), this.operationSymbol.getNamespace());
         writer.addImport(this.inputSymbol.getName(), this.inputSymbol.getName(), this.inputSymbol.getNamespace());
@@ -112,6 +70,7 @@ final class PaginationGenerator implements Runnable {
         this.writeFullRequest();
         this.writePaginator();
     }
+
     public static void generateServicePaginationInterfaces(String nonModularServiceName, Symbol service, TypeScriptWriter writer){
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         writer.addImport(nonModularServiceName, nonModularServiceName, service.getNamespace().replace(service.getName(), nonModularServiceName));
