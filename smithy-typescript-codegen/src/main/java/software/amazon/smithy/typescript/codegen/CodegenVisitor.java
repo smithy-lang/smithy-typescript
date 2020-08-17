@@ -15,17 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -34,6 +24,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.PaginationInfo;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -47,6 +38,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
@@ -277,10 +269,27 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        Set<String> paginationFiles  = new TreeSet<>();
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
+            if(operation.hasTrait(PaginatedTrait.ID)){
+                String outputFilename = "pagination/"+ operation.getId().getName() +"Paginator.ts";
+                paginationFiles.add(outputFilename);
+                writers.useFileWriter(outputFilename, paginationWriter ->
+                        new PaginationGenerator(settings, model, operation, symbolProvider, paginationWriter,
+                                runtimePlugins, protocolGenerator, applicationProtocol, nonModularName).run());
+            }
+        }
+
+        // TODO add pagination files to export in index.ts
+        for (String file: paginationFiles){
+            // write to the index.ts an export
+        }
+
+        if (paginationFiles.size() > 0){
+            // TODO add jmespath to the package.json
         }
 
         if (protocolGenerator != null) {
