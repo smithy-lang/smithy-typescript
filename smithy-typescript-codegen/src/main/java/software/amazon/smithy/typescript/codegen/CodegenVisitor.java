@@ -34,7 +34,6 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.PaginationInfo;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -279,14 +278,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        Set<String> paginationFiles  = new TreeSet<>();
+        Set<String> paginatorLocations = new TreeSet<>();
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
             if(operation.hasTrait(PaginatedTrait.ID)){
                 String outputFilename = "pagination/"+ operation.getId().getName() +"Paginator.ts";
-                paginationFiles.add(outputFilename);
+                paginatorLocations.add(outputFilename);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(settings, model, operation, symbolProvider, paginationWriter,
                                 runtimePlugins, protocolGenerator, applicationProtocol, nonModularName).run());
@@ -294,12 +293,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         // TODO add pagination files to export in index.ts
-        for (String file: paginationFiles){
+        for (String file: paginatorLocations) {
             // write to the index.ts an export
-        }
-
-        if (paginationFiles.size() > 0){
-            // TODO add jmespath to the package.json
         }
 
         if (protocolGenerator != null) {
