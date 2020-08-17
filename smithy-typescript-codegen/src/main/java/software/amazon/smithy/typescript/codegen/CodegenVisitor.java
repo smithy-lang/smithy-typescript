@@ -15,7 +15,17 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
