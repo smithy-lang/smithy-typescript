@@ -41,12 +41,8 @@ final class PaginationGenerator implements Runnable {
 
     private String methodName;
     private String nonModularServiceName;
-//    private String commandName;
-//    private String commandInput;
-//    private String commandOutput;
-//    private String serviceClassName;
-//    private String serviceClientClassName;
     private String paginationType;
+    private String interfaceLocation;
 
     PaginationGenerator(TypeScriptSettings settings,
                         Model model,
@@ -56,7 +52,8 @@ final class PaginationGenerator implements Runnable {
                         List<RuntimeClientPlugin> runtimePlugins,
                         ProtocolGenerator protocolGenerator,
                         ApplicationProtocol applicationProtocol,
-                        String nonModularServiceName){
+                        String nonModularServiceName,
+                        String interfaceLocation){
 
         this.settings = settings;
         this.model = model;
@@ -75,14 +72,7 @@ final class PaginationGenerator implements Runnable {
         inputType = symbol.expectProperty("inputType", Symbol.class);
         outputType = symbol.expectProperty("outputType", Symbol.class);
 
-        String operationName = operation.getId().getName(); //ListObjects
-//        this.methodName = Character.toLowerCase(operationName.charAt(0)) + operationName.substring(1); //listObjects
-//        this.commandName = operationName + "Command"; //ListObjectsCommand
-//        this.commandInput = commandName + "Input"; //ListObjectsCommandInput
-//        this.commandOutput = commandName + "Output"; //ListObjectsCommandOutput
-//        this.serviceClassName = service.getId().getName(); // S3
-//        this.serviceClientClassName = serviceClassName + "Client"; // S3Client
-//        this.paginationType = this.serviceClassName + "PaginationConfiguration";
+        String operationName = operation.getId().getName();
 
         this.serviceSymbol = symbolProvider.toSymbol(service);
         this.operationSymbol = symbolProvider.toSymbol(operation);
@@ -92,17 +82,8 @@ final class PaginationGenerator implements Runnable {
 
         this.nonModularServiceName = nonModularServiceName;
         this.methodName = Character.toLowerCase(operationName.charAt(0)) + operationName.substring(1); // e.g. listObjects
-
-//        this.commandName = commandSymbol.getName(); //ListObjectsCommand
-//        this.commandInput = inputSymbol.getName(); //ListObjectsCommandInput
-//        this.commandOutput = outputSymbol.getName(); //ListObjectsCommandOutput
-//        this.serviceClassName = service.getId().getName(); // S3
-//        this.serviceClientClassName = symbolProvider.toSymbol(service).getName(); // S3Client
         this.paginationType = this.nonModularServiceName + "PaginationConfiguration";
-
-
-        Symbol serviceSym = symbolProvider.toSymbol(service);
-
+        this.interfaceLocation = interfaceLocation;
 
         Optional<PaginationInfo> paginationInfo = model.getKnowledge(PaginatedIndex.class).getPaginationInfo(this.service, this.operation);
         this.paginatedInfo = paginationInfo.orElseThrow(() -> {return new CodegenException("Expected Paginator to have pagination information.");});
@@ -125,23 +106,20 @@ final class PaginationGenerator implements Runnable {
         // Import Pagination types
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
+        writer.addImport(this.paginationType, this.paginationType, "./" + this.interfaceLocation);
 
-        this.writeInterfaces();
         this.writeClientSideRequest();
         this.writeFullRequest();
         this.writePaginator();
-
     }
-
-    private void writeInterfaces(){
-        writer.openBlock("interface $L extends PaginationConfiguration {",
-                "}", this.paginationType, () -> {
-            writer.write("client: $L | $L ", this.nonModularServiceName, this.serviceSymbol.getName());
+    public static void generateServicePaginationInterfaces(String serviceType, String clientServiceType, TypeScriptWriter writer){
+        writer.openBlock("interface $LPaginationConfiguration extends PaginationConfiguration {", "}", serviceType, () -> {
+            writer.write("client: $L | $L ", serviceType, clientServiceType);
         });
     }
 
     private void writePaginator(){
-        writer.openBlock("export async function* $LPaginate(config: $L, input: $L, ...commandArgs: any): Promise<$L>{", "}", this.methodName, this.paginationType, this.commandInput, this.commandOutput, () -> {
+        writer.openBlock("export async function* $LPaginate(config: $L, input: $L, ...commandArgs: any): Promise<$L>{", "}", this.methodName, this.paginationType, this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("let token = config.startingToken || '';");
             writer.openBlock("const keyMapping = {", "}", () -> {
                 if (this.paginatedInfo.getPageSizeMember().isPresent()){
@@ -152,18 +130,18 @@ final class PaginationGenerator implements Runnable {
             });
 
             writer.write("let hasNext = true;");
-            writer.write("let page:$L;", this.commandOutput);
+            writer.write("let page:$L;", this.outputSymbol.getName());
             writer.openBlock("while (hasNext) {", "}", () -> {
                 writer.write("input[keyMapping.inputToken] = token;");
                 writer.write("input[keyMapping.limitKey] = config.pageSize;");
-                writer.openBlock("if(config.client instanceof $L) {", "}", this.serviceClassName, () -> {
+                writer.openBlock("if(config.client instanceof $L) {", "}", this.nonModularServiceName, () -> {
                     writer.write("page = await makePagedRequest(config.client, input, ...additionalArguments);");
                 });
-                writer.openBlock("else if (config.client instanceof $L) {", "}", this.serviceClientClassName, () -> {
+                writer.openBlock("else if (config.client instanceof $L) {", "}", this.serviceSymbol.getName(), () -> {
                     writer.write(" page = await makePagedClientRequest(config.client, input, ...additionalArguments);");
                 });
                 writer.openBlock("else {", "}", () -> {
-                    writer.write(" throw new Error(\"Invalid client, expected $L | $L\");", this.serviceClassName, this.serviceClientClassName);
+                    writer.write(" throw new Error(\"Invalid client, expected $L | $L\");", this.nonModularServiceName, this.serviceSymbol.getName());
                 });
 
                 writer.write("yield page;");
@@ -174,18 +152,18 @@ final class PaginationGenerator implements Runnable {
         });
     }
 
-    private void writeClientSideRequest(){
-        writer.openBlock("const makePagedClientRequest = async (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {", "}", this.serviceClientClassName, this.commandInput, this.commandOutput, () -> {
-            writer.write("// @ts-ignore");
-            writer.write("return await client.send(new $L(input, ...additionalArguments));", this.operationSymbol.getName());
-        });
-    }
 
     private void writeFullRequest(){
-        writer.openBlock("const makePagedRequest = async (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {", "}", this.serviceClassName, this.commandInput, this.commandOutput, () -> {
+        writer.openBlock("const makePagedRequest = async (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {", "}", this.nonModularServiceName, this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
             writer.write("return await client.$L(input, ...additionalArguments);", this.methodName);
         });
     }
 
+    private void writeClientSideRequest(){
+        writer.openBlock("const makePagedClientRequest = async (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {", "}", this.serviceSymbol.getName(), this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
+            writer.write("// @ts-ignore");
+            writer.write("return await client.send(new $L(input, ...additionalArguments));", this.operationSymbol.getName());
+        });
+    }
 }

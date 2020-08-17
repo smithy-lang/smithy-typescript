@@ -279,6 +279,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         Set<String> paginatorLocations = new TreeSet<>();
+        String paginationInterfaceLocation = "pagination/interface.ts";
+
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
@@ -288,13 +290,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 paginatorLocations.add(outputFilename);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(settings, model, operation, symbolProvider, paginationWriter,
-                                runtimePlugins, protocolGenerator, applicationProtocol, nonModularName).run());
+                                runtimePlugins, protocolGenerator, applicationProtocol, nonModularName, paginationInterfaceLocation).run());
             }
         }
 
         // TODO add pagination files to export in index.ts
         for (String file: paginatorLocations) {
             // write to the index.ts an export
+        }
+        
+        if (!paginatorLocations.isEmpty()){
+            writers.useFileWriter(paginationInterfaceLocation, paginationWriter ->
+            PaginationGenerator.generateServicePaginationInterfaces(nonModularName, serviceSymbol.getName(), paginationWriter));
         }
 
         if (protocolGenerator != null) {
