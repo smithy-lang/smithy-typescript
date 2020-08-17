@@ -33,7 +33,7 @@ final class PaginationGenerator implements Runnable {
                         SymbolProvider symbolProvider,
                         TypeScriptWriter writer,
                         String nonModularServiceName,
-                        String interfaceLocation){
+                        String interfaceLocation) {
 
         this.symbolProvider = symbolProvider;
         this.writer = writer;
@@ -50,7 +50,9 @@ final class PaginationGenerator implements Runnable {
         this.interfaceLocation = interfaceLocation;
 
         Optional<PaginationInfo> paginationInfo = model.getKnowledge(PaginatedIndex.class).getPaginationInfo(service, operation);
-        this.paginatedInfo = paginationInfo.orElseThrow(() -> {return new CodegenException("Expected Paginator to have pagination information.");});
+        this.paginatedInfo = paginationInfo.orElseThrow(() -> {
+            return new CodegenException("Expected Paginator to have pagination information.");
+        });
     }
 
     @Override
@@ -71,7 +73,7 @@ final class PaginationGenerator implements Runnable {
         this.writePaginator();
     }
 
-    public static void generateServicePaginationInterfaces(String nonModularServiceName, Symbol service, TypeScriptWriter writer){
+    public static void generateServicePaginationInterfaces(String nonModularServiceName, Symbol service, TypeScriptWriter writer) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         writer.addImport(nonModularServiceName, nonModularServiceName, service.getNamespace().replace(service.getName(), nonModularServiceName));
         writer.addImport(service.getName(), service.getName(), service.getNamespace());
@@ -81,7 +83,7 @@ final class PaginationGenerator implements Runnable {
         });
     }
 
-    private void writePaginator(){
+    private void writePaginator() {
         writer.openBlock("export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{", "}", this.methodName, this.paginationType, this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("let token = config.startingToken || '';");
 
@@ -89,7 +91,7 @@ final class PaginationGenerator implements Runnable {
             writer.write("let page:$L;", this.outputSymbol.getName());
             writer.openBlock("while (hasNext) {", "}", () -> {
                 writer.write("input[\"$L\"] = token;", this.paginatedInfo.getInputTokenMember().getMemberName());
-                if (this.paginatedInfo.getPageSizeMember().isPresent()){
+                if (this.paginatedInfo.getPageSizeMember().isPresent()) {
                     writer.write("input[\"$L\"] = config.pageSize;", this.paginatedInfo.getPageSizeMember().get().getMemberName());
                 }
 
@@ -104,7 +106,7 @@ final class PaginationGenerator implements Runnable {
                 });
 
                 writer.write("yield page;");
-                if (this.paginatedInfo.getOutputTokenMember().getMemberName().contains(".")){
+                if (this.paginatedInfo.getOutputTokenMember().getMemberName().contains(".")) {
                     // Smithy allows one level indexing (ex. 'bucket.outputToken').
                     String[] outputIndex = this.paginatedInfo.getOutputTokenMember().getMemberName().split(".");
                     writer.write("token = page[\"$L\"][\"$L\"];", outputIndex[0], outputIndex[1]);
@@ -120,14 +122,14 @@ final class PaginationGenerator implements Runnable {
     }
 
 
-    private void writeFullRequest(){
+    private void writeFullRequest() {
         writer.openBlock("const makePagedRequest = async (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {", "}", this.nonModularServiceName, this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
             writer.write("return await client.$L(input, ...additionalArguments);", this.methodName);
         });
     }
 
-    private void writeClientSideRequest(){
+    private void writeClientSideRequest() {
         writer.openBlock("const makePagedClientRequest = async (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {", "}", this.serviceSymbol.getName(), this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
             writer.write("return await client.send(new $L(input, ...additionalArguments));", this.operationSymbol.getName());

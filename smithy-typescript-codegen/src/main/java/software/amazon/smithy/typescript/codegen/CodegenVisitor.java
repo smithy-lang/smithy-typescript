@@ -27,6 +27,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -58,7 +59,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
 
-    /** A mapping of static resource files to copy over to a new filename. */
+    /**
+     * A mapping of static resource files to copy over to a new filename.
+     */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
             "jest.config.js", "jest.config.js",
             "tsconfig.es.json", "tsconfig.es.json",
@@ -285,8 +288,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
-            if(operation.hasTrait(PaginatedTrait.ID)){
-                String outputFilename = "pagination/"+ operation.getId().getName() +"Paginator.ts";
+            if (operation.hasTrait(PaginatedTrait.ID)) {
+                String outputFilename = "pagination/" + operation.getId().getName() + "Paginator.ts";
                 paginatorLocations.add(outputFilename);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
@@ -295,13 +298,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         // TODO add pagination files to export in index.ts
-        for (String file: paginatorLocations) {
+        for (String file : paginatorLocations) {
             // write to the index.ts an export
         }
 
-        if (!paginatorLocations.isEmpty()){
+        if (!paginatorLocations.isEmpty()) {
             writers.useFileWriter(paginationInterfaceLocation, paginationWriter ->
-            PaginationGenerator.generateServicePaginationInterfaces(nonModularName, serviceSymbol, paginationWriter));
+                    PaginationGenerator.generateServicePaginationInterfaces(nonModularName, serviceSymbol, paginationWriter));
         }
 
         if (protocolGenerator != null) {
