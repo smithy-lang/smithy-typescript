@@ -13,6 +13,7 @@ import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -104,36 +105,35 @@ final class PaginationGenerator implements Runnable {
         writer.addImport(this.serviceSymbol.getName(), this.serviceSymbol.getName(), this.serviceSymbol.getNamespace());
 
         // Import Pagination types
-        writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
-        writer.addImport(this.paginationType, this.paginationType, "./" + this.interfaceLocation);
+        writer.addImport(this.paginationType, this.paginationType, "./" + this.interfaceLocation.replace(".ts", ""));
 
         this.writeClientSideRequest();
         this.writeFullRequest();
         this.writePaginator();
     }
-    public static void generateServicePaginationInterfaces(String serviceType, String clientServiceType, TypeScriptWriter writer){
-        writer.openBlock("interface $LPaginationConfiguration extends PaginationConfiguration {", "}", serviceType, () -> {
-            writer.write("client: $L | $L ", serviceType, clientServiceType);
+    public static void generateServicePaginationInterfaces(String nonModularServiceName, Symbol service, TypeScriptWriter writer){
+        writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
+        writer.addImport(nonModularServiceName, nonModularServiceName, service.getNamespace().replace(service.getName(), nonModularServiceName));
+        writer.addImport(service.getName(), service.getName(), service.getNamespace());
+
+        writer.openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {", "}", nonModularServiceName, () -> {
+            writer.write("client: $L | $L;", nonModularServiceName, service.getName());
         });
     }
 
     private void writePaginator(){
-        writer.openBlock("export async function* $LPaginate(config: $L, input: $L, ...commandArgs: any): Promise<$L>{", "}", this.methodName, this.paginationType, this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
+        writer.openBlock("export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{", "}", this.methodName, this.paginationType, this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("let token = config.startingToken || '';");
-            writer.openBlock("const keyMapping = {", "}", () -> {
-                if (this.paginatedInfo.getPageSizeMember().isPresent()){
-                    writer.write("limitKey: \"$L\",", this.paginatedInfo.getPageSizeMember().get());
-                }
-                writer.write("inputToken: \"$L\",", this.paginatedInfo.getInputTokenMember().getMemberName());
-                writer.write("outputToken: \"$L\",", this.paginatedInfo.getOutputTokenMember().getMemberName());
-            });
 
             writer.write("let hasNext = true;");
             writer.write("let page:$L;", this.outputSymbol.getName());
             writer.openBlock("while (hasNext) {", "}", () -> {
-                writer.write("input[keyMapping.inputToken] = token;");
-                writer.write("input[keyMapping.limitKey] = config.pageSize;");
+                writer.write("input[\"$L\"] = token;", this.paginatedInfo.getInputTokenMember().getMemberName());
+                if (this.paginatedInfo.getPageSizeMember().isPresent()){
+                    writer.write("input[\"$L\"] = config.pageSize;", this.paginatedInfo.getPageSizeMember().get().getMemberName());
+                }
+
                 writer.openBlock("if(config.client instanceof $L) {", "}", this.nonModularServiceName, () -> {
                     writer.write("page = await makePagedRequest(config.client, input, ...additionalArguments);");
                 });
@@ -145,7 +145,15 @@ final class PaginationGenerator implements Runnable {
                 });
 
                 writer.write("yield page;");
-                writer.write("token = page[keyMapping.outputToken];");
+                if (this.paginatedInfo.getOutputTokenMember().getMemberName().contains(".")){
+                    // Smithy allows one level indexing (ex. 'bucket.outputToken').
+                    String[] outputIndex = this.paginatedInfo.getOutputTokenMember().getMemberName().split(".");
+                    writer.write("token = page[\"$L\"][\"$L\"];", outputIndex[0], outputIndex[1]);
+
+                } else {
+                    writer.write("token = page[\"$L\"];", paginatedInfo.getOutputTokenMember().getMemberName());
+                }
+
                 writer.write("hasNext = !!(token);");
             });
             writer.write("return undefined;");
