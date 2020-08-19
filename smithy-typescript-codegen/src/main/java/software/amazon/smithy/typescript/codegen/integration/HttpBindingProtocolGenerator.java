@@ -227,12 +227,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // them. The client's resolved endpoint can be default one or supplied by users.
             writer.write("const {hostname, protocol = \"https\", port} = await context.endpoint();");
             writer.openBlock("return new $T({", "});", requestType, () -> {
+                writer.write("protocol,");
                 if (hasHostPrefix) {
                     writer.write("hostname: resolvedHostname,");
                 } else {
                     writer.write("hostname,");
                 }
-                writer.write("protocol,");
                 writer.write("port,");
                 writer.write("method: $S,", trait.getMethod());
                 writer.write("headers,");
