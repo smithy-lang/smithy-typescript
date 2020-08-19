@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 /**
  * Generates objects, interfaces, enums, etc.
@@ -107,10 +108,13 @@ final class StructuredMemberWriter {
         if (structureTarget.hasTrait(SensitiveTrait.class)) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
-            return;
+        } else if (structureTarget.hasTrait(StreamingTrait.class) && structureTarget.isUnionShape()) {
+            // disable logging for StreamingTrait
+            writer.write("'STREAMING_TRAIT'");
+        } else {
+            // Call filterSensitiveLog on Structure.
+            writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
         }
-        // Call filterSensitiveLog on Structure.
-        writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
     }
 
     /**

@@ -180,6 +180,17 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void filtersStreamingUnion() {
+        testStructureCodegen("test-streaming-union.smithy",
+                                "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
+                                + "    ...obj,\n"
+                                + "    ...(obj.foo && { foo:\n"
+                                + "      'STREAMING_TRAIT'\n"
+                                + "    }),\n"
+                                + "  })\n");
+    }
+
+    @Test
     public void filtersSensitiveUnion() {
         testStructureCodegen("test-sensitive-union.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
