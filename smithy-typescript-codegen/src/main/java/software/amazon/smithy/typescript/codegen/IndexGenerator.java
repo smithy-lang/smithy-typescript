@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.Set;
 import java.util.TreeSet;
+
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -24,6 +25,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.traits.PaginatedTrait;
 
 /**
  * Generates an index to export the service client and each command.
@@ -52,8 +54,18 @@ final class IndexGenerator {
         // write export statements for each command in /commands directory
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        Boolean isPaginatedService = false;
         for (OperationShape operation : containedOperations) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
+            if (operation.hasTrait(PaginatedTrait.ID)) {
+                isPaginatedService = true;
+                String modulePath = PaginationGenerator.generateOutputFilelocation(operation);
+                writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
+            }
+        }
+        if (isPaginatedService) {
+            String modulePath = PaginationGenerator.generateInterfaceFilelocation();
+            writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
         }
 
         // write export statement for models

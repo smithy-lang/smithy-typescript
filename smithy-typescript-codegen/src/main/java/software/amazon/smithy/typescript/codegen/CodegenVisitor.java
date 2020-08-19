@@ -281,30 +281,27 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        Set<String> paginatorLocations = new TreeSet<>();
-        String paginationInterfaceLocation = "pagination/Interfaces.ts";
+        Boolean isPaginatedService = false;
 
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
             if (operation.hasTrait(PaginatedTrait.ID)) {
-                String outputFilename = "pagination/" + operation.getId().getName() + "Paginator.ts";
-                paginatorLocations.add(outputFilename);
+                isPaginatedService = true;
+                String outputFilename = PaginationGenerator.generateOutputFilelocation(operation);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
-                                nonModularName, paginationInterfaceLocation).run());
+                                nonModularName).run());
             }
         }
 
-        // TODO add pagination files to export in index.ts
-        for (String file : paginatorLocations) {
-            // write to the index.ts an export
-        }
-
-        if (!paginatorLocations.isEmpty()) {
-            writers.useFileWriter(paginationInterfaceLocation, paginationWriter ->
-                    PaginationGenerator.generateServicePaginationInterfaces(nonModularName, serviceSymbol, paginationWriter));
+        if (isPaginatedService) {
+            writers.useFileWriter(PaginationGenerator.generateInterfaceFilelocation(), paginationWriter ->
+                    PaginationGenerator.generateServicePaginationInterfaces(
+                            nonModularName,
+                            serviceSymbol,
+                            paginationWriter));
         }
 
         if (protocolGenerator != null) {
