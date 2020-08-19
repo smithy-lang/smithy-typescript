@@ -229,9 +229,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 if (hasHostPrefix) {
                     writer.write("hostname: resolvedHostname,");
+                } else {
+                    writer.write("hostname,");
                 }
                 writer.write("protocol,");
-                writer.write("hostname,");
                 writer.write("port,");
                 writer.write("method: $S,", trait.getMethod());
                 writer.write("headers,");
