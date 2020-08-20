@@ -29,7 +29,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 
 final class PaginationGenerator implements Runnable {
 
-    private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
     private final PaginationInfo paginatedInfo;
 
@@ -50,7 +49,6 @@ final class PaginationGenerator implements Runnable {
                         TypeScriptWriter writer,
                         String nonModularServiceName) {
 
-        this.symbolProvider = symbolProvider;
         this.writer = writer;
 
         this.serviceSymbol = symbolProvider.toSymbol(service);
@@ -129,7 +127,7 @@ final class PaginationGenerator implements Runnable {
         writer.openBlock("$L $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
                 "}", functionType, this.methodName, this.paginationType,
                 this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
-            writer.write("let token = config.startingToken || '';");
+            writer.write("let token: string | undefined = config.startingToken || '';");
 
             writer.write("let hasNext = true;");
             writer.write("let page:$L;", this.outputSymbol.getName());
@@ -163,6 +161,8 @@ final class PaginationGenerator implements Runnable {
 
                 writer.write("hasNext = !!(token);");
             });
+
+            writer.write("// @ts-ignore");
             writer.write("return undefined;");
         });
     }
