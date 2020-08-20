@@ -64,7 +64,7 @@ final class IndexGenerator {
             }
         }
         if (hasPaginatedOperation) {
-            String modulePath = PaginationGenerator.getInterfaceFilelocation();
+            String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
             writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
         }
 

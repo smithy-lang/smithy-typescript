@@ -297,7 +297,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (hasPaginatedOperation) {
-            writers.useFileWriter(PaginationGenerator.getInterfaceFilelocation(), paginationWriter ->
+            writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
                             nonModularName,
                             serviceSymbol,
