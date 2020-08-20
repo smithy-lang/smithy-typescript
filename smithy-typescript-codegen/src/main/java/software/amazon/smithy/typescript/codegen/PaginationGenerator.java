@@ -100,15 +100,15 @@ final class PaginationGenerator implements Runnable {
         this.writePager();
     }
 
-    public static String getOutputFilelocation(OperationShape operation) {
+    static String getOutputFilelocation(OperationShape operation) {
         return "pagination/" + operation.getId().getName() + "Paginator.ts";
     }
 
-    public static String getInterfaceFilelocation() {
+    static String getInterfaceFilelocation() {
         return "pagination/Interfaces.ts";
     }
 
-    public static void generateServicePaginationInterfaces(String nonModularServiceName,
+    static void generateServicePaginationInterfaces(String nonModularServiceName,
                                                            Symbol service,
                                                            TypeScriptWriter writer) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
