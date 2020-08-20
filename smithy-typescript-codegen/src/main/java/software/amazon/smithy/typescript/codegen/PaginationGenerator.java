@@ -66,8 +66,8 @@ final class PaginationGenerator implements Runnable {
         this.methodName = Character.toLowerCase(operationName.charAt(0)) + operationName.substring(1);
         this.paginationType = this.nonModularServiceName + "PaginationConfiguration";
 
-        PaginatedIndex paginatedModel = model.getKnowledge(PaginatedIndex.class);
-        Optional<PaginationInfo> paginationInfo = paginatedModel.getPaginationInfo(service, operation);
+        PaginatedIndex paginatedIndex = model.getKnowledge(PaginatedIndex.class);
+        Optional<PaginationInfo> paginationInfo = paginatedIndex.getPaginationInfo(service, operation);
         this.paginatedInfo = paginationInfo.orElseThrow(() -> {
             return new CodegenException("Expected Paginator to have pagination information.");
         });
