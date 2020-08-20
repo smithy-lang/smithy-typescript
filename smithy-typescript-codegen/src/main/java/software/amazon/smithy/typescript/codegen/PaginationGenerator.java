@@ -42,12 +42,14 @@ final class PaginationGenerator implements Runnable {
     private String paginationType;
     private String interfaceLocation;
 
-    PaginationGenerator(Model model,
-                        ServiceShape service,
-                        OperationShape operation,
-                        SymbolProvider symbolProvider,
-                        TypeScriptWriter writer,
-                        String nonModularServiceName) {
+    PaginationGenerator(
+            Model model,
+            ServiceShape service,
+            OperationShape operation,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer,
+            String nonModularServiceName
+    ) {
 
         this.writer = writer;
 
@@ -61,7 +63,7 @@ final class PaginationGenerator implements Runnable {
         this.methodName = Character.toLowerCase(operationName.charAt(0))
                 + operationName.substring(1); // e.g. listObjects
         this.paginationType = this.nonModularServiceName + "PaginationConfiguration";
-        this.interfaceLocation = PaginationGenerator.generateInterfaceFilelocation();
+        this.interfaceLocation = PaginationGenerator.getInterfaceFilelocation();
 
         PaginatedIndex paginatedModel = model.getKnowledge(PaginatedIndex.class);
         Optional<PaginationInfo> paginationInfo = paginatedModel.getPaginationInfo(service, operation);
@@ -94,18 +96,16 @@ final class PaginationGenerator implements Runnable {
         writer.addImport(this.paginationType, this.paginationType, "./" + this.interfaceLocation.replace(".ts", ""));
 
         this.writeClientSideRequest();
-        this.writeFullRequest();
+        this.writeRequest();
         this.writePager();
     }
 
-    public static String generateOutputFilelocation(OperationShape operation) {
-        String outputFilename = "pagination/" + operation.getId().getName() + "Paginator.ts";
-        return outputFilename;
+    public static String getOutputFilelocation(OperationShape operation) {
+        return "pagination/" + operation.getId().getName() + "Paginator.ts";
     }
 
-    public static String generateInterfaceFilelocation() {
-        String outputFilename = "pagination/Interfaces.ts";
-        return outputFilename;
+    public static String getInterfaceFilelocation() {
+        return "pagination/Interfaces.ts";
     }
 
     public static void generateServicePaginationInterfaces(String nonModularServiceName,
@@ -123,9 +123,9 @@ final class PaginationGenerator implements Runnable {
     }
 
     private void writePager() {
-        String functionType = "export async function*";
-        writer.openBlock("$L $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
-                "}", functionType, this.methodName, this.paginationType,
+        writer.openBlock(
+                "export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
+                "}",  this.methodName, this.paginationType,
                 this.inputSymbol.getName(), this.outputSymbol.getName(), () -> {
             writer.write("let token: string | undefined = config.startingToken || '';");
 
@@ -138,7 +138,7 @@ final class PaginationGenerator implements Runnable {
                     writer.write("input[\"$L\"] = config.pageSize;", pageSize);
                 }
 
-                writer.openBlock("if(config.client instanceof $L) {", "}", this.nonModularServiceName, () -> {
+                writer.openBlock("if (config.client instanceof $L) {", "}", this.nonModularServiceName, () -> {
                     writer.write("page = await makePagedRequest(config.client, input, ...additionalArguments);");
                 });
                 writer.openBlock("else if (config.client instanceof $L) {", "}", this.serviceSymbol.getName(), () -> {
@@ -168,23 +168,31 @@ final class PaginationGenerator implements Runnable {
     }
 
 
-    private void writeFullRequest() {
-        String funcDefinition = "const makePagedRequest = async";
-        writer.openBlock("$L (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {",
-                "}", funcDefinition, this.nonModularServiceName, this.inputSymbol.getName(),
+    /**
+     * Paginated command that calls Command({...}) under the hood. This is meant for server side environments and
+     * exposes the entire service.
+     */
+    private void writeRequest() {
+        writer.openBlock(
+                "const makePagedRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
+                "}", this.nonModularServiceName, this.inputSymbol.getName(),
                 this.outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
-            writer.write("return await client.$L(input, ...additionalArguments);", this.methodName);
+            writer.write("return await client.$L(input, ...args);", this.methodName);
         });
     }
 
+    /**
+     * Paginated command that calls CommandClient().send({...}) under the hood. This is meant for client side (browser)
+     * environments and does not generally expose the entire service.
+     */
     private void writeClientSideRequest() {
-        String funcDefinition = "const makePagedClientRequest = async";
-        writer.openBlock("$L (client: $L, input: $L, ...additionalArguments: any): Promise<$L> => {",
-                "}", funcDefinition, this.serviceSymbol.getName(), this.inputSymbol.getName(),
+        writer.openBlock(
+                "const makePagedClientRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
+                "}", this.serviceSymbol.getName(), this.inputSymbol.getName(),
                 this.outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
-            writer.write("return await client.send(new $L(input, ...additionalArguments));",
+            writer.write("return await client.send(new $L(input, ...args));",
                     this.operationSymbol.getName());
         });
     }

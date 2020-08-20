@@ -54,17 +54,17 @@ final class IndexGenerator {
         // write export statements for each command in /commands directory
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        Boolean isPaginatedService = false;
+        boolean hasPaginatedOperation = false;
         for (OperationShape operation : containedOperations) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
             if (operation.hasTrait(PaginatedTrait.ID)) {
-                isPaginatedService = true;
-                String modulePath = PaginationGenerator.generateOutputFilelocation(operation);
+                hasPaginatedOperation = true;
+                String modulePath = PaginationGenerator.getOutputFilelocation(operation);
                 writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
             }
         }
-        if (isPaginatedService) {
-            String modulePath = PaginationGenerator.generateInterfaceFilelocation();
+        if (hasPaginatedOperation) {
+            String modulePath = PaginationGenerator.getInterfaceFilelocation();
             writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
         }
 

@@ -281,23 +281,23 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        Boolean isPaginatedService = false;
+        boolean hasPaginatedOperation = false;
 
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
             if (operation.hasTrait(PaginatedTrait.ID)) {
-                isPaginatedService = true;
-                String outputFilename = PaginationGenerator.generateOutputFilelocation(operation);
+                hasPaginatedOperation = true;
+                String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
                                 nonModularName).run());
             }
         }
 
-        if (isPaginatedService) {
-            writers.useFileWriter(PaginationGenerator.generateInterfaceFilelocation(), paginationWriter ->
+        if (hasPaginatedOperation) {
+            writers.useFileWriter(PaginationGenerator.getInterfaceFilelocation(), paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
                             nonModularName,
                             serviceSymbol,
