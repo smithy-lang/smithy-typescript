@@ -90,7 +90,7 @@ final class PaginationGenerator implements Runnable {
         writer.addImport(nonModularServiceName,
                 nonModularServiceName,
                 nonModularLocation);
-        writer.addImport(this.serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
+        writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
 
         // Import Pagination types
         writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
