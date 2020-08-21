@@ -25,6 +25,7 @@ import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
@@ -89,6 +90,8 @@ final class StructuredMemberWriter {
         if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
+        } else if (memberTarget instanceof SimpleShape) {
+            writer.write(memberParam);
         } else if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
             writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
         } else if (memberTarget instanceof CollectionShape) {
@@ -103,7 +106,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for StructureShape.
      */
-    void writeStructureFilterSensitiveLog(
+    private void writeStructureFilterSensitiveLog(
             TypeScriptWriter writer,
             Shape structureTarget,
             String structureParam
@@ -123,7 +126,7 @@ final class StructuredMemberWriter {
     /**
      * Recursively writes filterSensitiveLog for CollectionShape.
      */
-    void writeCollectionFilterSensitiveLog(
+    private void writeCollectionFilterSensitiveLog(
             TypeScriptWriter writer,
             MemberShape collectionMember,
             String collectionParam
@@ -131,76 +134,77 @@ final class StructuredMemberWriter {
         if (collectionMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
-            return;
+        } else if (model.expectShape(collectionMember.getTarget()) instanceof SimpleShape) {
+            writer.write(collectionParam);
+        } else {
+            writer.openBlock("$L.map(", ")", collectionParam, () -> {
+                String itemParam = "item";
+                Shape collectionMemberTarget = model.expectShape(collectionMember.getTarget());
+                writer.write("$L => ", itemParam);
+                if (collectionMemberTarget.isStructureShape() || collectionMemberTarget.isUnionShape()) {
+                    writeStructureFilterSensitiveLog(writer, collectionMemberTarget, itemParam);
+                } else if (collectionMemberTarget instanceof CollectionShape) {
+                    MemberShape nestedCollectionMember = ((CollectionShape) collectionMemberTarget).getMember();
+                    writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, itemParam);
+                } else if (collectionMemberTarget instanceof MapShape) {
+                    MemberShape mapMember = ((MapShape) collectionMemberTarget).getValue();
+                    writeMapFilterSensitiveLog(writer, mapMember, itemParam);
+                } else {
+                    // This path should not reach because of recursive isMemberOverwriteRequired.
+                    throw new CodegenException(String.format(
+                        "CollectionFilterSensitiveLog attempted for %s while it was not required",
+                        collectionMemberTarget.getType()
+                    ));
+                    // For quick-fix in case of high severity issue:
+                    // comment out the exception above and uncomment the line below.
+                    // writer.write("$L", itemParam);
+                }
+            });
         }
-
-        writer.openBlock("$L.map(", ")", collectionParam, () -> {
-            String itemParam = "item";
-            Shape collectionMemberTarget = model.expectShape(collectionMember.getTarget());
-            writer.write("$L => ", itemParam);
-            if (collectionMemberTarget.isStructureShape() || collectionMemberTarget.isUnionShape()) {
-                writeStructureFilterSensitiveLog(writer, collectionMemberTarget, itemParam);
-            } else if (collectionMemberTarget instanceof CollectionShape) {
-                MemberShape nestedCollectionMember = ((CollectionShape) collectionMemberTarget).getMember();
-                writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, itemParam);
-            } else if (collectionMemberTarget instanceof MapShape) {
-                MemberShape mapMember = ((MapShape) collectionMemberTarget).getValue();
-                writeMapFilterSensitiveLog(writer, mapMember, itemParam);
-            } else {
-                // This path should not reach because of recursive isMemberOverwriteRequired.
-                throw new CodegenException(String.format(
-                    "CollectionFilterSensitiveLog attempted for %s while it was not required",
-                    collectionMemberTarget.getType()
-                ));
-                // For quick-fix in case of high severity issue:
-                // comment out the exception above and uncomment the line below.
-                // writer.write("$L", itemParam);
-            }
-        });
     }
 
     /**
      * Recursively writes filterSensitiveLog for MapShape.
      */
-    void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember, String mapParam) {
+    private void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember, String mapParam) {
         if (mapMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             // member is Sensitive, hide the value.
             writer.write("SENSITIVE_STRING");
-            return;
+        } else if (model.expectShape(mapMember.getTarget()) instanceof SimpleShape) {
+            writer.write(mapParam);
+        } else {
+            String accParam = "acc"; // accumulator for the reducer
+            String keyParam = "key"; // key of the Object.entries() key-value pair
+            String valueParam = "value"; // value of the Object.entries() key-value pair
+
+            // Reducer is common to all shapes.
+            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
+                mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
+                    writer.write("...$L,", accParam);
+                    Shape mapMemberTarget = model.expectShape(mapMember.getTarget());
+                    writer.openBlock("[$L]: ", ",", keyParam, () -> {
+                        if (mapMemberTarget.isStructureShape() || mapMemberTarget.isUnionShape()) {
+                            writeStructureFilterSensitiveLog(writer, mapMemberTarget, valueParam);
+                        } else if (mapMemberTarget instanceof CollectionShape) {
+                            MemberShape collectionMember = ((CollectionShape) mapMemberTarget).getMember();
+                            writeCollectionFilterSensitiveLog(writer, collectionMember, valueParam);
+                        } else if (mapMemberTarget instanceof MapShape) {
+                            MemberShape nestedMapMember = ((MapShape) mapMemberTarget).getValue();
+                            writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
+                        } else {
+                            // This path should not reach because of recursive isMemberOverwriteRequired.
+                            throw new CodegenException(String.format(
+                                "MapFilterSensitiveLog attempted for %s while it was not required",
+                                mapMemberTarget.getType()
+                            ));
+                            // For quick-fix in case of high severity issue:
+                            // comment out the exception above and uncomment the line below.
+                            // writer.write("$L", valueParam);
+                        }
+                    });
+                }
+            );
         }
-
-        String accParam = "acc"; // accumulator for the reducer
-        String keyParam = "key"; // key of the Object.entries() key-value pair
-        String valueParam = "value"; // value of the Object.entries() key-value pair
-
-        // Reducer is common to all shapes.
-        writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
-            mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
-                writer.write("...$L,", accParam);
-                Shape mapMemberTarget = model.expectShape(mapMember.getTarget());
-                writer.openBlock("[$L]: ", ",", keyParam, () -> {
-                    if (mapMemberTarget.isStructureShape() || mapMemberTarget.isUnionShape()) {
-                        writeStructureFilterSensitiveLog(writer, mapMemberTarget, valueParam);
-                    } else if (mapMemberTarget instanceof CollectionShape) {
-                        MemberShape collectionMember = ((CollectionShape) mapMemberTarget).getMember();
-                        writeCollectionFilterSensitiveLog(writer, collectionMember, valueParam);
-                    } else if (mapMemberTarget instanceof MapShape) {
-                        MemberShape nestedMapMember = ((MapShape) mapMemberTarget).getValue();
-                        writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
-                    } else {
-                        // This path should not reach because of recursive isMemberOverwriteRequired.
-                        throw new CodegenException(String.format(
-                            "MapFilterSensitiveLog attempted for %s while it was not required",
-                            mapMemberTarget.getType()
-                        ));
-                        // For quick-fix in case of high severity issue:
-                        // comment out the exception above and uncomment the line below.
-                        // writer.write("$L", valueParam);
-                    }
-
-                });
-            }
-        );
     }
 
     /**

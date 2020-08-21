@@ -152,8 +152,12 @@ public class StructureGeneratorTest {
     public void callsFilterInUnionWithSensitiveData() {
         testStructureCodegen("test-union-with-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
-                                + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
-                                + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
+                                + "    if (obj.bar !== undefined) return {bar:\n"
+                                + "      obj.bar\n"
+                                + "    };\n"
+                                + "    if (obj.sensitiveBar !== undefined) return {sensitiveBar:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    };\n"
                                 + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
     }
@@ -173,8 +177,12 @@ public class StructureGeneratorTest {
     public void callsFilterInUnionWithoutSensitiveData() {
         testStructureCodegen("test-union-without-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
-                                + "    if (obj.fooString !== undefined) return {fooString: obj.fooString};\n"
-                                + "    if (obj.barString !== undefined) return {barString: obj.barString};\n"
+                                + "    if (obj.fooString !== undefined) return {fooString:\n"
+                                + "      obj.fooString\n"
+                                + "    };\n"
+                                + "    if (obj.barString !== undefined) return {barString:\n"
+                                + "      obj.barString\n"
+                                + "    };\n"
                                 + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
     }
@@ -184,7 +192,7 @@ public class StructureGeneratorTest {
         testStructureCodegen("test-union-with-structure.smithy",
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                                 + "    if (obj.fooUser !== undefined) return {fooUser:\n"
-                                + "    User.filterSensitiveLog(obj.fooUser)\n"
+                                + "      User.filterSensitiveLog(obj.fooUser)\n"
                                 + "    };\n"
                                 + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
@@ -195,7 +203,7 @@ public class StructureGeneratorTest {
         testStructureCodegen("test-union-with-list.smithy",
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                                 + "    if (obj.list !== undefined) return {list:\n"
-                                + "    obj.list\n"
+                                + "      obj.list\n"
                                 + "    };\n"
                                 + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
@@ -206,7 +214,7 @@ public class StructureGeneratorTest {
         testStructureCodegen("test-union-with-map.smithy",
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                                 + "    if (obj.map !== undefined) return {map:\n"
-                                + "    obj.map\n"
+                                + "      obj.map\n"
                                 + "    };\n"
                                 + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
@@ -288,8 +296,12 @@ public class StructureGeneratorTest {
     public void callsFilterInListWithUnionWithSensitiveData() {
         testStructureCodegen("test-list-with-union-with-sensitive-data.smithy",
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
-                                + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
-                                + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
+                                + "    if (obj.bar !== undefined) return {bar:\n"
+                                + "      obj.bar\n"
+                                + "    };\n"
+                                + "    if (obj.sensitiveBar !== undefined) return {sensitiveBar:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    };\n"
                                 + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
     }
@@ -381,11 +393,15 @@ public class StructureGeneratorTest {
     @Test
     public void callsFilterInMapWithUnionWithSensitiveData() {
         testStructureCodegen("test-map-with-union-with-sensitive-data.smithy",
-                            "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
-                            + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
-                            + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
-                            + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
-                            + "  }\n");
+                                "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
+                                + "    if (obj.bar !== undefined) return {bar:\n"
+                                + "      obj.bar\n"
+                                + "    };\n"
+                                + "    if (obj.sensitiveBar !== undefined) return {sensitiveBar:\n"
+                                + "      SENSITIVE_STRING\n"
+                                + "    };\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
+                                + "  }\n");
     }
 
 

@@ -20,13 +20,8 @@ import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.CollectionShape;
-import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -232,42 +227,15 @@ final class UnionGenerator implements Runnable {
             objectParam, symbol.getName(),
             () -> {
                 for (MemberShape member : shape.getAllMembers().values()) {
-                    Shape memberTarget = model.expectShape(member.getTarget());
                     String memberName = symbolProvider.toMemberName(member);
-
-                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                        // member is Sensitive, hide the value.
-                        writer.write("if (${1L}.${2L} !== undefined) return {[${2L}]: SENSITIVE_STRING};",
-                            objectParam, memberName);
-                    } else if (memberTarget instanceof SimpleShape) {
-                        writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ${1L}.${2L}};",
-                            objectParam, memberName);
-                    } else {
-                        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                             model, symbolProvider, shape.getAllMembers().values());
-                        String memberParam = String.format("%s.%s", objectParam, memberName);
-
-                        writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ", objectParam, memberName);
-                        if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
-                            structuredMemberWriter.writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
-                        } else if (memberTarget instanceof CollectionShape) {
-                            MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
-                            if (model.expectShape(collectionMember.getTarget()) instanceof SimpleShape) {
-                                writer.write(memberParam);
-                            } else {
-                                structuredMemberWriter.writeCollectionFilterSensitiveLog(
-                                    writer, collectionMember, memberParam);
-                            }
-                        } else if (memberTarget instanceof MapShape) {
-                            MemberShape mapMember = ((MapShape) memberTarget).getValue();
-                            if (model.expectShape(mapMember.getTarget()) instanceof SimpleShape) {
-                                writer.write(memberParam);
-                            } else {
-                                structuredMemberWriter.writeMapFilterSensitiveLog(writer, mapMember, memberParam);
-                            }
+                    writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
+                        objectParam, memberName, () -> {
+                            String memberParam = String.format("%s.%s", objectParam, memberName);
+                            structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member, memberParam);
                         }
-                        writer.write("};");
-                    }
+                    );
                 }
                 writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
                     objectParam);
