@@ -185,7 +185,7 @@ public class StructureGeneratorTest {
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
                                 + "    ...obj,\n"
                                 + "    ...(obj.foo && { foo:\n"
-                                + "      'STREAMING_TRAIT'\n"
+                                + "      'STREAMING_CONTENT'\n"
                                 + "    }),\n"
                                 + "  })\n");
     }

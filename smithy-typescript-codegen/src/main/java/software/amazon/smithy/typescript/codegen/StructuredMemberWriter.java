@@ -110,7 +110,7 @@ final class StructuredMemberWriter {
             writer.write("SENSITIVE_STRING");
         } else if (structureTarget.hasTrait(StreamingTrait.class) && structureTarget.isUnionShape()) {
             // disable logging for StreamingTrait
-            writer.write("'STREAMING_TRAIT'");
+            writer.write("'STREAMING_CONTENT'");
         } else {
             // Call filterSensitiveLog on Structure.
             writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
