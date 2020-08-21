@@ -134,7 +134,7 @@ final class PaginationGenerator implements Runnable {
             writer.write("let token: string | undefined = config.startingToken || '';");
 
             writer.write("let hasNext = true;");
-            writer.write("let page:$L;", outputTypeName);
+            writer.write("let page: $L;", outputTypeName);
             writer.openBlock("while (hasNext) {", "}", () -> {
                 writer.write("input[$S] = token;", inputTokenName);
                 if (paginatedInfo.getPageSizeMember().isPresent()) {
