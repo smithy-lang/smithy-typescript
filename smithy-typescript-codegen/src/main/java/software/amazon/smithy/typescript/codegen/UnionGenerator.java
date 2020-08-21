@@ -25,7 +25,6 @@ import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -249,7 +248,7 @@ final class UnionGenerator implements Runnable {
                         String memberParam = String.format("%s.%s", objectParam, memberName);
 
                         writer.write("if (${1L}.${2L} !== undefined) return {${2L}: ", objectParam, memberName);
-                        if (memberTarget instanceof StructureShape || memberTarget instanceof UnionShape) {
+                        if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
                             structuredMemberWriter.writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
                         } else if (memberTarget instanceof CollectionShape) {
                             MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();

@@ -26,7 +26,6 @@ import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -83,7 +82,7 @@ final class StructuredMemberWriter {
                     if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
                         // member is Sensitive, hide the value.
                         writer.write("SENSITIVE_STRING");
-                    } else if (memberTarget instanceof StructureShape || memberTarget instanceof UnionShape) {
+                    } else if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
                         writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
                     } else if (memberTarget instanceof CollectionShape) {
                         MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
@@ -135,7 +134,7 @@ final class StructuredMemberWriter {
             String itemParam = "item";
             Shape collectionMemberTarget = model.expectShape(collectionMember.getTarget());
             writer.write("$L => ", itemParam);
-            if (collectionMemberTarget instanceof StructureShape || collectionMemberTarget instanceof UnionShape) {
+            if (collectionMemberTarget.isStructureShape() || collectionMemberTarget.isUnionShape()) {
                 writeStructureFilterSensitiveLog(writer, collectionMemberTarget, itemParam);
             } else if (collectionMemberTarget instanceof CollectionShape) {
                 MemberShape nestedCollectionMember = ((CollectionShape) collectionMemberTarget).getMember();
@@ -176,7 +175,7 @@ final class StructuredMemberWriter {
                 writer.write("...$L,", accParam);
                 Shape mapMemberTarget = model.expectShape(mapMember.getTarget());
                 writer.openBlock("[$L]: ", ",", keyParam, () -> {
-                    if (mapMemberTarget instanceof StructureShape || mapMemberTarget instanceof UnionShape) {
+                    if (mapMemberTarget.isStructureShape() || mapMemberTarget.isUnionShape()) {
                         writeStructureFilterSensitiveLog(writer, mapMemberTarget, valueParam);
                     } else if (mapMemberTarget instanceof CollectionShape) {
                         MemberShape collectionMember = ((CollectionShape) mapMemberTarget).getMember();
@@ -214,10 +213,10 @@ final class StructuredMemberWriter {
 
         Shape memberTarget = model.expectShape(member.getTarget());
         parents.add(symbolProvider.toMemberName(member));
-        if (memberTarget instanceof UnionShape) {
+        if (memberTarget.isUnionShape()) {
             // always call filterSensitiveLog for UnionShape
             return true;
-        } else if (memberTarget instanceof StructureShape) {
+        } else if (memberTarget.isStructureShape()) {
             Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
             for (MemberShape structureMember: structureMemberList) {
                 if (!parents.contains(symbolProvider.toMemberName(structureMember))
