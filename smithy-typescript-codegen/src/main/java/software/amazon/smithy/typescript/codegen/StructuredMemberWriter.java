@@ -75,24 +75,28 @@ final class StructuredMemberWriter {
         writer.write("...$L,", objectParam);
         for (MemberShape member : members) {
             if (isMemberOverwriteRequired(member, new HashSet<String>())) {
-                Shape memberTarget = model.expectShape(member.getTarget());
                 String memberName = getSanitizedMemberName(member);
-                String memberParam = String.format("%s.%s", objectParam, memberName);
                 writer.openBlock("...($1L.$2L && { $2L: ", "}),", objectParam, memberName, () -> {
-                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                        // member is Sensitive, hide the value.
-                        writer.write("SENSITIVE_STRING");
-                    } else if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
-                        writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
-                    } else if (memberTarget instanceof CollectionShape) {
-                        MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
-                        writeCollectionFilterSensitiveLog(writer, collectionMember, memberParam);
-                    } else if (memberTarget instanceof MapShape) {
-                        MemberShape mapMember = ((MapShape) memberTarget).getValue();
-                        writeMapFilterSensitiveLog(writer, mapMember, memberParam);
-                    }
+                    String memberParam = String.format("%s.%s", objectParam, memberName);
+                    writeMemberFilterSensitiveLog(writer, member, memberParam);
                 });
             }
+        }
+    }
+
+    void writeMemberFilterSensitiveLog(TypeScriptWriter writer, MemberShape member, String memberParam) {
+        Shape memberTarget = model.expectShape(member.getTarget());
+        if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+            // member is Sensitive, hide the value.
+            writer.write("SENSITIVE_STRING");
+        } else if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
+            writeStructureFilterSensitiveLog(writer, memberTarget, memberParam);
+        } else if (memberTarget instanceof CollectionShape) {
+            MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
+            writeCollectionFilterSensitiveLog(writer, collectionMember, memberParam);
+        } else if (memberTarget instanceof MapShape) {
+            MemberShape mapMember = ((MapShape) memberTarget).getValue();
+            writeMapFilterSensitiveLog(writer, mapMember, memberParam);
         }
     }
 
