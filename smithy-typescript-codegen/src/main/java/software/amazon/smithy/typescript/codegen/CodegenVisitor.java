@@ -27,6 +27,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -47,6 +48,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
@@ -57,7 +59,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
 
-    /** A mapping of static resource files to copy over to a new filename. */
+    /**
+     * A mapping of static resource files to copy over to a new filename.
+     */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
             "jest.config.js", "jest.config.js",
             "tsconfig.es.json", "tsconfig.es.json",
@@ -277,10 +281,27 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate each operation for the service.
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        boolean hasPaginatedOperation = false;
+
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                     settings, model, operation, symbolProvider, commandWriter,
                     runtimePlugins, protocolGenerator, applicationProtocol).run());
+            if (operation.hasTrait(PaginatedTrait.ID)) {
+                hasPaginatedOperation = true;
+                String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
+                writers.useFileWriter(outputFilename, paginationWriter ->
+                        new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
+                                nonModularName).run());
+            }
+        }
+
+        if (hasPaginatedOperation) {
+            writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
+                    PaginationGenerator.generateServicePaginationInterfaces(
+                            nonModularName,
+                            serviceSymbol,
+                            paginationWriter));
         }
 
         if (protocolGenerator != null) {
