@@ -115,7 +115,7 @@ import software.amazon.smithy.utils.StringUtils;
  *     if (obj.bear !== undefined)
  *       return { bear: Bear.filterSensitiveLog(obj.bear) };
  *     if (obj.$unknown !== undefined)
- *       return { [obj.$unknown[0]]: obj.$unknown[1] };
+ *       return { [obj.$unknown[0]]: 'UNKNOWN' };
  *   }
  * }
  * }</pre>
@@ -270,7 +270,7 @@ final class UnionGenerator implements Runnable {
                         writer.write("};");
                     }
                 }
-                writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: ${1L}.$$unknown[1]};",
+                writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
                     objectParam);
             }
         );

@@ -154,7 +154,7 @@ public class StructureGeneratorTest {
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                                 + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
                                 + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
-                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: obj.$unknown[1]};\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
     }
 
@@ -175,7 +175,7 @@ public class StructureGeneratorTest {
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                                 + "    if (obj.fooString !== undefined) return {fooString: obj.fooString};\n"
                                 + "    if (obj.barString !== undefined) return {barString: obj.barString};\n"
-                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: obj.$unknown[1]};\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
     }
 
@@ -257,7 +257,7 @@ public class StructureGeneratorTest {
                                 "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                                 + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
                                 + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
-                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: obj.$unknown[1]};\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                                 + "  }\n");
     }
 
@@ -351,7 +351,7 @@ public class StructureGeneratorTest {
                             "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
                             + "    if (obj.bar !== undefined) return {bar: obj.bar};\n"
                             + "    if (obj.sensitiveBar !== undefined) return {[sensitiveBar]: SENSITIVE_STRING};\n"
-                            + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: obj.$unknown[1]};\n"
+                            + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
                             + "  }\n");
     }
 
