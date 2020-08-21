@@ -96,18 +96,20 @@ final class PaginationGenerator implements Runnable {
         writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
         writer.addImport(paginationType, paginationType, "./" + PAGINATION_INTERFACE_FILE.replace(".ts", ""));
 
-        this.writeClientSideRequest();
-        this.writeRequest();
-        this.writePager();
+        writeCommandRequest();
+        writeMethodRequest();
+        writePager();
     }
 
     static String getOutputFilelocation(OperationShape operation) {
         return "pagination/" + operation.getId().getName() + "Paginator.ts";
     }
 
-    static void generateServicePaginationInterfaces(String nonModularServiceName,
-                                                           Symbol service,
-                                                           TypeScriptWriter writer) {
+    static void generateServicePaginationInterfaces(
+            String nonModularServiceName,
+            Symbol service,
+            TypeScriptWriter writer
+    ) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         String nonModularLocation = service.getNamespace().replace(service.getName(), nonModularServiceName);
         writer.addImport(nonModularServiceName, nonModularServiceName, nonModularLocation);
@@ -134,20 +136,20 @@ final class PaginationGenerator implements Runnable {
             writer.write("let hasNext = true;");
             writer.write("let page:$L;", outputTypeName);
             writer.openBlock("while (hasNext) {", "}", () -> {
-                writer.write("input[\"$L\"] = token;", inputTokenName);
+                writer.write("input[$S] = token;", inputTokenName);
                 if (paginatedInfo.getPageSizeMember().isPresent()) {
                     String pageSize = paginatedInfo.getPageSizeMember().get().getMemberName();
-                    writer.write("input[\"$L\"] = config.pageSize;", pageSize);
+                    writer.write("input[$S] = config.pageSize;", pageSize);
                 }
 
                 writer.openBlock("if (config.client instanceof $L) {", "}", nonModularServiceName, () -> {
                     writer.write("page = await makePagedRequest(config.client, input, ...additionalArguments);");
                 });
                 writer.openBlock("else if (config.client instanceof $L) {", "}", serviceTypeName, () -> {
-                    writer.write(" page = await makePagedClientRequest(config.client, input, ...additionalArguments);");
+                    writer.write("page = await makePagedClientRequest(config.client, input, ...additionalArguments);");
                 });
                 writer.openBlock("else {", "}", () -> {
-                    writer.write(" throw new Error(\"Invalid client, expected $L | $L\");",
+                    writer.write("throw new Error(\"Invalid client, expected $L | $L\");",
                             nonModularServiceName, serviceTypeName);
                 });
 
@@ -155,9 +157,9 @@ final class PaginationGenerator implements Runnable {
                 if (outputTokenName.contains(".")) {
                     // Smithy allows one level indexing (ex. 'bucket.outputToken').
                     String[] outputIndex = outputTokenName.split("\\.");
-                    writer.write("token = page[\"$L\"][\"$L\"];", outputIndex[0], outputIndex[1]);
+                    writer.write("token = page[$S][$S];", outputIndex[0], outputIndex[1]);
                 } else {
-                    writer.write("token = page[\"$L\"];", outputTokenName);
+                    writer.write("token = page[$S];", outputTokenName);
                 }
 
                 writer.write("hasNext = !!(token);");
@@ -170,10 +172,10 @@ final class PaginationGenerator implements Runnable {
 
 
     /**
-     * Paginated command that calls Command({...}) under the hood. This is meant for server side environments and
+     * Paginated command that calls client.method({...}) under the hood. This is meant for server side environments and
      * exposes the entire service.
      */
-    private void writeRequest() {
+    private void writeMethodRequest() {
         writer.openBlock(
                 "const makePagedRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
                 "}", nonModularServiceName, inputSymbol.getName(),
@@ -187,7 +189,7 @@ final class PaginationGenerator implements Runnable {
      * Paginated command that calls CommandClient().send({...}) under the hood. This is meant for client side (browser)
      * environments and does not generally expose the entire service.
      */
-    private void writeClientSideRequest() {
+    private void writeCommandRequest() {
         writer.openBlock(
                 "const makePagedClientRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
                 "}", serviceSymbol.getName(), inputSymbol.getName(),
