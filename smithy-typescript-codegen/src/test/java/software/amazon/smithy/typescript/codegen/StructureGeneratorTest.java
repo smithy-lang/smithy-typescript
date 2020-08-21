@@ -180,6 +180,39 @@ public class StructureGeneratorTest {
     }
 
     @Test
+    public void callsFilterInUnionWithStructure() {
+        testStructureCodegen("test-union-with-structure.smithy",
+                                "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
+                                + "    if (obj.fooUser !== undefined) return {fooUser:\n"
+                                + "    User.filterSensitiveLog(obj.fooUser)\n"
+                                + "    };\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
+                                + "  }\n");
+    }
+
+    @Test
+    public void callsFilterInUnionWithList() {
+        testStructureCodegen("test-union-with-list.smithy",
+                                "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
+                                + "    if (obj.list !== undefined) return {list:\n"
+                                + "    obj.list\n"
+                                + "    };\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
+                                + "  }\n");
+    }
+
+    @Test
+    public void callsFilterInUnionWithMap() {
+        testStructureCodegen("test-union-with-map.smithy",
+                                "  export const filterSensitiveLog = (obj: TestUnion): any => {\n"
+                                + "    if (obj.map !== undefined) return {map:\n"
+                                + "    obj.map\n"
+                                + "    };\n"
+                                + "    if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
+                                + "  }\n");
+    }
+
+    @Test
     public void filtersStreamingUnion() {
         testStructureCodegen("test-streaming-union.smithy",
                                 "  export const filterSensitiveLog = (obj: GetFooInput): any => ({\n"
