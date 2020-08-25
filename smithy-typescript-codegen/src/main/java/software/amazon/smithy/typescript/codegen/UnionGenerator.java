@@ -101,6 +101,16 @@ import software.amazon.smithy.utils.StringUtils;
  *     if (value.bear !== undefined) return visitor.bear(value.bear);
  *     return visitor._(value.$unknown[0], value.$unknown[1]);
  *   }
+ *   export const filterSensitiveLog = (obj: Attacker) => {
+ *     if (obj.lion !== undefined)
+ *       return { lion: Lion.filterSensitiveLog(obj.lion) };
+ *     if (obj.tiger !== undefined)
+ *       return { tiger: Tiger.filterSensitiveLog(obj.tiger) };
+ *     if (obj.bear !== undefined)
+ *       return { bear: Bear.filterSensitiveLog(obj.bear) };
+ *     if (obj.$unknown !== undefined)
+ *       return { [obj.$unknown[0]]: 'UNKNOWN' };
+ *   }
  * }
  * }</pre>
  *
@@ -148,6 +158,7 @@ final class UnionGenerator implements Runnable {
             writeUnionMemberInterfaces();
             writeVisitorType();
             writeVisitorFunction();
+            writeFilterSensitiveLog();
         });
     }
 
@@ -155,6 +166,7 @@ final class UnionGenerator implements Runnable {
         writer.openBlock("interface $$Base {", "}", () -> {
             writer.write("__type?: $S;", shape.getId().getName());
         });
+        writer.write("");
 
         for (MemberShape member : shape.getAllMembers().values()) {
             String name = variantMap.get(member.getMemberName());
@@ -170,6 +182,7 @@ final class UnionGenerator implements Runnable {
                 }
                 writer.write("$$unknown?: never;");
             });
+            writer.write("");
         }
 
         // Write out the unknown variant.
@@ -179,6 +192,7 @@ final class UnionGenerator implements Runnable {
             }
             writer.write("$$unknown: [string, any];");
         });
+        writer.write("");
     }
 
     private void writeVisitorType() {
@@ -189,6 +203,7 @@ final class UnionGenerator implements Runnable {
             }
             writer.write("_: (name: string, value: any) => T;");
         });
+        writer.write("");
     }
 
     private void writeVisitorFunction() {
@@ -203,5 +218,28 @@ final class UnionGenerator implements Runnable {
         }
         writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
         writer.dedent().write("}");
+        writer.write("");
+    }
+
+    private void writeFilterSensitiveLog() {
+        String objectParam = "obj";
+        writer.openBlock("export const filterSensitiveLog = ($L: $L): any => {", "}",
+            objectParam, symbol.getName(),
+            () -> {
+                for (MemberShape member : shape.getAllMembers().values()) {
+                    String memberName = symbolProvider.toMemberName(member);
+                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                            model, symbolProvider, shape.getAllMembers().values());
+                    writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
+                        objectParam, memberName, () -> {
+                            String memberParam = String.format("%s.%s", objectParam, memberName);
+                            structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member, memberParam);
+                        }
+                    );
+                }
+                writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
+                    objectParam);
+            }
+        );
     }
 }
