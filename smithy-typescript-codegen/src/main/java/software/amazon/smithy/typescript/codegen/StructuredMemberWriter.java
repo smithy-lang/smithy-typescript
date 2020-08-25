@@ -139,26 +139,8 @@ final class StructuredMemberWriter {
         } else {
             writer.openBlock("$L.map(", ")", collectionParam, () -> {
                 String itemParam = "item";
-                Shape collectionMemberTarget = model.expectShape(collectionMember.getTarget());
                 writer.write("$L => ", itemParam);
-                if (collectionMemberTarget.isStructureShape() || collectionMemberTarget.isUnionShape()) {
-                    writeStructureFilterSensitiveLog(writer, collectionMemberTarget, itemParam);
-                } else if (collectionMemberTarget instanceof CollectionShape) {
-                    MemberShape nestedCollectionMember = ((CollectionShape) collectionMemberTarget).getMember();
-                    writeCollectionFilterSensitiveLog(writer, nestedCollectionMember, itemParam);
-                } else if (collectionMemberTarget instanceof MapShape) {
-                    MemberShape mapMember = ((MapShape) collectionMemberTarget).getValue();
-                    writeMapFilterSensitiveLog(writer, mapMember, itemParam);
-                } else {
-                    // This path should not reach because of recursive isMemberOverwriteRequired.
-                    throw new CodegenException(String.format(
-                        "CollectionFilterSensitiveLog attempted for %s while it was not required",
-                        collectionMemberTarget.getType()
-                    ));
-                    // For quick-fix in case of high severity issue:
-                    // comment out the exception above and uncomment the line below.
-                    // writer.write("$L", itemParam);
-                }
+                writeMemberFilterSensitiveLog(writer, collectionMember, itemParam);
             });
         }
     }
@@ -181,26 +163,8 @@ final class StructuredMemberWriter {
             writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
                 mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
                     writer.write("...$L,", accParam);
-                    Shape mapMemberTarget = model.expectShape(mapMember.getTarget());
                     writer.openBlock("[$L]: ", ",", keyParam, () -> {
-                        if (mapMemberTarget.isStructureShape() || mapMemberTarget.isUnionShape()) {
-                            writeStructureFilterSensitiveLog(writer, mapMemberTarget, valueParam);
-                        } else if (mapMemberTarget instanceof CollectionShape) {
-                            MemberShape collectionMember = ((CollectionShape) mapMemberTarget).getMember();
-                            writeCollectionFilterSensitiveLog(writer, collectionMember, valueParam);
-                        } else if (mapMemberTarget instanceof MapShape) {
-                            MemberShape nestedMapMember = ((MapShape) mapMemberTarget).getValue();
-                            writeMapFilterSensitiveLog(writer, nestedMapMember, valueParam);
-                        } else {
-                            // This path should not reach because of recursive isMemberOverwriteRequired.
-                            throw new CodegenException(String.format(
-                                "MapFilterSensitiveLog attempted for %s while it was not required",
-                                mapMemberTarget.getType()
-                            ));
-                            // For quick-fix in case of high severity issue:
-                            // comment out the exception above and uncomment the line below.
-                            // writer.write("$L", valueParam);
-                        }
+                        writeMemberFilterSensitiveLog(writer, mapMember, valueParam);
                     });
                 }
             );
