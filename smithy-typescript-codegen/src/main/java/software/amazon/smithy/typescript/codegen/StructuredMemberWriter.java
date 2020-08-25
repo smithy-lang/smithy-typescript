@@ -100,6 +100,10 @@ final class StructuredMemberWriter {
         } else if (memberTarget instanceof MapShape) {
             MemberShape mapMember = ((MapShape) memberTarget).getValue();
             writeMapFilterSensitiveLog(writer, mapMember, memberParam);
+        } else {
+            throw new CodegenException(String.format(
+                "MemberFilterSensitiveLog attempted for %s", memberTarget.getType()
+            ));
         }
     }
 
