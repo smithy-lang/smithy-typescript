@@ -175,7 +175,7 @@ final class CommandGenerator implements Runnable {
                     if (outputShape.isPresent()) {
                         writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(outputShape.get()));
                     } else {
-                        writer.writeInline("(input) => input");
+                        writer.writeInline("(output) => output");
                     }
                 });
             });
