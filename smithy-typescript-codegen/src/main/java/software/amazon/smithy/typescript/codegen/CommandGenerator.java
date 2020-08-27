@@ -15,9 +15,11 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -30,6 +32,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Generates a client command using plugins.
@@ -153,6 +156,11 @@ final class CommandGenerator implements Runnable {
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
+
+                String serviceId = service.getTrait(ServiceTrait.class).map(ServiceTrait::getSdkId).orElse("");
+                writer.write("clientName: '$L',", Arrays.asList(serviceId.split(" "))
+                        .stream().map(StringUtils::capitalize).collect(Collectors.joining("")));
+
                 writer.openBlock("inputFilterLog: ", ",", () -> {
                     Optional<StructureShape> inputShape = operationIndex.getInput(operation);
                     if (inputShape.isPresent()) {
@@ -161,6 +169,7 @@ final class CommandGenerator implements Runnable {
                         writer.writeInline("(input) => input");
                     }
                 });
+
                 writer.openBlock("outputFilterLog: ", ",", () -> {
                     Optional<StructureShape> outputShape = operationIndex.getOutput(operation);
                     if (outputShape.isPresent()) {
