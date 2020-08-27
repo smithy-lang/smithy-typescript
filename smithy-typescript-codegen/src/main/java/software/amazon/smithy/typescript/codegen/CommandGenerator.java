@@ -161,6 +161,11 @@ final class CommandGenerator implements Runnable {
                 writer.write("clientName: '$L',", Arrays.asList(serviceId.split(" "))
                         .stream().map(StringUtils::capitalize).collect(Collectors.joining("")));
 
+                String operationName = StringUtils.uncapitalize(
+                    symbolProvider.toSymbol(operation).getName().replaceAll("Command$", "")
+                );
+                writer.write("clientName: '$L',", operationName);
+
                 writer.openBlock("inputFilterLog: ", ",", () -> {
                     Optional<StructureShape> inputShape = operationIndex.getInput(operation);
                     if (inputShape.isPresent()) {
