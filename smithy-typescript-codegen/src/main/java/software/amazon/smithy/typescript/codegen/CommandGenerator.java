@@ -153,6 +153,22 @@ final class CommandGenerator implements Runnable {
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
+                writer.openBlock("inputFilterLog: ", ",", () -> {
+                    Optional<StructureShape> inputShape = operationIndex.getInput(operation);
+                    if (inputShape.isPresent()) {
+                        writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(inputShape.get()));
+                    } else {
+                        writer.writeInline("(input) => input");
+                    }
+                });
+                writer.openBlock("outputFilterLog: ", ",", () -> {
+                    Optional<StructureShape> outputShape = operationIndex.getOutput(operation);
+                    if (outputShape.isPresent()) {
+                        writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(outputShape.get()));
+                    } else {
+                        writer.writeInline("(input) => input");
+                    }
+                });
             });
             writer.write("const { requestHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
