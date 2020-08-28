@@ -30,6 +30,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.utils.OptionalUtils;
 
 /**
  * Generates a client command using plugins.
@@ -154,20 +155,14 @@ final class CommandGenerator implements Runnable {
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger: {} as any,");
                 writer.openBlock("inputFilterLog: ", ",", () -> {
-                    Optional<StructureShape> inputShape = operationIndex.getInput(operation);
-                    if (inputShape.isPresent()) {
-                        writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(inputShape.get()));
-                    } else {
-                        writer.writeInline("(input) => input");
-                    }
+                    OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
+                        input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
+                        () -> writer.writeInline("(input) => input"));
                 });
                 writer.openBlock("outputFilterLog: ", ",", () -> {
-                    Optional<StructureShape> outputShape = operationIndex.getOutput(operation);
-                    if (outputShape.isPresent()) {
-                        writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(outputShape.get()));
-                    } else {
-                        writer.writeInline("(output) => output");
-                    }
+                    OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
+                        output -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(output)),
+                        () -> writer.writeInline("(output) => output"));
                 });
             });
             writer.write("const { requestHandler } = configuration;");
