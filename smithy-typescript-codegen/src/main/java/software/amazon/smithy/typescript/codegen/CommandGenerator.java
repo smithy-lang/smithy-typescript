@@ -158,12 +158,12 @@ final class CommandGenerator implements Runnable {
                 writer.openBlock("inputFilterLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
                         input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
-                        () -> writer.writeInline("(input) => input"));
+                        () -> writer.writeInline("(input: any) => input"));
                 });
                 writer.openBlock("outputFilterLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
                         output -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(output)),
-                        () -> writer.writeInline("(output) => output"));
+                        () -> writer.writeInline("(output: any) => output"));
                 });
             });
             writer.write("const { requestHandler } = configuration;");
