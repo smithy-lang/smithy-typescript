@@ -155,12 +155,12 @@ final class CommandGenerator implements Runnable {
             writer.write("const { logger } = configuration;");
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger,");
-                writer.openBlock("inputFilterLog: ", ",", () -> {
+                writer.openBlock("inputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
                         input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
                         () -> writer.writeInline("(input: any) => input"));
                 });
-                writer.openBlock("outputFilterLog: ", ",", () -> {
+                writer.openBlock("outputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
                         output -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(output)),
                         () -> writer.writeInline("(output: any) => output"));
