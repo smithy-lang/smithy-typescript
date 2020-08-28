@@ -64,7 +64,7 @@ public class HttpProtocolGeneratorUtilsTest {
 
         OperationShape operation = (OperationShape) model.expectShape(ShapeId.from("smithy.example#GetFoo"));
         HttpProtocolGeneratorUtils.writeHostPrefix(mockContext, operation);
-        assertThat(writer.toString(), containsString("let resolvedHostname = (context.endpoint as any).hostname;"));
+        assertThat(writer.toString(), containsString("let { hostname: resolvedHostname } = await context.endpoint();"));
         assertThat(writer.toString(), containsString("if (context.disableHostPrefix !== true) {"));
         assertThat(writer.toString(), containsString("resolvedHostname = \"{foo}.data.\" + resolvedHostname;"));
         assertThat(writer.toString(), containsString("resolvedHostname = resolvedHostname.replace(\"{foo}\", input.foo)"));

@@ -380,7 +380,7 @@ public final class HttpProtocolGeneratorUtils {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         EndpointTrait trait = operation.getTrait(EndpointTrait.class).get();
-        writer.write("let resolvedHostname = (context.endpoint as any).hostname;");
+        writer.write("let { hostname: resolvedHostname } = await context.endpoint();");
         // Check if disableHostPrefixInjection has been set to true at runtime
         writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
             writer.addImport("isValidHostname", "__isValidHostname",
