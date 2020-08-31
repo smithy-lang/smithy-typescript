@@ -30,6 +30,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.utils.OptionalUtils;
 
 /**
  * Generates a client command using plugins.
@@ -151,8 +152,19 @@ final class CommandGenerator implements Runnable {
 
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
+            writer.write("const { logger } = configuration;");
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
-                writer.write("logger: {} as any,");
+                writer.write("logger,");
+                writer.openBlock("inputFilterSensitiveLog: ", ",", () -> {
+                    OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
+                        input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
+                        () -> writer.writeInline("(input: any) => input"));
+                });
+                writer.openBlock("outputFilterSensitiveLog: ", ",", () -> {
+                    OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
+                        output -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(output)),
+                        () -> writer.writeInline("(output: any) => output"));
+                });
             });
             writer.write("const { requestHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
