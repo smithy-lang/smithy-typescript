@@ -361,7 +361,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             writer.write("try {\n"
                        + "  await client.send(command);\n"
                        + "} catch (err) {\n"
-                       + "  if (!$T.isa(err)) {\n"
+                       + "  if (err.name !== \"$T\") {\n"
                        + "    console.log(err);\n"
                        + "    fail(`Expected a $L to be thrown, got $${err.name} instead`);\n"
                        + "    return;\n"
