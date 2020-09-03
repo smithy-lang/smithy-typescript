@@ -69,8 +69,6 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is rendered:
      *
      * <pre>{@code
-     * import { isa as __isa } from "@aws-sdk/smithy-client";
-     *
      * export interface Person {
      *   __type?: "Person";
      *   name: string | undefined;
@@ -78,7 +76,7 @@ final class StructureGenerator implements Runnable {
      * }
      *
      * export namespace Person {
-     *   export const isa = (o: any): o is Person => __isa(o, "Person");
+     *   export const filterSensitiveLog = (obj: Person): any => ({...obj});
      * }
      * }</pre>
      */
@@ -127,8 +125,7 @@ final class StructureGenerator implements Runnable {
      *
      * <pre>{@code
      * import {
-     *     SmithyException as __SmithyException,
-     *     isa as __isa
+     *     SmithyException as __SmithyException
      * } from "@aws-sdk/smithy-client";
      *
      * export interface NoSuchResource extends __SmithyException, $MetadataBearer {
@@ -138,7 +135,7 @@ final class StructureGenerator implements Runnable {
      * }
      *
      * export namespace NoSuchResource {
-     *   export const isa = (o: any): o is NoSuchResource => __isa(o, "NoSuchResource");
+     *   export const filterSensitiveLog = (obj: NoSuchResource): any => ({...obj});
      * }
      * }</pre>
      */
