@@ -70,7 +70,6 @@ final class StructureGenerator implements Runnable {
      *
      * <pre>{@code
      * export interface Person {
-     *   __type?: "Person";
      *   name: string | undefined;
      *   age?: number | null;
      * }
@@ -96,7 +95,6 @@ final class StructureGenerator implements Runnable {
             writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         }
 
-        writer.write("__type?: $S;", shape.getId().getName());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
         config.writeMembers(writer, shape);

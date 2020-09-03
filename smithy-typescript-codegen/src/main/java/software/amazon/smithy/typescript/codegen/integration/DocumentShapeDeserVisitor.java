@@ -220,7 +220,6 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *
      * <pre>{@code
      * let contents: any = {
-     *   __type: "Field",
      *   fooValue: undefined,
      *   barValue: undefined,
      * };
@@ -479,7 +478,6 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   context: SerdeContext
      * ): Field => {
      *   let field: any = {
-     *     __type: "Field",
      *     fooValue: undefined,
      *     barValue: undefined,
      *   };

@@ -47,7 +47,7 @@ public class UnionGeneratorTest {
         assertThat(output, containsString("export namespace Example {"));
 
         // It generates an unknown variant
-        assertThat(output, containsString("export interface $UnknownMember extends $Base {\n"
+        assertThat(output, containsString("export interface $UnknownMember {\n"
                                           + "    A?: never;\n"
                                           + "    B?: never;\n"
                                           + "    C?: never;\n"
@@ -55,21 +55,21 @@ public class UnionGeneratorTest {
                                           + "  }"));
 
         // It generates a variant for each member.
-        assertThat(output, containsString("export interface AMember extends $Base {\n"
+        assertThat(output, containsString("export interface AMember {\n"
                                           + "    A: string;\n"
                                           + "    B?: never;\n"
                                           + "    C?: never;\n"
                                           + "    $unknown?: never;\n"
                                           + "  }"));
 
-        assertThat(output, containsString("export interface BMember extends $Base {\n"
+        assertThat(output, containsString("export interface BMember {\n"
                                           + "    A?: never;\n"
                                           + "    B: number;\n"
                                           + "    C?: never;\n"
                                           + "    $unknown?: never;\n"
                                           + "  }"));
 
-        assertThat(output, containsString("export interface CMember extends $Base {\n"
+        assertThat(output, containsString("export interface CMember {\n"
                                           + "    A?: never;\n"
                                           + "    B?: never;\n"
                                           + "    C: boolean;\n"

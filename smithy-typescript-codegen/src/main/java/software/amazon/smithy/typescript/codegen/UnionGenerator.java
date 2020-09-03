@@ -59,39 +59,42 @@ import software.amazon.smithy.utils.StringUtils;
  *   | Attacker.$UnknownMember;
  *
  * export namespace Attacker {
- *   export const ID = "smithy.example#Attacker";
- *   interface $Base {
- *     __type?: "Attacker",
- *   }
- *   export interface LionMember extends $Base {
+ *
+ *   export interface LionMember {
  *     lion: Lion;
  *     tiger?: never;
+ *     bear?: never;
  *     $unknown?: never;
  *   }
- *   export interface TigerMember extends $Base {
+ *
+ *   export interface TigerMember {
  *     lion?: never;
  *     tiger?: Tiger;
  *     bear?: never;
  *     $unknown?: never;
  *   }
- *   export interface BearMember extends $Base {
+ *
+ *   export interface BearMember {
  *     lion?: never;
  *     tiger?: never;
  *     bear: Bear;
  *     $unknown: never;
  *   }
- *   export interface $UnknownMember extends $Base {
+ *
+ *   export interface $UnknownMember {
  *     lion?: never;
  *     tiger?: never;
  *     bear?: never;
  *     $unknown: [string, any];
  *   }
+ *
  *   export interface Visitor<T> {
  *     lion: (value: Lion) => T;
  *     tiger: (value: Tiger) => T;
  *     bear: (value: Bear) => T;
  *     _: (name: string, value: any) => T;
  *   }
+ *
  *   export const visit = <T>(
  *     value: Attacker,
  *     visitor: Visitor<T>
@@ -101,6 +104,7 @@ import software.amazon.smithy.utils.StringUtils;
  *     if (value.bear !== undefined) return visitor.bear(value.bear);
  *     return visitor._(value.$unknown[0], value.$unknown[1]);
  *   }
+ *
  *   export const filterSensitiveLog = (obj: Attacker) => {
  *     if (obj.lion !== undefined)
  *       return { lion: Lion.filterSensitiveLog(obj.lion) };
@@ -163,15 +167,12 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeUnionMemberInterfaces() {
-        writer.openBlock("interface $$Base {", "}", () -> {
-            writer.write("__type?: $S;", shape.getId().getName());
-        });
         writer.write("");
 
         for (MemberShape member : shape.getAllMembers().values()) {
             String name = variantMap.get(member.getMemberName());
             writer.writeMemberDocs(model, member);
-            writer.openBlock("export interface $L extends $$Base {", "}", name, () -> {
+            writer.openBlock("export interface $L {", "}", name, () -> {
                 for (MemberShape variantMember : shape.getAllMembers().values()) {
                     if (variantMember.getMemberName().equals(member.getMemberName())) {
                         writer.write("$L: $T;", symbolProvider.toMemberName(variantMember),
@@ -186,7 +187,7 @@ final class UnionGenerator implements Runnable {
         }
 
         // Write out the unknown variant.
-        writer.openBlock("export interface $$UnknownMember extends $$Base {", "}", () -> {
+        writer.openBlock("export interface $$UnknownMember {", "}", () -> {
             for (MemberShape member : shape.getAllMembers().values()) {
                 writer.write("$L?: never;", symbolProvider.toMemberName(member));
             }

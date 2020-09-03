@@ -496,7 +496,6 @@ public class StructureGeneratorTest {
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));
-        assertThat(output, containsString("__type?: \"Bar\";"));
         assertThat(output, containsString("foo?: string;"));
         assertThat(output, containsString("export namespace Bar {"));
     }
