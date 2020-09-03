@@ -169,7 +169,6 @@ final class StructureGenerator implements Runnable {
     }
 
     private void renderStructureNamespace() {
-        writer.addImport("isa", "__isa", "@aws-sdk/smithy-client");
         writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
@@ -181,9 +180,6 @@ final class StructureGenerator implements Runnable {
                         model, symbolProvider, shape.getAllMembers().values());
                     structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
                 }
-            );
-            writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
-                symbol.getName(), shape.getId().getName()
             );
         });
     }
