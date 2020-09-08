@@ -17,7 +17,9 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -75,6 +77,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private final Model model;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> errorShapes = new HashSet<>();
+    private final ModuleNameDelegator moduleNameDelegator = new ModuleNameDelegator();
 
     SymbolVisitor(Model model) {
         this.model = model;
@@ -225,7 +228,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol operationShape(OperationShape shape) {
         String commandName = flattenShapeName(shape) + "Command";
-        String moduleName = formatModuleName(shape.getType(), commandName);
+        String moduleName = moduleNameDelegator.formatModuleName(shape, commandName);
         Symbol intermediate = createGeneratedSymbolBuilder(shape, commandName, moduleName).build();
         Symbol.Builder builder = intermediate.toBuilder();
         // Add input and output type symbols (XCommandInput / XCommandOutput).
@@ -271,7 +274,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol serviceShape(ServiceShape shape) {
         String name = StringUtils.capitalize(shape.getId().getName()) + "Client";
-        String moduleName = formatModuleName(shape.getType(), name);
+        String moduleName = moduleNameDelegator.formatModuleName(shape, name);
         return createGeneratedSymbolBuilder(shape, name, moduleName).build();
     }
 
@@ -358,7 +361,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
         String name = flattenShapeName(shape);
-        String moduleName = formatModuleName(shape.getType(), name);
+        String moduleName = moduleNameDelegator.formatModuleName(shape, name);
         return createGeneratedSymbolBuilder(shape, name, moduleName);
     }
 
@@ -378,18 +381,44 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .definitionFile(toFilename(namespace));
     }
 
-    private String formatModuleName(ShapeType shapeType, String name) {
-        // All shapes except for the service and operations are stored in models.
-        if (shapeType == ShapeType.SERVICE) {
-            return "./" + name;
-        } else if (shapeType == ShapeType.OPERATION) {
-            return "./commands/" + name;
-        } else {
-            return "./models/index";
-        }
-    }
-
     private String toFilename(String namespace) {
         return namespace + ".ts";
+    }
+
+    /**
+     * Utility class to locate which path should the symbol be generated into.
+     * It will break the models into multiple files to prevent it being too big.
+     */
+    static final class ModuleNameDelegator {
+        static final int DEFAULT_CHUNK_SIZE = 300;
+
+        private final Map<Shape, String> visitedModels = new HashMap<>();
+        private int bucketCount = 0;
+        private int currentBucketSize = 0;
+
+        public String formatModuleName(Shape shape, String name) {
+            // All shapes except for the service and operations are stored in models.
+            if (shape.getType() == ShapeType.SERVICE) {
+                return "./" + name;
+            } else if (shape.getType() == ShapeType.OPERATION) {
+                return "./commands/" + name;
+            } else {
+                if (visitedModels.containsKey(shape)) {
+                    return visitedModels.get(shape);
+                }
+                if (currentBucketSize == DEFAULT_CHUNK_SIZE) {
+                    bucketCount++;
+                    currentBucketSize = 0;
+                }
+                currentBucketSize++;
+                String path = getModelPath(bucketCount);
+                visitedModels.put(shape, path);
+                return path;
+            }
+        }
+
+        private String getModelPath(int bucketNumber) {
+            return String.format("./models/index%s", bucketCount == 0 ? "" : String.format("_%d", bucketCount));
+        }
     }
 }
