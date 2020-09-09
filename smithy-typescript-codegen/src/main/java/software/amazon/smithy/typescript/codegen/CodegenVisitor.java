@@ -155,16 +155,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
         // Walk the tree and condense duplicate shapes
         Collection<Shape> shapeSet = condenseShapes(new Walker(nonTraits).walkShapes(service));
-        Model shapeSetModel = Model.builder().addShapes(shapeSet).build();
+        Model prunedModel = Model.builder().addShapes(shapeSet).build();
 
         // Generate models from condensed shapes
-        for (Shape shape : TopologicalIndex.of(shapeSetModel).getOrderedShapes()) {
+        for (Shape shape : TopologicalIndex.of(prunedModel).getOrderedShapes()) {
             shape.accept(this);
         }
-
-        for (Shape shape : TopologicalIndex.of(shapeSetModel).getRecursiveShapes()) {
+        for (Shape shape : TopologicalIndex.of(prunedModel).getRecursiveShapes()) {
             shape.accept(this);
         }
+        SymbolVisitor.writeModelIndex(prunedModel, symbolProvider, fileManifest);
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted

@@ -17,12 +17,17 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -77,9 +82,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private final Model model;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> errorShapes = new HashSet<>();
-    private final ModuleNameDelegator moduleNameDelegator = new ModuleNameDelegator();
+    private final ModuleNameDelegator moduleNameDelegator;
 
     SymbolVisitor(Model model) {
+        this(model, ModuleNameDelegator.DEFAULT_CHUNK_SIZE);
+    }
+
+    SymbolVisitor(Model model, int shapeChunkSize) {
         this.model = model;
 
         // Load reserved words from a new-line delimited file.
@@ -99,6 +108,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         model.shapes(OperationShape.class).forEach(operationShape -> {
             errorShapes.addAll(operationIndex.getErrors(operationShape));
         });
+
+        moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
+    }
+
+    static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
+        ModuleNameDelegator.writeModelIndex(model, symbolProvider, fileManifest);
     }
 
     @Override
@@ -391,10 +406,20 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      */
     static final class ModuleNameDelegator {
         static final int DEFAULT_CHUNK_SIZE = 300;
+        static final String SHAPE_NAMESPACE_PREFIX = "./models/";
 
         private final Map<Shape, String> visitedModels = new HashMap<>();
         private int bucketCount = 0;
         private int currentBucketSize = 0;
+        private final int chunkSize;
+
+        ModuleNameDelegator(int shapeChunkSize) {
+            chunkSize = shapeChunkSize;
+        }
+
+        ModuleNameDelegator() {
+            chunkSize = DEFAULT_CHUNK_SIZE;
+        }
 
         public String formatModuleName(Shape shape, String name) {
             // All shapes except for the service and operations are stored in models.
@@ -406,19 +431,28 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 if (visitedModels.containsKey(shape)) {
                     return visitedModels.get(shape);
                 }
-                if (currentBucketSize == DEFAULT_CHUNK_SIZE) {
+                if (currentBucketSize == chunkSize) {
                     bucketCount++;
                     currentBucketSize = 0;
                 }
                 currentBucketSize++;
-                String path = getModelPath(bucketCount);
+                String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
                 visitedModels.put(shape, path);
                 return path;
             }
         }
 
-        private String getModelPath(int bucketNumber) {
-            return String.format("./models/index%s", bucketCount == 0 ? "" : String.format("_%d", bucketCount));
+        static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
+            TypeScriptWriter writer = new TypeScriptWriter("");
+            List<String> namespaces = model.shapes().map(shape -> symbolProvider.toSymbol(shape).getNamespace())
+                    .filter(namespace -> namespace.startsWith(SHAPE_NAMESPACE_PREFIX))
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .collect(Collectors.toList());
+            namespaces.sort(Comparator.naturalOrder());
+            namespaces.forEach(namespace -> writer.write(
+                    "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
+            fileManifest.writeFile("models/index.ts", writer.toString());
         }
     }
 }
