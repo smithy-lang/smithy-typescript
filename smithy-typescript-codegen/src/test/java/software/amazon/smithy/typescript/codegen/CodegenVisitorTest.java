@@ -143,7 +143,6 @@ public class CodegenVisitorTest {
         Assertions.assertTrue(manifest.hasFile("models/index.ts"));
         assertThat(manifest.getFileString("models/index.ts").get(),
                 containsString("export interface Bar {\n" +
-                        "  __type?: \"Bar\";\n" +
                         "  baz: string | undefined;\n" +
                         "}"));
     }

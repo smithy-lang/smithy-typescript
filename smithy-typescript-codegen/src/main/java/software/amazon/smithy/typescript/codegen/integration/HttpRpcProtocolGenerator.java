@@ -332,7 +332,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             writer.openBlock("const response: $T = {", "};", outputType, () -> {
                 writer.write("$$metadata: deserializeMetadata(output),");
                 operation.getOutput().ifPresent(outputId -> {
-                    writer.write("__type: $S,", outputId.getName());
                     writer.write("...contents,");
                 });
             });

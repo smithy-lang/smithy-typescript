@@ -69,16 +69,13 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is rendered:
      *
      * <pre>{@code
-     * import { isa as __isa } from "@aws-sdk/smithy-client";
-     *
      * export interface Person {
-     *   __type?: "Person";
      *   name: string | undefined;
      *   age?: number | null;
      * }
      *
      * export namespace Person {
-     *   export const isa = (o: any): o is Person => __isa(o, "Person");
+     *   export const filterSensitiveLog = (obj: Person): any => ({...obj});
      * }
      * }</pre>
      */
@@ -98,7 +95,6 @@ final class StructureGenerator implements Runnable {
             writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
         }
 
-        writer.write("__type?: $S;", shape.getId().getName());
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
         config.writeMembers(writer, shape);
@@ -127,8 +123,7 @@ final class StructureGenerator implements Runnable {
      *
      * <pre>{@code
      * import {
-     *     SmithyException as __SmithyException,
-     *     isa as __isa
+     *     SmithyException as __SmithyException
      * } from "@aws-sdk/smithy-client";
      *
      * export interface NoSuchResource extends __SmithyException, $MetadataBearer {
@@ -138,7 +133,7 @@ final class StructureGenerator implements Runnable {
      * }
      *
      * export namespace NoSuchResource {
-     *   export const isa = (o: any): o is NoSuchResource => __isa(o, "NoSuchResource");
+     *   export const filterSensitiveLog = (obj: NoSuchResource): any => ({...obj});
      * }
      * }</pre>
      */
@@ -169,7 +164,6 @@ final class StructureGenerator implements Runnable {
     }
 
     private void renderStructureNamespace() {
-        writer.addImport("isa", "__isa", "@aws-sdk/smithy-client");
         writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
@@ -181,9 +175,6 @@ final class StructureGenerator implements Runnable {
                         model, symbolProvider, shape.getAllMembers().values());
                     structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
                 }
-            );
-            writer.write("export const isa = (o: any): o is $L => __isa(o, $S);",
-                symbol.getName(), shape.getId().getName()
             );
         });
     }

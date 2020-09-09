@@ -480,11 +480,8 @@ public class StructureGeneratorTest {
     private void testErrorStructureCodegen(String file, String expectedType) {
         String contents = testStructureCodegen(file, expectedType);
 
-        assertThat(contents, containsString("as __isa"));
         assertThat(contents, containsString("as __SmithyException"));
         assertThat(contents, containsString("namespace Err {"));
-        assertThat(contents, containsString("  export const isa = (o: any): o is Err => "
-                                            + "__isa(o, \"Err\");\n"));
     }
 
     @Test
@@ -498,13 +495,9 @@ public class StructureGeneratorTest {
         new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
         String output = writer.toString();
 
-        assertThat(output, containsString("as __isa"));
         assertThat(output, containsString("export interface Bar {"));
-        assertThat(output, containsString("__type?: \"Bar\";"));
         assertThat(output, containsString("foo?: string;"));
         assertThat(output, containsString("export namespace Bar {"));
-        assertThat(output, containsString(
-                "export const isa = (o: any): o is Bar => __isa(o, \"Bar\");"));
     }
 
     private StructureShape createNonErrorStructure() {

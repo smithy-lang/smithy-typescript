@@ -845,7 +845,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
                 // Only set a type and the members if we have output.
                 operation.getOutput().ifPresent(outputId -> {
-                    writer.write("__type: $S,", outputId.getName());
                     // Set all the members to undefined to meet type constraints.
                     StructureShape target = model.expectShape(outputId).asStructureShape().get();
                     new TreeMap<>(target.getAllMembers())
@@ -1141,11 +1140,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (event.hasTrait(ErrorTrait.class)) {
                 generateErrorEventDeserializer(context, event);
             } else {
-                writer.openBlock("let contents: $L = {", "} as any;", symbol.getName(), () -> {
-                    if (!event.getAllMembers().values().isEmpty()) {
-                        writer.write("__type: $S,", event.getId().getName());
-                    }
-                });
+                writer.write("let contents: $L = {} as any;", symbol.getName());
                 readEventHeaders(context, event);
                 readEventBody(context, event);
                 writer.write("return contents;");
