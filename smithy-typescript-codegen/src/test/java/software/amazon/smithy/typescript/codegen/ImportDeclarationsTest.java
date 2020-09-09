@@ -100,6 +100,15 @@ public class ImportDeclarationsTest {
     }
 
     @Test
+    public void canImportDefaultImport() {
+        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        declarations.addDefaultImport("foo", "@types/foo");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import foo from \"@types/foo\";"));
+    }
+
+    @Test
     public void canImportNestedFromRoot() {
         ImportDeclarations declarations = new ImportDeclarations("");
         declarations.addImport("Foo", "", "./models/foo");
