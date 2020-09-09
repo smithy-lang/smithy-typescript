@@ -42,13 +42,7 @@ final class ImportDeclarations {
     }
 
     ImportDeclarations addDefaultImport(String name, String module) {
-        if (relativize != null && module.startsWith(".")) {
-            // A relative import is resolved against the current file.
-            module = relativize.relativize(Paths.get(module)).toString();
-            if (!module.startsWith(".")) {
-                module = "./" + module;
-            }
-        }
+        module = getRelativizedModule(relativize, module);
 
         if (!module.isEmpty() && (relativize == null || !module.equals(relativize.toString()))) {
             defaultImports.put(module, name);
@@ -62,13 +56,7 @@ final class ImportDeclarations {
             alias = name;
         }
 
-        if (relativize != null && module.startsWith(".")) {
-            // A relative import is resolved against the current file.
-            module = relativize.relativize(Paths.get(module)).toString();
-            if (!module.startsWith(".")) {
-                module = "./" + module;
-            }
-        }
+        module = getRelativizedModule(relativize, module);
 
         if (!module.isEmpty() && (relativize == null || !module.equals(relativize.toString()))) {
             namedImports.computeIfAbsent(module, m -> new TreeMap<>()).put(alias, name);
@@ -133,5 +121,16 @@ final class ImportDeclarations {
         return entry.getKey().equals(entry.getValue())
                ? entry.getKey()
                : entry.getValue() + " as " + entry.getKey();
+    }
+
+    private static String getRelativizedModule(Path relativize, String module) {
+        if (relativize != null && module.startsWith(".")) {
+            // A relative import is resolved against the current file.
+            module = relativize.relativize(Paths.get(module)).toString();
+            if (!module.startsWith(".")) {
+                module = "./" + module;
+            }
+        }
+        return module;
     }
 }
