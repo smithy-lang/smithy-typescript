@@ -150,6 +150,18 @@ public final class TypeScriptWriter extends CodeWriter {
     }
 
     /**
+     * default import using an alias from a module only if necessary.
+     *
+     * @param name Name of default import.
+     * @param from Module to default import from.
+     * @return Returns the writer.
+     */
+    public TypeScriptWriter addDefaultImport(String name, String from) {
+        imports.addDefaultImport(name, from);
+        return this;
+    }
+
+    /**
      * Imports a type using an alias from a module only if necessary.
      *
      * @param name Type to import.

@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import software.amazon.smithy.codegen.core.CodegenException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ import java.util.TreeMap;
 final class ImportDeclarations {
 
     private final Path relativize;
-    private final Map<String, Map<String, String>> imports = new TreeMap<>();
+    private final Map<String, String> defaultImports = new TreeMap<>();
+    private final Map<String, Map<String, String>> namedImports = new TreeMap<>();
 
     ImportDeclarations(String relativize) {
         if (!relativize.startsWith("./")) {
@@ -37,6 +39,22 @@ final class ImportDeclarations {
 
         // Strip off the filename of what's being relativized since it isn't needed.
         this.relativize = Paths.get(relativize).getParent();
+    }
+
+    ImportDeclarations addDefaultImport(String name, String module) {
+        if (relativize != null && module.startsWith(".")) {
+            // A relative import is resolved against the current file.
+            module = relativize.relativize(Paths.get(module)).toString();
+            if (!module.startsWith(".")) {
+                module = "./" + module;
+            }
+        }
+
+        if (!module.isEmpty() && (relativize == null || !module.equals(relativize.toString()))) {
+            defaultImports.put(module, name);
+        }
+
+        return this;
     }
 
     ImportDeclarations addImport(String name, String alias, String module) {
@@ -53,7 +71,7 @@ final class ImportDeclarations {
         }
 
         if (!module.isEmpty() && (relativize == null || !module.equals(relativize.toString()))) {
-            imports.computeIfAbsent(module, m -> new TreeMap<>()).put(alias, name);
+            namedImports.computeIfAbsent(module, m -> new TreeMap<>()).put(alias, name);
         }
 
         return this;
@@ -63,34 +81,41 @@ final class ImportDeclarations {
     public String toString() {
         StringBuilder result = new StringBuilder();
 
-        if (!imports.isEmpty()) {
-            for (Map.Entry<String, Map<String, String>> entry : imports.entrySet()) {
+        if (!defaultImports.isEmpty()) {
+            List<Map.Entry<String, String>> entries = new ArrayList<>(defaultImports.entrySet());
+            for (Map.Entry<String, String> importEntry : entries) {
+                result.append("import ")
+                        .append(importEntry.getValue())
+                        .append(" from \"")
+                        .append(importEntry.getKey())
+                        .append("\";\n");
+            }
+            result.append("\n");
+        }
+
+        if (!namedImports.isEmpty()) {
+            for (Map.Entry<String, Map<String, String>> entry : namedImports.entrySet()) {
                 String module = entry.getKey();
                 Map<String, String> moduleImports = entry.getValue();
-                List<Map.Entry<String, String>> nonStarEntries = new ArrayList<>(moduleImports.entrySet());
+                List<Map.Entry<String, String>> entries = new ArrayList<>(moduleImports.entrySet());
 
-                // "*" imports must be special-cased and can't be joined with named imports, and
-                // remove "*" imports from nonStarEntries which is iterated afterwards.
+                // "*" imports are not supported https://github.com/awslabs/smithy-typescript/issues/211
                 for (Map.Entry<String, String> importEntry : moduleImports.entrySet()) {
                     if (importEntry.getValue().equals("*")) {
-                        nonStarEntries.remove(importEntry);
-                        result.append("import ")
-                                .append(createImportStatement(importEntry))
-                                .append(" from \"")
-                                .append(module)
-                                .append("\";\n");
+                        throw new CodegenException("Star imports are not supported, attempted for " + module
+                                + ". Use default import instead.");
                     }
                 }
 
-                if (nonStarEntries.size() == 1) {
+                if (entries.size() == 1) {
                     result.append("import { ")
-                            .append(createImportStatement(nonStarEntries.get(0)))
+                            .append(createImportStatement(entries.get(0)))
                             .append(" } from \"")
                             .append(module)
                             .append("\";\n");
-                } else if (!nonStarEntries.isEmpty()) {
+                } else if (!entries.isEmpty()) {
                     result.append("import {\n");
-                    for (Map.Entry<String, String> importEntry : nonStarEntries) {
+                    for (Map.Entry<String, String> importEntry : entries) {
                         result.append("  ");
                         result.append(createImportStatement(importEntry));
                         result.append(",\n");
