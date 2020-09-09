@@ -15,13 +15,13 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import software.amazon.smithy.codegen.core.CodegenException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import software.amazon.smithy.codegen.core.CodegenException;
 
 /**
  * Internal class used for aggregating imports of a file.
