@@ -132,3 +132,8 @@ const equivalentContents = (expected: any, generated: any): boolean => {
 
   return true;
 }
+
+const clientParams = {
+  region: "us-west-2",
+  credentials: { accessKeyId: "key", secretAccessKey: "secret" }
+}
