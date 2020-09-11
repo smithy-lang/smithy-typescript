@@ -17,9 +17,8 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.CodegenException;
 
@@ -84,10 +83,10 @@ final class ImportDeclarations {
             for (Map.Entry<String, Map<String, String>> entry : namedImports.entrySet()) {
                 String module = entry.getKey();
                 Map<String, String> moduleImports = entry.getValue();
-                List<Map.Entry<String, String>> entries = new ArrayList<>(moduleImports.entrySet());
+                Set<Map.Entry<String, String>> entries = moduleImports.entrySet();
 
                 // "*" imports are not supported https://github.com/awslabs/smithy-typescript/issues/211
-                for (Map.Entry<String, String> importEntry : moduleImports.entrySet()) {
+                for (Map.Entry<String, String> importEntry : entries) {
                     if (importEntry.getValue().equals("*")) {
                         throw new CodegenException("Star imports are not supported, attempted for " + module
                                 + ". Use default import instead.");
@@ -96,7 +95,7 @@ final class ImportDeclarations {
 
                 if (entries.size() == 1) {
                     result.append("import { ")
-                            .append(createImportStatement(entries.get(0)))
+                            .append(createImportStatement(entries.iterator().next()))
                             .append(" } from \"")
                             .append(module)
                             .append("\";\n");
