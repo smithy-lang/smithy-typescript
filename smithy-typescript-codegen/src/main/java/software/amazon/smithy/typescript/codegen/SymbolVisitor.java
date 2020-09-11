@@ -20,12 +20,10 @@ import static java.lang.String.format;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -402,7 +400,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     /**
      * Utility class to locate which path should the symbol be generated into.
-     * It will break the models into multiple files to prevent it being too big.
+     * It will break the models into multiple files to prevent it getting too big.
      */
     static final class ModuleNameDelegator {
         static final int DEFAULT_CHUNK_SIZE = 300;
@@ -417,41 +415,35 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             chunkSize = shapeChunkSize;
         }
 
-        ModuleNameDelegator() {
-            chunkSize = DEFAULT_CHUNK_SIZE;
-        }
-
         public String formatModuleName(Shape shape, String name) {
             // All shapes except for the service and operations are stored in models.
             if (shape.getType() == ShapeType.SERVICE) {
                 return "./" + name;
             } else if (shape.getType() == ShapeType.OPERATION) {
                 return "./commands/" + name;
-            } else {
-                if (visitedModels.containsKey(shape)) {
-                    return visitedModels.get(shape);
-                }
-                if (currentBucketSize == chunkSize) {
-                    bucketCount++;
-                    currentBucketSize = 0;
-                }
-                currentBucketSize++;
-                String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
-                visitedModels.put(shape, path);
-                return path;
+            } else if (visitedModels.containsKey(shape)) {
+                return visitedModels.get(shape);
             }
+            // Add models into buckets no bigger than chunk size.
+            String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
+            visitedModels.put(shape, path);
+            currentBucketSize++;
+            if (currentBucketSize == chunkSize) {
+                bucketCount++;
+                currentBucketSize = 0;
+            }
+            return path;
         }
 
         static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
-            List<String> namespaces = model.shapes().map(shape -> symbolProvider.toSymbol(shape).getNamespace())
+            model.shapes()
+                    .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                     .filter(namespace -> namespace.startsWith(SHAPE_NAMESPACE_PREFIX))
-                    .collect(Collectors.toSet())
-                    .stream()
-                    .collect(Collectors.toList());
-            namespaces.sort(Comparator.naturalOrder());
-            namespaces.forEach(namespace -> writer.write(
-                    "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
+                    .distinct()
+                    .sorted(Comparator.naturalOrder())
+                    .forEach(namespace -> writer.write(
+                        "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
             fileManifest.writeFile("models/index.ts", writer.toString());
         }
     }
