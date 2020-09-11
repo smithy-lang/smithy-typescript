@@ -70,8 +70,7 @@ final class ImportDeclarations {
         StringBuilder result = new StringBuilder();
 
         if (!defaultImports.isEmpty()) {
-            List<Map.Entry<String, String>> entries = new ArrayList<>(defaultImports.entrySet());
-            for (Map.Entry<String, String> importEntry : entries) {
+            for (Map.Entry<String, String> importEntry : defaultImports.entrySet()) {
                 result.append("import ")
                         .append(importEntry.getValue())
                         .append(" from \"")
