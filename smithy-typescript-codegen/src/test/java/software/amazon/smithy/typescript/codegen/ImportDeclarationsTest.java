@@ -3,7 +3,9 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.amazon.smithy.codegen.core.CodegenException;
 
 public class ImportDeclarationsTest {
     @Test
@@ -91,24 +93,29 @@ public class ImportDeclarationsTest {
     }
 
     @Test
-    public void canImportStarImport() {
+    public void throwsOnStarImport() {
         ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
         declarations.addImport("*", "_baz", "@types/foo");
-        declarations.addImport("*", "*", "@types/other");
-        String result = declarations.toString();
-
-        assertThat(result, containsString("import * as _baz from \"@types/foo\";"));
-        assertThat(result, containsString("import * from \"@types/other\";"));
+        Assertions.assertThrows(CodegenException.class, () -> declarations.toString());
     }
 
     @Test
-    public void canImportStarImportsWithNamedImports() {
+    public void canImportDefaultImport() {
         ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
-        declarations.addImport("*", "_baz", "@types/foo");
+        declarations.addDefaultImport("foo", "@types/foo");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("import foo from \"@types/foo\";"));
+    }
+
+    @Test
+    public void canImportDefaultImportWithNamedImport() {
+        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        declarations.addDefaultImport("foo", "@types/foo");
         declarations.addImport("Bar", "Bar", "@types/foo");
         String result = declarations.toString();
 
-        assertThat(result, containsString("import * as _baz from \"@types/foo\";"));
+        assertThat(result, containsString("import foo from \"@types/foo\";"));
         assertThat(result, containsString("import { Bar } from \"@types/foo\";"));
     }
 
