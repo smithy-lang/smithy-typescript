@@ -180,8 +180,10 @@ final class HttpProtocolTestGenerator implements Runnable {
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             // Create a client with a custom request handler that intercepts requests.
-            writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () ->
-                    writer.write("requestHandler: new RequestSerializationTestHandler()"));
+            writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
+                    writer.write("...clientParams,");
+                    writer.write("requestHandler: new RequestSerializationTestHandler(),");
+            });
 
             // Run the parameters through a visitor to adjust for TS specific inputs.
             ObjectNode params = testCase.getParams();
@@ -387,7 +389,8 @@ final class HttpProtocolTestGenerator implements Runnable {
         String body = testCase.getBody().orElse(null);
 
         // Create a client with a custom request handler that intercepts requests.
-        writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () ->
+        writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
+                writer.write("...clientParams,");
                 writer.openBlock("requestHandler: new ResponseDeserializationTestHandler(", ")", () -> {
                     writer.write("$L,", isSuccess);
                     writer.write("$L,", testCase.getCode());
@@ -395,7 +398,8 @@ final class HttpProtocolTestGenerator implements Runnable {
                     if (body != null) {
                         writer.write("`$L`,", body);
                     }
-                }));
+                });
+            });
 
         // Set the command's parameters to empty, using the any type to
         // trick TS in to letting us send this command through.
