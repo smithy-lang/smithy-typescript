@@ -17,10 +17,15 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -75,8 +80,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private final Model model;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> errorShapes = new HashSet<>();
+    private final ModuleNameDelegator moduleNameDelegator;
 
     SymbolVisitor(Model model) {
+        this(model, ModuleNameDelegator.DEFAULT_CHUNK_SIZE);
+    }
+
+    SymbolVisitor(Model model, int shapeChunkSize) {
         this.model = model;
 
         // Load reserved words from a new-line delimited file.
@@ -96,6 +106,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         model.shapes(OperationShape.class).forEach(operationShape -> {
             errorShapes.addAll(operationIndex.getErrors(operationShape));
         });
+
+        moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
+    }
+
+    static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
+        ModuleNameDelegator.writeModelIndex(model, symbolProvider, fileManifest);
     }
 
     @Override
@@ -225,7 +241,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol operationShape(OperationShape shape) {
         String commandName = flattenShapeName(shape) + "Command";
-        String moduleName = formatModuleName(shape.getType(), commandName);
+        String moduleName = moduleNameDelegator.formatModuleName(shape, commandName);
         Symbol intermediate = createGeneratedSymbolBuilder(shape, commandName, moduleName).build();
         Symbol.Builder builder = intermediate.toBuilder();
         // Add input and output type symbols (XCommandInput / XCommandOutput).
@@ -271,7 +287,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol serviceShape(ServiceShape shape) {
         String name = StringUtils.capitalize(shape.getId().getName()) + "Client";
-        String moduleName = formatModuleName(shape.getType(), name);
+        String moduleName = moduleNameDelegator.formatModuleName(shape, name);
         return createGeneratedSymbolBuilder(shape, name, moduleName).build();
     }
 
@@ -358,7 +374,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
         String name = flattenShapeName(shape);
-        String moduleName = formatModuleName(shape.getType(), name);
+        String moduleName = moduleNameDelegator.formatModuleName(shape, name);
         return createGeneratedSymbolBuilder(shape, name, moduleName);
     }
 
@@ -378,18 +394,57 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .definitionFile(toFilename(namespace));
     }
 
-    private String formatModuleName(ShapeType shapeType, String name) {
-        // All shapes except for the service and operations are stored in models.
-        if (shapeType == ShapeType.SERVICE) {
-            return "./" + name;
-        } else if (shapeType == ShapeType.OPERATION) {
-            return "./commands/" + name;
-        } else {
-            return "./models/index";
-        }
-    }
-
     private String toFilename(String namespace) {
         return namespace + ".ts";
+    }
+
+    /**
+     * Utility class to locate which path should the symbol be generated into.
+     * It will break the models into multiple files to prevent it getting too big.
+     */
+    static final class ModuleNameDelegator {
+        static final int DEFAULT_CHUNK_SIZE = 300;
+        static final String SHAPE_NAMESPACE_PREFIX = "./models/";
+
+        private final Map<Shape, String> visitedModels = new HashMap<>();
+        private int bucketCount = 0;
+        private int currentBucketSize = 0;
+        private final int chunkSize;
+
+        ModuleNameDelegator(int shapeChunkSize) {
+            chunkSize = shapeChunkSize;
+        }
+
+        public String formatModuleName(Shape shape, String name) {
+            // All shapes except for the service and operations are stored in models.
+            if (shape.getType() == ShapeType.SERVICE) {
+                return "./" + name;
+            } else if (shape.getType() == ShapeType.OPERATION) {
+                return "./commands/" + name;
+            } else if (visitedModels.containsKey(shape)) {
+                return visitedModels.get(shape);
+            }
+            // Add models into buckets no bigger than chunk size.
+            String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
+            visitedModels.put(shape, path);
+            currentBucketSize++;
+            if (currentBucketSize == chunkSize) {
+                bucketCount++;
+                currentBucketSize = 0;
+            }
+            return path;
+        }
+
+        static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
+            TypeScriptWriter writer = new TypeScriptWriter("");
+            model.shapes()
+                    .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
+                    .filter(namespace -> namespace.startsWith(SHAPE_NAMESPACE_PREFIX))
+                    .distinct()
+                    .sorted(Comparator.naturalOrder())
+                    .forEach(namespace -> writer.write(
+                        "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
+            fileManifest.writeFile("models/index.ts", writer.toString());
+        }
     }
 }

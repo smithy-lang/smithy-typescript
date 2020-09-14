@@ -1,10 +1,12 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
 import org.junit.jupiter.api.Test;
+import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -25,9 +27,9 @@ public class SymbolProviderTest {
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("Hello"));
-        assertThat(symbol.getNamespace(), equalTo("./models/index"));
+        assertThat(symbol.getNamespace(), equalTo("./models/models_0"));
         assertThat(symbol.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol.getDefinitionFile(), equalTo("./models/index.ts"));
+        assertThat(symbol.getDefinitionFile(), equalTo("./models/models_0.ts"));
     }
 
     @Test
@@ -38,16 +40,20 @@ public class SymbolProviderTest {
         SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
+        MockManifest manifest = new MockManifest();
+        SymbolVisitor.writeModelIndex(model, provider, manifest);
 
         assertThat(symbol1.getName(), equalTo("Hello"));
-        assertThat(symbol1.getNamespace(), equalTo("./models/index"));
+        assertThat(symbol1.getNamespace(), equalTo("./models/models_0"));
         assertThat(symbol1.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol1.getDefinitionFile(), equalTo("./models/index.ts"));
+        assertThat(symbol1.getDefinitionFile(), equalTo("./models/models_0.ts"));
 
         assertThat(symbol2.getName(), equalTo("Hello"));
-        assertThat(symbol2.getNamespace(), equalTo("./models/index"));
+        assertThat(symbol2.getNamespace(), equalTo("./models/models_0"));
         assertThat(symbol2.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol2.getDefinitionFile(), equalTo("./models/index.ts"));
+        assertThat(symbol2.getDefinitionFile(), equalTo("./models/models_0.ts"));
+        assertThat(manifest.getFileString("models/index.ts").get(),
+                containsString("export * from \"./models_0\";"));
     }
 
     @Test
@@ -78,7 +84,7 @@ public class SymbolProviderTest {
 
         // Normal structure with escaping.
         assertThat(structSymbol.getName(), equalTo("_Object"));
-        assertThat(structSymbol.getNamespace(), equalTo("./models/index"));
+        assertThat(structSymbol.getNamespace(), equalTo("./models/models_0"));
 
         // Reference to built-in type with no escaping.
         assertThat(memberSymbol.getName(), equalTo("string"));

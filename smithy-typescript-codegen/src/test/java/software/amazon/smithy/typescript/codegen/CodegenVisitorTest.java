@@ -141,7 +141,10 @@ public class CodegenVisitorTest {
         new TypeScriptCodegenPlugin().execute(context);
 
         Assertions.assertTrue(manifest.hasFile("models/index.ts"));
+        Assertions.assertTrue(manifest.hasFile("models/models_0.ts"));
         assertThat(manifest.getFileString("models/index.ts").get(),
+                containsString("export * from \"./models_0\";"));
+        assertThat(manifest.getFileString("models/models_0.ts").get(),
                 containsString("export interface Bar {\n" +
                         "  baz: string | undefined;\n" +
                         "}"));

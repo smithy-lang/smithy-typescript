@@ -34,6 +34,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
@@ -152,15 +153,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Generate models that are connected to the service being generated.
         LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
-        Set<Shape> serviceShapes = new TreeSet<>(new Walker(nonTraits).walkShapes(service));
-
-        // Condense duplicate shapes
-        Map<String, Shape> shapeMap = condenseShapes(serviceShapes);
+        // Walk the tree and condense duplicate shapes
+        Collection<Shape> shapeSet = condenseShapes(new Walker(nonTraits).walkShapes(service));
+        Model prunedModel = Model.builder().addShapes(shapeSet).build();
 
         // Generate models from condensed shapes
-        for (Shape shape : shapeMap.values()) {
+        for (Shape shape : TopologicalIndex.of(prunedModel).getOrderedShapes()) {
             shape.accept(this);
         }
+        for (Shape shape : TopologicalIndex.of(prunedModel).getRecursiveShapes()) {
+            shape.accept(this);
+        }
+        SymbolVisitor.writeModelIndex(prunedModel, symbolProvider, fileManifest);
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
@@ -325,7 +329,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         return null;
     }
 
-    private Map<String, Shape> condenseShapes(Set<Shape> shapes) {
+    private Collection<Shape> condenseShapes(Set<Shape> shapes) {
         Map<String, Shape> shapeMap = new LinkedHashMap<>();
 
         // Check for colliding shapes and prune non-unique shapes
@@ -342,7 +346,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             }
         }
 
-        return shapeMap;
+        return shapeMap.values();
     }
 
     private boolean isShapeCollision(Shape shapeA, Shape shapeB) {
