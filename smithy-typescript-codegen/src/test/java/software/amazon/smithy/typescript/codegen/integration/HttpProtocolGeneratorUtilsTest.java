@@ -67,7 +67,7 @@ public class HttpProtocolGeneratorUtilsTest {
         assertThat(writer.toString(), containsString("let { hostname: resolvedHostname } = await context.endpoint();"));
         assertThat(writer.toString(), containsString("if (context.disableHostPrefix !== true) {"));
         assertThat(writer.toString(), containsString("resolvedHostname = \"{foo}.data.\" + resolvedHostname;"));
-        assertThat(writer.toString(), containsString("resolvedHostname = resolvedHostname.replace(\"{foo}\", input.foo)"));
+        assertThat(writer.toString(), containsString("resolvedHostname = resolvedHostname.replace(\"{foo}\", input.foo!)"));
         assertThat(writer.toString(), containsString("if (!__isValidHostname(resolvedHostname)) {"));
         assertThat(writer.toString(), containsString(
                 "throw new Error(\"ValidationError: prefixed hostname must be hostname compatible."));

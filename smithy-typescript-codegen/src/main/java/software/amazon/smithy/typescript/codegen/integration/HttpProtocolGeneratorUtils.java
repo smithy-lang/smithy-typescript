@@ -392,7 +392,7 @@ public final class HttpProtocolGeneratorUtils {
             for (SmithyPattern.Segment label : prefixLabels) {
                 MemberShape member = inputShape.getMember(label.getContent()).get();
                 String memberName = symbolProvider.toMemberName(member);
-                writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L)",
+                writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L!)",
                         label.getContent(), memberName);
             }
             writer.openBlock("if (!__isValidHostname(resolvedHostname)) {", "}", () -> {
