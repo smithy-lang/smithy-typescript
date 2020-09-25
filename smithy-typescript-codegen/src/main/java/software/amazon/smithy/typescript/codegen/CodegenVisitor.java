@@ -98,12 +98,15 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
 
         // Preprocess model using integrations.
-        settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
-        Model baseModel = context.getModel();
         for (TypeScriptIntegration integration : integrations) {
-            baseModel = integration.preprocessModel(context, settings);
+            Model modifiedModel = integration.preprocessModel(context,
+                    TypeScriptSettings.from(context.getModel(), context.getSettings()));
+            if (modifiedModel != context.getModel()) {
+                context = context.toBuilder().model(modifiedModel).build();
+            }
         }
-        model = baseModel;
+        settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
+        model = context.getModel();
         nonTraits = context.getModelWithoutTraitShapes();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
