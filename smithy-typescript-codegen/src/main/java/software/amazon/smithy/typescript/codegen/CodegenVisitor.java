@@ -82,13 +82,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ApplicationProtocol applicationProtocol;
 
     CodegenVisitor(PluginContext context) {
-        settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
-        nonTraits = context.getModelWithoutTraitShapes();
-        model = context.getModel();
-        service = settings.getService(model);
-        fileManifest = context.getFileManifest();
-        LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
-
         // Load all integrations.
         ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
         LOGGER.info("Attempting to discover TypeScriptIntegration from the classpath...");
@@ -103,6 +96,22 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 });
         // Sort the integrations in specified order.
         integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
+
+        // Preprocess model using integrations.
+        TypeScriptSettings typescriptSettings = TypeScriptSettings.from(context.getModel(), context.getSettings());
+        for (TypeScriptIntegration integration : integrations) {
+            Model modifiedModel = integration.preprocessModel(context, typescriptSettings);
+            if (modifiedModel != context.getModel()) {
+                context = context.toBuilder().model(modifiedModel).build();
+                typescriptSettings = TypeScriptSettings.from(modifiedModel, context.getSettings());
+            }
+        }
+        settings = typescriptSettings;
+        model = context.getModel();
+        nonTraits = context.getModelWithoutTraitShapes();
+        service = settings.getService(model);
+        fileManifest = context.getFileManifest();
+        LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
 
         // Decorate the symbol provider using integrations.
         SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
