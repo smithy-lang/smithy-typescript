@@ -392,6 +392,9 @@ public final class HttpProtocolGeneratorUtils {
             for (SmithyPattern.Segment label : prefixLabels) {
                 MemberShape member = inputShape.getMember(label.getContent()).get();
                 String memberName = symbolProvider.toMemberName(member);
+                writer.openBlock("if (input.$L === undefined) {", "}", memberName, () -> {
+                    writer.write("throw new Error('Empty value provided for input host prefix: $L.');", memberName);
+                });
                 writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L!)",
                         label.getContent(), memberName);
             }
