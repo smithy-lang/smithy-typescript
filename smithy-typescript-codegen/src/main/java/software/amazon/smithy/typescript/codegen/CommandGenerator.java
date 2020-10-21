@@ -137,7 +137,7 @@ final class CommandGenerator implements Runnable {
 
     private void generateCommandMiddlewareResolver(String configType) {
         Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
-
+        writer.writeDocs("@internal");
         writer.write("resolveMiddleware(")
                 .indent()
                 .write("clientStack: MiddlewareStack<$L, $L>,", "ServiceInputTypes", "ServiceOutputTypes")
