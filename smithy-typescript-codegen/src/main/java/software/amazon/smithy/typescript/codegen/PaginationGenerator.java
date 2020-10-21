@@ -121,12 +121,18 @@ final class PaginationGenerator implements Runnable {
         });
     }
 
+     private String destructurePath(String path) {
+        String[] splitIndex = path.split("\\.");
+        return "['" + String.join("']['", splitIndex) + "']";
+    }
+
     private void writePager() {
         String serviceTypeName = serviceSymbol.getName();
         String inputTypeName = inputSymbol.getName();
         String outputTypeName = outputSymbol.getName();
-        String inputTokenName = paginatedInfo.getInputTokenMember().getMemberName();
-        String outputTokenName = paginatedInfo.getOutputTokenMember().getMemberName();
+
+        String inputTokenName = paginatedInfo.getPaginatedTrait().getInputToken().get();
+        String outputTokenName = paginatedInfo.getPaginatedTrait().getOutputToken().get();
 
         writer.openBlock(
                 "export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
@@ -136,7 +142,8 @@ final class PaginationGenerator implements Runnable {
             writer.write("let hasNext = true;");
             writer.write("let page: $L;", outputTypeName);
             writer.openBlock("while (hasNext) {", "}", () -> {
-                writer.write("input[$S] = token;", inputTokenName);
+                writer.write("input$L = token;", destructurePath(inputTokenName));
+
                 if (paginatedInfo.getPageSizeMember().isPresent()) {
                     String pageSize = paginatedInfo.getPageSizeMember().get().getMemberName();
                     writer.write("input[$S] = config.pageSize;", pageSize);
@@ -154,13 +161,7 @@ final class PaginationGenerator implements Runnable {
                 });
 
                 writer.write("yield page;");
-                if (outputTokenName.contains(".")) {
-                    // Smithy allows one level indexing (ex. 'bucket.outputToken').
-                    String[] outputIndex = outputTokenName.split("\\.");
-                    writer.write("token = page[$S][$S];", outputIndex[0], outputIndex[1]);
-                } else {
-                    writer.write("token = page[$S];", outputTokenName);
-                }
+                writer.write("token = page$L;", destructurePath(outputTokenName));
 
                 writer.write("hasNext = !!(token);");
             });
