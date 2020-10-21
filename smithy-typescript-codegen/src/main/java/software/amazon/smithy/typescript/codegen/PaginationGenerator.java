@@ -121,7 +121,7 @@ final class PaginationGenerator implements Runnable {
         });
     }
 
-    public static String destructurePath(String path) {
+     private String destructurePath(String path) {
         String[] splitIndex = path.split("\\.");
         return "['" + String.join("']['", splitIndex) + "']";
     }
@@ -130,8 +130,9 @@ final class PaginationGenerator implements Runnable {
         String serviceTypeName = serviceSymbol.getName();
         String inputTypeName = inputSymbol.getName();
         String outputTypeName = outputSymbol.getName();
-        String inputTokenName = paginatedInfo.getInputTokenMember().getMemberName();
-        String outputTokenName = paginatedInfo.getOutputTokenMember().getMemberName();
+
+        String inputTokenName = paginatedInfo.getPaginatedTrait().getInputToken().get();
+        String outputTokenName = paginatedInfo.getPaginatedTrait().getOutputToken().get();
 
         writer.openBlock(
                 "export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
