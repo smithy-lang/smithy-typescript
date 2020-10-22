@@ -136,7 +136,7 @@ final class PaginationGenerator implements Runnable {
         writer.openBlock(
                 "export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
                 "}",  methodName, paginationType, inputTypeName, outputTypeName, () -> {
-            writer.write("let token: string | undefined = config.startingToken || '';");
+            writer.write("let token: string | undefined = config.startingToken || undefined;");
 
             writer.write("let hasNext = true;");
             writer.write("let page: $L;", outputTypeName);
