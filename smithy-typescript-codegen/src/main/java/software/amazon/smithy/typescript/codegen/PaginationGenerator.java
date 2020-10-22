@@ -122,8 +122,7 @@ final class PaginationGenerator implements Runnable {
     }
 
      private String destructurePath(String path) {
-        String[] splitIndex = path.split("\\.");
-        return "['" + String.join("']['", splitIndex) + "']";
+        return "."  + path.replace(".", "!.");
     }
 
     private void writePager() {
