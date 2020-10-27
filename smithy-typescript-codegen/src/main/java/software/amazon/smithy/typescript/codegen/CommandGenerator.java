@@ -155,8 +155,8 @@ final class CommandGenerator implements Runnable {
             writer.write("const { logger } = configuration;");
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger,");
-                writer.write("serviceName: \"$L\",", symbolProvider.toSymbol(service).getName());
-                writer.write("operationName: \"$L\",", symbolProvider.toSymbol(operation).getName());
+                writer.write("clientName: \"$L\",", symbolProvider.toSymbol(service).getName());
+                writer.write("commandName: \"$L\",", symbolProvider.toSymbol(operation).getName());
                 writer.openBlock("inputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
                         input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
