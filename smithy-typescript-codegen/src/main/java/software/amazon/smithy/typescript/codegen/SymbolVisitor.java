@@ -422,7 +422,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             } else if (shape.getType() == ShapeType.OPERATION) {
                 return "./src/commands/" + name;
             } else if (visitedModels.containsKey(shape)) {
-                return "./src/" + visitedModels.get(shape);
+                return visitedModels.get(shape);
             }
             // Add models into buckets no bigger than chunk size.
             String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
