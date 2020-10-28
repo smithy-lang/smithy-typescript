@@ -209,7 +209,7 @@ final class RuntimeConfigGenerator {
     void generate(LanguageTarget target) {
         String template = TypeScriptUtils.loadResourceAsString(target.getTemplateFileName());
         String contents = template
-                .replace("${clientModuleName}", symbolProvider.toSymbol(service).getNamespace())
+                .replace("${clientModuleName}", symbolProvider.toSymbol(service).getNamespace().replace("src/", ""))
                 .replace("${apiVersion}", service.getVersion())
                 .replace("$", "$$") // sanitize template place holders.
                 .replace("$${customizations}", "${L@customizations}");
