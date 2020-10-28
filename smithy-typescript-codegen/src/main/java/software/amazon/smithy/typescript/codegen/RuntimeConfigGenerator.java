@@ -99,7 +99,6 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_NODE);
                 writer.addImport("defaultUserAgent", "defaultUserAgent",
                         TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_NODE.packageName);
-                writer.addDefaultImport("packageInfo", "./package.json");
                 writer.write("defaultUserAgent: defaultUserAgent(packageInfo.name, packageInfo.version),");
             }
     );
@@ -162,7 +161,6 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_BROWSER);
                 writer.addImport("defaultUserAgent", "defaultUserAgent",
                         TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_BROWSER.packageName);
-                writer.addDefaultImport("packageInfo", "./package.json");
                 writer.write("defaultUserAgent: defaultUserAgent(packageInfo.name, packageInfo.version),");
             }
     );
@@ -180,7 +178,6 @@ final class RuntimeConfigGenerator {
                 writer.write("urlParser: parseUrl,");
             },
             "defaultUserAgent", writer -> {
-                writer.addDefaultImport("packageInfo", "./package.json");
                 writer.write("defaultUserAgent: "
                     + "`aws-sdk-js-v3-react-native-$${packageInfo.name}/$${packageInfo.version}`,");
             }

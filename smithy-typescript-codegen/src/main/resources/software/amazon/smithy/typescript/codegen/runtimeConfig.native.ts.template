@@ -1,3 +1,6 @@
+// @ts-ignore hack to avoid 'package.json' is not under 'rootDir', package.json will exist in dist
+import packageInfo from "./package.json";
+
 import { ClientDefaults } from "${clientModuleName}";
 import { ClientDefaultValues as BrowserDefaults } from "./runtimeConfig.browser";
 
