@@ -29,7 +29,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 
 final class PaginationGenerator implements Runnable {
 
-    static final String PAGINATION_INTERFACE_FILE = "src/pagination/Interfaces.ts";
+    static final String PAGINATION_INTERFACE_FILE = "pagination/Interfaces.ts";
 
     private final TypeScriptWriter writer;
     private final PaginationInfo paginatedInfo;
@@ -102,7 +102,7 @@ final class PaginationGenerator implements Runnable {
     }
 
     static String getOutputFilelocation(OperationShape operation) {
-        return "src/pagination/" + operation.getId().getName() + "Paginator.ts";
+        return "pagination/" + operation.getId().getName() + "Paginator.ts";
     }
 
     static void generateServicePaginationInterfaces(
