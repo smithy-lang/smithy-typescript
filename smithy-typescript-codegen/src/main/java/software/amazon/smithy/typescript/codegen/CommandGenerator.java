@@ -153,8 +153,8 @@ final class CommandGenerator implements Runnable {
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
             writer.write("const { logger } = configuration;");
-            writer.write("const clientName = '$L';", symbolProvider.toSymbol(service).getName());
-            writer.write("const commandName = '$L';", symbolProvider.toSymbol(operation).getName());
+            writer.write("const clientName = $S;", symbolProvider.toSymbol(service).getName());
+            writer.write("const commandName = $S;", symbolProvider.toSymbol(operation).getName());
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger,");
                 writer.write("clientName,");
