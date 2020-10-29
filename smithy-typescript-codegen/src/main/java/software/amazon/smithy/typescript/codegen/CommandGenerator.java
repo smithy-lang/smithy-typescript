@@ -153,10 +153,12 @@ final class CommandGenerator implements Runnable {
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
             writer.write("const { logger } = configuration;");
+            writer.write("const clientName = $S;", symbolProvider.toSymbol(service).getName());
+            writer.write("const commandName = $S;", symbolProvider.toSymbol(operation).getName());
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger,");
-                writer.write("clientName: \"$L\",", symbolProvider.toSymbol(service).getName());
-                writer.write("commandName: \"$L\",", symbolProvider.toSymbol(operation).getName());
+                writer.write("clientName,");
+                writer.write("commandName,");
                 writer.openBlock("inputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
                         input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
@@ -166,6 +168,12 @@ final class CommandGenerator implements Runnable {
                     OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
                         output -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(output)),
                         () -> writer.writeInline("(output: any) => output"));
+                });
+            });
+            writer.openBlock("\nif (typeof logger.info === 'function') {", "}\n", () -> {
+                writer.openBlock("logger.info({", "});", () -> {
+                    writer.write("clientName,");
+                    writer.write("commandName,");
                 });
             });
             writer.write("const { requestHandler } = configuration;");
