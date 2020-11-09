@@ -195,7 +195,7 @@ final class PaginationGenerator implements Runnable {
                 "}", serviceSymbol.getName(), inputSymbol.getName(),
                 outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
-            writer.write("return await client.send(new $L(input, ...args));", operationSymbol.getName());
+            writer.write("return await client.send(new $L(input), ...args);", operationSymbol.getName());
         });
     }
 }
