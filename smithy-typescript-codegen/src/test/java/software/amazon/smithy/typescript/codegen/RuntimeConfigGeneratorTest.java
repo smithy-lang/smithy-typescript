@@ -92,7 +92,6 @@ public class RuntimeConfigGeneratorTest {
 
         // Does the runtimeConfig.ts file expand the template properties properly?
         String runtimeConfigContents = manifest.getFileString("runtimeConfig.ts").get();
-        assertThat(runtimeConfigContents, containsString("import packageInfo from \"./package.json\""));
         assertThat(runtimeConfigContents,
                    containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
@@ -100,7 +99,6 @@ public class RuntimeConfigGeneratorTest {
 
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
         String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.browser.ts").get();
-        assertThat(runtimeConfigContents, containsString("import packageInfo from \"./package.json\""));
         assertThat(runtimeConfigBrowserContents,
                    containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
@@ -108,7 +106,6 @@ public class RuntimeConfigGeneratorTest {
 
         // Does the runtimeConfig.native.ts file expand the browser template properties properly?
         String runtimeConfigNativeContents = manifest.getFileString("runtimeConfig.native.ts").get();
-        assertThat(runtimeConfigContents, containsString("import packageInfo from \"./package.json\""));
         assertThat(runtimeConfigNativeContents,
                 containsString("import { ClientDefaults } from \"./ExampleClient\";"));
         assertThat(runtimeConfigNativeContents,
