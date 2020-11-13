@@ -177,6 +177,7 @@ final class PaginationGenerator implements Runnable {
      * exposes the entire service.
      */
     private void writeMethodRequest() {
+        writer.writeDocs("@private");
         writer.openBlock(
                 "const makePagedRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
                 "}", nonModularServiceName, inputSymbol.getName(),
@@ -191,6 +192,7 @@ final class PaginationGenerator implements Runnable {
      * environments and does not generally expose the entire service.
      */
     private void writeCommandRequest() {
+        writer.writeDocs("@private");
         writer.openBlock(
                 "const makePagedClientRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
                 "}", serviceSymbol.getName(), inputSymbol.getName(),
