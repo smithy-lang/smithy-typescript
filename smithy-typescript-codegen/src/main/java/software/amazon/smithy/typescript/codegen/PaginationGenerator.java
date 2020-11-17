@@ -39,6 +39,7 @@ final class PaginationGenerator implements Runnable {
     private final Symbol inputSymbol;
     private final Symbol outputSymbol;
 
+    private final String operationName;
     private final String methodName;
     private final String nonModularServiceName;
     private final String paginationType;
@@ -59,7 +60,7 @@ final class PaginationGenerator implements Runnable {
         this.inputSymbol = symbolProvider.toSymbol(operation).expectProperty("inputType", Symbol.class);
         this.outputSymbol = symbolProvider.toSymbol(operation).expectProperty("outputType", Symbol.class);
 
-        String operationName = operation.getId().getName();
+        this.operationName = operation.getId().getName();
         this.nonModularServiceName = nonModularServiceName;
 
         // e.g. listObjects
@@ -134,8 +135,8 @@ final class PaginationGenerator implements Runnable {
         String outputTokenName = paginatedInfo.getPaginatedTrait().getOutputToken().get();
 
         writer.openBlock(
-                "export async function* $LPaginate(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
-                "}",  methodName, paginationType, inputTypeName, outputTypeName, () -> {
+                "export async function* paginate$L(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
+                "}",  operationName, paginationType, inputTypeName, outputTypeName, () -> {
             writer.write("let token: string | undefined = config.startingToken || undefined;");
 
             writer.write("let hasNext = true;");
