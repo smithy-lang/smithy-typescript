@@ -216,7 +216,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
-            List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex);
+            List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex, trait);
             boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
 
             if (hasHostPrefix) {
@@ -394,11 +394,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private List<HttpBinding> writeRequestBody(
             GenerationContext context,
             OperationShape operation,
-            HttpBindingIndex bindingIndex
+            HttpBindingIndex bindingIndex,
+            HttpTrait trait
     ) {
         TypeScriptWriter writer = context.getWriter();
         // Write the default `body` property.
-        writer.write("let body: any;");
+        writer.write("let body: any = undefined;");
+
+        if (trait.getMethod().equalsIgnoreCase("GET") || trait.getMethod().equalsIgnoreCase("HEAD")) {
+            return ListUtils.of();
+        }
 
         // Handle a payload binding explicitly.
         List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
