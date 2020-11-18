@@ -16,7 +16,7 @@ class EXPECTED_REQUEST_SERIALIZATION_ERROR {
 class RequestSerializationTestHandler implements HttpHandler {
     handle(
         request: HttpRequest,
-        options: HttpHandlerOptions
+        options?: HttpHandlerOptions
     ): Promise<{ response: HttpResponse }> {
         return Promise.reject(new EXPECTED_REQUEST_SERIALIZATION_ERROR(request));
     }
@@ -52,7 +52,7 @@ class ResponseDeserializationTestHandler implements HttpHandler {
 
     handle(
         request: HttpRequest,
-        options: HttpHandlerOptions
+        options?: HttpHandlerOptions
     ): Promise<{ response: HttpResponse }> {
         return Promise.resolve({
             response: {
