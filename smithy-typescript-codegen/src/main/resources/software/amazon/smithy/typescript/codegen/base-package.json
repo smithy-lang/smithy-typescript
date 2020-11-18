@@ -3,8 +3,8 @@
   "description": "${packageDescription}",
   "version": "${packageVersion}",
   "scripts": {
-    "clean": "npm run remove-definitions && npm run remove-dist",
-    "build-documentation": "npm run clean && typedoc ./",
+    "clean": "yarn remove-definitions && yarn remove-dist && yarn remove-documentation",
+    "build-documentation": "yarn remove-documentation && typedoc ./",
     "prepublishOnly": "yarn build",
     "pretest": "yarn build:cjs",
     "remove-definitions": "rimraf ./types",
