@@ -1,6 +1,9 @@
 import { ClientDefaults } from "${clientModuleName}";
 import { ClientDefaultValues as BrowserDefaults } from "./runtimeConfig.browser";
 
+/**
+ * @internal
+ */
 export const ClientDefaultValues: Required<ClientDefaults> = {
   ...BrowserDefaults,
   runtime: "react-native",

@@ -101,6 +101,7 @@ final class CommandGenerator implements Runnable {
         addInputAndOutputTypes();
 
         String name = symbol.getName();
+        writer.writeShapeDocs(operation);
         writer.openBlock("export class $L extends $$Command<$T, $T, $L> {", "}", name, inputType, outputType,
                 configType, () -> {
 
@@ -136,7 +137,7 @@ final class CommandGenerator implements Runnable {
 
     private void generateCommandMiddlewareResolver(String configType) {
         Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
-
+        writer.writeDocs("@internal");
         writer.write("resolveMiddleware(")
                 .indent()
                 .write("clientStack: MiddlewareStack<$L, $L>,", "ServiceInputTypes", "ServiceOutputTypes")
