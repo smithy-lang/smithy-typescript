@@ -62,19 +62,19 @@ final class IndexGenerator {
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
                 String modulePath = PaginationGenerator.getOutputFilelocation(operation);
-                writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
+                writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
                     String modulePath = WaiterGenerator.getOutputFileLocation(waiterName);
-                    writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
+                    writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
                 });
             }
         }
         if (hasPaginatedOperation) {
             String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
-            writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
+            writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
         }
 
         // write export statement for models
