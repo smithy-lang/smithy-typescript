@@ -88,8 +88,7 @@ final class StructuredMemberWriter {
     void writeMemberFilterSensitiveLog(TypeScriptWriter writer, MemberShape member, String memberParam) {
         Shape memberTarget = model.expectShape(member.getTarget());
         if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-            // member is Sensitive, hide the value.
-            writer.write("SENSITIVE_STRING");
+            writeSensitiveString(writer);
         } else if (memberTarget instanceof SimpleShape) {
             writer.write(memberParam);
         } else if (memberTarget.isStructureShape() || memberTarget.isUnionShape()) {
@@ -108,6 +107,14 @@ final class StructuredMemberWriter {
     }
 
     /**
+     * Writes SENSITIVE_STRING to hide the value of sensitive members.
+     */
+    private void writeSensitiveString(TypeScriptWriter writer) {
+        writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
+        writer.write("SENSITIVE_STRING");
+    }
+
+    /**
      * Recursively writes filterSensitiveLog for StructureShape.
      */
     private void writeStructureFilterSensitiveLog(
@@ -116,8 +123,7 @@ final class StructuredMemberWriter {
             String structureParam
     ) {
         if (structureTarget.hasTrait(SensitiveTrait.class)) {
-            // member is Sensitive, hide the value.
-            writer.write("SENSITIVE_STRING");
+            writeSensitiveString(writer);
         } else if (structureTarget.hasTrait(StreamingTrait.class) && structureTarget.isUnionShape()) {
             // disable logging for StreamingTrait
             writer.write("'STREAMING_CONTENT'");
@@ -136,8 +142,7 @@ final class StructuredMemberWriter {
             String collectionParam
     ) {
         if (collectionMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-            // member is Sensitive, hide the value.
-            writer.write("SENSITIVE_STRING");
+            writeSensitiveString(writer);
         } else if (model.expectShape(collectionMember.getTarget()) instanceof SimpleShape) {
             writer.write(collectionParam);
         } else {
@@ -154,8 +159,7 @@ final class StructuredMemberWriter {
      */
     private void writeMapFilterSensitiveLog(TypeScriptWriter writer, MemberShape mapMember, String mapParam) {
         if (mapMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-            // member is Sensitive, hide the value.
-            writer.write("SENSITIVE_STRING");
+            writeSensitiveString(writer);
         } else if (model.expectShape(mapMember.getTarget()) instanceof SimpleShape) {
             writer.write(mapParam);
         } else {

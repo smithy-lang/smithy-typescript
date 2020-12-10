@@ -164,7 +164,6 @@ final class StructureGenerator implements Runnable {
     }
 
     private void renderStructureNamespace() {
-        writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             String objectParam = "obj";
