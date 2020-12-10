@@ -55,6 +55,8 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
+import software.amazon.smithy.waiters.WaitableTrait;
+import software.amazon.smithy.waiters.Waiter;
 
 class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
@@ -295,6 +297,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         boolean hasPaginatedOperation = false;
+        boolean hasWaiter = false;
 
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
@@ -307,6 +310,17 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
                                 nonModularName).run());
             }
+            if (operation.hasTrait(WaitableTrait.ID)) {
+                hasWaiter = true;
+                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
+
+                waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
+                    String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
+                    writers.useFileWriter(outputFilename, waiterWriter ->
+                            new WaiterGenerator(waiterName, waiter, service, operation, waiterWriter,
+                                    symbolProvider).run());
+                });
+            }
         }
 
         if (hasPaginatedOperation) {
@@ -315,6 +329,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             nonModularName,
                             serviceSymbol,
                             paginationWriter));
+        }
+
+        if (hasWaiter) {
+            writers.useFileWriter(WaiterGenerator.WAITABLE_INTERFACE_FILE, waiterWriter ->
+                    WaiterGenerator.generateInterface(serviceSymbol, waiterWriter));
         }
 
         if (protocolGenerator != null) {
