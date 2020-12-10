@@ -4,6 +4,8 @@ namespace example.weather
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 
+use smithy.waiters#waitable
+
 /// Provides weather forecasts.
 @fakeProtocol
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
@@ -160,9 +162,30 @@ apply NoSuchResource @httpResponseTests([
 @readonly
 @paginated(items: "items")
 @http(method: "GET", uri: "/cities")
+@waitable(
+    CitiesExist: {
+        acceptors: [
+            {
+                  state: "success",
+                  matcher: {
+                      output: {
+                          path: "length(items[]) > `0`",
+                          comparator: "booleanEquals",
+                          expected: "true"
+                      }
+                  }
+              },
+            {
+                state: "failure",
+                matcher: { errorType : "NoSuchResource" }
+            }
+        ]
+    }
+)
 operation ListCities {
     input: ListCitiesInput,
-    output: ListCitiesOutput
+    output: ListCitiesOutput,
+    errors: [NoSuchResource]
 }
 
 apply ListCities @httpRequestTests([
