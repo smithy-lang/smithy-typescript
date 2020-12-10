@@ -53,16 +53,16 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     TypeScriptJmesPathVisitor(TypeScriptWriter writer, String accessor, JmespathExpression expression) {
         this.writer = writer;
         this.accessor = accessor;
-        this.executionContext = accessor;
-        this.jmesExpression = expression;
+        executionContext = accessor;
+        jmesExpression = expression;
         scopeCount = 0;
     }
 
     public void run() {
         writer.openBlock("let returnComparator = () => {", "}", () -> {
-            executionContext = this.accessor;
+            executionContext = accessor;
             jmesExpression.accept(this);
-            writer.write("return $L;", this.executionContext);
+            writer.write("return $L;", executionContext);
         });
         executionContext = "returnComparator()";
     }
@@ -73,14 +73,14 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     }
 
     void writeBooleanExpectation(String expectedValue, String returnValue) {
-        writer.openBlock("if ($L == $L) {", "}", this.executionContext, expectedValue, () -> {
+        writer.openBlock("if ($L == $L) {", "}", executionContext, expectedValue, () -> {
             writer.write("return $L;", returnValue);
         });
     }
 
     void writeAnyStringEqualsExpectation(String expectedValue, String returnValue) {
         String element = makeNewScope("anyStringEq_");
-        writer.openBlock("for (let $L of $L) {", "}", element, this.executionContext, () -> {
+        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
             writer.openBlock("if ($L == $S) {", "}", element, expectedValue, () -> {
                 writer.write("return $L;", returnValue);
             });
@@ -90,8 +90,8 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     void writeAllStringEqualsExpectation(String expectedValue, String returnValue) {
         String element = makeNewScope("element_");
         String result = makeNewScope("allStringEq_");
-        writer.write("let $L = ($L.length > 0);", result, this.executionContext);
-        writer.openBlock("for (let $L of $L) {", "}", element, this.executionContext, () -> {
+        writer.write("let $L = ($L.length > 0);", result, executionContext);
+        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
             writer.write("$L = $L && ($L == $S)", result, result, element, expectedValue);
         });
         writer.openBlock("if ($L) {", "}", result, () -> {
@@ -100,7 +100,7 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     }
 
     void writeStringExpectation(String expectedValue, String returnValue) {
-        writer.openBlock("if ($L === $S) {", "}", this.executionContext, expectedValue, () -> {
+        writer.openBlock("if ($L === $S) {", "}", executionContext, expectedValue, () -> {
             writer.write("return $L;", returnValue);
         });
     }
@@ -108,18 +108,18 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     @Override
     public Void visitComparator(ComparatorExpression expression) {
 
-        String executionContextInital = this.executionContext;
+        String executionContextInital = executionContext;
+        String comparator = expression.getComparator().toString();
 
         expression.getLeft().accept(this);
-        String leftContext = this.executionContext;
+        String leftContext = executionContext;
 
-        this.executionContext = executionContextInital;
+        executionContext = executionContextInital;
 
         expression.getRight().accept(this);
-        String rightContext = this.executionContext;
+        String rightContext = executionContext;
 
-        this.executionContext = "(" + leftContext + " " + expression.getComparator().toString()
-                + " " + rightContext + ")";
+        executionContext = String.format("(%s %s %s)", leftContext, comparator, rightContext);
         return null;
     }
 
@@ -138,8 +138,8 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     public Void visitFlatten(FlattenExpression expression) {
         expression.getExpression().accept(this);
         String flatScope = makeNewScope("flat_");
-        writer.write("let $L: any[] = [].concat(...$L);", flatScope, this.executionContext);
-        this.executionContext = flatScope;
+        writer.write("let $L: any[] = [].concat(...$L);", flatScope, executionContext);
+        executionContext = flatScope;
         return null;
     }
 
@@ -151,10 +151,10 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
             argExpression.accept(this);
             switch (expression.getName()) {
                 case "length":
-                    this.executionContext = this.executionContext + ".length";
+                    executionContext = executionContext + ".length";
                     break;
                 case "contains":
-                    executionContexts.add(this.executionContext);
+                    executionContexts.add(executionContext);
                     break;
                 default:
                     throw new CodegenException("TypeScriptJmesPath visitor has not implemented function: "
@@ -170,8 +170,8 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
     @Override
     public Void visitField(FieldExpression expression) {
-        this.executionContext += ".";
-        this.executionContext += expression.getName();
+        executionContext += ".";
+        executionContext += expression.getName();
         return null;
     }
 
@@ -190,12 +190,12 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     public Void visitLiteral(LiteralExpression expression) {
         switch (expression.getType()) {
             case STRING:
-                this.executionContext = "\"" + expression.getValue().toString() + "\"";
+                executionContext = "\"" + expression.getValue().toString() + "\"";
                 break;
             default:
                 // All other options are already valid js literials.
                 // (BOOLEAN, ANY, ARRAY, NULL, NUMBER, OBJECT, EXPRESSION)
-                this.executionContext = expression.getValue().toString();
+                executionContext = expression.getValue().toString();
                 break;
         }
         return null;
@@ -205,12 +205,12 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     public Void visitMultiSelectList(MultiSelectListExpression expression) {
         ArrayList<String> evaluators = new ArrayList<String>();
 
-        String executionContextInital = this.executionContext;
+        String executionContextInital = executionContext;
 
         expression.getExpressions().forEach((JmespathExpression exp) -> {
             exp.accept(this);
-            evaluators.add(this.executionContext);
-            this.executionContext = executionContextInital;
+            evaluators.add(executionContext);
+            executionContext = executionContextInital;
         });
 
         String resultScope = makeNewScope("result_");
@@ -218,7 +218,7 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         for (String evaluator : evaluators) {
             writer.write("$L.push($L);", resultScope, evaluator);
         }
-        writer.write("$L = $L;", this.executionContext, resultScope);
+        writer.write("$L = $L;", executionContext, resultScope);
 
         return null;
     }
@@ -230,38 +230,39 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
     @Override
     public Void visitAnd(AndExpression expression) {
-        String initialContext = this.executionContext;
+        String initialContext = executionContext;
 
         expression.getLeft().accept(this);
-        String leftContext = this.executionContext;
-        this.executionContext = initialContext;
+        String leftContext = executionContext;
+        executionContext = initialContext;
 
         expression.getRight().accept(this);
-        String rightContext = this.executionContext;
+        String rightContext = executionContext;
 
-        this.executionContext = "(" + leftContext + " && " + rightContext + ")";
+        executionContext = String.format("(%s && %s)", leftContext, rightContext);
         return null;
     }
 
     @Override
     public Void visitOr(OrExpression expression) {
-        String initialContext = this.executionContext;
+        String initialContext = executionContext;
 
         expression.getLeft().accept(this);
-        String leftContext = this.executionContext;
-        this.executionContext = initialContext;
+        String leftContext = executionContext;
+        executionContext = initialContext;
 
         expression.getRight().accept(this);
-        String rightContext = this.executionContext;
+        String rightContext = executionContext;
 
-        this.executionContext = "(" + leftContext + " || " + rightContext + ")";
+        executionContext = String.format("(%s || %s)", leftContext, rightContext);
+
         return null;
     }
 
     @Override
     public Void visitNot(NotExpression expression) {
         expression.getExpression().accept(this);
-        this.executionContext = "(!" + this.executionContext + ")";
+        executionContext = String.format("(!%s)", executionContext);
         return null;
     }
 
@@ -272,12 +273,12 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         String element = makeNewScope("element_");
         String result = makeNewScope("objectProjection_");
         writer.openBlock("let $L = Object.values($L).map(($L: any) => {", "});", result,
-                this.executionContext, element, () -> {
-            this.executionContext = element;
+                executionContext, element, () -> {
+            executionContext = element;
             expression.getRight().accept(this);
-            writer.write("return $L;", this.executionContext);
+            writer.write("return $L;", executionContext);
         });
-        this.executionContext = result;
+        executionContext = result;
         return null;
     }
 
@@ -289,12 +290,12 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
             String element = makeNewScope("element_");
             String result = makeNewScope("projection_");
             writer.openBlock("let $L = $L.map(($L: any) => {", "});", result,
-                    this.executionContext, element, () -> {
-                        this.executionContext = element;
+                    executionContext, element, () -> {
+                        executionContext = element;
                         expression.getRight().accept(this);
-                        writer.write("return $L;", this.executionContext);
+                        writer.write("return $L;", executionContext);
                     });
-            this.executionContext = result;
+            executionContext = result;
         }
         return null;
     }
@@ -309,13 +310,13 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         String elementScope = makeNewScope("element_");
         String resultScope = makeNewScope("filterRes_");
         writer.openBlock("let $L = $L.filter(($L: any) => {", "});", resultScope,
-                this.executionContext, elementScope, () -> {
-            this.executionContext = elementScope;
+                executionContext, elementScope, () -> {
+            executionContext = elementScope;
             expression.getComparison().accept(this);
-            writer.write("return $L;", this.executionContext);
+            writer.write("return $L;", executionContext);
         });
 
-        this.executionContext = resultScope;
+        executionContext = resultScope;
         return null;
     }
 
