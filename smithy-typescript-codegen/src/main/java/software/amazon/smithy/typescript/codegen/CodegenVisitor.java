@@ -297,7 +297,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         boolean hasPaginatedOperation = false;
-        boolean hasWaiter = false;
 
         for (OperationShape operation : containedOperations) {
             writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
@@ -311,7 +310,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                                 nonModularName).run());
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
-                hasWaiter = true;
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
 
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
@@ -329,11 +327,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             nonModularName,
                             serviceSymbol,
                             paginationWriter));
-        }
-
-        if (hasWaiter) {
-            writers.useFileWriter(WaiterGenerator.WAITABLE_INTERFACE_FILE, waiterWriter ->
-                    WaiterGenerator.generateInterface(serviceSymbol, waiterWriter));
         }
 
         if (protocolGenerator != null) {

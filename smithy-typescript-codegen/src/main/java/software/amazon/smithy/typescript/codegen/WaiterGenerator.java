@@ -28,7 +28,6 @@ import software.amazon.smithy.waiters.PathMatcher;
 import software.amazon.smithy.waiters.Waiter;
 
 class WaiterGenerator implements Runnable {
-    static final String WAITABLE_INTERFACE_FILE = "waiters/Interfaces.ts";
     static final String WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS.packageName;
 
     private final String waiterName;
@@ -58,29 +57,12 @@ class WaiterGenerator implements Runnable {
     @Override
     public void run() {
         writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_WAITERS);
-        this.generateImports();
         this.generateAcceptors();
         this.generateWaiter();
     }
 
     public static String getOutputFileLocation(String waiterName) {
         return  "waiters/waitFor" + waiterName + ".ts";
-    }
-
-    public static void generateInterface(Symbol serviceSymbol, TypeScriptWriter writer) {
-        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_WAITERS);
-        writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
-        writer.addImport("WaiterOptions", "WaiterOptions", WAITABLE_UTIL_PACKAGE);
-
-        writer.openBlock("export interface $LWaiter extends WaiterOptions {", "}", serviceSymbol.getName(), () -> {
-            writer.write("client: $T", serviceSymbol);
-        });
-    }
-
-
-    private void generateImports() {
-        String serviceWaiterType = serviceSymbol.getName() + "Waiter";
-        writer.addImport(serviceWaiterType, serviceWaiterType, "./" + WAITABLE_INTERFACE_FILE.replace(".ts", ""));
     }
 
     private void generateWaiter() {
@@ -92,8 +74,8 @@ class WaiterGenerator implements Runnable {
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
                 + " @param params : Waiter configuration options.\n"
                 + " @param input : the input to " + operationSymbol.getName() + " for polling.");
-        writer.openBlock("const waitFor$L = async (params: $LWaiter, input: $T): Promise<WaiterResult> => {", "}",
-                waiterName, serviceSymbol.getName(), inputSymbol, () -> {
+        writer.openBlock("const waitFor$L = async (params: WaiterConfiguration<$T>, input: $T): "
+                + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
                             waiter.getMaxDelay());
             writer.write("return createWaiter({...serviceDefaults, ...params}, params.client, input, checkState);");

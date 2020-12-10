@@ -57,7 +57,6 @@ final class IndexGenerator {
         TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         boolean hasPaginatedOperation = false;
-        boolean hasWaiterOperation = false;
         for (OperationShape operation : containedOperations) {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
             if (operation.hasTrait(PaginatedTrait.ID)) {
@@ -66,7 +65,6 @@ final class IndexGenerator {
                 writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
-                hasWaiterOperation = true;
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
                     String modulePath = WaiterGenerator.getOutputFileLocation(waiterName);
@@ -76,11 +74,6 @@ final class IndexGenerator {
         }
         if (hasPaginatedOperation) {
             String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
-            writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
-        }
-
-        if (hasWaiterOperation) {
-            String modulePath = WaiterGenerator.WAITABLE_INTERFACE_FILE;
             writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
         }
 
