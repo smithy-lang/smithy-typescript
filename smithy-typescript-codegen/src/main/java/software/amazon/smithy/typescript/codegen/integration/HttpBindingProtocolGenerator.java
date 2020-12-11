@@ -1078,7 +1078,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         return ListUtils.of();
     }
 
-    private HttpBinding readResponsePayload(
+    /**
+     * Writes the code needed to deserialized the output payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * bound member name of the {@code contents} variable after deserializing
+     * the response body. This variable will already be defined in scope.
+     *
+     *
+     * @param context The generation context.
+     * @param binding The payload binding to deserialize.
+     * @return The deserialized payload binding.
+     */
+    protected HttpBinding readResponsePayload(
             GenerationContext context,
             HttpBinding binding
     ) {
