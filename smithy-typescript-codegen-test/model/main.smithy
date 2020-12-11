@@ -259,6 +259,7 @@ union Precipitation {
 
 structure OtherStructure {}
 
+@suppress(["EnumNamesPresent"])
 @enum([{value: "YES"}, {value: "NO"}])
 string SimpleYesNo
 
