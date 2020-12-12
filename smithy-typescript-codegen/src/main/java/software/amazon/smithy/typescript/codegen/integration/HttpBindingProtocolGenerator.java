@@ -352,8 +352,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Headers are always present either from the default document or the payload.
         writer.openBlock("const headers: any = {", "};",
             () -> {
-                writer.write("'content-type': $S,", bindingIndex.determineRequestContentType(
-                        operation, getDocumentContentType()));
+                // Only set the content type if one can be determined.
+                bindingIndex.determineRequestContentType(operation, getDocumentContentType()).ifPresent(contentType ->
+                        writer.write("'content-type': $S,", contentType));
                 writeDefaultHeaders(context, operation);
 
                 operation.getInput().ifPresent(outputId -> {
