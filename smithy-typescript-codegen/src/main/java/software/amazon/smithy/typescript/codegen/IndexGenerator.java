@@ -26,6 +26,8 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.waiters.WaitableTrait;
+import software.amazon.smithy.waiters.Waiter;
 
 /**
  * Generates an index to export the service client and each command.
@@ -60,12 +62,19 @@ final class IndexGenerator {
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
                 String modulePath = PaginationGenerator.getOutputFilelocation(operation);
-                writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
+                writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+            }
+            if (operation.hasTrait(WaitableTrait.ID)) {
+                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
+                waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
+                    String modulePath = WaiterGenerator.getOutputFileLocation(waiterName);
+                    writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+                });
             }
         }
         if (hasPaginatedOperation) {
             String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
-            writer.write("export * from \"./$L\"", modulePath.replace(".ts", ""));
+            writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
         }
 
         // write export statement for models

@@ -55,6 +55,8 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
+import software.amazon.smithy.waiters.WaitableTrait;
+import software.amazon.smithy.waiters.Waiter;
 
 class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
@@ -306,6 +308,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
                                 nonModularName).run());
+            }
+            if (operation.hasTrait(WaitableTrait.ID)) {
+                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
+
+                waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
+                    String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
+                    writers.useFileWriter(outputFilename, waiterWriter ->
+                            new WaiterGenerator(waiterName, waiter, service, operation, waiterWriter,
+                                    symbolProvider).run());
+                });
             }
         }
 
