@@ -84,7 +84,7 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateAcceptors() {
-        writer.openBlock("const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {", "}",
+        writer.openBlock("export const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {", "}",
                 serviceSymbol, inputSymbol, () -> {
                     writer.openBlock("try {", "}", () -> {
                         writer.write("let result: any = await client.send(new $T(input))", operationSymbol);
