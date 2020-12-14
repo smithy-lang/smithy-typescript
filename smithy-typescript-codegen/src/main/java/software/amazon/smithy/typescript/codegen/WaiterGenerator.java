@@ -70,6 +70,7 @@ class WaiterGenerator implements Runnable {
         writer.addImport("createWaiter", "createWaiter", WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterResult", "WaiterResult", WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterState", "WaiterState", WAITABLE_UTIL_PACKAGE);
+        writer.addImport("WaiterConfiguration", "WaiterConfiguration", WAITABLE_UTIL_PACKAGE);
 
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
                 + " @param params : Waiter configuration options.\n"
@@ -78,7 +79,7 @@ class WaiterGenerator implements Runnable {
                 + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
                             waiter.getMaxDelay());
-            writer.write("return createWaiter({...serviceDefaults, ...params}, params.client, input, checkState);");
+            writer.write("return createWaiter({...serviceDefaults, ...params}, input, checkState);");
         });
     }
 
@@ -92,7 +93,7 @@ class WaiterGenerator implements Runnable {
                     writer.openBlock("catch (exception) {", "}", () -> {
                         writeAcceptors("exception", true);
                     });
-                    writer.write("return $L;", maketWaiterResult(AcceptorState.RETRY));
+                    writer.write("return $L;", makeWaiterResult(AcceptorState.RETRY));
                 });
     }
 
@@ -126,13 +127,13 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateSuccessMatcher(Matcher.SuccessMember member, AcceptorState state) {
-        writer.write("return $L", maketWaiterResult(state));
+        writer.write("return $L", makeWaiterResult(state));
     }
 
     private void generateErrorMatcher(String accessor, Matcher.ErrorTypeMember member, AcceptorState state) {
         writer.openBlock("if ($L.name && $L.name == $S) {", "}", accessor, accessor,
                 member.getValue(), () -> {
-                    writer.write("return $L", maketWaiterResult(state));
+                    writer.write("return $L", makeWaiterResult(state));
                 });
     }
 
@@ -140,7 +141,7 @@ class WaiterGenerator implements Runnable {
         writer.openBlock("try {", "} catch (e) {}", () -> {
             JmespathExpression expression = JmespathExpression.parse(pathMatcher.getPath());
             TypeScriptJmesPathVisitor expressionVisitor = new TypeScriptJmesPathVisitor(writer, accessor, expression);
-            String expectedState = maketWaiterResult(state);
+            String expectedState = makeWaiterResult(state);
             expressionVisitor.run();
 
             switch (pathMatcher.getComparator()) {
@@ -162,7 +163,7 @@ class WaiterGenerator implements Runnable {
         });
     }
 
-    private String maketWaiterResult(AcceptorState resultantState) {
+    private String makeWaiterResult(AcceptorState resultantState) {
         if (resultantState == AcceptorState.SUCCESS) {
             return  "{ state: WaiterState.SUCCESS }";
         } else if (resultantState == AcceptorState.FAILURE) {
