@@ -143,7 +143,7 @@ public class TypeScriptJmesPathVisitorTest {
     public void createOrIndex() {
         String result = generateTypescriptInterpretation("length(items[]) == `0` || length(foo) > `0`");
         assertThat(result,
-                equalTo("let returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  return ((flat_1.length == 0.0) || (result.foo.length > 0.0));\n}\n"));
+                equalTo("let returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  return (((flat_1.length == 0.0) || (result.foo.length > 0.0)) && ((result.foo.length > 0.0) || (flat_1.length == 0.0))) ;\n}\n"));
     }
 
     @Test

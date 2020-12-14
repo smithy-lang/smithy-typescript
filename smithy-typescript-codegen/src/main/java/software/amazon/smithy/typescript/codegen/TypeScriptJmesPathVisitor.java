@@ -147,6 +147,7 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     public Void visitFunction(FunctionExpression expression) {
         ArrayList<String> executionContexts = new ArrayList<>();
 
+        String orginalExecutionContext = this.executionContext;
         expression.arguments.forEach((JmespathExpression argExpression) -> {
             argExpression.accept(this);
             switch (expression.getName()) {
@@ -155,6 +156,7 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
                     break;
                 case "contains":
                     executionContexts.add(executionContext);
+                    this.executionContext = orginalExecutionContext;
                     break;
                 default:
                     throw new CodegenException("TypeScriptJmesPath visitor has not implemented function: "
@@ -192,9 +194,14 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
             case STRING:
                 executionContext = "\"" + expression.getValue().toString() + "\"";
                 break;
+            case OBJECT:
+            case ARRAY:
+                // TODO: resolve JMESPATH OBJECTS and ARRAY types as literals
+                throw new CodegenException("TypeScriptJmesPath visitor has not implemented resolution of ARRAY and"
+                        + " OBJECT literials ");
             default:
                 // All other options are already valid js literials.
-                // (BOOLEAN, ANY, ARRAY, NULL, NUMBER, OBJECT, EXPRESSION)
+                // (BOOLEAN, ANY, NULL, NUMBER, EXPRESSION)
                 executionContext = expression.getValue().toString();
                 break;
         }
@@ -254,7 +261,8 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         expression.getRight().accept(this);
         String rightContext = executionContext;
 
-        executionContext = String.format("(%s || %s)", leftContext, rightContext);
+        executionContext = String.format("((%s || %s) && (%s || %s)) ", leftContext, rightContext, rightContext,
+                leftContext);
 
         return null;
     }
