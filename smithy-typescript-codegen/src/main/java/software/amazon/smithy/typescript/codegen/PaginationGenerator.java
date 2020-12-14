@@ -137,12 +137,15 @@ final class PaginationGenerator implements Runnable {
         writer.openBlock(
                 "export async function* paginate$L(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
                 "}",  operationName, paginationType, inputTypeName, outputTypeName, () -> {
-            writer.write("let token: string | undefined = config.startingToken || undefined;");
+            String destructuredInputTokenName = destructurePath(inputTokenName);
+            writer.write("// ToDo: replace with actual type instead of typeof input$L", destructuredInputTokenName);
+            writer.write("let token: typeof input$L | undefined = config.startingToken || undefined;",
+                    destructuredInputTokenName);
 
             writer.write("let hasNext = true;");
             writer.write("let page: $L;", outputTypeName);
             writer.openBlock("while (hasNext) {", "}", () -> {
-                writer.write("input$L = token;", destructurePath(inputTokenName));
+                writer.write("input$L = token;", destructuredInputTokenName);
 
                 if (paginatedInfo.getPageSizeMember().isPresent()) {
                     String pageSize = paginatedInfo.getPageSizeMember().get().getMemberName();

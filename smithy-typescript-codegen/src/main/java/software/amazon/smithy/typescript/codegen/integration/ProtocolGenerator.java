@@ -150,13 +150,8 @@ public interface ProtocolGenerator {
         // e.g., serializeAws_restJson1_1ExecuteStatement
         String functionName = "serialize" + ProtocolGenerator.getSanitizedName(protocol);
 
-        // These need intermediate serializers, so generate a separate name.
-        Shape shape = symbol.expectProperty("shape", Shape.class);
-        if (shape.isListShape() || shape.isSetShape() || shape.isMapShape()) {
-            functionName += shape.getId().getName();
-        } else {
-            functionName += symbol.getName();
-        }
+        // Update the function to have a component based on the symbol.
+        functionName += getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
 
         return functionName;
     }
@@ -172,15 +167,24 @@ public interface ProtocolGenerator {
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String functionName = "deserialize" + ProtocolGenerator.getSanitizedName(protocol);
 
-        // These need intermediate serializers, so generate a separate name.
-        Shape shape = symbol.expectProperty("shape", Shape.class);
-        if (shape.isListShape() || shape.isSetShape() || shape.isMapShape()) {
-            functionName += shape.getId().getName();
-        } else {
-            functionName += symbol.getName();
-        }
+        // Update the function to have a component based on the symbol.
+        functionName += getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
 
         return functionName;
+    }
+
+    static String getSerdeFunctionSymbolComponent(Symbol symbol, Shape shape) {
+        switch (shape.getType()) {
+            case LIST:
+            case SET:
+            case MAP:
+            case DOCUMENT:
+                // These need specialized serializers because they use complex but
+                // non-generated types, so generate a separate name.
+                return shape.getId().getName();
+            default:
+                return symbol.getName();
+        }
     }
 
     /**

@@ -195,7 +195,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
         writer.openBlock("const headers: __HeaderBag = {", "};",
             () -> {
-                writer.write("'Content-Type': $S,", getDocumentContentType());
+                writer.write("'content-type': $S,", getDocumentContentType());
                 writeDefaultHeaders(context, operation);
             }
         );
