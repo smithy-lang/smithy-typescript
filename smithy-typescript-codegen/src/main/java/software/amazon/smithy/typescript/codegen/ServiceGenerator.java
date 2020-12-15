@@ -232,9 +232,6 @@ final class ServiceGenerator implements Runnable {
             writer.writeDocs("The function that will be used to convert binary data to a UTF-8 encoded string");
             writer.write("utf8Encoder?: __Encoder;\n");
 
-            writer.writeDocs("The string that will be used to populate default value in 'User-Agent' header");
-            writer.write("defaultUserAgent?: string;\n");
-
             writer.writeDocs("The runtime environment");
             writer.write("runtime?: string;\n");
 

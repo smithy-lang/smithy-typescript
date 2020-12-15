@@ -94,13 +94,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("toUtf8", "toUtf8",
                         TypeScriptDependency.AWS_SDK_UTIL_UTF8_NODE.packageName);
                 writer.write("utf8Encoder: toUtf8,");
-            },
-            "defaultUserAgent", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_NODE);
-                writer.addImport("defaultUserAgent", "defaultUserAgent",
-                        TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_NODE.packageName);
-                writer.addDefaultImport("packageInfo", "./package.json");
-                writer.write("defaultUserAgent: defaultUserAgent(packageInfo.name, packageInfo.version),");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> browserRuntimeConfigDefaults = MapUtils.of(
@@ -157,13 +150,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("toUtf8", "toUtf8",
                         TypeScriptDependency.AWS_SDK_UTIL_UTF8_BROWSER.packageName);
                 writer.write("utf8Encoder: toUtf8,");
-            },
-            "defaultUserAgent", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_BROWSER);
-                writer.addImport("defaultUserAgent", "defaultUserAgent",
-                        TypeScriptDependency.AWS_SDK_UTIL_USER_AGENT_BROWSER.packageName);
-                writer.addDefaultImport("packageInfo", "./package.json");
-                writer.write("defaultUserAgent: defaultUserAgent(packageInfo.name, packageInfo.version),");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
@@ -178,11 +164,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("parseUrl", "parseUrl",
                         TypeScriptDependency.AWS_SDK_URL_PARSER_NODE.packageName);
                 writer.write("urlParser: parseUrl,");
-            },
-            "defaultUserAgent", writer -> {
-                writer.addDefaultImport("packageInfo", "./package.json");
-                writer.write("defaultUserAgent: "
-                    + "`aws-sdk-js-v3-react-native-$${packageInfo.name}/$${packageInfo.version}`,");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
