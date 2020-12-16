@@ -171,12 +171,6 @@ final class CommandGenerator implements Runnable {
                         () -> writer.writeInline("(output: any) => output"));
                 });
             });
-            writer.openBlock("\nif (typeof logger.info === 'function') {", "}\n", () -> {
-                writer.openBlock("logger.info({", "});", () -> {
-                    writer.write("clientName,");
-                    writer.write("commandName,");
-                });
-            });
             writer.write("const { requestHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
                 writer.write("(request: FinalizeHandlerArguments<any>) => ");
