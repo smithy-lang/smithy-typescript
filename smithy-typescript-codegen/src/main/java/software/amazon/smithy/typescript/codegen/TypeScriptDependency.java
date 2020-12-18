@@ -37,7 +37,6 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", "1.0.0-rc.0", true),
     MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", "1.0.0-rc.0", true),
-    MIDDLEWARE_USER_AGENT("dependencies", "@aws-sdk/middleware-user-agent", "1.0.0-rc.0", true),
     MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", "1.0.0-rc.0", true),
     MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", "1.0.0-rc.0", true),
 
