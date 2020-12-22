@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -48,7 +49,7 @@ final class StructuredMemberWriter {
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
         this.model = model;
         this.symbolProvider = symbolProvider;
-        this.members = members;
+        this.members = new TreeSet<>(members);
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
