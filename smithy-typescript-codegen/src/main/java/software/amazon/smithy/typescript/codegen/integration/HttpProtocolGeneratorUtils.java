@@ -188,7 +188,10 @@ public final class HttpProtocolGeneratorUtils {
         writer.openBlock("const deserializeMetadata = (output: $T): __ResponseMetadata => ({", "});", responseType,
                 () -> {
                     writer.write("httpStatusCode: output.statusCode,");
-                    writer.write("requestId: output.headers[\"x-amzn-requestid\"]");
+                    writer.write("requestId: output.headers[\"x-amzn-requestid\"] ??"
+                        + " output.headers[\"x-amzn-request-id\"],");
+                    writer.write("extendedRequestId: output.headers[\"x-amz-id-2\"],");
+                    writer.write("cfId: output.headers[\"x-amz-cf-id\"],");
                 });
         writer.write("");
     }
