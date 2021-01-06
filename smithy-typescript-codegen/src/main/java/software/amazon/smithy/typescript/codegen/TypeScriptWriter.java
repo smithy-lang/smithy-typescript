@@ -218,7 +218,7 @@ public final class TypeScriptWriter extends CodeWriter {
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
-                        writeDocs("@deprecated\n" + docs);
+                        writeDocs("@deprecated\n\n" + docs);
                     } else {
                         writeDocs(docs);
                     }
