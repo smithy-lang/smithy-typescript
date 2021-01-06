@@ -78,7 +78,7 @@ final class CommandGenerator implements Runnable {
         this.applicationProtocol = applicationProtocol;
 
         symbol = symbolProvider.toSymbol(operation);
-        operationIndex = model.getKnowledge(OperationIndex.class);
+        operationIndex = OperationIndex.of(model);
         inputType = symbol.expectProperty("inputType", Symbol.class);
         outputType = symbol.expectProperty("outputType", Symbol.class);
     }

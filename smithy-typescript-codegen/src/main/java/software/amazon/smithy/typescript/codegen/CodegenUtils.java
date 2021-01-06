@@ -54,7 +54,7 @@ public final class CodegenUtils {
         // Get default SerdeContext.
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         // If event stream trait exists, add corresponding serde context type to the intersection type.
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getInputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
             contextInterfaceList.add("__EventStreamSerdeContext");
@@ -77,7 +77,7 @@ public final class CodegenUtils {
         // Get default SerdeContext.
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         // If event stream trait exists, add corresponding serde context type to the intersection type.
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
             contextInterfaceList.add("__EventStreamSerdeContext");
