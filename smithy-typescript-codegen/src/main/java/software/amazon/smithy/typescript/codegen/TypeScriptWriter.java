@@ -237,7 +237,11 @@ public final class TypeScriptWriter extends CodeWriter {
         return member.getMemberTrait(model, DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
-                    writeDocs(docs);
+                    if (member.getMemberTrait(model, DeprecatedTrait.class).isPresent()) {
+                        writeDocs("@deprecated\n\n" + docs);
+                    } else {
+                        writeDocs(docs);
+                    }
                     return true;
                 }).orElse(false);
     }
