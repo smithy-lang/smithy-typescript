@@ -218,10 +218,9 @@ public final class TypeScriptWriter extends CodeWriter {
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
-                        writeDocs("@deprecated\n\n" + docs);
-                    } else {
-                        writeDocs(docs);
+                        docs = "@deprecated\n\n" + docs;
                     }
+                    writeDocs(docs);
                     return true;
                 }).orElse(false);
     }
@@ -238,10 +237,9 @@ public final class TypeScriptWriter extends CodeWriter {
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
                     if (member.getMemberTrait(model, DeprecatedTrait.class).isPresent()) {
-                        writeDocs("@deprecated\n\n" + docs);
-                    } else {
-                        writeDocs(docs);
+                        docs = "@deprecated\n\n" + docs;
                     }
+                    writeDocs(docs);
                     return true;
                 }).orElse(false);
     }
