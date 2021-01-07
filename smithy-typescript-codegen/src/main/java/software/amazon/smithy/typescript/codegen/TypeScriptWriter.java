@@ -33,6 +33,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.utils.CodeWriter;
 import software.amazon.smithy.utils.StringUtils;
@@ -216,6 +217,9 @@ public final class TypeScriptWriter extends CodeWriter {
         return shape.getTrait(DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
+                    if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
+                        docs = "@deprecated\n\n" + docs;
+                    }
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -232,6 +236,9 @@ public final class TypeScriptWriter extends CodeWriter {
         return member.getMemberTrait(model, DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
+                    if (member.getMemberTrait(model, DeprecatedTrait.class).isPresent()) {
+                        docs = "@deprecated\n\n" + docs;
+                    }
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
