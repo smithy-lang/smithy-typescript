@@ -64,7 +64,7 @@ final class NonModularServiceGenerator implements Runnable {
 
     @Override
     public void run() {
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
 
         // Generate the client and extend from the modular client.
         writer.writeShapeDocs(service);

@@ -294,7 +294,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 settings, model, symbolProvider, nonModularName, writer, applicationProtocol).run());
 
         // Generate each operation for the service.
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         boolean hasPaginatedOperation = false;
 

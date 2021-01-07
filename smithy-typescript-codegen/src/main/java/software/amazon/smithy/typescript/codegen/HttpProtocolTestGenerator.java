@@ -115,8 +115,8 @@ final class HttpProtocolTestGenerator implements Runnable {
 
     @Override
     public void run() {
-        OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        OperationIndex operationIndex = OperationIndex.of(model);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
 
         // Use a TreeSet to have a fixed ordering of tests.
         for (OperationShape operation : new TreeSet<>(topDownIndex.getContainedOperations(service))) {
@@ -296,7 +296,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             // Fast check if we have an undescribed or plain text body.
             if (mediaType == null || mediaType.equals("text/plain")) {
                 // Handle converting to the right comparison format for blob payloads.
-                HttpBindingIndex httpBindingIndex = model.getKnowledge(HttpBindingIndex.class);
+                HttpBindingIndex httpBindingIndex = HttpBindingIndex.of(model);
                 List<HttpBinding> payloadBindings = httpBindingIndex.getRequestBindings(operation, Location.PAYLOAD);
                 if (!payloadBindings.isEmpty() && hasBlobBinding(payloadBindings)) {
                     writer.write("expect(r.body).toMatchObject(Uint8Array.from($S, c => c.charCodeAt(0)));", body);

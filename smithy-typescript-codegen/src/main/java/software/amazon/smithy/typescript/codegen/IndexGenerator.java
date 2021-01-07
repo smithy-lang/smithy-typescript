@@ -54,7 +54,7 @@ final class IndexGenerator {
         writer.write("export * from \"./" + nonModularName + "\";");
 
         // write export statements for each command in /commands directory
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         boolean hasPaginatedOperation = false;
         for (OperationShape operation : containedOperations) {
