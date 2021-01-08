@@ -104,6 +104,7 @@ final class CommandGenerator implements Runnable {
         writer.writeShapeDocs(operation);
         writer.openBlock("export class $L extends $$Command<$T, $T, $L> {", "}", name, inputType, outputType,
                 configType, () -> {
+            writer.write("private resolved = false;");
 
             // Section for adding custom command properties.
             writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
@@ -145,11 +146,15 @@ final class CommandGenerator implements Runnable {
                 .write("options?: $T", applicationProtocol.getOptionsType())
                 .dedent();
         writer.openBlock("): Handler<$T, $T> {", "}", inputType, outputType, () -> {
-            // Add serialization and deserialization plugin.
-            writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
+            writer.openBlock("if (!this.resolved) {", "}", () -> {
+                // Add serialization and deserialization plugin.
+                writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
 
-            // Add customizations.
-            addCommandSpecificPlugins();
+                // Add customizations.
+                addCommandSpecificPlugins();
+
+                writer.write("this.resolved = true;");
+            });
 
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
