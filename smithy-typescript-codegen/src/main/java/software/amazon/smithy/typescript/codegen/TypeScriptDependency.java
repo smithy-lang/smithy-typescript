@@ -29,7 +29,7 @@ import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/client-documentation-generator", "1.0.0-rc.0", true),
-    AWS_SDK_TYPES("devDependencies", "@aws-sdk/types", "1.0.0-rc.0", true),
+    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", "1.0.0-rc.0", true),
     AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", "1.0.0-rc.0", true),
     INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", "1.0.0-rc.0", true),
     CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", "1.0.0-rc.0", true),
