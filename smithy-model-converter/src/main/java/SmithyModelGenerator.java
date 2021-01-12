@@ -14,6 +14,7 @@
  */
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,12 +30,12 @@ import software.amazon.smithy.model.shapes.SmithyIdlModelSerializer;
 public class SmithyModelGenerator {
 
     File[] JsonModels;
-    String outputLocation;
+    String outputFolder;
 
-    SmithyModelGenerator(String inputLocation, String ouputLocation){
+    SmithyModelGenerator(String inputLocation, String output){
         File folder = new File(inputLocation);
         JsonModels = folder.listFiles((dir, name) -> name.endsWith(".json"));
-        this.outputLocation = ouputLocation;
+        outputFolder = output;
     }
 
     void run() throws IOException {
@@ -42,7 +43,7 @@ public class SmithyModelGenerator {
         for (File jsonModel: JsonModels) {
             System.out.println("Converting: " + jsonModel.toString());
 
-            String output = jsonModel.getName().split('\.')[0];
+            String serviceName = jsonModel.getName().split("\\.")[0];
 
 
             Path path = Paths.get(jsonModel.getAbsolutePath());
@@ -53,9 +54,17 @@ public class SmithyModelGenerator {
             Model model = modelAssembler.assemble().getResult().orElseThrow();
             SmithyIdlModelSerializer serializer = new SmithyIdlModelSerializer.Builder().build();
 
-            Map<Path, String> result = serializer.serialize(model);
+            Map<Path, String> serializedSmithyModels = serializer.serialize(model);
 
-            System.out.println(result);
+            File outputLocation = new File(outputFolder + "/" + serviceName);
+            outputLocation.mkdirs();
+
+            for (Map.Entry<Path, String> smithyModel : serializedSmithyModels.entrySet()){
+                FileWriter smithyFile = new FileWriter(outputLocation.getAbsolutePath() + "/" + smithyModel.getKey());
+                smithyFile.write(smithyModel.getValue());
+                smithyFile.close();
+            }
+
 
         }
     }
