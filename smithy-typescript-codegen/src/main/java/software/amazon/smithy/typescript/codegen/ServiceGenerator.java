@@ -117,7 +117,7 @@ final class ServiceGenerator implements Runnable {
             Function<Symbol, Optional<Symbol>> mapper,
             Consumer<TypeScriptWriter> defaultTypeGenerator
     ) {
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = topDownIndex.getContainedOperations(service);
 
         List<Symbol> symbols = containedOperations.stream()

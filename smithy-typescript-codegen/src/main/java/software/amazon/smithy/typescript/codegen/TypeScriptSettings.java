@@ -254,7 +254,7 @@ public final class TypeScriptSettings {
             return protocol;
         }
 
-        ServiceIndex serviceIndex = model.getKnowledge(ServiceIndex.class);
+        ServiceIndex serviceIndex = ServiceIndex.of(model);
         Set<ShapeId> resolvedProtocols = serviceIndex.getProtocols(service).keySet();
         if (resolvedProtocols.isEmpty()) {
             throw new UnresolvableProtocolException(

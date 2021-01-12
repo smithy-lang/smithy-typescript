@@ -102,7 +102,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .buildEscaper();
 
         // Get each structure that's used an error.
-        OperationIndex operationIndex = model.getKnowledge(OperationIndex.class);
+        OperationIndex operationIndex = OperationIndex.of(model);
         model.shapes(OperationShape.class).forEach(operationShape -> {
             errorShapes.addAll(operationIndex.getErrors(operationShape));
         });

@@ -102,9 +102,9 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
             Model model,
             ServiceShape service
     ) {
-        TopDownIndex topDownIndex = model.getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
-        EventStreamIndex eventStreamIndex = model.getKnowledge(EventStreamIndex.class);
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         for (OperationShape operation : operations) {
             if (eventStreamIndex.getInputInfo(operation).isPresent()
                     || eventStreamIndex.getOutputInfo(operation).isPresent()
