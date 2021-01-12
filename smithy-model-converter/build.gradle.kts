@@ -34,7 +34,6 @@ dependencies {
     implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.5.0, 2.0[")
 }
 
-
 task("generateSmithyModelFromJson", JavaExec::class) {
     group = "convert"
     description = "Convert .json models from ./modelJson into .smithy models placed into ./modelSmithy"

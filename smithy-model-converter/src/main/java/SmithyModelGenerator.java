@@ -32,20 +32,19 @@ public class SmithyModelGenerator {
     File[] JsonModels;
     String outputFolder;
 
-    SmithyModelGenerator(String inputLocation, String output){
+    SmithyModelGenerator(String inputLocation, String output) throws IOException {
         File folder = new File(inputLocation);
         JsonModels = folder.listFiles((dir, name) -> name.endsWith(".json"));
+        if (JsonModels.length == 0) {
+            throw new IOException("Did not file any *.json models at ./" + inputLocation);
+        }
         outputFolder = output;
     }
 
     void run() throws IOException {
 
         for (File jsonModel: JsonModels) {
-            System.out.println("Converting: " + jsonModel.toString());
-
             String serviceName = jsonModel.getName().split("\\.")[0];
-
-
             Path path = Paths.get(jsonModel.getAbsolutePath());
             String content = Files.readString(path, StandardCharsets.UTF_8);
 
@@ -64,21 +63,14 @@ public class SmithyModelGenerator {
                 smithyFile.write(smithyModel.getValue());
                 smithyFile.close();
             }
-
-
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         String INPUT_LOCATION = "modelJson";
         String OUTPUT_LOCATION = "modelSmithy";
         SmithyModelGenerator smithyModelGenerator = new SmithyModelGenerator(INPUT_LOCATION, OUTPUT_LOCATION);
-        try {
-            smithyModelGenerator.run();
-        } catch (IOException e) {
-
-        }
-
+        smithyModelGenerator.run();
     }
 }
