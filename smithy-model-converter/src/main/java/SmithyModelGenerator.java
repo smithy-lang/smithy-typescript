@@ -29,13 +29,13 @@ import software.amazon.smithy.model.shapes.SmithyIdlModelSerializer;
 
 public class SmithyModelGenerator {
 
-    File[] JsonModels;
+    File[] jsonModels;
     String outputFolder;
 
     SmithyModelGenerator(String inputLocation, String output) throws IOException {
         File folder = new File(inputLocation);
-        JsonModels = folder.listFiles((dir, name) -> name.endsWith(".json"));
-        if (JsonModels.length == 0) {
+        jsonModels = folder.listFiles((dir, name) -> name.endsWith(".json"));
+        if (jsonModels.length == 0) {
             throw new IOException("Did not file any *.json models at ./" + inputLocation);
         }
         outputFolder = output;
@@ -43,7 +43,7 @@ public class SmithyModelGenerator {
 
     void run() throws IOException {
 
-        for (File jsonModel: JsonModels) {
+        for (File jsonModel: jsonModels) {
             String serviceName = jsonModel.getName().split("\\.")[0];
             Path path = Paths.get(jsonModel.getAbsolutePath());
             String content = Files.readString(path, StandardCharsets.UTF_8);
@@ -58,19 +58,19 @@ public class SmithyModelGenerator {
             File outputLocation = new File(outputFolder + "/" + serviceName);
             outputLocation.mkdirs();
 
-            for (Map.Entry<Path, String> smithyModel : serializedSmithyModels.entrySet()){
-                FileWriter smithyFile = new FileWriter(outputLocation.getAbsolutePath() + "/" + smithyModel.getKey());
-                smithyFile.write(smithyModel.getValue());
-                smithyFile.close();
+            for (Map.Entry<Path, String> serialization : serializedSmithyModels.entrySet()) {
+                String outputFile = outputLocation.getAbsolutePath() + "/" + serialization.getKey();
+                FileWriter smithy = new FileWriter(outputFile);
+                smithy.write(serialization.getValue());
+                smithy.close();
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
-
-        String INPUT_LOCATION = "modelJson";
-        String OUTPUT_LOCATION = "modelSmithy";
-        SmithyModelGenerator smithyModelGenerator = new SmithyModelGenerator(INPUT_LOCATION, OUTPUT_LOCATION);
+        String inputModels = "modelJson";
+        String outputModels = "modelSmithy";
+        SmithyModelGenerator smithyModelGenerator = new SmithyModelGenerator(inputModels, outputModels);
         smithyModelGenerator.run();
     }
 }
