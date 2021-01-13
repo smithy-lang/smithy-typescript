@@ -365,7 +365,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
                                 binding.getMember(), target);
                         writer.write("...isSerializableHeaderValue($L) && { $S: $L },",
-                                memberLocation, binding.getLocationName(), headerValue);
+                                memberLocation, binding.getLocationName().toLowerCase(Locale.US), headerValue);
                     }
 
                     // Handle assembling prefix headers.
@@ -376,15 +376,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // Iterate through each entry in the member.
                         writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
                             () -> {
-                                writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
-                                    () -> {
-                                        // Use a ! since we already validated the input member is defined above.
-                                        String headerValue = getInputValue(context, binding.getLocation(),
-                                                memberLocation + "![suffix]", binding.getMember(), target);
-                                        // Append the prefix to key.
-                                        writer.write("acc[$S + suffix] = $L;", binding.getLocationName(), headerValue);
-                                        writer.write("return acc;");
-                                    });
+                                writer.openBlock("(acc: any, suffix: string) => ({", "}), {}",
+                                () -> {
+                                    // Use a ! since we already validated the input member is defined above.
+                                    String headerValue = getInputValue(context, binding.getLocation(),
+                                            memberLocation + "![suffix]", binding.getMember(), target);
+                                    writer.write("...acc,");
+                                    // Append the prefix to key.
+                                    writer.write("[`$L$${suffix.toLowerCase()}`]: $L,",
+                                            binding.getLocationName().toLowerCase(Locale.US), headerValue);
+                                });
                             }
                         );
                     }
