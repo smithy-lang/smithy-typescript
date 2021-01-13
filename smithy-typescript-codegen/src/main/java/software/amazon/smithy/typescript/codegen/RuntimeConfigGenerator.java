@@ -53,12 +53,6 @@ final class RuntimeConfigGenerator {
                         TypeScriptDependency.AWS_SDK_HASH_NODE.packageName);
                 writer.write("sha256: Hash.bind(null, \"sha256\"),");
             },
-            "urlParser", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_NODE);
-                writer.addImport("parseUrl", "parseUrl",
-                        TypeScriptDependency.AWS_SDK_URL_PARSER_NODE.packageName);
-                writer.write("urlParser: parseUrl,");
-            },
             "bodyLengthChecker", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
                 writer.addImport("calculateBodyLength", "calculateBodyLength",
@@ -109,12 +103,6 @@ final class RuntimeConfigGenerator {
                         TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER.packageName);
                 writer.write("sha256: Sha256,");
             },
-            "urlParser", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_BROWSER);
-                writer.addImport("parseUrl", "parseUrl",
-                        TypeScriptDependency.AWS_SDK_URL_PARSER_BROWSER.packageName);
-                writer.write("urlParser: parseUrl,");
-            },
             "bodyLengthChecker", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
                 writer.addImport("calculateBodyLength", "calculateBodyLength",
@@ -160,15 +148,21 @@ final class RuntimeConfigGenerator {
                 writer.write("sha256: Sha256,");
             },
             "urlParser", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_NODE);
+                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_NATIVE);
                 writer.addImport("parseUrl", "parseUrl",
-                        TypeScriptDependency.AWS_SDK_URL_PARSER_NODE.packageName);
+                        TypeScriptDependency.AWS_SDK_URL_PARSER_NATIVE.packageName);
                 writer.write("urlParser: parseUrl,");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
             "disableHostPrefix", writer -> {
                 writer.write("disableHostPrefix: false,");
+            },
+            "urlParser", writer -> {
+                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER);
+                writer.addImport("parseUrl", "parseUrl",
+                        TypeScriptDependency.AWS_SDK_URL_PARSER.packageName);
+                writer.write("urlParser: parseUrl,");
             }
     );
 

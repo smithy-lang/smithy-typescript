@@ -44,8 +44,8 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "^1.0.0", true),
     AWS_SDK_HASH_NODE("dependencies", "@aws-sdk/hash-node", "3.0.0", true),
 
-    AWS_SDK_URL_PARSER_BROWSER("dependencies", "@aws-sdk/url-parser-browser", "3.0.0", true),
-    AWS_SDK_URL_PARSER_NODE("dependencies", "@aws-sdk/url-parser-node", "3.0.0", true),
+    AWS_SDK_URL_PARSER("dependencies", "@aws-sdk/url-parser", "3.0.0", true),
+    AWS_SDK_URL_PARSER_NATIVE("dependencies", "@aws-sdk/url-parser-native", "3.0.0", true),
 
     AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", "3.0.0", true),
     AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", "3.0.0", true),
