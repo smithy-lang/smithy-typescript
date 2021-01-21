@@ -11,11 +11,10 @@
     "remove-dist": "rimraf ./dist",
     "remove-documentation": "rimraf ./docs",
     "test": "yarn build && jest --coverage --passWithNoTests",
-    "postbuild:cjs": "downlevel-dts dist/cjs dist/cjs/ts3.4",
-    "postbuild:es": "downlevel-dts dist/es dist/es/ts3.4",
     "build:cjs": "tsc -p tsconfig.json",
     "build:es": "tsc -p tsconfig.es.json",
-    "build": "yarn build:cjs && yarn build:es"
+    "build": "yarn build:cjs && yarn build:es",
+    "postbuild": "downlevel-dts types types/ts3.4"
   },
   "main": "./dist/cjs/index.js",
   "types": "./types/index.d.ts",
@@ -42,8 +41,7 @@
   },
   "typesVersions": {
     "<3.9": {
-      "dist/cjs/*": ["dist/cjs/ts3.4/*"],
-      "dist/es/*": ["dist/es/ts3.4/*"]
+      "types/*": ["types/ts3.4/*"]
     }
   }
 }
