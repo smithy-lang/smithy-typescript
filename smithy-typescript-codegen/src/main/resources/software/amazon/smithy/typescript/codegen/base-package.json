@@ -29,6 +29,7 @@
     "tslib": "^2.0.0"
   },
   "devDependencies": {
+    "downlevel-dts": "0.7.0",
     "jest": "^26.1.0",
     "rimraf": "^3.0.0",
     "typedoc": "^0.19.2",
