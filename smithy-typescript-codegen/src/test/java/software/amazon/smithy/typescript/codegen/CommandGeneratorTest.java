@@ -18,10 +18,7 @@ public class CommandGeneratorTest {
                 "    configuration: ExampleClientResolvedConfig,\n" +
                 "    options?: __HttpHandlerOptions\n" +
                 "  ): Handler<GetFooCommandInput, GetFooCommandOutput> {\n" +
-                "    if (!this.resolved) {\n" +
-                "      this.middlewareStack.use(getSerdePlugin(configuration, this.serialize, this.deserialize));\n" +
-                "      this.resolved = true;\n" +
-                "    }\n" +
+                "    this.middlewareStack.use(getSerdePlugin(configuration, this.serialize, this.deserialize));\n" +
                 "\n" +
                 "    const stack = clientStack.concat(this.middlewareStack);");
     }
