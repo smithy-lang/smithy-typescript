@@ -2,7 +2,7 @@
  * Returns a map of key names that were un-equal to value objects showing the
  * discrepancies between the components.
  */
-const compareEquivalentBodies = (expectedBody: string, generatedBody: string): Object => {
+const compareEquivalentXmlBodies = (expectedBody: string, generatedBody: string): Object => {
   const decodeEscapedXml = (str: string) => {
     return str
       .replace(/&amp;/g, "&")
