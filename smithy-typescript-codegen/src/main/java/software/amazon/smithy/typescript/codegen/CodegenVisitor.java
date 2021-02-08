@@ -112,7 +112,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         nonTraits = context.getModelWithoutTraitShapes();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
+        LOGGER.info(() -> "Generating TypeScript for service " + service.getId());
 
         // Decorate the symbol provider using integrations.
         SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
@@ -281,6 +281,32 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             return null;
         }
 
+        if (settings.generateClient()) {
+            generateClient(shape);
+        }
+
+        if (protocolGenerator != null) {
+            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
+            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
+            writers.useFileWriter(fileName, writer -> {
+                ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+                context.setProtocolName(protocolGenerator.getName());
+                context.setIntegrations(integrations);
+                context.setModel(model);
+                context.setService(shape);
+                context.setSettings(settings);
+                context.setSymbolProvider(symbolProvider);
+                context.setWriter(writer);
+                protocolGenerator.generateRequestSerializers(context);
+                protocolGenerator.generateResponseDeserializers(context);
+                protocolGenerator.generateSharedComponents(context);
+            });
+        }
+
+        return null;
+    }
+
+    private void generateClient(ServiceShape shape) {
         // Generate the modular service client.
         writers.useShapeWriter(shape, writer -> new ServiceGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
@@ -327,26 +353,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             serviceSymbol,
                             paginationWriter));
         }
-
-        if (protocolGenerator != null) {
-            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
-            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
-            writers.useFileWriter(fileName, writer -> {
-                ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-                context.setProtocolName(protocolGenerator.getName());
-                context.setIntegrations(integrations);
-                context.setModel(model);
-                context.setService(shape);
-                context.setSettings(settings);
-                context.setSymbolProvider(symbolProvider);
-                context.setWriter(writer);
-                protocolGenerator.generateRequestSerializers(context);
-                protocolGenerator.generateResponseDeserializers(context);
-                protocolGenerator.generateSharedComponents(context);
-            });
-        }
-
-        return null;
     }
 
     private Collection<Shape> condenseShapes(Set<Shape> shapes) {

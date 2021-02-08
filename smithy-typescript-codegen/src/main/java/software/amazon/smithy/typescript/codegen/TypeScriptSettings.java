@@ -47,6 +47,7 @@ public final class TypeScriptSettings {
     private static final String SERVICE = "service";
     private static final String PROTOCOL = "protocol";
     private static final String PRIVATE = "private";
+    private static final String GENERATE_CLIENT = "generateClient";
 
     private String packageName;
     private String packageDescription = "";
@@ -56,6 +57,7 @@ public final class TypeScriptSettings {
     private ObjectNode pluginSettings = Node.objectNode();
     private ShapeId protocol;
     private boolean isPrivate;
+    private boolean generateClient;
 
     /**
      * Create a settings object from a configuration object node.
@@ -82,6 +84,7 @@ public final class TypeScriptSettings {
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
+        settings.setGenerateClient(config.getBooleanMember(GENERATE_CLIENT).map(BooleanNode::getValue).orElse(true));
 
         settings.setPluginSettings(config);
         return settings;
@@ -212,6 +215,19 @@ public final class TypeScriptSettings {
 
     public void setPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
+    }
+
+    /**
+     * Returns if the generated package will include a client.
+     *
+     * @return If the package will include a client.
+     */
+    public boolean generateClient() {
+        return generateClient;
+    }
+
+    public void setGenerateClient(boolean generateClient) {
+        this.generateClient = generateClient;
     }
 
     /**
