@@ -48,6 +48,7 @@ public final class TypeScriptSettings {
     private static final String PROTOCOL = "protocol";
     private static final String PRIVATE = "private";
     private static final String GENERATE_CLIENT = "generateClient";
+    private static final String GENERATE_SERVER_SDK = "generateServerSdk";
 
     private String packageName;
     private String packageDescription = "";
@@ -58,6 +59,7 @@ public final class TypeScriptSettings {
     private ShapeId protocol;
     private boolean isPrivate;
     private boolean generateClient;
+    private boolean generateServerSdk;
 
     /**
      * Create a settings object from a configuration object node.
@@ -85,6 +87,8 @@ public final class TypeScriptSettings {
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
         settings.setGenerateClient(config.getBooleanMember(GENERATE_CLIENT).map(BooleanNode::getValue).orElse(true));
+        settings.setGenerateServerSdk(
+                config.getBooleanMember(GENERATE_SERVER_SDK).map(BooleanNode::getValue).orElse(true));
 
         settings.setPluginSettings(config);
         return settings;
@@ -228,6 +232,19 @@ public final class TypeScriptSettings {
 
     public void setGenerateClient(boolean generateClient) {
         this.generateClient = generateClient;
+    }
+
+    /**
+     * Returns if the generated package will include a server sdk.
+     *
+     * @return If the package will include a server sdk.
+     */
+    public boolean generateServerSdk() {
+        return generateServerSdk;
+    }
+
+    public void setGenerateServerSdk(boolean generateServerSdk) {
+        this.generateServerSdk = generateServerSdk;
     }
 
     /**

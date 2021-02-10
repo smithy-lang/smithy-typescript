@@ -166,7 +166,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
-                    httpTrait -> generateOperationSerializer(context, operation, httpTrait),
+                    httpTrait -> {
+                        if (context.getSettings().generateClient()) {
+                            generateOperationRequestSerializer(context, operation, httpTrait);
+                        }
+                        if (context.getSettings().generateServerSdk()) {
+                            generateOperationResponseSerializer(context, operation, httpTrait);
+                        }
+                    },
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol request bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
@@ -189,7 +196,73 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private void generateOperationSerializer(
+    private void generateOperationResponseSerializer(
+            GenerationContext context,
+            OperationShape operation,
+            HttpTrait trait
+    ) {
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(operation);
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
+        TypeScriptWriter writer = context.getWriter();
+
+        // Ensure that the response type is imported.
+        writer.addUseImports(responseType);
+        // e.g., serializeAws_restJson1_1ExecuteStatement
+        String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName()) + "Response";
+        //String errorMethodName = methodName + "Error";
+        // Add the normalized output type.
+        Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
+        String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
+
+        writer.openBlock("export const $L = async(\n"
+                + "  input: $T,\n"
+                + "  context: $L\n"
+                + "): Promise<$T> => {", "}", methodName, outputType, contextType, responseType, () -> {
+            writeStatusCode(context, operation, bindingIndex, trait);
+            writeHeaders(context, operation, bindingIndex);
+
+            List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex);
+            if (!bodyBindings.isEmpty()) {
+                // Track all shapes bound to the body so their serializers may be generated.
+                bodyBindings.stream()
+                        .map(HttpBinding::getMember)
+                        .map(member -> context.getModel().expectShape(member.getTarget()))
+                        .forEach(serializingDocumentShapes::add);
+            }
+
+            writer.openBlock("return new $T({", "});", responseType, () -> {
+                writer.write("headers,");
+                writer.write("body,");
+                writer.write("statusCode,");
+            });
+        });
+        writer.write("");
+    }
+
+    private void writeStatusCode(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex,
+            HttpTrait trait
+    ) {
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        List<HttpBinding> bindings = bindingIndex.getResponseBindings(operation, Location.RESPONSE_CODE);
+        String statusCodeValue;
+        if (!bindings.isEmpty()) {
+            HttpBinding binding = bindings.get(0);
+            // This can only be bound to an int so we don't need to do the same sort of complex finagling
+            // as we do with other http bindings.
+            statusCodeValue = "output." + symbolProvider.toMemberName(binding.getMember());
+        } else {
+            statusCodeValue = String.format("%d", trait.getCode());
+        }
+        context.getWriter().write("const statusCode: number = $L", statusCodeValue);
+    }
+
+    private void generateOperationRequestSerializer(
             GenerationContext context,
             OperationShape operation,
             HttpTrait trait
