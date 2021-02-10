@@ -189,7 +189,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
-                    httpTrait -> generateOperationDeserializer(context, operation, httpTrait),
+                    httpTrait -> {
+                        if (context.getSettings().generateClient()) {
+                            generateOperationResponseDeserializer(context, operation, httpTrait);
+                        }
+                        if (context.getSettings().generateServerSdk()) {
+                            generateOperationRequestDeserializer(context, operation, httpTrait);
+                        }
+                    },
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
@@ -929,7 +936,57 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private void generateOperationDeserializer(
+    private void generateOperationRequestDeserializer(
+            GenerationContext context,
+            OperationShape operation,
+            HttpTrait trait
+    ) {
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(operation);
+        SymbolReference requestType = getApplicationProtocol().getRequestType();
+        Model model = context.getModel();
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(model);
+        TypeScriptWriter writer = context.getWriter();
+
+        // Ensure that the request type is imported.
+        writer.addUseImports(requestType);
+        writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
+        // e.g., serializeAws_restJson1_1ExecuteStatement
+        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName()) + "Request";
+        // Add the normalized input type.
+        Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
+        String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
+
+        writer.openBlock("export const $L = async(\n"
+                + "  output: $T,\n"
+                + "  context: $L\n"
+                + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
+            // TODO: deserialize query string
+            // TODO: deserialize path
+            // Start deserializing the response. TODO: this can be abstracted
+            writer.openBlock("const contents: $T = {", "};", inputType, () -> {
+                // Only set a type and the members if we have output.
+                operation.getInput().ifPresent(shapeId -> {
+                    // Set all the members to undefined to meet type constraints.
+                    StructureShape target = model.expectShape(shapeId).asStructureShape().get();
+                    new TreeMap<>(target.getAllMembers())
+                            .forEach((memberName, memberShape) -> writer.write(
+                                    "$L: undefined,", memberName));
+                });
+            });
+            readHeaders(context, operation, bindingIndex, "output");
+            List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = model.expectShape(binding.getMember().getTarget());
+                deserializingDocumentShapes.add(target);
+            });
+            writer.write("return Promise.resolve(contents);");
+        });
+        writer.write("");
+    }
+
+    private void generateOperationResponseDeserializer(
             GenerationContext context,
             OperationShape operation,
             HttpTrait trait
