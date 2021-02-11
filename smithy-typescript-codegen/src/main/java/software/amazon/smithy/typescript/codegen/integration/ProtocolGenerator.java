@@ -134,6 +134,22 @@ public interface ProtocolGenerator {
 
     /**
      * Generates the code used to deserialize the shapes of a service
+     * for requests.
+     *
+     * @param context Serialization context.
+     */
+    void generateRequestDeserializers(GenerationContext context);
+
+    /**
+     * Generates the code used to serialize the shapes of a service
+     * for responses.
+     *
+     * @param context Serialization context.
+     */
+    void generateResponseSerializers(GenerationContext context);
+
+    /**
+     * Generates the code used to deserialize the shapes of a service
      * for responses.
      *
      * @param context Deserialization context.

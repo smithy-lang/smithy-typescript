@@ -297,8 +297,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 context.setSettings(settings);
                 context.setSymbolProvider(symbolProvider);
                 context.setWriter(writer);
-                protocolGenerator.generateRequestSerializers(context);
-                protocolGenerator.generateResponseDeserializers(context);
+                if (context.getSettings().generateClient()) {
+                    protocolGenerator.generateRequestSerializers(context);
+                    protocolGenerator.generateResponseDeserializers(context);
+                }
+                if (context.getSettings().generateServerSdk()) {
+                    protocolGenerator.generateRequestDeserializers(context);
+                    protocolGenerator.generateResponseSerializers(context);
+                }
                 protocolGenerator.generateSharedComponents(context);
             });
         }

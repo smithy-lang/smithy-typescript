@@ -159,21 +159,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateRequestSerializers(GenerationContext context) {
-        TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
-                    httpTrait -> {
-                        if (context.getSettings().generateClient()) {
-                            generateOperationRequestSerializer(context, operation, httpTrait);
-                        }
-                        if (context.getSettings().generateServerSdk()) {
-                            generateOperationResponseSerializer(context, operation, httpTrait);
-                        }
-                    },
+                    httpTrait -> generateOperationRequestSerializer(context, operation, httpTrait),
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol request bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
@@ -181,22 +174,48 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     @Override
-    public void generateResponseDeserializers(GenerationContext context) {
-        TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
+    public void generateRequestDeserializers(GenerationContext context) {
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
-                    httpTrait -> {
-                        if (context.getSettings().generateClient()) {
-                            generateOperationResponseDeserializer(context, operation, httpTrait);
-                        }
-                        if (context.getSettings().generateServerSdk()) {
-                            generateOperationRequestDeserializer(context, operation, httpTrait);
-                        }
-                    },
+                    httpTrait -> generateOperationRequestDeserializer(context, operation, httpTrait),
+                    () -> LOGGER.warning(String.format(
+                            "Unable to generate %s protocol request bindings for %s because it does not have an "
+                            + "http binding trait", getName(), operation.getId())));
+        }
+
+    }
+
+    @Override
+    public void generateResponseSerializers(GenerationContext context) {
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
+
+        Set<OperationShape> containedOperations = new TreeSet<>(
+                topDownIndex.getContainedOperations(context.getService()));
+        for (OperationShape operation : containedOperations) {
+            OptionalUtils.ifPresentOrElse(
+                    operation.getTrait(HttpTrait.class),
+                    httpTrait -> generateOperationRequestSerializer(context, operation, httpTrait),
+                    () -> LOGGER.warning(String.format(
+                            "Unable to generate %s protocol response bindings for %s because it does not have an "
+                            + "http binding trait", getName(), operation.getId())));
+        }
+    }
+
+    @Override
+    public void generateResponseDeserializers(GenerationContext context) {
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
+
+        Set<OperationShape> containedOperations = new TreeSet<>(
+                topDownIndex.getContainedOperations(context.getService()));
+        for (OperationShape operation : containedOperations) {
+            OptionalUtils.ifPresentOrElse(
+                    operation.getTrait(HttpTrait.class),
+                    httpTrait -> generateOperationRequestDeserializer(context, operation, httpTrait),
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
