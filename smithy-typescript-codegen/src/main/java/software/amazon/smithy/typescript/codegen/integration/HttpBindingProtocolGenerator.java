@@ -199,7 +199,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
-                    httpTrait -> generateOperationRequestSerializer(context, operation, httpTrait),
+                    httpTrait -> generateOperationResponseSerializer(context, operation, httpTrait),
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
@@ -215,7 +215,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
-                    httpTrait -> generateOperationRequestDeserializer(context, operation, httpTrait),
+                    httpTrait -> generateOperationResponseDeserializer(context, operation, httpTrait),
                     () -> LOGGER.warning(String.format(
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
