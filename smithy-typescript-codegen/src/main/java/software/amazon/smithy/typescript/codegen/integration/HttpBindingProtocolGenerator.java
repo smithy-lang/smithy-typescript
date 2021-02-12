@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -1094,7 +1095,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
-        // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName()) + "Request";
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
@@ -1106,7 +1106,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
             // TODO: deserialize query string
             // TODO: deserialize path
-            // Start deserializing the response. TODO: this can be abstracted
+            // TODO: deserialize endpoint
+            // Start deserializing the response.
             writer.openBlock("const contents: $T = {", "};", inputType, () -> {
                 // Only set a type and the members if we have output.
                 operation.getInput().ifPresent(shapeId -> {
@@ -1117,8 +1118,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                     "$L: undefined,", memberName));
                 });
             });
-            readHeaders(context, operation, bindingIndex, "output");
-            List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
+            readRequestHeaders(context, operation, bindingIndex, "output");
+            List<HttpBinding> documentBindings = readRequestBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -1174,7 +1175,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                     "$L: undefined,", memberName));
                 });
             });
-            readHeaders(context, operation, bindingIndex, "output");
+            readResponseHeaders(context, operation, bindingIndex, "output");
             List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
@@ -1217,7 +1218,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
             });
 
-            readHeaders(context, error, bindingIndex, outputName);
+            readResponseHeaders(context, error, bindingIndex, outputName);
             List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
@@ -1249,55 +1250,113 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private void readHeaders(
+    private void readResponseHeaders(
             GenerationContext context,
             Shape operationOrError,
             HttpBindingIndex bindingIndex,
             String outputName
     ) {
-        TypeScriptWriter writer = context.getWriter();
-        SymbolProvider symbolProvider = context.getSymbolProvider();
+        List<HttpBinding> headerBindings = bindingIndex.getResponseBindings(operationOrError, Location.HEADER);
+        readNormalHeaders(context, headerBindings, outputName);
 
-        Model model = context.getModel();
-        for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
-            String memberName = symbolProvider.toMemberName(binding.getMember());
+        List<HttpBinding> prefixHeaderBindings =
+                bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
+        readPrefixHeaders(context, prefixHeaderBindings, outputName);
+    }
+
+    private void readRequestHeaders(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex,
+            String outputName
+    ) {
+        List<HttpBinding> headerBindings = bindingIndex.getRequestBindings(operation, Location.HEADER);
+        readNormalHeaders(context, headerBindings, outputName);
+
+        List<HttpBinding> prefixHeaderBindings =
+                bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS);
+        readPrefixHeaders(context, prefixHeaderBindings, outputName);
+    }
+
+    /**
+     * Reads headers that are 1-1 mapped to members via the @httpHeader trait
+     *
+     * @param context the generation context.
+     * @param headerBindings a collection of header bindings.
+     * @param outputName the name of the output variable to read from.
+     */
+    private void readNormalHeaders(
+            GenerationContext context,
+            Collection<HttpBinding> headerBindings,
+            String outputName
+    ) {
+        for (HttpBinding binding : headerBindings) {
+            TypeScriptWriter writer = context.getWriter();
+            String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
             String headerName = binding.getLocationName().toLowerCase(Locale.US);
             writer.openBlock("if ($L.headers[$S] !== undefined) {", "}", outputName, headerName, () -> {
-                Shape target = model.expectShape(binding.getMember().getTarget());
+                Shape target = context.getModel().expectShape(binding.getMember().getTarget());
                 String headerValue = getOutputValue(context, binding.getLocation(),
                         outputName + ".headers['" + headerName + "']", binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, headerValue);
             });
         }
+    }
 
-        // Handle loading up prefix headers.
-        List<HttpBinding> prefixHeaderBindings =
-                bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
-        if (!prefixHeaderBindings.isEmpty()) {
-            // Run through the headers one time, matching any prefix groups.
-            writer.openBlock("Object.keys($L.headers).forEach(header => {", "});", outputName, () -> {
-                for (HttpBinding binding : prefixHeaderBindings) {
-                    // Prepare a grab bag for these headers if necessary
-                    String memberName = symbolProvider.toMemberName(binding.getMember());
-                    writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
-                        writer.write("contents.$L = {};", memberName);
-                    });
-
-                    // Generate a single block for each group of lower-cased prefix headers.
-                    String headerLocation = binding.getLocationName().toLowerCase(Locale.US);
-                    writer.openBlock("if (header.startsWith($S)) {", "}", headerLocation, () -> {
-                        MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
-                        Shape target = model.expectShape(prefixMap.getValue().getTarget());
-                        String headerValue = getOutputValue(context, binding.getLocation(),
-                                outputName + ".headers[header]", binding.getMember(), target);
-
-                        // Extract the non-prefix portion as the key.
-                        writer.write("contents.$L[header.substring($L)] = $L;",
-                                memberName, headerLocation.length(), headerValue);
-                    });
-                }
-            });
+    /**
+     * Reads headers are bound by the @httpPrefixHeaders trait.
+     *
+     * @param context the generation context.
+     * @param prefixHeaderBindings a collection of prefix header bindings.
+     * @param outputName the name of the output variable to read from.
+     */
+    private void readPrefixHeaders(
+            GenerationContext context,
+            Collection<HttpBinding> prefixHeaderBindings,
+            String outputName
+    ) {
+        if (prefixHeaderBindings.isEmpty()) {
+            return;
         }
+
+        Model model = context.getModel();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        TypeScriptWriter writer = context.getWriter();
+
+        // Run through the headers one time, matching any prefix groups.
+        writer.openBlock("Object.keys($L.headers).forEach(header => {", "});", outputName, () -> {
+            for (HttpBinding binding : prefixHeaderBindings) {
+                // Prepare a grab bag for these headers if necessary
+                String memberName = symbolProvider.toMemberName(binding.getMember());
+                writer.openBlock("if (contents.$L === undefined) {", "}", memberName, () -> {
+                    writer.write("contents.$L = {};", memberName);
+                });
+
+                // Generate a single block for each group of lower-cased prefix headers.
+                String headerLocation = binding.getLocationName().toLowerCase(Locale.US);
+                writer.openBlock("if (header.startsWith($S)) {", "}", headerLocation, () -> {
+                    MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
+                    Shape target = model.expectShape(prefixMap.getValue().getTarget());
+                    String headerValue = getOutputValue(context, binding.getLocation(),
+                            outputName + ".headers[header]", binding.getMember(), target);
+
+                    // Extract the non-prefix portion as the key.
+                    writer.write("contents.$L[header.substring($L)] = $L;",
+                            memberName, headerLocation.length(), headerValue);
+                });
+            }
+        });
+    }
+
+    private List<HttpBinding> readRequestBody(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex
+    ) {
+        List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
+        documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
+        List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
+        return readBody(context, operation, documentBindings, payloadBindings, Collections.emptyList());
     }
 
     private List<HttpBinding> readResponseBody(
@@ -1305,14 +1364,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Shape operationOrError,
             HttpBindingIndex bindingIndex
     ) {
-        TypeScriptWriter writer = context.getWriter();
-        SymbolProvider symbolProvider = context.getSymbolProvider();
-
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
         List<HttpBinding> responseCodeBindings = bindingIndex.getResponseBindings(
                 operationOrError, Location.RESPONSE_CODE);
+        return readBody(context, operationOrError, documentBindings, payloadBindings, responseCodeBindings);
+    }
+
+    private List<HttpBinding> readBody(
+            GenerationContext context,
+            Shape operationOrError,
+            List<HttpBinding> documentBindings,
+            List<HttpBinding> payloadBindings,
+            List<HttpBinding> responseCodeBindings
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
 
         if (!documentBindings.isEmpty()) {
             // If the response has document bindings, the body can be parsed to a JavaScript object.
