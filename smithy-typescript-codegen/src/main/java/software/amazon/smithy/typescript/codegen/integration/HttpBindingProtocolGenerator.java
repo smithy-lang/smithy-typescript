@@ -274,27 +274,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    private void writeOperationStatusCode(
-            GenerationContext context,
-            OperationShape operation,
-            HttpBindingIndex bindingIndex,
-            HttpTrait trait
-    ) {
-        SymbolProvider symbolProvider = context.getSymbolProvider();
-
-        List<HttpBinding> bindings = bindingIndex.getResponseBindings(operation, Location.RESPONSE_CODE);
-        String statusCodeValue;
-        if (!bindings.isEmpty()) {
-            HttpBinding binding = bindings.get(0);
-            // This can only be bound to an int so we don't need to do the same sort of complex finagling
-            // as we do with other http bindings.
-            statusCodeValue = "output." + symbolProvider.toMemberName(binding.getMember());
-        } else {
-            statusCodeValue = String.format("%d", trait.getCode());
-        }
-        context.getWriter().write("const statusCode: number = $L", statusCodeValue);
-    }
-
     private void generateErrorSerializer(GenerationContext context, StructureShape error) {
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol symbol = symbolProvider.toSymbol(error);
@@ -328,14 +307,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
         });
         writer.write("");
-    }
-
-    private void writeErrorStatusCode(GenerationContext context, StructureShape error) {
-        ErrorTrait trait = error.expectTrait(ErrorTrait.class);
-        int code = error.getTrait(HttpErrorTrait.class)
-                .map(HttpErrorTrait::getCode)
-                .orElse(trait.getDefaultHttpStatusCode());
-        context.getWriter().write("const statusCode: number = $L", code);
     }
 
     private void generateOperationRequestSerializer(
@@ -403,6 +374,35 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
 
         writer.write("");
+    }
+
+    private void writeOperationStatusCode(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex,
+            HttpTrait trait
+    ) {
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        List<HttpBinding> bindings = bindingIndex.getResponseBindings(operation, Location.RESPONSE_CODE);
+        String statusCodeValue;
+        if (!bindings.isEmpty()) {
+            HttpBinding binding = bindings.get(0);
+            // This can only be bound to an int so we don't need to do the same sort of complex finagling
+            // as we do with other http bindings.
+            statusCodeValue = "output." + symbolProvider.toMemberName(binding.getMember());
+        } else {
+            statusCodeValue = String.format("%d", trait.getCode());
+        }
+        context.getWriter().write("const statusCode: number = $L", statusCodeValue);
+    }
+
+    private void writeErrorStatusCode(GenerationContext context, StructureShape error) {
+        ErrorTrait trait = error.expectTrait(ErrorTrait.class);
+        int code = error.getTrait(HttpErrorTrait.class)
+                .map(HttpErrorTrait::getCode)
+                .orElse(trait.getDefaultHttpStatusCode());
+        context.getWriter().write("const statusCode: number = $L", code);
     }
 
     private void writeResolvedPath(
@@ -506,7 +506,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
             operation.getInput().ifPresent(outputId -> {
                 for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
-                    writeNormalHeaders(context, binding);
+                    writeNormalHeader(context, binding);
                 }
 
                 // Handle assembling prefix headers.
@@ -517,7 +517,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
     }
 
-    private void writeNormalHeaders(GenerationContext context, HttpBinding binding) {
+    private void writeNormalHeader(GenerationContext context, HttpBinding binding) {
         String memberLocation = "input." + context.getSymbolProvider().toMemberName(binding.getMember());
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
         String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
@@ -565,7 +565,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             injectExtraHeaders.run();
 
             for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
-                writeNormalHeaders(context, binding);
+                writeNormalHeader(context, binding);
             }
 
             // Handle assembling prefix headers.
@@ -580,7 +580,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OperationShape operation,
             HttpBindingIndex bindingIndex
     ) {
-        return writeBody(context, operation, bindingIndex.getRequestBindings(operation).values());
+        List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
+        List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
+        boolean shouldWriteDefaultBody = bindingIndex.getRequestBindings(operation).isEmpty();
+        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody);
     }
 
     private List<HttpBinding> writeResponseBody(
@@ -591,21 +594,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // We just make one up here since it's not actually used by consumers.
         // TODO: remove the need for this at all
         OperationShape operation = OperationShape.builder().id("ns.foo#bar").build();
-        return writeBody(context, operation, bindingIndex.getResponseBindings(operationOrError).values());
+        List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
+        List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
+        boolean shouldWriteDefaultBody = bindingIndex.getResponseBindings(operationOrError).isEmpty();
+        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody);
     }
 
     private List<HttpBinding> writeBody(
             GenerationContext context,
             OperationShape operation,
-            Collection<HttpBinding> httpBindings
+            List<HttpBinding> payloadBindings,
+            List<HttpBinding> documentBindings,
+            boolean shouldWriteDefaultBody
     ) {
         TypeScriptWriter writer = context.getWriter();
         // Write the default `body` property.
         writer.write("let body: any;");
 
-        List<HttpBinding> payloadBindings = httpBindings.stream()
-                .filter(binding -> binding.getLocation().equals(Location.PAYLOAD))
-                .collect(Collectors.toList());
         // Handle a payload binding explicitly.
         if (!payloadBindings.isEmpty()) {
             // There can only be one payload binding.
@@ -616,10 +621,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // If we have document bindings or need a defaulted request body,
         // use the input document serialization.
-        List<HttpBinding> documentBindings = httpBindings.stream()
-                .filter(binding -> binding.getLocation().equals(Location.DOCUMENT))
-                .collect(Collectors.toList());
-        if (!documentBindings.isEmpty() || httpBindings.isEmpty()) {
+        if (!documentBindings.isEmpty() || shouldWriteDefaultBody) {
             documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
 
             serializeInputDocument(context, operation, documentBindings);
