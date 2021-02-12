@@ -249,7 +249,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  context: $L\n"
                 + "): Promise<$T> => {", "}", methodName, outputType, contextType, responseType, () -> {
             writeOperationStatusCode(context, operation, bindingIndex, trait);
-            writeOperationHeaders(context, operation, bindingIndex);
+            writeResponseHeaders(context, operation, bindingIndex, () -> writeDefaultHeaders(context, operation));
 
             List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
             if (!bodyBindings.isEmpty()) {
@@ -309,7 +309,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  context: __SerdeContext\n"
                 + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
             writeErrorStatusCode(context, error);
-            writeErrorHeaders(context, error, bindingIndex);
+            writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
 
             List<HttpBinding> bodyBindings = writeResponseBody(context, error, bindingIndex);
             if (!bodyBindings.isEmpty()) {
@@ -361,7 +361,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  input: $T,\n"
                        + "  context: $L\n"
                        + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
-            writeOperationHeaders(context, operation, bindingIndex);
+            writeRequestHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
 
@@ -489,7 +489,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         return !queryBindings.isEmpty() || !queryLiterals.isEmpty();
     }
 
-    private void writeOperationHeaders(
+    private void writeRequestHeaders(
             GenerationContext context,
             OperationShape operation,
             HttpBindingIndex bindingIndex
@@ -548,26 +548,27 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         );
     }
 
-    private void writeErrorHeaders(
+    private void writeResponseHeaders(
             GenerationContext context,
-            StructureShape error,
-            HttpBindingIndex bindingIndex
+            ToShapeId operationOrError,
+            HttpBindingIndex bindingIndex,
+            Runnable injectExtraHeaders
     ) {
         TypeScriptWriter writer = context.getWriter();
 
         // Headers are always present either from the default document or the payload.
         writer.openBlock("const headers: any = {", "};", () -> {
             // Only set the content type if one can be determined.
-            bindingIndex.determineResponseContentType(error, getDocumentContentType()).ifPresent(contentType ->
-                    writer.write("'content-type': $S,", contentType));
-            writeDefaultErrorHeaders(context, error);
+            bindingIndex.determineResponseContentType(operationOrError, getDocumentContentType())
+                    .ifPresent(contentType -> writer.write("'content-type': $S,", contentType));
+            injectExtraHeaders.run();
 
-            for (HttpBinding binding : bindingIndex.getResponseBindings(error, Location.HEADER)) {
+            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
                 writeNormalHeaders(context, binding);
             }
 
             // Handle assembling prefix headers.
-            for (HttpBinding binding : bindingIndex.getResponseBindings(error, Location.PREFIX_HEADERS)) {
+            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
                 writePrefixHeaders(context, binding);
             }
         });
