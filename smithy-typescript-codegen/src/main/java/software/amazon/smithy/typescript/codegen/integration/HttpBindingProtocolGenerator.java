@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -46,14 +47,17 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
+import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -74,6 +78,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
+    private final Set<StructureShape> serializingErrorShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
     private final Set<StructureShape> serializeEventShapes = new TreeSet<>();
     private final Set<StructureShape> deserializingEventShapes = new TreeSet<>();
@@ -139,6 +144,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         serializeEventShapes.forEach(event -> generateEventSerializer(context, event));
         deserializingEventShapes.forEach(event -> generateEventDeserializer(context, event));
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
+        serializingErrorShapes.forEach(error -> generateErrorSerializer(context, error));
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
@@ -233,12 +239,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
         TypeScriptWriter writer = context.getWriter();
 
-        // Ensure that the response type is imported.
         writer.addUseImports(responseType);
-        // e.g., serializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName()) + "Response";
-        //String errorMethodName = methodName + "Error";
-        // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
@@ -246,10 +248,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  input: $T,\n"
                 + "  context: $L\n"
                 + "): Promise<$T> => {", "}", methodName, outputType, contextType, responseType, () -> {
-            writeStatusCode(context, operation, bindingIndex, trait);
-            writeHeaders(context, operation, bindingIndex);
+            writeOperationStatusCode(context, operation, bindingIndex, trait);
+            writeOperationHeaders(context, operation, bindingIndex);
 
-            List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex);
+            List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
             if (!bodyBindings.isEmpty()) {
                 // Track all shapes bound to the body so their serializers may be generated.
                 bodyBindings.stream()
@@ -265,9 +267,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
         });
         writer.write("");
+
+        for (ShapeId errorShapeId : operation.getErrors()) {
+            serializingErrorShapes.add(context.getModel().expectShape(errorShapeId).asStructureShape().get());
+        }
     }
 
-    private void writeStatusCode(
+    private void writeOperationStatusCode(
             GenerationContext context,
             OperationShape operation,
             HttpBindingIndex bindingIndex,
@@ -286,6 +292,49 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             statusCodeValue = String.format("%d", trait.getCode());
         }
         context.getWriter().write("const statusCode: number = $L", statusCodeValue);
+    }
+
+    private void generateErrorSerializer(GenerationContext context, StructureShape error) {
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(error);
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.addUseImports(responseType);
+        String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName()) + "Error";
+
+        writer.openBlock("export const $L = async(\n"
+                + "  input: $T,\n"
+                + "  context: __SerdeContext\n"
+                + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
+            writeErrorStatusCode(context, error);
+            writeErrorHeaders(context, error, bindingIndex);
+
+            List<HttpBinding> bodyBindings = writeResponseBody(context, error, bindingIndex);
+            if (!bodyBindings.isEmpty()) {
+                // Track all shapes bound to the body so their serializers may be generated.
+                bodyBindings.stream()
+                        .map(HttpBinding::getMember)
+                        .map(member -> context.getModel().expectShape(member.getTarget()))
+                        .forEach(serializingDocumentShapes::add);
+            }
+
+            writer.openBlock("return new $T({", "});", responseType, () -> {
+                writer.write("headers,");
+                writer.write("body,");
+                writer.write("statusCode,");
+            });
+        });
+        writer.write("");
+    }
+
+    private void writeErrorStatusCode(GenerationContext context, StructureShape error) {
+        ErrorTrait trait = error.expectTrait(ErrorTrait.class);
+        int code = error.getTrait(HttpErrorTrait.class)
+                .map(HttpErrorTrait::getCode)
+                .orElse(trait.getDefaultHttpStatusCode());
+        context.getWriter().write("const statusCode: number = $L", code);
     }
 
     private void generateOperationRequestSerializer(
@@ -312,7 +361,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  input: $T,\n"
                        + "  context: $L\n"
                        + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
-            writeHeaders(context, operation, bindingIndex);
+            writeOperationHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
 
@@ -440,57 +489,88 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         return !queryBindings.isEmpty() || !queryLiterals.isEmpty();
     }
 
-    private void writeHeaders(
+    private void writeOperationHeaders(
             GenerationContext context,
             OperationShape operation,
             HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
-        SymbolProvider symbolProvider = context.getSymbolProvider();
 
         // Headers are always present either from the default document or the payload.
-        writer.openBlock("const headers: any = {", "};",
+        writer.openBlock("const headers: any = {", "};", () -> {
+            // Only set the content type if one can be determined.
+            bindingIndex.determineRequestContentType(operation, getDocumentContentType()).ifPresent(contentType ->
+                    writer.write("'content-type': $S,", contentType));
+            writeDefaultHeaders(context, operation);
+
+            operation.getInput().ifPresent(outputId -> {
+                for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
+                    writeNormalHeaders(context, binding);
+                }
+
+                // Handle assembling prefix headers.
+                for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
+                    writePrefixHeaders(context, binding);
+                }
+            });
+        });
+    }
+
+    private void writeNormalHeaders(GenerationContext context, HttpBinding binding) {
+        String memberLocation = "input." + context.getSymbolProvider().toMemberName(binding.getMember());
+        Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+        String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
+                binding.getMember(), target);
+        context.getWriter().write("...isSerializableHeaderValue($L) && { $S: $L },",
+                memberLocation, binding.getLocationName().toLowerCase(Locale.US), headerValue);
+    }
+
+    private void writePrefixHeaders(GenerationContext context, HttpBinding binding) {
+        Model model = context.getModel();
+        TypeScriptWriter writer = context.getWriter();
+        String memberLocation = "input." + context.getSymbolProvider().toMemberName(binding.getMember());
+        MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
+        Shape target = model.expectShape(prefixMap.getValue().getTarget());
+        // Iterate through each entry in the member.
+        writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
             () -> {
-                // Only set the content type if one can be determined.
-                bindingIndex.determineRequestContentType(operation, getDocumentContentType()).ifPresent(contentType ->
-                        writer.write("'content-type': $S,", contentType));
-                writeDefaultHeaders(context, operation);
-
-                operation.getInput().ifPresent(outputId -> {
-                    Model model = context.getModel();
-                    for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
-                        String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        String headerValue = getInputValue(context, binding.getLocation(), memberLocation + "!",
-                                binding.getMember(), target);
-                        writer.write("...isSerializableHeaderValue($L) && { $S: $L },",
-                                memberLocation, binding.getLocationName().toLowerCase(Locale.US), headerValue);
-                    }
-
-                    // Handle assembling prefix headers.
-                    for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS)) {
-                        String memberLocation = "input." + symbolProvider.toMemberName(binding.getMember());
-                        MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
-                        Shape target = model.expectShape(prefixMap.getValue().getTarget());
-                        // Iterate through each entry in the member.
-                        writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
-                            () -> {
-                                writer.openBlock("(acc: any, suffix: string) => ({", "}), {}",
-                                () -> {
-                                    // Use a ! since we already validated the input member is defined above.
-                                    String headerValue = getInputValue(context, binding.getLocation(),
-                                            memberLocation + "![suffix]", binding.getMember(), target);
-                                    writer.write("...acc,");
-                                    // Append the prefix to key.
-                                    writer.write("[`$L$${suffix.toLowerCase()}`]: $L,",
-                                            binding.getLocationName().toLowerCase(Locale.US), headerValue);
-                                });
-                            }
-                        );
-                    }
-                });
+                writer.openBlock("(acc: any, suffix: string) => ({", "}), {}",
+                    () -> {
+                        // Use a ! since we already validated the input member is defined above.
+                        String headerValue = getInputValue(context, binding.getLocation(),
+                                memberLocation + "![suffix]", binding.getMember(), target);
+                        writer.write("...acc,");
+                        // Append the prefix to key.
+                        writer.write("[`$L$${suffix.toLowerCase()}`]: $L,",
+                                binding.getLocationName().toLowerCase(Locale.US), headerValue);
+                    });
             }
         );
+    }
+
+    private void writeErrorHeaders(
+            GenerationContext context,
+            StructureShape error,
+            HttpBindingIndex bindingIndex
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+
+        // Headers are always present either from the default document or the payload.
+        writer.openBlock("const headers: any = {", "};", () -> {
+            // Only set the content type if one can be determined.
+            bindingIndex.determineResponseContentType(error, getDocumentContentType()).ifPresent(contentType ->
+                    writer.write("'content-type': $S,", contentType));
+            writeDefaultErrorHeaders(context, error);
+
+            for (HttpBinding binding : bindingIndex.getResponseBindings(error, Location.HEADER)) {
+                writeNormalHeaders(context, binding);
+            }
+
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : bindingIndex.getResponseBindings(error, Location.PREFIX_HEADERS)) {
+                writePrefixHeaders(context, binding);
+            }
+        });
     }
 
     private List<HttpBinding> writeRequestBody(
@@ -498,12 +578,33 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OperationShape operation,
             HttpBindingIndex bindingIndex
     ) {
+        return writeBody(context, operation, bindingIndex.getRequestBindings(operation).values());
+    }
+
+    private List<HttpBinding> writeResponseBody(
+            GenerationContext context,
+            ToShapeId operationOrError,
+            HttpBindingIndex bindingIndex
+    ) {
+        // We just make one up here since it's not actually used by consumers.
+        // TODO: remove the need for this at all
+        OperationShape operation = OperationShape.builder().id("ns.foo#bar").build();
+        return writeBody(context, operation, bindingIndex.getResponseBindings(operationOrError).values());
+    }
+
+    private List<HttpBinding> writeBody(
+            GenerationContext context,
+            OperationShape operation,
+            Collection<HttpBinding> httpBindings
+    ) {
         TypeScriptWriter writer = context.getWriter();
         // Write the default `body` property.
         writer.write("let body: any;");
 
+        List<HttpBinding> payloadBindings = httpBindings.stream()
+                .filter(binding -> binding.getLocation().equals(Location.PAYLOAD))
+                .collect(Collectors.toList());
         // Handle a payload binding explicitly.
-        List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
         if (!payloadBindings.isEmpty()) {
             // There can only be one payload binding.
             HttpBinding payloadBinding = payloadBindings.get(0);
@@ -513,8 +614,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // If we have document bindings or need a defaulted request body,
         // use the input document serialization.
-        List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
-        if (!documentBindings.isEmpty() || bindingIndex.getRequestBindings(operation).isEmpty()) {
+        List<HttpBinding> documentBindings = httpBindings.stream()
+                .filter(binding -> binding.getLocation().equals(Location.DOCUMENT))
+                .collect(Collectors.toList());
+        if (!documentBindings.isEmpty() || httpBindings.isEmpty()) {
             documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
 
             serializeInputDocument(context, operation, documentBindings);
@@ -754,6 +857,26 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {
     }
+
+    /**
+     * Writes any additional HTTP headers required by the protocol implementation for errors.
+     *
+     * <p>Two parameters will be available in scope:
+     * <ul>
+     *   <li>{@code input: <T>}: the type generated for the operation's error.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     * </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     *   "foo": "This is a custom header",
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param error The error being generated.
+     */
+    protected void writeDefaultErrorHeaders(GenerationContext context, StructureShape error) {}
 
     /**
      * Writes the code needed to serialize the input document of a request.
