@@ -284,6 +284,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         if (settings.generateClient()) {
             generateClient(shape);
         }
+        if (settings.generateClient() || settings.generateServerSdk()) {
+            generateCommands(shape);
+        }
 
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
@@ -330,9 +333,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         boolean hasPaginatedOperation = false;
 
         for (OperationShape operation : containedOperations) {
-            writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
-                    settings, model, operation, symbolProvider, commandWriter,
-                    runtimePlugins, protocolGenerator, applicationProtocol).run());
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
                 String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
@@ -358,6 +358,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             nonModularName,
                             serviceSymbol,
                             paginationWriter));
+        }
+    }
+
+    private void generateCommands(ServiceShape shape) {
+        // Generate each operation for the service.
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
+        for (OperationShape operation : containedOperations) {
+            // Right now this only generates stubs
+            writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
+                    settings, model, operation, symbolProvider, commandWriter,
+                    runtimePlugins, protocolGenerator, applicationProtocol).run());
         }
     }
 

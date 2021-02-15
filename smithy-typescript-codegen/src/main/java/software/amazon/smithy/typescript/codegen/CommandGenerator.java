@@ -85,6 +85,13 @@ final class CommandGenerator implements Runnable {
 
     @Override
     public void run() {
+        addInputAndOutputTypes();
+        if (settings.generateClient()) {
+            generateClientCommand();
+        }
+    }
+
+    private void generateClientCommand() {
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
         String configType = ServiceGenerator.getResolvedConfigTypeName(serviceSymbol);
 
