@@ -88,7 +88,7 @@ public final class TypeScriptSettings {
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
         settings.setGenerateClient(config.getBooleanMember(GENERATE_CLIENT).map(BooleanNode::getValue).orElse(true));
         settings.setGenerateServerSdk(
-                config.getBooleanMember(GENERATE_SERVER_SDK).map(BooleanNode::getValue).orElse(true));
+                config.getBooleanMember(GENERATE_SERVER_SDK).map(BooleanNode::getValue).orElse(false));
 
         settings.setPluginSettings(config);
         return settings;
