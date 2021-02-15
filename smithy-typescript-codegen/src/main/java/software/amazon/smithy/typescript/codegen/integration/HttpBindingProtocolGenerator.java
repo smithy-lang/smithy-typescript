@@ -1281,7 +1281,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Reads headers that are 1-1 mapped to members via the @httpHeader trait
+     * Reads headers that are 1-1 mapped to members via the @httpHeader trait.
      *
      * @param context the generation context.
      * @param headerBindings a collection of header bindings.

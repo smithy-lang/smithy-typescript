@@ -42,6 +42,22 @@ final class IndexGenerator {
         FileManifest fileManifest
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
+
+        if (settings.generateClient()) {
+            writeClientExports(settings, model, symbolProvider, writer);
+        }
+
+        // write export statement for models
+        writer.write("export * from \"./models/index\";");
+        fileManifest.writeFile("index.ts", writer.toString());
+    }
+
+    private static void writeClientExports(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
+    ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
 
@@ -75,9 +91,5 @@ final class IndexGenerator {
             String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
             writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
         }
-
-        // write export statement for models
-        writer.write("export * from \"./models/index\";");
-        fileManifest.writeFile("index.ts", writer.toString());
     }
 }
