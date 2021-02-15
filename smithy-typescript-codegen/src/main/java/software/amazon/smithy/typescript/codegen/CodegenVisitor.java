@@ -179,11 +179,15 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
         // environment.
-        RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
-                settings, model, symbolProvider, writers, integrations);
-        for (LanguageTarget target : LanguageTarget.values()) {
-            LOGGER.fine("Generating " + target + " runtime configuration");
-            configGenerator.generate(target);
+        if (settings.generateClient()) {
+            // For now these are only generated for clients.
+            // TODO: generate ssdk config
+            RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
+                    settings, model, symbolProvider, writers, integrations);
+            for (LanguageTarget target : LanguageTarget.values()) {
+                LOGGER.fine("Generating " + target + " runtime configuration");
+                configGenerator.generate(target);
+            }
         }
 
         // Write each custom file.
