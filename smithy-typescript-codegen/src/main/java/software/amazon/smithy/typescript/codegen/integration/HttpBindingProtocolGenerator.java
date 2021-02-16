@@ -58,6 +58,7 @@ import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
+import software.amazon.smithy.model.traits.HostLabelTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
@@ -1106,7 +1107,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  output: $T,\n"
                 + "  context: $L\n"
                 + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
-            // TODO: deserialize endpoint
             // Start deserializing the response.
             writer.openBlock("const contents: $T = {", "};", inputType, () -> {
                 // Only set a type and the members if we have output.
@@ -1120,6 +1120,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
             readQueryString(context, operation, bindingIndex);
             readPath(context, operation, bindingIndex, trait);
+            readHost(context, operation);
             readRequestHeaders(context, operation, bindingIndex, "output");
             List<HttpBinding> documentBindings = readRequestBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
@@ -1179,13 +1180,50 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
         writer.write("const pathRegex = new RegExp($S);", pathRegexBuilder.toString());
         writer.write("const parsedPath: RegExpMatchArray = output.endpoint.path.match(pathRegex);");
-        for (HttpBinding binding : pathBindings) {
-            Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-            String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
-            String labelValue = getOutputValue(context, binding.getLocation(),
-                    "parsedPath.groups." + binding.getLocationName(), binding.getMember(), target);
-            writer.write("contents.$L = $L;", memberName, labelValue);
+        writer.openBlock("if (parsedPath.groups !== undefined) {", "}", () -> {
+            for (HttpBinding binding : pathBindings) {
+                Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+                String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
+                String labelValue = getOutputValue(context, binding.getLocation(),
+                        "parsedPath.groups." + binding.getLocationName(), binding.getMember(), target);
+                writer.write("contents.$L = $L;", memberName, labelValue);
+            }
+        });
+    }
+
+    private void readHost(GenerationContext context, OperationShape operation) {
+        TypeScriptWriter writer = context.getWriter();
+        if (!operation.hasTrait(EndpointTrait.class)) {
+            return;
         }
+        EndpointTrait endpointTrait = operation.expectTrait(EndpointTrait.class);
+        if (endpointTrait.getHostPrefix().getLabels().isEmpty()) {
+            return;
+        }
+        // Anchor to the beginning since we're looking at the host's prefix
+        StringBuilder endpointRegexBuilder = new StringBuilder("^");
+        for (Segment segment : endpointTrait.getHostPrefix().getSegments()) {
+            if (segment.isLabel()) {
+                // Create a named capture group for the segment so we can grab it later without regard to order.
+                endpointRegexBuilder.append(String.format("(?<%s>.*)", segment.getContent()));
+            } else {
+                endpointRegexBuilder.append(segment.getContent().replace(".", "\\."));
+            }
+        }
+        writer.write("const hostRegex = new RegExp($S);", endpointRegexBuilder.toString());
+        writer.write("const parsedHost: RegExpMatchArray = output.endpoint.path.match(pathRegex);");
+        Shape input = context.getModel().expectShape(operation.getInput().get());
+        writer.openBlock("if (parsedHost.groups !== undefined) {", "}", () -> {
+            for (MemberShape member : input.members()) {
+                if (member.hasTrait(HostLabelTrait.class)) {
+                    Shape target = context.getModel().expectShape(member.getTarget());
+                    String memberName = context.getSymbolProvider().toMemberName(member);
+                    String labelValue = getOutputValue(context, Location.LABEL,
+                            "parsedHost.groups." + member.getMemberName(), member, target);
+                    writer.write("contents.$L = $L;", memberName, labelValue);
+                }
+            }
+        });
     }
 
     private void generateOperationResponseDeserializer(
