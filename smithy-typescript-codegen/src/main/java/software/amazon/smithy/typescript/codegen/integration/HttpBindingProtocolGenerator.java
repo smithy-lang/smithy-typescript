@@ -1106,7 +1106,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  output: $T,\n"
                 + "  context: $L\n"
                 + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
-            // TODO: deserialize query string
             // TODO: deserialize path
             // TODO: deserialize endpoint
             // Start deserializing the response.
@@ -1120,6 +1119,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                     "$L: undefined,", memberName));
                 });
             });
+            readQueryString(context, operation, bindingIndex);
             readRequestHeaders(context, operation, bindingIndex, "output");
             List<HttpBinding> documentBindings = readRequestBody(context, operation, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
@@ -1130,6 +1130,30 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
+    }
+
+    private void readQueryString(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
+        if (queryBindings.isEmpty()) {
+            return;
+        }
+        writer.write("const query = output.endpoint.query");
+        writer.openBlock("if (query !== undefined && query !== null) {", "}", () -> {
+            for (HttpBinding binding : queryBindings) {
+                String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
+                writer.openBlock("if (query['$L'] !== undefined) {", "}", binding.getLocationName(), () -> {
+                    Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+                    String headerValue = getOutputValue(context, binding.getLocation(),
+                            "query['" + binding.getLocationName() + "']", binding.getMember(), target);
+                    writer.write("contents.$L = $L;", memberName, headerValue);
+                });
+            }
+        });
     }
 
     private void generateOperationResponseDeserializer(
