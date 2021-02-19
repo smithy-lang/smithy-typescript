@@ -278,53 +278,42 @@ final class HttpProtocolTestGenerator implements Runnable {
             writer.write("expect(r.body).toBeDefined();");
 
             // Otherwise load a media type specific comparator and do a comparison.
-            String mediaType = testCase.getBodyMediaType().orElse(null);
-
-            // Fast check if we have an undescribed or plain text body.
-            if (mediaType == null || mediaType.equals("text/plain")) {
-                // Handle converting to the right comparison format for blob payloads.
-                HttpBindingIndex httpBindingIndex = HttpBindingIndex.of(model);
-                List<HttpBinding> payloadBindings = httpBindingIndex.getRequestBindings(operation, Location.PAYLOAD);
-                if (!payloadBindings.isEmpty() && hasBlobBinding(payloadBindings)) {
-                    writer.write("expect(r.body).toMatchObject(Uint8Array.from($S, c => c.charCodeAt(0)));", body);
-                } else {
-                    writer.write("expect(r.body).toBe($S);", body);
-                }
-                return;
-            }
-            registerBodyComparatorStub(mediaType);
+            String mediaType = testCase.getBodyMediaType().orElse("UNKNOWN");
+            String comparatorInvoke = registerBodyComparatorStub(mediaType);
 
             // Handle escaping strings with quotes inside them.
             writer.write("const bodyString = `$L`;", body.replace("\"", "\\\""));
-            writer.write("const unequalParts: any = compareEquivalentBodies(bodyString, r.body.toString());");
+            writer.write("const unequalParts: any = $L;", comparatorInvoke);
             writer.write("expect(unequalParts).toBeUndefined();");
         });
     }
 
-    private boolean hasBlobBinding(List<HttpBinding> payloadBindings) {
-        // Can only have one payload binding at a time.
-        return model.expectShape(payloadBindings.get(0).getMember().getTarget()).isBlobShape();
-    }
-
-    private void registerBodyComparatorStub(String mediaType) {
+    private String registerBodyComparatorStub(String mediaType) {
         // Load an additional stub to handle body comparisons for the
         // set of bodyMediaType values we know of.
         switch (mediaType) {
             case "application/x-www-form-urlencoded":
                 additionalStubs.add("protocol-test-form-urlencoded-stub.ts");
-                break;
+                return "compareEquivalentFormUrlencodedBodies(bodyString, r.body.toString())";
             case "application/json":
                 additionalStubs.add("protocol-test-json-stub.ts");
-                break;
+                return "compareEquivalentJsonBodies(bodyString, r.body.toString())";
             case "application/xml":
                 writer.addDependency(TypeScriptDependency.XML_PARSER);
                 writer.addImport("parse", "xmlParse", "fast-xml-parser");
                 additionalStubs.add("protocol-test-xml-stub.ts");
-                break;
+                return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
+            case "application/octet-stream":
+                additionalStubs.add("protocol-test-octet-stream-stub.ts");
+                return "compareEquivalentOctetStreamBodies(client.config, bodyString, r.body)";
+            case "text/plain":
+                additionalStubs.add("protocol-test-text-stub.ts");
+                return "compareEquivalentTextBodies(bodyString, r.body)";
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
                         + "`, defaulting to direct comparison.");
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
+                return "compareEquivalentUnknownTypeBodies(client.config, bodyString, r.body)";
         }
     }
 
