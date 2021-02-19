@@ -248,7 +248,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("export const $L = async(\n"
                 + "  input: $T,\n"
-                + "  context: $L\n"
+                + "  context: Omit<$L, 'endpoint'>\n"
                 + "): Promise<$T> => {", "}", methodName, outputType, contextType, responseType, () -> {
             writeOperationStatusCode(context, operation, bindingIndex, trait);
             writeResponseHeaders(context, operation, bindingIndex, () -> writeDefaultHeaders(context, operation));
@@ -287,7 +287,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("export const $L = async(\n"
                 + "  input: $T,\n"
-                + "  context: __SerdeContext\n"
+                + "  context: Omit<__SerdeContext, 'endpoint'>\n"
                 + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
             writeErrorStatusCode(context, error);
             writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
