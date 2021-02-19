@@ -1179,8 +1179,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             pathRegexBuilder.append("/");
         }
         writer.write("const pathRegex = new RegExp($S);", pathRegexBuilder.toString());
-        writer.write("const parsedPath: RegExpMatchArray = output.endpoint.path.match(pathRegex);");
-        writer.openBlock("if (parsedPath.groups !== undefined) {", "}", () -> {
+        writer.write("const parsedPath = output.path.match(pathRegex);");
+        writer.openBlock("if (parsedPath?.groups !== undefined) {", "}", () -> {
             for (HttpBinding binding : pathBindings) {
                 Shape target = context.getModel().expectShape(binding.getMember().getTarget());
                 String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
@@ -1211,9 +1211,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             }
         }
         writer.write("const hostRegex = new RegExp($S);", endpointRegexBuilder.toString());
-        writer.write("const parsedHost: RegExpMatchArray = output.endpoint.path.match(pathRegex);");
+        writer.write("const parsedHost = output.path.match(pathRegex);");
         Shape input = context.getModel().expectShape(operation.getInput().get());
-        writer.openBlock("if (parsedHost.groups !== undefined) {", "}", () -> {
+        writer.openBlock("if (parsedHost?.groups !== undefined) {", "}", () -> {
             for (MemberShape member : input.members()) {
                 if (member.hasTrait(HostLabelTrait.class)) {
                     Shape target = context.getModel().expectShape(member.getTarget());
