@@ -246,7 +246,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @param context The generation context.
      * @param operation The operation being generated.
      */
-    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {}
+    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {
+    }
 
     /**
      * Writes the code needed to serialize the input document of a request.
