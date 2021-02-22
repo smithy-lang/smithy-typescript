@@ -17,7 +17,6 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.shapes.OperationShape;

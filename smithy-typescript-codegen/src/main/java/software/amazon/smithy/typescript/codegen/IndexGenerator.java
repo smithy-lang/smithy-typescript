@@ -17,7 +17,6 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.Set;
 import java.util.TreeSet;
-
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;

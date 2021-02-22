@@ -18,7 +18,6 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
