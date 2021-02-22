@@ -245,9 +245,12 @@ subprojects {
         tasks["spotbugsTest"].enabled = false
 
         // Configure the bug filter for spotbugs.
-        tasks.withType<com.github.spotbugs.SpotBugsTask> {
-            effort = "max"
-            excludeFilterConfig = project.resources.text.fromFile("${project.rootDir}/config/spotbugs/filter.xml")
+        spotbugs {
+            setEffort("max")
+            val excludeFile = File("${project.rootDir}/config/spotbugs/filter.xml")
+            if (excludeFile.exists()) {
+                excludeFilter.set(excludeFile)
+            }
         }
     }
 }
