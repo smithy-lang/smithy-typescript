@@ -52,6 +52,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.HttpPrefixHeadersTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.protocoltests.traits.AppliesTo;
 import software.amazon.smithy.protocoltests.traits.HttpMessageTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestsTrait;
@@ -118,13 +119,13 @@ final class HttpProtocolTestGenerator implements Runnable {
             if (!operation.hasTag("server-only")) {
                 // 1. Generate test cases for each request.
                 operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
-                    for (HttpRequestTestCase testCase : trait.getTestCases()) {
+                    for (HttpRequestTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
                         onlyIfProtocolMatches(testCase, () -> generateRequestTest(operation, testCase));
                     }
                 });
                 // 2. Generate test cases for each response.
                 operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
-                    for (HttpResponseTestCase testCase : trait.getTestCases()) {
+                    for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
                         onlyIfProtocolMatches(testCase, () -> generateResponseTest(operation, testCase));
                     }
                 });
@@ -132,7 +133,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                 for (StructureShape error : operationIndex.getErrors(operation)) {
                     if (!error.hasTag("server-only")) {
                         error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
-                            for (HttpResponseTestCase testCase : trait.getTestCases()) {
+                            for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
                                 onlyIfProtocolMatches(testCase,
                                         () -> generateErrorResponseTest(operation, error, testCase));
                             }
