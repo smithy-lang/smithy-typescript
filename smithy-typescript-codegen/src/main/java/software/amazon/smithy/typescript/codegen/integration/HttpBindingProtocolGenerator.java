@@ -1174,15 +1174,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (pathBindings.isEmpty()) {
             return;
         }
-        StringBuilder pathRegexBuilder = new StringBuilder("/");
+        StringBuilder pathRegexBuilder = new StringBuilder();
         for (Segment segment : trait.getUri().getSegments()) {
+            pathRegexBuilder.append("/");
             if (segment.isLabel()) {
                 // Create a named capture group for the segment so we can grab it later without regard to order.
                 pathRegexBuilder.append(String.format("(?<%s>.*)", segment.getContent()));
             } else {
                 pathRegexBuilder.append(segment.getContent());
             }
-            pathRegexBuilder.append("/");
         }
         writer.write("const pathRegex = new RegExp($S);", pathRegexBuilder.toString());
         writer.write("const parsedPath = output.path.match(pathRegex);");
