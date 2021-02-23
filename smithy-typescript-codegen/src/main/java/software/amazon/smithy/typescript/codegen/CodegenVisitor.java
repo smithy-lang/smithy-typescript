@@ -197,7 +197,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         // Generate index for client.
-        IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest, protocolGenerator);
 
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {

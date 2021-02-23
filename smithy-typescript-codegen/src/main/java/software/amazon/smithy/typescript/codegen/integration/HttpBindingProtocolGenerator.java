@@ -242,7 +242,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
 
         writer.addUseImports(responseType);
-        String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName()) + "Response";
+        String methodName = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Response";
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
@@ -283,7 +283,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
 
         writer.addUseImports(responseType);
-        String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName()) + "Error";
+        String methodName = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Error";
 
         writer.openBlock("export const $L = async(\n"
                 + "  input: $T,\n"
@@ -1099,7 +1099,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
-        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName()) + "Request";
+        String methodName = ProtocolGenerator.getGenericDeserFunctionName(symbol) + "Request";
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
