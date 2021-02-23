@@ -881,7 +881,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param context The generation context.
      * @param error The error being generated.
      */
-    protected void writeDefaultErrorHeaders(GenerationContext context, StructureShape error) {}
+    protected void writeDefaultErrorHeaders(GenerationContext context, StructureShape error) {
+    }
 
     /**
      * Writes the code needed to serialize the input document of a request.
