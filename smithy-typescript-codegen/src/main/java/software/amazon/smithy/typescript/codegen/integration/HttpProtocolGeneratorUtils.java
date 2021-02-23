@@ -387,17 +387,19 @@ public final class HttpProtocolGeneratorUtils {
             writer.addImport("isValidHostname", "__isValidHostname",
                     TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP.packageName);
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
-            List<SmithyPattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
-            StructureShape inputShape = context.getModel().expectShape(operation.getInput()
-                    .get(), StructureShape.class);
-            for (SmithyPattern.Segment label : prefixLabels) {
-                MemberShape member = inputShape.getMember(label.getContent()).get();
-                String memberName = symbolProvider.toMemberName(member);
-                writer.openBlock("if (input.$L === undefined) {", "}", memberName, () -> {
-                    writer.write("throw new Error('Empty value provided for input host prefix: $L.');", memberName);
-                });
-                writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L!)",
-                        label.getContent(), memberName);
+            if (operation.getInput().isPresent()) {
+                List<SmithyPattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
+                StructureShape inputShape = context.getModel().expectShape(operation.getInput()
+                        .get(), StructureShape.class);
+                for (SmithyPattern.Segment label : prefixLabels) {
+                    MemberShape member = inputShape.getMember(label.getContent()).get();
+                    String memberName = symbolProvider.toMemberName(member);
+                    writer.openBlock("if (input.$L === undefined) {", "}", memberName, () -> {
+                        writer.write("throw new Error('Empty value provided for input host prefix: $L.');", memberName);
+                    });
+                    writer.write("resolvedHostname = resolvedHostname.replace(\"{$L}\", input.$L!)",
+                            label.getContent(), memberName);
+                }
             }
             writer.openBlock("if (!__isValidHostname(resolvedHostname)) {", "}", () -> {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
