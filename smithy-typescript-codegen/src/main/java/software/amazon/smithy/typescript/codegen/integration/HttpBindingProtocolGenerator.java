@@ -1817,10 +1817,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     private String getBooleanOutputParam(Location bindingType, String dataSource) {
         switch (bindingType) {
+            // TODO: make sure this actually works
+            case QUERY:
+            case LABEL:
             case HEADER:
                 return dataSource + " === 'true'";
             default:
-                throw new CodegenException("Unexpected blob binding location `" + bindingType + "`");
+                throw new CodegenException("Unexpected boolean binding location `" + bindingType + "`");
         }
     }
 
@@ -1864,6 +1867,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case PAYLOAD:
                 return dataSource;
+            // TODO: make sure this actually works
+            case QUERY:
+            case LABEL:
             case HEADER:
                 // Decode these from base64.
                 return "context.base64Decoder(" + dataSource + ")";
@@ -1894,6 +1900,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String collectionTargetValue = getOutputValue(context, bindingType, "_entry.trim()",
                 targetMember, collectionTarget);
         switch (bindingType) {
+            // TODO: make sure this actually works
+            case QUERY:
+            case LABEL:
             case HEADER:
                 dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on commas.
@@ -1964,6 +1973,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     private String getNumberOutputParam(Location bindingType, String dataSource, Shape target) {
         switch (bindingType) {
+            // TODO: validate the assumption that query works the same here
+            case QUERY:
+            case LABEL:
             case HEADER:
                 if (target instanceof FloatShape || target instanceof DoubleShape) {
                     return "parseFloat(" + dataSource + ")";
