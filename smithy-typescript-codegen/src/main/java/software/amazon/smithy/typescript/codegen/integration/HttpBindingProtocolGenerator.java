@@ -1151,7 +1151,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writer.openBlock("if (query['$L'] !== undefined) {", "}", binding.getLocationName(), () -> {
                     Shape target = context.getModel().expectShape(binding.getMember().getTarget());
                     String headerValue = getOutputValue(context, binding.getLocation(),
-                            "query['" + binding.getLocationName() + "']", binding.getMember(), target);
+                            // Here we're using "as any" to avoid having to deal with the fact that the value
+                            // could either be a string or an array of strings.
+                            // TODO: should we make runtime assertions that this is the right type?
+                            "query['" + binding.getLocationName() + "'] as any", binding.getMember(), target);
                     writer.write("contents.$L = $L;", memberName, headerValue);
                 });
             }
