@@ -399,16 +399,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         List<HttpBinding> bindings = bindingIndex.getResponseBindings(operation, Location.RESPONSE_CODE);
-        String statusCodeValue;
+        TypeScriptWriter writer = context.getWriter();
+        writer.write("let statusCode: number = $L", trait.getCode());
         if (!bindings.isEmpty()) {
             HttpBinding binding = bindings.get(0);
             // This can only be bound to an int so we don't need to do the same sort of complex finagling
             // as we do with other http bindings.
-            statusCodeValue = "output." + symbolProvider.toMemberName(binding.getMember());
-        } else {
-            statusCodeValue = String.format("%d", trait.getCode());
+            String bindingMember = "input." + symbolProvider.toMemberName(binding.getMember());
+            writer.openBlock("if ($L !== undefined) {", "}", bindingMember, () -> {
+                writer.write("statusCode = $L", bindingMember);
+            });
         }
-        context.getWriter().write("const statusCode: number = $L", statusCodeValue);
     }
 
     private void writeErrorStatusCode(GenerationContext context, StructureShape error) {
