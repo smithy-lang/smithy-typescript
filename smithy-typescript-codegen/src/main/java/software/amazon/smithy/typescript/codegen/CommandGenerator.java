@@ -105,8 +105,6 @@ final class CommandGenerator implements Runnable {
         writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", "@aws-sdk/types");
         writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
 
-        addInputAndOutputTypes();
-
         String name = symbol.getName();
         writer.writeShapeDocs(operation);
         writer.openBlock("export class $L extends $$Command<$T, $T, $L> {", "}", name, inputType, outputType,
