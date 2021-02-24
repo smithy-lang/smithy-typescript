@@ -1144,7 +1144,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (queryBindings.isEmpty()) {
             return;
         }
-        writer.write("const query = output.endpoint.query");
+        writer.write("const query = output.query");
         writer.openBlock("if (query !== undefined && query !== null) {", "}", () -> {
             for (HttpBinding binding : queryBindings) {
                 String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
