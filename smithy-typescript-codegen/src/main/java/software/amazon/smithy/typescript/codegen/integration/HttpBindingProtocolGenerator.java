@@ -1212,7 +1212,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             }
         }
         writer.write("const hostRegex = new RegExp($S);", endpointRegexBuilder.toString());
-        writer.write("const parsedHost = output.path.match(pathRegex);");
+        writer.write("const parsedHost = output.path.match(hostRegex);");
         Shape input = context.getModel().expectShape(operation.getInput().get());
         writer.openBlock("if (parsedHost?.groups !== undefined) {", "}", () -> {
             for (MemberShape member : input.members()) {
