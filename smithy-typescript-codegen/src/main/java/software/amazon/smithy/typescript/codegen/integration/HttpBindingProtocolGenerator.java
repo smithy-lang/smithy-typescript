@@ -1150,11 +1150,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
                 writer.openBlock("if (query['$L'] !== undefined) {", "}", binding.getLocationName(), () -> {
                     Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+                    String expectedType = "string";
+                    if (target instanceof CollectionShape) {
+                        expectedType = "string[]";
+                    }
                     String headerValue = getOutputValue(context, binding.getLocation(),
-                            // Here we're using "as any" to avoid having to deal with the fact that the value
-                            // could either be a string or an array of strings.
-                            // TODO: should we make runtime assertions that this is the right type?
-                            "query['" + binding.getLocationName() + "'] as any", binding.getMember(), target);
+                            "query['" + binding.getLocationName() + "'] as " + expectedType,
+                            binding.getMember(), target);
                     writer.write("contents.$L = $L;", memberName, headerValue);
                 });
             }
@@ -1902,14 +1904,24 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
         String collectionTargetValue = getOutputValue(context, bindingType, "_entry.trim()",
                 targetMember, collectionTarget);
+        String outputParam;
         switch (bindingType) {
             // TODO: make sure this actually works
             case QUERY:
+                return "(" + dataSource + ").map(_entry => " + collectionTargetValue + ")";
             case LABEL:
+                dataSource = "(" + dataSource + " || \"\")";
+                // Split these values on commas.
+                outputParam = "" + dataSource + ".split('/')";
+
+                // Iterate over each entry and do deser work.
+                outputParam += ".map(_entry => " + collectionTargetValue + ")";
+
+                return outputParam;
             case HEADER:
                 dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on commas.
-                String outputParam = "" + dataSource + ".split(',')";
+                outputParam = "" + dataSource + ".split(',')";
 
                 // Headers that have HTTP_DATE formatted timestamps already contain a ","
                 // in their formatted entry, so split on every other "," instead.
