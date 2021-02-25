@@ -15,7 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -65,22 +64,10 @@ final class ServerGenerator {
             responseInterfaces.add(responseInterfaceName);
         }
 
-        writer.writeInline("export type $LRequests = ", serviceInterfaceName);
-        for (Iterator<String> iter = requestInterfaces.iterator(); iter.hasNext();) {
-            writer.writeInline(iter.next());
-            if (iter.hasNext()) {
-                writer.writeInline(" | ");
-            }
-        }
-        writer.write(";");
+        writer.write("export type $LRequests = $L;",
+                serviceInterfaceName, String.join(" | ", requestInterfaces));
 
-        writer.writeInline("export type $LResponses = ", serviceInterfaceName);
-        for (Iterator<String> iter = responseInterfaces.iterator(); iter.hasNext();) {
-            writer.writeInline(iter.next());
-            if (iter.hasNext()) {
-                writer.writeInline(" | ");
-            }
-        }
-        writer.write(";");
+        writer.write("export type $LResponses = $L;",
+                serviceInterfaceName, String.join(" | ", responseInterfaces));
     }
 }

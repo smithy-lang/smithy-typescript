@@ -60,6 +60,7 @@ import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
 import software.amazon.smithy.model.traits.HostLabelTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
+import software.amazon.smithy.model.traits.HttpQueryTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -70,6 +71,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Abstract implementation useful for all protocols that use HTTP bindings.
@@ -212,6 +214,87 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
         }
+    }
+
+    @Override
+    public void generateRouter(GenerationContext context) {
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
+        TypeScriptWriter writer = context.getWriter();
+        Set<OperationShape> containedOperations = new TreeSet<>(
+                topDownIndex.getContainedOperations(context.getService()));
+
+        writer.addImport("httpbinding", null, "@aws-smithy/server-common");
+
+        String serviceName = context.getService().getId().getName();
+        String operationsUnionName = StringUtils.capitalize(serviceName) + "Operations";
+
+        writer.write("type $L = $L;",
+                operationsUnionName,
+                containedOperations.stream()
+                    .map(value -> StringUtils.escapeJavaString(value.getId().getName(), ""))
+                    .collect(Collectors.joining(" | ")));
+
+        writer.openBlock("export const $LRouter = new httpbinding.Router<$S, $L>([", "]);",
+                StringUtils.uncapitalize(serviceName),
+                serviceName,
+                operationsUnionName,
+                () -> {
+                    for (OperationShape operation : containedOperations) {
+                        OptionalUtils.ifPresentOrElse(
+                                operation.getTrait(HttpTrait.class),
+                                httpTrait -> generateUriSpec(context, operation, httpTrait),
+                                () -> LOGGER.warning(String.format(
+                                        "Unable to generate %s uri spec for %s because it does not have an "
+                                                + "http binding trait", getName(), operation.getId())));
+
+                    }
+               }
+       );
+    }
+
+    private void generateUriSpec(GenerationContext context,
+                                 OperationShape operation,
+                                 HttpTrait httpTrait) {
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.openBlock("new httpbinding.UriSpec<$S, $S>(", "),",
+                context.getService().getId().getName(),
+                operation.getId().getName(),
+                () -> {
+                    writer.write("'$L',", httpTrait.getMethod());
+                    writer.openBlock("[", "],", () -> {
+                        for (Segment s : httpTrait.getUri().getSegments()) {
+                            if (s.isGreedyLabel()) {
+                                writer.write("{ type: 'greedy' },");
+                            } else if (s.isLabel()) {
+                                writer.write("{ type: 'path' },");
+                            } else {
+                                writer.write("{ type: 'path_literal', value: $S },", s.getContent());
+                            }
+                        }
+                    });
+                    writer.openBlock("[", "],", () -> {
+                        for (Map.Entry<String, String> e : httpTrait.getUri().getQueryLiterals().entrySet()) {
+                            if (e.getValue() == null) {
+                                writer.write("{ type: 'query_literal', key: $S },", e.getKey());
+                            } else {
+                                writer.write("{ type: 'query_literal', key: $S, value: $S },",
+                                        e.getKey(), e.getValue());
+                            }
+                        }
+                        operation.getInput().ifPresent(inputId -> {
+                            StructureShape inputShape = context.getModel().expectShape(inputId, StructureShape.class);
+                            for (MemberShape ms : inputShape.members()) {
+                                if (ms.isRequired() && ms.hasTrait(HttpQueryTrait.class)) {
+                                    HttpQueryTrait queryTrait = ms.expectTrait(HttpQueryTrait.class);
+                                    writer.write("{ type: 'query', key: $S },", queryTrait.getValue());
+                                }
+                            }
+                        });
+                    });
+                    writer.writeInline("{ service: $S, operation: $S }",
+                        context.getService().getId().getName(), operation.getId().getName());
+                });
     }
 
     @Override

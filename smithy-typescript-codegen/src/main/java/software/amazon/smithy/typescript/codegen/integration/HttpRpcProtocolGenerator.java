@@ -154,6 +154,11 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     @Override
+    public void generateRouter(GenerationContext context) {
+        LOGGER.warning("Router generation is not currently supported for RPC protocols.");
+    }
+
+    @Override
     public void generateResponseDeserializers(GenerationContext context) {
         TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
 

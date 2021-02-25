@@ -149,6 +149,14 @@ public interface ProtocolGenerator {
     void generateResponseSerializers(GenerationContext context);
 
     /**
+     * Generates the code used to determine the service and operation
+     * targeted by a given request.
+     *
+     * @param context Generation context.
+     */
+    void generateRouter(GenerationContext context);
+
+    /**
      * Generates the code used to deserialize the shapes of a service
      * for responses.
      *

@@ -318,6 +318,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 if (context.getSettings().generateServerSdk()) {
                     protocolGenerator.generateRequestDeserializers(context);
                     protocolGenerator.generateResponseSerializers(context);
+                    protocolGenerator.generateRouter(context);
                 }
                 protocolGenerator.generateSharedComponents(context);
             });
