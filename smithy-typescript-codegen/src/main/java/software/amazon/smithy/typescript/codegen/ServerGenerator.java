@@ -27,6 +27,87 @@ final class ServerGenerator {
 
     private ServerGenerator() {}
 
+    static void generateServiceHandler(ServiceShape service,
+                                       Set<OperationShape> operations,
+                                       TypeScriptWriter writer) {
+        writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
+        writer.addImport("Mux", null, "@aws-smithy/server-common");
+        writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
+        writer.addImport("NodeHttpHandler", null, "@aws-sdk/node-http-handler");
+        writer.addImport("streamCollector", null, "@aws-sdk/node-http-handler");
+        writer.addImport("fromBase64", null, "@aws-sdk/util-base64-node");
+        writer.addImport("toBase64", null, "@aws-sdk/util-base64-node");
+        writer.addImport("fromUtf8", null, "@aws-sdk/util-utf8-node");
+        writer.addImport("toUtf8", null, "@aws-sdk/util-utf8-node");
+        writer.addImport("HttpRequest", null, "@aws-sdk/protocol-http");
+        writer.addImport("HttpResponse", null, "@aws-sdk/protocol-http");
+
+        String serviceName = StringUtils.capitalize(service.getId().getName());
+        String operationsTypeName = serviceName + "Operations";
+
+        writer.addImport(serviceName + "Service", null, ".");
+        writer.write("type $L = keyof $L;", operationsTypeName, serviceName + "Service");
+
+        writer.openBlock("export class $LServiceHandler implements ServiceHandler {", "}", serviceName, () -> {
+            writer.write("private service: $LService;", serviceName);
+            writer.write("private mux: Mux<$S, $L>;", serviceName, operationsTypeName);
+            writer.write("private serializers: Record<$1L, OperationSerializer<$2LService, $1L>>;",
+                    operationsTypeName, serviceName);
+            writer.openBlock("private serdeContextBase = {", "};", () -> {
+                writer.write("base64Encoder: toBase64,");
+                writer.write("base64Decoder: fromBase64,");
+                writer.write("utf8Encoder: toUtf8,");
+                writer.write("utf8Decoder: fromUtf8,");
+                writer.write("streamCollector: streamCollector,");
+                writer.write("requestHandler: new NodeHttpHandler(),");
+                writer.write("disableHostPrefix: true");
+            });
+            writer.write("/**");
+            writer.write(" * Construct a $LService handler.", serviceName);
+            writer.write(" * @param service The {@link $LService} implementation that supplies", serviceName);
+            writer.write(" *                the business logic for $LService", serviceName);
+            writer.write(" * @param mux The {@link Mux} that determines which service and operation are being");
+            writer.write(" *            invoked by a given {@link HttpRequest}");
+            writer.write(" * @param serializers An {@link OperationSerializer} for each operation in");
+            writer.write(" *                    $LService that handles deserialization of requests and", serviceName);
+            writer.write(" *                    serialization of responses");
+            writer.write(" */");
+            writer.openBlock("constructor(service: $1LService, "
+                            + "mux: Mux<$1S, $2L>, "
+                            + "serializers: Record<$2L, OperationSerializer<$1LService, $2L>>) {", "}",
+                    serviceName, operationsTypeName, () -> {
+                writer.write("this.service = service;");
+                writer.write("this.mux = mux;");
+                writer.write("this.serializers = serializers;");
+            });
+            writer.openBlock("async handle(request: HttpRequest): Promise<HttpResponse> {", "}", () -> {
+                writer.write("const target = this.mux.match(request);");
+                writer.openBlock("if (target === undefined) {", "}", () -> {
+                    writer.write("throw new Error(`Could not match any operation to $${request.method} "
+                            + "$${request.path} $${JSON.stringify(request.query)}`);");
+                });
+                writer.openBlock("switch (target.operation) {", "}", () -> {
+                    for (OperationShape operation : operations) {
+                        generateHandlerCase(writer, serviceName, operation);
+                    }
+                });
+            });
+        });
+    }
+
+    private static void generateHandlerCase(TypeScriptWriter writer, String serviceName, OperationShape operation) {
+        String opName = operation.getId().getName();
+        writer.openBlock("case $S : {", "}", opName, () -> {
+            writer.write("let serializer = this.serializers.$1L as OperationSerializer<$2LService, $1S>;",
+                    opName, serviceName);
+            writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
+                writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
+            });
+            writer.write("let output = this.service.$L(input, request);", opName);
+            writer.write("return serializer.serialize(output, this.serdeContextBase);");
+        });
+    }
+
     static void generateServerInterfaces(SymbolProvider symbolProvider,
                                          ServiceShape service,
                                          Set<OperationShape> operations,

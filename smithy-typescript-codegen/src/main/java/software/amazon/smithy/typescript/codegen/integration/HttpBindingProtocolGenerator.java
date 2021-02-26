@@ -217,7 +217,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     @Override
-    public void generateRouter(GenerationContext context) {
+    public void generateMux(GenerationContext context) {
         TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
         TypeScriptWriter writer = context.getWriter();
         Set<OperationShape> containedOperations = new TreeSet<>(
@@ -225,19 +225,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.addImport("httpbinding", null, "@aws-smithy/server-common");
 
-        String serviceName = context.getService().getId().getName();
-        String operationsUnionName = StringUtils.capitalize(serviceName) + "Operations";
+        String serviceName = StringUtils.capitalize(context.getService().getId().getName());
 
-        writer.write("type $L = $L;",
-                operationsUnionName,
-                containedOperations.stream()
-                    .map(value -> StringUtils.escapeJavaString(value.getId().getName(), ""))
-                    .collect(Collectors.joining(" | ")));
-
-        writer.openBlock("export const $LRouter = new httpbinding.Router<$S, $L>([", "]);",
+        writer.openBlock("const $1LMux = new httpbinding.HttpBindingMux<$2S, keyof $2LService>([", "]);",
                 StringUtils.uncapitalize(serviceName),
                 serviceName,
-                operationsUnionName,
                 () -> {
                     for (OperationShape operation : containedOperations) {
                         OptionalUtils.ifPresentOrElse(
@@ -256,9 +248,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                  OperationShape operation,
                                  HttpTrait httpTrait) {
         TypeScriptWriter writer = context.getWriter();
+        String serviceName = StringUtils.capitalize(context.getService().getId().getName());
 
         writer.openBlock("new httpbinding.UriSpec<$S, $S>(", "),",
-                context.getService().getId().getName(),
+                serviceName,
                 operation.getId().getName(),
                 () -> {
                     writer.write("'$L',", httpTrait.getMethod());
@@ -293,8 +286,38 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         });
                     });
                     writer.writeInline("{ service: $S, operation: $S }",
-                        context.getService().getId().getName(), operation.getId().getName());
+                            serviceName, operation.getId().getName());
                 });
+    }
+
+    @Override
+    public void generateHandlerFactory(GenerationContext context) {
+        TypeScriptWriter writer = context.getWriter();
+        TopDownIndex index = TopDownIndex.of(context.getModel());
+        Set<OperationShape> operations = index.getContainedOperations(context.getService());
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        String serviceName = StringUtils.capitalize(context.getService().getId().getName());
+
+        writer.addImport(serviceName + "Service", null, "./server/interfaces");
+        writer.addImport(serviceName + "ServiceHandler", null, "./server/handler");
+        writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
+
+        writer.openBlock("export const get$1LServiceHandler = (service: $1LService): ServiceHandler => {", "}",
+                serviceName, () -> {
+            writer.openBlock("return new $LServiceHandler(service, $LMux, {", "});",
+                    serviceName, StringUtils.uncapitalize(serviceName), () -> {
+                        operations.stream()
+                                  .filter(o -> o.getTrait(HttpTrait.class).isPresent())
+                                  .sorted()
+                                  .forEach(operation -> {
+                    Symbol symbol = symbolProvider.toSymbol(operation);
+                    writer.openBlock("$L: {", "},", operation.getId().getName(), () -> {
+                        writer.write("serialize: $LResponse,", ProtocolGenerator.getGenericSerFunctionName(symbol));
+                        writer.write("deserialize: $LRequest,", ProtocolGenerator.getGenericDeserFunctionName(symbol));
+                    });
+                });
+            });
+        });
     }
 
     @Override

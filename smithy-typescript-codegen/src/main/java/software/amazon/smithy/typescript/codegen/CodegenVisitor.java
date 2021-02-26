@@ -296,6 +296,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             generateServiceInterface(shape);
             writers.useFileWriter("server/index.ts", writer -> {
                 writer.write("export * from \"./interfaces\";");
+                writer.write("export * from \"./handler\";");
             });
         }
 
@@ -318,7 +319,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 if (context.getSettings().generateServerSdk()) {
                     protocolGenerator.generateRequestDeserializers(context);
                     protocolGenerator.generateResponseSerializers(context);
-                    protocolGenerator.generateRouter(context);
+                    protocolGenerator.generateMux(context);
+                    protocolGenerator.generateHandlerFactory(context);
                 }
                 protocolGenerator.generateSharedComponents(context);
             });
@@ -378,6 +380,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Set<OperationShape> operations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
         writers.useFileWriter("server/interfaces.ts", interfaceWriter ->
                 ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, interfaceWriter));
+        writers.useFileWriter("server/handler.ts", interfaceWriter ->
+                ServerGenerator.generateServiceHandler(shape, operations, interfaceWriter));
 
     }
 
