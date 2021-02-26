@@ -193,11 +193,11 @@ final class StructuredMemberWriter {
         }
 
         Shape memberTarget = model.expectShape(member.getTarget());
-        parents.add(symbolProvider.toMemberName(member));
         if (memberTarget.isUnionShape()) {
             // always call filterSensitiveLog for UnionShape
             return true;
         } else if (memberTarget.isStructureShape()) {
+            parents.add(symbolProvider.toMemberName(member));
             Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
             for (MemberShape structureMember: structureMemberList) {
                 if (!parents.contains(symbolProvider.toMemberName(structureMember))
