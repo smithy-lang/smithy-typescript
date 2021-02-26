@@ -72,7 +72,7 @@ public final class TypeScriptSettings {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(
                 PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
-                SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE));
+                SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, GENERATE_CLIENT, GENERATE_SERVER_SDK));
 
         // Get the service from the settings or infer one from the given model.
         settings.setService(config.getStringMember(SERVICE)
