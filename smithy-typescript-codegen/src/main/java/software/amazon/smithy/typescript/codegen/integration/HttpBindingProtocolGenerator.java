@@ -1193,7 +1193,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             pathRegexBuilder.append("/");
             if (segment.isLabel()) {
                 // Create a named capture group for the segment so we can grab it later without regard to order.
-                pathRegexBuilder.append(String.format("(?<%s>.*)", segment.getContent()));
+                pathRegexBuilder.append(String.format("(?<%s>", segment.getContent()));
+                if (segment.isGreedyLabel()) {
+                    pathRegexBuilder.append(".+");
+                } else {
+                    pathRegexBuilder.append("[^/]+");
+                }
+                pathRegexBuilder.append(")");
             } else {
                 pathRegexBuilder.append(segment.getContent());
             }
