@@ -85,6 +85,13 @@ final class CommandGenerator implements Runnable {
 
     @Override
     public void run() {
+        addInputAndOutputTypes();
+        if (settings.generateClient()) {
+            generateClientCommand();
+        }
+    }
+
+    private void generateClientCommand() {
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
         String configType = ServiceGenerator.getResolvedConfigTypeName(serviceSymbol);
 
@@ -97,8 +104,6 @@ final class CommandGenerator implements Runnable {
         writer.addImport("Handler", "Handler", "@aws-sdk/types");
         writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", "@aws-sdk/types");
         writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
-
-        addInputAndOutputTypes();
 
         String name = symbol.getName();
         writer.writeShapeDocs(operation);

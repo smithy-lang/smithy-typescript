@@ -134,6 +134,22 @@ public interface ProtocolGenerator {
 
     /**
      * Generates the code used to deserialize the shapes of a service
+     * for requests.
+     *
+     * @param context Serialization context.
+     */
+    void generateRequestDeserializers(GenerationContext context);
+
+    /**
+     * Generates the code used to serialize the shapes of a service
+     * for responses.
+     *
+     * @param context Serialization context.
+     */
+    void generateResponseSerializers(GenerationContext context);
+
+    /**
+     * Generates the code used to deserialize the shapes of a service
      * for responses.
      *
      * @param context Deserialization context.
@@ -158,6 +174,17 @@ public interface ProtocolGenerator {
     }
 
     /**
+     * Generates the name of a serializer function for shapes of a service that is not protocol-specific.
+     *
+     * @param symbol The symbol the serializer function is being generated for.
+     * @return Returns the generated function name.
+     */
+    static String getGenericSerFunctionName(Symbol symbol) {
+        // e.g., serializeExecuteStatement
+        return "serialize" + getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
+    }
+
+    /**
      * Generates the name of a deserializer function for shapes of a service.
      *
      * @param symbol The symbol the deserializer function is being generated for.
@@ -172,6 +199,18 @@ public interface ProtocolGenerator {
         functionName += getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
 
         return functionName;
+    }
+
+    /**
+     * Generates the name of a deserializer function for shapes of a service that is not protocol-specific.
+     *
+     * @param symbol The symbol the deserializer function is being generated for.
+     * @return Returns the generated function name.
+     */
+    static String getGenericDeserFunctionName(Symbol symbol) {
+        // e.g., deserializeExecuteStatement
+        return "deserialize"
+                + getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
     }
 
     static String getSerdeFunctionSymbolComponent(Symbol symbol, Shape shape) {

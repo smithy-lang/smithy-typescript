@@ -22,7 +22,7 @@ public class IndexGeneratorTest {
         SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         MockManifest manifest = new MockManifest();
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, manifest);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, manifest, null);
 
         String contents = manifest.getFileString("index.ts").get();
         assertThat(contents, containsString("export * from \"./Example\";"));

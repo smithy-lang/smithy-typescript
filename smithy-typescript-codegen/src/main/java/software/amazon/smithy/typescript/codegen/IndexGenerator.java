@@ -25,6 +25,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.waiters.WaitableTrait;
 import software.amazon.smithy.waiters.Waiter;
 
@@ -39,9 +40,35 @@ final class IndexGenerator {
         TypeScriptSettings settings,
         Model model,
         SymbolProvider symbolProvider,
-        FileManifest fileManifest
+        FileManifest fileManifest,
+        ProtocolGenerator protocolGenerator
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
+
+        if (settings.generateClient()) {
+            writeClientExports(settings, model, symbolProvider, writer);
+        }
+
+        if (settings.generateServerSdk() && protocolGenerator != null) {
+            writeProtocolExports(protocolGenerator, writer);
+        }
+
+        // write export statement for models
+        writer.write("export * from \"./models/index\";");
+        fileManifest.writeFile("index.ts", writer.toString());
+    }
+
+    private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
+        String protocolName = ProtocolGenerator.getSanitizedName(protocolGenerator.getName());
+        writer.write("export * as $L from \"./protocols/$L\";", protocolName, protocolName);
+    }
+
+    private static void writeClientExports(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
+    ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
 
@@ -75,9 +102,5 @@ final class IndexGenerator {
             String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
             writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
         }
-
-        // write export statement for models
-        writer.write("export * from \"./models/index\";");
-        fileManifest.writeFile("index.ts", writer.toString());
     }
 }
