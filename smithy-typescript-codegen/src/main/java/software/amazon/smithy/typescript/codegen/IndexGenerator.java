@@ -51,6 +51,7 @@ final class IndexGenerator {
 
         if (settings.generateServerSdk() && protocolGenerator != null) {
             writeProtocolExports(protocolGenerator, writer);
+            writer.write("export * from \"./server/index\";");
         }
 
         // write export statement for models

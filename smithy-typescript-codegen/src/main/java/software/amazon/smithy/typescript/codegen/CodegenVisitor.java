@@ -292,6 +292,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             generateCommands(shape);
         }
 
+        if (settings.generateServerSdk()) {
+            generateServiceInterface(shape);
+            writers.useFileWriter("server/index.ts", writer -> {
+                writer.write("export * from \"./interfaces\";");
+                writer.write("export * from \"./handler\";");
+            });
+        }
+
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
             String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
@@ -311,6 +319,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 if (context.getSettings().generateServerSdk()) {
                     protocolGenerator.generateRequestDeserializers(context);
                     protocolGenerator.generateResponseSerializers(context);
+                    protocolGenerator.generateMux(context);
+                    protocolGenerator.generateHandlerFactory(context);
                 }
                 protocolGenerator.generateSharedComponents(context);
             });
@@ -363,6 +373,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             serviceSymbol,
                             paginationWriter));
         }
+    }
+
+    private void generateServiceInterface(ServiceShape shape) {
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> operations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
+        writers.useFileWriter("server/interfaces.ts", interfaceWriter ->
+                ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, interfaceWriter));
+        writers.useFileWriter("server/handler.ts", interfaceWriter ->
+                ServerGenerator.generateServiceHandler(shape, operations, interfaceWriter));
+
     }
 
     private void generateCommands(ServiceShape shape) {
