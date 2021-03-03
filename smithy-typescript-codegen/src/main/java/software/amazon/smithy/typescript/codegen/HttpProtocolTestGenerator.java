@@ -177,6 +177,12 @@ final class HttpProtocolTestGenerator implements Runnable {
                     onlyIfProtocolMatches(testCase, () -> generateServerRequestTest(operation, testCase));
                 }
             });
+            // 2. Generate test cases for each response.
+            operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
+                    onlyIfProtocolMatches(testCase, () -> generateServerResponseTest(operation, testCase));
+                }
+            });
         }
     }
 
@@ -242,7 +248,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  }\n"
                        + "  const r = err.request;")
                     .indent()
-                    .call(() -> writeRequestAssertions(operation, testCase))
+                    .call(() -> writeHttpRequestAssertions(testCase))
                     .dedent()
                     .write("}");
         });
@@ -349,16 +355,22 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     // Ensure that the serialized request matches the expected request.
-    private void writeRequestAssertions(OperationShape operation, HttpRequestTestCase testCase) {
+    private void writeHttpRequestAssertions(HttpRequestTestCase testCase) {
         writer.write("expect(r.method).toBe($S);", testCase.getMethod());
         writer.write("expect(r.path).toBe($S);", testCase.getUri());
 
-        writeRequestHeaderAssertions(testCase);
-        writeRequestQueryAssertions(testCase);
-        writeRequestBodyAssertions(operation, testCase);
+        writeHttpHeaderAssertions(testCase);
+        writeHttpQueryAssertions(testCase);
+        writeHttpBodyAssertions(testCase);
     }
 
-    private void writeRequestQueryAssertions(HttpRequestTestCase testCase) {
+    private void writeHttpResponseAssertions(HttpResponseTestCase testCase) {
+        writer.write("expect(r.statusCode).toBe($L);", testCase.getCode());
+        writeHttpHeaderAssertions(testCase);
+        writeHttpBodyAssertions(testCase);
+    }
+
+    private void writeHttpQueryAssertions(HttpRequestTestCase testCase) {
         testCase.getRequireQueryParams().forEach(requiredQueryParam ->
                 writer.write("expect(r.query[$S]).toBeDefined();", requiredQueryParam));
         writer.write("");
@@ -380,7 +392,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeRequestHeaderAssertions(HttpRequestTestCase testCase) {
+    private void writeHttpHeaderAssertions(HttpMessageTestCase testCase) {
         testCase.getRequireHeaders().forEach(requiredHeader -> {
             writer.write("expect(r.headers[$S]).toBeDefined();", requiredHeader.toLowerCase());
         });
@@ -398,7 +410,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeRequestBodyAssertions(OperationShape operation, HttpRequestTestCase testCase) {
+    private void writeHttpBodyAssertions(HttpMessageTestCase testCase) {
         testCase.getBody().ifPresent(body -> {
             // If we expect an empty body, expect it to be falsy.
             if (body.isEmpty()) {
@@ -412,6 +424,17 @@ final class HttpProtocolTestGenerator implements Runnable {
             // Otherwise load a media type specific comparator and do a comparison.
             String mediaType = testCase.getBodyMediaType().orElse("UNKNOWN");
             String comparatorInvoke = registerBodyComparatorStub(mediaType);
+
+            // If this is a request case then we know we're generating a client test,
+            // because a request case for servers would be comparing parsed objects. We
+            // need to know which is which here to be able to grab the utf8Encoder from
+            // the right place.
+            if (testCase instanceof HttpRequestTestCase) {
+                writer.write("const utf8Encoder = client.config.utf8Encoder;");
+            } else {
+                writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8-node");
+                writer.write("const utf8Encoder = __utf8Encoder;");
+            }
 
             // Handle escaping strings with quotes inside them.
             writer.write("const bodyString = `$L`;", body.replace("\"", "\\\""));
@@ -438,7 +461,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             case "application/octet-stream":
                 writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-octet-stream-stub.ts");
-                return "compareEquivalentOctetStreamBodies(client.config.utf8Encoder, bodyString, r.body)";
+                return "compareEquivalentOctetStreamBodies(utf8Encoder, bodyString, r.body)";
             case "text/plain":
                 additionalStubs.add("protocol-test-text-stub.ts");
                 return "compareEquivalentTextBodies(bodyString, r.body)";
@@ -447,8 +470,70 @@ final class HttpProtocolTestGenerator implements Runnable {
                         + "`, defaulting to direct comparison.");
                 writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
-                return "compareEquivalentUnknownTypeBodies(client.config.utf8Encoder, bodyString, r.body)";
+                return "compareEquivalentUnknownTypeBodies(utf8Encoder, bodyString, r.body)";
         }
+    }
+
+    public void generateServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
+        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+        Symbol serviceOperationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+        String testName = testCase.getId() + ":ServerResponse";
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+            Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
+            writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
+                writer.openBlock("$L(input: any, request: HttpRequest): $T {", "}",
+                        operationSymbol.getName(), outputType, () -> {
+                    Optional<ShapeId> outputOptional = operation.getOutput();
+                    if (outputOptional.isPresent()) {
+                        StructureShape outputShape = model.expectShape(outputOptional.get(), StructureShape.class);
+                        writer.writeInline("let response = ");
+                        testCase.getParams().accept(new CommandInputNodeVisitor(outputShape, true));
+                        writer.write("return { ...response, '$$metadata': {} };");
+                    } else {
+                        writer.write("return { '$$metadata': {} };");
+                    }
+                });
+            });
+
+            writer.write("const service: any = new TestService()");
+
+            // There's a lot of setup here, including creating our own mux, serializers list, and ultimately
+            // our own service handler. This is largely in service of avoiding having to go through the
+            // request deserializer
+            writer.addImport("httpbinding", null, "@aws-smithy/server-common");
+            writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
+                service.getId().getName(), serviceSymbol, () -> {
+                    writer.openBlock("new httpbinding.UriSpec<$S, $S>('POST', [], [], {", "}),",
+                        service.getId().getName(), operation.getId().getName(), () -> {
+                            writer.write("service: $S,", service.getId().getName());
+                            writer.write("operation: $S,", operation.getId().getName());
+                        });
+                });
+
+            writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
+
+            String serializerName = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
+            writer.addImport(serializerName, serializerName,
+                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+
+            writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
+            writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T> = (op) => {", "};",
+                    serviceOperationsSymbol, serviceSymbol, () -> {
+                writer.openBlock("return {", "};", () -> {
+                    writer.write("serialize: $L,", serializerName);
+                    writer.openBlock("deserialize: (output: any, context: any): Promise<any> => {", "},", () -> {
+                        writer.write("return Promise.resolve({});");
+                    });
+                });
+            });
+
+            writer.write("const handler = new $T(service, testMux, serFn);", handlerSymbol);
+            writer.write("let r = await handler.handle(request)").write("");
+            writeHttpResponseAssertions(testCase);
+        });
     }
 
     private void generateResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
@@ -659,10 +744,16 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final class CommandInputNodeVisitor implements NodeVisitor<Void> {
         private final StructureShape inputShape;
         private Shape workingShape;
+        private boolean appendSemicolon;
 
         private CommandInputNodeVisitor(StructureShape inputShape) {
+            this(inputShape, false);
+        }
+
+        private CommandInputNodeVisitor(StructureShape inputShape, boolean appendSemicolon) {
             this.inputShape = inputShape;
             this.workingShape = inputShape;
+            this.appendSemicolon = appendSemicolon;
         }
 
         @Override
@@ -718,10 +809,25 @@ final class HttpProtocolTestGenerator implements Runnable {
 
             // Both objects and maps can use a majority of the same logic.
             // Use "as any" to have TS complain less about undefined entries.
-            writer.openBlock("{", "} as any,\n", () -> {
+            String suffix = "} as any";
+
+            // When generating a server response test, we need the top level structure to have a semicolon
+            // rather than a comma.
+            if (appendSemicolon) {
+                suffix += ";";
+                appendSemicolon = false;
+            } else {
+                suffix += ",\n";
+            }
+
+            writer.openBlock("{", suffix, () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getMembers().forEach((keyNode, valueNode) -> {
-                    writer.writeInline("$L: ", keyNode.getValue());
+                    if (keyNode.getValue().matches("[^\\w]+")) {
+                        writer.writeInline("$L: ", keyNode.getValue());
+                    } else {
+                        writer.writeInline("$S: ", keyNode.getValue());
+                    }
 
                     // Grab the correct member related to the node member we have.
                     MemberShape memberShape;
