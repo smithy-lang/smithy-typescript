@@ -193,28 +193,26 @@ final class StructuredMemberWriter {
         }
 
         Shape memberTarget = model.expectShape(member.getTarget());
-        parents.add(symbolProvider.toMemberName(member));
         if (memberTarget.isUnionShape()) {
             // always call filterSensitiveLog for UnionShape
             return true;
         } else if (memberTarget.isStructureShape()) {
-            Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
-            for (MemberShape structureMember: structureMemberList) {
-                if (!parents.contains(symbolProvider.toMemberName(structureMember))
-                        && isMemberOverwriteRequired(structureMember, parents)) {
-                    return true;
+            if (!parents.contains(symbolProvider.toMemberName(member))) {
+                parents.add(symbolProvider.toMemberName(member));
+                Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
+                for (MemberShape structureMember: structureMemberList) {
+                    if (!parents.contains(symbolProvider.toMemberName(structureMember))
+                            && isMemberOverwriteRequired(structureMember, parents)) {
+                        return true;
+                    }
                 }
             }
         } else if (memberTarget instanceof CollectionShape) {
             MemberShape collectionMember = ((CollectionShape) memberTarget).getMember();
-            if (!parents.contains(symbolProvider.toMemberName(collectionMember))) {
-                return isMemberOverwriteRequired(collectionMember, parents);
-            }
+            return isMemberOverwriteRequired(collectionMember, parents);
         } else if (memberTarget instanceof MapShape) {
             MemberShape mapMember = ((MapShape) memberTarget).getValue();
-            if (!parents.contains(symbolProvider.toMemberName(mapMember))) {
-                return isMemberOverwriteRequired(mapMember, parents);
-            }
+            return isMemberOverwriteRequired(mapMember, parents);
         }
         return false;
     }
