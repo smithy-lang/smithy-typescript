@@ -15,19 +15,35 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.util.LinkedHashSet;
+import java.util.Iterator;
 import java.util.Set;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.utils.StringUtils;
+import software.amazon.smithy.model.shapes.Shape;
 
 final class ServerGenerator {
 
     private ServerGenerator() {}
 
-    static void generateServiceHandler(ServiceShape service,
+    static void generateOperationsType(SymbolProvider symbolProvider,
+                                       Shape serviceShape,
+                                       Set<OperationShape> operations,
+                                       TypeScriptWriter writer) {
+        Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
+        writer.writeInline("type $L = ", serviceSymbol.expectProperty("operations", Symbol.class).getName());
+        for (Iterator<OperationShape> iter = operations.iterator(); iter.hasNext();) {
+            writer.writeInline("$S", iter.next().getId().getName());
+            if (iter.hasNext()) {
+                writer.writeInline(" | ");
+            }
+        }
+        writer.write(";");
+    }
+
+    static void generateServiceHandler(SymbolProvider symbolProvider,
+                                       Shape serviceShape,
                                        Set<OperationShape> operations,
                                        TypeScriptWriter writer) {
         writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
@@ -42,17 +58,15 @@ final class ServerGenerator {
         writer.addImport("HttpRequest", null, "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", null, "@aws-sdk/protocol-http");
 
-        String serviceName = StringUtils.capitalize(service.getId().getName());
-        String operationsTypeName = serviceName + "Operations";
+        Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
+        Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+        Symbol operationsType = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writer.addImport(serviceName + "Service", null, ".");
-        writer.write("type $L = keyof $L;", operationsTypeName, serviceName + "Service");
-
-        writer.openBlock("export class $LServiceHandler implements ServiceHandler {", "}", serviceName, () -> {
-            writer.write("private service: $LService;", serviceName);
-            writer.write("private mux: Mux<$S, $L>;", serviceName, operationsTypeName);
-            writer.write("private serializers: Record<$1L, OperationSerializer<$2LService, $1L>>;",
-                    operationsTypeName, serviceName);
+        writer.openBlock("export class $L implements ServiceHandler {", "}", handlerSymbol.getName(), () -> {
+            writer.write("private service: $T;", serviceSymbol);
+            writer.write("private mux: Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
+            writer.write("private serializers: Record<$1T, OperationSerializer<$2L, $1T>>;",
+                    operationsType, serviceSymbol.getName());
             writer.openBlock("private serdeContextBase = {", "};", () -> {
                 writer.write("base64Encoder: toBase64,");
                 writer.write("base64Decoder: fromBase64,");
@@ -63,19 +77,19 @@ final class ServerGenerator {
                 writer.write("disableHostPrefix: true");
             });
             writer.write("/**");
-            writer.write(" * Construct a $LService handler.", serviceName);
-            writer.write(" * @param service The {@link $LService} implementation that supplies", serviceName);
-            writer.write(" *                the business logic for $LService", serviceName);
+            writer.write(" * Construct a $T handler.", serviceSymbol);
+            writer.write(" * @param service The {@link $T} implementation that supplies", serviceSymbol);
+            writer.write(" *                the business logic for $T", serviceSymbol);
             writer.write(" * @param mux The {@link Mux} that determines which service and operation are being");
             writer.write(" *            invoked by a given {@link HttpRequest}");
             writer.write(" * @param serializers An {@link OperationSerializer} for each operation in");
-            writer.write(" *                    $LService that handles deserialization of requests and", serviceName);
-            writer.write(" *                    serialization of responses");
+            writer.write(" *                    $T that handles deserialization of requests", serviceSymbol);
+            writer.write(" *                    and serialization of responses");
             writer.write(" */");
-            writer.openBlock("constructor(service: $1LService, "
-                            + "mux: Mux<$1S, $2L>, "
-                            + "serializers: Record<$2L, OperationSerializer<$1LService, $2L>>) {", "}",
-                    serviceName, operationsTypeName, () -> {
+            writer.openBlock("constructor(service: $1T, "
+                            + "mux: Mux<$3S, $2T>, "
+                            + "serializers: Record<$2T, OperationSerializer<$1T, $2T>>) {", "}",
+                    serviceSymbol, operationsType, serviceShape.getId().getName(), () -> {
                 writer.write("this.service = service;");
                 writer.write("this.mux = mux;");
                 writer.write("this.serializers = serializers;");
@@ -88,22 +102,25 @@ final class ServerGenerator {
                 });
                 writer.openBlock("switch (target.operation) {", "}", () -> {
                     for (OperationShape operation : operations) {
-                        generateHandlerCase(writer, serviceName, operation);
+                        generateHandlerCase(writer, serviceSymbol, operation, symbolProvider.toSymbol(operation));
                     }
                 });
             });
         });
     }
 
-    private static void generateHandlerCase(TypeScriptWriter writer, String serviceName, OperationShape operation) {
-        String opName = operation.getId().getName();
+    private static void generateHandlerCase(TypeScriptWriter writer,
+                                            Symbol serviceSymbol,
+                                            Shape operationShape,
+                                            Symbol operationSymbol) {
+        String opName = operationShape.getId().getName();
         writer.openBlock("case $S : {", "}", opName, () -> {
-            writer.write("let serializer = this.serializers.$1L as OperationSerializer<$2LService, $1S>;",
-                    opName, serviceName);
+            writer.write("let serializer = this.serializers.$2L as OperationSerializer<$1L, $2S>;",
+                    serviceSymbol.getName(), opName);
             writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
                 writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
             });
-            writer.write("let output = this.service.$L(input, request);", opName);
+            writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
             writer.write("return serializer.serialize(output, this.serdeContextBase);");
         });
     }
@@ -114,41 +131,16 @@ final class ServerGenerator {
                                          TypeScriptWriter writer) {
         writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
 
-        String serviceInterfaceName = StringUtils.capitalize(service.getId().getName()) + "Service";
+        String serviceInterfaceName = symbolProvider.toSymbol(service).getName();
 
         writer.openBlock("export interface $L {", "}", serviceInterfaceName, () -> {
             for (OperationShape operation : operations) {
                 Symbol symbol = symbolProvider.toSymbol(operation);
-                writer.write("$L: $L<$T, $T>", StringUtils.capitalize(operation.getId().getName()),
+                writer.write("$L: $L<$T, $T>", symbol.getName(),
                         "__Operation",
                         symbol.expectProperty("inputType", Symbol.class),
                         symbol.expectProperty("outputType", Symbol.class));
             }
         });
-
-        writer.addImport("ParsedRequest", "__ParsedRequest", "@aws-smithy/server-common");
-        writer.addImport("PreparedResponse", "__PreparedResponse", "@aws-smithy/server-common");
-
-        Set<String> requestInterfaces = new LinkedHashSet<>();
-        Set<String> responseInterfaces = new LinkedHashSet<>();
-        for (OperationShape operation : operations) {
-            String opName = StringUtils.capitalize(operation.getId().getName());
-            String requestInterfaceName = "Parsed" + opName + "Request";
-            String responseInterfaceName = "Prepared" + opName + "Response";
-
-            writer.write("export interface $L extends $L<$L, $S> {}",
-                    requestInterfaceName, "__ParsedRequest", serviceInterfaceName, opName);
-            writer.write("export interface $L extends $L<$L, $S> {}",
-                    responseInterfaceName, "__PreparedResponse", serviceInterfaceName, opName);
-
-            requestInterfaces.add(requestInterfaceName);
-            responseInterfaces.add(responseInterfaceName);
-        }
-
-        writer.write("export type $LRequests = $L;",
-                serviceInterfaceName, String.join(" | ", requestInterfaces));
-
-        writer.write("export type $LResponses = $L;",
-                serviceInterfaceName, String.join(" | ", responseInterfaces));
     }
 }

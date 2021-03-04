@@ -64,6 +64,26 @@ final class IndexGenerator {
         writer.write("export * as $L from \"./protocols/$L\";", protocolName, protocolName);
     }
 
+    static void writeServerIndex(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            FileManifest fileManifest
+    ) {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+
+        ServiceShape service = settings.getService(model);
+        Symbol symbol = symbolProvider.toSymbol(service);
+
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        for (OperationShape operation : containedOperations) {
+            writer.write("export * from \"./types/$L\";", symbolProvider.toSymbol(operation).getName());
+        }
+        writer.write("export * from \"./$L\"", symbol.getName());
+        fileManifest.writeFile("server/index.ts", writer.toString());
+    }
+
     private static void writeClientExports(
             TypeScriptSettings settings,
             Model model,
