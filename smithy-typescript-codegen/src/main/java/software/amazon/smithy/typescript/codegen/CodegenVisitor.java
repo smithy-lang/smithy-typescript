@@ -202,7 +202,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
             ShapeId protocol = protocolGenerator.getProtocol();
-            new HttpProtocolTestGenerator(settings, model, protocol, symbolProvider, writers).run();
+            new HttpProtocolTestGenerator(settings, model, protocol, symbolProvider, writers, protocolGenerator).run();
         }
 
         // Write each pending writer.
