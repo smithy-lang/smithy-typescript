@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -71,7 +72,6 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Abstract implementation useful for all protocols that use HTTP bindings.
@@ -216,23 +216,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    @Override
-    public void generateMux(GenerationContext context) {
+    private void generateMux(GenerationContext context) {
         TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
         TypeScriptWriter writer = context.getWriter();
-        Set<OperationShape> containedOperations = new TreeSet<>(
-                topDownIndex.getContainedOperations(context.getService()));
 
         writer.addImport("httpbinding", null, "@aws-smithy/server-common");
 
         Symbol serviceSymbol = context.getSymbolProvider().toSymbol(context.getService());
 
-        writer.openBlock("const $L = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
-                getMuxName(serviceSymbol),
+        writer.openBlock("const mux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
                 context.getService().getId().getName(),
                 serviceSymbol,
                 () -> {
-                    for (OperationShape operation : containedOperations) {
+                    for (OperationShape operation : topDownIndex.getContainedOperations(context.getService())) {
                         OptionalUtils.ifPresentOrElse(
                                 operation.getTrait(HttpTrait.class),
                                 httpTrait -> generateUriSpec(context, operation, httpTrait),
@@ -301,28 +297,36 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+        Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
 
         writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
+        writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
 
-        writer.openBlock("export const get$1L = (service: $2T): ServiceHandler => {", "}",
+        writer.openBlock("export const get$L = (service: $T): ServiceHandler => {", "}",
                 handlerSymbol.getName(), serviceSymbol, () -> {
-            writer.openBlock("return new $T(service, $L, {", "});", handlerSymbol, getMuxName(serviceSymbol), () -> {
-                operations.stream()
-                          .filter(o -> o.getTrait(HttpTrait.class).isPresent())
-                          .sorted()
-                          .forEach(operation -> {
-                    Symbol symbol = symbolProvider.toSymbol(operation);
-                    writer.openBlock("$L: {", "},", operation.getId().getName(), () -> {
-                        writer.write("serialize: $LResponse,", ProtocolGenerator.getGenericSerFunctionName(symbol));
-                        writer.write("deserialize: $LRequest,", ProtocolGenerator.getGenericDeserFunctionName(symbol));
-                    });
+            generateMux(context);
+            writer.openBlock("const serFn: (op: $1T) => OperationSerializer<$2T, $1T> = (op) => {", "};",
+                    operationsSymbol, serviceSymbol, () -> {
+                writer.openBlock("switch (op) {", "}", () -> {
+                    operations.stream()
+                            .filter(o -> o.getTrait(HttpTrait.class).isPresent())
+                            .forEach(writeOperationCase(writer, symbolProvider));
                 });
             });
+            writer.write("return new $T(service, mux, serFn);", handlerSymbol);
         });
     }
 
-    private String getMuxName(Symbol serviceSymbol) {
-        return StringUtils.uncapitalize(serviceSymbol.getName()) + "Mux";
+    private Consumer<OperationShape> writeOperationCase(TypeScriptWriter writer, SymbolProvider symbolProvider) {
+        return operation -> {
+            Symbol symbol = symbolProvider.toSymbol(operation);
+            writer.openBlock("case $S: {", "}", operation.getId().getName(), () -> {
+                writer.openBlock("return {", "};", () -> {
+                    writer.write("serialize: $LResponse,", ProtocolGenerator.getGenericSerFunctionName(symbol));
+                    writer.write("deserialize: $LRequest,", ProtocolGenerator.getGenericDeserFunctionName(symbol));
+                });
+            });
+        };
     }
 
     @Override

@@ -32,7 +32,7 @@ final class ServerGenerator {
                                        Set<OperationShape> operations,
                                        TypeScriptWriter writer) {
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
-        writer.writeInline("type $L = ", serviceSymbol.expectProperty("operations", Symbol.class).getName());
+        writer.writeInline("export type $L = ", serviceSymbol.expectProperty("operations", Symbol.class).getName());
         for (Iterator<OperationShape> iter = operations.iterator(); iter.hasNext();) {
             writer.writeInline("$S", iter.next().getId().getName());
             if (iter.hasNext()) {
@@ -65,8 +65,8 @@ final class ServerGenerator {
         writer.openBlock("export class $L implements ServiceHandler {", "}", handlerSymbol.getName(), () -> {
             writer.write("private service: $T;", serviceSymbol);
             writer.write("private mux: Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
-            writer.write("private serializers: Record<$1T, OperationSerializer<$2L, $1T>>;",
-                    operationsType, serviceSymbol.getName());
+            writer.write("private serializerFactory: <T extends $T>(operation: T) => OperationSerializer<$T, T>;",
+                    operationsType, serviceSymbol);
             writer.openBlock("private serdeContextBase = {", "};", () -> {
                 writer.write("base64Encoder: toBase64,");
                 writer.write("base64Decoder: fromBase64,");
@@ -76,23 +76,24 @@ final class ServerGenerator {
                 writer.write("requestHandler: new NodeHttpHandler(),");
                 writer.write("disableHostPrefix: true");
             });
-            writer.write("/**");
-            writer.write(" * Construct a $T handler.", serviceSymbol);
-            writer.write(" * @param service The {@link $T} implementation that supplies", serviceSymbol);
-            writer.write(" *                the business logic for $T", serviceSymbol);
-            writer.write(" * @param mux The {@link Mux} that determines which service and operation are being");
-            writer.write(" *            invoked by a given {@link HttpRequest}");
-            writer.write(" * @param serializers An {@link OperationSerializer} for each operation in");
-            writer.write(" *                    $T that handles deserialization of requests", serviceSymbol);
-            writer.write(" *                    and serialization of responses");
-            writer.write(" */");
+            writer.writeDocs(() -> {
+                writer.write("Construct a $T handler.", serviceSymbol);
+                writer.write("@param service The {@link $1T} implementation that supplies the business logic for $1T",
+                        serviceSymbol);
+                writer.writeInline("@param mux The {@link Mux} that determines which service and operation are being ");
+                writer.write("invoked by a given {@link HttpRequest}");
+                writer.writeInline("@param serializerFactory A factory for an {@link OperationSerializer} for each ");
+                writer.write("operation in $T that ", serviceSymbol);
+                writer.writeInline("                         ")
+                      .write("handles deserialization of requests and serialization of responses");
+            });
             writer.openBlock("constructor(service: $1T, "
                             + "mux: Mux<$3S, $2T>, "
-                            + "serializers: Record<$2T, OperationSerializer<$1T, $2T>>) {", "}",
+                            + "serializerFactory: <T extends $2T>(op: T) => OperationSerializer<$1T, T>) {", "}",
                     serviceSymbol, operationsType, serviceShape.getId().getName(), () -> {
                 writer.write("this.service = service;");
                 writer.write("this.mux = mux;");
-                writer.write("this.serializers = serializers;");
+                writer.write("this.serializerFactory = serializerFactory;");
             });
             writer.openBlock("async handle(request: HttpRequest): Promise<HttpResponse> {", "}", () -> {
                 writer.write("const target = this.mux.match(request);");
@@ -115,8 +116,7 @@ final class ServerGenerator {
                                             Symbol operationSymbol) {
         String opName = operationShape.getId().getName();
         writer.openBlock("case $S : {", "}", opName, () -> {
-            writer.write("let serializer = this.serializers.$2L as OperationSerializer<$1L, $2S>;",
-                    serviceSymbol.getName(), opName);
+            writer.write("let serializer = this.serializerFactory($S);", opName);
             writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
                 writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
             });

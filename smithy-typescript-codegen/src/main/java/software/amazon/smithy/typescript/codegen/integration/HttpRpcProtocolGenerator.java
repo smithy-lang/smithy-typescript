@@ -154,11 +154,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     @Override
-    public void generateMux(GenerationContext context) {
-        LOGGER.warning("Router generation is not currently supported for RPC protocols.");
-    }
-
-    @Override
     public void generateHandlerFactory(GenerationContext context) {
         LOGGER.warning("Handler factory generation is not currently supported for RPC protocols.");
     }
