@@ -436,16 +436,18 @@ final class HttpProtocolTestGenerator implements Runnable {
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
             case "application/octet-stream":
+                writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-octet-stream-stub.ts");
-                return "compareEquivalentOctetStreamBodies(client.config, bodyString, r.body)";
+                return "compareEquivalentOctetStreamBodies(client.config.utf8Encoder, bodyString, r.body)";
             case "text/plain":
                 additionalStubs.add("protocol-test-text-stub.ts");
                 return "compareEquivalentTextBodies(bodyString, r.body)";
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
                         + "`, defaulting to direct comparison.");
+                writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
-                return "compareEquivalentUnknownTypeBodies(client.config, bodyString, r.body)";
+                return "compareEquivalentUnknownTypeBodies(client.config.utf8Encoder, bodyString, r.body)";
         }
     }
 
