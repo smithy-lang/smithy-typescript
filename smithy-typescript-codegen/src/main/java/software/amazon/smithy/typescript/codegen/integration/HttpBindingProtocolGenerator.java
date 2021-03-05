@@ -225,11 +225,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.addImport("httpbinding", null, "@aws-smithy/server-common");
 
-        String serviceName = StringUtils.capitalize(context.getService().getId().getName());
+        Symbol serviceSymbol = context.getSymbolProvider().toSymbol(context.getService());
 
-        writer.openBlock("const $1LMux = new httpbinding.HttpBindingMux<$2S, keyof $2LService>([", "]);",
-                StringUtils.uncapitalize(serviceName),
-                serviceName,
+        writer.openBlock("const $L = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
+                getMuxName(serviceSymbol),
+                context.getService().getId().getName(),
+                serviceSymbol,
                 () -> {
                     for (OperationShape operation : containedOperations) {
                         OptionalUtils.ifPresentOrElse(
@@ -248,7 +249,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                  OperationShape operation,
                                  HttpTrait httpTrait) {
         TypeScriptWriter writer = context.getWriter();
-        String serviceName = StringUtils.capitalize(context.getService().getId().getName());
+
+        String serviceName = context.getService().getId().getName();
 
         writer.openBlock("new httpbinding.UriSpec<$S, $S>(", "),",
                 serviceName,
@@ -296,20 +298,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TopDownIndex index = TopDownIndex.of(context.getModel());
         Set<OperationShape> operations = index.getContainedOperations(context.getService());
         SymbolProvider symbolProvider = context.getSymbolProvider();
-        String serviceName = StringUtils.capitalize(context.getService().getId().getName());
 
-        writer.addImport(serviceName + "Service", null, "./server/interfaces");
-        writer.addImport(serviceName + "ServiceHandler", null, "./server/handler");
+        Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
+        Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+
         writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
 
-        writer.openBlock("export const get$1LServiceHandler = (service: $1LService): ServiceHandler => {", "}",
-                serviceName, () -> {
-            writer.openBlock("return new $LServiceHandler(service, $LMux, {", "});",
-                    serviceName, StringUtils.uncapitalize(serviceName), () -> {
-                        operations.stream()
-                                  .filter(o -> o.getTrait(HttpTrait.class).isPresent())
-                                  .sorted()
-                                  .forEach(operation -> {
+        writer.openBlock("export const get$1L = (service: $2T): ServiceHandler => {", "}",
+                handlerSymbol.getName(), serviceSymbol, () -> {
+            writer.openBlock("return new $T(service, $L, {", "});", handlerSymbol, getMuxName(serviceSymbol), () -> {
+                operations.stream()
+                          .filter(o -> o.getTrait(HttpTrait.class).isPresent())
+                          .sorted()
+                          .forEach(operation -> {
                     Symbol symbol = symbolProvider.toSymbol(operation);
                     writer.openBlock("$L: {", "},", operation.getId().getName(), () -> {
                         writer.write("serialize: $LResponse,", ProtocolGenerator.getGenericSerFunctionName(symbol));
@@ -318,6 +319,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 });
             });
         });
+    }
+
+    private String getMuxName(Symbol serviceSymbol) {
+        return StringUtils.uncapitalize(serviceSymbol.getName()) + "Mux";
     }
 
     @Override

@@ -75,6 +75,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ServiceShape service;
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
+    private final SymbolProvider serverSymbolProvider;
     private final Model nonTraits;
     private final TypeScriptDelegator writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
@@ -120,6 +121,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
         }
         symbolProvider = SymbolProvider.cache(resolvedProvider);
+        if (settings.generateServerSdk()) {
+            serverSymbolProvider = SymbolProvider.cache(new ServerSymbolVisitor(model, symbolProvider));
+        } else {
+            serverSymbolProvider = symbolProvider;
+        }
 
         // Resolve the nullable protocol generator and application protocol.
         protocolGenerator = resolveProtocolGenerator(integrations, service, settings);
@@ -198,6 +204,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Generate index for client.
         IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest, protocolGenerator);
+
+        if (settings.generateServerSdk()) {
+            // Generate index for server
+            IndexGenerator.writeServerIndex(settings, model, serverSymbolProvider, fileManifest);
+        }
 
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
@@ -294,10 +305,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (settings.generateServerSdk()) {
             generateServiceInterface(shape);
-            writers.useFileWriter("server/index.ts", writer -> {
-                writer.write("export * from \"./interfaces\";");
-                writer.write("export * from \"./handler\";");
-            });
         }
 
         if (protocolGenerator != null) {
@@ -317,10 +324,12 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                     protocolGenerator.generateResponseDeserializers(context);
                 }
                 if (context.getSettings().generateServerSdk()) {
-                    protocolGenerator.generateRequestDeserializers(context);
-                    protocolGenerator.generateResponseSerializers(context);
-                    protocolGenerator.generateMux(context);
-                    protocolGenerator.generateHandlerFactory(context);
+                    ProtocolGenerator.GenerationContext serverContext =
+                            context.withSymbolProvider(serverSymbolProvider);
+                    protocolGenerator.generateRequestDeserializers(serverContext);
+                    protocolGenerator.generateResponseSerializers(serverContext);
+                    protocolGenerator.generateMux(serverContext);
+                    protocolGenerator.generateHandlerFactory(serverContext);
                 }
                 protocolGenerator.generateSharedComponents(context);
             });
@@ -378,11 +387,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private void generateServiceInterface(ServiceShape shape) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
-        writers.useFileWriter("server/interfaces.ts", interfaceWriter ->
-                ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, interfaceWriter));
-        writers.useFileWriter("server/handler.ts", interfaceWriter ->
-                ServerGenerator.generateServiceHandler(shape, operations, interfaceWriter));
-
+        writers.useShapeWriter(shape, serverSymbolProvider, writer -> {
+            ServerGenerator.generateOperationsType(serverSymbolProvider, shape, operations, writer);
+            ServerGenerator.generateServerInterfaces(serverSymbolProvider, shape, operations, writer);
+            ServerGenerator.generateServiceHandler(serverSymbolProvider, shape, operations, writer);
+        });
     }
 
     private void generateCommands(ServiceShape shape) {
@@ -391,9 +400,17 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
         for (OperationShape operation : containedOperations) {
             // Right now this only generates stubs
-            writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
-                    settings, model, operation, symbolProvider, commandWriter,
-                    runtimePlugins, protocolGenerator, applicationProtocol).run());
+            if (settings.generateClient()) {
+                writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
+                        settings, model, operation, symbolProvider, commandWriter,
+                        runtimePlugins, protocolGenerator, applicationProtocol).run());
+            }
+
+            if (settings.generateServerSdk()) {
+                writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new CommandGenerator(
+                        settings, model, operation, serverSymbolProvider, commandWriter,
+                        runtimePlugins, protocolGenerator, applicationProtocol).run());
+            }
         }
     }
 

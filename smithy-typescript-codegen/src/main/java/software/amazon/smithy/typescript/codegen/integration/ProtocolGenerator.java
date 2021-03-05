@@ -310,5 +310,17 @@ public interface ProtocolGenerator {
         public void setProtocolName(String protocolName) {
             this.protocolName = protocolName;
         }
+
+        public GenerationContext withSymbolProvider(SymbolProvider newProvider) {
+            GenerationContext copy = new GenerationContext();
+            copy.setSettings(settings);
+            copy.setModel(model);
+            copy.setService(service);
+            copy.setSymbolProvider(newProvider);
+            copy.setWriter(writer);
+            copy.setIntegrations(integrations);
+            copy.setProtocolName(protocolName);
+            return copy;
+        }
     }
 }

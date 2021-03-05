@@ -81,11 +81,12 @@ final class TypeScriptDelegator {
      * with the writer.
      *
      * @param shape Shape to create the writer for.
+     * @param provider The symbol provider to use (instead of the default one).
      * @param writerConsumer Consumer that accepts and works with the file.
      */
-    void useShapeWriter(Shape shape, Consumer<TypeScriptWriter> writerConsumer) {
+    void useShapeWriter(Shape shape, SymbolProvider provider, Consumer<TypeScriptWriter> writerConsumer) {
         // Checkout/create the appropriate writer for the shape.
-        Symbol symbol = symbolProvider.toSymbol(shape);
+        Symbol symbol = provider.toSymbol(shape);
         TypeScriptWriter writer = checkoutWriter(symbol.getDefinitionFile());
 
         // Add any needed DECLARE symbols.
@@ -97,11 +98,24 @@ final class TypeScriptDelegator {
         // Allow integrations to do things like add onSection callbacks.
         // These onSection callbacks are removed when popState is called.
         for (TypeScriptIntegration integration : integrations) {
-            integration.onShapeWriterUse(settings, model, symbolProvider, writer, shape);
+            integration.onShapeWriterUse(settings, model, provider, writer, shape);
         }
 
         writerConsumer.accept(writer);
         writer.popState();
+    }
+
+    /**
+     * Gets a previously created writer or creates a new one if needed.
+     *
+     * <p>Any imports required by the given symbol are automatically registered
+     * with the writer.
+     *
+     * @param shape Shape to create the writer for.
+     * @param writerConsumer Consumer that accepts and works with the file.
+     */
+    void useShapeWriter(Shape shape, Consumer<TypeScriptWriter> writerConsumer) {
+        useShapeWriter(shape, symbolProvider, writerConsumer);
     }
 
     /**
