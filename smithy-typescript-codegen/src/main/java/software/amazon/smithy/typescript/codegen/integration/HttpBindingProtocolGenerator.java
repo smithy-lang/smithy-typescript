@@ -850,8 +850,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Write event document bindings if exist.
             SymbolProvider symbolProvider = context.getSymbolProvider();
             Symbol symbol = symbolProvider.toSymbol(event);
-            // Use normal structure deserializer instead of event deserializer to deserialize document body.
-            String serFunctionName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+            // Use normal structure serializer instead of event serializer to serialize document body.
+            String serFunctionName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
             writer.write("message.body = $L(input, context);", serFunctionName);
         }
     }
