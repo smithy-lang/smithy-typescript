@@ -407,9 +407,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             }
 
             if (settings.generateServerSdk()) {
-                writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new CommandGenerator(
-                        settings, model, operation, serverSymbolProvider, commandWriter,
-                        runtimePlugins, protocolGenerator, applicationProtocol).run());
+                writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new ServerCommandGenerator(
+                        settings, model, operation, serverSymbolProvider, commandWriter).run());
             }
         }
     }

@@ -131,7 +131,7 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
             if (shape.getType() == ShapeType.SERVICE) {
                 return "./server/" + name;
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return "./server/types/" + name;
+                return "./server/operations/" + name;
             }
 
             throw new IllegalArgumentException("Unsupported shape type: " + shape.getType());

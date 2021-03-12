@@ -17,9 +17,15 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.EventStreamIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 /**
  * Utility methods needed across Java packages.
@@ -90,5 +96,35 @@ public final class CodegenUtils {
         writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
         contextInterfaceList.add("__SerdeContext");
         return contextInterfaceList;
+    }
+
+    static List<MemberShape> getBlobStreamingMembers(Model model, StructureShape shape) {
+        return shape.getAllMembers().values().stream()
+                .filter(memberShape -> {
+                    // Streaming blobs need to have their types modified
+                    // See `writeStreamingInputType`
+                    Shape target = model.expectShape(memberShape.getTarget());
+                    return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
+     * This type decoration is allowed in Smithy because it makes input type more permissive than output type
+     * for the same member.
+     * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
+     */
+    static void writeStreamingMemberType(
+            TypeScriptWriter writer,
+            Symbol containerSymbol,
+            String typeName,
+            MemberShape streamingMember
+    ) {
+        String memberName = streamingMember.getMemberName();
+        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
+        writer.openBlock("export type $L = Omit<$T, $S> & {", "};", typeName, containerSymbol, memberName, () ->
+                writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;",
+                        memberName, optionalSuffix, containerSymbol));
     }
 }
