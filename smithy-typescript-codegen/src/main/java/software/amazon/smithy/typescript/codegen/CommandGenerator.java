@@ -15,6 +15,9 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,9 +28,7 @@ import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -86,9 +87,7 @@ final class CommandGenerator implements Runnable {
     @Override
     public void run() {
         addInputAndOutputTypes();
-        if (settings.generateClient()) {
-            generateClientCommand();
-        }
+        generateClientCommand();
     }
 
     private void generateClientCommand() {
@@ -195,11 +194,11 @@ final class CommandGenerator implements Runnable {
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
-            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(input);
+            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
             if (blobStreamingMembers.isEmpty()) {
                 writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(input));
             } else {
-                writeStreamingInputType(typeName, input, blobStreamingMembers.get(0));
+                writeStreamingMemberType(writer, symbolProvider.toSymbol(input), typeName, blobStreamingMembers.get(0));
             }
         } else {
             // If the input is non-existent, then use an empty object.
@@ -217,31 +216,6 @@ final class CommandGenerator implements Runnable {
         } else {
             writer.write("export type $L = __MetadataBearer", typeName);
         }
-    }
-
-    private List<MemberShape> getBlobStreamingMembers(StructureShape shape) {
-        return shape.getAllMembers().values().stream()
-                .filter(memberShape -> {
-                    // Streaming blobs need to have their types modified
-                    // See `writeStreamingInputType`
-                    Shape target = model.expectShape(memberShape.getTarget());
-                    return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
-                })
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
-     * This type decoration is allowed in Smithy because it makes input type more permissive than output type
-     * for the same member.
-     * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
-     */
-    private void writeStreamingInputType(String typeName, StructureShape inputShape, MemberShape streamingMember) {
-        Symbol inputSymbol = symbolProvider.toSymbol(inputShape);
-        String memberName = streamingMember.getMemberName();
-        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.openBlock("export type $L = Omit<$T, $S> & {", "};", typeName, inputSymbol, memberName, () ->
-            writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix, inputSymbol));
     }
 
     private void addCommandSpecificPlugins() {

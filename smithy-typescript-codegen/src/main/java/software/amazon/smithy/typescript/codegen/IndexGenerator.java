@@ -78,7 +78,7 @@ final class IndexGenerator {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         for (OperationShape operation : containedOperations) {
-            writer.write("export * from \"./types/$L\";", symbolProvider.toSymbol(operation).getName());
+            writer.write("export * from \"./operations/$L\";", symbolProvider.toSymbol(operation).getName());
         }
         writer.write("export * from \"./$L\"", symbol.getName());
         fileManifest.writeFile("server/index.ts", writer.toString());

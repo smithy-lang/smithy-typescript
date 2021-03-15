@@ -66,7 +66,6 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.Pair;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Generates HTTP protocol test cases to be run using Jest.
@@ -91,6 +90,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final Symbol serviceSymbol;
+    private final SymbolProvider serverSymbolProvider;
     private final Set<String> additionalStubs = new TreeSet<>();
     private final ProtocolGenerator protocolGenerator;
 
@@ -105,6 +105,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             Model model,
             ShapeId protocol,
             SymbolProvider symbolProvider,
+            SymbolProvider serverSymbolProvider,
             TypeScriptDelegator delegator,
             ProtocolGenerator protocolGenerator
     ) {
@@ -113,6 +114,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         this.protocol = protocol;
         this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
+        this.serverSymbolProvider = serverSymbolProvider;
         this.delegator = delegator;
         this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
@@ -247,7 +249,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void generateServerRequestTest(OperationShape operation, HttpRequestTestCase testCase) {
-        Symbol operationSymbol = symbolProvider.toSymbol(operation);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
 
         // Lowercase all the headers we're expecting as this is what we'll get.
         Map<String, String> headers = testCase.getHeaders().entrySet().stream()
@@ -260,9 +262,8 @@ final class HttpProtocolTestGenerator implements Runnable {
         String testName = testCase.getId() + ":ServerRequest";
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
-            // TODO: use the symbol provider when it's ready
-            String serviceName = StringUtils.capitalize(service.getId().getName());
-            String operationName = StringUtils.capitalize(operation.getId().getName());
+            Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+            Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
             Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
             Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
 
@@ -274,18 +275,18 @@ final class HttpProtocolTestGenerator implements Runnable {
             // We use a partial here so that we don't have to define the entire service, but still get the advantages
             // the type checker, including excess property checking. Later on we'll use `as` to cast this to the
             // full service so that we can actually use it.
-            writer.addImport(serviceName + "Service", null, "./server");
-            writer.openBlock("const testService: Partial<$LService> = {", "};", serviceName, () -> {
+            writer.openBlock("const testService: Partial<$T> = {", "};", serviceSymbol, () -> {
                 writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
-                writer.write("$L: testFunction as __Operation<$T, $T>,", operationName, inputType, outputType);
+                writer.write("$L: testFunction as __Operation<$T, $T>,",
+                        operationSymbol.getName(), inputType, outputType);
             });
 
-            String getHandlerName = String.format("get%sServiceHandler", serviceName);
+            String getHandlerName = "get" + handlerSymbol.getName();
             writer.addImport(getHandlerName, getHandlerName,
                     "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
 
             // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
-            writer.write("const handler = $L(testService as $LService);", getHandlerName, serviceName);
+            writer.write("const handler = $L(testService as $T);", getHandlerName, serviceSymbol);
 
             // Construct a new http request according to the test case definition.
             writer.openBlock("const request = new HttpRequest({", "});", () -> {

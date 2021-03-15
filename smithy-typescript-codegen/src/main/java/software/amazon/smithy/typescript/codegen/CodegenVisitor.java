@@ -213,7 +213,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
             ShapeId protocol = protocolGenerator.getProtocol();
-            new HttpProtocolTestGenerator(settings, model, protocol, symbolProvider, writers, protocolGenerator).run();
+            new HttpProtocolTestGenerator(
+                    settings, model, protocol, symbolProvider, serverSymbolProvider, writers, protocolGenerator).run();
         }
 
         // Write each pending writer.
@@ -406,9 +407,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             }
 
             if (settings.generateServerSdk()) {
-                writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new CommandGenerator(
-                        settings, model, operation, serverSymbolProvider, commandWriter,
-                        runtimePlugins, protocolGenerator, applicationProtocol).run());
+                writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new ServerCommandGenerator(
+                        settings, model, operation, serverSymbolProvider, commandWriter).run());
             }
         }
     }
