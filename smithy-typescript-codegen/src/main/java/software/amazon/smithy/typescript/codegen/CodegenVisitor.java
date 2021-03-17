@@ -410,7 +410,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
             if (settings.generateServerSdk()) {
                 writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new ServerCommandGenerator(
-                        settings, model, operation, serverSymbolProvider, commandWriter).run());
+                        settings, model, operation, serverSymbolProvider, commandWriter,
+                        protocolGenerator, applicationProtocol).run());
             }
         }
     }
