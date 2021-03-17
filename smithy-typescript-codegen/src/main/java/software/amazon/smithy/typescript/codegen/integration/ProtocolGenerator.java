@@ -303,16 +303,28 @@ public interface ProtocolGenerator {
             this.protocolName = protocolName;
         }
 
-        public GenerationContext withSymbolProvider(SymbolProvider newProvider) {
+        public GenerationContext copy() {
             GenerationContext copy = new GenerationContext();
             copy.setSettings(settings);
             copy.setModel(model);
             copy.setService(service);
-            copy.setSymbolProvider(newProvider);
+            copy.setSymbolProvider(symbolProvider);
             copy.setWriter(writer);
             copy.setIntegrations(integrations);
             copy.setProtocolName(protocolName);
             return copy;
+        }
+
+        public GenerationContext withSymbolProvider(SymbolProvider newProvider) {
+            GenerationContext copyContext = copy();
+            copyContext.setSymbolProvider(newProvider);
+            return copyContext;
+        }
+
+        public GenerationContext withWriter(TypeScriptWriter newWriter) {
+            GenerationContext copyContext = copy();
+            copyContext.setWriter(newWriter);
+            return copyContext;
         }
     }
 }

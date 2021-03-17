@@ -299,9 +299,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
-        writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
-
         writer.openBlock("export const get$L = (service: $T): ServiceHandler => {", "}",
                 handlerSymbol.getName(), serviceSymbol, () -> {
             generateMux(context);
@@ -317,13 +314,22 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
     }
 
-    private Consumer<OperationShape> writeOperationCase(TypeScriptWriter writer, SymbolProvider symbolProvider) {
+    private Consumer<OperationShape> writeOperationCase(
+            TypeScriptWriter writer,
+            SymbolProvider symbolProvider
+    ) {
         return operation -> {
             Symbol symbol = symbolProvider.toSymbol(operation);
+            String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Response";
+            String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(symbol) + "Request";
+            writer.addImport(serializerFunction, null,
+                    "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+            writer.addImport(deserializerFunction, null,
+                    "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
             writer.openBlock("case $S: {", "}", operation.getId().getName(), () -> {
                 writer.openBlock("return {", "};", () -> {
-                    writer.write("serialize: $LResponse,", ProtocolGenerator.getGenericSerFunctionName(symbol));
-                    writer.write("deserialize: $LRequest,", ProtocolGenerator.getGenericDeserFunctionName(symbol));
+                    writer.write("serialize: $L,", serializerFunction);
+                    writer.write("deserialize: $L,", deserializerFunction);
                 });
             });
         };

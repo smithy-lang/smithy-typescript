@@ -329,7 +329,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             context.withSymbolProvider(serverSymbolProvider);
                     protocolGenerator.generateRequestDeserializers(serverContext);
                     protocolGenerator.generateResponseSerializers(serverContext);
-                    protocolGenerator.generateHandlerFactory(serverContext);
+                    writers.useShapeWriter(shape, serverSymbolProvider, w -> {
+                        protocolGenerator.generateHandlerFactory(serverContext.withWriter(w));
+                    });
                 }
                 protocolGenerator.generateSharedComponents(context);
             });
