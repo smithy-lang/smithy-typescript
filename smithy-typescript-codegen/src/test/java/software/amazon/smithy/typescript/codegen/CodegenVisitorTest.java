@@ -99,57 +99,6 @@ public class CodegenVisitorTest {
         assertThat(manifest.getFileString("ExampleClient.ts").get(), containsString("export class ExampleClient"));
     }
 
-    @Test void throwsOnShapesThatCannotBeCondensed() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service-with-shape-conflict.smithy"))
-                .addImport(getClass().getResource("simple-service-with-shape-conflict-2.smithy"))
-                .addImport(getClass().getResource("simple-service-with-shape-conflict-3.smithy"))
-                .assemble()
-                .unwrap();
-        MockManifest manifest = new MockManifest();
-        PluginContext context = PluginContext.builder()
-                .model(model)
-                .fileManifest(manifest)
-                .pluginClassLoader(getClass().getClassLoader())
-                .settings(Node.objectNodeBuilder()
-                        .withMember("package", Node.from("example"))
-                        .withMember("packageVersion", Node.from("1.0.0"))
-                        .build())
-                .build();
-
-        Assertions.assertThrows(CodegenException.class, () -> new TypeScriptCodegenPlugin().execute(context));
-    }
-
-    @Test void successfullyCondensesShapesThatMatch() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service-with-condensible-shapes.smithy"))
-                .addImport(getClass().getResource("simple-service-with-condensible-shapes-2.smithy"))
-                .addImport(getClass().getResource("simple-service-with-condensible-shapes-3.smithy"))
-                .assemble()
-                .unwrap();
-        MockManifest manifest = new MockManifest();
-        PluginContext context = PluginContext.builder()
-                .model(model)
-                .fileManifest(manifest)
-                .pluginClassLoader(getClass().getClassLoader())
-                .settings(Node.objectNodeBuilder()
-                        .withMember("package", Node.from("example"))
-                        .withMember("packageVersion", Node.from("1.0.0"))
-                        .build())
-                .build();
-
-        new TypeScriptCodegenPlugin().execute(context);
-
-        Assertions.assertTrue(manifest.hasFile("models/index.ts"));
-        Assertions.assertTrue(manifest.hasFile("models/models_0.ts"));
-        assertThat(manifest.getFileString("models/index.ts").get(),
-                containsString("export * from \"./models_0\";"));
-        assertThat(manifest.getFileString("models/models_0.ts").get(),
-                containsString("export interface Bar {\n" +
-                        "  baz: string | undefined;\n" +
-                        "}"));
-    }
-
     @Test
     public void invokesOnWriterCustomizations() {
         // TODO
