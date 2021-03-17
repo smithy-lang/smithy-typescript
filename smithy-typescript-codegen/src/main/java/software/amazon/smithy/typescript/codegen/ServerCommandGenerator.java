@@ -44,6 +44,7 @@ final class ServerCommandGenerator implements Runnable {
     private final OperationIndex operationIndex;
     private final Symbol inputType;
     private final Symbol outputType;
+    private final Symbol errorsType;
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
@@ -68,14 +69,15 @@ final class ServerCommandGenerator implements Runnable {
         operationIndex = OperationIndex.of(model);
         inputType = operationSymbol.expectProperty("inputType", Symbol.class);
         outputType = operationSymbol.expectProperty("outputType", Symbol.class);
+        errorsType = operationSymbol.expectProperty("errorsType", Symbol.class);
     }
 
     @Override
     public void run() {
+        writeOperationType();
         addInputAndOutputTypes();
         writeErrorType();
-        writeErrorChecker();
-        writeErrorHandler();
+        writeOperationSerializer();
     }
 
     private void addInputAndOutputTypes() {
@@ -114,10 +116,9 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeErrorType() {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
-        String errorsUnionName = operationSymbol.getName() + "Errors";
 
         if (operation.getErrors().isEmpty()) {
-            writer.write("export type $L = never;", errorsUnionName);
+            writer.write("export type $L = never;", errorsType.getName());
         } else {
             writer.writeInline("export type $LErrors = ", operationSymbol.getName());
             for (Iterator<ShapeId> iter = operation.getErrors().iterator(); iter.hasNext();) {
@@ -131,15 +132,42 @@ final class ServerCommandGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeErrorChecker() {
+    private void writeOperationType() {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
-        String errorsUnionName = operationSymbol.getName() + "Errors";
+        writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
+        writer.write("export type $L = __Operation<$T, $T>", operationSymbol.getName(), inputType, outputType);
+        writer.write("");
+    }
 
-        writer.openBlock("const is$1L = (error: any): error is $1L => {", "};", errorsUnionName, () -> {
+    private void writeOperationSerializer() {
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
+        String serializerName = operationSymbol.expectProperty("serializerType", Symbol.class).getName();
+        Symbol serverSymbol = symbolProvider.toSymbol(model.expectShape(settings.getService()));
+
+        writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
+        writer.openBlock("export class $L implements OperationSerializer<$T, $S, $T> {", "}",
+                serializerName, serverSymbol, operation.getId().getName(), errorsType, () -> {
+            String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
+            String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
+            writer.addImport(serializerFunction, null,
+                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+            writer.addImport(deserializerFunction, null,
+                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+            writer.write("serialize = $L;", serializerFunction);
+            writer.write("deserialize = $L;", deserializerFunction);
+            writer.write("");
+            writeErrorChecker();
+            writeErrorHandler();
+        });
+        writer.write("");
+    }
+
+    private void writeErrorChecker() {
+        writer.openBlock("isOperationError(error: any): error is $T {", "};", errorsType, () -> {
             if (operation.getErrors().isEmpty()) {
                 writer.write("return false;");
             } else {
-                writer.writeInline("const names: $L['name'][] = [", errorsUnionName);
+                writer.writeInline("const names: $T['name'][] = [", errorsType);
                 for (Iterator<ShapeId> iter = operation.getErrors().iterator(); iter.hasNext();) {
                     writer.writeInline("$S", iter.next().getName());
                     if (iter.hasNext()) {
@@ -154,11 +182,9 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     private void writeErrorHandler() {
-        Symbol operationSymbol = symbolProvider.toSymbol(operation);
-        String errorsUnionName = operationSymbol.getName() + "Errors";
         writer.addImport("SerdeContext", null, "@aws-sdk/types");
-        writer.openBlock("const handle$1L = (error: $1L, ctx: Omit<SerdeContext, 'endpoint'>): Promise<$2T> => {", "}",
-                errorsUnionName, applicationProtocol.getResponseType(), () -> {
+        writer.openBlock("serializeError(error: $T, ctx: Omit<SerdeContext, 'endpoint'>): Promise<$T> {", "}",
+                errorsType, applicationProtocol.getResponseType(), () -> {
             writer.openBlock("switch (error.name) {", "}", () -> {
                 for (ShapeId errorId : operation.getErrors()) {
                     writeErrorHandlerCase(errorId);

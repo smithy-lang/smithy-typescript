@@ -81,6 +81,8 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
         //TODO: these names suck but otherwise they clash with the names in models
         builder.putProperty("inputType", intermediate.toBuilder().name(shapeName + "ServerInput").build());
         builder.putProperty("outputType", intermediate.toBuilder().name(shapeName + "ServerOutput").build());
+        builder.putProperty("errorsType", intermediate.toBuilder().name(shapeName + "Errors").build());
+        builder.putProperty("serializerType", intermediate.toBuilder().name(shapeName + "Serializer").build());
         return builder.build();
     }
 
