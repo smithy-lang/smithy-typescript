@@ -119,11 +119,19 @@ final class ServerGenerator {
         String opName = operationShape.getId().getName();
         writer.openBlock("case $S : {", "}", opName, () -> {
             writer.write("let serializer = this.serializerFactory($S);", opName);
-            writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
-                writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
+            writer.openBlock("try {", "} catch(error: unknown) {", () -> {
+                writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
+                    writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
+                });
+                writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
+                writer.write("return serializer.serialize(output, this.serdeContextBase);");
             });
-            writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
-            writer.write("return serializer.serialize(output, this.serdeContextBase);");
+            writer.openBlock("", "}", () -> {
+                writer.openBlock("if (serializer.isOperationError(error)) {", "}", () -> {
+                    writer.write("return serializer.serializeError(error, this.serdeContextBase);");
+                });
+                writer.write("throw error;");
+            });
         });
     }
 

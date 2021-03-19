@@ -175,7 +175,7 @@ final class ServerCommandGenerator implements Runnable {
                     }
                 }
                 writer.write("];");
-                writer.write("return error.name in names;");
+                writer.write("return names.includes(error.name);");
             }
         });
         writer.write("");
