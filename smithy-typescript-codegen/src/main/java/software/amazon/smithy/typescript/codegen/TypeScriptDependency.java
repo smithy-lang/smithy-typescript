@@ -74,7 +74,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     // Conditionally added when interacting with specific protocol test bodyMediaType values.
     AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", "3.6.1", false),
-    XML_PARSER("dependencies", "fast-xml-parser", "3.17.4", false);
+    XML_PARSER("dependencies", "fast-xml-parser", "3.19.0", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";
