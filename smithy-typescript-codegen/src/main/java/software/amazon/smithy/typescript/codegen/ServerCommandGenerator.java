@@ -115,12 +115,10 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     private void writeErrorType() {
-        Symbol operationSymbol = symbolProvider.toSymbol(operation);
-
         if (operation.getErrors().isEmpty()) {
             writer.write("export type $L = never;", errorsType.getName());
         } else {
-            writer.writeInline("export type $LErrors = ", operationSymbol.getName());
+            writer.writeInline("export type $L = ", errorsType.getName());
             for (Iterator<ShapeId> iter = operation.getErrors().iterator(); iter.hasNext();) {
                 writer.writeInline("$T", symbolProvider.toSymbol(model.expectShape(iter.next())));
                 if (iter.hasNext()) {
