@@ -299,14 +299,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
-        writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
-
         writer.openBlock("export const get$L = (service: $T): ServiceHandler => {", "}",
                 handlerSymbol.getName(), serviceSymbol, () -> {
             generateMux(context);
-            writer.openBlock("const serFn: (op: $1T) => OperationSerializer<$2T, $1T> = (op) => {", "};",
-                    operationsSymbol, serviceSymbol, () -> {
+            writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
+            writer.openBlock("const serFn: (op: $1T) => OperationSerializer<$2T, $1T, __SmithyException> = "
+                            + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
                 writer.openBlock("switch (op) {", "}", () -> {
                     operations.stream()
                             .filter(o -> o.getTrait(HttpTrait.class).isPresent())
@@ -317,15 +315,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
     }
 
-    private Consumer<OperationShape> writeOperationCase(TypeScriptWriter writer, SymbolProvider symbolProvider) {
+    private Consumer<OperationShape> writeOperationCase(
+            TypeScriptWriter writer,
+            SymbolProvider symbolProvider
+    ) {
         return operation -> {
-            Symbol symbol = symbolProvider.toSymbol(operation);
-            writer.openBlock("case $S: {", "}", operation.getId().getName(), () -> {
-                writer.openBlock("return {", "};", () -> {
-                    writer.write("serialize: $LResponse,", ProtocolGenerator.getGenericSerFunctionName(symbol));
-                    writer.write("deserialize: $LRequest,", ProtocolGenerator.getGenericDeserFunctionName(symbol));
-                });
-            });
+            Symbol symbol = symbolProvider.toSymbol(operation).expectProperty("serializerType", Symbol.class);
+            writer.write("case $S: return new $T();", operation.getId().getName(), symbol);
         };
     }
 

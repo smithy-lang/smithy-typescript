@@ -57,6 +57,7 @@ final class ServerGenerator {
         writer.addImport("toUtf8", null, "@aws-sdk/util-utf8-node");
         writer.addImport("HttpRequest", null, "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", null, "@aws-sdk/protocol-http");
+        writer.addImport("SmithyException", null, "@aws-sdk/smithy-client");
 
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
@@ -65,8 +66,8 @@ final class ServerGenerator {
         writer.openBlock("export class $L implements ServiceHandler {", "}", handlerSymbol.getName(), () -> {
             writer.write("private service: $T;", serviceSymbol);
             writer.write("private mux: Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
-            writer.write("private serializerFactory: <T extends $T>(operation: T) => OperationSerializer<$T, T>;",
-                    operationsType, serviceSymbol);
+            writer.write("private serializerFactory: <T extends $T>(operation: T) => "
+                            + "OperationSerializer<$T, T, SmithyException>;", operationsType, serviceSymbol);
             writer.openBlock("private serdeContextBase = {", "};", () -> {
                 writer.write("base64Encoder: toBase64,");
                 writer.write("base64Decoder: fromBase64,");
@@ -89,7 +90,8 @@ final class ServerGenerator {
             });
             writer.openBlock("constructor(service: $1T, "
                             + "mux: Mux<$3S, $2T>, "
-                            + "serializerFactory: <T extends $2T>(op: T) => OperationSerializer<$1T, T>) {", "}",
+                            + "serializerFactory: <T extends $2T>(op: T) => "
+                            + "OperationSerializer<$1T, T, SmithyException>) {", "}",
                     serviceSymbol, operationsType, serviceShape.getId().getName(), () -> {
                 writer.write("this.service = service;");
                 writer.write("this.mux = mux;");
@@ -117,11 +119,19 @@ final class ServerGenerator {
         String opName = operationShape.getId().getName();
         writer.openBlock("case $S : {", "}", opName, () -> {
             writer.write("let serializer = this.serializerFactory($S);", opName);
-            writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
-                writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
+            writer.openBlock("try {", "} catch(error: unknown) {", () -> {
+                writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
+                    writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
+                });
+                writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
+                writer.write("return serializer.serialize(output, this.serdeContextBase);");
             });
-            writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
-            writer.write("return serializer.serialize(output, this.serdeContextBase);");
+            writer.openBlock("", "}", () -> {
+                writer.openBlock("if (serializer.isOperationError(error)) {", "}", () -> {
+                    writer.write("return serializer.serializeError(error, this.serdeContextBase);");
+                });
+                writer.write("throw error;");
+            });
         });
     }
 
@@ -136,10 +146,7 @@ final class ServerGenerator {
         writer.openBlock("export interface $L {", "}", serviceInterfaceName, () -> {
             for (OperationShape operation : operations) {
                 Symbol symbol = symbolProvider.toSymbol(operation);
-                writer.write("$L: $L<$T, $T>", symbol.getName(),
-                        "__Operation",
-                        symbol.expectProperty("inputType", Symbol.class),
-                        symbol.expectProperty("outputType", Symbol.class));
+                writer.write("$L: $T", symbol.getName(), symbol);
             }
         });
     }

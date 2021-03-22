@@ -329,7 +329,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             context.withSymbolProvider(serverSymbolProvider);
                     protocolGenerator.generateRequestDeserializers(serverContext);
                     protocolGenerator.generateResponseSerializers(serverContext);
-                    protocolGenerator.generateHandlerFactory(serverContext);
+                    writers.useShapeWriter(shape, serverSymbolProvider, w -> {
+                        protocolGenerator.generateHandlerFactory(serverContext.withWriter(w));
+                    });
                 }
                 protocolGenerator.generateSharedComponents(context);
             });
@@ -408,7 +410,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
             if (settings.generateServerSdk()) {
                 writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new ServerCommandGenerator(
-                        settings, model, operation, serverSymbolProvider, commandWriter).run());
+                        settings, model, operation, serverSymbolProvider, commandWriter,
+                        protocolGenerator, applicationProtocol).run());
             }
         }
     }
