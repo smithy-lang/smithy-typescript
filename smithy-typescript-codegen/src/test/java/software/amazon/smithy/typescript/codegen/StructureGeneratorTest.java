@@ -489,10 +489,14 @@ public class StructureGeneratorTest {
         StructureShape struct = createNonErrorStructure();
         ModelAssembler assembler = Model.assembler().addShape(struct);
         struct.getAllMembers().values().forEach(assembler::addShape);
-        Model model = assembler.assemble().unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
+        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model, settings), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));
@@ -514,10 +518,14 @@ public class StructureGeneratorTest {
         struct.getAllMembers().values().forEach(assembler::addShape);
         OperationShape operation = OperationShape.builder().id("com.foo#Operation").output(struct).build();
         assembler.addShape(operation);
-        Model model = assembler.assemble().unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model), writer, struct).run();
+        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model, settings), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));

@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 
@@ -30,8 +31,16 @@ public class UnionGeneratorTest {
                 .addMember(memberB)
                 .addMember(memberC)
                 .build();
-        Model model = Model.assembler().addShapes(unionShape, memberA, memberB, memberC).assemble().unwrap();
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .addShapes(unionShape, memberA, memberB, memberC)
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         TypeScriptWriter writer = new TypeScriptWriter("./Example");
         new UnionGenerator(model, symbolProvider, writer, unionShape).run();
         String output = writer.toString();
