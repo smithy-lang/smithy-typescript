@@ -149,6 +149,13 @@ public interface ProtocolGenerator {
     void generateResponseSerializers(GenerationContext context);
 
     /**
+     * Generates the code used to serialize unmodeled errors for servers.
+     *
+     * @param serverContext Serialization context.
+     */
+    void generateFrameworkErrorSerializer(GenerationContext serverContext);
+
+    /**
      * Generates the code used to determine the service and operation
      * targeted by a given request.
      *

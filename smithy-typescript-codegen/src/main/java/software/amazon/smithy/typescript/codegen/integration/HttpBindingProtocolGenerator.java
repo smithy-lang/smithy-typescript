@@ -68,6 +68,7 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
@@ -216,6 +217,37 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
+    @Override
+    public void generateFrameworkErrorSerializer(GenerationContext inputContext) {
+        final GenerationContext context = inputContext.copy();
+        context.setModel(FrameworkErrorModel.INSTANCE.getModel());
+
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
+        writer.addUseImports(responseType);
+
+        writer.openBlock("export const serializeFrameworkException = async(\n"
+                + "  input: __SmithyFrameworkException,\n"
+                + "  ctx: Omit<__SerdeContext, 'endpoint'>\n"
+                + "): Promise<$T> => {", "}", responseType, () -> {
+
+            writeEmptyEndpoint(context);
+
+            writer.openBlock("switch (input.name) {", "}", () -> {
+                for (final Shape shape : context.getModel().getShapesWithTrait(HttpErrorTrait.class)) {
+                    StructureShape errorShape = shape.asStructureShape().orElseThrow(IllegalArgumentException::new);
+                    writer.openBlock("case $S: {", "}", errorShape.getId().getName(), () -> {
+                        generateErrorSerializationImplementation(context, errorShape, responseType, bindingIndex);
+                    });
+                }
+            });
+        });
+        writer.write("");
+    }
+
     private void generateMux(GenerationContext context) {
         TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
         TypeScriptWriter writer = context.getWriter();
@@ -295,6 +327,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Set<OperationShape> operations = index.getContainedOperations(context.getService());
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
+        writer.addImport("serializeFrameworkException", null,
+                "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
@@ -311,7 +346,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             .forEach(writeOperationCase(writer, symbolProvider));
                 });
             });
-            writer.write("return new $T(service, mux, serFn);", handlerSymbol);
+            writer.write("return new $T(service, mux, serFn, serializeFrameworkException);", handlerSymbol);
         });
     }
 
@@ -402,25 +437,33 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  ctx: Omit<__SerdeContext, 'endpoint'>\n"
                 + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
             writeEmptyEndpoint(context);
-            writeErrorStatusCode(context, error);
-            writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
-
-            List<HttpBinding> bodyBindings = writeResponseBody(context, error, bindingIndex);
-            if (!bodyBindings.isEmpty()) {
-                // Track all shapes bound to the body so their serializers may be generated.
-                bodyBindings.stream()
-                        .map(HttpBinding::getMember)
-                        .map(member -> context.getModel().expectShape(member.getTarget()))
-                        .forEach(serializingDocumentShapes::add);
-            }
-
-            writer.openBlock("return new $T({", "});", responseType, () -> {
-                writer.write("headers,");
-                writer.write("body,");
-                writer.write("statusCode,");
-            });
+            generateErrorSerializationImplementation(context, error, responseType, bindingIndex);
         });
         writer.write("");
+    }
+
+    private void generateErrorSerializationImplementation(GenerationContext context,
+                                                          StructureShape error,
+                                                          SymbolReference responseType,
+                                                          HttpBindingIndex bindingIndex) {
+        TypeScriptWriter writer = context.getWriter();
+        writeErrorStatusCode(context, error);
+        writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
+
+        List<HttpBinding> bodyBindings = writeResponseBody(context, error, bindingIndex);
+        if (!bodyBindings.isEmpty()) {
+            // Track all shapes bound to the body so their serializers may be generated.
+            bodyBindings.stream()
+                    .map(HttpBinding::getMember)
+                    .map(member -> context.getModel().expectShape(member.getTarget()))
+                    .forEach(serializingDocumentShapes::add);
+        }
+
+        writer.openBlock("return new $T({", "});", responseType, () -> {
+            writer.write("headers,");
+            writer.write("body,");
+            writer.write("statusCode,");
+        });
     }
 
     private void writeEmptyEndpoint(GenerationContext context) {

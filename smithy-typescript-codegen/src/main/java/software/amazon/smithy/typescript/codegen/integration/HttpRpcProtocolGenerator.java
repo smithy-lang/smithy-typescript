@@ -144,6 +144,11 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     @Override
+    public void generateFrameworkErrorSerializer(GenerationContext serverContext) {
+        LOGGER.warning("Framework error serialization is not currently supported for RPC protocols.");
+    }
+
+    @Override
     public void generateRequestDeserializers(GenerationContext context) {
         LOGGER.warning("Request deserialization is not currently supported for RPC protocols.");
     }
