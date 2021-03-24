@@ -185,7 +185,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             });
             // 3. Generate test cases for each error on each operation.
             for (StructureShape error : operationIndex.getErrors(operation)) {
-                if (!error.hasTag("server-only")) {
+                if (!error.hasTag("client-only")) {
                     error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
                         for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
                             onlyIfProtocolMatches(testCase,
@@ -537,14 +537,25 @@ final class HttpProtocolTestGenerator implements Runnable {
         Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
         Symbol errorSymbol = serverSymbolProvider.toSymbol(error);
         ErrorTrait errorTrait = error.expectTrait(ErrorTrait.class);
+
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         String testName = testCase.getId() + ":ServerErrorResponse";
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+
+            // Generates a Partial implementation of the service type that only includes
+            // the specific operation under test. Later we'll have to "cast" this with an "as",
+            // but using the partial in the meantime will give us proper type checking on the
+            // operation we want.
             writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
                 writer.openBlock("$L(input: any, request: HttpRequest): $T {", "}",
                     operationSymbol.getName(), outputType, () -> {
+                        // Write out an object according to what's defined in the test case.
                         writer.writeInline("const response = ");
                         testCase.getParams().accept(new CommandInputNodeVisitor(error, true));
+
+                        // Add in the necessary wrapping information to make the error satisfy its interface.
+                        // TODO: having proper constructors for these errors would be really nice so we don't
+                        // have to do this.
                         writer.openBlock("const error: $T = {", "};", errorSymbol, () -> {
                             writer.write("...response,");
                             writer.write("name: $S,", error.getId().getName());
@@ -579,14 +590,19 @@ final class HttpProtocolTestGenerator implements Runnable {
                     });
             });
 
-        writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
-
+        // Extend the existing serializer and replace the deserialize with a noop so we don't have to
+        // worry about trying to construct something that matches.
         writer.openBlock("class TestSerializer extends $T {", "}", serializerSymbol, () -> {
             writer.openBlock("deserialize = (output: any, context: any): Promise<any> => {", "};", () -> {
                 writer.write("return Promise.resolve({});");
             });
         });
 
+        // Since we aren't going through the deserializer, we don't have to put much in the fake request.
+        // Just enough to get it through our test mux.
+        writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
+
+        // Create a new serializer factory that always returns our test serializer.
         writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
         writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = (op) =>"
