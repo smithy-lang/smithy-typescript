@@ -183,12 +183,16 @@ final class ServerCommandGenerator implements Runnable {
         writer.addImport("SerdeContext", null, "@aws-sdk/types");
         writer.openBlock("serializeError(error: $T, ctx: Omit<SerdeContext, 'endpoint'>): Promise<$T> {", "}",
                 errorsType, applicationProtocol.getResponseType(), () -> {
-            writer.openBlock("switch (error.name) {", "}", () -> {
-                for (ShapeId errorId : operation.getErrors()) {
-                    writeErrorHandlerCase(errorId);
-                }
-                writer.openBlock("default: {", "}", () -> writer.write("throw error;"));
-            });
+            if (operation.getErrors().isEmpty()) {
+                writer.write("throw error;");
+            } else {
+                writer.openBlock("switch (error.name) {", "}", () -> {
+                    for (ShapeId errorId : operation.getErrors()) {
+                        writeErrorHandlerCase(errorId);
+                    }
+                    writer.openBlock("default: {", "}", () -> writer.write("throw error;"));
+                });
+            }
         });
         writer.write("");
     }

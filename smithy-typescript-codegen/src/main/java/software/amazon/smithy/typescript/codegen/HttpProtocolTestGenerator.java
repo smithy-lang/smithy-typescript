@@ -183,6 +183,17 @@ final class HttpProtocolTestGenerator implements Runnable {
                     onlyIfProtocolMatches(testCase, () -> generateServerResponseTest(operation, testCase));
                 }
             });
+            // 3. Generate test cases for each error on each operation.
+            for (StructureShape error : operationIndex.getErrors(operation)) {
+                if (!error.hasTag("client-only")) {
+                    error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                        for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
+                            onlyIfProtocolMatches(testCase,
+                                    () -> generateServerErrorResponseTest(operation, error, testCase));
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -288,8 +299,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             });
 
             String getHandlerName = "get" + handlerSymbol.getName();
-            writer.addImport(getHandlerName, getHandlerName,
-                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+            writer.addImport(getHandlerName, null, "./server/");
 
             // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
             writer.write("const handler = $L(testService as $T);", getHandlerName, serviceSymbol);
@@ -477,8 +487,6 @@ final class HttpProtocolTestGenerator implements Runnable {
     public void generateServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
         Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
         Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
-        Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
-        Symbol serviceOperationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         String testName = testCase.getId() + ":ServerResponse";
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
@@ -497,42 +505,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                     }
                 });
             });
-
-            writer.write("const service: any = new TestService()");
-
-            // There's a lot of setup here, including creating our own mux, serializers list, and ultimately
-            // our own service handler. This is largely in service of avoiding having to go through the
-            // request deserializer
-            writer.addImport("httpbinding", null, "@aws-smithy/server-common");
-            writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
-                service.getId().getName(), serviceSymbol, () -> {
-                    writer.openBlock("new httpbinding.UriSpec<$S, $S>('POST', [], [], {", "}),",
-                        service.getId().getName(), operation.getId().getName(), () -> {
-                            writer.write("service: $S,", service.getId().getName());
-                            writer.write("operation: $S,", operation.getId().getName());
-                        });
-                });
-
-            writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
-
-            String serializerName = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
-            writer.addImport(serializerName, serializerName,
-                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
-
-            writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
-            writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T> = (op) => {", "};",
-                    serviceOperationsSymbol, serviceSymbol, () -> {
-                writer.openBlock("return {", "};", () -> {
-                    writer.write("serialize: $L,", serializerName);
-                    writer.openBlock("deserialize: (output: any, context: any): Promise<any> => {", "},", () -> {
-                        writer.write("return Promise.resolve({});");
-                    });
-                });
-            });
-
-            writer.write("const handler = new $T(service, testMux, serFn);", handlerSymbol);
-            writer.write("let r = await handler.handle(request)").write("");
-            writeHttpResponseAssertions(testCase);
+            writeServerResponseTest(operation, testCase);
         });
     }
 
@@ -552,6 +525,92 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "}");
             writeResponseAssertions(operation, testCase);
         });
+    }
+
+    private void generateServerErrorResponseTest(
+            OperationShape operation,
+            StructureShape error,
+            HttpResponseTestCase testCase
+    ) {
+        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
+        Symbol errorSymbol = serverSymbolProvider.toSymbol(error);
+        ErrorTrait errorTrait = error.expectTrait(ErrorTrait.class);
+
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+        String testName = testCase.getId() + ":ServerErrorResponse";
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+
+            // Generates a Partial implementation of the service type that only includes
+            // the specific operation under test. Later we'll have to "cast" this with an "as",
+            // but using the partial in the meantime will give us proper type checking on the
+            // operation we want.
+            writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
+                writer.openBlock("$L(input: any, request: HttpRequest): $T {", "}",
+                    operationSymbol.getName(), outputType, () -> {
+                        // Write out an object according to what's defined in the test case.
+                        writer.writeInline("const response = ");
+                        testCase.getParams().accept(new CommandInputNodeVisitor(error, true));
+
+                        // Add in the necessary wrapping information to make the error satisfy its interface.
+                        // TODO: having proper constructors for these errors would be really nice so we don't
+                        // have to do this.
+                        writer.openBlock("const error: $T = {", "};", errorSymbol, () -> {
+                            writer.write("...response,");
+                            writer.write("name: $S,", error.getId().getName());
+                            writer.write("$$fault: $S,", errorTrait.isClientError() ? "client" : "server");
+                            writer.write("$$metadata: {},");
+                        });
+                        writer.write("throw error;");
+                    });
+            });
+            writeServerResponseTest(operation, testCase);
+        });
+    }
+
+    private void writeServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
+        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+        Symbol serializerSymbol = operationSymbol.expectProperty("serializerType", Symbol.class);
+        Symbol serviceOperationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
+        writer.write("const service: any = new TestService()");
+
+        // There's a lot of setup here, including creating our own mux, serializers list, and ultimately
+        // our own service handler. This is largely in service of avoiding having to go through the
+        // request deserializer
+        writer.addImport("httpbinding", null, "@aws-smithy/server-common");
+        writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
+            service.getId().getName(), serviceSymbol, () -> {
+                writer.openBlock("new httpbinding.UriSpec<$S, $S>('POST', [], [], {", "}),",
+                    service.getId().getName(), operation.getId().getName(), () -> {
+                        writer.write("service: $S,", service.getId().getName());
+                        writer.write("operation: $S,", operation.getId().getName());
+                    });
+            });
+
+        // Extend the existing serializer and replace the deserialize with a noop so we don't have to
+        // worry about trying to construct something that matches.
+        writer.openBlock("class TestSerializer extends $T {", "}", serializerSymbol, () -> {
+            writer.openBlock("deserialize = (output: any, context: any): Promise<any> => {", "};", () -> {
+                writer.write("return Promise.resolve({});");
+            });
+        });
+
+        // Since we aren't going through the deserializer, we don't have to put much in the fake request.
+        // Just enough to get it through our test mux.
+        writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
+
+        // Create a new serializer factory that always returns our test serializer.
+        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
+        writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
+        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = (op) =>"
+                        + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
+
+        writer.write("const handler = new $T(service, testMux, serFn);", handlerSymbol);
+        writer.write("let r = await handler.handle(request)").write("");
+        writeHttpResponseAssertions(testCase);
     }
 
     private void generateErrorResponseTest(
