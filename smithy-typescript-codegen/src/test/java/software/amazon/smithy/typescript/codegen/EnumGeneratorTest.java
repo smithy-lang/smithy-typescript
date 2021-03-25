@@ -20,7 +20,11 @@ public class EnumGeneratorTest {
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
-        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        Model model = Model.assembler()
+                .addShape(shape)
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
         TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
@@ -41,7 +45,11 @@ public class EnumGeneratorTest {
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
-        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        Model model = Model.assembler()
+                .addShape(shape)
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
         TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))

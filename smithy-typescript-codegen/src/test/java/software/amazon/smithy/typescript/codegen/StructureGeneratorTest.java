@@ -487,9 +487,11 @@ public class StructureGeneratorTest {
     @Test
     public void generatesNonErrorStructures() {
         StructureShape struct = createNonErrorStructure();
-        ModelAssembler assembler = Model.assembler().addShape(struct);
+        ModelAssembler assembler = Model.assembler()
+                .addShape(struct)
+                .addImport(getClass().getResource("simple-service.smithy"));
         struct.getAllMembers().values().forEach(assembler::addShape);
-        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        Model model = assembler.assemble().unwrap();
         TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
@@ -514,11 +516,13 @@ public class StructureGeneratorTest {
     @Test
     public void generatesNonErrorStructuresThatExtendOtherInterfaces() {
         StructureShape struct = createNonErrorStructure();
-        ModelAssembler assembler = Model.assembler().addShape(struct);
+        ModelAssembler assembler = Model.assembler()
+                .addShape(struct)
+                .addImport(getClass().getResource("simple-service.smithy"));
         struct.getAllMembers().values().forEach(assembler::addShape);
         OperationShape operation = OperationShape.builder().id("com.foo#Operation").output(struct).build();
         assembler.addShape(operation);
-        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        Model model = assembler.assemble().unwrap();
         TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
