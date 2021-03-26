@@ -143,7 +143,7 @@ final class ServerGenerator {
                     + "this.serdeContextBase);");
             writer.closeBlock("}");
             writer.openBlock("try {", "} catch(error: unknown) {", () -> {
-                writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
+                writer.write("let output = await this.service.$L(input, request);", operationSymbol.getName());
                 writer.write("return serializer.serialize(output, this.serdeContextBase);");
             });
             writer.indent();
