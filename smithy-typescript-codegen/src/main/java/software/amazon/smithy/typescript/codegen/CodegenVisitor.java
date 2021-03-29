@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +28,6 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
-import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -37,7 +35,6 @@ import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -46,10 +43,8 @@ import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
-import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -115,7 +110,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
 
         // Decorate the symbol provider using integrations.
-        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         for (TypeScriptIntegration integration : integrations) {
             resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
         }
@@ -163,11 +158,12 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Generate models that are connected to the service being generated.
         LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
-        // Walk the tree and condense duplicate shapes
-        Collection<Shape> shapeSet = condenseShapes(new Walker(nonTraits).walkShapes(service));
+        // Walk the tree.
+        Collection<Shape> shapeSet = new Walker(nonTraits).walkShapes(service);
+
         Model prunedModel = Model.builder().addShapes(shapeSet).build();
 
-        // Generate models from condensed shapes
+        // Generate models from shapes.
         for (Shape shape : TopologicalIndex.of(prunedModel).getOrderedShapes()) {
             shape.accept(this);
         }
@@ -347,58 +343,5 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         return null;
-    }
-
-    private Collection<Shape> condenseShapes(Set<Shape> shapes) {
-        Map<String, Shape> shapeMap = new LinkedHashMap<>();
-
-        // Check for colliding shapes and prune non-unique shapes
-        for (Shape shape : shapes) {
-            String shapeReference = shape.getType().toString() + shape.getId().asRelativeReference();
-
-            if (shapeMap.containsKey(shapeReference)) {
-                Shape knownShape = shapeMap.get(shapeReference);
-                if (isShapeCollision(shape, knownShape)) {
-                    throw new CodegenException(("Shape Collision: cannot condense " + shape + " and " + knownShape));
-                }
-            } else {
-                shapeMap.put(shapeReference, shape);
-            }
-        }
-
-        return shapeMap.values();
-    }
-
-    private boolean isShapeCollision(Shape shapeA, Shape shapeB) {
-        // Check names match.
-        if (!shapeA.getId().getName().equals(shapeB.getId().getName())) {
-            return true;
-        }
-
-        // Check traits match.
-        Map<ShapeId, Trait> traitsA = new HashMap<>(shapeA.getAllTraits());
-        Map<ShapeId, Trait> traitsB = new HashMap<>(shapeB.getAllTraits());
-        // Ignore the box trait since it has no effect in JavaScript.
-        traitsA.remove(BoxTrait.ID);
-        traitsB.remove(BoxTrait.ID);
-        if (!traitsA.equals(traitsB)) {
-            return false;
-        }
-
-        // Check members match.
-        Collection<MemberShape> memberShapesA = shapeA.members();
-        Collection<MemberShape> memberShapesB = shapeB.members();
-        for (MemberShape memberShape : memberShapesA) {
-            if (!memberShapesB.stream().anyMatch(s -> s.getMemberName().contains(memberShape.getMemberName()))) {
-                return true;
-            }
-        }
-        for (MemberShape otherMemberShape : memberShapesB) {
-            if (!memberShapesA.stream().anyMatch(s -> s.getMemberName().contains(otherMemberShape.getMemberName()))) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

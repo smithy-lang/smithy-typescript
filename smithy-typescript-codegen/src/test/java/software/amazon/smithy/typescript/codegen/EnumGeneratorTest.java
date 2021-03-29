@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -19,7 +20,16 @@ public class EnumGeneratorTest {
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
-        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(Model.builder().build()).toSymbol(shape);
+        Model model = Model.assembler()
+                .addShape(shape)
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(model, settings).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export enum Baz {"));
@@ -35,7 +45,16 @@ public class EnumGeneratorTest {
                 .build();
         StringShape shape = StringShape.builder().id("com.foo#Baz").addTrait(trait).build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
-        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(Model.builder().build()).toSymbol(shape);
+        Model model = Model.assembler()
+                .addShape(shape)
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(model, settings).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export type Baz = \"BAR\" | \"FOO\""));
