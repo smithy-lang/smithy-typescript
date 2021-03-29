@@ -27,7 +27,7 @@ public class ServiceGeneratorTest {
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         ApplicationProtocol applicationProtocol = ApplicationProtocol.createDefaultHttpApplicationProtocol();
 
         List<TypeScriptIntegration> integrations = new ArrayList<>();

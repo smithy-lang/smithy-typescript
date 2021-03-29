@@ -77,16 +77,18 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
     private final Model model;
+    private final TypeScriptSettings settings;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> errorShapes = new HashSet<>();
     private final ModuleNameDelegator moduleNameDelegator;
 
-    SymbolVisitor(Model model) {
-        this(model, ModuleNameDelegator.DEFAULT_CHUNK_SIZE);
+    SymbolVisitor(Model model, TypeScriptSettings settings) {
+        this(model, settings, ModuleNameDelegator.DEFAULT_CHUNK_SIZE);
     }
 
-    SymbolVisitor(Model model, int shapeChunkSize) {
+    SymbolVisitor(Model model, TypeScriptSettings settings, int shapeChunkSize) {
         this.model = model;
+        this.settings = settings;
 
         // Load reserved words from a new-line delimited file.
         ReservedWords reservedWords = new ReservedWordsBuilder()
@@ -285,7 +287,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol serviceShape(ServiceShape shape) {
-        String name = StringUtils.capitalize(shape.getId().getName()) + "Client";
+        String name = StringUtils.capitalize(shape.getId().getName(shape)) + "Client";
         String moduleName = moduleNameDelegator.formatModuleName(shape, name);
         return createGeneratedSymbolBuilder(shape, name, moduleName).build();
     }
@@ -368,7 +370,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private String flattenShapeName(ToShapeId id) {
-        return StringUtils.capitalize(id.toShapeId().getName());
+        ServiceShape serviceShape = model.expectShape(settings.getService(), ServiceShape.class);
+        return StringUtils.capitalize(id.toShapeId().getName(serviceShape));
     }
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
