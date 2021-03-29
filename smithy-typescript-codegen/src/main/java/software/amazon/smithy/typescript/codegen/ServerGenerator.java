@@ -49,6 +49,11 @@ final class ServerGenerator {
         writer.addImport("ServiceHandler", null, "@aws-smithy/server-common");
         writer.addImport("Mux", null, "@aws-smithy/server-common");
         writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
+        writer.addImport("UnknownOperationException", null, "@aws-smithy/server-common");
+        writer.addImport("InternalFailureException", null, "@aws-smithy/server-common");
+        writer.addImport("SerializationException", null, "@aws-smithy/server-common");
+        writer.addImport("SmithyFrameworkException", null, "@aws-smithy/server-common");
+        writer.addImport("SerdeContext", null, "@aws-sdk/types");
         writer.addImport("NodeHttpHandler", null, "@aws-sdk/node-http-handler");
         writer.addImport("streamCollector", null, "@aws-sdk/node-http-handler");
         writer.addImport("fromBase64", null, "@aws-sdk/util-base64-node");
@@ -68,6 +73,8 @@ final class ServerGenerator {
             writer.write("private mux: Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
             writer.write("private serializerFactory: <T extends $T>(operation: T) => "
                             + "OperationSerializer<$T, T, SmithyException>;", operationsType, serviceSymbol);
+            writer.write("private serializeFrameworkException: (e: SmithyFrameworkException, "
+                            + "ctx: Omit<SerdeContext, 'endpoint'>) => Promise<HttpResponse>;");
             writer.openBlock("private serdeContextBase = {", "};", () -> {
                 writer.write("base64Encoder: toBase64,");
                 writer.write("base64Decoder: fromBase64,");
@@ -87,25 +94,32 @@ final class ServerGenerator {
                 writer.write("operation in $T that ", serviceSymbol);
                 writer.writeInline("                         ")
                       .write("handles deserialization of requests and serialization of responses");
+                writer.write("@param serializeFrameworkException A function that can serialize "
+                        + "{@link SmithyFrameworkException}s");
             });
-            writer.openBlock("constructor(service: $1T, "
-                            + "mux: Mux<$3S, $2T>, "
-                            + "serializerFactory: <T extends $2T>(op: T) => "
-                            + "OperationSerializer<$1T, T, SmithyException>) {", "}",
-                    serviceSymbol, operationsType, serviceShape.getId().getName(), () -> {
-                writer.write("this.service = service;");
-                writer.write("this.mux = mux;");
-                writer.write("this.serializerFactory = serializerFactory;");
+            writer.openBlock("constructor(", ") {", () -> {
+                writer.write("service: $T,", serviceSymbol);
+                writer.write("mux: Mux<$S, $T>,", serviceShape.getId().getName(), operationsType);
+                writer.write("serializerFactory:<T extends $T>(op: T) => OperationSerializer<$T, T, SmithyException>,",
+                        operationsType, serviceSymbol);
+                writer.write("serializeFrameworkException: (e: SmithyFrameworkException, ctx: Omit<SerdeContext, "
+                        + "'endpoint'>) => Promise<HttpResponse>");
             });
+            writer.indent();
+            writer.write("this.service = service;");
+            writer.write("this.mux = mux;");
+            writer.write("this.serializerFactory = serializerFactory;");
+            writer.write("this.serializeFrameworkException = serializeFrameworkException;");
+            writer.closeBlock("}");
             writer.openBlock("async handle(request: HttpRequest): Promise<HttpResponse> {", "}", () -> {
                 writer.write("const target = this.mux.match(request);");
                 writer.openBlock("if (target === undefined) {", "}", () -> {
-                    writer.write("throw new Error(`Could not match any operation to $${request.method} "
-                            + "$${request.path} $${JSON.stringify(request.query)}`);");
+                    writer.write("return serializeFrameworkException(new UnknownOperationException(), "
+                            + "this.serdeContextBase);");
                 });
                 writer.openBlock("switch (target.operation) {", "}", () -> {
                     for (OperationShape operation : operations) {
-                        generateHandlerCase(writer, serviceSymbol, operation, symbolProvider.toSymbol(operation));
+                        generateHandlerCase(writer, operation, symbolProvider.toSymbol(operation));
                     }
                 });
             });
@@ -113,25 +127,33 @@ final class ServerGenerator {
     }
 
     private static void generateHandlerCase(TypeScriptWriter writer,
-                                            Symbol serviceSymbol,
                                             Shape operationShape,
                                             Symbol operationSymbol) {
         String opName = operationShape.getId().getName();
         writer.openBlock("case $S : {", "}", opName, () -> {
             writer.write("let serializer = this.serializerFactory($S);", opName);
-            writer.openBlock("try {", "} catch(error: unknown) {", () -> {
-                writer.openBlock("let input = await serializer.deserialize(request, {", "});", () -> {
+            writer.write("let input;");
+            writer.openBlock("try {", "} catch (error: unknown) {", () -> {
+                writer.openBlock("input = await serializer.deserialize(request, {", "});", () -> {
                     writer.write("endpoint: () => Promise.resolve(request), ...this.serdeContextBase");
                 });
-                writer.write("let output = this.service.$L(input, request);", operationSymbol.getName());
+            });
+            writer.indent();
+            writer.write("return this.serializeFrameworkException(new SerializationException(), "
+                    + "this.serdeContextBase);");
+            writer.closeBlock("}");
+            writer.openBlock("try {", "} catch(error: unknown) {", () -> {
+                writer.write("let output = await this.service.$L(input, request);", operationSymbol.getName());
                 writer.write("return serializer.serialize(output, this.serdeContextBase);");
             });
-            writer.openBlock("", "}", () -> {
-                writer.openBlock("if (serializer.isOperationError(error)) {", "}", () -> {
-                    writer.write("return serializer.serializeError(error, this.serdeContextBase);");
-                });
-                writer.write("throw error;");
+            writer.indent();
+            writer.openBlock("if (serializer.isOperationError(error)) {", "}", () -> {
+                writer.write("return serializer.serializeError(error, this.serdeContextBase);");
             });
+            writer.write("console.log('Received an unexpected error', error);");
+            writer.write("return this.serializeFrameworkException(new InternalFailureException(), "
+                    + "this.serdeContextBase);");
+            writer.closeBlock("}");
         });
     }
 
