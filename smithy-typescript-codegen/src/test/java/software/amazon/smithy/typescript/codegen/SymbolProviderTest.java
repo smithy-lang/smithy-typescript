@@ -10,6 +10,7 @@ import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -22,8 +23,16 @@ public class SymbolProviderTest {
     @Test
     public void createsSymbols() {
         Shape shape = StructureShape.builder().id("com.foo.baz#Hello").build();
-        Model model = Model.assembler().addShape(shape).assemble().unwrap();
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .addShape(shape)
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("Hello"));
@@ -36,8 +45,16 @@ public class SymbolProviderTest {
     public void createsSymbolsIntoTargetNamespace() {
         Shape shape1 = StructureShape.builder().id("com.foo#Hello").build();
         Shape shape2 = StructureShape.builder().id("com.foo.baz#Hello").build();
-        Model model = Model.assembler().addShapes(shape1, shape2).assemble().unwrap();
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .addShapes(shape1, shape2)
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
         MockManifest manifest = new MockManifest();
@@ -59,8 +76,16 @@ public class SymbolProviderTest {
     @Test
     public void escapesReservedWords() {
         Shape shape = StructureShape.builder().id("com.foo.baz#Pick").build();
-        Model model = Model.assembler().addShape(shape).assemble().unwrap();
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .addShape(shape)
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("_Pick"));
@@ -74,11 +99,16 @@ public class SymbolProviderTest {
                 .addMember(member)
                 .build();
         Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
                 .addShapes(struct, member)
                 .assemble()
                 .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
 
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
         Symbol structSymbol = provider.toSymbol(struct);
         Symbol memberSymbol = provider.toSymbol(member);
 
@@ -100,11 +130,16 @@ public class SymbolProviderTest {
                 .member(listMember)
                 .build();
         Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
                 .addShapes(list, listMember, record)
                 .assemble()
                 .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
 
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol listSymbol = provider.toSymbol(list);
 
         assertThat(listSymbol.getName(), equalTo("(_Record)[]"));
@@ -116,11 +151,15 @@ public class SymbolProviderTest {
                 .addImport(getClass().getResource("output-structure.smithy"))
                 .assemble()
                 .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
 
         Shape input = model.expectShape(ShapeId.from("smithy.example#GetFooInput"));
         Shape output = model.expectShape(ShapeId.from("smithy.example#GetFooOutput"));
         Shape error = model.expectShape(ShapeId.from("smithy.example#GetFooError"));
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol inputSymbol = provider.toSymbol(input);
         Symbol outputSymbol = provider.toSymbol(output);
         Symbol errorSymbol = provider.toSymbol(error);
@@ -148,9 +187,13 @@ public class SymbolProviderTest {
                 .addImport(getClass().getResource("output-structure.smithy"))
                 .assemble()
                 .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
 
         Shape command = model.expectShape(ShapeId.from("smithy.example#GetFoo"));
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol commandSymbol = provider.toSymbol(command);
 
         assertThat(commandSymbol.getName(), equalTo("GetFooCommand"));
@@ -167,11 +210,16 @@ public class SymbolProviderTest {
                 .addMember(member)
                 .build();
         Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
                 .addShapes(struct, member, jsonString)
                 .assemble()
                 .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
 
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
 
         assertThat(memberSymbol.getName(), equalTo("__LazyJsonString | string"));

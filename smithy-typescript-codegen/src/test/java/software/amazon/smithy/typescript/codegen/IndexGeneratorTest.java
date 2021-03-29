@@ -19,7 +19,7 @@ public class IndexGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model);
+        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
         MockManifest manifest = new MockManifest();
 
         IndexGenerator.writeIndex(settings, model, symbolProvider, manifest, null);
