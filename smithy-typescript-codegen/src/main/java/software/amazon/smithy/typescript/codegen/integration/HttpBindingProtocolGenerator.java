@@ -237,7 +237,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeEmptyEndpoint(context);
 
             writer.openBlock("switch (input.name) {", "}", () -> {
-                for (final Shape shape : context.getModel().getShapesWithTrait(HttpErrorTrait.class)) {
+                for (final Shape shape : new TreeSet<>(context.getModel().getShapesWithTrait(HttpErrorTrait.class))) {
                     StructureShape errorShape = shape.asStructureShape().orElseThrow(IllegalArgumentException::new);
                     writer.openBlock("case $S: {", "}", errorShape.getId().getName(), () -> {
                         generateErrorSerializationImplementation(context, errorShape, responseType, bindingIndex);
