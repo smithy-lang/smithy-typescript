@@ -17,7 +17,7 @@ const compareEquivalentXmlBodies = (expectedBody: string, generatedBody: string)
     ignoreAttributes: false,
     parseNodeValue: false,
     trimValues: false,
-    tagValueProcessor: (val: any, tagName: any) => decodeEscapedXml(val)
+    tagValueProcessor: (val: any, tagName: any) => val.trim() === "" ? "" : decodeEscapedXml(val)
   };
 
   const parseXmlBody = (body: string) => {
