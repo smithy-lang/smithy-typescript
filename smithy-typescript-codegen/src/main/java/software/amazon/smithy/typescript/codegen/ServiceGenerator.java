@@ -320,6 +320,12 @@ final class ServiceGenerator implements Runnable {
     private void generateDestroyMethod() {
         // Generates the destroy() method, and calls the destroy() method of
         // any runtime plugin that claims to have a destroy method.
+        if (applicationProtocol.isHttpProtocol()) {
+            writer.writeDocs("Destroy underlying resources, like sockets. It's usually not necessary to do this.\n"
+                    + "However in Node.js, it's best to explicitly shut down the client's agent when it is no longer "
+                    + "needed.\nOtherwise, sockets might stay open for quite a long time before the server terminates "
+                    + "them.");
+        }
         writer.openBlock("destroy(): void {", "}", () -> {
             writer.pushState(CLIENT_DESTROY_SECTION);
             for (RuntimeClientPlugin plugin : runtimePlugins) {
