@@ -281,21 +281,17 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
             Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
-            Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
-            Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
 
             // Create a mock function to set in place of the server operation function so we can capture
             // input and other information.
             writer.write("let testFunction = jest.fn();");
-            writer.write("testFunction.mockReturnValue({});");
+            writer.write("testFunction.mockReturnValue(Promise.resolve({}));");
 
             // We use a partial here so that we don't have to define the entire service, but still get the advantages
             // the type checker, including excess property checking. Later on we'll use `as` to cast this to the
             // full service so that we can actually use it.
             writer.openBlock("const testService: Partial<$T> = {", "};", serviceSymbol, () -> {
-                writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
-                writer.write("$L: testFunction as __Operation<$T, $T>,",
-                        operationSymbol.getName(), inputType, outputType);
+                writer.write("$L: testFunction as $T,", operationSymbol.getName(), operationSymbol);
             });
 
             String getHandlerName = "get" + handlerSymbol.getName();
@@ -322,7 +318,6 @@ final class HttpProtocolTestGenerator implements Runnable {
 
             // Capture the input. We need to cast this to any so we can index into it.
             writer.write("let r: any = testFunction.mock.calls[0][0];").write("");
-
             writeRequestParamAssertions(operation, testCase);
         });
     }
@@ -492,16 +487,16 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
             writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
-                writer.openBlock("$L(input: any, request: HttpRequest): $T {", "}",
+                writer.openBlock("$L(input: any, request: HttpRequest): Promise<$T> {", "}",
                         operationSymbol.getName(), outputType, () -> {
                     Optional<ShapeId> outputOptional = operation.getOutput();
                     if (outputOptional.isPresent()) {
                         StructureShape outputShape = model.expectShape(outputOptional.get(), StructureShape.class);
                         writer.writeInline("let response = ");
                         testCase.getParams().accept(new CommandInputNodeVisitor(outputShape, true));
-                        writer.write("return { ...response, '$$metadata': {} };");
+                        writer.write("return Promise.resolve({ ...response, '$$metadata': {} });");
                     } else {
-                        writer.write("return { '$$metadata': {} };");
+                        writer.write("return Promise.resolve({ '$$metadata': {} });");
                     }
                 });
             });
@@ -547,7 +542,7 @@ final class HttpProtocolTestGenerator implements Runnable {
             // but using the partial in the meantime will give us proper type checking on the
             // operation we want.
             writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
-                writer.openBlock("$L(input: any, request: HttpRequest): $T {", "}",
+                writer.openBlock("$L(input: any, request: HttpRequest): Promise<$T> {", "}",
                     operationSymbol.getName(), outputType, () -> {
                         // Write out an object according to what's defined in the test case.
                         writer.writeInline("const response = ");
@@ -608,7 +603,9 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = (op) =>"
                         + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
-        writer.write("const handler = new $T(service, testMux, serFn);", handlerSymbol);
+        writer.addImport("serializeFrameworkException", null,
+                "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+        writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException);", handlerSymbol);
         writer.write("let r = await handler.handle(request)").write("");
         writeHttpResponseAssertions(testCase);
     }
