@@ -1308,27 +1308,52 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBindingIndex bindingIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
-        List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
-        if (queryBindings.isEmpty()) {
+        List<HttpBinding> directQueryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
+        List<HttpBinding> mappedQueryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY_PARAMS);
+        if (directQueryBindings.isEmpty() && mappedQueryBindings.isEmpty()) {
             return;
         }
         writer.write("const query = output.query");
         writer.openBlock("if (query !== undefined && query !== null) {", "}", () -> {
-            for (HttpBinding binding : queryBindings) {
-                String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
-                writer.openBlock("if (query['$L'] !== undefined) {", "}", binding.getLocationName(), () -> {
-                    Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-                    String expectedType = "string";
-                    if (target instanceof CollectionShape) {
-                        expectedType = "string[]";
-                    }
-                    String headerValue = getOutputValue(context, binding.getLocation(),
-                            "query['" + binding.getLocationName() + "'] as " + expectedType,
-                            binding.getMember(), target);
-                    writer.write("contents.$L = $L;", memberName, headerValue);
-                });
+            readDirectQueryBindings(context, directQueryBindings);
+            if (!mappedQueryBindings.isEmpty()) {
+                // There can only ever be one of these bindings on a given operation.
+                readMappedQueryBindings(context, mappedQueryBindings.get(0));
             }
         });
+    }
+
+    private void readDirectQueryBindings(GenerationContext context, List<HttpBinding> directQueryBindings) {
+        TypeScriptWriter writer = context.getWriter();
+        for (HttpBinding binding : directQueryBindings) {
+            String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
+            writer.openBlock("if (query['$L'] !== undefined) {", "}", binding.getLocationName(), () -> {
+                Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+                String queryValue = getOutputValue(context, binding.getLocation(),
+                        "query['" + binding.getLocationName() + "'] as string",
+                        binding.getMember(), target);
+                writer.write("contents.$L = $L;", memberName, queryValue);
+            });
+        }
+    }
+
+    private void readMappedQueryBindings(GenerationContext context, HttpBinding mappedBinding) {
+        TypeScriptWriter writer = context.getWriter();
+        MapShape target = context.getModel()
+                .expectShape(mappedBinding.getMember().getTarget()).asMapShape().get();
+        Shape valueShape = context.getModel().expectShape(target.getValue().getTarget());
+        String valueType = "string";
+        if (valueShape instanceof CollectionShape) {
+            valueType = "string[]";
+        }
+        writer.write("let parsedQuery: { [key: string]: $L } = {}", valueType);
+        String parsedValue = getOutputValue(context, mappedBinding.getLocation(), "value as string",
+                target.getValue(), valueShape);
+        writer.openBlock("for (const [key, value] of Object.entries(query)) {", "}", () -> {
+            writer.write("parsedQuery[key] = $L;", parsedValue);
+        });
+        String memberName = context.getSymbolProvider().toMemberName(mappedBinding.getMember());
+        writer.write("contents.$L = parsedQuery;", memberName);
     }
 
     private void readPath(
@@ -2080,9 +2105,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 targetMember, collectionTarget);
         String outputParam;
         switch (bindingType) {
-            // TODO: make sure this actually works
+            case QUERY_PARAMS:
             case QUERY:
-                return "(" + dataSource + ").map(_entry => " + collectionTargetValue + ")";
+                return String.format("(Array.isArray(%1$s) ? (%1$s[]) : [%1$s]).map(_entry => %2$s)",
+                        dataSource, collectionTargetValue);
             case LABEL:
                 dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on commas.
