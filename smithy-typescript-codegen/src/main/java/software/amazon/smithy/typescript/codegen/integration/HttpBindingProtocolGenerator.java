@@ -248,7 +248,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("");
     }
 
-    private void generateMux(GenerationContext context) {
+    private void generateServiceMux(GenerationContext context) {
         TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
         TypeScriptWriter writer = context.getWriter();
 
@@ -271,6 +271,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     }
                }
        );
+    }
+
+    private void generateOperationMux(GenerationContext context, OperationShape operation) {
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.addImport("httpbinding", null, "@aws-smithy/server-common");
+
+        writer.openBlock("const mux = new httpbinding.HttpBindingMux<$S, $S>([", "]);",
+                context.getService().getId().getName(),
+                operation.getId().getName(),
+                () -> {
+                    HttpTrait httpTrait = operation.expectTrait(HttpTrait.class);
+                    generateUriSpec(context, operation, httpTrait);
+                }
+        );
     }
 
     private void generateUriSpec(GenerationContext context,
@@ -321,7 +336,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     @Override
-    public void generateHandlerFactory(GenerationContext context) {
+    public void generateServiceHandlerFactory(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
         TopDownIndex index = TopDownIndex.of(context.getModel());
         Set<OperationShape> operations = index.getContainedOperations(context.getService());
@@ -334,11 +349,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writer.openBlock("export const get$L = (service: $T): ServiceHandler => {", "}",
+        writer.openBlock("export const get$L = (service: $T): __ServiceHandler => {", "}",
                 handlerSymbol.getName(), serviceSymbol, () -> {
-            generateMux(context);
+            generateServiceMux(context);
             writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
-            writer.openBlock("const serFn: (op: $1T) => OperationSerializer<$2T, $1T, __SmithyException> = "
+            writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = "
                             + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
                 writer.openBlock("switch (op) {", "}", () -> {
                     operations.stream()
@@ -348,6 +363,29 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
             writer.write("return new $T(service, mux, serFn, serializeFrameworkException);", handlerSymbol);
         });
+    }
+
+    @Override
+    public void generateOperationHandlerFactory(GenerationContext context, OperationShape operation) {
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        writer.addImport("serializeFrameworkException", null,
+                "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+
+        final Symbol operationSymbol = symbolProvider.toSymbol(operation);
+        final Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
+        final Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
+        final Symbol serializerType = operationSymbol.expectProperty("serializerType", Symbol.class);
+        final Symbol operationHandlerSymbol = operationSymbol.expectProperty("handler", Symbol.class);
+
+        writer.openBlock("export const get$L = (operation: __Operation<$T, $T>): __ServiceHandler => {", "}",
+                operationHandlerSymbol.getName(), inputType, outputType,
+                () -> {
+                    generateOperationMux(context, operation);
+                    writer.write("return new $T(operation, mux, new $T(), serializeFrameworkException);",
+                            operationHandlerSymbol, serializerType);
+                });
     }
 
     private Consumer<OperationShape> writeOperationCase(

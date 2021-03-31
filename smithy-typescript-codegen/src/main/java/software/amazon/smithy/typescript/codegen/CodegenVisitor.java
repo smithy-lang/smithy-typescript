@@ -287,6 +287,16 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     @Override
+    public Void operationShape(OperationShape operation) {
+        if (settings.generateServerSdk()) {
+            writers.useShapeWriter(operation, serverSymbolProvider, w -> {
+                ServerGenerator.generateOperationHandler(serverSymbolProvider, service, operation, w);
+            });
+        }
+        return null;
+    }
+
+    @Override
     public Void serviceShape(ServiceShape shape) {
         if (!Objects.equals(service, shape)) {
             LOGGER.fine(() -> "Skipping `" + shape.getId() + "` because it is not `" + service.getId() + "`");
@@ -328,8 +338,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                     protocolGenerator.generateResponseSerializers(serverContext);
                     protocolGenerator.generateFrameworkErrorSerializer(serverContext);
                     writers.useShapeWriter(shape, serverSymbolProvider, w -> {
-                        protocolGenerator.generateHandlerFactory(serverContext.withWriter(w));
+                        protocolGenerator.generateServiceHandlerFactory(serverContext.withWriter(w));
                     });
+                    for (OperationShape operation: TopDownIndex.of(model).getContainedOperations(service)) {
+                        writers.useShapeWriter(operation, serverSymbolProvider, w -> {
+                            protocolGenerator.generateOperationHandlerFactory(serverContext.withWriter(w), operation);
+                        });
+                    }
                 }
                 protocolGenerator.generateSharedComponents(context);
             });

@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -156,12 +157,21 @@ public interface ProtocolGenerator {
     void generateFrameworkErrorSerializer(GenerationContext serverContext);
 
     /**
-     * Generates the code used to determine the service and operation
-     * targeted by a given request.
+     * Generates a factory for the ServiceHandler implementation for this service.
      *
      * @param context Generation context.
      */
-    void generateHandlerFactory(GenerationContext context);
+    void generateServiceHandlerFactory(GenerationContext context);
+
+    /**
+     * Generates the code used to handle a request for a specific operation in the given service. This allows the
+     * business logic for a service to be split among multiple deployment targets, for example, one Lambda function
+     * per operation.
+     *
+     * @param context Generation context.
+     * @param operation The operation to generate a handler factory for.
+     */
+    void generateOperationHandlerFactory(GenerationContext context, OperationShape operation);
 
     /**
      * Generates the code used to deserialize the shapes of a service
