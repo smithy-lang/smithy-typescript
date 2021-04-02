@@ -161,6 +161,25 @@ public interface TypeScriptIntegration {
     }
 
     /**
+     * Write additional export statement to client root index.ts.
+     * This is necessary when {@link TypeScriptIntegration#writeAdditionalFiles} is also implemented.
+     *
+     * @param settings Settings used to generate.
+     * @param model Model to generate from.
+     * @param symbolProvider Symbol provider used for codegen.
+     * @param writer TypeScript writer that works with the file.
+     * @see #writeAdditionalFiles(TypeScriptSettings, Model, SymbolProvider, BiConsumer)
+     */
+    default void writeAdditionalExports(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
+    ) {
+        // pass
+    }
+
+    /**
      * Gets a list of plugins to apply to the generated client.
      *
      * @return Returns the list of RuntimePlugins to apply to the client.

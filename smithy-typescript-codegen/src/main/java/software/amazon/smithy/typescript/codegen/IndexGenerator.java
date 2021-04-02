@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
@@ -25,6 +26,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.waiters.WaitableTrait;
 import software.amazon.smithy.waiters.Waiter;
 
@@ -39,7 +41,8 @@ final class IndexGenerator {
         TypeScriptSettings settings,
         Model model,
         SymbolProvider symbolProvider,
-        FileManifest fileManifest
+        FileManifest fileManifest,
+        List<TypeScriptIntegration> integrations
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
         ServiceShape service = settings.getService(model);
@@ -78,6 +81,10 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models/index\";");
+        // Write each custom export.
+        for (TypeScriptIntegration integration : integrations) {
+            integration.writeAdditionalExports(settings, model, symbolProvider, writer);
+        }
         fileManifest.writeFile("index.ts", writer.toString());
     }
 }
