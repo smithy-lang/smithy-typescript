@@ -290,11 +290,16 @@ final class ServiceGenerator implements Runnable {
             // (e.g., _config_0, _config_1, etc).
             for (RuntimeClientPlugin plugin : runtimePlugins) {
                 if (plugin.getResolveFunction().isPresent()) {
+                    Optional<List<String>> additionalParameters = plugin.getAdditionalResolveFunctionParameters();
                     configVariable++;
-                    writer.write("let $L = $T($L);",
+                    writer.write("let $L = $T($L$L);",
                                  generateConfigVariable(configVariable),
                                  plugin.getResolveFunction().get(),
-                                 generateConfigVariable(configVariable - 1));
+                                 generateConfigVariable(configVariable - 1),
+                                 additionalParameters.map(
+                                        params -> params.stream().map(param -> ", " + param)
+                                                .collect(Collectors.joining())).orElseGet(() -> "")
+                                 );
                 }
             }
 
