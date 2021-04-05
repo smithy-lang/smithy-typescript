@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,11 +57,15 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         inputConfig = builder.inputConfig;
         resolvedConfig = builder.resolvedConfig;
         resolveFunction = builder.resolveFunction;
-        additionalResolveFunctionParameters = builder.additionalResolveFunctionParameters;
+        additionalResolveFunctionParameters = ListUtils.copyOf(builder.additionalResolveFunctionParameters);
         pluginFunction = builder.pluginFunction;
         destroyFunction = builder.destroyFunction;
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
+
+        if (!additionalResolveFunctionParameters.isEmpty() && resolveFunction == null) {
+            throw new IllegalStateException("Additional parameters can only be set if a resolve function is set.");
+        }
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -158,15 +163,16 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     }
 
     /**
-     * Gets the optionally present list of parameters to be supplied to the
+     * Gets a list of additional parameters to be supplied to the
      * resolve function. These parameters are to be supplied to resolve
-     * function as Nth(N &gt; 1) positional arguments.
+     * function as Nth(N &gt; 1) positional arguments. The list is empty if
+     * there are no additional parameters.
      *
      * @return Returns the optionally present list of parameters.
      * @see #getResolveFunction()
      */
-    public Optional<List<String>> getAdditionalResolveFunctionParameters() {
-        return Optional.ofNullable(additionalResolveFunctionParameters);
+    public List<String> getAdditionalResolveFunctionParameters() {
+        return additionalResolveFunctionParameters;
     }
 
     /**
@@ -310,7 +316,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private SymbolReference inputConfig;
         private SymbolReference resolvedConfig;
         private SymbolReference resolveFunction;
-        private List<String> additionalResolveFunctionParameters;
+        private List<String> additionalResolveFunctionParameters = new ArrayList<>();
         private SymbolReference pluginFunction;
         private SymbolReference destroyFunction;
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
@@ -395,7 +401,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             return this;
         }
 
-          /**
+        /**
          * Sets the symbol reference that is invoked in order to convert the
          * input symbol type to a resolved symbol type.
          *
@@ -445,18 +451,14 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         }
 
         /**
-         * Add additional positional input parameters to resolve function
+         * Set additional positional input parameters to resolve function
          * <p>this can only be set if {@link #resolveFunction} is set.
          *
          * @param additionalParameters Additional parameters to be generated as resolve function input.
          * @return Returns the builder.
          * @see #getResolveFunction()
          */
-        public Builder addAdditionalResolveFunctionParameters(String... additionalParameters) {
-            if (this.resolveFunction == null) {
-                throw new IllegalStateException("Additional parameters can only be set after a resolve function"
-                    + " is set.");
-            }
+        public Builder additionalResolveFunctionParameters(String... additionalParameters) {
             this.additionalResolveFunctionParameters = ListUtils.of(additionalParameters);
             return this;
         }
