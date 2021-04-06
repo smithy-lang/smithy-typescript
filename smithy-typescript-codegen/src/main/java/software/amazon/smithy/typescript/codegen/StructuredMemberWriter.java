@@ -108,6 +108,26 @@ final class StructuredMemberWriter {
     }
 
     /**
+     * Writes a constructor function that takes in an object allowing modeled fields to be initialized.
+     */
+    void writeConstructor(TypeScriptWriter writer, Shape shape) {
+        writer.openBlock("constructor(opts: {", "}) {", () -> {
+            writeMembers(writer, shape);
+        });
+        writer.indent();
+
+        for (MemberShape member : members) {
+            if (skipMembers.contains(member.getMemberName())) {
+                continue;
+            }
+
+            writer.write("this.${1L} = opts.${1L};", getSanitizedMemberName(member));
+        }
+
+        writer.closeBlock("}");
+    }
+
+    /**
      * Writes SENSITIVE_STRING to hide the value of sensitive members.
      */
     private void writeSensitiveString(TypeScriptWriter writer) {
