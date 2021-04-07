@@ -125,7 +125,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Generates serialization functions for shapes in the passed set. These functions
      * should return a value that can then be serialized by the implementation of
-     * {@code serializeInputDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
+     * {@code serializeDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
      * are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
@@ -136,7 +136,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Generates deserialization functions for shapes in the passed set. These functions
      * should return a value that can then be deserialized by the implementation of
-     * {@code deserializeOutputDocument}. The {@link DocumentShapeDeserVisitor} and
+     * {@code deserializeDocument}. The {@link DocumentShapeDeserVisitor} and
      * {@link DocumentMemberDeserVisitor} are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
@@ -429,7 +429,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "): Promise<$T> => {", "}", methodName, outputType, responseType, () -> {
             writeEmptyEndpoint(context);
             writeOperationStatusCode(context, operation, bindingIndex, trait);
-            writeResponseHeaders(context, operation, bindingIndex, () -> writeDefaultHeaders(context, operation));
+            writeResponseHeaders(context, operation, bindingIndex,
+                    () -> writeDefaultHeaders(context, operation, false));
 
             List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
             if (!bodyBindings.isEmpty()) {
@@ -480,7 +481,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                                           HttpBindingIndex bindingIndex) {
         TypeScriptWriter writer = context.getWriter();
         writeErrorStatusCode(context, error);
-        writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
+        writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultHeaders(context, error, false));
 
         List<HttpBinding> bodyBindings = writeResponseBody(context, error, bindingIndex);
         if (!bodyBindings.isEmpty()) {
@@ -722,7 +723,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Only set the content type if one can be determined.
             bindingIndex.determineRequestContentType(operation, getDocumentContentType()).ifPresent(contentType ->
                     writer.write("'content-type': $S,", contentType));
-            writeDefaultHeaders(context, operation);
+            writeDefaultHeaders(context, operation, true);
 
             operation.getInput().ifPresent(outputId -> {
                 for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
@@ -803,7 +804,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
         List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
         boolean shouldWriteDefaultBody = bindingIndex.getRequestBindings(operation).isEmpty();
-        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody);
+        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody, true);
     }
 
     private List<HttpBinding> writeResponseBody(
@@ -817,7 +818,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         boolean shouldWriteDefaultBody = bindingIndex.getResponseBindings(operationOrError).isEmpty();
-        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody);
+        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody, false);
     }
 
     private List<HttpBinding> writeBody(
@@ -825,7 +826,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OperationShape operation,
             List<HttpBinding> payloadBindings,
             List<HttpBinding> documentBindings,
-            boolean shouldWriteDefaultBody
+            boolean shouldWriteDefaultBody,
+            boolean isInput
     ) {
         TypeScriptWriter writer = context.getWriter();
         // Write the default `body` property.
@@ -835,7 +837,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!payloadBindings.isEmpty()) {
             // There can only be one payload binding.
             HttpBinding payloadBinding = payloadBindings.get(0);
-            serializeInputPayload(context, operation, payloadBinding);
+            serializePayload(context, operation, payloadBinding, true);
             return payloadBindings;
         }
 
@@ -844,7 +846,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!documentBindings.isEmpty() || shouldWriteDefaultBody) {
             documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
 
-            serializeInputDocument(context, operation, documentBindings);
+            serializeDocumentBody(context, operation, documentBindings, isInput);
             return documentBindings;
         }
 
@@ -1110,34 +1112,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }</pre>
      *
      * @param context The generation context.
-     * @param operation The operation being generated.
+     * @param operationOrError The operation or error being generated.
+     * @param isInput Whether the headers for an input or output/error are being generated.
      */
-    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {
+    protected void writeDefaultHeaders(GenerationContext context, Shape operationOrError, boolean isInput) {
     }
 
     /**
-     * Writes any additional HTTP headers required by the protocol implementation for errors.
-     *
-     * <p>Two parameters will be available in scope:
-     * <ul>
-     *   <li>{@code input: <T>}: the type generated for the operation's error.</li>
-     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
-     * </ul>
-     *
-     * <p>For example:
-     *
-     * <pre>{@code
-     *   "foo": "This is a custom header",
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param error The error being generated.
-     */
-    protected void writeDefaultErrorHeaders(GenerationContext context, StructureShape error) {
-    }
-
-    /**
-     * Writes the code needed to serialize the input document of a request.
+     * Writes the code needed to serialize a protocol document.
      *
      * <p>Implementations of this method are expected to set a value to the
      * {@code body} variable that will be serialized as the request body.
@@ -1155,15 +1137,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }
      * body = JSON.stringify(bodyParams);
      * }</pre>
-     *
-     * @param context The generation context.
+     *  @param context The generation context.
      * @param operation The operation being generated.
      * @param documentBindings The bindings to place in the document.
+     * @param isInput Whether the input or output/error of the operation is being serialized.
      */
-    protected abstract void serializeInputDocument(
+    protected abstract void serializeDocumentBody(
             GenerationContext context,
             OperationShape operation,
-            List<HttpBinding> documentBindings
+            List<HttpBinding> documentBindings,
+            boolean isInput
     );
 
     /**
@@ -1180,15 +1163,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *   body = context.base64Encoder(input.body);
      * }
      * }</pre>
-     *
-     * @param context The generation context.
+     *  @param context The generation context.
      * @param operation The operation being generated.
      * @param payloadBinding The payload binding to serialize.
+     * @param isInput Whether the input or output/error of the operation is being serialized.
      */
-    protected void serializeInputPayload(
+    protected void serializePayload(
             GenerationContext context,
             OperationShape operation,
-            HttpBinding payloadBinding
+            HttpBinding payloadBinding,
+            boolean isInput
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -1627,7 +1611,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("const data: any = $L;", getErrorBodyLocation(context, "parsedOutput.body"));
             List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
             responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
-            deserializeOutputDocument(context, error, responseBindings);
+            deserializeDocumentBody(context, error, responseBindings, false);
             return responseBindings;
         } else {
             // Deserialize response body just like in a normal response.
@@ -1741,7 +1725,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
         documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
         List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
-        return readBody(context, operation, documentBindings, payloadBindings, Collections.emptyList());
+        return readBody(context, operation, documentBindings, payloadBindings, Collections.emptyList(), false);
     }
 
     private List<HttpBinding> readResponseBody(
@@ -1754,7 +1738,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
         List<HttpBinding> responseCodeBindings = bindingIndex.getResponseBindings(
                 operationOrError, Location.RESPONSE_CODE);
-        return readBody(context, operationOrError, documentBindings, payloadBindings, responseCodeBindings);
+        return readBody(context, operationOrError, documentBindings, payloadBindings, responseCodeBindings, true);
     }
 
     private List<HttpBinding> readBody(
@@ -1762,7 +1746,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Shape operationOrError,
             List<HttpBinding> documentBindings,
             List<HttpBinding> payloadBindings,
-            List<HttpBinding> responseCodeBindings
+            List<HttpBinding> responseCodeBindings,
+            boolean isInput
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -1776,7 +1761,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             }
             writer.write("const data: any = $L;", bodyLocation);
 
-            deserializeOutputDocument(context, operationOrError, documentBindings);
+            deserializeDocumentBody(context, operationOrError, documentBindings, isInput);
         }
         if (!payloadBindings.isEmpty()) {
             HttpBinding payloadBinding = readResponsePayload(context, payloadBindings.get(0));
@@ -2325,7 +2310,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code needed to deserialize the output document of a response.
+     * Writes the code needed to deserialize a protocol document.
      *
      * <p>Implementations of this method are expected to set members in the
      * {@code contents} variable that represents the type generated for the
@@ -2340,14 +2325,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
      * }
      * }</pre>
-     *
      * @param context The generation context.
      * @param operationOrError The operation or error with a document being deserialized.
      * @param documentBindings The bindings to read from the document.
+     * @param isInput Whether the input or output/error of the operation is being deserialized.
      */
-    protected abstract void deserializeOutputDocument(
+    protected abstract void deserializeDocumentBody(
             GenerationContext context,
             Shape operationOrError,
-            List<HttpBinding> documentBindings
+            List<HttpBinding> documentBindings,
+            boolean isInput
     );
 }
