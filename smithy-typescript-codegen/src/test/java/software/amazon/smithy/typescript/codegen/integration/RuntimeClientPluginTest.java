@@ -9,6 +9,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.utils.ListUtils;
 
 public class RuntimeClientPluginTest {
     @Test
@@ -68,6 +69,7 @@ public class RuntimeClientPluginTest {
     public void configuresWithDefaultConventions() {
         RuntimeClientPlugin plugin = RuntimeClientPlugin.builder()
                 .withConventions("foo/baz", "1.0.0", "Foo")
+                .additionalResolveFunctionParameters("this")
                 .build();
 
         assertThat(plugin.getInputConfig().get().getSymbol().getNamespace(), equalTo("foo/baz"));
@@ -78,6 +80,8 @@ public class RuntimeClientPluginTest {
 
         assertThat(plugin.getResolveFunction().get().getSymbol().getNamespace(), equalTo("foo/baz"));
         assertThat(plugin.getResolveFunction().get().getSymbol().getName(), equalTo("resolveFooConfig"));
+
+        assertThat(plugin.getAdditionalResolveFunctionParameters(), equalTo(ListUtils.of("this")));
 
         assertThat(plugin.getPluginFunction().get().getSymbol().getNamespace(), equalTo("foo/baz"));
         assertThat(plugin.getPluginFunction().get().getSymbol().getName(), equalTo("getFooPlugin"));
