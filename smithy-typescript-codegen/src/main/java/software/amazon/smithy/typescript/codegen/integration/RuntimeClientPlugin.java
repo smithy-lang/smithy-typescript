@@ -451,8 +451,11 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         }
 
         /**
-         * Set additional positional input parameters to resolve function
-         * <p>this can only be set if {@link #resolveFunction} is set.
+         * Set additional positional input parameters to resolve function. Set
+         * this with no arguments to remove the current parameters.
+         *
+         * <p>If this is set, then all of {@link #resolveFunction},
+         * {@link #resolvedConfig} and {@link #inputConfig} must also be set.
          *
          * @param additionalParameters Additional parameters to be generated as resolve function input.
          * @return Returns the builder.
