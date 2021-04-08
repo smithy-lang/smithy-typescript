@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -53,7 +54,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
-import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -721,8 +721,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Headers are always present either from the default document or the payload.
         writer.openBlock("const headers: any = {", "};", () -> {
             // Only set the content type if one can be determined.
-            bindingIndex.determineRequestContentType(operation, getDocumentContentType()).ifPresent(contentType ->
-                    writer.write("'content-type': $S,", contentType));
+            writeContentTypeHeader(context, operation, true);
             writeDefaultHeaders(context, operation, true);
 
             operation.getInput().ifPresent(outputId -> {
@@ -772,7 +771,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private void writeResponseHeaders(
             GenerationContext context,
-            ToShapeId operationOrError,
+            Shape operationOrError,
             HttpBindingIndex bindingIndex,
             Runnable injectExtraHeaders
     ) {
@@ -780,9 +779,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Headers are always present either from the default document or the payload.
         writer.openBlock("const headers: any = {", "};", () -> {
-            // Only set the content type if one can be determined.
-            bindingIndex.determineResponseContentType(operationOrError, getDocumentContentType())
-                    .ifPresent(contentType -> writer.write("'content-type': $S,", contentType));
+            writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
 
             for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
@@ -796,6 +793,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
     }
 
+    private void writeContentTypeHeader(GenerationContext context, Shape operationOrError, boolean isInput) {
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
+        Optional<String> optionalContentType;
+        if (isInput) {
+            optionalContentType = bindingIndex.determineRequestContentType(operationOrError, getDocumentContentType());
+        } else {
+            optionalContentType = bindingIndex.determineResponseContentType(operationOrError, getDocumentContentType());
+        }
+        // If we need to write a default body then it needs a content type.
+        if (!optionalContentType.isPresent() && shouldWriteDefaultBody(context, operationOrError, isInput)) {
+            optionalContentType = Optional.of(getDocumentContentType());
+        }
+        optionalContentType.ifPresent(contentType -> context.getWriter().write("'content-type': $S,", contentType));
+    }
+
     private List<HttpBinding> writeRequestBody(
             GenerationContext context,
             OperationShape operation,
@@ -803,13 +815,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
         List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
-        boolean shouldWriteDefaultBody = bindingIndex.getRequestBindings(operation).isEmpty();
+        boolean shouldWriteDefaultBody = shouldWriteDefaultBody(context, operation, true);
         return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody, true);
     }
 
     private List<HttpBinding> writeResponseBody(
             GenerationContext context,
-            ToShapeId operationOrError,
+            Shape operationOrError,
             HttpBindingIndex bindingIndex
     ) {
         // We just make one up here since it's not actually used by consumers.
@@ -817,8 +829,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         OperationShape operation = OperationShape.builder().id("ns.foo#bar").build();
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
-        boolean shouldWriteDefaultBody = bindingIndex.getResponseBindings(operationOrError).isEmpty();
+        boolean shouldWriteDefaultBody = shouldWriteDefaultBody(context, operationOrError, false);
         return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody, false);
+    }
+
+    /**
+     * Given a context, operation/error, and whether the shape is being serialized for input or output,
+     * should a default body be written. By default no body will be written if there are no members bound
+     * to the input/output/error.
+     *
+     * @param context The generation context.
+     * @param operationOrError The operation or error being serialized.
+     * @param isInput Whether the body being generated is for an input or an output.
+     *
+     * @return True if a default body should be generated.
+     */
+    protected boolean shouldWriteDefaultBody(GenerationContext context, Shape operationOrError, boolean isInput) {
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
+        if (isInput) {
+            return bindingIndex.getRequestBindings(operationOrError).isEmpty();
+        } else {
+            return bindingIndex.getResponseBindings(operationOrError).isEmpty();
+        }
     }
 
     private List<HttpBinding> writeBody(
