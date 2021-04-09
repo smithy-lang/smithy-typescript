@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    /**
+     * Must allow:
+     */
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noUnusedParameters": false,
+    "removeComments": false,
+    "incremental": true,
+    "sourceMap": true,
+    "preserveConstEnums": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es5",
+    "lib": ["es2015", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@aws-smithy/server-common": ["server-common/src"],
+      "@aws-smithy/server-apigateway" : ["server-apigateway/src"]
+    }
+  },
+  "exclude": ["node_modules/"],
+  "typedocOptions": {
+    "readme": "README.md",
+    "mode": "modules",
+    "out": "docs",
+    "exclude": ["**/node_modules/**", "**/*.spec.ts"],
+    "excludeExternals": true,
+    "ignoreCompilerErrors": true,
+    "theme": "minimal",
+    "hideGenerator": true,
+    "clientDocs": "clients/{{CLIENT}}/docs",
+    "plugin": ["typedoc-plugin-lerna-packages"]
+  }
+}

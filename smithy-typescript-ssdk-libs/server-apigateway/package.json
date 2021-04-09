@@ -1,0 +1,50 @@
+{
+  "name": "@aws-smithy/server-apigateway",
+  "version": "1.0.0",
+  "description": "Base components for Smithy services behind APIGateway",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./types/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "yarn build:cjs && yarn build:es",
+    "pretest": "yarn build:cjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build": "yarn build:es && yarn build:cjs",
+    "postbuild": "downlevel-dts types types/ts3.4",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awslabs/smithy-typescript.git",
+    "directory": "smithy-typescript-libs/smithy-server-apigateway"
+  },
+  "author": "AWS Smithy Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@aws-sdk/protocol-http": "^3.5.0",
+    "@aws-sdk/types": "^3.4.1",
+    "@types/aws-lambda": "^8.10.72",
+    "tslib": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.4",
+    "downlevel-dts": "^0.7.0",
+    "jest": "^26.1.0",
+    "typescript": "~4.1.2"
+  },
+  "engines": {
+    "node": ">= 10.0.0"
+  },
+  "typesVersions": {
+    "<4.0": {
+      "types/*": [
+        "types/ts3.4/*"
+      ]
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/smithy-typescript/issues"
+  },
+  "homepage": "https://github.com/awslabs/smithy-typescript#readme"
+}
