@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "stripInternal": true,
+    "declarationDir": "./types",
+    "rootDir": "./src",
+    "outDir": "./dist/cjs",
+    "baseUrl": ".",
+    "composite": true
+  },
+  "extends": "../tsconfig.cjs.json",
+  "include": ["src/"]
+}
