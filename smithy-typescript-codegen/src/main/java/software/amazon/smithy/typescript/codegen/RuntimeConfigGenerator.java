@@ -145,12 +145,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("Sha256", "Sha256",
                         TypeScriptDependency.AWS_CRYPTO_SHA256_JS.packageName);
                 writer.write("sha256: Sha256,");
-            },
-            "urlParser", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER_NATIVE);
-                writer.addImport("parseUrl", "parseUrl",
-                        TypeScriptDependency.AWS_SDK_URL_PARSER_NATIVE.packageName);
-                writer.write("urlParser: parseUrl,");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
