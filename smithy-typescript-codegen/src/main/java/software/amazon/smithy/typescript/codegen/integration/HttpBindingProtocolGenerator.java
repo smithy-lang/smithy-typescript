@@ -321,8 +321,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         Shape target = model.expectShape(binding.getMember().getTarget());
                         String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                                 binding.getMember(), target);
-                        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
-                                binding.getLocationName(), queryValue);
+                        writer.write("...(input.$L !== undefined && $L),", memberName, queryValue);
                     }
                 }
                 // Handle any additional query bindings.
@@ -632,7 +631,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => ({"
             +   "...acc,"
             +   "[key]: " + valueString + ","
-            + "}))";
+            + "}), {})";
     }
 
     /**
