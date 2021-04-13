@@ -469,6 +469,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return getCollectionInputParam(context, bindingType, dataSource, (CollectionShape) target);
         } else if (target instanceof StructureShape || target instanceof UnionShape) {
             return getNamedMembersInputParam(context, bindingType, dataSource, target);
+        } else if (target instanceof MapShape) {
+            return getMapInputParam(context, bindingType, dataSource, (MapShape) target);
         }
 
         throw new CodegenException(String.format(
@@ -600,6 +602,36 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
+    }
+
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * map.
+     *
+     * @param context The generation context.
+     * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
+     * @return Returns a value or expression of the input collection.
+     */
+    private String getMapInputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            MapShape target
+    ) {
+        Model model = context.getModel();
+        MemberShape mapMember = target.getValue();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        String valueString = getInputValue(context, bindingType, "value", mapMember,
+                model.expectShape(mapMember.getTarget()));
+        return "(" + dataSource + " || {}).reduce("
+            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => ({"
+            +   "...acc,"
+            +   "[key]: " + valueString + ","
+            + "}))";
     }
 
     /**
