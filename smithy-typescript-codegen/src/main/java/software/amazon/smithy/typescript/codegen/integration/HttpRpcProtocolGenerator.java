@@ -159,7 +159,12 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     @Override
-    public void generateHandlerFactory(GenerationContext context) {
+    public void generateServiceHandlerFactory(GenerationContext context) {
+        LOGGER.warning("Handler factory generation is not currently supported for RPC protocols.");
+    }
+
+    @Override
+    public void generateOperationHandlerFactory(GenerationContext context, OperationShape operation) {
         LOGGER.warning("Handler factory generation is not currently supported for RPC protocols.");
     }
 

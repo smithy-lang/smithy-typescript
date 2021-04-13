@@ -83,6 +83,8 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
         builder.putProperty("outputType", intermediate.toBuilder().name(shapeName + "ServerOutput").build());
         builder.putProperty("errorsType", intermediate.toBuilder().name(shapeName + "Errors").build());
         builder.putProperty("serializerType", intermediate.toBuilder().name(shapeName + "Serializer").build());
+        builder.putProperty("handler",
+                intermediate.toBuilder().name(shapeName + "Handler").build());
         return builder.build();
     }
 

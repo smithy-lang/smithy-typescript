@@ -142,8 +142,8 @@ final class ServerCommandGenerator implements Runnable {
         String serializerName = operationSymbol.expectProperty("serializerType", Symbol.class).getName();
         Symbol serverSymbol = symbolProvider.toSymbol(model.expectShape(settings.getService()));
 
-        writer.addImport("OperationSerializer", null, "@aws-smithy/server-common");
-        writer.openBlock("export class $L implements OperationSerializer<$T, $S, $T> {", "}",
+        writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
+        writer.openBlock("export class $L implements __OperationSerializer<$T, $S, $T> {", "}",
                 serializerName, serverSymbol, operation.getId().getName(), errorsType, () -> {
             String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
             String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
