@@ -299,7 +299,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpTrait trait
     ) {
         TypeScriptWriter writer = context.getWriter();
-        SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
         List<HttpBinding> queryParamsBindings = bindingIndex.getRequestBindings(operation, Location.QUERY_PARAMS);
 
