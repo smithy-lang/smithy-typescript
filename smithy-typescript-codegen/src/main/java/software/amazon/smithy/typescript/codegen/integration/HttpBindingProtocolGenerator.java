@@ -159,7 +159,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateRequestSerializers(GenerationContext context) {
-        TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
@@ -175,7 +175,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateResponseDeserializers(GenerationContext context) {
-        TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
@@ -197,7 +197,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol symbol = symbolProvider.toSymbol(operation);
         SymbolReference requestType = getApplicationProtocol().getRequestType();
-        HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
         TypeScriptWriter writer = context.getWriter();
 
         // Ensure that the request type is imported.
@@ -615,7 +615,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             String dataSource,
             MemberShape member
     ) {
-        HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
         Format format;
         switch (bindingType) {
             case HEADER:
@@ -864,7 +864,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol symbol = symbolProvider.toSymbol(operation);
         SymbolReference responseType = getApplicationProtocol().getResponseType();
-        HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
         Model model = context.getModel();
         TypeScriptWriter writer = context.getWriter();
 
@@ -922,7 +922,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
-        HttpBindingIndex bindingIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
         Model model = context.getModel();
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
@@ -1351,7 +1351,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof DocumentShape) {
             return dataSource;
         } else if (target instanceof TimestampShape) {
-            HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+            HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
             return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, bindingType, member, format);
         } else if (target instanceof BlobShape) {
@@ -1465,7 +1465,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // in their formatted entry, so split on every other "," instead.
                 if (collectionTarget.isTimestampShape()) {
                     // Check if our member resolves to the HTTP_DATE format.
-                    HttpBindingIndex httpIndex = context.getModel().getKnowledge(HttpBindingIndex.class);
+                    HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
                     Format format = httpIndex.determineTimestampFormat(targetMember, bindingType, Format.HTTP_DATE);
 
                     if (format == Format.HTTP_DATE) {
