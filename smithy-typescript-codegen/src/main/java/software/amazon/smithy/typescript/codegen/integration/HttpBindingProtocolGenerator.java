@@ -313,29 +313,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 // Handle any additional query params bindings.
                 if (!queryParamsBindings.isEmpty()) {
-                    Model model = context.getModel();
                     for (HttpBinding binding : queryParamsBindings) {
-                        String memberName = symbolProvider.toMemberName(binding.getMember());
-                        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
-                                "@aws-sdk/smithy-client");
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
-                                binding.getMember(), target);
-                        writer.write("...(input.$L !== undefined && $L),", memberName, queryValue);
+                        writeRequestQueryParam(context, binding, "...(input.$L !== undefined && $L),");
                     }
                 }
                 // Handle any additional query bindings.
                 if (!queryBindings.isEmpty()) {
-                    Model model = context.getModel();
                     for (HttpBinding binding : queryBindings) {
-                        String memberName = symbolProvider.toMemberName(binding.getMember());
-                        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
-                                "@aws-sdk/smithy-client");
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
-                                binding.getMember(), target);
-                        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
-                                binding.getLocationName(), queryValue);
+                        writeRequestQueryParam(context, binding,
+                            "...(input.$L !== undefined && { " + binding.getLocationName() + ": $L }),");
                     }
                 }
             });
@@ -343,6 +329,25 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Any binding or literal means we generated a query bag.
         return !queryBindings.isEmpty() || !queryLiterals.isEmpty() || !queryParamsBindings.isEmpty();
+    }
+
+    private void writeRequestQueryParam(
+            GenerationContext context,
+            HttpBinding binding,
+            String spreadString
+    ) {
+        Model model = context.getModel();
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        String memberName = symbolProvider.toMemberName(binding.getMember());
+        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                "@aws-sdk/smithy-client");
+
+        Shape target = model.expectShape(binding.getMember().getTarget());
+        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                binding.getMember(), target);
+        writer.write(spreadString, memberName, queryValue);
     }
 
     private void writeHeaders(
