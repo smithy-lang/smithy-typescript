@@ -628,7 +628,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         String valueString = getInputValue(context, bindingType, "value", mapMember,
                 model.expectShape(mapMember.getTarget()));
-        return "(" + dataSource + " || {}).reduce("
+        return "Object.entries(" + dataSource + " || {}).reduce("
             + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => ({"
             +   "...acc,"
             +   "[key]: " + valueString + ","
