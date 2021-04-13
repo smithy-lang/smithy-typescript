@@ -301,14 +301,29 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
+        List<HttpBinding> queryParamsBindings = bindingIndex.getRequestBindings(operation, Location.QUERY_PARAMS);
 
         // Build the initial query bag.
         Map<String, String> queryLiterals = trait.getUri().getQueryLiterals();
-        if (!queryLiterals.isEmpty() || !queryBindings.isEmpty()) {
+        if (!queryLiterals.isEmpty() || !queryBindings.isEmpty() || !queryParamsBindings.isEmpty()) {
             writer.openBlock("const query: any = {", "};", () -> {
                 if (!queryLiterals.isEmpty()) {
                     // Write any query literals present in the uri.
                     queryLiterals.forEach((k, v) -> writer.write("$S: $S,", k, v));
+                }
+                // Handle any additional query params bindings.
+                if (!queryParamsBindings.isEmpty()) {
+                    Model model = context.getModel();
+                    for (HttpBinding binding : queryParamsBindings) {
+                        String memberName = symbolProvider.toMemberName(binding.getMember());
+                        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                                "@aws-sdk/smithy-client");
+                        Shape target = model.expectShape(binding.getMember().getTarget());
+                        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                                binding.getMember(), target);
+                        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
+                                binding.getLocationName(), queryValue);
+                    }
                 }
                 // Handle any additional query bindings.
                 if (!queryBindings.isEmpty()) {
@@ -328,7 +343,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
 
         // Any binding or literal means we generated a query bag.
-        return !queryBindings.isEmpty() || !queryLiterals.isEmpty();
+        return !queryBindings.isEmpty() || !queryLiterals.isEmpty() || !queryParamsBindings.isEmpty();
     }
 
     private void writeHeaders(
