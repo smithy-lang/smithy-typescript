@@ -561,6 +561,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case HEADER:
                 return iteratedParam + ".join(', ')";
             case QUERY:
+            case QUERY_PARAMS:
                 return iteratedParam;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
