@@ -147,16 +147,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         HttpProtocolGeneratorUtils.generateHttpBindingUtils(context);
     }
 
-    /**
-     * Detects if the target shape is expressed as a native simple type.
-     *
-     * @param target The shape of the value being provided.
-     * @return Returns if the shape is a native simple type.
-     */
-    private boolean isNativeSimpleType(Shape target) {
-        return target instanceof BooleanShape || target instanceof NumberShape || target instanceof StringShape;
-    }
-
     @Override
     public void generateRequestSerializers(GenerationContext context) {
         TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
@@ -452,7 +442,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof FloatShape || target instanceof DoubleShape) {
             // Handle decimal numbers needing to have .0 in their value when whole numbers.
             return "((" + dataSource + " % 1 == 0) ? " + dataSource + " + \".0\" : " + dataSource + ".toString())";
-        } else if (isNativeSimpleType(target)) {
+        } else if (target instanceof BooleanShape || target instanceof NumberShape) {
             return dataSource + ".toString()";
         } else if (target instanceof TimestampShape) {
             return getTimestampInputParam(context, bindingType, dataSource, member);
