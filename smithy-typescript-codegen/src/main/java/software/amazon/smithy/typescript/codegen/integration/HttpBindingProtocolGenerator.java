@@ -314,15 +314,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // If query string parameter is also present in httpQuery, it would be overwritten.
                 // Serializing HTTP messages https://awslabs.github.io/smithy/1.0/spec/core/http-traits.html#serializing-http-messages
                 if (!queryParamsBindings.isEmpty()) {
-                    for (HttpBinding binding : queryParamsBindings) {
-                        writeRequestQueryParam(context, binding, "...(input.$L !== undefined && $L),");
-                    }
+                    SymbolProvider symbolProvider = context.getSymbolProvider();
+                    String memberName = symbolProvider.toMemberName(queryParamsBindings.get(0).getMember());
+                    writer.write("...(input.$1L !== undefined && input.$1L),", memberName);
                 }
                 // Handle any additional query bindings.
                 if (!queryBindings.isEmpty()) {
                     for (HttpBinding binding : queryBindings) {
-                        writeRequestQueryParam(context, binding,
-                            "...(input.$L !== undefined && { " + binding.getLocationName() + ": $L }),");
+                        writeRequestQueryParam(context, binding);
                     }
                 }
             });
@@ -334,8 +333,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private void writeRequestQueryParam(
             GenerationContext context,
-            HttpBinding binding,
-            String spreadString
+            HttpBinding binding
     ) {
         Model model = context.getModel();
         TypeScriptWriter writer = context.getWriter();
@@ -348,7 +346,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Shape target = model.expectShape(binding.getMember().getTarget());
         String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
                 binding.getMember(), target);
-        writer.write(spreadString, memberName, queryValue);
+        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
+                binding.getLocationName(), queryValue);
     }
 
     private void writeHeaders(
