@@ -299,36 +299,55 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpTrait trait
     ) {
         TypeScriptWriter writer = context.getWriter();
-        SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> queryBindings = bindingIndex.getRequestBindings(operation, Location.QUERY);
+        List<HttpBinding> queryParamsBindings = bindingIndex.getRequestBindings(operation, Location.QUERY_PARAMS);
 
         // Build the initial query bag.
         Map<String, String> queryLiterals = trait.getUri().getQueryLiterals();
-        if (!queryLiterals.isEmpty() || !queryBindings.isEmpty()) {
+        if (!queryLiterals.isEmpty() || !queryBindings.isEmpty() || !queryParamsBindings.isEmpty()) {
             writer.openBlock("const query: any = {", "};", () -> {
                 if (!queryLiterals.isEmpty()) {
                     // Write any query literals present in the uri.
                     queryLiterals.forEach((k, v) -> writer.write("$S: $S,", k, v));
                 }
+                // Handle any additional query params bindings.
+                // If query string parameter is also present in httpQuery, it would be overwritten.
+                // Serializing HTTP messages https://awslabs.github.io/smithy/1.0/spec/core/http-traits.html#serializing-http-messages
+                if (!queryParamsBindings.isEmpty()) {
+                    SymbolProvider symbolProvider = context.getSymbolProvider();
+                    String memberName = symbolProvider.toMemberName(queryParamsBindings.get(0).getMember());
+                    writer.write("...(input.$1L !== undefined && input.$1L),", memberName);
+                }
                 // Handle any additional query bindings.
                 if (!queryBindings.isEmpty()) {
-                    Model model = context.getModel();
                     for (HttpBinding binding : queryBindings) {
-                        String memberName = symbolProvider.toMemberName(binding.getMember());
-                        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
-                                "@aws-sdk/smithy-client");
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
-                                binding.getMember(), target);
-                        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
-                                binding.getLocationName(), queryValue);
+                        writeRequestQueryParam(context, binding);
                     }
                 }
             });
         }
 
         // Any binding or literal means we generated a query bag.
-        return !queryBindings.isEmpty() || !queryLiterals.isEmpty();
+        return !queryBindings.isEmpty() || !queryLiterals.isEmpty() || !queryParamsBindings.isEmpty();
+    }
+
+    private void writeRequestQueryParam(
+            GenerationContext context,
+            HttpBinding binding
+    ) {
+        Model model = context.getModel();
+        TypeScriptWriter writer = context.getWriter();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        String memberName = symbolProvider.toMemberName(binding.getMember());
+        writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
+                "@aws-sdk/smithy-client");
+
+        Shape target = model.expectShape(binding.getMember().getTarget());
+        String queryValue = getInputValue(context, binding.getLocation(), "input." + memberName,
+                binding.getMember(), target);
+        writer.write("...(input.$L !== undefined && { $S: $L }),", memberName,
+                binding.getLocationName(), queryValue);
     }
 
     private void writeHeaders(
@@ -454,6 +473,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return getCollectionInputParam(context, bindingType, dataSource, (CollectionShape) target);
         } else if (target instanceof StructureShape || target instanceof UnionShape) {
             return getNamedMembersInputParam(context, bindingType, dataSource, target);
+        } else if (target instanceof MapShape) {
+            return getMapInputParam(context, bindingType, dataSource, (MapShape) target);
         }
 
         throw new CodegenException(String.format(
@@ -544,6 +565,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case HEADER:
                 return iteratedParam + ".join(', ')";
             case QUERY:
+            case QUERY_PARAMS:
                 return iteratedParam;
             default:
                 throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
@@ -585,6 +607,36 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
+    }
+
+    /**
+     * Given context and a source of data, generate an input value provider for the
+     * map.
+     *
+     * @param context The generation context.
+     * @param bindingType How this value is bound to the operation input.
+     * @param dataSource The in-code location of the data to provide an input of
+     *                   ({@code input.foo}, {@code entry}, etc.)
+     * @param target The shape of the value being provided.
+     * @return Returns a value or expression of the input collection.
+     */
+    private String getMapInputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            MapShape target
+    ) {
+        Model model = context.getModel();
+        MemberShape mapMember = target.getValue();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+
+        String valueString = getInputValue(context, bindingType, "value", mapMember,
+                model.expectShape(mapMember.getTarget()));
+        return "Object.entries(" + dataSource + " || {}).reduce("
+            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => ({"
+            +   "...acc,"
+            +   "[key]: " + valueString + ","
+            + "}), {})";
     }
 
     /**
