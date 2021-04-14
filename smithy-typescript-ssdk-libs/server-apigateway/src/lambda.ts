@@ -42,6 +42,9 @@ export function convertResponse(response: HttpResponse) : APIGatewayProxyResultV
     }
 }
 
+// TODO: this can be rewritten with arrow functions / Object.fromEntries / filter
+// but first we need to split up generated client and servers so we can have different
+// language version targets.
 function convertHeaders(headers: APIGatewayProxyEventHeaders): HeaderBag {
     const retVal: {[key: string]: string} = {};
 
@@ -55,6 +58,7 @@ function convertHeaders(headers: APIGatewayProxyEventHeaders): HeaderBag {
     return retVal;
 }
 
+// TODO: this can be rewritten with arrow functions / Object.fromEntries / filter
 function convertQuery(params: APIGatewayProxyEventQueryStringParameters | undefined): QueryParameterBag | undefined {
     if (params === undefined) {
         return undefined;
