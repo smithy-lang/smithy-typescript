@@ -311,6 +311,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     queryLiterals.forEach((k, v) -> writer.write("$S: $S,", k, v));
                 }
                 // Handle any additional query params bindings.
+                // If query string parameter is also present in httpQuery, it would be overwritten.
+                // Serializing HTTP messages https://awslabs.github.io/smithy/1.0/spec/core/http-traits.html#serializing-http-messages
                 if (!queryParamsBindings.isEmpty()) {
                     for (HttpBinding binding : queryParamsBindings) {
                         writeRequestQueryParam(context, binding, "...(input.$L !== undefined && $L),");
