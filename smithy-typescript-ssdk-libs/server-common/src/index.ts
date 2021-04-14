@@ -32,8 +32,8 @@ export interface OperationSerializer<T, K extends keyof T, E extends SmithyExcep
     serializeError(error: E, ctx: Omit<SerdeContext, 'endpoint'>): Promise<HttpResponse>
 }
 
-export interface ServiceHandler {
-    handle(request: HttpRequest): Promise<HttpResponse>
+export interface ServiceHandler<RequestType = HttpRequest, ResponseType = HttpResponse> {
+    handle(request: RequestType): Promise<ResponseType>
 }
 
 export interface ServiceCoordinate<S extends string, O extends String> {
