@@ -15,6 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +28,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
+import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.StringUtils;
 import software.amazon.smithy.utils.ToSmithyBuilder;
@@ -44,6 +47,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final SymbolReference inputConfig;
     private final SymbolReference resolvedConfig;
     private final SymbolReference resolveFunction;
+    private final List<String> additionalResolveFunctionParameters;
     private final SymbolReference pluginFunction;
     private final SymbolReference destroyFunction;
     private final BiPredicate<Model, ServiceShape> servicePredicate;
@@ -53,10 +57,15 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         inputConfig = builder.inputConfig;
         resolvedConfig = builder.resolvedConfig;
         resolveFunction = builder.resolveFunction;
+        additionalResolveFunctionParameters = ListUtils.copyOf(builder.additionalResolveFunctionParameters);
         pluginFunction = builder.pluginFunction;
         destroyFunction = builder.destroyFunction;
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
+
+        if (!additionalResolveFunctionParameters.isEmpty() && resolveFunction == null) {
+            throw new IllegalStateException("Additional parameters can only be set if a resolve function is set.");
+        }
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -140,15 +149,30 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * <p>If the plugin has a resolve function, then it also must define a
      * <em>resolved interface</em> and a <em>resolve function</em>.
      * The referenced function must accept the input type of the plugin
-     * as the first positional argument and return the resolved interface
-     * as the return value.
+     * as the first positional argument and optional parameters as additional
+     * positional arguments, and return the resolved interface as the return
+     * value.
      *
      * @return Returns the optionally present resolve function.
      * @see #getInputConfig()
+     * @see #getAdditionalResolveFunctionParameters()
      * @see #getResolvedConfig()
      */
     public Optional<SymbolReference> getResolveFunction() {
         return Optional.ofNullable(resolveFunction);
+    }
+
+    /**
+     * Gets a list of additional parameters to be supplied to the
+     * resolve function. These parameters are to be supplied to resolve
+     * function as Nth(N &gt; 1) positional arguments. The list is empty if
+     * there are no additional parameters.
+     *
+     * @return Returns the optionally present list of parameters.
+     * @see #getResolveFunction()
+     */
+    public List<String> getAdditionalResolveFunctionParameters() {
+        return additionalResolveFunctionParameters;
     }
 
     /**
@@ -255,6 +279,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                + "inputConfig=" + inputConfig
                + ", resolvedConfig=" + resolvedConfig
                + ", resolveFunction=" + resolveFunction
+               + ", additionalResolveFunctionParameters=" + additionalResolveFunctionParameters
                + ", pluginFunction=" + pluginFunction
                + ", destroyFunction=" + destroyFunction
                + '}';
@@ -272,6 +297,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         return Objects.equals(inputConfig, that.inputConfig)
                && Objects.equals(resolvedConfig, that.resolvedConfig)
                && Objects.equals(resolveFunction, that.resolveFunction)
+               && Objects.equals(additionalResolveFunctionParameters, that.additionalResolveFunctionParameters)
                && Objects.equals(pluginFunction, that.pluginFunction)
                && Objects.equals(destroyFunction, that.destroyFunction)
                && servicePredicate.equals(that.servicePredicate)
@@ -290,6 +316,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private SymbolReference inputConfig;
         private SymbolReference resolvedConfig;
         private SymbolReference resolveFunction;
+        private List<String> additionalResolveFunctionParameters = new ArrayList<>();
         private SymbolReference pluginFunction;
         private SymbolReference destroyFunction;
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
@@ -375,6 +402,24 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         }
 
         /**
+         * Sets the symbol reference that is invoked in order to convert the
+         * input symbol type to a resolved symbol type.
+         *
+         * <p>If this is set, then both {@link #resolvedConfig} and
+         * {@link #inputConfig} must also be set.
+         *
+         * @param resolveFunction Function used to convert input to resolved.
+         * @param additionalParameters Additional parameters to be generated as resolve function input.
+         * @return Returns the builder.
+         * @see #getResolveFunction()
+         */
+        public Builder resolveFunction(SymbolReference resolveFunction, String... additionalParameters) {
+            this.resolveFunction = resolveFunction;
+            this.additionalResolveFunctionParameters = ListUtils.of(additionalParameters);
+            return this;
+        }
+
+        /**
          * Sets the symbol that is invoked in order to convert the
          * input symbol type to a resolved symbol type.
          *
@@ -387,6 +432,38 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          */
         public Builder resolveFunction(Symbol resolveFunction) {
             return resolveFunction(SymbolReference.builder().symbol(resolveFunction).build());
+        }
+
+        /**
+         * Sets the symbol that is invoked in order to convert the
+         * input symbol type to a resolved symbol type.
+         *
+         * <p>If this is set, then both {@link #resolvedConfig} and
+         * {@link #inputConfig} must also be set.
+         *
+         * @param resolveFunction Function used to convert input to resolved.
+         * @param additionalParameters Additional parameters to be generated as resolve function input.
+         * @return Returns the builder.
+         * @see #getResolveFunction()
+         */
+        public Builder resolveFunction(Symbol resolveFunction, String... additionalParameters) {
+            return resolveFunction(SymbolReference.builder().symbol(resolveFunction).build(), additionalParameters);
+        }
+
+        /**
+         * Set additional positional input parameters to resolve function. Set
+         * this with no arguments to remove the current parameters.
+         *
+         * <p>If this is set, then all of {@link #resolveFunction},
+         * {@link #resolvedConfig} and {@link #inputConfig} must also be set.
+         *
+         * @param additionalParameters Additional parameters to be generated as resolve function input.
+         * @return Returns the builder.
+         * @see #getResolveFunction()
+         */
+        public Builder additionalResolveFunctionParameters(String... additionalParameters) {
+            this.additionalResolveFunctionParameters = ListUtils.of(additionalParameters);
+            return this;
         }
 
         /**

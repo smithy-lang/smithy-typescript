@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
@@ -26,6 +27,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.waiters.WaitableTrait;
 import software.amazon.smithy.waiters.Waiter;
 
@@ -41,12 +43,13 @@ final class IndexGenerator {
         Model model,
         SymbolProvider symbolProvider,
         FileManifest fileManifest,
+        List<TypeScriptIntegration> integrations,
         ProtocolGenerator protocolGenerator
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
 
         if (settings.generateClient()) {
-            writeClientExports(settings, model, symbolProvider, writer);
+            writeClientExports(settings, model, symbolProvider, writer, fileManifest, integrations);
         }
 
         if (settings.generateServerSdk() && protocolGenerator != null) {
@@ -88,7 +91,9 @@ final class IndexGenerator {
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+            TypeScriptWriter writer,
+            FileManifest fileManifest,
+            List<TypeScriptIntegration> integrations
     ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
@@ -123,5 +128,13 @@ final class IndexGenerator {
             String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
             writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
         }
+
+        // write export statement for models
+        writer.write("export * from \"./models/index\";");
+        // Write each custom export.
+        for (TypeScriptIntegration integration : integrations) {
+            integration.writeAdditionalExports(settings, model, symbolProvider, writer);
+        }
+        fileManifest.writeFile("index.ts", writer.toString());
     }
 }

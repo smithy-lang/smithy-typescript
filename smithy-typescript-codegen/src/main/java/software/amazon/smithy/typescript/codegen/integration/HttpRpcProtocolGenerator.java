@@ -134,7 +134,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     @Override
     public void generateRequestSerializers(GenerationContext context) {
-        TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
@@ -170,7 +170,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     @Override
     public void generateResponseDeserializers(GenerationContext context) {
-        TopDownIndex topDownIndex = context.getModel().getKnowledge(TopDownIndex.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(context.getModel());
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
