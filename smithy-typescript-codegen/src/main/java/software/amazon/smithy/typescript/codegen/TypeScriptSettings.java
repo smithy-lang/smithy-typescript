@@ -47,8 +47,6 @@ public final class TypeScriptSettings {
     private static final String SERVICE = "service";
     private static final String PROTOCOL = "protocol";
     private static final String PRIVATE = "private";
-    private static final String GENERATE_CLIENT = "generateClient";
-    private static final String GENERATE_SERVER_SDK = "generateServerSdk";
 
     private String packageName;
     private String packageDescription = "";
@@ -58,8 +56,7 @@ public final class TypeScriptSettings {
     private ObjectNode pluginSettings = Node.objectNode();
     private ShapeId protocol;
     private boolean isPrivate;
-    private boolean generateClient;
-    private boolean generateServerSdk;
+    private ArtifactType artifactType = ArtifactType.CLIENT;
 
     /**
      * Create a settings object from a configuration object node.
@@ -72,7 +69,7 @@ public final class TypeScriptSettings {
         TypeScriptSettings settings = new TypeScriptSettings();
         config.warnIfAdditionalProperties(Arrays.asList(
                 PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
-                SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, GENERATE_CLIENT, GENERATE_SERVER_SDK));
+                SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE));
 
         // Get the service from the settings or infer one from the given model.
         settings.setService(config.getStringMember(SERVICE)
@@ -86,9 +83,6 @@ public final class TypeScriptSettings {
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
-        settings.setGenerateClient(config.getBooleanMember(GENERATE_CLIENT).map(BooleanNode::getValue).orElse(true));
-        settings.setGenerateServerSdk(
-                config.getBooleanMember(GENERATE_SERVER_SDK).map(BooleanNode::getValue).orElse(false));
 
         settings.setPluginSettings(config);
         return settings;
@@ -222,29 +216,34 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Returns if the generated package will include a client.
+     * Returns if the generated package will be a client.
      *
      * @return If the package will include a client.
      */
     public boolean generateClient() {
-        return generateClient;
-    }
-
-    public void setGenerateClient(boolean generateClient) {
-        this.generateClient = generateClient;
+        return artifactType.equals(ArtifactType.CLIENT);
     }
 
     /**
-     * Returns if the generated package will include a server sdk.
+     * Returns if the generated package will be a server sdk.
      *
      * @return If the package will include a server sdk.
      */
     public boolean generateServerSdk() {
-        return generateServerSdk;
+        return artifactType.equals(ArtifactType.SSDK);
     }
 
-    public void setGenerateServerSdk(boolean generateServerSdk) {
-        this.generateServerSdk = generateServerSdk;
+    /**
+     * Returns the type of artifact being generated, such as a client or ssdk.
+     *
+     * @return The artifact type.
+     */
+    public ArtifactType getArtifactType() {
+        return artifactType;
+    }
+
+    public void setArtifactType(ArtifactType artifactType) {
+        this.artifactType = artifactType;
     }
 
     /**
@@ -312,5 +311,13 @@ public final class TypeScriptSettings {
      */
     public void setProtocol(ShapeId protocol) {
         this.protocol = Objects.requireNonNull(protocol);
+    }
+
+    /**
+     * An enum indicating the type of artifact the code generator will produce.
+     */
+    public enum ArtifactType {
+        CLIENT,
+        SSDK
     }
 }

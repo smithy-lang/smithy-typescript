@@ -1,1 +1,2 @@
 software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin
+software.amazon.smithy.typescript.codegen.TypeScriptServerCodegenPlugin

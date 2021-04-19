@@ -90,7 +90,6 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final Symbol serviceSymbol;
-    private final SymbolProvider serverSymbolProvider;
     private final Set<String> additionalStubs = new TreeSet<>();
     private final ProtocolGenerator protocolGenerator;
 
@@ -105,7 +104,6 @@ final class HttpProtocolTestGenerator implements Runnable {
             Model model,
             ShapeId protocol,
             SymbolProvider symbolProvider,
-            SymbolProvider serverSymbolProvider,
             TypeScriptDelegator delegator,
             ProtocolGenerator protocolGenerator
     ) {
@@ -114,7 +112,6 @@ final class HttpProtocolTestGenerator implements Runnable {
         this.protocol = protocol;
         this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
-        this.serverSymbolProvider = serverSymbolProvider;
         this.delegator = delegator;
         this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
@@ -266,7 +263,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void generateServerRequestTest(OperationShape operation, HttpRequestTestCase testCase) {
-        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
 
         // Lowercase all the headers we're expecting as this is what we'll get.
         Map<String, String> headers = testCase.getHeaders().entrySet().stream()
@@ -279,7 +276,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         String testName = testCase.getId() + ":ServerRequest";
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
-            Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+            Symbol serviceSymbol = symbolProvider.toSymbol(service);
             Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
 
             // Create a mock function to set in place of the server operation function so we can capture
@@ -480,8 +477,8 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     public void generateServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
-        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
-        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol serviceSymbol = symbolProvider.toSymbol(service);
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         String testName = testCase.getId() + ":ServerResponse";
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
@@ -527,10 +524,10 @@ final class HttpProtocolTestGenerator implements Runnable {
             StructureShape error,
             HttpResponseTestCase testCase
     ) {
-        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
-        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol serviceSymbol = symbolProvider.toSymbol(service);
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
         Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
-        Symbol errorSymbol = serverSymbolProvider.toSymbol(error);
+        Symbol errorSymbol = symbolProvider.toSymbol(error);
         ErrorTrait errorTrait = error.expectTrait(ErrorTrait.class);
 
         testCase.getDocumentation().ifPresent(writer::writeDocs);
@@ -565,8 +562,8 @@ final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void writeServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
-        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
-        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol serviceSymbol = symbolProvider.toSymbol(service);
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol serializerSymbol = operationSymbol.expectProperty("serializerType", Symbol.class);
         Symbol serviceOperationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
