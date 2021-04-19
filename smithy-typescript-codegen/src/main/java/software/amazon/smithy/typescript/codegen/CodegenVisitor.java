@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -70,7 +71,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ServiceShape service;
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
-    private final SymbolProvider serverSymbolProvider;
     private final Model nonTraits;
     private final TypeScriptDelegator writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
@@ -78,7 +78,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
-    CodegenVisitor(PluginContext context) {
+    CodegenVisitor(
+            PluginContext context,
+            BiFunction<Model, TypeScriptSettings, SymbolProvider> createSymbolProvider,
+            TypeScriptSettings.ArtifactType artifactType
+    ) {
         // Load all integrations.
         ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
         LOGGER.info("Attempting to discover TypeScriptIntegration from the classpath...");
@@ -96,6 +100,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Preprocess model using integrations.
         TypeScriptSettings typescriptSettings = TypeScriptSettings.from(context.getModel(), context.getSettings());
+        typescriptSettings.setArtifactType(artifactType);
         for (TypeScriptIntegration integration : integrations) {
             Model modifiedModel = integration.preprocessModel(context, typescriptSettings);
             if (modifiedModel != context.getModel()) {
@@ -112,16 +117,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 settings.generateClient() ? "client" : "server", service.getId()));
 
         // Decorate the symbol provider using integrations.
-        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider resolvedProvider = createSymbolProvider.apply(model, settings);
         for (TypeScriptIntegration integration : integrations) {
             resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
         }
         symbolProvider = SymbolProvider.cache(resolvedProvider);
-        if (settings.generateServerSdk()) {
-            serverSymbolProvider = SymbolProvider.cache(new ServerSymbolVisitor(model, symbolProvider));
-        } else {
-            serverSymbolProvider = symbolProvider;
-        }
 
         // Resolve the nullable protocol generator and application protocol.
         protocolGenerator = resolveProtocolGenerator(integrations, service, settings);
@@ -204,14 +204,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (settings.generateServerSdk()) {
             // Generate index for server
-            IndexGenerator.writeServerIndex(settings, model, serverSymbolProvider, fileManifest);
+            IndexGenerator.writeServerIndex(settings, model, symbolProvider, fileManifest);
         }
 
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
             ShapeId protocol = protocolGenerator.getProtocol();
             new HttpProtocolTestGenerator(
-                    settings, model, protocol, symbolProvider, serverSymbolProvider, writers, protocolGenerator).run();
+                    settings, model, protocol, symbolProvider, writers, protocolGenerator).run();
         }
 
         // Write each pending writer.
@@ -290,8 +290,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     @Override
     public Void operationShape(OperationShape operation) {
         if (settings.generateServerSdk()) {
-            writers.useShapeWriter(operation, serverSymbolProvider, w -> {
-                ServerGenerator.generateOperationHandler(serverSymbolProvider, service, operation, w);
+            writers.useShapeWriter(operation, symbolProvider, w -> {
+                ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
             });
         }
         return null;
@@ -334,15 +334,15 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 }
                 if (context.getSettings().generateServerSdk()) {
                     ProtocolGenerator.GenerationContext serverContext =
-                            context.withSymbolProvider(serverSymbolProvider);
+                            context.withSymbolProvider(symbolProvider);
                     protocolGenerator.generateRequestDeserializers(serverContext);
                     protocolGenerator.generateResponseSerializers(serverContext);
                     protocolGenerator.generateFrameworkErrorSerializer(serverContext);
-                    writers.useShapeWriter(shape, serverSymbolProvider, w -> {
+                    writers.useShapeWriter(shape, symbolProvider, w -> {
                         protocolGenerator.generateServiceHandlerFactory(serverContext.withWriter(w));
                     });
                     for (OperationShape operation: TopDownIndex.of(model).getContainedOperations(service)) {
-                        writers.useShapeWriter(operation, serverSymbolProvider, w -> {
+                        writers.useShapeWriter(operation, symbolProvider, w -> {
                             protocolGenerator.generateOperationHandlerFactory(serverContext.withWriter(w), operation);
                         });
                     }
@@ -403,10 +403,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private void generateServiceInterface(ServiceShape shape) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
-        writers.useShapeWriter(shape, serverSymbolProvider, writer -> {
-            ServerGenerator.generateOperationsType(serverSymbolProvider, shape, operations, writer);
-            ServerGenerator.generateServerInterfaces(serverSymbolProvider, shape, operations, writer);
-            ServerGenerator.generateServiceHandler(serverSymbolProvider, shape, operations, writer);
+        writers.useShapeWriter(shape, symbolProvider, writer -> {
+            ServerGenerator.generateOperationsType(symbolProvider, shape, operations, writer);
+            ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, writer);
+            ServerGenerator.generateServiceHandler(symbolProvider, shape, operations, writer);
         });
     }
 
@@ -418,8 +418,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 .distinct()
                 .map(id -> model.expectShape(id).asStructureShape().orElseThrow(IllegalArgumentException::new))
                 .sorted()
-                .forEachOrdered(error -> writers.useShapeWriter(service, serverSymbolProvider, writer -> {
-                    new ServerErrorGenerator(settings, model, error, serverSymbolProvider, writer).run();
+                .forEachOrdered(error -> writers.useShapeWriter(service, symbolProvider, writer -> {
+                    new ServerErrorGenerator(settings, model, error, symbolProvider, writer).run();
                 }));
     }
 
@@ -436,8 +436,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             }
 
             if (settings.generateServerSdk()) {
-                writers.useShapeWriter(operation, serverSymbolProvider, commandWriter -> new ServerCommandGenerator(
-                        settings, model, operation, serverSymbolProvider, commandWriter,
+                writers.useShapeWriter(operation, symbolProvider, commandWriter -> new ServerCommandGenerator(
+                        settings, model, operation, symbolProvider, commandWriter,
                         protocolGenerator, applicationProtocol).run());
             }
         }
