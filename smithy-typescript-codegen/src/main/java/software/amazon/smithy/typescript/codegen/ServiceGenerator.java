@@ -169,8 +169,8 @@ final class ServiceGenerator implements Runnable {
             writer.dedent();
         }
 
-        writer.writeDocs("The configuration interface of " + symbol.getName() + " class constructor that set the "
-                + "region, credentials and other options.");
+        writer.writeDocs(String.format("The configuration interface of %s class constructor that set the region, "
+                + "credentials and other options.", symbol.getName()));
         writer.write("export interface $1L extends $1LType {}", configType);
 
         // Generate the corresponding "Resolved" configuration type to account for
