@@ -5,10 +5,9 @@
   "main": "./dist/cjs/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "prepublishOnly": "yarn build:cjs",
-    "pretest": "yarn build:cjs",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build": "yarn build:cjs",
+    "prepublishOnly": "yarn build",
+    "pretest": "yarn build",
+    "build": "tsc -p tsconfig.json",
     "postbuild": "downlevel-dts dist/types dist/types/ts3.4",
     "test": "jest"
   },
@@ -20,13 +19,13 @@
   "author": "AWS Smithy Team",
   "license": "Apache-2.0",
   "dependencies": {
-    "@aws-sdk/smithy-client": "3.6.1",
     "@aws-sdk/protocol-http": "^3.5.0",
+    "@aws-sdk/smithy-client": "3.6.1",
     "@aws-sdk/types": "^3.4.1",
     "tslib": "^1.8.0"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^26.0.22",
     "@types/node": "^14.14.37",
     "downlevel-dts": "^0.7.0",
     "jest": "^26.6.3",
