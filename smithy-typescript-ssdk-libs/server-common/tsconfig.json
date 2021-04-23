@@ -4,8 +4,7 @@
     "declarationDir": "./dist/types",
     "rootDir": "./src",
     "outDir": "./dist/cjs",
-    "baseUrl": ".",
-    "composite": true
+    "baseUrl": "."
   },
   "extends": "../tsconfig.cjs.json",
   "include": ["src/"]
