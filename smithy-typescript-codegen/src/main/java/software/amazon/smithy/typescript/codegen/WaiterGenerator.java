@@ -189,7 +189,6 @@ class WaiterGenerator implements Runnable {
         } else if (resultantState == AcceptorState.FAILURE) {
             return  "{ state: WaiterState.FAILURE, reason }";
         } else if (resultantState == AcceptorState.RETRY) {
-
             return  "{ state: WaiterState.RETRY, reason }";
         }
         throw new CodegenException("Hit an invalid acceptor state to codegen " + resultantState.toString());
