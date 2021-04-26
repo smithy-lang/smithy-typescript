@@ -9,7 +9,6 @@
     "noUnusedParameters": false,
     "removeComments": false,
     "incremental": true,
-    "sourceMap": true,
     "preserveConstEnums": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
