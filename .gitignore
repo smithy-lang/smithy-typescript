@@ -24,3 +24,8 @@ wrapper/
 
 # Visual Studio Code
 .vscode/*
+
+# Integ test Yarn stuff
+smithy-typescript-integ-tests/dist
+smithy-typescript-integ-tests/node_modules
+smithy-typescript-integ-tests/yarn.lock
