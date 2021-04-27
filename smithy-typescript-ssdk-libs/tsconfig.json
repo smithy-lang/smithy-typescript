@@ -26,7 +26,7 @@
     "inlineSources": true,
     "paths": {
       "@aws-smithy/server-common": ["server-common/src"],
-      "@aws-smithy/server-apigateway" : ["server-apigateway/src"]
+      "@aws-smithy/server-apigateway": ["server-apigateway/src"]
     }
   },
   "exclude": ["node_modules/"]

@@ -13,27 +13,27 @@
  *  permissions and limitations under the License.
  */
 
-import { SmithyException } from "@aws-sdk/smithy-client"
+import { SmithyException } from "@aws-sdk/smithy-client";
 
 export type SmithyFrameworkException = InternalFailureException | UnknownOperationException | SerializationException;
 
 export class InternalFailureException implements SmithyException {
-    readonly name = "InternalFailure";
-    readonly $fault = 'server';
-    readonly statusCode = 500;
-    readonly $frameworkError = true;
+  readonly name = "InternalFailure";
+  readonly $fault = "server";
+  readonly statusCode = 500;
+  readonly $frameworkError = true;
 }
 
 export class UnknownOperationException implements SmithyException {
-    readonly name = "UnknownOperationException";
-    readonly $fault = 'server';
-    readonly statusCode = 404;
-    readonly $frameworkError = true;
+  readonly name = "UnknownOperationException";
+  readonly $fault = "server";
+  readonly statusCode = 404;
+  readonly $frameworkError = true;
 }
 
 export class SerializationException implements SmithyException {
-    readonly name = "SerializationException";
-    readonly $fault = 'server';
-    readonly statusCode = 400;
-    readonly $frameworkError = true;
+  readonly name = "SerializationException";
+  readonly $fault = "server";
+  readonly statusCode = 400;
+  readonly $frameworkError = true;
 }

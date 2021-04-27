@@ -13,4 +13,4 @@
  *  permissions and limitations under the License.
  */
 
-export * from "./mux"
+export * from "./mux";
