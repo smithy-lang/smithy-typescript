@@ -150,7 +150,7 @@ final class ServiceGenerator implements Runnable {
 
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
-        writer.write("export type $L = Partial<__SmithyConfiguration<$T>>", configType,
+        writer.write("type $LType = Partial<__SmithyConfiguration<$T>>", configType,
                 applicationProtocol.getOptionsType());
         writer.write("  & ClientDefaults");
 
@@ -169,10 +169,14 @@ final class ServiceGenerator implements Runnable {
             writer.dedent();
         }
 
+        writer.writeDocs(String.format("The configuration interface of %s class constructor that set the region, "
+                + "credentials and other options.", symbol.getName()));
+        writer.write("export interface $1L extends $1LType {}", configType);
+
         // Generate the corresponding "Resolved" configuration type to account for
         // each "Input" configuration type.
         writer.write("");
-        writer.write("export type $L = __SmithyResolvedConfiguration<$T>",
+        writer.write("type $LType = __SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
         writer.write("  & Required<ClientDefaults>");
 
@@ -183,6 +187,11 @@ final class ServiceGenerator implements Runnable {
                     .forEach(symbol -> writer.write("& $T", symbol));
             writer.dedent();
         }
+
+        writer.writeDocs(String.format("The resolved configuration interface of %s class. This is resolved and"
+                + " normalized from the {@link %s | constructor configuration interface}.", symbol.getName(),
+                        configType));
+        writer.write("export interface $1L extends $1LType {}", resolvedConfigType);
 
         writer.popState();
     }
@@ -268,6 +277,8 @@ final class ServiceGenerator implements Runnable {
     private void generateClientProperties() {
         // Hook for adding/changing client properties.
         writer.pushState(CLIENT_PROPERTIES_SECTION);
+        writer.writeDocs(String.format("The resolved configuration of %s class. This is resolved and normalized from "
+                + "the {@link %s | constructor configuration interface}.", symbol.getName(), configType));
         writer.write("readonly config: $L;\n", resolvedConfigType);
         writer.popState();
     }

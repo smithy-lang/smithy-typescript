@@ -102,7 +102,7 @@ public final class CodegenUtils {
         return shape.getAllMembers().values().stream()
                 .filter(memberShape -> {
                     // Streaming blobs need to have their types modified
-                    // See `writeStreamingInputType`
+                    // See `writeStreamingMemberType`
                     Shape target = model.expectShape(memberShape.getTarget());
                     return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
                 })
@@ -123,8 +123,13 @@ public final class CodegenUtils {
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.openBlock("export type $L = Omit<$T, $S> & {", "};", typeName, containerSymbol, memberName, () ->
-                writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;",
-                        memberName, optionalSuffix, containerSymbol));
+        writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName, containerSymbol, memberName, () -> {
+            writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
+                    containerSymbol.getName(), memberName));
+            writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix, containerSymbol);
+        });
+        writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
+                + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
+        writer.write("export interface $1L extends $1LType {}", typeName);
     }
 }

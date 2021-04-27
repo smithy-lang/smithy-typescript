@@ -196,13 +196,13 @@ final class CommandGenerator implements Runnable {
             StructureShape input = inputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
             if (blobStreamingMembers.isEmpty()) {
-                writer.write("export type $L = $T;", typeName, symbolProvider.toSymbol(input));
+                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             } else {
                 writeStreamingMemberType(writer, symbolProvider.toSymbol(input), typeName, blobStreamingMembers.get(0));
             }
         } else {
             // If the input is non-existent, then use an empty object.
-            writer.write("export type $L = {}", typeName);
+            writer.write("export interface $L {}", typeName);
         }
     }
 
@@ -211,10 +211,10 @@ final class CommandGenerator implements Runnable {
         // to a defined output shape.
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         if (outputShape.isPresent()) {
-            writer.write("export type $L = $T & __MetadataBearer;",
+            writer.write("export interface $L extends $T, __MetadataBearer {}",
                     typeName, symbolProvider.toSymbol(outputShape.get()));
         } else {
-            writer.write("export type $L = __MetadataBearer", typeName);
+            writer.write("export interface $L extends __MetadataBearer {}", typeName);
         }
     }
 
