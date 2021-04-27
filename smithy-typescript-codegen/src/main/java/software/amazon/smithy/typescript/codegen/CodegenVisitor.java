@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -46,6 +45,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -78,11 +78,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
-    CodegenVisitor(
-            PluginContext context,
-            BiFunction<Model, TypeScriptSettings, SymbolProvider> createSymbolProvider,
-            TypeScriptSettings.ArtifactType artifactType
-    ) {
+    CodegenVisitor(PluginContext context, ArtifactType artifactType) {
         // Load all integrations.
         ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
         LOGGER.info("Attempting to discover TypeScriptIntegration from the classpath...");
@@ -117,7 +113,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 settings.generateClient() ? "client" : "server", service.getId()));
 
         // Decorate the symbol provider using integrations.
-        SymbolProvider resolvedProvider = createSymbolProvider.apply(model, settings);
+        SymbolProvider resolvedProvider = artifactType.createSymbolProvider(model, settings);
         for (TypeScriptIntegration integration : integrations) {
             resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
         }

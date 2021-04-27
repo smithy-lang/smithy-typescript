@@ -19,9 +19,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.node.BooleanNode;
@@ -317,7 +319,24 @@ public final class TypeScriptSettings {
      * An enum indicating the type of artifact the code generator will produce.
      */
     public enum ArtifactType {
-        CLIENT,
-        SSDK
+        CLIENT(SymbolVisitor::new),
+        SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)));
+
+        private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
+
+        ArtifactType(BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory) {
+            this.symbolProviderFactory = symbolProviderFactory;
+        }
+
+        /**
+         * Creates a TypeScript symbol provider suited to the artifact type.
+         *
+         * @param model Model to generate symbols for.
+         * @param settings Settings used by the symbol provider.
+         * @return Returns the created provider.
+         */
+        public SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
+            return symbolProviderFactory.apply(model, settings);
+        }
     }
 }

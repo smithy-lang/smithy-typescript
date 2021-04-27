@@ -33,20 +33,10 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
-        new CodegenVisitor(
-                context,
-                TypeScriptCodegenPlugin::createSymbolProvider,
-                ArtifactType.CLIENT
-        ).execute();
+        new CodegenVisitor(context, ArtifactType.CLIENT).execute();
     }
 
-    /**
-     * Creates a TypeScript symbol provider.
-     *
-     * @param model Model to generate symbols for.
-     * @param settings Settings used by the plugin.
-     * @return Returns the created provider.
-     */
+    @Deprecated
     public static SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
         return new SymbolVisitor(model, settings);
     }
