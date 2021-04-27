@@ -430,7 +430,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeEmptyEndpoint(context);
             writeOperationStatusCode(context, operation, bindingIndex, trait);
             writeResponseHeaders(context, operation, bindingIndex,
-                    () -> writeDefaultHeaders(context, operation, false));
+                    () -> writeDefaultOutputHeaders(context, operation));
 
             List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
             if (!bodyBindings.isEmpty()) {
@@ -481,7 +481,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                                           HttpBindingIndex bindingIndex) {
         TypeScriptWriter writer = context.getWriter();
         writeErrorStatusCode(context, error);
-        writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultHeaders(context, error, false));
+        writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
 
         List<HttpBinding> bodyBindings = writeResponseBody(context, error, bindingIndex);
         if (!bodyBindings.isEmpty()) {
@@ -722,7 +722,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("const headers: any = {", "};", () -> {
             // Only set the content type if one can be determined.
             writeContentTypeHeader(context, operation, true);
-            writeDefaultHeaders(context, operation, true);
+            writeDefaultInputHeaders(context, operation);
 
             operation.getInput().ifPresent(outputId -> {
                 for (HttpBinding binding : bindingIndex.getRequestBindings(operation, Location.HEADER)) {
@@ -815,7 +815,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         List<HttpBinding> payloadBindings = bindingIndex.getRequestBindings(operation, Location.PAYLOAD);
         List<HttpBinding> documentBindings = bindingIndex.getRequestBindings(operation, Location.DOCUMENT);
-        boolean shouldWriteDefaultBody = shouldWriteDefaultBody(context, operation, true);
+        boolean shouldWriteDefaultBody = shouldWriteDefaultInputBody(context, operation);
         return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody, true);
     }
 
@@ -825,37 +825,66 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBindingIndex bindingIndex
     ) {
         // We just make one up here since it's not actually used by consumers.
-        // TODO: remove the need for this at all
-        OperationShape operation = OperationShape.builder().id("ns.foo#bar").build();
         List<HttpBinding> payloadBindings = bindingIndex.getResponseBindings(operationOrError, Location.PAYLOAD);
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
-        boolean shouldWriteDefaultBody = shouldWriteDefaultBody(context, operationOrError, false);
-        return writeBody(context, operation, payloadBindings, documentBindings, shouldWriteDefaultBody, false);
+        boolean shouldWriteDefaultBody = operationOrError.asOperationShape()
+                .map(operation -> shouldWriteDefaultOutputBody(context, operation))
+                .orElse(shouldWriteDefaultErrorBody(context, operationOrError.asStructureShape().get()));
+        return writeBody(context, operationOrError, payloadBindings, documentBindings, shouldWriteDefaultBody, false);
+    }
+
+    private boolean shouldWriteDefaultBody(GenerationContext context, Shape operationOrError, boolean isInput) {
+        if (isInput) {
+            return shouldWriteDefaultInputBody(context, operationOrError.asOperationShape().get());
+        } else if (operationOrError.isOperationShape()) {
+            return shouldWriteDefaultOutputBody(context, operationOrError.asOperationShape().get());
+        } else {
+            return shouldWriteDefaultErrorBody(context, operationOrError.asStructureShape().get());
+        }
     }
 
     /**
-     * Given a context, operation/error, and whether the shape is being serialized for input or output,
-     * should a default body be written. By default no body will be written if there are no members bound
-     * to the input/output/error.
+     * Given a context and operation, should a default input body be written. By default no body will be written
+     * if there are no members bound to the input.
      *
      * @param context The generation context.
-     * @param operationOrError The operation or error being serialized.
-     * @param isInput Whether the body being generated is for an input or an output.
+     * @param operation The operation whose input is being serialized.
      *
      * @return True if a default body should be generated.
      */
-    protected boolean shouldWriteDefaultBody(GenerationContext context, Shape operationOrError, boolean isInput) {
-        HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
-        if (isInput) {
-            return bindingIndex.getRequestBindings(operationOrError).isEmpty();
-        } else {
-            return bindingIndex.getResponseBindings(operationOrError).isEmpty();
-        }
+    protected boolean shouldWriteDefaultInputBody(GenerationContext context, OperationShape operation) {
+        return HttpBindingIndex.of(context.getModel()).getRequestBindings(operation).isEmpty();
+    }
+
+    /**
+     * Given a context and operation, should a default output body be written. By default no body will be written
+     * if there are no members bound to the output.
+     *
+     * @param context The generation context.
+     * @param operation The operation whose output is being serialized.
+     *
+     * @return True if a default body should be generated.
+     */
+    protected boolean shouldWriteDefaultOutputBody(GenerationContext context, OperationShape operation) {
+        return HttpBindingIndex.of(context.getModel()).getResponseBindings(operation).isEmpty();
+    }
+
+    /**
+     * Given a context and error, should a default body be written. By default no body will be written
+     * if there are no members bound to the error.
+     *
+     * @param context The generation context.
+     * @param error The error being serialized.
+     *
+     * @return True if a default body should be generated.
+     */
+    protected boolean shouldWriteDefaultErrorBody(GenerationContext context, StructureShape error) {
+        return HttpBindingIndex.of(context.getModel()).getResponseBindings(error).isEmpty();
     }
 
     private List<HttpBinding> writeBody(
             GenerationContext context,
-            OperationShape operation,
+            Shape operationOrError,
             List<HttpBinding> payloadBindings,
             List<HttpBinding> documentBindings,
             boolean shouldWriteDefaultBody,
@@ -869,7 +898,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (!payloadBindings.isEmpty()) {
             // There can only be one payload binding.
             HttpBinding payloadBinding = payloadBindings.get(0);
-            serializePayload(context, operation, payloadBinding, true);
+            if (isInput) {
+                serializeInputPayload(context, operationOrError.asOperationShape().get(), payloadBinding);
+            } else if (operationOrError.isOperationShape()) {
+                serializeOutputPayload(context, operationOrError.asOperationShape().get(), payloadBinding);
+            } else {
+                serializeErrorPayload(context, operationOrError.asStructureShape().get(), payloadBinding);
+            }
             return payloadBindings;
         }
 
@@ -877,8 +912,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // use the input document serialization.
         if (!documentBindings.isEmpty() || shouldWriteDefaultBody) {
             documentBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
-
-            serializeDocumentBody(context, operation, documentBindings, isInput);
+            if (isInput) {
+                serializeInputDocumentBody(context, operationOrError.asOperationShape().get(), documentBindings);
+            } else if (operationOrError.isOperationShape()) {
+                serializeOutputDocumentBody(context, operationOrError.asOperationShape().get(), documentBindings);
+            } else {
+                serializeErrorDocumentBody(context, operationOrError.asStructureShape().get(), documentBindings);
+            }
             return documentBindings;
         }
 
@@ -1129,7 +1169,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes any additional HTTP headers required by the protocol implementation.
+     * Writes any additional HTTP input headers required by the protocol implementation.
      *
      * <p>Two parameters will be available in scope:
      * <ul>
@@ -1144,14 +1184,55 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }</pre>
      *
      * @param context The generation context.
-     * @param operationOrError The operation or error being generated.
-     * @param isInput Whether the headers for an input or output/error are being generated.
+     * @param operation The operation whose input is being generated.
      */
-    protected void writeDefaultHeaders(GenerationContext context, Shape operationOrError, boolean isInput) {
+    protected void writeDefaultInputHeaders(GenerationContext context, OperationShape operation) {
     }
 
     /**
-     * Writes the code needed to serialize a protocol document.
+     * Writes any additional HTTP output headers required by the protocol implementation.
+     *
+     * <p>Two parameters will be available in scope:
+     * <ul>
+     *   <li>{@code input: <T>}: the type generated for the operation's input.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     * </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     *   "foo": "This is a custom header",
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param operation The operation whose output is being generated.
+     */
+    protected void writeDefaultOutputHeaders(GenerationContext context, OperationShape operation) {
+    }
+
+    /**
+     * Writes any additional HTTP error headers required by the protocol implementation.
+     *
+     * <p>Two parameters will be available in scope:
+     * <ul>
+     *   <li>{@code input: <T>}: the type generated for the operation's input.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     * </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     *   "foo": "This is a custom header",
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param error The error which is being generated.
+     */
+    protected void writeDefaultErrorHeaders(GenerationContext context, StructureShape error) {
+    }
+
+    /**
+     * Writes the code needed to serialize a protocol input document.
      *
      * <p>Implementations of this method are expected to set a value to the
      * {@code body} variable that will be serialized as the request body.
@@ -1169,16 +1250,72 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }
      * body = JSON.stringify(bodyParams);
      * }</pre>
-     *  @param context The generation context.
-     * @param operation The operation being generated.
+     * @param context The generation context.
+     * @param operation The operation whose input is being generated.
      * @param documentBindings The bindings to place in the document.
-     * @param isInput Whether the input or output/error of the operation is being serialized.
      */
-    protected abstract void serializeDocumentBody(
+    protected abstract void serializeInputDocumentBody(
             GenerationContext context,
             OperationShape operation,
-            List<HttpBinding> documentBindings,
-            boolean isInput
+            List<HttpBinding> documentBindings
+    );
+
+    /**
+     * Writes the code needed to serialize a protocol output document.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * {@code body} variable that will be serialized as the request body.
+     * This variable will already be defined in scope.
+     *
+     * Implementations MUST properly fill the body parameter even if no
+     * document bindings are present.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * const bodyParams: any = {};
+     * if (input.barValue !== undefined) {
+     *   bodyParams['barValue'] = input.barValue;
+     * }
+     * body = JSON.stringify(bodyParams);
+     * }</pre>
+     * @param context The generation context.
+     * @param operation The operation whose output is being generated.
+     * @param documentBindings The bindings to place in the document.
+     */
+    protected abstract void serializeOutputDocumentBody(
+            GenerationContext context,
+            OperationShape operation,
+            List<HttpBinding> documentBindings
+    );
+
+    /**
+     * Writes the code needed to serialize a protocol error document.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * {@code body} variable that will be serialized as the request body.
+     * This variable will already be defined in scope.
+     *
+     * Implementations MUST properly fill the body parameter even if no
+     * document bindings are present.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * const bodyParams: any = {};
+     * if (input.barValue !== undefined) {
+     *   bodyParams['barValue'] = input.barValue;
+     * }
+     * body = JSON.stringify(bodyParams);
+     * }</pre>
+     * @param context The generation context.
+     * @param error The error that is being generated.
+     * @param documentBindings The bindings to place in the document.
+     */
+    protected abstract void serializeErrorDocumentBody(
+            GenerationContext context,
+            StructureShape error,
+            List<HttpBinding> documentBindings
     );
 
     /**
@@ -1195,17 +1332,71 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *   body = context.base64Encoder(input.body);
      * }
      * }</pre>
-     *  @param context The generation context.
-     * @param operation The operation being generated.
+     * @param context The generation context.
+     * @param operation The operation whose input is being generated.
      * @param payloadBinding The payload binding to serialize.
-     * @param isInput Whether the input or output/error of the operation is being serialized.
      */
-    protected void serializePayload(
+    protected void serializeInputPayload(
             GenerationContext context,
             OperationShape operation,
-            HttpBinding payloadBinding,
-            boolean isInput
+            HttpBinding payloadBinding
     ) {
+        genericSerializePayload(context, payloadBinding);
+    }
+
+    /**
+     * Writes the code needed to serialize the output payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * {@code body} variable that will be serialized as the request body.
+     * This variable will already be defined in scope.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (input.body !== undefined) {
+     *   body = context.base64Encoder(input.body);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param operation The operation whose output is being generated.
+     * @param payloadBinding The payload binding to serialize.
+     */
+    protected void serializeOutputPayload(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBinding payloadBinding
+    ) {
+        genericSerializePayload(context, payloadBinding);
+    }
+
+    /**
+     * Writes the code needed to serialize the error payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * {@code body} variable that will be serialized as the request body.
+     * This variable will already be defined in scope.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (input.body !== undefined) {
+     *   body = context.base64Encoder(input.body);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param error The error being generated.
+     * @param payloadBinding The payload binding to serialize.
+     */
+    protected void serializeErrorPayload(
+            GenerationContext context,
+            StructureShape error,
+            HttpBinding payloadBinding
+    ) {
+        genericSerializePayload(context, payloadBinding);
+    }
+
+    private void genericSerializePayload(GenerationContext context, HttpBinding payloadBinding) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         String memberName = symbolProvider.toMemberName(payloadBinding.getMember());
@@ -1643,7 +1834,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("const data: any = $L;", getErrorBodyLocation(context, "parsedOutput.body"));
             List<HttpBinding> responseBindings = bindingIndex.getResponseBindings(error, Location.DOCUMENT);
             responseBindings.sort(Comparator.comparing(HttpBinding::getMemberName));
-            deserializeDocumentBody(context, error, responseBindings, false);
+            deserializeErrorDocumentBody(context, error.asStructureShape().get(), responseBindings);
             return responseBindings;
         } else {
             // Deserialize response body just like in a normal response.
@@ -1793,10 +1984,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             }
             writer.write("const data: any = $L;", bodyLocation);
 
-            deserializeDocumentBody(context, operationOrError, documentBindings, isInput);
+            if (isInput) {
+                deserializeInputDocumentBody(context, operationOrError.asOperationShape().get(), documentBindings);
+            } else if (operationOrError.isOperationShape()) {
+                deserializeOutputDocumentBody(context, operationOrError.asOperationShape().get(), documentBindings);
+            } else {
+                deserializeErrorDocumentBody(context, operationOrError.asStructureShape().get(), documentBindings);
+            }
         }
         if (!payloadBindings.isEmpty()) {
-            HttpBinding payloadBinding = readResponsePayload(context, payloadBindings.get(0));
+            HttpBinding payloadBinding = payloadBindings.get(0);
+            if (isInput) {
+                deserializeInputPayload(context, operationOrError.asOperationShape().get(), payloadBinding);
+            } else if (operationOrError.isOperationShape()) {
+                deserializeOutputPayload(context, operationOrError.asOperationShape().get(), payloadBinding);
+            } else {
+                deserializeErrorPayload(context, operationOrError.asStructureShape().get(), payloadBinding);
+            }
             if (payloadBinding != null) {
                 return ListUtils.of(payloadBinding);
             } else {
@@ -1824,19 +2028,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         return ListUtils.of();
     }
 
-    /**
-     * Writes the code needed to deserialized the output payload of a request.
-     *
-     * <p>Implementations of this method are expected to set a value to the
-     * bound member name of the {@code contents} variable after deserializing
-     * the response body. This variable will already be defined in scope.
-     *
-     *
-     * @param context The generation context.
-     * @param binding The payload binding to deserialize.
-     * @return The deserialized payload binding.
-     */
-    protected HttpBinding readResponsePayload(
+    private HttpBinding readPayload(
             GenerationContext context,
             HttpBinding binding
     ) {
@@ -1872,6 +2064,69 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                 Location.PAYLOAD, "data", binding.getMember(), target));
         return binding;
+    }
+
+    /**
+     * Writes the code needed to deserialize the input payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * bound member name of the {@code contents} variable after deserializing
+     * the response body. This variable will already be defined in scope.
+     *
+     *
+     * @param context The generation context.
+     * @param operation The operation whose input payload is being deserialized.
+     * @param binding The payload binding to deserialize.
+     * @return The deserialized payload binding.
+     */
+    protected HttpBinding deserializeInputPayload(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBinding binding
+    ) {
+        return readPayload(context, binding);
+    }
+
+    /**
+     * Writes the code needed to deserialize the output payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * bound member name of the {@code contents} variable after deserializing
+     * the response body. This variable will already be defined in scope.
+     *
+     *
+     * @param context The generation context.
+     * @param operation The operation whose output payload is being deserialized.
+     * @param binding The payload binding to deserialize.
+     * @return The deserialized payload binding.
+     */
+    protected HttpBinding deserializeOutputPayload(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBinding binding
+    ) {
+        return readPayload(context, binding);
+    }
+
+    /**
+     * Writes the code needed to deserialize the input payload of a request.
+     *
+     * <p>Implementations of this method are expected to set a value to the
+     * bound member name of the {@code contents} variable after deserializing
+     * the response body. This variable will already be defined in scope.
+     *
+     *
+     * @param context The generation context.
+     * @param error The error whose payload is being deserialized.
+     * @param binding The payload binding to deserialize.
+     * @return The deserialized payload binding.
+     */
+    protected HttpBinding deserializeErrorPayload(
+            GenerationContext context,
+            StructureShape error,
+            HttpBinding binding
+    ) {
+        return readPayload(context, binding);
     }
 
     // Writes a function deserializing response payload to stream of event messages
@@ -2342,7 +2597,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code needed to deserialize a protocol document.
+     * Writes the code needed to deserialize a protocol input document.
      *
      * <p>Implementations of this method are expected to set members in the
      * {@code contents} variable that represents the type generated for the
@@ -2358,14 +2613,64 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * }
      * }</pre>
      * @param context The generation context.
-     * @param operationOrError The operation or error with a document being deserialized.
+     * @param operation The operation whose input document is being deserialized.
      * @param documentBindings The bindings to read from the document.
-     * @param isInput Whether the input or output/error of the operation is being deserialized.
      */
-    protected abstract void deserializeDocumentBody(
+    protected abstract void deserializeInputDocumentBody(
             GenerationContext context,
-            Shape operationOrError,
-            List<HttpBinding> documentBindings,
-            boolean isInput
+            OperationShape operation,
+            List<HttpBinding> documentBindings
+    );
+
+    /**
+     * Writes the code needed to deserialize a protocol output document.
+     *
+     * <p>Implementations of this method are expected to set members in the
+     * {@code contents} variable that represents the type generated for the
+     * response. This variable will already be defined in scope.
+     *
+     * <p>The contents of the response body will be available in a {@code data} variable.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (data.fieldList !== undefined) {
+     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param operation The operation whose output document is being deserialized.
+     * @param documentBindings The bindings to read from the document.
+     */
+    protected abstract void deserializeOutputDocumentBody(
+            GenerationContext context,
+            OperationShape operation,
+            List<HttpBinding> documentBindings
+    );
+
+    /**
+     * Writes the code needed to deserialize a protocol error document.
+     *
+     * <p>Implementations of this method are expected to set members in the
+     * {@code contents} variable that represents the type generated for the
+     * response. This variable will already be defined in scope.
+     *
+     * <p>The contents of the response body will be available in a {@code data} variable.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (data.fieldList !== undefined) {
+     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param error The error being deserialized.
+     * @param documentBindings The bindings to read from the document.
+     */
+    protected abstract void deserializeErrorDocumentBody(
+            GenerationContext context,
+            StructureShape error,
+            List<HttpBinding> documentBindings
     );
 }
