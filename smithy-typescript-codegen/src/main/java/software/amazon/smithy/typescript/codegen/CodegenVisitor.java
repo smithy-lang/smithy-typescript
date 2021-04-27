@@ -108,7 +108,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         nonTraits = context.getModelWithoutTraitShapes();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        LOGGER.info(() -> "Generating TypeScript for service " + service.getId());
+        LOGGER.info(() -> String.format("Generating TypeScript %s for service %s",
+                settings.generateClient() ? "client" : "server", service.getId()));
 
         // Decorate the symbol provider using integrations.
         SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
