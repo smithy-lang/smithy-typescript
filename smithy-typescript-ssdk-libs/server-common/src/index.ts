@@ -26,10 +26,10 @@ export type OperationInput<T> = T extends Operation<infer I, any> ? I : never;
 export type OperationOutput<T> = T extends Operation<any, infer O> ? O : never;
 
 export interface OperationSerializer<T, K extends keyof T, E extends SmithyException> {
-  serialize(input: OperationOutput<T[K]>, ctx: Omit<SerdeContext, "endpoint">): Promise<HttpResponse>;
+  serialize(input: OperationOutput<T[K]>, ctx: ServerSerdeContext): Promise<HttpResponse>;
   deserialize(input: HttpRequest, ctx: SerdeContext): Promise<OperationInput<T[K]>>;
   isOperationError(error: any): error is E;
-  serializeError(error: E, ctx: Omit<SerdeContext, "endpoint">): Promise<HttpResponse>;
+  serializeError(error: E, ctx: ServerSerdeContext): Promise<HttpResponse>;
 }
 
 export interface ServiceHandler<RequestType = HttpRequest, ResponseType = HttpResponse> {
@@ -43,3 +43,5 @@ export interface ServiceCoordinate<S extends string, O extends string> {
 export interface Mux<S extends string, O extends string> {
   match(req: HttpRequest): ServiceCoordinate<S, O> | undefined;
 }
+
+export interface ServerSerdeContext extends Omit<SerdeContext, "endpoint"> {}

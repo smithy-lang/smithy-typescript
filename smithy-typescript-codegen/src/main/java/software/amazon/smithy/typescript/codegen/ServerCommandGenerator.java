@@ -180,8 +180,8 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     private void writeErrorHandler() {
-        writer.addImport("SerdeContext", null, "@aws-sdk/types");
-        writer.openBlock("serializeError(error: $T, ctx: Omit<SerdeContext, 'endpoint'>): Promise<$T> {", "}",
+        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
+        writer.openBlock("serializeError(error: $T, ctx: ServerSerdeContext): Promise<$T> {", "}",
                 errorsType, applicationProtocol.getResponseType(), () -> {
             if (operation.getErrors().isEmpty()) {
                 writer.write("throw error;");

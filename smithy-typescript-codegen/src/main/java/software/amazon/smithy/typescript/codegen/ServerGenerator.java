@@ -52,6 +52,7 @@ final class ServerGenerator {
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsType = serviceSymbol.expectProperty("operations", Symbol.class);
+        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writeSerdeContextBase(writer);
         writeHandleFunction(writer);
@@ -62,7 +63,7 @@ final class ServerGenerator {
             writer.write("private serializerFactory: <T extends $T>(operation: T) => "
                             + "__OperationSerializer<$T, T, __SmithyException>;", operationsType, serviceSymbol);
             writer.write("private serializeFrameworkException: (e: __SmithyFrameworkException, "
-                            + "ctx: Omit<SerdeContext, 'endpoint'>) => Promise<__HttpResponse>;");
+                            + "ctx: ServerSerdeContext) => Promise<__HttpResponse>;");
             writer.writeDocs(() -> {
                 writer.write("Construct a $T handler.", serviceSymbol);
                 writer.write("@param service The {@link $1T} implementation that supplies the business logic for $1T",
@@ -81,8 +82,8 @@ final class ServerGenerator {
                 writer.write("mux: __Mux<$S, $T>,", serviceShape.getId().getName(), operationsType);
                 writer.write("serializerFactory:<T extends $T>(op: T) => "
                                 + "__OperationSerializer<$T, T, __SmithyException>,", operationsType, serviceSymbol);
-                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: Omit<SerdeContext, "
-                        + "'endpoint'>) => Promise<__HttpResponse>");
+                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: ServerSerdeContext) => "
+                        + "Promise<__HttpResponse>");
             });
             writer.indent();
             writer.write("this.service = service;");
@@ -127,6 +128,7 @@ final class ServerGenerator {
         Symbol outputSymbol = operationSymbol.expectProperty("outputType", Symbol.class);
         Symbol handlerSymbol = operationSymbol.expectProperty("handler", Symbol.class);
         Symbol errorsSymbol = operationSymbol.expectProperty("errorsType", Symbol.class);
+        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writer.openBlock("export class $L implements __ServiceHandler {", "}", handlerSymbol.getName(), () -> {
             writer.write("private operation: __Operation<$T, $T>;", inputSymbol, outputSymbol);
@@ -134,7 +136,7 @@ final class ServerGenerator {
             writer.write("private serializer: __OperationSerializer<$T, $S, $T>;",
                     serviceSymbol, operationName, errorsSymbol);
             writer.write("private serializeFrameworkException: (e: __SmithyFrameworkException, "
-                    + "ctx: Omit<SerdeContext, 'endpoint'>) => Promise<__HttpResponse>;");
+                    + "ctx: ServerSerdeContext) => Promise<__HttpResponse>;");
             writer.writeDocs(() -> {
                 writer.write("Construct a $T handler.", operationSymbol);
                 writer.write("@param service The {@link __Operation} implementation that supplies the business "
@@ -152,8 +154,8 @@ final class ServerGenerator {
                 writer.write("mux: __Mux<$S, $S>,", serviceShape.getId().getName(), operationName);
                 writer.write("serializer: __OperationSerializer<$T, $S, $T>,",
                         serviceSymbol, operationName, errorsSymbol);
-                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: Omit<SerdeContext, "
-                        + "'endpoint'>) => Promise<__HttpResponse>");
+                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: ServerSerdeContext) => "
+                        + "Promise<__HttpResponse>");
             });
             writer.indent();
             writer.write("this.operation = operation;");
@@ -198,7 +200,7 @@ final class ServerGenerator {
             writer.write("serializer: __OperationSerializer<S, O, __SmithyException>,");
             writer.write("operation: __Operation<__OperationInput<S[O]>, __OperationOutput<S[O]>>,");
             writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, "
-                    + "ctx: Omit<SerdeContext, 'endpoint'>) => Promise<__HttpResponse>");
+                    + "ctx: ServerSerdeContext) => Promise<__HttpResponse>");
         });
         writer.indent();
         writer.write("let input;");

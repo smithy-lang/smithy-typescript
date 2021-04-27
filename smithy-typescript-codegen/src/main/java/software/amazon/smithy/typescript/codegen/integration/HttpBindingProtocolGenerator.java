@@ -218,10 +218,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
         writer.addUseImports(responseType);
+        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writer.openBlock("export const serializeFrameworkException = async(\n"
                 + "  input: __SmithyFrameworkException,\n"
-                + "  ctx: Omit<__SerdeContext, 'endpoint'>\n"
+                + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", responseType, () -> {
 
             writeEmptyEndpoint(context);
@@ -419,10 +420,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String methodName = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Response";
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
+        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writer.openBlock("export const $L = async(\n"
                 + "  input: $T,\n"
-                + "  ctx: Omit<$L, 'endpoint'>\n"
+                + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", methodName, outputType, contextType, responseType, () -> {
             writeEmptyEndpoint(context);
             writeOperationStatusCode(context, operation, bindingIndex, trait);
@@ -459,10 +461,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.addUseImports(responseType);
         String methodName = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Error";
+        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writer.openBlock("export const $L = async(\n"
                 + "  input: $T,\n"
-                + "  ctx: Omit<__SerdeContext, 'endpoint'>\n"
+                + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
             writeEmptyEndpoint(context);
             generateErrorSerializationImplementation(context, error, responseType, bindingIndex);
