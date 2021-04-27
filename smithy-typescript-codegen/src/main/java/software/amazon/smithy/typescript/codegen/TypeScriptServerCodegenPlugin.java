@@ -17,8 +17,6 @@ package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
-import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.model.Model;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 
 /**
@@ -33,21 +31,6 @@ public class TypeScriptServerCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
-        new CodegenVisitor(
-                context,
-                TypeScriptServerCodegenPlugin::createSymbolProvider,
-                ArtifactType.SSDK
-        ).execute();
-    }
-
-    /**
-     * Creates a TypeScript symbol provider.
-     *
-     * @param model Model to generate symbols for.
-     * @param settings Settings used by the plugin.
-     * @return Returns the created provider.
-     */
-    public static SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
-        return new ServerSymbolVisitor(model, new SymbolVisitor(model, settings));
+        new CodegenVisitor(context, ArtifactType.SSDK).execute();
     }
 }
