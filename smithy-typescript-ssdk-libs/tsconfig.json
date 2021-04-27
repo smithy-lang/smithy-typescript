@@ -15,25 +15,19 @@
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "ES2018",
     "lib": ["es2015", "dom"],
     "baseUrl": ".",
+    "strict": true,
+    "declaration": true,
+    "importHelpers": true,
+    "noEmitHelpers": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
     "paths": {
       "@aws-smithy/server-common": ["server-common/src"],
       "@aws-smithy/server-apigateway" : ["server-apigateway/src"]
     }
   },
-  "exclude": ["node_modules/"],
-  "typedocOptions": {
-    "readme": "README.md",
-    "mode": "modules",
-    "out": "docs",
-    "exclude": ["**/node_modules/**", "**/*.spec.ts"],
-    "excludeExternals": true,
-    "ignoreCompilerErrors": true,
-    "theme": "minimal",
-    "hideGenerator": true,
-    "clientDocs": "clients/{{CLIENT}}/docs",
-    "plugin": ["typedoc-plugin-lerna-packages"]
-  }
+  "exclude": ["node_modules/"]
 }

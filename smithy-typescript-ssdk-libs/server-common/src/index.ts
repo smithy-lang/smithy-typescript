@@ -36,10 +36,10 @@ export interface ServiceHandler<RequestType = HttpRequest, ResponseType = HttpRe
     handle(request: RequestType): Promise<ResponseType>
 }
 
-export interface ServiceCoordinate<S extends string, O extends String> {
+export interface ServiceCoordinate<S extends string, O extends string> {
     readonly service: S
     readonly operation: O
 }
-export interface Mux<S extends string, O extends String> {
+export interface Mux<S extends string, O extends string> {
     match(req: HttpRequest) : ServiceCoordinate<S, O> | undefined;
 }

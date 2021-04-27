@@ -39,7 +39,7 @@ export interface QuerySegment {
     type: 'query'
     key: string
 }
-export class UriSpec<S extends string, O extends String> {
+export class UriSpec<S extends string, O extends string> {
     private readonly method: string;
     private readonly pathSegments: (PathLiteralSegment | PathLabelSegment | GreedySegment)[];
     private readonly querySegments: (QueryLiteralSegment | QuerySegment)[];
@@ -133,7 +133,7 @@ export class UriSpec<S extends string, O extends String> {
     }
 }
 
-export class HttpBindingMux<S extends string, O extends String> implements Mux<S, O> {
+export class HttpBindingMux<S extends string, O extends string> implements Mux<S, O> {
     private readonly specs: UriSpec<S, O>[]
 
     constructor(inputSpecs: UriSpec<S, O>[]) {
