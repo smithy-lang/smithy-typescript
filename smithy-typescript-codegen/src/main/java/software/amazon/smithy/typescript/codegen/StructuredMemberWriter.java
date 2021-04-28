@@ -15,22 +15,34 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.SimpleShape;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.PatternTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.model.traits.Trait;
+import software.amazon.smithy.model.traits.UniqueItemsTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -265,5 +277,154 @@ final class StructuredMemberWriter {
      */
     private boolean isRequiredMember(MemberShape member) {
         return member.isRequired() && !member.hasTrait(IdempotencyTokenTrait.class);
+    }
+
+    /**
+     * Writes a const map of member validators into the namespace for use by the validate method.
+     *
+     * @param writer the writer for the type, currently positioned in the type's exported namespace
+     */
+    void writeMemberValidators(TypeScriptWriter writer) {
+        writer.openBlock("const memberValidators = {", "};", () -> {
+            for (MemberShape member : members) {
+                final Shape targetShape = model.expectShape(member.getTarget());
+                Collection<Trait> constraintTraits = getConstraintTraits(member);
+                writer.writeInline("$L: ", getSanitizedMemberName(member));
+                writeShapeValidator(writer, targetShape, constraintTraits);
+            }
+        });
+    }
+
+    private void writeShapeValidator(TypeScriptWriter writer, Shape shape, Collection<Trait> constraintTraits) {
+        if (shape.isStructureShape() || shape.isUnionShape()) {
+            writer.addImport("CompositeStructureValidator",
+                    "__CompositeStructureValidator",
+                    "@aws-smithy/server-common");
+            writer.openBlock("new __CompositeStructureValidator<$T>(", "),",
+                symbolProvider.toSymbol(shape),
+                () -> {
+                    writeCompositeValidator(writer, shape, constraintTraits);
+                    writer.write("$T.validate,", symbolProvider.toSymbol(shape));
+                }
+            );
+        } else if (shape.isListShape() || shape.isSetShape()) {
+            writer.addImport("CompositeCollectionValidator",
+                    "__CompositeCollectionValidator",
+                    "@aws-smithy/server-common");
+            MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
+            Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
+            writer.openBlock("new __CompositeCollectionValidator<$T>(", "),",
+                    symbolProvider.toSymbol(collectionMemberTargetShape),
+                    () -> {
+                        writeCompositeValidator(writer, shape, constraintTraits);
+                        writeShapeValidator(writer,
+                                            collectionMemberTargetShape,
+                                            getConstraintTraits(collectionMemberShape));
+                    });
+        } else if (shape.isMapShape()) {
+            writer.addImport("CompositeMapValidator",
+                    "__CompositeMapValidator",
+                    "@aws-smithy/server-common");
+            MapShape mapShape = (MapShape) shape;
+            final MemberShape keyShape = mapShape.getKey();
+            final MemberShape valueShape = mapShape.getValue();
+            writer.openBlock("new __CompositeMapValidator<$T>(", "),",
+                    symbolProvider.toSymbol(model.expectShape(valueShape.getTarget())),
+                    () -> {
+                        writeCompositeValidator(writer, mapShape, constraintTraits);
+                        writeShapeValidator(writer,
+                                            model.expectShape(keyShape.getTarget()),
+                                            getConstraintTraits(keyShape));
+                        writeShapeValidator(writer,
+                                            model.expectShape(valueShape.getTarget()),
+                                            getConstraintTraits(valueShape));
+                    });
+        } else if (shape instanceof SimpleShape) {
+            writeCompositeValidator(writer, shape, constraintTraits);
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported shape found when generating validator: %s", shape));
+        }
+    }
+
+    private void writeCompositeValidator(TypeScriptWriter writer,
+                                         Shape shape,
+                                         Collection<Trait> constraints) {
+        if (constraints.isEmpty()) {
+            writer.addImport("NoOpValidator", "__NoOpValidator", "@aws-smithy/server-common");
+            writer.write("new __NoOpValidator(),");
+            return;
+        }
+        writer.addImport("CompositeValidator",
+                "__CompositeValidator",
+                "@aws-smithy/server-common");
+
+        Symbol symbol;
+        if (shape instanceof StringShape) {
+            // Don't let the TypeScript type for an enum narrow our validator's type too much
+            symbol = symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
+        } else {
+            symbol = symbolProvider.toSymbol(shape);
+        }
+
+        writer.openBlock("new __CompositeValidator<$T>([", "]),", symbol,
+            () -> {
+                for (Trait t : constraints) {
+                    writeValidator(writer, t);
+                }
+            }
+        );
+    }
+
+    void writeValidate(TypeScriptWriter writer, String param) {
+        writer.openBlock("return [", "];", () -> {
+            for (MemberShape member : members) {
+                writer.write("...memberValidators.$1L.validate($2L.$1L, $3S),",
+                        getSanitizedMemberName(member), param, member.getMemberName());
+            }
+        });
+    }
+
+    private void writeValidator(TypeScriptWriter writer, Trait trait) {
+        if (trait instanceof RequiredTrait) {
+            writer.addImport("RequiredValidator", "__RequiredValidator", "@aws-smithy/server-common");
+            writer.write("new __RequiredValidator(),");
+        } else if (trait instanceof EnumTrait) {
+            writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
+            writer.openBlock("new __EnumValidator([", "]),", () -> {
+                for (String e : ((EnumTrait) trait).getEnumDefinitionValues()) {
+                    writer.write("$S,", e);
+                }
+            });
+        } else if (trait instanceof LengthTrait) {
+            LengthTrait lengthTrait = (LengthTrait) trait;
+            writer.addImport("LengthValidator", "__LengthValidator", "@aws-smithy/server-common");
+            writer.write("new __LengthValidator($L, $L),",
+                    lengthTrait.getMin().map(Object::toString).orElse("undefined"),
+                    lengthTrait.getMax().map(Object::toString).orElse("undefined"));
+        } else if (trait instanceof PatternTrait) {
+            writer.addImport("PatternValidator", "__PatternValidator", "@aws-smithy/server-common");
+            writer.write("new __PatternValidator($S),", ((PatternTrait) trait).getValue());
+        } else if (trait instanceof RangeTrait) {
+            RangeTrait rangeTrait = (RangeTrait) trait;
+            writer.addImport("RangeValidator", "__RangeValidator", "@aws-smithy/server-common");
+            writer.write("new __RangeValidator($L, $L),",
+                    rangeTrait.getMin().map(Object::toString).orElse("undefined"),
+                    rangeTrait.getMax().map(Object::toString).orElse("undefined"));
+        } else if (trait instanceof UniqueItemsTrait) {
+            writer.addImport("UniqueItemsValidator", "__UniqueItemsValidator", "@aws-smithy/server-common");
+            writer.write("new __UniqueItemsValidator(),");
+        }
+    }
+
+    private Collection<Trait> getConstraintTraits(MemberShape member) {
+        List<Trait> traits = new ArrayList<>();
+        member.getTrait(RequiredTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, EnumTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, LengthTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, PatternTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, RangeTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, UniqueItemsTrait.class).ifPresent(traits::add);
+        return traits;
     }
 }

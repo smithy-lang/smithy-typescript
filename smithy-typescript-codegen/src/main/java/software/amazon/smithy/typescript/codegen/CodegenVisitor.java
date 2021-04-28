@@ -259,7 +259,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     @Override
     public Void structureShape(StructureShape shape) {
-        writers.useShapeWriter(shape, writer -> new StructureGenerator(model, symbolProvider, writer, shape).run());
+        writers.useShapeWriter(shape, writer ->
+                new StructureGenerator(model, symbolProvider, writer, shape, settings.generateServerSdk()).run());
         return null;
     }
 
@@ -271,7 +272,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     @Override
     public Void unionShape(UnionShape shape) {
-        writers.useShapeWriter(shape, writer -> new UnionGenerator(model, symbolProvider, writer, shape).run());
+        writers.useShapeWriter(shape, writer ->
+                new UnionGenerator(model, symbolProvider, writer, shape, settings.generateServerSdk()).run());
         return null;
     }
 

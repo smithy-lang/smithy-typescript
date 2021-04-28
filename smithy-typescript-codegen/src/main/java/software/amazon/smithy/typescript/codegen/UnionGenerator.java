@@ -132,13 +132,26 @@ final class UnionGenerator implements Runnable {
     private final Symbol symbol;
     private final UnionShape shape;
     private final Map<String, String> variantMap;
+    private final boolean includeValidation;
 
+    /**
+     * sets 'includeValidation' to 'false' for backwards compatibility.
+     */
     UnionGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, UnionShape shape) {
+        this(model, symbolProvider, writer, shape, false);
+    }
+
+    UnionGenerator(Model model,
+                   SymbolProvider symbolProvider,
+                   TypeScriptWriter writer,
+                   UnionShape shape,
+                   boolean includeValidation) {
         this.shape = shape;
         this.symbol = symbolProvider.toSymbol(shape);
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
+        this.includeValidation = includeValidation;
 
         variantMap = new TreeMap<>();
         for (MemberShape member : shape.getAllMembers().values()) {
@@ -165,6 +178,9 @@ final class UnionGenerator implements Runnable {
             writeVisitorType();
             writeVisitorFunction();
             writeFilterSensitiveLog();
+            if (includeValidation) {
+                writeValidate();
+            }
         });
     }
 
@@ -243,6 +259,21 @@ final class UnionGenerator implements Runnable {
                 writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
                     objectParam);
             }
+        );
+    }
+
+    private void writeValidate() {
+        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                model, symbolProvider, shape.getAllMembers().values());
+
+        structuredMemberWriter.writeMemberValidators(writer);
+
+        writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+        writer.openBlock("export const validate = ($L: $L): __ValidationFailure[] => {", "}",
+                "obj", symbol.getName(),
+                () -> {
+                    structuredMemberWriter.writeValidate(writer, "obj");
+                }
         );
     }
 }

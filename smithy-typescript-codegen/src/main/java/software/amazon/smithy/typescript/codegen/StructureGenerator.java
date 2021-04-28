@@ -36,12 +36,25 @@ final class StructureGenerator implements Runnable {
     private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
     private final StructureShape shape;
+    private final boolean includeValidation;
 
+    /**
+     * sets 'includeValidation' to 'false' for backwards compatibility.
+     */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
+        this(model, symbolProvider, writer, shape, false);
+    }
+
+    StructureGenerator(Model model,
+                       SymbolProvider symbolProvider,
+                       TypeScriptWriter writer,
+                       StructureShape shape,
+                       boolean includeValidation) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;
+        this.includeValidation = includeValidation;
     }
 
     @Override
@@ -64,6 +77,7 @@ final class StructureGenerator implements Runnable {
      * structure Person {
      *     @required
      *     name: String,
+     *     @range(min: 1)
      *     age: Integer,
      * }
      * }</pre>
@@ -78,6 +92,22 @@ final class StructureGenerator implements Runnable {
      *
      * export namespace Person {
      *   export const filterSensitiveLog = (obj: Person): any => ({...obj});
+     * }
+     * }</pre>
+     *
+     * <p>If validation is enabled, it generates the following:
+     *
+     * <pre>{@code
+     * export interface Person {
+     *   name: string | undefined;
+     *   age?: number | null;
+     * }
+     *
+     * export namespace Person {
+     *   export const filterSensitiveLog = (obj: Person): any => ({...obj});
+     *   export const validate = (obj: Person): ValidationFailure[] => {
+     *       // validation
+     *   }
      * }
      * }</pre>
      */
@@ -102,7 +132,7 @@ final class StructureGenerator implements Runnable {
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
-        renderStructureNamespace();
+        renderStructureNamespace(config, includeValidation);
     }
 
     /**
@@ -162,20 +192,32 @@ final class StructureGenerator implements Runnable {
         structuredMemberWriter.writeMembers(writer, shape);
         writer.closeBlock("}"); // interface
         writer.write("");
-        renderStructureNamespace();
+        renderStructureNamespace(structuredMemberWriter, false);
     }
 
-    private void renderStructureNamespace() {
+    private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             String objectParam = "obj";
             writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
                 objectParam, symbol.getName(),
                 () -> {
-                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                        model, symbolProvider, shape.getAllMembers().values());
                     structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
                 }
+            );
+
+            if (!includeValidation) {
+                return;
+            }
+
+            structuredMemberWriter.writeMemberValidators(writer);
+
+            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+            writer.openBlock("export const validate = ($L: $L): __ValidationFailure[] => {", "}",
+                    objectParam, symbol.getName(),
+                    () -> {
+                        structuredMemberWriter.writeValidate(writer, objectParam);
+                    }
             );
         });
     }
