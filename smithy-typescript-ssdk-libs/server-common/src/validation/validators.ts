@@ -13,16 +13,57 @@
  *  permissions and limitations under the License.
  */
 
-import { EnumValidationFailure, LengthValidationFailure, PatternValidationFailure, UniqueItemsValidationFailure } from ".";
+import {
+    EnumValidationFailure,
+    LengthValidationFailure,
+    PatternValidationFailure,
+    RangeValidationFailure,
+    RequiredValidationFailure,
+    UniqueItemsValidationFailure,
+    ValidationFailure
+} from ".";
 
-export class EnumValidator {
+export class CompositeValidator<T> {
+    private readonly validators: Validator<T, any>[];
+
+    constructor(validators: Validator<T, any>[]) {
+        this.validators = validators;
+    }
+
+    validate(input: T | undefined | null, memberName: string): ValidationFailure[] {
+        let retVal: ValidationFailure[] = [];
+        for (let v of this.validators) {
+            let failure = v.validate(input, memberName);
+            if (failure) {
+                retVal.push(failure);
+            }
+        }
+        return retVal;
+    }
+}
+
+export class NullValidator {
+    validate(input: any, memberName: string): ValidationFailure[] {
+        return [];
+    }
+}
+
+export interface Validator<T, F> {
+    validate(input: T | undefined | null, memberName: string): F | null;
+}
+
+export class EnumValidator implements Validator<string, EnumValidationFailure> {
     private readonly allowedValues: string[];
 
     constructor(allowedValues: readonly string[]) {
         this.allowedValues = allowedValues.slice();
     }
 
-    validate(input: string, memberName: string): EnumValidationFailure | null {
+    validate(input: string | undefined | null, memberName: string): EnumValidationFailure | null {
+        if (input === null || input === undefined) {
+            return null;
+        }
+
         if (this.allowedValues.indexOf(input) < 0) {
             return {
                 constraintType: 'enum',
@@ -37,7 +78,9 @@ export class EnumValidator {
 
 }
 
-export class LengthValidator {
+type LengthCheckable = { length: number } | { [key: string]: any };
+
+export class LengthValidator implements Validator<LengthCheckable, LengthValidationFailure> {
     private readonly min?: number;
     private readonly max?: number;
 
@@ -49,9 +92,13 @@ export class LengthValidator {
         this.max = max;
     }
 
-    validate(input: { length: number } | { [key: string]: any }, memberName: string): LengthValidationFailure | null {
+    validate(input: LengthCheckable | undefined | null, memberName: string): LengthValidationFailure | null {
+        if (input === null || input === undefined) {
+            return null;
+        }
+
         let length: number;
-        if (LengthValidator.hasProperty(input, 'length')) {
+        if (LengthValidator.hasLength(input)) {
             length = input.length;
         } else {
             length = Object.keys(input).length;
@@ -71,12 +118,12 @@ export class LengthValidator {
         return null;
     }
 
-    private static hasProperty<P extends PropertyKey>(obj: any, prop: P): obj is Record<P, unknown> {
-        return obj.hasOwnProperty(prop)
+    private static hasLength<P extends PropertyKey>(obj: any): obj is { length: number } {
+        return obj.hasOwnProperty("length")
     }
 }
 
-export class RangeValidator {
+export class RangeValidator implements Validator<number, RangeValidationFailure> {
     private readonly min?: number;
     private readonly max?: number;
 
@@ -88,7 +135,11 @@ export class RangeValidator {
         this.max = max;
     }
 
-    validate(input: number, memberName: string) {
+    validate(input: number | undefined | null, memberName: string): RangeValidationFailure | null {
+        if (input === null || input === undefined) {
+            return null;
+        }
+
         if (this.min !== undefined && input < this.min || this.max !== undefined && input > this.max) {
             return {
                 constraintType: 'range',
@@ -104,7 +155,7 @@ export class RangeValidator {
     }
 }
 
-export class PatternValidator {
+export class PatternValidator implements Validator<string, PatternValidationFailure> {
     private readonly inputPattern: string;
     private readonly pattern: RegExp;
 
@@ -113,7 +164,11 @@ export class PatternValidator {
         this.pattern = new RegExp(pattern, "u");
     }
 
-    validate(input: string, memberName: string): PatternValidationFailure | null {
+    validate(input: string | undefined | null, memberName: string): PatternValidationFailure | null {
+        if (input === null || input === undefined) {
+            return null;
+        }
+
         if (!input.match(this.pattern)) {
             return {
                 constraintType: 'pattern',
@@ -126,9 +181,22 @@ export class PatternValidator {
     }
 }
 
-export class UniqueItemsValidator {
+export class RequiredValidator implements Validator<any, RequiredValidationFailure> {
+    validate(input: any, memberName: string) : RequiredValidationFailure | null {
+        if (input === null || input === undefined) {
+            return new RequiredValidationFailure(memberName);
+        }
+        return null;
+    }
+}
 
-    validate(input: Array<any>, memberName: string): UniqueItemsValidationFailure | null {
+export class UniqueItemsValidator implements Validator<Array<any>, UniqueItemsValidationFailure> {
+
+    validate(input: Array<any> | undefined | null, memberName: string): UniqueItemsValidationFailure | null {
+        if (input === null || input === undefined) {
+            return null;
+        }
+
         let repeats = new Set<any>();
         let uniqueValues = new Set<any>();
         for (let i of input) {
