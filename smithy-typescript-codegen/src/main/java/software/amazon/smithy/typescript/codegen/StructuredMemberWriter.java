@@ -15,9 +15,11 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -28,9 +30,16 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.PatternTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.model.traits.Trait;
+import software.amazon.smithy.model.traits.UniqueItemsTrait;
 
 /**
  * Generates objects, interfaces, enums, etc.
@@ -263,5 +272,84 @@ final class StructuredMemberWriter {
      */
     private boolean isRequiredMember(MemberShape member) {
         return member.isRequired() && !member.hasTrait(IdempotencyTokenTrait.class);
+    }
+
+    /**
+     * Writes a const map of member validators into the namespace for use by the validate method.
+     *
+     * @param writer the writer for the type, currently positioned in the type's exported namespace
+     */
+    void writeMemberValidators(TypeScriptWriter writer) {
+        writer.openBlock("const memberValidators = {", "};", () -> {
+            for (MemberShape member : members) {
+                Collection<Trait> constraintTraits = getConstraintTraits(member);
+                if (constraintTraits.isEmpty()) {
+                    writer.addImport("NullValidator", "__NullValidator", "@aws-smithy/server-common");
+                    writer.write("$L: new __NullValidator(),", getSanitizedMemberName(member));
+                } else {
+                    writer.addImport("CompositeValidator", "__CompositeValidator", "@aws-smithy/server-common");
+                    writer.openBlock("$L: new __CompositeValidator<$T>([", "]),",
+                            getSanitizedMemberName(member),
+                            symbolProvider.toSymbol(member),
+                            () -> {
+                        for (Trait t : constraintTraits) {
+                            writeValidator(writer, t);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    void writeValidate(TypeScriptWriter writer, String param) {
+        writer.openBlock("return [", "];", () -> {
+            for (MemberShape member : members) {
+                writer.write("...memberValidators.$1L.validate($2L.$1L, $3S),",
+                        getSanitizedMemberName(member), param, member.getMemberName());
+            }
+        });
+    }
+
+    private void writeValidator(TypeScriptWriter writer, Trait trait) {
+        if (trait instanceof RequiredTrait) {
+            writer.addImport("RequiredValidator", "__RequiredValidator", "@aws-smithy/server-common");
+            writer.write("new __RequiredValidator(),");
+        } else if (trait instanceof EnumTrait) {
+            writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
+            writer.openBlock("new __EnumValidator([", "]),", () -> {
+                for (String e : ((EnumTrait) trait).getEnumDefinitionValues()) {
+                    writer.write("$S,", e);
+                }
+            });
+        } else if (trait instanceof LengthTrait) {
+            LengthTrait lengthTrait = (LengthTrait) trait;
+            writer.addImport("LengthValidator", "__LengthValidator", "@aws-smithy/server-common");
+            writer.write("new __LengthValidator($L, $L),",
+                    lengthTrait.getMin().map(Object::toString).orElse("undefined"),
+                    lengthTrait.getMax().map(Object::toString).orElse("undefined"));
+        } else if (trait instanceof PatternTrait) {
+            writer.addImport("PatternValidator", "__PatternValidator", "@aws-smithy/server-common");
+            writer.write("new __PatternValidator($S),", ((PatternTrait) trait).getValue());
+        } else if (trait instanceof RangeTrait) {
+            RangeTrait rangeTrait = (RangeTrait) trait;
+            writer.addImport("RangeValidator", "__RangeValidator", "@aws-smithy/server-common");
+            writer.write("new __RangeValidator($L, $L),",
+                    rangeTrait.getMin().map(Object::toString).orElse("undefined"),
+                    rangeTrait.getMax().map(Object::toString).orElse("undefined"));
+        } else if (trait instanceof UniqueItemsTrait) {
+            writer.addImport("UniqueItemsValidator", "__UniqueItemsValidator", "@aws-smithy/server-common");
+            writer.write("new __UniqueItemsValidator(),");
+        }
+    }
+
+    private Collection<Trait> getConstraintTraits(MemberShape member) {
+        List<Trait> traits = new ArrayList<>();
+        member.getTrait(RequiredTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, EnumTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, LengthTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, PatternTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, RangeTrait.class).ifPresent(traits::add);
+        member.getMemberTrait(model, UniqueItemsTrait.class).ifPresent(traits::add);
+        return traits;
     }
 }
