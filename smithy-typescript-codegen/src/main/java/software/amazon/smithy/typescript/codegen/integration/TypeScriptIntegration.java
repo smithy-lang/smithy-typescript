@@ -30,12 +30,14 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Java SPI for customizing TypeScript code generation, registering
  * new protocol code generators, renaming shapes, modifying the model,
  * adding custom code, etc.
  */
+@SmithyUnstableApi
 public interface TypeScriptIntegration {
     /**
      * Gets the sort order of the customization from -128 to 127.

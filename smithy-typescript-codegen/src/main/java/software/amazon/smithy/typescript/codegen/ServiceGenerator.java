@@ -32,10 +32,12 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates a service client and configuration using plugins.
  */
+@SmithyInternalApi
 final class ServiceGenerator implements Runnable {
 
     static final String CLIENT_CONFIG_SECTION = "client_config";

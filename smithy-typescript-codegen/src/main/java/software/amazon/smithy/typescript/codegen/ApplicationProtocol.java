@@ -18,11 +18,13 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.Objects;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Represents the resolves {@link Symbol}s and references for an
  * application protocol (e.g., "http", "mqtt", etc).
  */
+@SmithyUnstableApi
 public final class ApplicationProtocol {
 
     private final String name;

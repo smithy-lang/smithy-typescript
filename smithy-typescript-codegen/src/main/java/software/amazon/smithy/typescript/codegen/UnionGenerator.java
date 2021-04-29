@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -122,6 +123,7 @@ import software.amazon.smithy.utils.StringUtils;
  * so that it is forward-compatible to change a structure with optional
  * and mutually exclusive members to a tagged union.
  */
+@SmithyInternalApi
 final class UnionGenerator implements Runnable {
 
     private final Model model;

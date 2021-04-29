@@ -22,10 +22,12 @@ import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Private class used to generates a package.json file for the project.
  */
+@SmithyInternalApi
 final class PackageJsonGenerator {
 
     private PackageJsonGenerator() {}

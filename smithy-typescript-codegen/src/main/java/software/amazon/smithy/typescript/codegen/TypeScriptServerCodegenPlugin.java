@@ -18,10 +18,12 @@ package software.amazon.smithy.typescript.codegen;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Plugin to trigger TypeScript SSDK code generation.
  */
+@SmithyInternalApi
 public class TypeScriptServerCodegenPlugin implements SmithyBuildPlugin {
 
     @Override

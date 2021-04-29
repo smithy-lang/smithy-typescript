@@ -45,6 +45,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Visitor to generate member values for aggregate types serialized in documents.
@@ -62,6 +63,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  *   <li>All other types: unmodified.</li>
  * </ul>
  */
+@SmithyUnstableApi
 public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     private final GenerationContext context;
     private final String dataSource;

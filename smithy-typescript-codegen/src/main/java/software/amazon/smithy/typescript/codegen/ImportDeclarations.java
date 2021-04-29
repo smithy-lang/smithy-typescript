@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Internal class used for aggregating imports of a file.
  */
+@SmithyInternalApi
 final class ImportDeclarations {
 
     private final Path relativize;

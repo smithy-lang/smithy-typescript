@@ -31,12 +31,14 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates objects, interfaces, enums, etc.
  *
  * TODO: Replace this with a builder for generating classes and interfaces.
  */
+@SmithyInternalApi
 final class StructuredMemberWriter {
 
     Model model;

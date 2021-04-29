@@ -36,6 +36,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.utils.CodeWriter;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -52,6 +53,7 @@ import software.amazon.smithy.utils.StringUtils;
  * <p>Dependencies introduced via a TypeScriptWriter are added to the package.json
  * file if the writer is a part of the {@link TypeScriptDelegator} of the {@link CodegenVisitor}.
  */
+@SmithyUnstableApi
 public final class TypeScriptWriter extends CodeWriter {
 
     private static final Logger LOGGER = Logger.getLogger(TypeScriptWriter.class.getName());

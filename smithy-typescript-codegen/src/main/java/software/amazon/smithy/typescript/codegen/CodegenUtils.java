@@ -26,10 +26,12 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Utility methods needed across Java packages.
  */
+@SmithyUnstableApi
 public final class CodegenUtils {
 
     private CodegenUtils() {}

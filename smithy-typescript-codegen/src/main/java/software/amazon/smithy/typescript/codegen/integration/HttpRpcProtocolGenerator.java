@@ -30,10 +30,12 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Abstract implementation useful for all HTTP protocols without bindings.
  */
+@SmithyUnstableApi
 public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     public static final Logger LOGGER = Logger.getLogger(HttpRpcProtocolGenerator.class.getName());

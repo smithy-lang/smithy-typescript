@@ -73,10 +73,12 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Abstract implementation useful for all protocols that use HTTP bindings.
  */
+@SmithyUnstableApi
 public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());

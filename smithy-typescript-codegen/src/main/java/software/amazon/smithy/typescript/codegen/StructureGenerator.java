@@ -24,10 +24,12 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates normal structures and error structures.
  */
+@SmithyInternalApi
 final class StructureGenerator implements Runnable {
 
     private final Model model;

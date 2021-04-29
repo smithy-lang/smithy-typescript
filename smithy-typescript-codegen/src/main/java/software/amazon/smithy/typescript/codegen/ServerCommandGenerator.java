@@ -30,10 +30,12 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates server operation types.
  */
+@SmithyInternalApi
 final class ServerCommandGenerator implements Runnable {
 
     private final TypeScriptSettings settings;

@@ -37,7 +37,9 @@ import software.amazon.smithy.jmespath.ast.OrExpression;
 import software.amazon.smithy.jmespath.ast.ProjectionExpression;
 import software.amazon.smithy.jmespath.ast.SliceExpression;
 import software.amazon.smithy.jmespath.ast.Subexpression;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
+@SmithyInternalApi
 class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
     // Execution context is the current "head" of the execution. This is scope on which the expression

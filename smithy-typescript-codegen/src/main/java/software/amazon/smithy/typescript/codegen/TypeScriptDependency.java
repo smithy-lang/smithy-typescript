@@ -21,10 +21,12 @@ import java.util.List;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * An enum of all of the built-in dependencies managed by this package.
  */
+@SmithyUnstableApi
 public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/client-documentation-generator", "3.6.1", true),

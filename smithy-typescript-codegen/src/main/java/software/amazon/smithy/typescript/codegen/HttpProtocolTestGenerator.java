@@ -66,6 +66,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.Pair;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates HTTP protocol test cases to be run using Jest.
@@ -79,6 +80,7 @@ import software.amazon.smithy.utils.Pair;
  *
  * TODO: try/catch and if/else are still cumbersome with TypeScriptWriter.
  */
+@SmithyInternalApi
 final class HttpProtocolTestGenerator implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(HttpProtocolTestGenerator.class.getName());
