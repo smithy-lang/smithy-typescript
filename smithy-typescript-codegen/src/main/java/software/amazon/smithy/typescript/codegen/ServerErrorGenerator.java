@@ -20,11 +20,13 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates convenience error types for servers, since service developers will throw a modeled exception directly,
  * while clients typically care only about catching them.
  */
+@SmithyInternalApi
 final class ServerErrorGenerator implements Runnable {
 
     private final TypeScriptSettings settings;

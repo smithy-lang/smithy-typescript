@@ -32,10 +32,12 @@ import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.MapUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Adds event streams if needed.
  */
+@SmithyInternalApi
 public final class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override

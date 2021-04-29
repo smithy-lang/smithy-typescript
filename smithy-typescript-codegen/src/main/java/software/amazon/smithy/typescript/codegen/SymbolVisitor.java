@@ -63,6 +63,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -71,6 +72,7 @@ import software.amazon.smithy.utils.StringUtils;
  * <p>Reserved words for TypeScript are automatically escaped so that they are
  * prefixed with "_". See "reserved-words.txt" for the list of words.
  */
+@SmithyInternalApi
 final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     static final String IMPLEMENTS_INTERFACE_PROPERTY = "implementsInterface";

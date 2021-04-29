@@ -23,6 +23,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -33,6 +34,7 @@ import software.amazon.smithy.utils.StringUtils;
  * operations of a service are considered referenced, meaning they will
  * not be removed by tree-shaking.
  */
+@SmithyInternalApi
 final class NonModularServiceGenerator implements Runnable {
 
     private final TypeScriptSettings settings;

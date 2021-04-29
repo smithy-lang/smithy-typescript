@@ -20,6 +20,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates an appropriate TypeScript type from a Smithy enum string.
@@ -51,6 +52,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
  * }
  * }</pre>
  */
+@SmithyInternalApi
 final class EnumGenerator implements Runnable {
 
     private final Symbol symbol;

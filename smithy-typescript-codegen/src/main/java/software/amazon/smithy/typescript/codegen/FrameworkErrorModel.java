@@ -16,7 +16,9 @@
 package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
+@SmithyUnstableApi
 public enum FrameworkErrorModel {
 
     INSTANCE;

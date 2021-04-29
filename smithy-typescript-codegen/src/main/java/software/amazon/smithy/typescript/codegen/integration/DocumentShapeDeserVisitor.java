@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Visitor to generate deserialization functions for shapes in protocol document bodies.
@@ -62,6 +63,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
  *   <li>All other types: no function generated. <b>May be overridden.</b></li>
  * </ul>
  */
+@SmithyUnstableApi
 public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Void> {
     private final GenerationContext context;
 

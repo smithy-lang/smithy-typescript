@@ -25,12 +25,14 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates runtime configuration files, files that are used to
  * supply different default values based on the targeted language
  * environment of the SDK (e.g., Node vs Browser).
  */
+@SmithyInternalApi
 final class RuntimeConfigGenerator {
 
     private final TypeScriptSettings settings;

@@ -20,10 +20,12 @@ import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Plugin to trigger TypeScript code generation.
  */
+@SmithyInternalApi
 public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
 
     @Override

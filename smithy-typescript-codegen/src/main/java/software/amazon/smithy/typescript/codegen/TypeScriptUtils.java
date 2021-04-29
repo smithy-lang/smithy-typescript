@@ -22,11 +22,13 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Utility methods for TypeScript / JavaScript.
  */
+@SmithyInternalApi
 final class TypeScriptUtils {
 
     private static final Pattern PROPERTY_NAME_REGEX = Pattern.compile("^(?![0-9])[a-zA-Z0-9$_]+$");

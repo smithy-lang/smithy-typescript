@@ -32,10 +32,12 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates a client command using plugins.
  */
+@SmithyInternalApi
 final class CommandGenerator implements Runnable {
 
     static final String COMMAND_PROPERTIES_SECTION = "command_properties";

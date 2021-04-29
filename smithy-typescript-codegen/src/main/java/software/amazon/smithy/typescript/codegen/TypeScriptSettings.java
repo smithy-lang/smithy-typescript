@@ -33,10 +33,12 @@ import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Settings used by {@link TypeScriptCodegenPlugin}.
  */
+@SmithyUnstableApi
 public final class TypeScriptSettings {
 
     static final String TARGET_NAMESPACE = "targetNamespace";

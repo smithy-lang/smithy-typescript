@@ -41,10 +41,12 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Utility methods for generating HTTP protocols.
  */
+@SmithyUnstableApi
 public final class HttpProtocolGeneratorUtils {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());

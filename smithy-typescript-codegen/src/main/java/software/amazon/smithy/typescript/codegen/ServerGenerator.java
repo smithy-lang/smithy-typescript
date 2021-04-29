@@ -22,7 +22,9 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
+@SmithyInternalApi
 final class ServerGenerator {
 
     private ServerGenerator() {}

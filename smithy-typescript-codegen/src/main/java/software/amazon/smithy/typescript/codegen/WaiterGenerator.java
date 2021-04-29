@@ -21,12 +21,14 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.jmespath.JmespathExpression;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.Acceptor;
 import software.amazon.smithy.waiters.AcceptorState;
 import software.amazon.smithy.waiters.Matcher;
 import software.amazon.smithy.waiters.PathMatcher;
 import software.amazon.smithy.waiters.Waiter;
 
+@SmithyInternalApi
 class WaiterGenerator implements Runnable {
     static final String WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS.packageName;
 

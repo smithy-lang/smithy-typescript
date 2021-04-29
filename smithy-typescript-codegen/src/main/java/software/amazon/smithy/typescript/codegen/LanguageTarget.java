@@ -15,9 +15,12 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import software.amazon.smithy.utils.SmithyUnstableApi;
+
 /**
  * Represents a possible language target that can be generated.
  */
+@SmithyUnstableApi
 public enum LanguageTarget {
     /**
      * Node-specific language target.

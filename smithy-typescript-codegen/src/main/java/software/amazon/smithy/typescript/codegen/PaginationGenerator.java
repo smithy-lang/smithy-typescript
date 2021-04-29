@@ -25,7 +25,9 @@ import software.amazon.smithy.model.knowledge.PaginatedIndex;
 import software.amazon.smithy.model.knowledge.PaginationInfo;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
+@SmithyInternalApi
 final class PaginationGenerator implements Runnable {
 
     static final String PAGINATION_INTERFACE_FILE = "pagination/Interfaces.ts";

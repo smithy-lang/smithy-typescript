@@ -28,11 +28,13 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ToShapeId;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Wraps a client SymbolProvider and generates substitute shapes for server-specific symbols.
  */
+@SmithyInternalApi
 final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements SymbolProvider {
     private static final Logger LOGGER = Logger.getLogger(ServerSymbolVisitor.class.getName());
 

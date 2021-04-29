@@ -30,10 +30,12 @@ import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.CaseUtils;
+import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Smithy protocol code generators.
  */
+@SmithyUnstableApi
 public interface ProtocolGenerator {
     /**
      * Sanitizes the name of the protocol so it can be used as a symbol
