@@ -37,7 +37,7 @@ public class IndexGeneratorTest {
             }
         });
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, manifest, integrations);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, manifest, integrations, null);
 
         String contents = manifest.getFileString("index.ts").get();
         assertThat(contents, containsString("export * from \"./Example\";"));

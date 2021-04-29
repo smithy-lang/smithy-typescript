@@ -45,6 +45,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -77,7 +78,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
-    CodegenVisitor(PluginContext context) {
+    CodegenVisitor(PluginContext context, ArtifactType artifactType) {
         // Load all integrations.
         ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
         LOGGER.info("Attempting to discover TypeScriptIntegration from the classpath...");
@@ -95,6 +96,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Preprocess model using integrations.
         TypeScriptSettings typescriptSettings = TypeScriptSettings.from(context.getModel(), context.getSettings());
+        typescriptSettings.setArtifactType(artifactType);
         for (TypeScriptIntegration integration : integrations) {
             Model modifiedModel = integration.preprocessModel(context, typescriptSettings);
             if (modifiedModel != context.getModel()) {
@@ -107,10 +109,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         nonTraits = context.getModelWithoutTraitShapes();
         service = settings.getService(model);
         fileManifest = context.getFileManifest();
-        LOGGER.info(() -> "Generating TypeScript client for service " + service.getId());
+        LOGGER.info(() -> String.format("Generating TypeScript %s for service %s",
+                settings.generateClient() ? "client" : "server", service.getId()));
 
         // Decorate the symbol provider using integrations.
-        SymbolProvider resolvedProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider resolvedProvider = artifactType.createSymbolProvider(model, settings);
         for (TypeScriptIntegration integration : integrations) {
             resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
         }
@@ -175,11 +178,15 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
         // environment.
-        RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
-                settings, model, symbolProvider, writers, integrations);
-        for (LanguageTarget target : LanguageTarget.values()) {
-            LOGGER.fine("Generating " + target + " runtime configuration");
-            configGenerator.generate(target);
+        if (settings.generateClient()) {
+            // For now these are only generated for clients.
+            // TODO: generate ssdk config
+            RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
+                    settings, model, symbolProvider, writers, integrations);
+            for (LanguageTarget target : LanguageTarget.values()) {
+                LOGGER.fine("Generating " + target + " runtime configuration");
+                configGenerator.generate(target);
+            }
         }
 
         // Write each custom file.
@@ -189,12 +196,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         // Generate index for client.
-        IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest, integrations);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest, integrations, protocolGenerator);
+
+        if (settings.generateServerSdk()) {
+            // Generate index for server
+            IndexGenerator.writeServerIndex(settings, model, symbolProvider, fileManifest);
+        }
 
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
             ShapeId protocol = protocolGenerator.getProtocol();
-            new HttpProtocolTestGenerator(settings, model, protocol, symbolProvider, writers).run();
+            new HttpProtocolTestGenerator(
+                    settings, model, protocol, symbolProvider, writers, protocolGenerator).run();
         }
 
         // Write each pending writer.
@@ -271,12 +284,73 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     @Override
+    public Void operationShape(OperationShape operation) {
+        if (settings.generateServerSdk()) {
+            writers.useShapeWriter(operation, symbolProvider, w -> {
+                ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
+            });
+        }
+        return null;
+    }
+
+    @Override
     public Void serviceShape(ServiceShape shape) {
         if (!Objects.equals(service, shape)) {
             LOGGER.fine(() -> "Skipping `" + shape.getId() + "` because it is not `" + service.getId() + "`");
             return null;
         }
 
+        if (settings.generateClient()) {
+            generateClient(shape);
+        }
+        if (settings.generateClient() || settings.generateServerSdk()) {
+            generateCommands(shape);
+        }
+
+        if (settings.generateServerSdk()) {
+            generateServiceInterface(shape);
+            generateServerErrors(shape);
+        }
+
+        if (protocolGenerator != null) {
+            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
+            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
+            writers.useFileWriter(fileName, writer -> {
+                ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+                context.setProtocolName(protocolGenerator.getName());
+                context.setIntegrations(integrations);
+                context.setModel(model);
+                context.setService(shape);
+                context.setSettings(settings);
+                context.setSymbolProvider(symbolProvider);
+                context.setWriter(writer);
+                if (context.getSettings().generateClient()) {
+                    protocolGenerator.generateRequestSerializers(context);
+                    protocolGenerator.generateResponseDeserializers(context);
+                }
+                if (context.getSettings().generateServerSdk()) {
+                    ProtocolGenerator.GenerationContext serverContext =
+                            context.withSymbolProvider(symbolProvider);
+                    protocolGenerator.generateRequestDeserializers(serverContext);
+                    protocolGenerator.generateResponseSerializers(serverContext);
+                    protocolGenerator.generateFrameworkErrorSerializer(serverContext);
+                    writers.useShapeWriter(shape, symbolProvider, w -> {
+                        protocolGenerator.generateServiceHandlerFactory(serverContext.withWriter(w));
+                    });
+                    for (OperationShape operation: TopDownIndex.of(model).getContainedOperations(service)) {
+                        writers.useShapeWriter(operation, symbolProvider, w -> {
+                            protocolGenerator.generateOperationHandlerFactory(serverContext.withWriter(w), operation);
+                        });
+                    }
+                }
+                protocolGenerator.generateSharedComponents(context);
+            });
+        }
+
+        return null;
+    }
+
+    private void generateClient(ServiceShape shape) {
         // Generate the modular service client.
         writers.useShapeWriter(shape, writer -> new ServiceGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
@@ -294,9 +368,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         boolean hasPaginatedOperation = false;
 
         for (OperationShape operation : containedOperations) {
-            writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
-                    settings, model, operation, symbolProvider, commandWriter,
-                    runtimePlugins, protocolGenerator, applicationProtocol).run());
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
                 String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
@@ -323,25 +394,48 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                             serviceSymbol,
                             paginationWriter));
         }
+    }
 
-        if (protocolGenerator != null) {
-            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
-            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
-            writers.useFileWriter(fileName, writer -> {
-                ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-                context.setProtocolName(protocolGenerator.getName());
-                context.setIntegrations(integrations);
-                context.setModel(model);
-                context.setService(shape);
-                context.setSettings(settings);
-                context.setSymbolProvider(symbolProvider);
-                context.setWriter(writer);
-                protocolGenerator.generateRequestSerializers(context);
-                protocolGenerator.generateResponseDeserializers(context);
-                protocolGenerator.generateSharedComponents(context);
-            });
+    private void generateServiceInterface(ServiceShape shape) {
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> operations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
+        writers.useShapeWriter(shape, symbolProvider, writer -> {
+            ServerGenerator.generateOperationsType(symbolProvider, shape, operations, writer);
+            ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, writer);
+            ServerGenerator.generateServiceHandler(symbolProvider, shape, operations, writer);
+        });
+    }
+
+    private void generateServerErrors(ServiceShape service) {
+        TopDownIndex.of(model)
+                .getContainedOperations(service)
+                .stream()
+                .flatMap(o -> o.getErrors().stream())
+                .distinct()
+                .map(id -> model.expectShape(id).asStructureShape().orElseThrow(IllegalArgumentException::new))
+                .sorted()
+                .forEachOrdered(error -> writers.useShapeWriter(service, symbolProvider, writer -> {
+                    new ServerErrorGenerator(settings, model, error, symbolProvider, writer).run();
+                }));
+    }
+
+    private void generateCommands(ServiceShape shape) {
+        // Generate each operation for the service.
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
+        for (OperationShape operation : containedOperations) {
+            // Right now this only generates stubs
+            if (settings.generateClient()) {
+                writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
+                        settings, model, operation, symbolProvider, commandWriter,
+                        runtimePlugins, protocolGenerator, applicationProtocol).run());
+            }
+
+            if (settings.generateServerSdk()) {
+                writers.useShapeWriter(operation, symbolProvider, commandWriter -> new ServerCommandGenerator(
+                        settings, model, operation, symbolProvider, commandWriter,
+                        protocolGenerator, applicationProtocol).run());
+            }
         }
-
-        return null;
     }
 }

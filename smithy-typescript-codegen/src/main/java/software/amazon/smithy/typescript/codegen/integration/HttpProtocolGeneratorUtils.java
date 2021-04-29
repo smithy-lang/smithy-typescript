@@ -102,8 +102,9 @@ public final class HttpProtocolGeneratorUtils {
                 break;
             case EPOCH_SECONDS:
                 modifiedSource = dataSource;
-                // Make sure we turn a header's forced string into a number.
-                if (bindingType.equals(Location.HEADER)) {
+                // Make sure we turn a header, label, or query's forced string into a number.
+                if (bindingType.equals(Location.HEADER) || bindingType.equals(Location.QUERY)
+                        || bindingType.equals(Location.LABEL)) {
                     modifiedSource = "parseInt(" + modifiedSource + ", 10)";
                 }
                 // Convert whole and decimal numbers to milliseconds.

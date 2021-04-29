@@ -19,9 +19,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.node.BooleanNode;
@@ -56,6 +58,7 @@ public final class TypeScriptSettings {
     private ObjectNode pluginSettings = Node.objectNode();
     private ShapeId protocol;
     private boolean isPrivate;
+    private ArtifactType artifactType = ArtifactType.CLIENT;
 
     /**
      * Create a settings object from a configuration object node.
@@ -215,6 +218,37 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * Returns if the generated package will be a client.
+     *
+     * @return If the package will include a client.
+     */
+    public boolean generateClient() {
+        return artifactType.equals(ArtifactType.CLIENT);
+    }
+
+    /**
+     * Returns if the generated package will be a server sdk.
+     *
+     * @return If the package will include a server sdk.
+     */
+    public boolean generateServerSdk() {
+        return artifactType.equals(ArtifactType.SSDK);
+    }
+
+    /**
+     * Returns the type of artifact being generated, such as a client or ssdk.
+     *
+     * @return The artifact type.
+     */
+    public ArtifactType getArtifactType() {
+        return artifactType;
+    }
+
+    public void setArtifactType(ArtifactType artifactType) {
+        this.artifactType = artifactType;
+    }
+
+    /**
      * Gets the corresponding {@link ServiceShape} from a model.
      *
      * @param model Model to search for the service shape by ID.
@@ -279,5 +313,30 @@ public final class TypeScriptSettings {
      */
     public void setProtocol(ShapeId protocol) {
         this.protocol = Objects.requireNonNull(protocol);
+    }
+
+    /**
+     * An enum indicating the type of artifact the code generator will produce.
+     */
+    public enum ArtifactType {
+        CLIENT(SymbolVisitor::new),
+        SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)));
+
+        private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
+
+        ArtifactType(BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory) {
+            this.symbolProviderFactory = symbolProviderFactory;
+        }
+
+        /**
+         * Creates a TypeScript symbol provider suited to the artifact type.
+         *
+         * @param model Model to generate symbols for.
+         * @param settings Settings used by the symbol provider.
+         * @return Returns the created provider.
+         */
+        public SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
+            return symbolProviderFactory.apply(model, settings);
+        }
     }
 }
