@@ -3,12 +3,12 @@
  * discrepancies between the components.
  */
 const compareEquivalentOctetStreamBodies = (
-  config: any,
+  utf8Encoder: __Encoder,
   expectedBody: string,
   generatedBody: Uint8Array
 ): Object => {
   const expectedParts = {Value: expectedBody};
-  const generatedParts = {Value: config.utf8Encoder(generatedBody)};
+  const generatedParts = {Value: utf8Encoder(generatedBody)};
 
   return compareParts(expectedParts, generatedParts);
 }

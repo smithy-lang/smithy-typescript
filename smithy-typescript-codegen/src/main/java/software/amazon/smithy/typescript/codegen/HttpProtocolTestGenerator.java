@@ -17,6 +17,9 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -58,6 +62,7 @@ import software.amazon.smithy.protocoltests.traits.HttpRequestTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestsTrait;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestsTrait;
+import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.Pair;
@@ -85,7 +90,9 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final Symbol serviceSymbol;
+    private final SymbolProvider serverSymbolProvider;
     private final Set<String> additionalStubs = new TreeSet<>();
+    private final ProtocolGenerator protocolGenerator;
 
     /** Vends a TypeScript IFF it's needed. */
     private final TypeScriptDelegator delegator;
@@ -98,14 +105,18 @@ final class HttpProtocolTestGenerator implements Runnable {
             Model model,
             ShapeId protocol,
             SymbolProvider symbolProvider,
-            TypeScriptDelegator delegator
+            SymbolProvider serverSymbolProvider,
+            TypeScriptDelegator delegator,
+            ProtocolGenerator protocolGenerator
     ) {
         this.settings = settings;
         this.model = model;
         this.protocol = protocol;
         this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
+        this.serverSymbolProvider = serverSymbolProvider;
         this.delegator = delegator;
+        this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
     }
 
@@ -116,36 +127,73 @@ final class HttpProtocolTestGenerator implements Runnable {
 
         // Use a TreeSet to have a fixed ordering of tests.
         for (OperationShape operation : new TreeSet<>(topDownIndex.getContainedOperations(service))) {
-            if (!operation.hasTag("server-only")) {
-                // 1. Generate test cases for each request.
-                operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
-                    for (HttpRequestTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
-                        onlyIfProtocolMatches(testCase, () -> generateRequestTest(operation, testCase));
-                    }
-                });
-                // 2. Generate test cases for each response.
-                operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
-                    for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
-                        onlyIfProtocolMatches(testCase, () -> generateResponseTest(operation, testCase));
-                    }
-                });
-                // 3. Generate test cases for each error on each operation.
-                for (StructureShape error : operationIndex.getErrors(operation)) {
-                    if (!error.hasTag("server-only")) {
-                        error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
-                            for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
-                                onlyIfProtocolMatches(testCase,
-                                        () -> generateErrorResponseTest(operation, error, testCase));
-                            }
-                        });
-                    }
-                }
+            if (settings.generateClient()) {
+                generateClientOperationTests(operation, operationIndex);
+            }
+            if (settings.generateServerSdk()) {
+                generateServerOperationTests(operation, operationIndex);
             }
         }
 
         // Include any additional stubs required.
         for (String additionalStub : additionalStubs) {
             writer.write(IoUtils.readUtf8Resource(getClass(), additionalStub));
+        }
+    }
+
+    private void generateClientOperationTests(OperationShape operation, OperationIndex operationIndex) {
+        if (!operation.hasTag("server-only")) {
+            // 1. Generate test cases for each request.
+            operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
+                for (HttpRequestTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
+                    onlyIfProtocolMatches(testCase, () -> generateClientRequestTest(operation, testCase));
+                }
+            });
+            // 2. Generate test cases for each response.
+            operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
+                    onlyIfProtocolMatches(testCase, () -> generateResponseTest(operation, testCase));
+                }
+            });
+            // 3. Generate test cases for each error on each operation.
+            for (StructureShape error : operationIndex.getErrors(operation)) {
+                if (!error.hasTag("server-only")) {
+                    error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                        for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
+                            onlyIfProtocolMatches(testCase,
+                                    () -> generateErrorResponseTest(operation, error, testCase));
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private void generateServerOperationTests(OperationShape operation, OperationIndex operationIndex) {
+        if (!operation.hasTag("client-only")) {
+            // 1. Generate test cases for each request.
+            operation.getTrait(HttpRequestTestsTrait.class).ifPresent(trait -> {
+                for (HttpRequestTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
+                    onlyIfProtocolMatches(testCase, () -> generateServerRequestTest(operation, testCase));
+                }
+            });
+            // 2. Generate test cases for each response.
+            operation.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
+                    onlyIfProtocolMatches(testCase, () -> generateServerResponseTest(operation, testCase));
+                }
+            });
+            // 3. Generate test cases for each error on each operation.
+            for (StructureShape error : operationIndex.getErrors(operation)) {
+                if (!error.hasTag("client-only")) {
+                    error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
+                        for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
+                            onlyIfProtocolMatches(testCase,
+                                    () -> generateServerErrorResponseTest(operation, error, testCase));
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -175,7 +223,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         return TEST_CASE_FILE_TEMPLATE.replace("%s", baseName);
     }
 
-    private void generateRequestTest(OperationShape operation, HttpRequestTestCase testCase) {
+    private void generateClientRequestTest(OperationShape operation, HttpRequestTestCase testCase) {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
 
         String testName = testCase.getId() + ":Request";
@@ -211,23 +259,123 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "  }\n"
                        + "  const r = err.request;")
                     .indent()
-                    .call(() -> writeRequestAssertions(operation, testCase))
+                    .call(() -> writeHttpRequestAssertions(testCase))
                     .dedent()
                     .write("}");
         });
     }
 
+    private void generateServerRequestTest(OperationShape operation, HttpRequestTestCase testCase) {
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+
+        // Lowercase all the headers we're expecting as this is what we'll get.
+        Map<String, String> headers = testCase.getHeaders().entrySet().stream()
+                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
+        String queryParameters = Node.prettyPrintJson(buildQueryBag(testCase));
+        String headerParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(headers));
+        String body = testCase.getBody().orElse(null);
+
+        String testName = testCase.getId() + ":ServerRequest";
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+            Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+            Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+
+            // Create a mock function to set in place of the server operation function so we can capture
+            // input and other information.
+            writer.write("let testFunction = jest.fn();");
+            writer.write("testFunction.mockReturnValue(Promise.resolve({}));");
+
+            // We use a partial here so that we don't have to define the entire service, but still get the advantages
+            // the type checker, including excess property checking. Later on we'll use `as` to cast this to the
+            // full service so that we can actually use it.
+            writer.openBlock("const testService: Partial<$T> = {", "};", serviceSymbol, () -> {
+                writer.write("$L: testFunction as $T,", operationSymbol.getName(), operationSymbol);
+            });
+
+            String getHandlerName = "get" + handlerSymbol.getName();
+            writer.addImport(getHandlerName, null, "./server/");
+
+            // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
+            writer.write("const handler = $L(testService as $T);", getHandlerName, serviceSymbol);
+
+            // Construct a new http request according to the test case definition.
+            writer.openBlock("const request = new HttpRequest({", "});", () -> {
+                writer.write("method: $S,", testCase.getMethod());
+                writer.write("hostname: $S,", testCase.getHost().orElse("foo.example.com"));
+                writer.write("path: $S,", testCase.getUri());
+                writer.write("query: $L,", queryParameters);
+                writer.write("headers: $L,", headerParameters);
+                if (body != null) {
+                    writer.write("body: Readable.from([$S]),", body);
+                }
+            });
+            writer.write("await handler.handle(request);").write("");
+
+            // Assert that the function has been called exactly once.
+            writer.write("expect(testFunction.mock.calls.length).toBe(1);");
+
+            // Capture the input. We need to cast this to any so we can index into it.
+            writer.write("let r: any = testFunction.mock.calls[0][0];").write("");
+            writeRequestParamAssertions(operation, testCase);
+        });
+    }
+
+    private ObjectNode buildQueryBag(HttpRequestTestCase testCase) {
+        // The query params in the test definition is a list of strings that looks like
+        // "Foo=Bar", so we need to split the keys from the values.
+        Map<String, List<String>> query = testCase.getQueryParams().stream()
+            .map(pair -> {
+                String[] split = pair.split("=");
+                String key;
+                String value = "";
+                try {
+                    // The strings we're given are url encoded, so we need to decode them. In an actual implementation
+                    // the request we're given will have already decoded these.
+                    key = URLDecoder.decode(split[0], StandardCharsets.UTF_8.toString());
+                    if (split.length > 1) {
+                        value = URLDecoder.decode(split[1], StandardCharsets.UTF_8.toString());
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+                return Pair.of(key, value);
+            })
+            // Query lists/sets will just use the same key repeatedly, so here we collect all the values that
+            // share a key.
+            .collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
+
+        ObjectNode.Builder nodeBuilder = ObjectNode.objectNodeBuilder();
+        for (Map.Entry<String, List<String>> entry : query.entrySet()) {
+            // The value of the query bag can either be a single string or a list, so we need to ensure individual
+            // values are written out as individual strings.
+            if (entry.getValue().size() == 1) {
+                nodeBuilder.withMember(entry.getKey(), StringNode.from(entry.getValue().get(0)));
+            } else {
+                nodeBuilder.withMember(entry.getKey(), ArrayNode.fromStrings(entry.getValue()));
+            }
+        }
+        return nodeBuilder.build();
+    }
+
     // Ensure that the serialized request matches the expected request.
-    private void writeRequestAssertions(OperationShape operation, HttpRequestTestCase testCase) {
+    private void writeHttpRequestAssertions(HttpRequestTestCase testCase) {
         writer.write("expect(r.method).toBe($S);", testCase.getMethod());
         writer.write("expect(r.path).toBe($S);", testCase.getUri());
 
-        writeRequestHeaderAssertions(testCase);
-        writeRequestQueryAssertions(testCase);
-        writeRequestBodyAssertions(operation, testCase);
+        writeHttpHeaderAssertions(testCase);
+        writeHttpQueryAssertions(testCase);
+        writeHttpBodyAssertions(testCase);
     }
 
-    private void writeRequestQueryAssertions(HttpRequestTestCase testCase) {
+    private void writeHttpResponseAssertions(HttpResponseTestCase testCase) {
+        writer.write("expect(r.statusCode).toBe($L);", testCase.getCode());
+        writeHttpHeaderAssertions(testCase);
+        writeHttpBodyAssertions(testCase);
+    }
+
+    private void writeHttpQueryAssertions(HttpRequestTestCase testCase) {
         testCase.getRequireQueryParams().forEach(requiredQueryParam ->
                 writer.write("expect(r.query[$S]).toBeDefined();", requiredQueryParam));
         writer.write("");
@@ -249,7 +397,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeRequestHeaderAssertions(HttpRequestTestCase testCase) {
+    private void writeHttpHeaderAssertions(HttpMessageTestCase testCase) {
         testCase.getRequireHeaders().forEach(requiredHeader -> {
             writer.write("expect(r.headers[$S]).toBeDefined();", requiredHeader.toLowerCase());
         });
@@ -267,7 +415,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeRequestBodyAssertions(OperationShape operation, HttpRequestTestCase testCase) {
+    private void writeHttpBodyAssertions(HttpMessageTestCase testCase) {
         testCase.getBody().ifPresent(body -> {
             // If we expect an empty body, expect it to be falsy.
             if (body.isEmpty()) {
@@ -281,6 +429,17 @@ final class HttpProtocolTestGenerator implements Runnable {
             // Otherwise load a media type specific comparator and do a comparison.
             String mediaType = testCase.getBodyMediaType().orElse("UNKNOWN");
             String comparatorInvoke = registerBodyComparatorStub(mediaType);
+
+            // If this is a request case then we know we're generating a client test,
+            // because a request case for servers would be comparing parsed objects. We
+            // need to know which is which here to be able to grab the utf8Encoder from
+            // the right place.
+            if (testCase instanceof HttpRequestTestCase) {
+                writer.write("const utf8Encoder = client.config.utf8Encoder;");
+            } else {
+                writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8-node");
+                writer.write("const utf8Encoder = __utf8Encoder;");
+            }
 
             // Handle escaping strings with quotes inside them.
             writer.write("const bodyString = `$L`;", body.replace("\"", "\\\""));
@@ -305,17 +464,44 @@ final class HttpProtocolTestGenerator implements Runnable {
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
             case "application/octet-stream":
+                writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-octet-stream-stub.ts");
-                return "compareEquivalentOctetStreamBodies(client.config, bodyString, r.body)";
+                return "compareEquivalentOctetStreamBodies(utf8Encoder, bodyString, r.body)";
             case "text/plain":
                 additionalStubs.add("protocol-test-text-stub.ts");
                 return "compareEquivalentTextBodies(bodyString, r.body)";
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
                         + "`, defaulting to direct comparison.");
+                writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
-                return "compareEquivalentUnknownTypeBodies(client.config, bodyString, r.body)";
+                return "compareEquivalentUnknownTypeBodies(utf8Encoder, bodyString, r.body)";
         }
+    }
+
+    public void generateServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
+        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+        String testName = testCase.getId() + ":ServerResponse";
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+            Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
+            writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
+                writer.openBlock("$L(input: any, request: HttpRequest): Promise<$T> {", "}",
+                        operationSymbol.getName(), outputType, () -> {
+                    Optional<ShapeId> outputOptional = operation.getOutput();
+                    if (outputOptional.isPresent()) {
+                        StructureShape outputShape = model.expectShape(outputOptional.get(), StructureShape.class);
+                        writer.writeInline("let response = ");
+                        testCase.getParams().accept(new CommandInputNodeVisitor(outputShape, true));
+                        writer.write("return Promise.resolve({ ...response, '$$metadata': {} });");
+                    } else {
+                        writer.write("return Promise.resolve({ '$$metadata': {} });");
+                    }
+                });
+            });
+            writeServerResponseTest(operation, testCase);
+        });
     }
 
     private void generateResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
@@ -334,6 +520,94 @@ final class HttpProtocolTestGenerator implements Runnable {
                        + "}");
             writeResponseAssertions(operation, testCase);
         });
+    }
+
+    private void generateServerErrorResponseTest(
+            OperationShape operation,
+            StructureShape error,
+            HttpResponseTestCase testCase
+    ) {
+        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
+        Symbol errorSymbol = serverSymbolProvider.toSymbol(error);
+        ErrorTrait errorTrait = error.expectTrait(ErrorTrait.class);
+
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+        String testName = testCase.getId() + ":ServerErrorResponse";
+        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+
+            // Generates a Partial implementation of the service type that only includes
+            // the specific operation under test. Later we'll have to "cast" this with an "as",
+            // but using the partial in the meantime will give us proper type checking on the
+            // operation we want.
+            writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
+                writer.openBlock("$L(input: any, request: HttpRequest): Promise<$T> {", "}",
+                    operationSymbol.getName(), outputType, () -> {
+                        // Write out an object according to what's defined in the test case.
+                        writer.writeInline("const response = ");
+                        testCase.getParams().accept(new CommandInputNodeVisitor(error, true));
+
+                        // Add in the necessary wrapping information to make the error satisfy its interface.
+                        // TODO: having proper constructors for these errors would be really nice so we don't
+                        // have to do this.
+                        writer.openBlock("const error: $T = {", "};", errorSymbol, () -> {
+                            writer.write("...response,");
+                            writer.write("name: $S,", error.getId().getName());
+                            writer.write("$$fault: $S,", errorTrait.isClientError() ? "client" : "server");
+                            writer.write("$$metadata: {},");
+                        });
+                        writer.write("throw error;");
+                    });
+            });
+            writeServerResponseTest(operation, testCase);
+        });
+    }
+
+    private void writeServerResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
+        Symbol serviceSymbol = serverSymbolProvider.toSymbol(service);
+        Symbol operationSymbol = serverSymbolProvider.toSymbol(operation);
+        Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+        Symbol serializerSymbol = operationSymbol.expectProperty("serializerType", Symbol.class);
+        Symbol serviceOperationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
+        writer.write("const service: any = new TestService()");
+
+        // There's a lot of setup here, including creating our own mux, serializers list, and ultimately
+        // our own service handler. This is largely in service of avoiding having to go through the
+        // request deserializer
+        writer.addImport("httpbinding", null, "@aws-smithy/server-common");
+        writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
+            service.getId().getName(), serviceSymbol, () -> {
+                writer.openBlock("new httpbinding.UriSpec<$S, $S>('POST', [], [], {", "}),",
+                    service.getId().getName(), operation.getId().getName(), () -> {
+                        writer.write("service: $S,", service.getId().getName());
+                        writer.write("operation: $S,", operation.getId().getName());
+                    });
+            });
+
+        // Extend the existing serializer and replace the deserialize with a noop so we don't have to
+        // worry about trying to construct something that matches.
+        writer.openBlock("class TestSerializer extends $T {", "}", serializerSymbol, () -> {
+            writer.openBlock("deserialize = (output: any, context: any): Promise<any> => {", "};", () -> {
+                writer.write("return Promise.resolve({});");
+            });
+        });
+
+        // Since we aren't going through the deserializer, we don't have to put much in the fake request.
+        // Just enough to get it through our test mux.
+        writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
+
+        // Create a new serializer factory that always returns our test serializer.
+        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
+        writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
+        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = (op) =>"
+                        + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
+
+        writer.addImport("serializeFrameworkException", null,
+                "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+        writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException);", handlerSymbol);
+        writer.write("let r = await handler.handle(request)").write("");
+        writeHttpResponseAssertions(testCase);
     }
 
     private void generateErrorResponseTest(
@@ -405,10 +679,40 @@ final class HttpProtocolTestGenerator implements Runnable {
     private void writeResponseAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         writer.write("expect(r['$$metadata'].httpStatusCode).toBe($L);", testCase.getCode());
 
-        writeParamAssertions(operationOrError, testCase);
+        writeReponseParamAssertions(operationOrError, testCase);
     }
 
-    private void writeParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
+    private void writeRequestParamAssertions(OperationShape operation, HttpRequestTestCase testCase) {
+        ObjectNode params = testCase.getParams();
+        if (!params.isEmpty()) {
+            StructureShape testInputShape = model.expectShape(
+                    operation.getInput().orElseThrow(() -> new CodegenException("Foo")),
+                    StructureShape.class);
+
+            // Use this trick wrapper to not need more complex trailing comma handling.
+            writer.write("const paramsToValidate: any = [")
+                    .call(() -> params.accept(new CommandOutputNodeVisitor(testInputShape)))
+                    .write("][0];");
+
+            // Extract a payload binding if present.
+            Optional<HttpBinding> pb = Optional.empty();
+            HttpBindingIndex index = HttpBindingIndex.of(model);
+            List<HttpBinding> payloadBindings = index.getRequestBindings(operation, Location.PAYLOAD);
+            if (!payloadBindings.isEmpty()) {
+                pb = Optional.of(payloadBindings.get(0));
+            }
+            final Optional<HttpBinding> payloadBinding = pb;
+
+            writeParamAssertions(writer, payloadBinding, () -> {
+                // TODO: replace this with a collector from the server config once it's available
+                writer.addImport("streamCollector", "__streamCollector", "@aws-sdk/node-http-handler");
+                writer.write("const comparableBlob = await __streamCollector(r[$S]);",
+                        payloadBinding.get().getMemberName());
+            });
+        }
+    }
+
+    private void writeReponseParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         ObjectNode params = testCase.getParams();
         if (!params.isEmpty()) {
             StructureShape testOutputShape;
@@ -438,40 +742,49 @@ final class HttpProtocolTestGenerator implements Runnable {
                         return null;
                     });
 
-            // If we have a streaming payload blob, we need to collect it to something that
-            // can be compared with the test contents. This emulates the customer experience.
-            boolean hasStreamingPayloadBlob = payloadBinding
-                    .map(binding ->
+            writeParamAssertions(writer, payloadBinding, () -> {
+                writer.write("const comparableBlob = await client.config.streamCollector(r[$S]);",
+                        payloadBinding.get().getMemberName());
+            });
+        }
+    }
+
+    private void writeParamAssertions(
+            TypeScriptWriter writer,
+            Optional<HttpBinding> payloadBinding,
+            Runnable writeComparableBlob
+    ) {
+        // If we have a streaming payload blob, we need to collect it to something that
+        // can be compared with the test contents. This emulates the customer experience.
+        boolean hasStreamingPayloadBlob = payloadBinding
+                .map(binding ->
                         model.getShape(binding.getMember().getTarget())
                                 .filter(Shape::isBlobShape)
                                 .filter(s -> s.hasTrait(StreamingTrait.ID))
                                 .isPresent())
-                    .orElse(false);
+                .orElse(false);
 
-            // Do the collection for payload blobs.
+        if (hasStreamingPayloadBlob) {
+            writeComparableBlob.run();
+        }
+
+        // Perform parameter comparisons.
+        writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
+            writer.write("expect(r[param]).toBeDefined();");
             if (hasStreamingPayloadBlob) {
-                writer.write("const comparableBlob = await client.config.streamCollector(r[$S]);",
-                        payloadBinding.get().getMemberName());
+                writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
+                        writer.write("expect(equivalentContents(comparableBlob, "
+                                + "paramsToValidate[param])).toBe(true);"));
+                writer.indent();
             }
 
-            // Perform parameter comparisons.
-            writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
-                writer.write("expect(r[param]).toBeDefined();");
-                if (hasStreamingPayloadBlob) {
-                    writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
-                            writer.write("expect(equivalentContents(comparableBlob, "
-                                    + "paramsToValidate[param])).toBe(true);"));
-                    writer.indent();
-                }
+            writer.write("expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);");
 
-                writer.write("expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);");
-
-                if (hasStreamingPayloadBlob) {
-                    writer.dedent();
-                    writer.write("}");
-                }
-            });
-        }
+            if (hasStreamingPayloadBlob) {
+                writer.dedent();
+                writer.write("}");
+            }
+        });
     }
 
     /**
@@ -487,10 +800,16 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final class CommandInputNodeVisitor implements NodeVisitor<Void> {
         private final StructureShape inputShape;
         private Shape workingShape;
+        private boolean appendSemicolon;
 
         private CommandInputNodeVisitor(StructureShape inputShape) {
+            this(inputShape, false);
+        }
+
+        private CommandInputNodeVisitor(StructureShape inputShape, boolean appendSemicolon) {
             this.inputShape = inputShape;
             this.workingShape = inputShape;
+            this.appendSemicolon = appendSemicolon;
         }
 
         @Override
@@ -546,10 +865,25 @@ final class HttpProtocolTestGenerator implements Runnable {
 
             // Both objects and maps can use a majority of the same logic.
             // Use "as any" to have TS complain less about undefined entries.
-            writer.openBlock("{", "} as any,\n", () -> {
+            String suffix = "} as any";
+
+            // When generating a server response test, we need the top level structure to have a semicolon
+            // rather than a comma.
+            if (appendSemicolon) {
+                suffix += ";";
+                appendSemicolon = false;
+            } else {
+                suffix += ",\n";
+            }
+
+            writer.openBlock("{", suffix, () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getMembers().forEach((keyNode, valueNode) -> {
-                    writer.writeInline("$L: ", keyNode.getValue());
+                    if (keyNode.getValue().matches("[^\\w]+")) {
+                        writer.writeInline("$L: ", keyNode.getValue());
+                    } else {
+                        writer.writeInline("$S: ", keyNode.getValue());
+                    }
 
                     // Grab the correct member related to the node member we have.
                     MemberShape memberShape;

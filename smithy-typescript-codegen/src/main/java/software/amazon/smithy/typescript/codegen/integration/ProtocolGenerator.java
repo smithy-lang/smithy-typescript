@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -134,6 +135,46 @@ public interface ProtocolGenerator {
 
     /**
      * Generates the code used to deserialize the shapes of a service
+     * for requests.
+     *
+     * @param context Serialization context.
+     */
+    void generateRequestDeserializers(GenerationContext context);
+
+    /**
+     * Generates the code used to serialize the shapes of a service
+     * for responses.
+     *
+     * @param context Serialization context.
+     */
+    void generateResponseSerializers(GenerationContext context);
+
+    /**
+     * Generates the code used to serialize unmodeled errors for servers.
+     *
+     * @param serverContext Serialization context.
+     */
+    void generateFrameworkErrorSerializer(GenerationContext serverContext);
+
+    /**
+     * Generates a factory for the ServiceHandler implementation for this service.
+     *
+     * @param context Generation context.
+     */
+    void generateServiceHandlerFactory(GenerationContext context);
+
+    /**
+     * Generates the code used to handle a request for a specific operation in the given service. This allows the
+     * business logic for a service to be split among multiple deployment targets, for example, one Lambda function
+     * per operation.
+     *
+     * @param context Generation context.
+     * @param operation The operation to generate a handler factory for.
+     */
+    void generateOperationHandlerFactory(GenerationContext context, OperationShape operation);
+
+    /**
+     * Generates the code used to deserialize the shapes of a service
      * for responses.
      *
      * @param context Deserialization context.
@@ -158,6 +199,17 @@ public interface ProtocolGenerator {
     }
 
     /**
+     * Generates the name of a serializer function for shapes of a service that is not protocol-specific.
+     *
+     * @param symbol The symbol the serializer function is being generated for.
+     * @return Returns the generated function name.
+     */
+    static String getGenericSerFunctionName(Symbol symbol) {
+        // e.g., serializeExecuteStatement
+        return "serialize" + getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
+    }
+
+    /**
      * Generates the name of a deserializer function for shapes of a service.
      *
      * @param symbol The symbol the deserializer function is being generated for.
@@ -172,6 +224,18 @@ public interface ProtocolGenerator {
         functionName += getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
 
         return functionName;
+    }
+
+    /**
+     * Generates the name of a deserializer function for shapes of a service that is not protocol-specific.
+     *
+     * @param symbol The symbol the deserializer function is being generated for.
+     * @return Returns the generated function name.
+     */
+    static String getGenericDeserFunctionName(Symbol symbol) {
+        // e.g., deserializeExecuteStatement
+        return "deserialize"
+                + getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
     }
 
     static String getSerdeFunctionSymbolComponent(Symbol symbol, Shape shape) {
@@ -254,6 +318,30 @@ public interface ProtocolGenerator {
 
         public void setProtocolName(String protocolName) {
             this.protocolName = protocolName;
+        }
+
+        public GenerationContext copy() {
+            GenerationContext copy = new GenerationContext();
+            copy.setSettings(settings);
+            copy.setModel(model);
+            copy.setService(service);
+            copy.setSymbolProvider(symbolProvider);
+            copy.setWriter(writer);
+            copy.setIntegrations(integrations);
+            copy.setProtocolName(protocolName);
+            return copy;
+        }
+
+        public GenerationContext withSymbolProvider(SymbolProvider newProvider) {
+            GenerationContext copyContext = copy();
+            copyContext.setSymbolProvider(newProvider);
+            return copyContext;
+        }
+
+        public GenerationContext withWriter(TypeScriptWriter newWriter) {
+            GenerationContext copyContext = copy();
+            copyContext.setWriter(newWriter);
+            return copyContext;
         }
     }
 }

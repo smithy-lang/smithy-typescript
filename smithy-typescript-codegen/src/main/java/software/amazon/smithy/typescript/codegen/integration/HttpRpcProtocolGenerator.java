@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -34,6 +35,8 @@ import software.amazon.smithy.utils.OptionalUtils;
  * Abstract implementation useful for all HTTP protocols without bindings.
  */
 public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
+
+    public static final Logger LOGGER = Logger.getLogger(HttpRpcProtocolGenerator.class.getName());
 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
@@ -138,6 +141,31 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         for (OperationShape operation : containedOperations) {
             generateOperationSerializer(context, operation);
         }
+    }
+
+    @Override
+    public void generateFrameworkErrorSerializer(GenerationContext serverContext) {
+        LOGGER.warning("Framework error serialization is not currently supported for RPC protocols.");
+    }
+
+    @Override
+    public void generateRequestDeserializers(GenerationContext context) {
+        LOGGER.warning("Request deserialization is not currently supported for RPC protocols.");
+    }
+
+    @Override
+    public void generateResponseSerializers(GenerationContext context) {
+        LOGGER.warning("Response serialization is not currently supported for RPC protocols.");
+    }
+
+    @Override
+    public void generateServiceHandlerFactory(GenerationContext context) {
+        LOGGER.warning("Handler factory generation is not currently supported for RPC protocols.");
+    }
+
+    @Override
+    public void generateOperationHandlerFactory(GenerationContext context, OperationShape operation) {
+        LOGGER.warning("Handler factory generation is not currently supported for RPC protocols.");
     }
 
     @Override

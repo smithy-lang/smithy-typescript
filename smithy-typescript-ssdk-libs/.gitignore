@@ -1,0 +1,4 @@
+**/node_modules/
+**/*.tsbuildinfo
+**/*.d.ts
+**/yarn-error.log
