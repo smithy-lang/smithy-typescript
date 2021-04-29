@@ -70,6 +70,7 @@ class WaiterGenerator implements Runnable {
         writer.addImport("createWaiter", "createWaiter", WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterResult", "WaiterResult", WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterState", "WaiterState", WAITABLE_UTIL_PACKAGE);
+        writer.addImport("checkExceptions", "checkExceptions", WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterConfiguration", "WaiterConfiguration", WAITABLE_UTIL_PACKAGE);
 
         // generates the now deprecated WaitFor....
@@ -93,10 +94,7 @@ class WaiterGenerator implements Runnable {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
                     waiter.getMaxDelay());
             writer.write("const result = await createWaiter({...serviceDefaults, ...params}, input, checkState);");
-            writer.openBlock("if (result.state !== WaiterState.SUCCESS) {", "}", () -> {
-                writer.write("throw Object.assign(new Error(result.state), result.reason);");
-            });
-            writer.write("return result;");
+            writer.write("return checkExceptions(result);");
         });
     }
 
