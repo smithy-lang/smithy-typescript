@@ -93,8 +93,8 @@ class WaiterGenerator implements Runnable {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
                     waiter.getMaxDelay());
             writer.write("const result = await createWaiter({...serviceDefaults, ...params}, input, checkState);");
-            writer.openBlock("if (result.state != WaiterState.SUCCESS) {", "}", () -> {
-                writer.write("throw result;");
+            writer.openBlock("if (result.state !== WaiterState.SUCCESS) {", "}", () -> {
+                writer.write("throw Object.assign(new Error(result.state), result.reason);");
             });
             writer.write("return result;");
         });
