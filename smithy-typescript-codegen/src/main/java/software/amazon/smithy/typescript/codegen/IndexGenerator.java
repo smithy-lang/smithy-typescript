@@ -129,8 +129,6 @@ final class IndexGenerator {
             writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
         }
 
-        // write export statement for models
-        writer.write("export * from \"./models/index\";");
         // Write each custom export.
         for (TypeScriptIntegration integration : integrations) {
             integration.writeAdditionalExports(settings, model, symbolProvider, writer);
