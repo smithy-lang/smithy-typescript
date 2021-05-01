@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "stripInternal": true,
+    "declarationDir": "./dist/types",
+    "rootDir": "./src",
+    "outDir": "./dist/cjs",
+    "baseUrl": ".",
+    "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noUnusedParameters": false,
+    "removeComments": false,
+    "incremental": true,
+    "preserveConstEnums": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2018",
+    "lib": ["es2015", "dom"],
+    "strict": true,
+    "declaration": true,
+    "importHelpers": true,
+    "noEmitHelpers": true,
+    "inlineSourceMap": true,
+    "inlineSources": true
+  },
+  "include": ["src/"]
+}
