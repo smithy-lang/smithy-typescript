@@ -1,0 +1,43 @@
+{
+  "name": "@aws-smithy/typescript-integ-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "TypeScript tests against generated Smithy types",
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "pretest": "yarn generate && yarn build:generated && yarn build",
+    "generate": "cd codegen && gradle build",
+    "build:generated": "cd codegen/build/smithyprojections/codegen/ts-server/typescript-ssdk-codegen && yarn install && yarn link @aws-smithy/server-common && yarn build",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awslabs/smithy-typescript.git",
+    "directory": "smithy-typescript-integ-tests"
+  },
+  "author": "AWS Smithy Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.37",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.2",
+    "typescript": "^4.2.2",
+    "@aws-smithy/typescript-integ-test-types": "1.0.0"
+  },
+  "engines": {
+    "node": ">= 14.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/smithy-typescript/issues"
+  },
+  "homepage": "https://github.com/awslabs/smithy-typescript#readme",
+  "workspaces": [
+    "codegen/build/smithyprojections/codegen/ts-server/typescript-ssdk-codegen"
+  ]
+}
