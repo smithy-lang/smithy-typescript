@@ -421,13 +421,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addUseImports(responseType);
         String methodName = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Response";
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
-        String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
         writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writer.openBlock("export const $L = async(\n"
                 + "  input: $T,\n"
                 + "  ctx: ServerSerdeContext\n"
-                + "): Promise<$T> => {", "}", methodName, outputType, contextType, responseType, () -> {
+                + "): Promise<$T> => {", "}", methodName, outputType, responseType, () -> {
             writeEmptyEndpoint(context);
             writeOperationStatusCode(context, operation, bindingIndex, trait);
             writeResponseHeaders(context, operation, bindingIndex, () -> writeDefaultHeaders(context, operation));
