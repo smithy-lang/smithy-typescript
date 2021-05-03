@@ -76,8 +76,8 @@ class WaiterGenerator implements Runnable {
         // generates the now deprecated WaitFor....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
                 + " @deprecated in favor of waitUntil" + waiterName + ". This does not throw on failure.\n"
-                + " @param params : Waiter configuration options.\n"
-                + " @param input : the input to " + operationSymbol.getName() + " for polling.");
+                + " @param params - Waiter configuration options.\n"
+                + " @param input - the input to " + operationSymbol.getName() + " for polling.");
         writer.openBlock("export const waitFor$L = async (params: WaiterConfiguration<$T>, input: $T): "
                 + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
@@ -87,8 +87,8 @@ class WaiterGenerator implements Runnable {
 
         // generates WaitUtil....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
-                + " @param params : Waiter configuration options.\n"
-                + " @param input : the input to " + operationSymbol.getName() + " for polling.");
+                + " @param params - Waiter configuration options.\n"
+                + " @param input - the input to " + operationSymbol.getName() + " for polling.");
         writer.openBlock("export const waitUntil$L = async (params: WaiterConfiguration<$T>, input: $T): "
                 + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
