@@ -31,9 +31,9 @@ export class CompositeValidator<T> implements MultiConstraintValidator<T> {
   }
 
   validate(input: T | undefined | null, memberName: string): ValidationFailure[] {
-    let retVal: ValidationFailure[] = [];
-    for (let v of this.validators) {
-      let failure = v.validate(input, memberName);
+    const retVal: ValidationFailure[] = [];
+    for (const v of this.validators) {
+      const failure = v.validate(input, memberName);
       if (failure) {
         retVal.push(failure);
       }
@@ -52,7 +52,7 @@ export class CompositeStructureValidator<T> implements MultiConstraintValidator<
   }
 
   validate(input: T | undefined | null, memberName: string): ValidationFailure[] {
-    let retVal: ValidationFailure[] = [];
+    const retVal: ValidationFailure[] = [];
     retVal.push(...this.referenceValidator.validate(input, memberName));
     if (input !== null && input !== undefined) {
       retVal.push(...this.structureValidator(input));
@@ -71,10 +71,10 @@ export class CompositeCollectionValidator<T> implements MultiConstraintValidator
   }
 
   validate(input: Iterable<T> | undefined | null, memberName: string): ValidationFailure[] {
-    let retVal: ValidationFailure[] = [];
+    const retVal: ValidationFailure[] = [];
     retVal.push(...this.referenceValidator.validate(input, memberName));
     if (input !== null && input !== undefined) {
-      for (let member of input) {
+      for (const member of input) {
         retVal.push(...this.memberValidator.validate(member, memberName));
       }
     }
@@ -98,7 +98,7 @@ export class CompositeMapValidator<T> implements MultiConstraintValidator<{ [key
   }
 
   validate(input: { [key: string]: T } | undefined | null, memberName: string): ValidationFailure[] {
-    let retVal: ValidationFailure[] = [];
+    const retVal: ValidationFailure[] = [];
     retVal.push(...this.referenceValidator.validate(input, memberName));
     if (input !== null && input !== undefined) {
       Object.keys(input).forEach((key) => {
@@ -278,9 +278,9 @@ export class UniqueItemsValidator implements SingleConstraintValidator<Array<any
       return null;
     }
 
-    let repeats = new Set<any>();
-    let uniqueValues = new Set<any>();
-    for (let i of input) {
+    const repeats = new Set<any>();
+    const uniqueValues = new Set<any>();
+    for (const i of input) {
       if (uniqueValues.has(i)) {
         repeats.add(i);
       } else {

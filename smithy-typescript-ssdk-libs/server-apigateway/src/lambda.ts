@@ -16,10 +16,10 @@
 import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
 import { HeaderBag, QueryParameterBag } from "@aws-sdk/types";
 import {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
   APIGatewayProxyEventHeaders,
   APIGatewayProxyEventQueryStringParameters,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
 } from "aws-lambda";
 import { Readable } from "stream";
 

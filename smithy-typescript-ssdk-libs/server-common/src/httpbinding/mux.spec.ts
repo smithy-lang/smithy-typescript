@@ -14,6 +14,7 @@
  */
 
 import { HttpRequest } from "@aws-sdk/protocol-http";
+
 import { HttpBindingMux, UriSpec } from ".";
 
 describe("simple matching", () => {
