@@ -14,6 +14,7 @@
  */
 
 import { HttpRequest } from "@aws-sdk/types";
+
 import { Mux, ServiceCoordinate } from "..";
 
 export interface PathLiteralSegment {
@@ -74,7 +75,7 @@ export class UriSpec<S extends string, O extends string> {
       return false;
     }
 
-    let requestPathSegments = req.path.split("/").filter((s) => s.length > 0);
+    const requestPathSegments = req.path.split("/").filter((s) => s.length > 0);
 
     let requestPathIdx = 0;
     path_loop: for (let i = 0; i < this.pathSegments.length; i++) {
@@ -94,7 +95,7 @@ export class UriSpec<S extends string, O extends string> {
         }
         let matched = false;
         if (i < this.pathSegments.length - 1) {
-          let nextSegment = this.pathSegments[i + 1];
+          const nextSegment = this.pathSegments[i + 1];
           while (!matched && ++requestPathIdx < requestPathSegments.length) {
             if (this.matchesSegment(requestPathSegments[requestPathIdx], nextSegment)) {
               matched = true;
