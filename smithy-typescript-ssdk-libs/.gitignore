@@ -2,3 +2,4 @@
 **/*.tsbuildinfo
 **/*.d.ts
 **/yarn-error.log
+coverage
