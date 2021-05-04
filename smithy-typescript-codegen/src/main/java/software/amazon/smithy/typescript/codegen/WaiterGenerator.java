@@ -75,8 +75,8 @@ class WaiterGenerator implements Runnable {
 
         // generates (deprecated) WaitFor....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
-                + " @deprecated Use waitUntil" + waiterName + " instead. " +
-                "waitFor" + waiterName + " does not throw error in non-success cases.");
+                + " @deprecated Use waitUntil" + waiterName + " instead. "
+                + "waitFor" + waiterName + " does not throw error in non-success cases.");
         writer.openBlock("export const waitFor$L = async (params: WaiterConfiguration<$T>, input: $T): "
                 + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
