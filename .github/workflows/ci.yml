@@ -24,3 +24,46 @@ jobs:
 
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
+
+  lint-typescript:
+    runs-on: ubuntu-latest
+    name: TypeScript Lint
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: cd smithy-typescript-ssdk-libs && yarn
+      - name: Run eslint
+        run: cd smithy-typescript-ssdk-libs && yarn lint
+
+  test-typescript:
+    runs-on: ubuntu-latest
+    name: TypeScript Test
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: cd smithy-typescript-ssdk-libs && yarn
+      - name: Run tests
+        run: cd smithy-typescript-ssdk-libs && yarn test
+
+  ensure-typescript-formatted:
+    runs-on: ubuntu-latest
+    name: Ensure TypeScript is formatted
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: cd smithy-typescript-ssdk-libs && yarn
+      - name: Run the code formatter
+        run: cd smithy-typescript-ssdk-libs && yarn format
+      # This checks the output of git diff. If it's not empty (i.e there were
+      # changes) it'll return a non-zero error code.
+      - name: Ensure there are no changes from running the formatter
+        run: test -z "$(git diff)"
