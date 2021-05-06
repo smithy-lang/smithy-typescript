@@ -125,8 +125,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Generates serialization functions for shapes in the passed set. These functions
      * should return a value that can then be serialized by the implementation of
-     * {@code serializeDocument}. The {@link DocumentShapeSerVisitor} and {@link DocumentMemberSerVisitor}
-     * are provided to reduce the effort of this implementation.
+     * {@link HttpBindingProtocolGenerator#serializeInputDocumentBody}. The {@link DocumentShapeSerVisitor} and
+     * {@link DocumentMemberSerVisitor} are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
      * @param shapes The shapes to generate serialization for.
@@ -136,7 +136,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Generates deserialization functions for shapes in the passed set. These functions
      * should return a value that can then be deserialized by the implementation of
-     * {@code deserializeDocument}. The {@link DocumentShapeDeserVisitor} and
+     * {@link HttpBindingProtocolGenerator#deserializeInputDocumentBody}. The {@link DocumentShapeDeserVisitor} and
      * {@link DocumentMemberDeserVisitor} are provided to reduce the effort of this implementation.
      *
      * @param context The generation context.
@@ -1345,10 +1345,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code needed to serialize the output payload of a request.
+     * Writes the code needed to serialize the output payload of a response.
      *
      * <p>Implementations of this method are expected to set a value to the
-     * {@code body} variable that will be serialized as the request body.
+     * {@code body} variable that will be serialized as the response body.
      * This variable will already be defined in scope.
      *
      * <p>For example:
@@ -1371,10 +1371,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code needed to serialize the error payload of a request.
+     * Writes the code needed to serialize the error payload of a response.
      *
      * <p>Implementations of this method are expected to set a value to the
-     * {@code body} variable that will be serialized as the request body.
+     * {@code body} variable that will be serialized as the response body.
      * This variable will already be defined in scope.
      *
      * <p>For example:
@@ -2073,7 +2073,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * bound member name of the {@code contents} variable after deserializing
      * the response body. This variable will already be defined in scope.
      *
-     *
      * @param context The generation context.
      * @param operation The operation whose input payload is being deserialized.
      * @param binding The payload binding to deserialize.
@@ -2088,12 +2087,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code needed to deserialize the output payload of a request.
+     * Writes the code needed to deserialize the output payload of a response.
      *
      * <p>Implementations of this method are expected to set a value to the
      * bound member name of the {@code contents} variable after deserializing
      * the response body. This variable will already be defined in scope.
-     *
      *
      * @param context The generation context.
      * @param operation The operation whose output payload is being deserialized.
@@ -2109,12 +2107,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code needed to deserialize the input payload of a request.
+     * Writes the code needed to deserialize the error payload of a response.
      *
      * <p>Implementations of this method are expected to set a value to the
      * bound member name of the {@code contents} variable after deserializing
      * the response body. This variable will already be defined in scope.
-     *
      *
      * @param context The generation context.
      * @param error The error whose payload is being deserialized.
