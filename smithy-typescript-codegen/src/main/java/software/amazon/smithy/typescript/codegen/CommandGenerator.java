@@ -133,7 +133,7 @@ final class CommandGenerator implements Runnable {
                     String commandOutput) {
         String packageName = settings.getPackageName();
         return "@example\n"
-            + "User a bare-bones client and the command you need to make an API call.\n"
+            + "Use a bare-bones client and the command you need to make an API call.\n"
             + "```javascript\n"
             + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
                     packageName)
