@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -210,21 +211,33 @@ public final class TypeScriptWriter extends CodeWriter {
     }
 
     /**
-     * Writes shape documentation comments if docs are present.
+     * Modifies and writes shape documentation comments if docs are present.
      *
      * @param shape Shape to write the documentation of.
+     * @param preprocessor UnaryOperator that takes documentation and returns modified one.
      * @return Returns true if docs were written.
      */
-    boolean writeShapeDocs(Shape shape) {
+    boolean writeShapeDocs(Shape shape, UnaryOperator<String> preprocessor) {
         return shape.getTrait(DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
+                    docs = preprocessor.apply(docs);
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         docs = "@deprecated\n\n" + docs;
                     }
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
+    }
+
+    /**
+     * Writes shape documentation comments if docs are present.
+     *
+     * @param shape Shape to write the documentation of.
+     * @return Returns true if docs were written.
+     */
+    boolean writeShapeDocs(Shape shape) {
+        return writeShapeDocs(shape, (docs) -> docs);
     }
 
     /**

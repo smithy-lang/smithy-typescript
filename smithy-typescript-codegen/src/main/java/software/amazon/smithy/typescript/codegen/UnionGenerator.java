@@ -242,6 +242,7 @@ final class UnionGenerator implements Runnable {
 
     private void writeFilterSensitiveLog() {
         String objectParam = "obj";
+        writer.writeDocs("@internal");
         writer.openBlock("export const filterSensitiveLog = ($L: $L): any => {", "}",
             objectParam, symbol.getName(),
             () -> {

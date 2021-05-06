@@ -199,6 +199,7 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             String objectParam = "obj";
+            writer.writeDocs("@internal");
             writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
                 objectParam, symbol.getName(),
                 () -> {

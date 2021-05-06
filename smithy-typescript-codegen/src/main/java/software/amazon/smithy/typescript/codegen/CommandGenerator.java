@@ -107,7 +107,8 @@ final class CommandGenerator implements Runnable {
         writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
 
         String name = symbol.getName();
-        writer.writeShapeDocs(operation);
+        writer.writeShapeDocs(operation, shapeDoc -> shapeDoc + "\n" + getCommandExample(serviceSymbol.getName(),
+                configType, name, inputType.getName(), outputType.getName()));
         writer.openBlock("export class $L extends $$Command<$T, $T, $L> {", "}", name, inputType, outputType,
                 configType, () -> {
 
@@ -128,6 +129,26 @@ final class CommandGenerator implements Runnable {
                     .popState()
                     .write("// End section: $L", COMMAND_BODY_EXTRA_SECTION);
         });
+    }
+
+    private String getCommandExample(String serviceName, String configName, String commandName, String commandInput,
+                    String commandOutput) {
+        String packageName = settings.getPackageName();
+        return "@example\n"
+            + "Use a bare-bones client and the command you need to make an API call.\n"
+            + "```javascript\n"
+            + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
+                    packageName)
+            + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
+                    packageName)
+            + String.format("const client = new %s(config);%n", serviceName)
+            + String.format("const command = new %s(input);%n", commandName)
+            + "const response = await client.send(command);\n"
+            + "```\n"
+            + "\n"
+            + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
+            + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
+            + String.format("@see {@link %s | config} for command's `input` shape.%n", configName);
     }
 
     private void generateCommandConstructor() {
