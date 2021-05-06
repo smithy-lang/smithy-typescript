@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "yarn clear-build-cache && yarn clear-build-info && lerna clean -y",
-    "clear-build-cache": "rimraf ./*/dist ./*/types",
+    "clear-build-cache": "rimraf ./*/dist ./*/types, ./*/*.tgz",
     "clear-build-info": "rimraf **/*.tsbuildinfo",
     "build": "lerna run build",
     "pretest": "yarn build",
