@@ -62,15 +62,22 @@ public final class TypeScriptSettings {
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
 
+    @Deprecated
+    public static TypeScriptSettings from(Model model, ObjectNode config) {
+        return from(model, config, ArtifactType.CLIENT);
+    }
+
     /**
      * Create a settings object from a configuration object node.
      *
      * @param model Model to infer the service to generate if not explicitly provided.
      * @param config Config object to load.
+     * @param artifactType The type of artifact being generated.
      * @return Returns the extracted settings.
      */
-    public static TypeScriptSettings from(Model model, ObjectNode config) {
+    public static TypeScriptSettings from(Model model, ObjectNode config, ArtifactType artifactType) {
         TypeScriptSettings settings = new TypeScriptSettings();
+        settings.setArtifactType(artifactType);
         config.warnIfAdditionalProperties(Arrays.asList(
                 PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
                 SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE));
