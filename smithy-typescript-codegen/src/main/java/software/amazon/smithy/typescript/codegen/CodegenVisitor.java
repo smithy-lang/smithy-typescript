@@ -97,13 +97,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
 
         // Preprocess model using integrations.
-        TypeScriptSettings typescriptSettings = TypeScriptSettings.from(context.getModel(), context.getSettings());
-        typescriptSettings.setArtifactType(artifactType);
+        TypeScriptSettings typescriptSettings = TypeScriptSettings.from(
+                context.getModel(), context.getSettings(), artifactType);
         for (TypeScriptIntegration integration : integrations) {
             Model modifiedModel = integration.preprocessModel(context, typescriptSettings);
             if (modifiedModel != context.getModel()) {
                 context = context.toBuilder().model(modifiedModel).build();
-                typescriptSettings = TypeScriptSettings.from(modifiedModel, context.getSettings());
+                typescriptSettings = TypeScriptSettings.from(modifiedModel, context.getSettings(), artifactType);
             }
         }
         settings = typescriptSettings;
