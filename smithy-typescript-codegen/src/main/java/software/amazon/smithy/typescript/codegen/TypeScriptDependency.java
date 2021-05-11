@@ -78,8 +78,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     // Conditionally added when XML parser needs to be used.
     XML_PARSER("dependencies", "fast-xml-parser", "3.19.0", false),
-    HTML_ENTITIES("dependencies", "he", "1.2.0", false),
-    TYPES_HTML_ENTITIES("devDependencies", "@types/he", "1.1.1", false);
+    HTML_ENTITIES("dependencies", "entities", "2.2.0", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

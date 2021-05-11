@@ -12,7 +12,7 @@ const compareEquivalentXmlBodies = (
     parseNodeValue: false,
     trimValues: false,
     tagValueProcessor: (val: any, tagName: any) =>
-      val.trim() === "" ? "" : heDecode(val),
+      val.trim() === "" ? "" : decodeHTML(val),
   };
 
   const parseXmlBody = (body: string) => {
