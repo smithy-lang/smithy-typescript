@@ -829,7 +829,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> documentBindings = bindingIndex.getResponseBindings(operationOrError, Location.DOCUMENT);
         boolean shouldWriteDefaultBody = operationOrError.asOperationShape()
                 .map(operation -> shouldWriteDefaultOutputBody(context, operation))
-                .orElse(shouldWriteDefaultErrorBody(context, operationOrError.asStructureShape().get()));
+                .orElseGet(() -> shouldWriteDefaultErrorBody(context, operationOrError.asStructureShape().get()));
         return writeBody(context, operationOrError, payloadBindings, documentBindings, shouldWriteDefaultBody, false);
     }
 
