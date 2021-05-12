@@ -1,11 +1,11 @@
 {
-  "version" : "1.0",
-  "outputDirectory" : "build/output",
-  "projections" : {
-    "ts-server" : {
+  "version": "1.0",
+  "outputDirectory": "build/output",
+  "projections": {
+    "ts-server": {
       "plugins": {
-        "typescript-ssdk-codegen" : {
-          "package" : "@aws-smithy/typescript-integ-test-types",
+        "typescript-ssdk-codegen": {
+          "package": "@aws-smithy/typescript-integ-test-types",
           "packageVersion": "1.0.0"
         }
       }
