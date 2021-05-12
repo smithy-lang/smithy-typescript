@@ -179,7 +179,8 @@ final class UnionGenerator implements Runnable {
             writeVisitorFunction();
             writeFilterSensitiveLog();
             if (includeValidation) {
-                writeValidate();
+                // TODO: re-enable this once we've solved recursive validation
+                //writeValidate();
             }
         });
     }
