@@ -16,6 +16,8 @@ operation Test {
 
 structure TestInput {
     enum: Enum,
+    enumList: ListOfEnums,
+    enumMap: MapOfEnums,
     lengthTests: LengthTests,
     nestedTests: NestedUnionOne
 }
@@ -59,6 +61,15 @@ union NestedUnionThree {
 
 @enum([{"value" : "valueA"}, {"value": "valueB"}])
 string Enum
+
+list ListOfEnums {
+    member: Enum
+}
+
+map MapOfEnums {
+    key: String,
+    value: Enum,
+}
 
 @length(min: 2, max: 7)
 string MinMaxLengthString
