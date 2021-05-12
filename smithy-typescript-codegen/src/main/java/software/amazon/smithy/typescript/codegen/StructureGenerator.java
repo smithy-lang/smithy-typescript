@@ -207,20 +207,19 @@ final class StructureGenerator implements Runnable {
                 }
             );
 
-            // TODO: re-enable this once we've solved recursive validation
-//            if (!includeValidation) {
-//                return;
-//            }
-//
-//            structuredMemberWriter.writeMemberValidators(writer);
-//
-//            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
-//            writer.openBlock("export const validate = ($L: $L): __ValidationFailure[] => {", "}",
-//                    objectParam, symbol.getName(),
-//                    () -> {
-//                        structuredMemberWriter.writeValidate(writer, objectParam);
-//                    }
-//            );
+            if (!includeValidation) {
+                return;
+            }
+
+            structuredMemberWriter.writeMemberValidators(writer);
+
+            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+            writer.openBlock("export const validate = ($L: $L): __ValidationFailure[] => {", "}",
+                    objectParam, symbol.getName(),
+                    () -> {
+                        structuredMemberWriter.writeValidate(writer, objectParam);
+                    }
+            );
         });
     }
 }
