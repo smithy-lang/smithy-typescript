@@ -211,12 +211,15 @@ final class StructureGenerator implements Runnable {
                 return;
             }
 
-            structuredMemberWriter.writeMemberValidators(writer);
-
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
             writer.openBlock("export const validate = ($L: $L): __ValidationFailure[] => {", "}",
                     objectParam, symbol.getName(),
                     () -> {
+                        // TODO: move this somewhere so it only gets run once.
+                        // Putting it at the top of the namespace can result in runtime errors when
+                        // you have mutually recursive structures because the validator of one will
+                        // be defined before the validator of the other exists at all.
+                        structuredMemberWriter.writeMemberValidators(writer);
                         structuredMemberWriter.writeValidate(writer, objectParam);
                     }
             );
