@@ -17,7 +17,7 @@ import {NestedUnionOne} from "@aws-smithy/typescript-integ-test-types";
 
 describe("ridiculously nested structures", () => {
     it("still work", () => {
-        expect(NestedUnionOne.validate({ value1: { value2: [ { unions: [ { value3: "abcdefghijk"}] } ] } }))
+        expect(NestedUnionOne.validate({ value1: { value2: [ { unions: [ { value3: "abcdefg"}] } ] } }))
             .toEqual([]);
     })
 });
