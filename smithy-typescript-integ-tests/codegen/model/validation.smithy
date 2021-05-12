@@ -19,7 +19,16 @@ structure TestInput {
     enumList: ListOfEnums,
     enumMap: MapOfEnums,
     lengthTests: LengthTests,
-    nestedTests: NestedUnionOne
+    nestedTests: NestedUnionOne,
+    recursiveTests: RecursiveStructureOne,
+}
+
+structure RecursiveStructureOne {
+    member: RecursiveStructureTwo
+}
+
+structure RecursiveStructureTwo {
+    member: RecursiveStructureOne
 }
 
 structure LengthTests {
