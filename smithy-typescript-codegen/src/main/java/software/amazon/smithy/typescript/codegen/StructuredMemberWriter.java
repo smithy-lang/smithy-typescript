@@ -313,14 +313,18 @@ final class StructuredMemberWriter {
                     "@aws-smithy/server-common");
             MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
             Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
-            writer.openBlock("new __CompositeCollectionValidator<$T>(", "),",
-                    symbolProvider.toSymbol(collectionMemberTargetShape),
-                    () -> {
-                        writeCompositeValidator(writer, shape, constraintTraits);
-                        writeShapeValidator(writer,
-                                            collectionMemberTargetShape,
-                                            getConstraintTraits(collectionMemberShape));
-                    });
+            if (collectionMemberTargetShape.hasTrait(EnumTrait.class)) {
+                // While there is a concrete type for enums, any string can be provided, and so we need
+                // to allow for that. The underlying validator will handle ensuring the values are correct.
+                writer.writeInline("new __CompositeCollectionValidator<string>");
+            } else {
+                writer.writeInline("new __CompositeCollectionValidator<$T>",
+                        symbolProvider.toSymbol(collectionMemberTargetShape));
+            }
+            writer.openBlock("(", "),", () -> {
+                writeCompositeValidator(writer, shape, constraintTraits);
+                writeShapeValidator(writer, collectionMemberTargetShape, getConstraintTraits(collectionMemberShape));
+            });
         } else if (shape.isMapShape()) {
             writer.addImport("CompositeMapValidator",
                     "__CompositeMapValidator",
@@ -328,17 +332,22 @@ final class StructuredMemberWriter {
             MapShape mapShape = (MapShape) shape;
             final MemberShape keyShape = mapShape.getKey();
             final MemberShape valueShape = mapShape.getValue();
-            writer.openBlock("new __CompositeMapValidator<$T>(", "),",
-                    symbolProvider.toSymbol(model.expectShape(valueShape.getTarget())),
-                    () -> {
-                        writeCompositeValidator(writer, mapShape, constraintTraits);
-                        writeShapeValidator(writer,
-                                            model.expectShape(keyShape.getTarget()),
-                                            getConstraintTraits(keyShape));
-                        writeShapeValidator(writer,
-                                            model.expectShape(valueShape.getTarget()),
-                                            getConstraintTraits(valueShape));
-                    });
+            if (valueShape.hasTrait(EnumTrait.class)) {
+                // While there is a concrete type for enums, any string can be provided, and so we need
+                // to allow for that. The underlying validator will handle ensuring the values are correct.
+                writer.writeInline("new __CompositeMapValidator<string>");
+            } else {
+                writer.writeInline("new __CompositeMapValidator<$T>", symbolProvider.toSymbol(valueShape));
+            }
+            writer.openBlock("(", "),", () -> {
+                writeCompositeValidator(writer, mapShape, constraintTraits);
+                writeShapeValidator(writer,
+                                    model.expectShape(keyShape.getTarget()),
+                                    getConstraintTraits(keyShape));
+                writeShapeValidator(writer,
+                                    model.expectShape(valueShape.getTarget()),
+                                    getConstraintTraits(valueShape));
+            });
         } else if (shape instanceof SimpleShape) {
             writeCompositeValidator(writer, shape, constraintTraits);
         } else {
