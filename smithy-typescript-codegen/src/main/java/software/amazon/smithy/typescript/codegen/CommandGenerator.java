@@ -248,7 +248,7 @@ final class CommandGenerator implements Runnable {
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
             plugin.getPluginFunction().ifPresent(symbol -> {
-                List<String> additionalParameters = plugin.getAdditionalResolveFunctionParameters();
+                List<String> additionalParameters = plugin.getAdditionalPluginFunctionParameters();
                 String additionalParamsString = additionalParameters.isEmpty()
                     ? ""
                     : ", { " + String.join(", ", additionalParameters) + "}";
