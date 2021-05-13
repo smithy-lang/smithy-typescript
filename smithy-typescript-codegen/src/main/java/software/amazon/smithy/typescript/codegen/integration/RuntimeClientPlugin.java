@@ -66,7 +66,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         servicePredicate = builder.servicePredicate;
 
         if (!additionalResolveFunctionParameters.isEmpty() && resolveFunction == null) {
-            throw new IllegalStateException("Additional parameters can only be set if a resolve function is set.");
+            if (pluginFunction == null) {
+                throw new IllegalStateException("Additional parameters can only be set if a resolve function is set.");
+            }
         }
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
