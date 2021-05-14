@@ -213,37 +213,46 @@ final class ServiceGenerator implements Runnable {
 
             writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
             writer.writeDocs("A constructor for a class implementing the @aws-sdk/types.Hash interface \n"
-                             + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.");
+                             + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
+                             + "@internal");
             writer.write("sha256?: __HashConstructor;\n");
 
             writer.addImport("UrlParser", "__UrlParser", "@aws-sdk/types");
-            writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.");
+            writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.\n"
+                             + "@internal");
             writer.write("urlParser?: __UrlParser;\n");
 
-            writer.writeDocs("A function that can calculate the length of a request body.");
+            writer.writeDocs("A function that can calculate the length of a request body.\n"
+                            + "@internal");
             writer.write("bodyLengthChecker?: (body: any) => number | undefined;\n");
 
             writer.addImport("StreamCollector", "__StreamCollector", "@aws-sdk/types");
-            writer.writeDocs("A function that converts a stream into an array of bytes.");
+            writer.writeDocs("A function that converts a stream into an array of bytes.\n"
+                            + "@internal");
             writer.write("streamCollector?: __StreamCollector;\n");
 
             // Note: Encoder and Decoder are both used for base64 and UTF.
             writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
             writer.addImport("Decoder", "__Decoder", "@aws-sdk/types");
 
-            writer.writeDocs("The function that will be used to convert a base64-encoded string to a byte array");
+            writer.writeDocs("The function that will be used to convert a base64-encoded string to a byte array.\n"
+                            + "@internal");
             writer.write("base64Decoder?: __Decoder;\n");
 
-            writer.writeDocs("The function that will be used to convert binary data to a base64-encoded string");
+            writer.writeDocs("The function that will be used to convert binary data to a base64-encoded string.\n"
+                            + "@internal");
             writer.write("base64Encoder?: __Encoder;\n");
 
-            writer.writeDocs("The function that will be used to convert a UTF8-encoded string to a byte array");
+            writer.writeDocs("The function that will be used to convert a UTF8-encoded string to a byte array.\n"
+                            + "@internal");
             writer.write("utf8Decoder?: __Decoder;\n");
 
-            writer.writeDocs("The function that will be used to convert binary data to a UTF-8 encoded string");
+            writer.writeDocs("The function that will be used to convert binary data to a UTF-8 encoded string.\n"
+                            + "@internal");
             writer.write("utf8Encoder?: __Encoder;\n");
 
-            writer.writeDocs("The runtime environment");
+            writer.writeDocs("The runtime environment.\n"
+                            + "@internal");
             writer.write("runtime?: string;\n");
 
             writer.writeDocs("Disable dyanamically changing the endpoint of the client based on the hostPrefix \n"
