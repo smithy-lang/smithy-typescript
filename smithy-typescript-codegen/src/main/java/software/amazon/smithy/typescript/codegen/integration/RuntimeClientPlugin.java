@@ -51,6 +51,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final SymbolReference resolveFunction;
     private final List<String> additionalResolveFunctionParameters;
     private final SymbolReference pluginFunction;
+    private final List<String> additionalPluginFunctionParameters;
     private final SymbolReference destroyFunction;
     private final BiPredicate<Model, ServiceShape> servicePredicate;
     private final OperationPredicate operationPredicate;
@@ -61,12 +62,17 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         resolveFunction = builder.resolveFunction;
         additionalResolveFunctionParameters = ListUtils.copyOf(builder.additionalResolveFunctionParameters);
         pluginFunction = builder.pluginFunction;
+        additionalPluginFunctionParameters = ListUtils.copyOf(builder.additionalPluginFunctionParameters);
         destroyFunction = builder.destroyFunction;
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
 
         if (!additionalResolveFunctionParameters.isEmpty() && resolveFunction == null) {
             throw new IllegalStateException("Additional parameters can only be set if a resolve function is set.");
+        }
+
+        if (!additionalPluginFunctionParameters.isEmpty() && pluginFunction == null) {
+            throw new IllegalStateException("Additional parameters can only be set if a plugin function is set.");
         }
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
@@ -203,6 +209,19 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     }
 
     /**
+     * Gets a list of additional parameters to be supplied to the
+     * plugin function. These parameters are to be supplied to plugin
+     * function as an options hash. The list is empty if
+     * there are no additional parameters.
+     *
+     * @return Returns the optionally present list of parameters.
+     * @see #getPluginFunction()
+     */
+    public List<String> getAdditionalPluginFunctionParameters() {
+        return additionalPluginFunctionParameters;
+    }
+
+    /**
      * Gets the optionally present symbol reference that points to the
      * function that is used to clean up any resources when a client is
      * destroyed.
@@ -283,6 +302,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                + ", resolveFunction=" + resolveFunction
                + ", additionalResolveFunctionParameters=" + additionalResolveFunctionParameters
                + ", pluginFunction=" + pluginFunction
+               + ", additionalPluginFunctionParameters=" + additionalPluginFunctionParameters
                + ", destroyFunction=" + destroyFunction
                + '}';
     }
@@ -301,6 +321,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                && Objects.equals(resolveFunction, that.resolveFunction)
                && Objects.equals(additionalResolveFunctionParameters, that.additionalResolveFunctionParameters)
                && Objects.equals(pluginFunction, that.pluginFunction)
+               && Objects.equals(additionalPluginFunctionParameters, that.additionalPluginFunctionParameters)
                && Objects.equals(destroyFunction, that.destroyFunction)
                && servicePredicate.equals(that.servicePredicate)
                && operationPredicate.equals(that.operationPredicate);
@@ -320,6 +341,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private SymbolReference resolveFunction;
         private List<String> additionalResolveFunctionParameters = new ArrayList<>();
         private SymbolReference pluginFunction;
+        private List<String> additionalPluginFunctionParameters = new ArrayList<>();
         private SymbolReference destroyFunction;
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
         private OperationPredicate operationPredicate = (model, service, operation) -> false;
@@ -482,6 +504,21 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         }
 
         /**
+         * Sets a function symbol reference used to configure clients and
+         * commands to use a specific middleware function.
+         *
+         * @param pluginFunction Plugin function symbol to invoke.
+         * @param additionalParameters Additional parameters to be generated as plugin function input.
+         * @return Returns the builder.
+         * @see #getPluginFunction()
+         */
+        public Builder pluginFunction(SymbolReference pluginFunction, String... additionalParameters) {
+            this.pluginFunction = pluginFunction;
+            this.additionalPluginFunctionParameters = ListUtils.of(additionalParameters);
+            return this;
+        }
+
+        /**
          * Sets a function symbol used to configure clients and commands to
          * use a specific middleware function.
          *
@@ -491,6 +528,32 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          */
         public Builder pluginFunction(Symbol pluginFunction) {
             return pluginFunction(SymbolReference.builder().symbol(pluginFunction).build());
+        }
+
+        /**
+         * Sets a function symbol used to configure clients and commands to
+         * use a specific middleware function.
+         *
+         * @param pluginFunction Plugin function symbol to invoke.
+         * @param additionalParameters Additional parameters to be generated as plugin function input.
+         * @return Returns the builder.
+         * @see #getPluginFunction()
+         */
+        public Builder pluginFunction(Symbol pluginFunction, String... additionalParameters) {
+            return pluginFunction(SymbolReference.builder().symbol(pluginFunction).build(), additionalParameters);
+        }
+
+        /**
+         * Set additional positional input parameters to plugin function. Set
+         * this with no arguments to remove the current parameters.
+         *
+         * @param additionalParameters Additional parameters to be generated as plugin function input.
+         * @return Returns the builder.
+         * @see #getPluginFunction()
+         */
+        public Builder additionalPluginFunctionParameters(String... additionalParameters) {
+            this.additionalPluginFunctionParameters = ListUtils.of(additionalParameters);
+            return this;
         }
 
         /**
