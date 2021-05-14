@@ -24,7 +24,7 @@ plugins {
 }
 
 allprojects {
-    group = "software.amazon.smithy"
+    group = "software.amazon.smithy.typescript"
     version = "0.3.0"
 }
 
