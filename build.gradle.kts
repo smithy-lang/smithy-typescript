@@ -139,7 +139,7 @@ subprojects {
         publishing {
             repositories {
                 mavenCentral {
-                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    url = uri("https://aws.oss.sonatype.org/service/local/staging/deploy/maven2/")
                     credentials {
                         username = sonatypeUser
                         password = sonatypePassword
