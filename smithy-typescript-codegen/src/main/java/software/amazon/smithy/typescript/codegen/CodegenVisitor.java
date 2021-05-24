@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Logger;
-import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -148,12 +147,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 .addTag(TypeScriptShapeLinkProvider.DESERIALIZER_TAG, "Command deserializer")
                 .build();
 
-        String serviceId;
-        if (service.hasTrait(ServiceTrait.class)) {
-            serviceId = service.getTrait(ServiceTrait.class).get().getSdkId();
-        } else {
-            serviceId = service.getId().getName();
-        }
+        String serviceId = service.getId().getName();
         TraceMetadata artifactMetadata = TraceMetadata.builder()
                 .setTimestampAsNow()
                 .id(serviceId)
