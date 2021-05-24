@@ -131,7 +131,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         applicationProtocol = protocolGenerator == null
                 ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
                 : protocolGenerator.getApplicationProtocol();
-
         // Make the symbol provider a cachingSymbolProvider.
         SymbolProvider cachedProvider = SymbolProvider.cache(resolvedProvider);
         // Defining Definitions for TraceFile Generation.
@@ -417,10 +416,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         boolean hasPaginatedOperation = false;
 
         for (OperationShape operation : containedOperations) {
-            OperationShape finalOperation = operation;
-            writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
-                    settings, model, finalOperation, symbolProvider, commandWriter,
-                    runtimePlugins, protocolGenerator, applicationProtocol).run());
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
                 String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
