@@ -119,17 +119,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         fileManifest = context.getFileManifest();
         LOGGER.info(() -> String.format("Generating TypeScript %s for service %s",
                 settings.generateClient() ? "client" : "server", service.getId()));
-        // Resolve the nullable protocol generator and application protocol.
-        protocolGenerator = resolveProtocolGenerator(integrations, service, settings);
-        applicationProtocol = protocolGenerator == null
-                ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
-                : protocolGenerator.getApplicationProtocol();
 
         // Decorate the symbol provider using integrations.
         SymbolProvider resolvedProvider = artifactType.createSymbolProvider(model, settings);
         for (TypeScriptIntegration integration : integrations) {
             resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
         }
+
+        // Resolve the nullable protocol generator and application protocol.
+        protocolGenerator = resolveProtocolGenerator(integrations, service, settings);
+        applicationProtocol = protocolGenerator == null
+                ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
+                : protocolGenerator.getApplicationProtocol();
 
         // Make the symbol provider a cachingSymbolProvider.
         SymbolProvider cachedProvider = SymbolProvider.cache(resolvedProvider);
