@@ -26,7 +26,7 @@ describe("enum validation", () => {
     expect(enumValidator.validate("kiwi", "fruit")).toEqual({
       constraintType: "enum",
       constraintValues: ["apple", "banana", "orange"],
-      memberName: "fruit",
+      path: "fruit",
       failureValue: "kiwi",
     });
   });
@@ -59,7 +59,7 @@ describe("length validation", () => {
         expect(new LengthValidator(4).validate(value, "aThreeLengthThing")).toEqual({
           constraintType: "length",
           constraintValues: [4, undefined],
-          memberName: "aThreeLengthThing",
+          path: "aThreeLengthThing",
           failureValue: 3,
         });
       });
@@ -67,7 +67,7 @@ describe("length validation", () => {
         expect(new LengthValidator(undefined, 2).validate(value, "aThreeLengthThing")).toEqual({
           constraintType: "length",
           constraintValues: [undefined, 2],
-          memberName: "aThreeLengthThing",
+          path: "aThreeLengthThing",
           failureValue: 3,
         });
       });
@@ -75,7 +75,7 @@ describe("length validation", () => {
         expect(new LengthValidator(1, 2).validate(value, "aThreeLengthThing")).toEqual({
           constraintType: "length",
           constraintValues: [1, 2],
-          memberName: "aThreeLengthThing",
+          path: "aThreeLengthThing",
           failureValue: 3,
         });
       });
@@ -96,7 +96,7 @@ describe("pattern validation", () => {
       constraintType: "pattern",
       constraintValues: "^\\w+$",
       failureValue: "!hello!",
-      memberName: "aField",
+      path: "aField",
     });
   });
   it("supports character class expressions", () => {
@@ -106,7 +106,7 @@ describe("pattern validation", () => {
       constraintType: "pattern",
       constraintValues: "^\\p{L}+$",
       failureValue: "!hello!",
-      memberName: "aField",
+      path: "aField",
     });
   });
 });
@@ -120,7 +120,7 @@ describe("range validation", () => {
       constraintType: "range",
       constraintValues: [3, undefined],
       failureValue: 1,
-      memberName: "aField",
+      path: "aField",
     });
   });
   it("supports max-only constraints", () => {
@@ -131,7 +131,7 @@ describe("range validation", () => {
       constraintType: "range",
       constraintValues: [undefined, 3],
       failureValue: 4,
-      memberName: "aField",
+      path: "aField",
     });
   });
   it("supports min-max constraints", () => {
@@ -143,13 +143,13 @@ describe("range validation", () => {
       constraintType: "range",
       constraintValues: [3, 5],
       failureValue: 1,
-      memberName: "aField",
+      path: "aField",
     });
     expect(validator.validate(6, "aField")).toEqual({
       constraintType: "range",
       constraintValues: [3, 5],
       failureValue: 6,
-      memberName: "aField",
+      path: "aField",
     });
   });
 });
@@ -161,7 +161,7 @@ describe("uniqueItems", () => {
     expect(validator.validate(["a", "a", "c", "a", "b", "b"], "aField")).toEqual({
       constraintType: "uniqueItems",
       failureValue: ["a", "b"],
-      memberName: "aField",
+      path: "aField",
     });
   });
   describe("supports numbers", () => {
@@ -169,7 +169,7 @@ describe("uniqueItems", () => {
     expect(validator.validate([1, 1, 3, 1, 1, 2.5, 2.5], "aField")).toEqual({
       constraintType: "uniqueItems",
       failureValue: [1, 2.5],
-      memberName: "aField",
+      path: "aField",
     });
   });
   describe("supports booleans, I guess", () => {
@@ -177,7 +177,7 @@ describe("uniqueItems", () => {
     expect(validator.validate([true, false, true], "aField")).toEqual({
       constraintType: "uniqueItems",
       failureValue: [true],
-      memberName: "aField",
+      path: "aField",
     });
   });
 });

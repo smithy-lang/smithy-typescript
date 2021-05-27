@@ -30,10 +30,10 @@ export class CompositeValidator<T> implements MultiConstraintValidator<T> {
     this.validators = validators;
   }
 
-  validate(input: T | undefined | null, memberName: string): ValidationFailure[] {
+  validate(input: T | undefined | null, path: string): ValidationFailure[] {
     const retVal: ValidationFailure[] = [];
     for (const v of this.validators) {
-      const failure = v.validate(input, memberName);
+      const failure = v.validate(input, path);
       if (failure) {
         retVal.push(failure);
       }
@@ -44,18 +44,21 @@ export class CompositeValidator<T> implements MultiConstraintValidator<T> {
 
 export class CompositeStructureValidator<T> implements MultiConstraintValidator<T> {
   private readonly referenceValidator: CompositeValidator<T>;
-  private readonly structureValidator: (input: T) => ValidationFailure[];
+  private readonly structureValidator: (input: T, path: string) => ValidationFailure[];
 
-  constructor(referenceValidator: CompositeValidator<T>, structureValidator: (input: T) => ValidationFailure[]) {
+  constructor(
+    referenceValidator: CompositeValidator<T>,
+    structureValidator: (input: T, path: string) => ValidationFailure[]
+  ) {
     this.referenceValidator = referenceValidator;
     this.structureValidator = structureValidator;
   }
 
-  validate(input: T | undefined | null, memberName: string): ValidationFailure[] {
+  validate(input: T | undefined | null, path: string): ValidationFailure[] {
     const retVal: ValidationFailure[] = [];
-    retVal.push(...this.referenceValidator.validate(input, memberName));
+    retVal.push(...this.referenceValidator.validate(input, path));
     if (input !== null && input !== undefined) {
-      retVal.push(...this.structureValidator(input));
+      retVal.push(...this.structureValidator(input, path));
     }
     return retVal;
   }
@@ -70,12 +73,14 @@ export class CompositeCollectionValidator<T> implements MultiConstraintValidator
     this.memberValidator = memberValidator;
   }
 
-  validate(input: Iterable<T> | undefined | null, memberName: string): ValidationFailure[] {
+  validate(input: Iterable<T> | undefined | null, path: string): ValidationFailure[] {
     const retVal: ValidationFailure[] = [];
-    retVal.push(...this.referenceValidator.validate(input, memberName));
+    retVal.push(...this.referenceValidator.validate(input, path));
     if (input !== null && input !== undefined) {
+      let i = 0;
       for (const member of input) {
-        retVal.push(...this.memberValidator.validate(member, memberName));
+        retVal.push(...this.memberValidator.validate(member, `${path}/${i}`));
+        i += 1;
       }
     }
     return retVal;
@@ -97,14 +102,14 @@ export class CompositeMapValidator<T> implements MultiConstraintValidator<{ [key
     this.valueValidator = valueValidator;
   }
 
-  validate(input: { [key: string]: T } | undefined | null, memberName: string): ValidationFailure[] {
+  validate(input: { [key: string]: T } | undefined | null, path: string): ValidationFailure[] {
     const retVal: ValidationFailure[] = [];
-    retVal.push(...this.referenceValidator.validate(input, memberName));
+    retVal.push(...this.referenceValidator.validate(input, path));
     if (input !== null && input !== undefined) {
       Object.keys(input).forEach((key) => {
         const value = input[key];
-        retVal.push(...this.keyValidator.validate(key, memberName));
-        retVal.push(...this.valueValidator.validate(value, memberName));
+        retVal.push(...this.keyValidator.validate(key, path));
+        retVal.push(...this.valueValidator.validate(value, `${path}/${key}`));
       });
     }
     return retVal;
@@ -116,17 +121,17 @@ export class NoOpValidator extends CompositeValidator<any> {
     super([]);
   }
 
-  validate(input: any, memberName: string): ValidationFailure[] {
+  validate(): ValidationFailure[] {
     return [];
   }
 }
 
 export interface MultiConstraintValidator<T> {
-  validate(input: T, memberName: string): ValidationFailure[];
+  validate(input: T, path: string): ValidationFailure[];
 }
 
 export interface SingleConstraintValidator<T, F> {
-  validate(input: T | undefined | null, memberName: string): F | null;
+  validate(input: T | undefined | null, path: string): F | null;
 }
 
 export class EnumValidator implements SingleConstraintValidator<string, EnumValidationFailure> {
@@ -136,7 +141,7 @@ export class EnumValidator implements SingleConstraintValidator<string, EnumVali
     this.allowedValues = allowedValues.slice();
   }
 
-  validate(input: string | undefined | null, memberName: string): EnumValidationFailure | null {
+  validate(input: string | undefined | null, path: string): EnumValidationFailure | null {
     if (input === null || input === undefined) {
       return null;
     }
@@ -145,7 +150,7 @@ export class EnumValidator implements SingleConstraintValidator<string, EnumVali
       return {
         constraintType: "enum",
         constraintValues: this.allowedValues.slice(),
-        memberName: memberName,
+        path: path,
         failureValue: input,
       };
     }
@@ -168,7 +173,7 @@ export class LengthValidator implements SingleConstraintValidator<LengthCheckabl
     this.max = max;
   }
 
-  validate(input: LengthCheckable | undefined | null, memberName: string): LengthValidationFailure | null {
+  validate(input: LengthCheckable | undefined | null, path: string): LengthValidationFailure | null {
     if (input === null || input === undefined) {
       return null;
     }
@@ -189,7 +194,7 @@ export class LengthValidator implements SingleConstraintValidator<LengthCheckabl
             : this.max === undefined
             ? [this.min!, undefined]
             : [this.min!, this.max!],
-        memberName: memberName,
+        path: path,
         failureValue: length,
       };
     }
@@ -197,7 +202,7 @@ export class LengthValidator implements SingleConstraintValidator<LengthCheckabl
     return null;
   }
 
-  private static hasLength<P extends PropertyKey>(obj: any): obj is { length: number } {
+  private static hasLength(obj: any): obj is { length: number } {
     return obj.hasOwnProperty("length");
   }
 }
@@ -214,7 +219,7 @@ export class RangeValidator implements SingleConstraintValidator<number, RangeVa
     this.max = max;
   }
 
-  validate(input: number | undefined | null, memberName: string): RangeValidationFailure | null {
+  validate(input: number | undefined | null, path: string): RangeValidationFailure | null {
     if (input === null || input === undefined) {
       return null;
     }
@@ -228,7 +233,7 @@ export class RangeValidator implements SingleConstraintValidator<number, RangeVa
             : this.max === undefined
             ? [this.min!, undefined]
             : [this.min!, this.max!],
-        memberName: memberName,
+        path: path,
         failureValue: input,
       };
     }
@@ -246,7 +251,7 @@ export class PatternValidator implements SingleConstraintValidator<string, Patte
     this.pattern = new RegExp(pattern, "u");
   }
 
-  validate(input: string | undefined | null, memberName: string): PatternValidationFailure | null {
+  validate(input: string | undefined | null, path: string): PatternValidationFailure | null {
     if (input === null || input === undefined) {
       return null;
     }
@@ -256,7 +261,7 @@ export class PatternValidator implements SingleConstraintValidator<string, Patte
         constraintType: "pattern",
         constraintValues: this.inputPattern,
         failureValue: input,
-        memberName: memberName,
+        path: path,
       };
     }
     return null;
@@ -264,16 +269,16 @@ export class PatternValidator implements SingleConstraintValidator<string, Patte
 }
 
 export class RequiredValidator implements SingleConstraintValidator<any, RequiredValidationFailure> {
-  validate(input: any, memberName: string): RequiredValidationFailure | null {
+  validate(input: any, path: string): RequiredValidationFailure | null {
     if (input === null || input === undefined) {
-      return new RequiredValidationFailure(memberName);
+      return new RequiredValidationFailure(path);
     }
     return null;
   }
 }
 
 export class UniqueItemsValidator implements SingleConstraintValidator<Array<any>, UniqueItemsValidationFailure> {
-  validate(input: Array<any> | undefined | null, memberName: string): UniqueItemsValidationFailure | null {
+  validate(input: Array<any> | undefined | null, path: string): UniqueItemsValidationFailure | null {
     if (input === null || input === undefined) {
       return null;
     }
@@ -291,7 +296,7 @@ export class UniqueItemsValidator implements SingleConstraintValidator<Array<any
     if (repeats.size > 0) {
       return {
         constraintType: "uniqueItems",
-        memberName: memberName,
+        path: path,
         failureValue: [...repeats].sort(),
       };
     }

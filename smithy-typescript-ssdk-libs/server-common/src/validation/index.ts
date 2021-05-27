@@ -13,10 +13,12 @@
  *  permissions and limitations under the License.
  */
 
+import { SmithyException } from "@aws-sdk/smithy-client";
+
 export * from "./validators";
 
 interface StandardValidationFailure<ConstraintBoundsType, FailureType> {
-  memberName: string;
+  path: string;
   constraintType: string;
   constraintValues: ArrayLike<ConstraintBoundsType>;
   failureValue: FailureType;
@@ -33,7 +35,7 @@ export interface LengthValidationFailure extends StandardValidationFailure<numbe
 }
 
 export interface PatternValidationFailure {
-  memberName: string;
+  path: string;
   constraintType: "pattern";
   constraintValues: string;
   failureValue: string;
@@ -45,16 +47,16 @@ export interface RangeValidationFailure extends StandardValidationFailure<number
 }
 
 export class RequiredValidationFailure {
-  memberName: string;
-  constraintType = "required";
+  path: string;
+  constraintType: "required" = "required";
 
-  constructor(memberName: string) {
-    this.memberName = memberName;
+  constructor(path: string) {
+    this.path = path;
   }
 }
 
 export interface UniqueItemsValidationFailure {
-  memberName: string;
+  path: string;
   constraintType: "uniqueItems";
   failureValue: Array<any>;
 }
@@ -66,3 +68,81 @@ export type ValidationFailure =
   | RangeValidationFailure
   | RequiredValidationFailure
   | UniqueItemsValidationFailure;
+
+export interface ValidationContext<O extends string> {
+  operation: O;
+}
+
+export type ValidationCustomizer<O extends string> = (
+  context: ValidationContext<O>,
+  failures: ValidationFailure[]
+) => SmithyException | undefined;
+
+export const generateValidationSummary = (failures: readonly ValidationFailure[]): string => {
+  const failingPaths = new Set(failures.map((failure) => failure.path));
+
+  let message = `${failures.length} validation error${failures.length > 1 ? "s" : ""} `;
+
+  if (failures.length > 1) {
+    message += `at ${failingPaths.size} ` + `path${failingPaths.size > 1 ? "s" : ""} `;
+  }
+
+  message += "detected. ";
+
+  if (failures.length > 1) {
+    message += "First failure: ";
+  }
+
+  return message + generateValidationMessage(failures[0]);
+};
+
+export const generateValidationMessage = (failure: ValidationFailure): string => {
+  const failureValue = failure.constraintType === "required" ? "null" : failure.failureValue.toString();
+
+  let prefix = "Value";
+  let suffix: string;
+  switch (failure.constraintType) {
+    case "required": {
+      suffix = "must not be null";
+      break;
+    }
+    case "enum": {
+      suffix = `must satisfy enum value set: ${failure.constraintValues}`;
+      break;
+    }
+    case "length": {
+      prefix = prefix + " with length";
+      const min = failure.constraintValues[0];
+      const max = failure.constraintValues[1];
+      if (min === undefined) {
+        suffix = `must have length less than or equal to ${max}`;
+      } else if (max === undefined) {
+        suffix = `must have length greater than or equal to ${min}`;
+      } else {
+        suffix = `must have length between ${min} and ${max}, inclusive`;
+      }
+      break;
+    }
+    case "pattern": {
+      suffix = `must satisfy regular expression pattern: ${failure.constraintValues}`;
+      break;
+    }
+    case "range": {
+      const min = failure.constraintValues[0];
+      const max = failure.constraintValues[1];
+      if (min === undefined) {
+        suffix = `must be less than or equal to ${max}`;
+      } else if (max === undefined) {
+        suffix = `must be greater than or equal to ${min}`;
+      } else {
+        suffix = `must be between ${min} and ${max}, inclusive`;
+      }
+      break;
+    }
+    case "uniqueItems": {
+      prefix = prefix + " with repeated values";
+      suffix = "must have unique values";
+    }
+  }
+  return `${prefix} ${failureValue} at '${failure.path}' failed to satisfy constraint: Member ${suffix}`;
+};
