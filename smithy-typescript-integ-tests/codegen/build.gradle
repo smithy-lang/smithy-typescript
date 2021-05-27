@@ -23,7 +23,8 @@ buildscript {
     dependencies {
         classpath 'software.amazon.smithy.typescript:smithy-typescript-codegen:0.3.0'
         classpath 'software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.3.0'
-        classpath "software.amazon.smithy:smithy-model:1.7.2"
+        classpath "software.amazon.smithy:smithy-model:1.8.0"
+        classpath "software.amazon.smithy:smithy-validation-model:1.8.0"
     }
 }
 
@@ -32,7 +33,7 @@ plugins {
 }
 
 dependencies {
-    implementation "software.amazon.smithy:smithy-aws-traits:1.7.2"
+    implementation "software.amazon.smithy:smithy-aws-traits:1.8.0"
 }
 
 repositories {

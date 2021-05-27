@@ -2,11 +2,22 @@
   "version": "1.0",
   "outputDirectory": "build/output",
   "projections": {
-    "ts-server": {
+    "validation": {
+      "imports": ["validation"],
       "plugins": {
         "typescript-ssdk-codegen": {
           "package": "@aws-smithy/typescript-integ-test-types",
           "packageVersion": "1.0.0"
+        }
+      }
+    },
+    "customValidation": {
+      "imports": ["custom_validation"],
+      "plugins": {
+        "typescript-ssdk-codegen": {
+          "package": "@aws-smithy/typescript-integ-test-custom-validation",
+          "packageVersion": "1.0.0",
+          "disableDefaultValidation": true
         }
       }
     }
