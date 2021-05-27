@@ -464,7 +464,7 @@ final class StructuredMemberWriter {
     void writeValidate(TypeScriptWriter writer, String param) {
         writer.openBlock("return [", "];", () -> {
             for (MemberShape member : members) {
-                writer.write("...getMemberValidator($1S).validate($2L.$1L, $3S),",
+                writer.write("...getMemberValidator($1S).validate($2L.$1L, `$${path}/$3L`),",
                         getSanitizedMemberName(member), param, member.getMemberName());
             }
         });

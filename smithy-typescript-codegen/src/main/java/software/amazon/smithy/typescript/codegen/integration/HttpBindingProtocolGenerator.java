@@ -337,25 +337,47 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.addImport("serializeFrameworkException", null,
                 "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writer.openBlock("export const get$L = (service: $T): __ServiceHandler => {", "}",
-                handlerSymbol.getName(), serviceSymbol, () -> {
-            generateServiceMux(context);
-            writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
-            writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = "
-                            + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
-                writer.openBlock("switch (op) {", "}", () -> {
-                    operations.stream()
-                            .filter(o -> o.getTrait(HttpTrait.class).isPresent())
-                            .forEach(writeOperationCase(writer, symbolProvider));
-                });
+        if (context.getSettings().isDisableDefaultValidation()) {
+            writer.write("export const get$L = (service: $T, "
+                            + "customizer: __ValidationCustomizer<$T>): __ServiceHandler => {",
+                    handlerSymbol.getName(), serviceSymbol, operationsSymbol);
+        } else {
+            writer.write("export const get$L = (service: $T): __ServiceHandler => {",
+                    handlerSymbol.getName(), serviceSymbol);
+        }
+        writer.indent();
+
+        generateServiceMux(context);
+        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
+        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = "
+                        + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
+            writer.openBlock("switch (op) {", "}", () -> {
+                operations.stream()
+                        .filter(o -> o.getTrait(HttpTrait.class).isPresent())
+                        .forEach(writeOperationCase(writer, symbolProvider));
             });
-            writer.write("return new $T(service, mux, serFn, serializeFrameworkException);", handlerSymbol);
         });
+
+        if (!context.getSettings().isDisableDefaultValidation()) {
+            writer.addImport("generateValidationSummary", "__generateValidationSummary", "@aws-smithy/server-common");
+            writer.addImport("generateValidationMessage", "__generateValidationMessage", "@aws-smithy/server-common");
+            writer.openBlock("const customizer: __ValidationCustomizer<$T> = (ctx, failures) => {", "};",
+                operationsSymbol,
+                () -> {
+                    writeDefaultValidationCustomizer(writer);
+                }
+            );
+        }
+
+        writer.write("return new $T(service, mux, serFn, serializeFrameworkException, customizer);", handlerSymbol);
+
+        writer.dedent().write("}");
     }
 
     @Override
@@ -372,13 +394,48 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         final Symbol serializerType = operationSymbol.expectProperty("serializerType", Symbol.class);
         final Symbol operationHandlerSymbol = operationSymbol.expectProperty("handler", Symbol.class);
 
-        writer.openBlock("export const get$L = (operation: __Operation<$T, $T>): __ServiceHandler => {", "}",
-                operationHandlerSymbol.getName(), inputType, outputType,
+        if (context.getSettings().isDisableDefaultValidation()) {
+            writer.write("export const get$L = (operation: __Operation<$T, $T>, "
+                            + "customizer: __ValidationCustomizer<$S>): __ServiceHandler => {",
+                    operationHandlerSymbol.getName(), inputType, outputType, operation.getId().getName());
+        } else {
+            writer.write("export const get$L = (operation: __Operation<$T, $T>): __ServiceHandler => {",
+                    operationHandlerSymbol.getName(), inputType, outputType);
+        }
+        writer.indent();
+
+        generateOperationMux(context, operation);
+
+        if (!context.getSettings().isDisableDefaultValidation()) {
+            writer.addImport("generateValidationSummary", "__generateValidationSummary", "@aws-smithy/server-common");
+            writer.addImport("generateValidationMessage", "__generateValidationMessage", "@aws-smithy/server-common");
+            writer.openBlock("const customizer: __ValidationCustomizer<$S> = (ctx, failures) => {", "};",
+                operation.getId().getName(),
                 () -> {
-                    generateOperationMux(context, operation);
-                    writer.write("return new $T(operation, mux, new $T(), serializeFrameworkException);",
-                            operationHandlerSymbol, serializerType);
-                });
+                    writeDefaultValidationCustomizer(writer);
+                }
+            );
+        }
+        writer.write("return new $T(operation, mux, new $T(), serializeFrameworkException, customizer);",
+                operationHandlerSymbol, serializerType);
+
+        writer.dedent().write("}");
+    }
+
+    private void writeDefaultValidationCustomizer(TypeScriptWriter writer) {
+        writer.openBlock("if (!failures) {", "}", () -> {
+            writer.write("return undefined;");
+        });
+
+        writer.openBlock("return {", "};", () -> {
+            writer.write("name: \"ValidationException\",");
+            writer.write("$$fault: \"client\",");
+            writer.write("message: __generateValidationSummary(failures),");
+            writer.openBlock("fieldList: failures.map(failure => ({", "}))", () -> {
+                writer.write("path: failure.path,");
+                writer.write("message: __generateValidationMessage(failure)");
+            });
+        });
     }
 
     private Consumer<OperationShape> writeOperationCase(

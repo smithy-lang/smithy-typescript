@@ -98,10 +98,21 @@ final class ServerCommandGenerator implements Runnable {
             } else {
                 writeStreamingMemberType(writer, symbolProvider.toSymbol(input), typeName, blobStreamingMembers.get(0));
             }
+            renderNamespace(typeName, input);
         } else {
             // If the input is non-existent, then use an empty object.
             writer.write("export interface $L {}", typeName);
         }
+    }
+
+    private void renderNamespace(String typeName, StructureShape input) {
+        Symbol symbol = symbolProvider.toSymbol(input);
+        writer.openBlock("export namespace $L {", "}", typeName, () -> {
+            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+            writer.writeDocs("@internal");
+            writer.write("export const validate: (obj: $L) => __ValidationFailure[] = $T.validate;",
+                    symbol.getName(), symbol);
+        });
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {

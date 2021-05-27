@@ -26,13 +26,16 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -67,6 +70,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             "tsconfig.es.json", "tsconfig.es.json",
             "tsconfig.json", "tsconfig.json"
     );
+    private static final ShapeId VALIDATION_EXCEPTION_SHAPE =
+            ShapeId.fromParts("smithy.framework", "ValidationException");
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -201,6 +206,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         IndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest, integrations, protocolGenerator);
 
         if (settings.generateServerSdk()) {
+            checkValidationSettings();
             // Generate index for server
             IndexGenerator.writeServerIndex(settings, model, symbolProvider, fileManifest);
         }
@@ -221,6 +227,32 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         LOGGER.fine("Generating package.json files");
         PackageJsonGenerator.writePackageJson(
                 settings, fileManifest, SymbolDependency.gatherDependencies(dependencies.stream()));
+    }
+
+    private void checkValidationSettings() {
+        if (settings.isDisableDefaultValidation()) {
+            return;
+        }
+
+        final OperationIndex operationIndex = OperationIndex.of(model);
+
+        List<String> unvalidatedOperations = TopDownIndex.of(model)
+                .getContainedOperations(service)
+                .stream()
+                .filter(o -> operationIndex.getErrors(o).stream()
+                                .noneMatch(e -> e.getId().equals(VALIDATION_EXCEPTION_SHAPE)))
+                .map(s -> s.getId().toString())
+                .sorted()
+                .collect(Collectors.toList());
+
+        if (!unvalidatedOperations.isEmpty()) {
+            throw new CodegenException(String.format("Every operation must have the %s error attached unless %s is set "
+                    + "to 'true' in the plugin settings. Operations without %s errors attached: %s",
+                    VALIDATION_EXCEPTION_SHAPE,
+                    TypeScriptSettings.DISABLE_DEFAULT_VALIDATION,
+                    VALIDATION_EXCEPTION_SHAPE,
+                    unvalidatedOperations));
+        }
     }
 
     @Override

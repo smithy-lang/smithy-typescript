@@ -214,7 +214,8 @@ final class StructureGenerator implements Runnable {
             structuredMemberWriter.writeMemberValidatorCache(writer, "memberValidators");
 
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
-            writer.openBlock("export const validate = ($L: $L): __ValidationFailure[] => {", "}",
+            writer.writeDocs("@internal");
+            writer.openBlock("export const validate = ($L: $L, path: string = \"\"): __ValidationFailure[] => {", "}",
                     objectParam, symbol.getName(),
                     () -> {
                         // TODO: move this somewhere so it only gets run once.
