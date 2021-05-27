@@ -15,6 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import static software.amazon.smithy.typescript.codegen.TypeScriptDependency.SERVER_COMMON;
+
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -97,7 +99,7 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
         String moduleName = moduleNameDelegator.formatModuleName(shape, serviceName);
 
         Symbol intermediate = createGeneratedSymbolBuilder(shape, serviceName, moduleName).build();
-        Symbol.Builder builder = intermediate.toBuilder();
+        Symbol.Builder builder = intermediate.toBuilder().addDependency(SERVER_COMMON);
         builder.putProperty("operations",
                 intermediate.toBuilder().name(serviceName + "Operations").build());
         builder.putProperty("handler",

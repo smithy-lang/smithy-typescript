@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -41,6 +42,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public final class TypeScriptSettings {
 
+    static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
     static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
@@ -61,6 +63,7 @@ public final class TypeScriptSettings {
     private ShapeId protocol;
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
+    private boolean disableDefaultValidation = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -78,9 +81,7 @@ public final class TypeScriptSettings {
     public static TypeScriptSettings from(Model model, ObjectNode config, ArtifactType artifactType) {
         TypeScriptSettings settings = new TypeScriptSettings();
         settings.setArtifactType(artifactType);
-        config.warnIfAdditionalProperties(Arrays.asList(
-                PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
-                SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE));
+        config.warnIfAdditionalProperties(artifactType.configProperties);
 
         // Get the service from the settings or infer one from the given model.
         settings.setService(config.getStringMember(SERVICE)
@@ -94,6 +95,10 @@ public final class TypeScriptSettings {
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
+
+        if (artifactType == ArtifactType.SSDK) {
+            settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
+        }
 
         settings.setPluginSettings(config);
         return settings;
@@ -258,6 +263,19 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * Returns whether or not default validation is disabled. This setting is only relevant for the SSDK.
+     *
+     * @return true if default validation is disabled. Default: false
+     */
+    public boolean isDisableDefaultValidation() {
+        return disableDefaultValidation;
+    }
+
+    public void setDisableDefaultValidation(boolean disableDefaultValidation) {
+        this.disableDefaultValidation = disableDefaultValidation;
+    }
+
+    /**
      * Gets the corresponding {@link ServiceShape} from a model.
      *
      * @param model Model to search for the service shape by ID.
@@ -328,13 +346,20 @@ public final class TypeScriptSettings {
      * An enum indicating the type of artifact the code generator will produce.
      */
     public enum ArtifactType {
-        CLIENT(SymbolVisitor::new),
-        SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)));
+        CLIENT(SymbolVisitor::new,
+                Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE)),
+        SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
+                Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION,
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, DISABLE_DEFAULT_VALIDATION));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
+        private final List<String> configProperties;
 
-        ArtifactType(BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory) {
+        ArtifactType(BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory,
+                     List<String> configProperties) {
             this.symbolProviderFactory = symbolProviderFactory;
+            this.configProperties = Collections.unmodifiableList(configProperties);
         }
 
         /**

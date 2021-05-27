@@ -54,18 +54,18 @@ final class ServerGenerator {
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsType = serviceSymbol.expectProperty("operations", Symbol.class);
-        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writeSerdeContextBase(writer);
         writeHandleFunction(writer);
 
         writer.openBlock("export class $L implements __ServiceHandler {", "}", handlerSymbol.getName(), () -> {
-            writer.write("private service: $T;", serviceSymbol);
-            writer.write("private mux: __Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
-            writer.write("private serializerFactory: <T extends $T>(operation: T) => "
+            writer.write("private readonly service: $T;", serviceSymbol);
+            writer.write("private readonly mux: __Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
+            writer.write("private readonly serializerFactory: <T extends $T>(operation: T) => "
                             + "__OperationSerializer<$T, T, __SmithyException>;", operationsType, serviceSymbol);
-            writer.write("private serializeFrameworkException: (e: __SmithyFrameworkException, "
-                            + "ctx: ServerSerdeContext) => Promise<__HttpResponse>;");
+            writer.write("private readonly serializeFrameworkException: (e: __SmithyFrameworkException, "
+                            + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>;");
+            writer.write("private readonly validationCustomizer: __ValidationCustomizer<$T>;", operationsType);
             writer.writeDocs(() -> {
                 writer.write("Construct a $T handler.", serviceSymbol);
                 writer.write("@param service The {@link $1T} implementation that supplies the business logic for $1T",
@@ -78,20 +78,24 @@ final class ServerGenerator {
                       .write("handles deserialization of requests and serialization of responses");
                 writer.write("@param serializeFrameworkException A function that can serialize "
                         + "{@link __SmithyFrameworkException}s");
+                writer.write("@param validationCustomizer A {@link __ValidationCustomizer} for turning validation "
+                        + "failures into {@link __SmithyFrameworkException}s");
             });
             writer.openBlock("constructor(", ") {", () -> {
                 writer.write("service: $T,", serviceSymbol);
                 writer.write("mux: __Mux<$S, $T>,", serviceShape.getId().getName(), operationsType);
                 writer.write("serializerFactory:<T extends $T>(op: T) => "
                                 + "__OperationSerializer<$T, T, __SmithyException>,", operationsType, serviceSymbol);
-                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: ServerSerdeContext) => "
-                        + "Promise<__HttpResponse>");
+                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: __ServerSerdeContext) "
+                        + "=> Promise<__HttpResponse>,");
+                writer.write("validationCustomizer: __ValidationCustomizer<$T>", operationsType);
             });
             writer.indent();
             writer.write("this.service = service;");
             writer.write("this.mux = mux;");
             writer.write("this.serializerFactory = serializerFactory;");
             writer.write("this.serializeFrameworkException = serializeFrameworkException;");
+            writer.write("this.validationCustomizer = validationCustomizer;");
             writer.closeBlock("}");
             writer.openBlock("async handle(request: __HttpRequest): Promise<__HttpResponse> {", "}", () -> {
                 writer.write("const target = this.mux.match(request);");
@@ -102,10 +106,12 @@ final class ServerGenerator {
                 writer.openBlock("switch (target.operation) {", "}", () -> {
                     for (OperationShape operation : operations) {
                         String opName = operation.getId().getName();
+                        Symbol operationSymbol = symbolProvider.toSymbol(operation);
+                        Symbol inputSymbol = operationSymbol.expectProperty("inputType", Symbol.class);
                         writer.openBlock("case $S : {", "}", opName, () -> {
-                            writer.write("return handle(request, this.serializerFactory($S), this.service.$L, "
-                                    + "this.serializeFrameworkException);",
-                                    opName, symbolProvider.toSymbol(operation).getName());
+                            writer.write("return handle(request, $1S, this.serializerFactory($1S), this.service.$2L, "
+                                    + "this.serializeFrameworkException, $3T.validate, this.validationCustomizer);",
+                                    opName, operationSymbol.getName(), inputSymbol);
                         });
                     }
                 });
@@ -130,15 +136,15 @@ final class ServerGenerator {
         Symbol outputSymbol = operationSymbol.expectProperty("outputType", Symbol.class);
         Symbol handlerSymbol = operationSymbol.expectProperty("handler", Symbol.class);
         Symbol errorsSymbol = operationSymbol.expectProperty("errorsType", Symbol.class);
-        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
 
         writer.openBlock("export class $L implements __ServiceHandler {", "}", handlerSymbol.getName(), () -> {
-            writer.write("private operation: __Operation<$T, $T>;", inputSymbol, outputSymbol);
-            writer.write("private mux: __Mux<$S, $S>;", serviceShape.getId().getName(), operationName);
-            writer.write("private serializer: __OperationSerializer<$T, $S, $T>;",
+            writer.write("private readonly operation: __Operation<$T, $T>;", inputSymbol, outputSymbol);
+            writer.write("private readonly mux: __Mux<$S, $S>;", serviceShape.getId().getName(), operationName);
+            writer.write("private readonly serializer: __OperationSerializer<$T, $S, $T>;",
                     serviceSymbol, operationName, errorsSymbol);
-            writer.write("private serializeFrameworkException: (e: __SmithyFrameworkException, "
-                    + "ctx: ServerSerdeContext) => Promise<__HttpResponse>;");
+            writer.write("private readonly serializeFrameworkException: (e: __SmithyFrameworkException, "
+                    + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>;");
+            writer.write("private readonly validationCustomizer: __ValidationCustomizer<$S>;", operationName);
             writer.writeDocs(() -> {
                 writer.write("Construct a $T handler.", operationSymbol);
                 writer.write("@param service The {@link __Operation} implementation that supplies the business "
@@ -150,20 +156,24 @@ final class ServerGenerator {
                         .write("handles deserialization of requests and serialization of responses");
                 writer.write("@param serializeFrameworkException A function that can serialize "
                         + "{@link __SmithyFrameworkException}s");
+                writer.write("@param validationCustomizer A {@link __ValidationCustomizer} for turning validation "
+                        + "failures into {@link __SmithyFrameworkException}s");
             });
             writer.openBlock("constructor(", ") {", () -> {
                 writer.write("operation: __Operation<$T, $T>,", inputSymbol, outputSymbol);
                 writer.write("mux: __Mux<$S, $S>,", serviceShape.getId().getName(), operationName);
                 writer.write("serializer: __OperationSerializer<$T, $S, $T>,",
                         serviceSymbol, operationName, errorsSymbol);
-                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: ServerSerdeContext) => "
-                        + "Promise<__HttpResponse>");
+                writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: __ServerSerdeContext) "
+                        + "=> Promise<__HttpResponse>,");
+                writer.write("validationCustomizer: __ValidationCustomizer<$S>", operationName);
             });
             writer.indent();
             writer.write("this.operation = operation;");
             writer.write("this.mux = mux;");
             writer.write("this.serializer = serializer;");
             writer.write("this.serializeFrameworkException = serializeFrameworkException;");
+            writer.write("this.validationCustomizer = validationCustomizer;");
             writer.closeBlock("}");
             writer.openBlock("async handle(request: __HttpRequest): Promise<__HttpResponse> {", "}", () -> {
                 writer.write("const target = this.mux.match(request);");
@@ -173,8 +183,9 @@ final class ServerGenerator {
                     writer.write("return this.serializeFrameworkException(new __InternalFailureException(), "
                             + "serdeContextBase);");
                 });
-                writer.write("return handle(request, this.serializer, this.operation, "
-                        + "this.serializeFrameworkException);");
+                writer.write("return handle(request, $S, this.serializer, this.operation, "
+                        + "this.serializeFrameworkException, $T.validate, this.validationCustomizer);",
+                        operationName, inputSymbol);
             });
         });
     }
@@ -190,20 +201,28 @@ final class ServerGenerator {
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
         writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
+        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
     }
 
     private static void writeHandleFunction(TypeScriptWriter writer) {
         writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
         writer.addImport("OperationInput", "__OperationInput", "@aws-smithy/server-common");
         writer.addImport("OperationOutput", "__OperationOutput", "@aws-smithy/server-common");
+        writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
 
-        writer.openBlock("async function handle<S, O extends keyof S>(", "): Promise<__HttpResponse> {", () -> {
-            writer.write("request:__HttpRequest,");
-            writer.write("serializer: __OperationSerializer<S, O, __SmithyException>,");
-            writer.write("operation: __Operation<__OperationInput<S[O]>, __OperationOutput<S[O]>>,");
-            writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, "
-                    + "ctx: ServerSerdeContext) => Promise<__HttpResponse>");
-        });
+        writer.openBlock("async function handle<S, O extends keyof S & string>(",
+                "): Promise<__HttpResponse> {",
+                () -> {
+                    writer.write("request:__HttpRequest,");
+                    writer.write("operationName: O,");
+                    writer.write("serializer: __OperationSerializer<S, O, __SmithyException>,");
+                    writer.write("operation: __Operation<__OperationInput<S[O]>, __OperationOutput<S[O]>>,");
+                    writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, "
+                            + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>,");
+                    writer.write("validationFn: (input: __OperationInput<S[O]>) => __ValidationFailure[],");
+                    writer.write("validationCustomizer: __ValidationCustomizer<O>");
+                });
         writer.indent();
         writer.write("let input;");
         writer.openBlock("try {", "} catch (error: unknown) {", () -> {
@@ -216,6 +235,14 @@ final class ServerGenerator {
                 + "serdeContextBase);");
         writer.closeBlock("}");
         writer.openBlock("try {", "} catch(error: unknown) {", () -> {
+            writer.write("let validationFailures = validationFn(input);");
+            writer.openBlock("if (validationFailures && validationFailures.length > 0) {", "}", () -> {
+                writer.write("let validationException = validationCustomizer({ operation: operationName }, "
+                    + "validationFailures);");
+                writer.openBlock("if (validationException) {", "}", () -> {
+                    writer.write("return serializer.serializeError(validationException, serdeContextBase);");
+                });
+            });
             writer.write("let output = await operation(input, request);");
             writer.write("return serializer.serialize(output, serdeContextBase);");
         });
@@ -231,7 +258,7 @@ final class ServerGenerator {
     }
 
     private static void writeSerdeContextBase(TypeScriptWriter writer) {
-        writer.addImport("SerdeContext", null, "@aws-sdk/types");
+        writer.addImport("ServerSerdeContext", "__ServerSerdeContext", "@aws-smithy/server-common");
         writer.addImport("NodeHttpHandler", null, "@aws-sdk/node-http-handler");
         writer.addImport("streamCollector", null, "@aws-sdk/node-http-handler");
         writer.addImport("fromBase64", null, "@aws-sdk/util-base64-node");

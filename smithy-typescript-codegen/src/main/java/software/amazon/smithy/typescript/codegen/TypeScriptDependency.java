@@ -78,7 +78,10 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     // Conditionally added when XML parser needs to be used.
     XML_PARSER("dependencies", "fast-xml-parser", "3.19.0", false),
-    HTML_ENTITIES("dependencies", "entities", "2.2.0", false);
+    HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
+
+    // Server dependency for SSDKs
+    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "^1.0.0-alpha.0", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";
