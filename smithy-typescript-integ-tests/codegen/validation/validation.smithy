@@ -11,7 +11,8 @@ service ValidationService {
 @readonly
 @http(method: "POST", uri:"/test")
 operation Test {
-    input: TestInput
+    input: TestInput,
+    errors: [ smithy.framework#ValidationException ]
 }
 
 structure TestInput {

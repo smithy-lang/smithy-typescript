@@ -13,11 +13,11 @@
  *  permissions and limitations under the License.
  */
 
-import { TestInput, Enum } from "@aws-smithy/typescript-integ-test-types";
+import { Enum, TestInput } from "@aws-smithy/typescript-integ-test-types";
 
 describe("enum constraints", () => {
   const validEnum: Enum = "valueA";
-  const invalidEnum: string = "invalidEnum";
+  const invalidEnum = "invalidEnum";
   const expectedFailureBase = {
     constraintType: "enum",
     constraintValues: ["valueA", "valueB"],
@@ -27,7 +27,7 @@ describe("enum constraints", () => {
     expect(TestInput.validate({ enum: validEnum })).toEqual([]);
     expect(TestInput.validate({ enum: invalidEnum })).toEqual([
       {
-        memberName: "enum",
+        path: "/enum",
         ...expectedFailureBase,
       },
     ]);
@@ -36,13 +36,13 @@ describe("enum constraints", () => {
     expect(TestInput.validate({ enumList: [validEnum] })).toEqual([]);
     expect(TestInput.validate({ enumList: [invalidEnum] })).toEqual([
       {
-        memberName: "enumList",
+        path: "/enumList/0",
         ...expectedFailureBase,
       },
     ]);
     expect(TestInput.validate({ enumList: [validEnum, invalidEnum] })).toEqual([
       {
-        memberName: "enumList",
+        path: "/enumList/1",
         ...expectedFailureBase,
       },
     ]);
@@ -51,7 +51,7 @@ describe("enum constraints", () => {
     expect(TestInput.validate({ enumMap: { valid: validEnum } })).toEqual([]);
     expect(TestInput.validate({ enumMap: { invalid: invalidEnum } })).toEqual([
       {
-        memberName: "enumMap",
+        path: "/enumMap/invalid",
         ...expectedFailureBase,
       },
     ]);
@@ -61,7 +61,7 @@ describe("enum constraints", () => {
       })
     ).toEqual([
       {
-        memberName: "enumMap",
+        path: "/enumMap/invalid",
         ...expectedFailureBase,
       },
     ]);

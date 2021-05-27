@@ -23,4 +23,18 @@ describe("ridiculously nested structures", () => {
       })
     ).toEqual([]);
   });
+  it("will also fail", () => {
+    expect(
+      NestedUnionOne.validate({
+        value1: { value2: [{ unions: [{ value3: "a" }] }] },
+      })
+    ).toEqual([
+      {
+        constraintType: "length",
+        constraintValues: [2, 7],
+        failureValue: 1,
+        path: "/value1/value2/0/unions/0/value3",
+      },
+    ]);
+  });
 });
