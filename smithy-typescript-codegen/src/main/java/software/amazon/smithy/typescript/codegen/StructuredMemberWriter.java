@@ -291,10 +291,14 @@ final class StructuredMemberWriter {
     void writeMemberValidatorCache(TypeScriptWriter writer, String cacheName) {
         writer.openBlock("const $L : {", "} = {};", cacheName, () -> {
             for (MemberShape member : members) {
+                writer.addImport("MultiConstraintValidator",
+                        "__MultiConstraintValidator",
+                        "@aws-smithy/server-common");
                 final Shape targetShape = model.expectShape(member.getTarget());
                 writer.writeInline("$L?: ", getSanitizedMemberName(member));
-                writeShapeValidatorType(writer, targetShape);
-                writer.write(",");
+                writer.writeInline("__MultiConstraintValidator<");
+                writeConstraintValidatorType(writer, targetShape);
+                writer.write(">,");
             }
         });
     }
@@ -319,7 +323,11 @@ final class StructuredMemberWriter {
                             Collection<Trait> constraintTraits = getConstraintTraits(member);
                             writer.openBlock("case $S: {", "}", getSanitizedMemberName(member), () -> {
                                 writer.writeInline("$L[$S] = ", cacheName, getSanitizedMemberName(member));
-                                writeShapeValidator(writer, targetShape, constraintTraits, ";");
+                                if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                                    writeSensitiveWrappedMemberValidator(writer, targetShape, constraintTraits);
+                                } else {
+                                    writeMemberValidator(writer, targetShape, constraintTraits, ";");
+                                }
                                 writer.write("break;");
                             });
                         }
@@ -330,138 +338,13 @@ final class StructuredMemberWriter {
         );
     }
 
-    private void writeShapeValidator(TypeScriptWriter writer,
-                                     Shape shape,
-                                     Collection<Trait> constraintTraits,
-                                     String trailer) {
-        if (shape instanceof SimpleShape) {
-            writeCompositeValidator(writer, shape, constraintTraits, trailer);
-            return;
-        }
-
-        writer.writeInline("new ");
-        writeShapeValidatorType(writer, shape);
-        if (shape.isStructureShape() || shape.isUnionShape()) {
-            writer.openBlock("(", ")" + trailer,
-                () -> {
-                    writeCompositeValidator(writer, shape, constraintTraits, ",");
-                    writer.write("$T.validate", symbolProvider.toSymbol(shape));
-                }
-            );
-        } else if (shape.isListShape() || shape.isSetShape()) {
-            MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
-            Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
-            writer.writeInline("(").openBlock("", ")" + trailer, () -> {
-                writeCompositeValidator(writer, shape, constraintTraits, ",");
-                writeShapeValidator(writer,
-                                    collectionMemberTargetShape,
-                                    getConstraintTraits(collectionMemberShape),
-                                    "");
-            });
-        } else if (shape.isMapShape()) {
-            MapShape mapShape = (MapShape) shape;
-            final MemberShape keyShape = mapShape.getKey();
-            final MemberShape valueShape = mapShape.getValue();
-            writer.openBlock("(", ")" + trailer, () -> {
-                writeCompositeValidator(writer, mapShape, constraintTraits, ",");
-                writeShapeValidator(writer,
-                                    model.expectShape(keyShape.getTarget()),
-                                    getConstraintTraits(keyShape),
-                                    ",");
-                writeShapeValidator(writer,
-                                    model.expectShape(valueShape.getTarget()),
-                                    getConstraintTraits(valueShape),
-                                    "");
-            });
-        } else {
-            throw new IllegalArgumentException(
-                    String.format("Unsupported shape found when generating validator: %s", shape));
-        }
-    }
-
-    private void writeShapeValidatorType(TypeScriptWriter writer, Shape shape) {
-        if (shape.isStructureShape() || shape.isUnionShape()) {
-            writer.addImport("CompositeStructureValidator",
-                    "__CompositeStructureValidator",
-                    "@aws-smithy/server-common");
-            writer.writeInline("__CompositeStructureValidator<$T>", symbolProvider.toSymbol(shape));
-        } else if (shape.isListShape() || shape.isSetShape()) {
-            writer.addImport("CompositeCollectionValidator",
-                    "__CompositeCollectionValidator",
-                    "@aws-smithy/server-common");
-            MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
-            Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
-            if (collectionMemberTargetShape.hasTrait(EnumTrait.class)) {
-                // While there is a concrete type for enums, any string can be provided, and so we need
-                // to allow for that. The underlying validator will handle ensuring the values are correct.
-                writer.writeInline("__CompositeCollectionValidator<string>");
-            } else {
-                writer.writeInline("__CompositeCollectionValidator<$T>",
-                        symbolProvider.toSymbol(collectionMemberTargetShape));
-            }
-        } else if (shape.isMapShape()) {
-            writer.addImport("CompositeMapValidator",
-                    "__CompositeMapValidator",
-                    "@aws-smithy/server-common");
-            final MemberShape valueShape = ((MapShape) shape).getValue();
-            if (valueShape.hasTrait(EnumTrait.class)) {
-                // While there is a concrete type for enums, any string can be provided, and so we need
-                // to allow for that. The underlying validator will handle ensuring the values are correct.
-                writer.writeInline("__CompositeMapValidator<string>");
-            } else {
-                writer.writeInline("__CompositeMapValidator<$T>", symbolProvider.toSymbol(valueShape));
-            }
-        } else if (shape instanceof SimpleShape) {
-            writer.addImport("CompositeValidator",
-                    "__CompositeValidator",
-                    "@aws-smithy/server-common");
-
-            Symbol symbol;
-            if (shape instanceof StringShape) {
-                // Don't let the TypeScript type for an enum narrow our validator's type too much
-                symbol = symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
-            } else {
-                symbol = symbolProvider.toSymbol(shape);
-            }
-            writer.writeInline("__CompositeValidator<$T>", symbol);
-        } else {
-            throw new IllegalArgumentException(
-                    String.format("Unsupported shape found when generating validator: %s", shape));
-        }
-    }
-
-    private void writeCompositeValidator(TypeScriptWriter writer,
-                                         Shape shape,
-                                         Collection<Trait> constraints,
-                                         String trailer) {
-        if (constraints.isEmpty()) {
-            writer.addImport("NoOpValidator", "__NoOpValidator", "@aws-smithy/server-common");
-            writer.write("new __NoOpValidator()" + trailer);
-            return;
-
-        }
-        writer.addImport("CompositeValidator",
-                "__CompositeValidator",
-                "@aws-smithy/server-common");
-
-        Symbol symbol;
-        if (shape instanceof StringShape) {
-            // Don't let the TypeScript type for an enum narrow our validator's type too much
-            symbol = symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
-        } else {
-            symbol = symbolProvider.toSymbol(shape);
-        }
-
-        writer.openBlock("new __CompositeValidator<$T>([", "])" + trailer, symbol,
-            () -> {
-                for (Trait t : constraints) {
-                    writeValidator(writer, t);
-                }
-            }
-        );
-    }
-
-    void writeValidate(TypeScriptWriter writer, String param) {
+    /**
+     * Writes the validate method contents.
+     *
+     * @param writer the writer, positioned within the validate method
+     * @param param the parameter name of the object being validated
+     */
+    void writeValidateMethodContents(TypeScriptWriter writer, String param) {
         writer.openBlock("return [", "];", () -> {
             for (MemberShape member : members) {
                 writer.write("...getMemberValidator($1S).validate($2L.$1L, `$${path}/$3L`),",
@@ -470,7 +353,122 @@ final class StructuredMemberWriter {
         });
     }
 
-    private void writeValidator(TypeScriptWriter writer, Trait trait) {
+    /**
+     * Writes a SensitiveConstraintValidator enclosing the shape validator for a sensitive member.
+     */
+    private void writeSensitiveWrappedMemberValidator(TypeScriptWriter writer,
+                                                      Shape targetShape,
+                                                      Collection<Trait> constraintTraits) {
+        writer.addImport("SensitiveConstraintValidator",
+                "__SensitiveConstraintValidator",
+                "@aws-smithy/server-common");
+        writer.writeInline("new __SensitiveConstraintValidator<");
+        writeConstraintValidatorType(writer, targetShape);
+        writer.openBlock(">(", ");",
+                () -> writeMemberValidator(writer, targetShape, constraintTraits, ""));
+    }
+
+    /**
+     * Writes the validator for the member of a structure or union.
+     * @param writer the writer
+     * @param shape the shape targeted by the member
+     * @param constraintTraits the traits applied to the targeted shape and the member
+     * @param trailer what to append to the output (such as a comma or semicolon)
+     */
+    private void writeMemberValidator(TypeScriptWriter writer,
+                                      Shape shape,
+                                      Collection<Trait> constraintTraits,
+                                      String trailer) {
+        if (shape instanceof SimpleShape) {
+            writeShapeValidator(writer, shape, constraintTraits, trailer);
+            return;
+        }
+
+        if (shape.isStructureShape() || shape.isUnionShape()) {
+            writer.addImport("CompositeStructureValidator",
+                    "__CompositeStructureValidator",
+                    "@aws-smithy/server-common");
+            writer.openBlock("new __CompositeStructureValidator<$T>(", ")" + trailer,
+                    getValidatorValueType(shape),
+                    () -> {
+                        writeShapeValidator(writer, shape, constraintTraits, ",");
+                        writer.write("$T.validate", symbolProvider.toSymbol(shape));
+                    }
+            );
+        } else if (shape.isListShape() || shape.isSetShape()) {
+            writer.addImport("CompositeCollectionValidator",
+                    "__CompositeCollectionValidator",
+                    "@aws-smithy/server-common");
+            MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
+            Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
+            writer.openBlock("new __CompositeCollectionValidator<$T>(", ")" + trailer,
+                    getValidatorValueType(shape),
+                    () -> {
+                        writeShapeValidator(writer, shape, constraintTraits, ",");
+                        writeMemberValidator(writer,
+                                collectionMemberTargetShape,
+                                getConstraintTraits(collectionMemberShape),
+                                "");
+                    }
+            );
+        } else if (shape.isMapShape()) {
+            writer.addImport("CompositeMapValidator", "__CompositeMapValidator", "@aws-smithy/server-common");
+
+            MapShape mapShape = (MapShape) shape;
+            final MemberShape keyShape = mapShape.getKey();
+            final MemberShape valueShape = mapShape.getValue();
+            writer.openBlock("new __CompositeMapValidator<$T>(", ")" + trailer,
+                    getValidatorValueType(shape),
+                    () -> {
+                        writeShapeValidator(writer, mapShape, constraintTraits, ",");
+                        writeMemberValidator(writer,
+                                model.expectShape(keyShape.getTarget()),
+                                getConstraintTraits(keyShape),
+                                ",");
+                        writeMemberValidator(writer,
+                                model.expectShape(valueShape.getTarget()),
+                                getConstraintTraits(valueShape),
+                                "");
+                    });
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported shape found when generating validator: %s", shape));
+        }
+    }
+
+    /**
+     * Writes a validator for a shape, aggregating all of the constraints applied to it. This shape could be a member
+     * target, or the target of a shape (such as the member of a list or the value of a map).
+     *
+     * @param writer the writer
+     * @param shape the shape being validated
+     * @param constraints the constraints relevant to this shape (includes member traits for member targets)
+     * @param trailer what to append to the output (for instance, a comma or semicolon)
+     */
+    private void writeShapeValidator(TypeScriptWriter writer,
+                                     Shape shape,
+                                     Collection<Trait> constraints,
+                                     String trailer) {
+        if (constraints.isEmpty()) {
+            writer.addImport("NoOpValidator", "__NoOpValidator", "@aws-smithy/server-common");
+            writer.write("new __NoOpValidator()" + trailer);
+            return;
+        }
+
+        writer.addImport("CompositeValidator", "__CompositeValidator", "@aws-smithy/server-common");
+        writer.openBlock("new __CompositeValidator<$T>([", "])" + trailer, getSymbolForValidatedType(shape),
+                () -> {
+                    for (Trait t : constraints) {
+                        writeSingleConstraintValidator(writer, t);
+                    }
+                }
+        );
+    }
+
+    /**
+     * Writes a validator for one constraint of one member.
+     */
+    private void writeSingleConstraintValidator(TypeScriptWriter writer, Trait trait) {
         if (trait instanceof RequiredTrait) {
             writer.addImport("RequiredValidator", "__RequiredValidator", "@aws-smithy/server-common");
             writer.write("new __RequiredValidator(),");
@@ -500,6 +498,62 @@ final class StructuredMemberWriter {
             writer.addImport("UniqueItemsValidator", "__UniqueItemsValidator", "@aws-smithy/server-common");
             writer.write("new __UniqueItemsValidator(),");
         }
+    }
+
+    /**
+     * Writes the type that is being validated (the TS type corresponding to the target shape) that is used as a
+     * type arg for MultiConstraintValidator.
+     */
+    private void writeConstraintValidatorType(TypeScriptWriter writer, Shape shape) {
+        if (shape.isStructureShape() || shape.isUnionShape()) {
+            writer.writeInline("$T", symbolProvider.toSymbol(shape));
+        } else if (shape.isListShape() || shape.isSetShape()) {
+            MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
+            Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
+            writer.writeInline("Iterable<$T>", getSymbolForValidatedType(collectionMemberTargetShape));
+        } else if (shape.isMapShape()) {
+            writer.writeInline("{ [key: string]: $T }", getSymbolForValidatedType(((MapShape) shape).getValue()));
+        } else if (shape instanceof SimpleShape) {
+            writer.writeInline("$T", getSymbolForValidatedType(shape));
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported shape found when generating validator: %s", shape));
+        }
+    }
+
+    /**
+     * @return returns the value type for a validator. For maps, this is the type of the value; for lists, this is
+     * the member type. This type is loosened by {@link #getSymbolForValidatedType(Shape)}
+     */
+    private Symbol getValidatorValueType(Shape shape) {
+        if (shape.isStructureShape() || shape.isUnionShape()) {
+            return symbolProvider.toSymbol(shape);
+        } else if (shape.isListShape() || shape.isSetShape()) {
+            MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
+            Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
+            return getSymbolForValidatedType(collectionMemberTargetShape);
+        } else if (shape.isMapShape()) {
+            return getSymbolForValidatedType(((MapShape) shape).getValue());
+        } else if (shape instanceof SimpleShape) {
+            return getSymbolForValidatedType(shape);
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported shape found when generating validator: %s", shape));
+        }
+    }
+
+    /**
+     * If we return the direct symbol for the validated type, then TypeScript will not pass type checks when we pass
+     * raw deserialized values into our validators. This is particularly problematic for enums.
+     *
+     * @return a looser supertype of the modeled value type (generally, string instead of a subtype of string)
+     */
+    private Symbol getSymbolForValidatedType(Shape shape) {
+        if (shape instanceof StringShape) {
+            return symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
+        }
+
+        return symbolProvider.toSymbol(shape);
     }
 
     private Collection<Trait> getConstraintTraits(MemberShape member) {
