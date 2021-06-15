@@ -103,7 +103,12 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
   } else if (failure.failureValue === null) {
     failureValue = "";
   } else {
-    failureValue = failure.failureValue.toString() + " ";
+    const rawFailureValue = failure.failureValue.toString();
+    if (rawFailureValue.length > 64) {
+      failureValue = rawFailureValue.substr(0, 49) + "... (truncated) ";
+    } else {
+      failureValue = rawFailureValue + " ";
+    }
   }
 
   let prefix = "Value";
@@ -114,7 +119,9 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       break;
     }
     case "enum": {
-      suffix = `must satisfy enum value set: ${failure.constraintValues}`;
+      suffix = `must satisfy enum value set: [${failure.constraintValues
+        .sort((a, b) => a.localeCompare(b))
+        .join(", ")}]`;
       break;
     }
     case "length": {
