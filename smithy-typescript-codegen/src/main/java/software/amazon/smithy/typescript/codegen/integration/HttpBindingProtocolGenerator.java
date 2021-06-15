@@ -2059,9 +2059,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 deserializeErrorPayload(context, operationOrError.asStructureShape().get(), payloadBinding);
             }
             if (payloadBinding != null) {
-                return ListUtils.of(payloadBinding);
-            } else {
-                return ListUtils.of();
+                documentBindings = ListUtils.of(payloadBinding);
             }
         }
 
