@@ -22,6 +22,10 @@ structure TestInput {
     lengthTests: LengthTests,
     nestedTests: NestedUnionOne,
     recursiveTests: RecursiveStructureOne,
+
+    @sensitive
+    @length(max: 5)
+    sensitiveMember: String
 }
 
 structure RecursiveStructureOne {
