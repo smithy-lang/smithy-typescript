@@ -275,7 +275,7 @@ final class UnionGenerator implements Runnable {
                 "obj", symbol.getName(),
                 () -> {
                     structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
-                    structuredMemberWriter.writeValidate(writer, "obj");
+                    structuredMemberWriter.writeValidateMethodContents(writer, "obj");
                 }
         );
     }

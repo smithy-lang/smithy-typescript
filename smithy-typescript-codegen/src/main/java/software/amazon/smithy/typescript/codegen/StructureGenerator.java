@@ -223,7 +223,7 @@ final class StructureGenerator implements Runnable {
                         // you have mutually recursive structures because the validator of one will
                         // be defined before the validator of the other exists at all.
                         structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
-                        structuredMemberWriter.writeValidate(writer, objectParam);
+                        structuredMemberWriter.writeValidateMethodContents(writer, objectParam);
                     }
             );
         });
