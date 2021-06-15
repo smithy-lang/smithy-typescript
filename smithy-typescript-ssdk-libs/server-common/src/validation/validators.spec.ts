@@ -13,7 +13,40 @@
  *  permissions and limitations under the License.
  */
 
-import { EnumValidator, LengthValidator, PatternValidator, RangeValidator, UniqueItemsValidator } from "./validators";
+import {
+  CompositeValidator,
+  EnumValidator,
+  LengthValidator,
+  PatternValidator,
+  RangeValidator,
+  SensitiveConstraintValidator,
+  SingleConstraintValidator,
+  UniqueItemsValidator,
+} from "./validators";
+
+describe("sensitive validation", () => {
+  function sensitize<T, V>(validator: SingleConstraintValidator<T, V>, input: T): V {
+    const failure = new SensitiveConstraintValidator(
+      new CompositeValidator<T>([validator])
+    ).validate(input, "")[0];
+    return (failure as unknown) as V;
+  }
+
+  describe("strips the failure value from the resultant validation failure", () => {
+    it("with enums", () => {
+      expect(sensitize(new EnumValidator(["apple", "banana", "orange"]), "pear").failureValue).toBeNull();
+    });
+    it("with length", () => {
+      expect(sensitize(new LengthValidator(2, 4), "pears").failureValue).toBeNull();
+    });
+    it("with ranges", () => {
+      expect(sensitize(new RangeValidator(2, 4), 7).failureValue).toBeNull();
+    });
+    it("with patterns", () => {
+      expect(sensitize(new PatternValidator("^[a-c]+$"), "defg").failureValue).toBeNull();
+    });
+  });
+});
 
 describe("enum validation", () => {
   const enumValidator = new EnumValidator(["apple", "banana", "orange"]);

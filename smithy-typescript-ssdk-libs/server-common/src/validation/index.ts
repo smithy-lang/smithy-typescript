@@ -21,7 +21,7 @@ interface StandardValidationFailure<ConstraintBoundsType, FailureType> {
   path: string;
   constraintType: string;
   constraintValues: ArrayLike<ConstraintBoundsType>;
-  failureValue: FailureType;
+  failureValue: FailureType | null;
 }
 
 export interface EnumValidationFailure extends StandardValidationFailure<string, string> {
@@ -38,7 +38,7 @@ export interface PatternValidationFailure {
   path: string;
   constraintType: "pattern";
   constraintValues: string;
-  failureValue: string;
+  failureValue: string | null;
 }
 
 export interface RangeValidationFailure extends StandardValidationFailure<number | undefined, number> {
@@ -58,7 +58,7 @@ export class RequiredValidationFailure {
 export interface UniqueItemsValidationFailure {
   path: string;
   constraintType: "uniqueItems";
-  failureValue: Array<any>;
+  failureValue: Array<any> | null;
 }
 
 export type ValidationFailure =
@@ -97,7 +97,14 @@ export const generateValidationSummary = (failures: readonly ValidationFailure[]
 };
 
 export const generateValidationMessage = (failure: ValidationFailure): string => {
-  const failureValue = failure.constraintType === "required" ? "null" : failure.failureValue.toString();
+  let failureValue;
+  if (failure.constraintType === "required") {
+    failureValue = "null ";
+  } else if (failure.failureValue === null) {
+    failureValue = "";
+  } else {
+    failureValue = failure.failureValue.toString() + " ";
+  }
 
   let prefix = "Value";
   let suffix: string;
@@ -111,7 +118,9 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       break;
     }
     case "length": {
-      prefix = prefix + " with length";
+      if (failure.failureValue !== null) {
+        prefix = prefix + " with length";
+      }
       const min = failure.constraintValues[0];
       const max = failure.constraintValues[1];
       if (min === undefined) {
@@ -144,5 +153,5 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       suffix = "must have unique values";
     }
   }
-  return `${prefix} ${failureValue} at '${failure.path}' failed to satisfy constraint: Member ${suffix}`;
+  return `${prefix} ${failureValue}at '${failure.path}' failed to satisfy constraint: Member ${suffix}`;
 };
