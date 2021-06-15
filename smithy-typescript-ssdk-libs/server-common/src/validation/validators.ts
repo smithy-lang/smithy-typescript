@@ -43,11 +43,11 @@ export class CompositeValidator<T> implements MultiConstraintValidator<T> {
 }
 
 export class CompositeStructureValidator<T> implements MultiConstraintValidator<T> {
-  private readonly referenceValidator: CompositeValidator<T>;
+  private readonly referenceValidator: MultiConstraintValidator<T>;
   private readonly structureValidator: (input: T, path: string) => ValidationFailure[];
 
   constructor(
-    referenceValidator: CompositeValidator<T>,
+    referenceValidator: MultiConstraintValidator<T>,
     structureValidator: (input: T, path: string) => ValidationFailure[]
   ) {
     this.referenceValidator = referenceValidator;
@@ -65,10 +65,10 @@ export class CompositeStructureValidator<T> implements MultiConstraintValidator<
 }
 
 export class CompositeCollectionValidator<T> implements MultiConstraintValidator<Iterable<T>> {
-  private readonly referenceValidator: CompositeValidator<Iterable<T>>;
+  private readonly referenceValidator: MultiConstraintValidator<Iterable<T>>;
   private readonly memberValidator: MultiConstraintValidator<T>;
 
-  constructor(referenceValidator: CompositeValidator<Iterable<T>>, memberValidator: MultiConstraintValidator<T>) {
+  constructor(referenceValidator: MultiConstraintValidator<Iterable<T>>, memberValidator: MultiConstraintValidator<T>) {
     this.referenceValidator = referenceValidator;
     this.memberValidator = memberValidator;
   }
@@ -88,12 +88,12 @@ export class CompositeCollectionValidator<T> implements MultiConstraintValidator
 }
 
 export class CompositeMapValidator<T> implements MultiConstraintValidator<{ [key: string]: T }> {
-  private readonly referenceValidator: CompositeValidator<{ [key: string]: T }>;
+  private readonly referenceValidator: MultiConstraintValidator<{ [key: string]: T }>;
   private readonly keyValidator: MultiConstraintValidator<string>;
   private readonly valueValidator: MultiConstraintValidator<T>;
 
   constructor(
-    referenceValidator: CompositeValidator<{ [key: string]: T }>,
+    referenceValidator: MultiConstraintValidator<{ [key: string]: T }>,
     keyValidator: MultiConstraintValidator<string>,
     valueValidator: MultiConstraintValidator<T>
   ) {
@@ -116,18 +116,31 @@ export class CompositeMapValidator<T> implements MultiConstraintValidator<{ [key
   }
 }
 
-export class NoOpValidator extends CompositeValidator<any> {
-  constructor() {
-    super([]);
-  }
-
+export class NoOpValidator implements MultiConstraintValidator<any> {
   validate(): ValidationFailure[] {
     return [];
   }
 }
 
+export class SensitiveConstraintValidator<T> implements MultiConstraintValidator<T> {
+  private readonly delegate: MultiConstraintValidator<T>;
+
+  constructor(delegate: MultiConstraintValidator<T>) {
+    this.delegate = delegate;
+  }
+
+  validate(input: T, path: string): ValidationFailure[] {
+    return this.delegate.validate(input, path).map((f) => {
+      return {
+        ...f,
+        failureValue: null,
+      };
+    });
+  }
+}
+
 export interface MultiConstraintValidator<T> {
-  validate(input: T, path: string): ValidationFailure[];
+  validate(input: T | undefined | null, path: string): ValidationFailure[];
 }
 
 export interface SingleConstraintValidator<T, F> {
