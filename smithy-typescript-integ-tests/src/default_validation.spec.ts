@@ -56,4 +56,25 @@ describe("automatic validation", () => {
         );
       });
   });
+  it("does not return sensitive member values", () => {
+      return testHandler
+          .handle(
+              new HttpRequest({
+                  method: "POST",
+                  path: "/test",
+                  body: Readable.from(Buffer.from('{"sensitiveMember": "abcdefg"}', "utf8")),
+              })
+          )
+          .then((result) => {
+              expect(result.statusCode).toEqual(400);
+              expect(result.headers["x-amzn-errortype"]).toEqual("ValidationException");
+              const parsedBody = JSON.parse(result.body);
+              expect(parsedBody.message).toContain("1 validation error detected");
+              expect(parsedBody.fieldList).toHaveLength(1);
+              expect(parsedBody.fieldList[0].path).toEqual("/sensitiveMember");
+              expect(parsedBody.fieldList[0].message).toEqual(
+                  "Value at '/sensitiveMember' failed to satisfy constraint: Member must have length less than or equal to 5"
+              );
+          });
+  });
 });
