@@ -310,7 +310,7 @@ final class HttpProtocolTestGenerator implements Runnable {
                     writer.write("body: Readable.from([$S]),", body);
                 }
             });
-            writer.write("await handler.handle(request);").write("");
+            writer.write("await handler.handle(request, {});").write("");
 
             // Assert that the function has been called exactly once.
             writer.write("expect(testFunction.mock.calls.length).toBe(1);");
@@ -487,8 +487,8 @@ final class HttpProtocolTestGenerator implements Runnable {
         String testName = testCase.getId() + ":ServerResponse";
         writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
             Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
-            writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
-                writer.openBlock("$L(input: any, request: HttpRequest): Promise<$T> {", "}",
+            writer.openBlock("class TestService implements Partial<$T<{}>> {", "}", serviceSymbol, () -> {
+                writer.openBlock("$L(input: any, ctx: {}): Promise<$T> {", "}",
                         operationSymbol.getName(), outputType, () -> {
                     Optional<ShapeId> outputOptional = operation.getOutput();
                     if (outputOptional.isPresent()) {
@@ -542,8 +542,8 @@ final class HttpProtocolTestGenerator implements Runnable {
             // the specific operation under test. Later we'll have to "cast" this with an "as",
             // but using the partial in the meantime will give us proper type checking on the
             // operation we want.
-            writer.openBlock("class TestService implements Partial<$T> {", "}", serviceSymbol, () -> {
-                writer.openBlock("$L(input: any, request: HttpRequest): Promise<$T> {", "}",
+            writer.openBlock("class TestService implements Partial<$T<{}>> {", "}", serviceSymbol, () -> {
+                writer.openBlock("$L(input: any, ctx: {}): Promise<$T> {", "}",
                     operationSymbol.getName(), outputType, () -> {
                         // Write out an object according to what's defined in the test case.
                         writer.writeInline("const response = ");
@@ -577,7 +577,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         // our own service handler. This is largely in service of avoiding having to go through the
         // request deserializer
         writer.addImport("httpbinding", null, "@aws-smithy/server-common");
-        writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
+        writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T<{}>>([", "]);",
             service.getId().getName(), serviceSymbol, () -> {
                 writer.openBlock("new httpbinding.UriSpec<$S, $S>('POST', [], [], {", "}),",
                     service.getId().getName(), operation.getId().getName(), () -> {
@@ -601,13 +601,13 @@ final class HttpProtocolTestGenerator implements Runnable {
         // Create a new serializer factory that always returns our test serializer.
         writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
         writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
-        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = (op) =>"
+        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<{}>, $1T, __SmithyException> = (op) =>"
                         + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
         writer.addImport("serializeFrameworkException", null,
                 "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
         writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException);", handlerSymbol);
-        writer.write("let r = await handler.handle(request)").write("");
+        writer.write("let r = await handler.handle(request, {})").write("");
         writeHttpResponseAssertions(testCase);
     }
 
