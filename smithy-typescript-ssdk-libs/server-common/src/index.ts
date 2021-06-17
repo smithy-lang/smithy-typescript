@@ -21,10 +21,10 @@ import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
 import { SmithyException } from "@aws-sdk/smithy-client";
 import { SerdeContext } from "@aws-sdk/types";
 
-export type Operation<I, O> = (input: I, request: HttpRequest) => Promise<O>;
+export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 
-export type OperationInput<T> = T extends Operation<infer I, any> ? I : never;
-export type OperationOutput<T> = T extends Operation<any, infer O> ? O : never;
+export type OperationInput<T> = T extends Operation<infer I, any, any> ? I : never;
+export type OperationOutput<T> = T extends Operation<any, infer O, any> ? O : never;
 
 export interface OperationSerializer<T, K extends keyof T, E extends SmithyException> {
   serialize(input: OperationOutput<T[K]>, ctx: ServerSerdeContext): Promise<HttpResponse>;
@@ -33,8 +33,8 @@ export interface OperationSerializer<T, K extends keyof T, E extends SmithyExcep
   serializeError(error: E, ctx: ServerSerdeContext): Promise<HttpResponse>;
 }
 
-export interface ServiceHandler<RequestType = HttpRequest, ResponseType = HttpResponse> {
-  handle(request: RequestType): Promise<ResponseType>;
+export interface ServiceHandler<Context = {}, RequestType = HttpRequest, ResponseType = HttpResponse> {
+  handle(request: RequestType, context: Context): Promise<ResponseType>;
 }
 
 export interface ServiceCoordinate<S extends string, O extends string> {
