@@ -58,11 +58,13 @@ final class ServerGenerator {
         writeSerdeContextBase(writer);
         writeHandleFunction(writer);
 
-        writer.openBlock("export class $L implements __ServiceHandler {", "}", handlerSymbol.getName(), () -> {
-            writer.write("private readonly service: $T;", serviceSymbol);
+        String classDeclaration = "export class $L<Context> implements __ServiceHandler<Context> {";
+        writer.openBlock(classDeclaration, "}", handlerSymbol.getName(), () -> {
+            writer.write("private readonly service: $T<Context>;", serviceSymbol);
             writer.write("private readonly mux: __Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
             writer.write("private readonly serializerFactory: <T extends $T>(operation: T) => "
-                            + "__OperationSerializer<$T, T, __SmithyException>;", operationsType, serviceSymbol);
+                            + "__OperationSerializer<$T<Context>, T, __SmithyException>;",
+                    operationsType, serviceSymbol);
             writer.write("private readonly serializeFrameworkException: (e: __SmithyFrameworkException, "
                             + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>;");
             writer.write("private readonly validationCustomizer: __ValidationCustomizer<$T>;", operationsType);
@@ -82,10 +84,11 @@ final class ServerGenerator {
                         + "failures into {@link __SmithyFrameworkException}s");
             });
             writer.openBlock("constructor(", ") {", () -> {
-                writer.write("service: $T,", serviceSymbol);
+                writer.write("service: $T<Context>,", serviceSymbol);
                 writer.write("mux: __Mux<$S, $T>,", serviceShape.getId().getName(), operationsType);
                 writer.write("serializerFactory:<T extends $T>(op: T) => "
-                                + "__OperationSerializer<$T, T, __SmithyException>,", operationsType, serviceSymbol);
+                                + "__OperationSerializer<$T<Context>, T, __SmithyException>,",
+                        operationsType, serviceSymbol);
                 writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: __ServerSerdeContext) "
                         + "=> Promise<__HttpResponse>,");
                 writer.write("validationCustomizer: __ValidationCustomizer<$T>", operationsType);
@@ -97,7 +100,8 @@ final class ServerGenerator {
             writer.write("this.serializeFrameworkException = serializeFrameworkException;");
             writer.write("this.validationCustomizer = validationCustomizer;");
             writer.closeBlock("}");
-            writer.openBlock("async handle(request: __HttpRequest): Promise<__HttpResponse> {", "}", () -> {
+            String handleDecl = "async handle(request: __HttpRequest, context: Context): Promise<__HttpResponse> {";
+            writer.openBlock(handleDecl, "}", () -> {
                 writer.write("const target = this.mux.match(request);");
                 writer.openBlock("if (target === undefined) {", "}", () -> {
                     writer.write("return this.serializeFrameworkException(new __UnknownOperationException(), "
@@ -109,8 +113,9 @@ final class ServerGenerator {
                         Symbol operationSymbol = symbolProvider.toSymbol(operation);
                         Symbol inputSymbol = operationSymbol.expectProperty("inputType", Symbol.class);
                         writer.openBlock("case $S : {", "}", opName, () -> {
-                            writer.write("return handle(request, $1S, this.serializerFactory($1S), this.service.$2L, "
-                                    + "this.serializeFrameworkException, $3T.validate, this.validationCustomizer);",
+                            writer.write("return handle(request, context, $1S, this.serializerFactory($1S), "
+                                    + "this.service.$2L, this.serializeFrameworkException, $3T.validate, "
+                                    + "this.validationCustomizer);",
                                     opName, operationSymbol.getName(), inputSymbol);
                         });
                     }
@@ -137,17 +142,18 @@ final class ServerGenerator {
         Symbol handlerSymbol = operationSymbol.expectProperty("handler", Symbol.class);
         Symbol errorsSymbol = operationSymbol.expectProperty("errorsType", Symbol.class);
 
-        writer.openBlock("export class $L implements __ServiceHandler {", "}", handlerSymbol.getName(), () -> {
-            writer.write("private readonly operation: __Operation<$T, $T>;", inputSymbol, outputSymbol);
+        String declaration = "export class $L<Context> implements __ServiceHandler<Context> {";
+        writer.openBlock(declaration, "}", handlerSymbol.getName(), () -> {
+            writer.write("private readonly operation: __Operation<$T, $T, Context>;", inputSymbol, outputSymbol);
             writer.write("private readonly mux: __Mux<$S, $S>;", serviceShape.getId().getName(), operationName);
-            writer.write("private readonly serializer: __OperationSerializer<$T, $S, $T>;",
+            writer.write("private readonly serializer: __OperationSerializer<$T<Context>, $S, $T>;",
                     serviceSymbol, operationName, errorsSymbol);
             writer.write("private readonly serializeFrameworkException: (e: __SmithyFrameworkException, "
                     + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>;");
             writer.write("private readonly validationCustomizer: __ValidationCustomizer<$S>;", operationName);
             writer.writeDocs(() -> {
                 writer.write("Construct a $T handler.", operationSymbol);
-                writer.write("@param service The {@link __Operation} implementation that supplies the business "
+                writer.write("@param operation The {@link __Operation} implementation that supplies the business "
                                 + "logic for $1T", operationSymbol);
                 writer.writeInline("@param mux The {@link __Mux} that verifies which service and operation are being ");
                 writer.write("invoked by a given {@link __HttpRequest}");
@@ -160,9 +166,9 @@ final class ServerGenerator {
                         + "failures into {@link __SmithyFrameworkException}s");
             });
             writer.openBlock("constructor(", ") {", () -> {
-                writer.write("operation: __Operation<$T, $T>,", inputSymbol, outputSymbol);
+                writer.write("operation: __Operation<$T, $T, Context>,", inputSymbol, outputSymbol);
                 writer.write("mux: __Mux<$S, $S>,", serviceShape.getId().getName(), operationName);
-                writer.write("serializer: __OperationSerializer<$T, $S, $T>,",
+                writer.write("serializer: __OperationSerializer<$T<Context>, $S, $T>,",
                         serviceSymbol, operationName, errorsSymbol);
                 writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: __ServerSerdeContext) "
                         + "=> Promise<__HttpResponse>,");
@@ -175,18 +181,21 @@ final class ServerGenerator {
             writer.write("this.serializeFrameworkException = serializeFrameworkException;");
             writer.write("this.validationCustomizer = validationCustomizer;");
             writer.closeBlock("}");
-            writer.openBlock("async handle(request: __HttpRequest): Promise<__HttpResponse> {", "}", () -> {
-                writer.write("const target = this.mux.match(request);");
-                writer.openBlock("if (target === undefined) {", "}", () -> {
-                    writer.write("console.log('Received a request that did not match $L.$L. This indicates a "
-                            + "misconfiguration.');", serviceShape.getId(), operation.getId().getName());
-                    writer.write("return this.serializeFrameworkException(new __InternalFailureException(), "
-                            + "serdeContextBase);");
-                });
-                writer.write("return handle(request, $S, this.serializer, this.operation, "
-                        + "this.serializeFrameworkException, $T.validate, this.validationCustomizer);",
-                        operationName, inputSymbol);
-            });
+            writer.openBlock("async handle(request: __HttpRequest, context: Context): Promise<__HttpResponse> {",
+                "}",
+                () -> {
+                    writer.write("const target = this.mux.match(request);");
+                    writer.openBlock("if (target === undefined) {", "}", () -> {
+                        writer.write("console.log('Received a request that did not match $L.$L. This indicates a "
+                                + "misconfiguration.');", serviceShape.getId(), operation.getId().getName());
+                        writer.write("return this.serializeFrameworkException(new __InternalFailureException(), "
+                                + "serdeContextBase);");
+                    });
+                    writer.write("return handle(request, context, $S, this.serializer, this.operation, "
+                            + "this.serializeFrameworkException, $T.validate, this.validationCustomizer);",
+                            operationName, inputSymbol);
+                }
+            );
         });
     }
 
@@ -211,13 +220,14 @@ final class ServerGenerator {
         writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
 
-        writer.openBlock("async function handle<S, O extends keyof S & string>(",
+        writer.openBlock("async function handle<S, O extends keyof S & string, Context>(",
                 "): Promise<__HttpResponse> {",
                 () -> {
-                    writer.write("request:__HttpRequest,");
+                    writer.write("request: __HttpRequest,");
+                    writer.write("context: Context,");
                     writer.write("operationName: O,");
                     writer.write("serializer: __OperationSerializer<S, O, __SmithyException>,");
-                    writer.write("operation: __Operation<__OperationInput<S[O]>, __OperationOutput<S[O]>>,");
+                    writer.write("operation: __Operation<__OperationInput<S[O]>, __OperationOutput<S[O]>, Context>,");
                     writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, "
                             + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>,");
                     writer.write("validationFn: (input: __OperationInput<S[O]>) => __ValidationFailure[],");
@@ -243,7 +253,7 @@ final class ServerGenerator {
                     writer.write("return serializer.serializeError(validationException, serdeContextBase);");
                 });
             });
-            writer.write("let output = await operation(input, request);");
+            writer.write("let output = await operation(input, context);");
             writer.write("return serializer.serialize(output, serdeContextBase);");
         });
         writer.indent();
@@ -285,10 +295,10 @@ final class ServerGenerator {
 
         String serviceInterfaceName = symbolProvider.toSymbol(service).getName();
 
-        writer.openBlock("export interface $L {", "}", serviceInterfaceName, () -> {
+        writer.openBlock("export interface $L<Context> {", "}", serviceInterfaceName, () -> {
             for (OperationShape operation : operations) {
                 Symbol symbol = symbolProvider.toSymbol(operation);
-                writer.write("$L: $T", symbol.getName(), symbol);
+                writer.write("$L: $T<Context>", symbol.getName(), symbol);
             }
         });
     }

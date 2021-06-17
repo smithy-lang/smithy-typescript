@@ -249,7 +249,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         Symbol serviceSymbol = context.getSymbolProvider().toSymbol(context.getService());
 
-        writer.openBlock("const mux = new httpbinding.HttpBindingMux<$S, keyof $T>([", "]);",
+        writer.openBlock("const mux = new httpbinding.HttpBindingMux<$S, keyof $T<Context>>([", "]);",
                 context.getService().getId().getName(),
                 serviceSymbol,
                 () -> {
@@ -338,24 +338,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("serializeFrameworkException", null,
                 "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
+        writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
+        writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
 
         if (context.getSettings().isDisableDefaultValidation()) {
-            writer.write("export const get$L = (service: $T, "
-                            + "customizer: __ValidationCustomizer<$T>): __ServiceHandler => {",
+            writer.write("export const get$L = <Context>(service: $T<Context>, "
+                            + "customizer: __ValidationCustomizer<$T>): "
+                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     handlerSymbol.getName(), serviceSymbol, operationsSymbol);
         } else {
-            writer.write("export const get$L = (service: $T): __ServiceHandler => {",
+            writer.write("export const get$L = <Context>(service: $T<Context>): "
+                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     handlerSymbol.getName(), serviceSymbol);
         }
         writer.indent();
 
         generateServiceMux(context);
         writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
-        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T, $1T, __SmithyException> = "
+        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __SmithyException> = "
                         + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
             writer.openBlock("switch (op) {", "}", () -> {
                 operations.stream()
@@ -387,6 +391,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.addImport("serializeFrameworkException", null,
                 "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+        writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
+        writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
 
         final Symbol operationSymbol = symbolProvider.toSymbol(operation);
         final Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
@@ -395,11 +401,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         final Symbol operationHandlerSymbol = operationSymbol.expectProperty("handler", Symbol.class);
 
         if (context.getSettings().isDisableDefaultValidation()) {
-            writer.write("export const get$L = (operation: __Operation<$T, $T>, "
-                            + "customizer: __ValidationCustomizer<$S>): __ServiceHandler => {",
+            writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>, "
+                            + "customizer: __ValidationCustomizer<$S>): "
+                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     operationHandlerSymbol.getName(), inputType, outputType, operation.getId().getName());
         } else {
-            writer.write("export const get$L = (operation: __Operation<$T, $T>): __ServiceHandler => {",
+            writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>): "
+                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     operationHandlerSymbol.getName(), inputType, outputType);
         }
         writer.indent();

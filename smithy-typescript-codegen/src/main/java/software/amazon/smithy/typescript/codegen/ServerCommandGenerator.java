@@ -146,7 +146,8 @@ final class ServerCommandGenerator implements Runnable {
     private void writeOperationType() {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
         writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
-        writer.write("export type $L = __Operation<$T, $T>", operationSymbol.getName(), inputType, outputType);
+        writer.write("export type $L<Context> = __Operation<$T, $T, Context>",
+                operationSymbol.getName(), inputType, outputType);
         writer.write("");
     }
 
@@ -156,7 +157,7 @@ final class ServerCommandGenerator implements Runnable {
         Symbol serverSymbol = symbolProvider.toSymbol(model.expectShape(settings.getService()));
 
         writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
-        writer.openBlock("export class $L implements __OperationSerializer<$T, $S, $T> {", "}",
+        writer.openBlock("export class $L implements __OperationSerializer<$T<any>, $S, $T> {", "}",
                 serializerName, serverSymbol, operation.getId().getName(), errorsType, () -> {
             String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
             String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
