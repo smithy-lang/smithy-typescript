@@ -45,7 +45,7 @@ describe("custom validation", () => {
           method: "POST",
           path: "/test",
           body: Readable.from(Buffer.from('{"enum": "valueA"}', "utf8")),
-        })
+        }), {}
       )
       .then((result) => {
         expect(result.statusCode).toEqual(200);
@@ -58,7 +58,7 @@ describe("custom validation", () => {
           method: "POST",
           path: "/test",
           body: Readable.from(Buffer.from('{"enumList": ["BANG!", "POW!", "valueA"]}', "utf8")),
-        })
+        }), {}
       )
       .then((result) => {
         expect(result.statusCode).toEqual(400);
