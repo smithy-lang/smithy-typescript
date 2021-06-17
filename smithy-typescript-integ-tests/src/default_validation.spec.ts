@@ -29,7 +29,7 @@ describe("automatic validation", () => {
           method: "POST",
           path: "/test",
           body: Readable.from(Buffer.from('{"enum": "valueA"}', "utf8")),
-        })
+        }), {}
       )
       .then((result) => {
         expect(result.statusCode).toEqual(200);
@@ -42,7 +42,7 @@ describe("automatic validation", () => {
           method: "POST",
           path: "/test",
           body: Readable.from(Buffer.from('{"enum": "BANG!"}', "utf8")),
-        })
+        }), {}
       )
       .then((result) => {
         expect(result.statusCode).toEqual(400);
@@ -63,7 +63,7 @@ describe("automatic validation", () => {
                   method: "POST",
                   path: "/test",
                   body: Readable.from(Buffer.from('{"sensitiveMember": "abcdefg"}', "utf8")),
-              })
+              }), {}
           )
           .then((result) => {
               expect(result.statusCode).toEqual(400);
