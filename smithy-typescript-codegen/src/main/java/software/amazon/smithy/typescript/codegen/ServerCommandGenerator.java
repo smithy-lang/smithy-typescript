@@ -102,6 +102,11 @@ final class ServerCommandGenerator implements Runnable {
         } else {
             // If the input is non-existent, then use an empty object.
             writer.write("export interface $L {}", typeName);
+            writer.openBlock("export namespace $L {", "}", typeName, () -> {
+                writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+                writer.writeDocs("@internal");
+                writer.write("export const validate: () => __ValidationFailure[] = () => [];");
+            });
         }
     }
 
@@ -110,8 +115,10 @@ final class ServerCommandGenerator implements Runnable {
         writer.openBlock("export namespace $L {", "}", typeName, () -> {
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
             writer.writeDocs("@internal");
-            writer.write("export const validate: (obj: $L) => __ValidationFailure[] = $T.validate;",
-                    symbol.getName(), symbol);
+            // Streaming makes the type of the object being validated weird on occasion.
+            // Using `Parameters` here means we don't have to try to derive the weird type twice
+            writer.write("export const validate: (obj: Parameters<typeof $1T.validate>[0]) => "
+                            + "__ValidationFailure[] = $1T.validate;", symbol);
         });
     }
 

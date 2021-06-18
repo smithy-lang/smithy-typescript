@@ -134,4 +134,20 @@ public final class CodegenUtils {
                 + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
         writer.write("export interface $1L extends $1LType {}", typeName);
     }
+
+    /**
+     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
+     * This is used for inline type declarations (such as parameters) that need to take more permissive inputs
+     * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
+     */
+    static void writeInlineStreamingMemberType(
+            TypeScriptWriter writer,
+            Symbol containerSymbol,
+            MemberShape streamingMember
+    ) {
+        String memberName = streamingMember.getMemberName();
+        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
+        writer.writeInline("Omit<$1T, $2S> & { $2L$3L: $1T[$2S]|string|Uint8Array|Buffer }",
+                containerSymbol, memberName, optionalSuffix);
+    }
 }
