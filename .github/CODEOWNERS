@@ -1,0 +1,14 @@
+# The JS team owns everything by default
+* @awslabs/aws-sdk-js-team
+
+# These libraries are only intended for use with the SSDK.
+smithy-typescript-ssdk-libs/* @adamthom-amzn @gosar @JordonPhillips
+
+# These integs tests are mostly for the SSDK integrations
+smithy-typescript-integ-tests/* @adamthom-amzn @gosar @JordonPhillips
+
+# These are all specific to SSDK functionality.
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerCommandGenerator.java @adamthom-amzn @gosar @JordonPhillips
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerErrorGenerator @adamthom-amzn @gosar @JordonPhillips
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerGenerator.java @adamthom-amzn @gosar @JordonPhillips
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerSymbolVisitor.java @adamthom-amzn @gosar @JordonPhillips
