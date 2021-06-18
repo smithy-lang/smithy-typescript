@@ -36,6 +36,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.PatternTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
@@ -347,8 +348,14 @@ final class StructuredMemberWriter {
     void writeValidateMethodContents(TypeScriptWriter writer, String param) {
         writer.openBlock("return [", "];", () -> {
             for (MemberShape member : members) {
-                writer.write("...getMemberValidator($1S).validate($2L.$1L, `$${path}/$3L`),",
-                        getSanitizedMemberName(member), param, member.getMemberName());
+                String optionalSuffix = "";
+                if (member.getMemberTrait(model, MediaTypeTrait.class).isPresent()
+                        && model.expectShape(member.getTarget()) instanceof StringShape) {
+                    // lazy JSON wrapper validation should be done based on the serialized form of the object
+                    optionalSuffix = "?.toString()";
+                }
+                writer.write("...getMemberValidator($1S).validate($2L.$1L$4L, `$${path}/$3L`),",
+                        getSanitizedMemberName(member), param, member.getMemberName(), optionalSuffix);
             }
         });
     }
@@ -551,6 +558,14 @@ final class StructuredMemberWriter {
     private Symbol getSymbolForValidatedType(Shape shape) {
         if (shape instanceof StringShape) {
             return symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
+        }
+
+        // Streaming blob inputs can also take string, Uint8Array and Buffer, so we widen the symbol
+        if (shape.isBlobShape() && shape.hasTrait(StreamingTrait.class)) {
+            return symbolProvider.toSymbol(shape)
+                    .toBuilder()
+                    .name("Readable | ReadableStream | Blob | string | Uint8Array | Buffer")
+                    .build();
         }
 
         return symbolProvider.toSymbol(shape);
