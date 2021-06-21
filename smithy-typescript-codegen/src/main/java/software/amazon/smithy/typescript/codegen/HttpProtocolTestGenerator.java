@@ -96,9 +96,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private final Set<String> additionalStubs = new TreeSet<>();
     private final ProtocolGenerator protocolGenerator;
     private final TestFilter testFilter;
+    private final GenerationContext context;
 
     private TypeScriptWriter writer;
-    private boolean writerInitialized = false;
 
     HttpProtocolTestGenerator(
             GenerationContext context,
@@ -110,10 +110,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
         this.protocol = context.getSettings().getProtocol();
         this.service = settings.getService(model);
         this.symbolProvider = context.getSymbolProvider();
-        this.writer = context.getWriter();
         this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
         this.testFilter = testFilter;
+        this.context = context;
     }
 
     HttpProtocolTestGenerator(
@@ -210,12 +210,12 @@ public final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void initializeWriterIfNeeded() {
-        if (!writerInitialized) {
+        if (writer == null) {
+            writer = context.getWriter();
             writer.addDependency(TypeScriptDependency.AWS_SDK_TYPES);
             writer.addDependency(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP);
             // Add the template to each generated test.
             writer.write(IoUtils.readUtf8Resource(getClass(), "protocol-test-stub.ts"));
-            writerInitialized = true;
         }
     }
 

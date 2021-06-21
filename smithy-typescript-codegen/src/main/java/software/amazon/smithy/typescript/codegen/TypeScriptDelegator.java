@@ -131,6 +131,16 @@ final class TypeScriptDelegator {
         writerConsumer.accept(checkoutWriter(filename));
     }
 
+    /**
+     * Gets a previously created writer or creates a new one if needed
+     * and adds a new line if the writer already exists.
+     *
+     * @param filename Name of the file to create.
+     */
+    TypeScriptWriter checkoutFileWriter(String filename) {
+        return checkoutWriter(filename);
+    }
+
     private TypeScriptWriter checkoutWriter(String filename) {
         String formattedFilename = Paths.get(filename).normalize().toString();
         boolean needsNewline = writers.containsKey(formattedFilename);

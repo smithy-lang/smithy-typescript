@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -270,6 +271,7 @@ public interface ProtocolGenerator {
         private ServiceShape service;
         private SymbolProvider symbolProvider;
         private TypeScriptWriter writer;
+        private Supplier<TypeScriptWriter> writerSupplier;
         private List<TypeScriptIntegration> integrations;
         private String protocolName;
 
@@ -306,11 +308,24 @@ public interface ProtocolGenerator {
         }
 
         public TypeScriptWriter getWriter() {
+            if (writerSupplier != null && writer == null) {
+                writer = writerSupplier.get();
+            }
             return writer;
         }
 
         public void setWriter(TypeScriptWriter writer) {
             this.writer = writer;
+            if (writer != null) {
+                this.writerSupplier = null;
+            }
+        }
+
+        public void setDeferredWriter(Supplier<TypeScriptWriter> writerSupplier) {
+            this.writerSupplier = writerSupplier;
+            if (writerSupplier != null) {
+                this.writer = null;
+            }
         }
 
         public List<TypeScriptIntegration> getIntegrations() {
@@ -336,6 +351,7 @@ public interface ProtocolGenerator {
             copy.setService(service);
             copy.setSymbolProvider(symbolProvider);
             copy.setWriter(writer);
+            copy.setDeferredWriter(writerSupplier);
             copy.setIntegrations(integrations);
             copy.setProtocolName(protocolName);
             return copy;
