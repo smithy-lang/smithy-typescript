@@ -63,6 +63,7 @@ import software.amazon.smithy.protocoltests.traits.HttpRequestTestsTrait;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestsTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.Pair;
@@ -81,7 +82,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * TODO: try/catch and if/else are still cumbersome with TypeScriptWriter.
  */
 @SmithyInternalApi
-final class HttpProtocolTestGenerator implements Runnable {
+public final class HttpProtocolTestGenerator implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(HttpProtocolTestGenerator.class.getName());
     private static final String TEST_CASE_FILE_TEMPLATE = "tests/functional/%s.spec.ts";
@@ -96,42 +97,30 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final ProtocolGenerator protocolGenerator;
     private final TestFilter testFilter;
 
-    /** Vends a TypeScript IFF it's needed. */
-    private final TypeScriptDelegator delegator;
-
-    /** The TypeScript writer that's only allocated once if needed. */
     private TypeScriptWriter writer;
+    private boolean writerInitialized = false;
 
     HttpProtocolTestGenerator(
-            TypeScriptSettings settings,
-            Model model,
-            ShapeId protocol,
-            SymbolProvider symbolProvider,
-            TypeScriptDelegator delegator,
+            GenerationContext context,
             ProtocolGenerator protocolGenerator,
             TestFilter testFilter
     ) {
-        this.settings = settings;
-        this.model = model;
-        this.protocol = protocol;
+        this.settings = context.getSettings();
+        this.model = context.getModel();
+        this.protocol = context.getSettings().getProtocol();
         this.service = settings.getService(model);
-        this.symbolProvider = symbolProvider;
-        this.delegator = delegator;
+        this.symbolProvider = context.getSymbolProvider();
+        this.writer = context.getWriter();
         this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
         this.testFilter = testFilter;
     }
 
     HttpProtocolTestGenerator(
-            TypeScriptSettings settings,
-            Model model,
-            ShapeId protocol,
-            SymbolProvider symbolProvider,
-            TypeScriptDelegator delegator,
+            GenerationContext context,
             ProtocolGenerator protocolGenerator
     ) {
-        this(settings, model, protocol, symbolProvider, delegator, protocolGenerator,
-                (service, operation, testCase, typeScriptSettings) -> false);
+        this(context, protocolGenerator, (service, operation, testCase, typeScriptSettings) -> false);
     }
 
     @Override
@@ -215,18 +204,18 @@ final class HttpProtocolTestGenerator implements Runnable {
     private <T extends HttpMessageTestCase> void onlyIfProtocolMatches(T testCase, Runnable runnable) {
         if (testCase.getProtocol().equals(protocol)) {
             LOGGER.fine(() -> format("Generating protocol test case for %s.%s", service.getId(), testCase.getId()));
-            allocateWriterIfNeeded();
+            initializeWriterIfNeeded();
             runnable.run();
         }
     }
 
-    private void allocateWriterIfNeeded() {
-        if (writer == null) {
-            delegator.useFileWriter(createTestCaseFilename(), writer -> this.writer = writer);
+    private void initializeWriterIfNeeded() {
+        if (!writerInitialized) {
             writer.addDependency(TypeScriptDependency.AWS_SDK_TYPES);
             writer.addDependency(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP);
             // Add the template to each generated test.
             writer.write(IoUtils.readUtf8Resource(getClass(), "protocol-test-stub.ts"));
+            writerInitialized = true;
         }
     }
 

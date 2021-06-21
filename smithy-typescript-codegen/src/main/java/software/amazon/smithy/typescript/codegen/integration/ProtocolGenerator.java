@@ -184,6 +184,13 @@ public interface ProtocolGenerator {
     void generateResponseDeserializers(GenerationContext context);
 
     /**
+     * Generates protocol tests to assert the protocol works properly.
+     *
+     * @param context Generation context.
+     */
+    void generateProtocolTests(GenerationContext context);
+
+    /**
      * Generates the name of a serializer function for shapes of a service.
      *
      * @param symbol The symbol the serializer function is being generated for.
