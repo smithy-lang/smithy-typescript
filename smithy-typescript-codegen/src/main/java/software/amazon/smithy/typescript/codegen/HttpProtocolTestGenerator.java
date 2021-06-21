@@ -94,6 +94,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     private final Symbol serviceSymbol;
     private final Set<String> additionalStubs = new TreeSet<>();
     private final ProtocolGenerator protocolGenerator;
+    private final TestFilter testFilter;
 
     /** Vends a TypeScript IFF it's needed. */
     private final TypeScriptDelegator delegator;
@@ -107,7 +108,8 @@ final class HttpProtocolTestGenerator implements Runnable {
             ShapeId protocol,
             SymbolProvider symbolProvider,
             TypeScriptDelegator delegator,
-            ProtocolGenerator protocolGenerator
+            ProtocolGenerator protocolGenerator,
+            TestFilter testFilter
     ) {
         this.settings = settings;
         this.model = model;
@@ -117,6 +119,19 @@ final class HttpProtocolTestGenerator implements Runnable {
         this.delegator = delegator;
         this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
+        this.testFilter = testFilter;
+    }
+
+    HttpProtocolTestGenerator(
+            TypeScriptSettings settings,
+            Model model,
+            ShapeId protocol,
+            SymbolProvider symbolProvider,
+            TypeScriptDelegator delegator,
+            ProtocolGenerator protocolGenerator
+    ) {
+        this(settings, model, protocol, symbolProvider, delegator, protocolGenerator,
+                (service, operation, testCase, typeScriptSettings) -> false);
     }
 
     @Override
@@ -227,7 +242,7 @@ final class HttpProtocolTestGenerator implements Runnable {
 
         String testName = testCase.getId() + ":Request";
         testCase.getDocumentation().ifPresent(writer::writeDocs);
-        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+        openTestBlock(operation, testCase, testName, () -> {
             // Create a client with a custom request handler that intercepts requests.
             writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
                     writer.write("...clientParams,");
@@ -277,7 +292,7 @@ final class HttpProtocolTestGenerator implements Runnable {
 
         String testName = testCase.getId() + ":ServerRequest";
         testCase.getDocumentation().ifPresent(writer::writeDocs);
-        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+        openTestBlock(operation, testCase, testName, () -> {
             Symbol serviceSymbol = symbolProvider.toSymbol(service);
             Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
 
@@ -485,7 +500,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         String testName = testCase.getId() + ":ServerResponse";
-        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+        openTestBlock(operation, testCase, testName, () -> {
             Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
             writer.openBlock("class TestService implements Partial<$T<{}>> {", "}", serviceSymbol, () -> {
                 writer.openBlock("$L(input: any, ctx: {}): Promise<$T> {", "}",
@@ -508,7 +523,7 @@ final class HttpProtocolTestGenerator implements Runnable {
     private void generateResponseTest(OperationShape operation, HttpResponseTestCase testCase) {
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         String testName = testCase.getId() + ":Response";
-        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+        openTestBlock(operation, testCase, testName, () -> {
             writeResponseTestSetup(operation, testCase, true);
 
             // Invoke the handler and look for the expected response to then perform assertions.
@@ -536,8 +551,7 @@ final class HttpProtocolTestGenerator implements Runnable {
 
         testCase.getDocumentation().ifPresent(writer::writeDocs);
         String testName = testCase.getId() + ":ServerErrorResponse";
-        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
-
+        openTestBlock(operation, testCase, testName, () -> {
             // Generates a Partial implementation of the service type that only includes
             // the specific operation under test. Later we'll have to "cast" this with an "as",
             // but using the partial in the meantime will give us proper type checking on the
@@ -624,7 +638,7 @@ final class HttpProtocolTestGenerator implements Runnable {
         // we can test for any operation specific values properly.
         String testName = testCase.getId() + ":Error:" + operation.getId().getName();
         testCase.getDocumentation().ifPresent(writer::writeDocs);
-        writer.openBlock("it($S, async () => {", "});\n", testName, () -> {
+        openTestBlock(operation, testCase, testName, () -> {
             writeResponseTestSetup(operation, testCase, false);
 
             // Invoke the handler and look for the expected exception to then perform assertions.
@@ -788,6 +802,20 @@ final class HttpProtocolTestGenerator implements Runnable {
         });
     }
 
+    private void openTestBlock(
+            OperationShape operation,
+            HttpMessageTestCase testCase,
+            String testName,
+            Runnable f
+    ) {
+        // Skipped tests are still generated, just not run.
+        if (testFilter.skip(service, operation, testCase, settings)) {
+            writer.openBlock("it.skip($S, async() => {", "});", testName, f);
+        } else {
+            writer.openBlock("it($S, async () => {", "});", testName, f);
+        }
+    }
+
     /**
      * Supports writing out TS specific input types in the generated code
      * through visiting the target shape at the same time as the node. If
@@ -943,6 +971,32 @@ final class HttpProtocolTestGenerator implements Runnable {
             }
             return null;
         }
+    }
+
+    /**
+     * Functional interface for skipping tests.
+     */
+    @FunctionalInterface
+    public interface TestFilter {
+        /**
+         * A function that determines whether or not to skip a test.
+         *
+         * <p>A test might be temporarily skipped if it's a known failure that
+         * will be addressed later, or if the test in question asserts a
+         * serialized message that can have multiple valid forms.
+         *
+         * @param service The service for which tests are being generated.
+         * @param operation The operation for which tests are being generated.
+         * @param testCase The test case in question.
+         * @param settings The settings being used to generate the test service.
+         * @return True if the test should be skipped, false otherwise.
+         */
+        boolean skip(
+                ServiceShape service,
+                OperationShape operation,
+                HttpMessageTestCase testCase,
+                TypeScriptSettings settings
+        );
     }
 
     /**
