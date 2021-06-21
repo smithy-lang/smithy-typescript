@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -214,8 +215,20 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
             ShapeId protocol = protocolGenerator.getProtocol();
-            new HttpProtocolTestGenerator(
-                    settings, model, protocol, symbolProvider, writers, protocolGenerator).run();
+            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+            context.setProtocolName(protocolGenerator.getName());
+            context.setIntegrations(integrations);
+            context.setModel(model);
+            context.setService(service);
+            context.setSettings(settings);
+            context.setSymbolProvider(symbolProvider);
+            String baseName = protocol.getName().toLowerCase(Locale.US)
+                    .replace("-", "_")
+                    .replace(".", "_");
+            writers.useFileWriter(String.format("tests/functional/%s.spec.ts", baseName), writer -> {
+                context.setWriter(writer);
+                protocolGenerator.generateProtocolTests(context);
+            });
         }
 
         // Write each pending writer.
