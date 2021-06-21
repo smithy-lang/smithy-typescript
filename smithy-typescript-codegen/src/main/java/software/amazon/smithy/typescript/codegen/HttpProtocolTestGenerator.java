@@ -100,7 +100,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private TypeScriptWriter writer;
 
-    HttpProtocolTestGenerator(
+    public HttpProtocolTestGenerator(
             GenerationContext context,
             ProtocolGenerator protocolGenerator,
             TestFilter testFilter
@@ -116,7 +116,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         this.context = context;
     }
 
-    HttpProtocolTestGenerator(
+    public HttpProtocolTestGenerator(
             GenerationContext context,
             ProtocolGenerator protocolGenerator
     ) {
