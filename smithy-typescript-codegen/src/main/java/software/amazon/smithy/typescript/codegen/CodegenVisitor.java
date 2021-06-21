@@ -225,10 +225,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             String baseName = protocol.getName().toLowerCase(Locale.US)
                     .replace("-", "_")
                     .replace(".", "_");
-            writers.useFileWriter(String.format("tests/functional/%s.spec.ts", baseName), writer -> {
-                context.setWriter(writer);
-                protocolGenerator.generateProtocolTests(context);
-            });
+            String protocolTestFileName = String.format("tests/functional/%s.spec.ts", baseName);
+            context.setDeferredWriter(() -> writers.checkoutFileWriter(protocolTestFileName));
+            protocolGenerator.generateProtocolTests(context);
         }
 
         // Write each pending writer.
