@@ -799,9 +799,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
     ) {
         // Skipped tests are still generated, just not run.
         if (testFilter.skip(service, operation, testCase, settings)) {
-            writer.openBlock("it.skip($S, async() => {", "});", testName, f);
+            writer.openBlock("it.skip($S, async() => {", "});\n", testName, f);
         } else {
-            writer.openBlock("it($S, async () => {", "});", testName, f);
+            writer.openBlock("it($S, async () => {", "});\n", testName, f);
         }
     }
 
