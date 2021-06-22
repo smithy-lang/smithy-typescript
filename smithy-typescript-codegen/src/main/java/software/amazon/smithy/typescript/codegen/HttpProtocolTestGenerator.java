@@ -955,6 +955,21 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // Handle blobs needing to be converted from strings to their input type of UInt8Array.
             if (workingShape.isBlobShape()) {
                 writer.write("Uint8Array.from($S, c => c.charCodeAt(0)),", node.getValue());
+            } else if (workingShape.isFloatShape() || workingShape.isDoubleShape()) {
+                switch (node.getValue()) {
+                    case "NaN":
+                        writer.write("NaN,");
+                        break;
+                    case "Infinity":
+                        writer.write("Infinity,");
+                        break;
+                    case "-Infinity":
+                        writer.write("-Infinity,");
+                        break;
+                    default:
+                        throw new CodegenException(String.format(
+                                "Unexpected string value for `%s`: \"%s\"", workingShape.getId(), node.getValue()));
+                }
             } else {
                 writer.write("$S,", node.getValue());
             }
