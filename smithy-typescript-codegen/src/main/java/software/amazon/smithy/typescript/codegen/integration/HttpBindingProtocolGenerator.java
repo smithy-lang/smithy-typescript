@@ -1683,10 +1683,25 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         for (HttpBinding binding : directQueryBindings) {
             String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
-            writer.openBlock("if (query['$L'] !== undefined) {", "}", binding.getLocationName(), () -> {
+            writer.openBlock("if (query[$S] !== undefined) {", "}", binding.getLocationName(), () -> {
                 Shape target = context.getModel().expectShape(binding.getMember().getTarget());
-                String queryValue = getOutputValue(context, binding.getLocation(),
-                        "query['" + binding.getLocationName() + "'] as string",
+                if (target instanceof CollectionShape) {
+                    writer.write("const decoded = Array.isArray(query[$1S]) ? (query[$1S] as string[])"
+                            + ".map(e => decodeURIComponent(e)) : [decodeURIComponent(query[$1S] as string)];",
+                            binding.getLocationName());
+                } else {
+                    writer.addImport("SerializationException",
+                            "__SerializationException",
+                            "@aws-smithy/server-common");
+                    writer.openBlock("if (Array.isArray(query[$1S])) {", "}",
+                            binding.getLocationName(),
+                            () -> {
+                                writer.write("throw new __SerializationException();");
+                            });
+                    writer.write("const decoded = decodeURIComponent(query[$1S] as string);",
+                            binding.getLocationName());
+                }
+                String queryValue = getOutputValue(context, binding.getLocation(), "decoded",
                         binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, queryValue);
             });
@@ -1703,10 +1718,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             valueType = "string[]";
         }
         writer.write("let parsedQuery: { [key: string]: $L } = {}", valueType);
-        String parsedValue = getOutputValue(context, mappedBinding.getLocation(), "value as string",
-                target.getValue(), valueShape);
+        String parsedValue = getOutputValue(context, mappedBinding.getLocation(),
+                "decoded", target.getValue(), valueShape);
         writer.openBlock("for (const [key, value] of Object.entries(query)) {", "}", () -> {
-            writer.write("parsedQuery[key] = $L;", parsedValue);
+            if (valueShape instanceof CollectionShape) {
+                writer.write("const decoded = Array.isArray(value) ? (value as string[])"
+                        + ".map(e => decodeURIComponent(e)) : [decodeURIComponent(value as string)];");
+            } else {
+                writer.addImport("SerializationException",
+                        "__SerializationException",
+                        "@aws-smithy/server-common");
+                writer.openBlock("if (Array.isArray(value)) {", "}",
+                        () -> {
+                            writer.write("throw new __SerializationException();");
+                        });
+                writer.write("const decoded = decodeURIComponent(value as string);");
+            }
+            writer.write("parsedQuery[decodeURIComponent(key)] = $L;", parsedValue);
         });
         String memberName = context.getSymbolProvider().toMemberName(mappedBinding.getMember());
         writer.write("contents.$L = parsedQuery;", memberName);
@@ -1745,8 +1773,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             for (HttpBinding binding : pathBindings) {
                 Shape target = context.getModel().expectShape(binding.getMember().getTarget());
                 String memberName = context.getSymbolProvider().toMemberName(binding.getMember());
+                // since this is in the path, we should decode early
+                String dataSource = String.format("decodeURIComponent(parsedPath.groups.%s)",
+                        binding.getLocationName());
                 String labelValue = getOutputValue(context, binding.getLocation(),
-                        "parsedPath.groups." + binding.getLocationName(), binding.getMember(), target);
+                        dataSource, binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, labelValue);
             }
         });
@@ -2527,11 +2558,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case QUERY_PARAMS:
             case QUERY:
-                return String.format("(Array.isArray(%1$s) ? (%1$s[]) : [%1$s]).map(_entry => %2$s)",
+                return String.format("%1$s.map(_entry => %2$s)",
                         dataSource, collectionTargetValue);
             case LABEL:
                 dataSource = "(" + dataSource + " || \"\")";
-                // Split these values on commas.
+                // Split these values on slashes.
                 outputParam = "" + dataSource + ".split('/')";
 
                 // Iterate over each entry and do deser work.
