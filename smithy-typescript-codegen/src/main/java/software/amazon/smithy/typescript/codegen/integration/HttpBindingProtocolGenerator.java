@@ -2403,7 +2403,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (target instanceof NumberShape) {
             return getNumberOutputParam(bindingType, dataSource, target);
         } else if (target instanceof BooleanShape) {
-            return getBooleanOutputParam(bindingType, dataSource);
+            return getBooleanOutputParam(context, bindingType, dataSource);
         } else if (target instanceof StringShape) {
             return getStringOutputParam(context, bindingType, dataSource, target);
         } else if (target instanceof DocumentShape) {
@@ -2427,7 +2427,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     /**
      * Given context and a source of data, generate an output value provider for the
-     * boolean. By default, this checks strict equality to 'true'in headers and passes
+     * boolean. By default, this checks strict equality to 'true' in headers and passes
      * through for documents.
      *
      * @param bindingType How this value is bound to the operation output.
@@ -2435,13 +2435,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *                   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output boolean.
      */
-    private String getBooleanOutputParam(Location bindingType, String dataSource) {
+    private String getBooleanOutputParam(GenerationContext context, Location bindingType, String dataSource) {
         switch (bindingType) {
-            // TODO: make sure this actually works
             case QUERY:
             case LABEL:
             case HEADER:
-                return dataSource + " === 'true'";
+                context.getWriter().addImport("parseBoolean", "__parseBoolean", "@aws-sdk/smithy-client");
+                return String.format("__parseBoolean(%s)", dataSource);
             default:
                 throw new CodegenException("Unexpected boolean binding location `" + bindingType + "`");
         }
@@ -2487,7 +2487,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case PAYLOAD:
                 return dataSource;
-            // TODO: make sure this actually works
             case QUERY:
             case LABEL:
             case HEADER:
@@ -2604,7 +2603,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     private String getNumberOutputParam(Location bindingType, String dataSource, Shape target) {
         switch (bindingType) {
-            // TODO: validate the assumption that query works the same here
             case QUERY:
             case LABEL:
             case HEADER:
