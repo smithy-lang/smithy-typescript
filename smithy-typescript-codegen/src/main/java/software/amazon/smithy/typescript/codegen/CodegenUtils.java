@@ -162,8 +162,8 @@ public final class CodegenUtils {
                     functionParametersList.add(String.format("%s: '%s'", key, value));
                 } else {
                     // Future support for param type should be added in else if.
-                    throw new CodegenException("plugin function parameters not supported for type"
-                            + value.toString());
+                    throw new CodegenException("Plugin function parameters not supported for type "
+                            + value.getClass());
                 }
             }
         }
