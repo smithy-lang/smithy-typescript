@@ -96,12 +96,12 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     @FunctionalInterface
     public interface FunctionParamsSupplier {
         /**
-         * Returns dynamic parameters for resolve function.
+         * Returns parameters to be passed to a function which can be computed dynamically.
          *
          * @param model Model the operation belongs to.
          * @param service Service the operation belongs to.
          * @param operation Operation to test.
-         * @return Returns true if middleware should be applied to the operation.
+         * @return Returns the map of parameters to be passed to a function.
          */
         Map<String, Object> apply(Model model, ServiceShape service, OperationShape operation);
     }
