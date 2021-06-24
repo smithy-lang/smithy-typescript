@@ -79,8 +79,8 @@ public class RuntimeClientPluginTest {
 
         RuntimeClientPlugin plugin = RuntimeClientPlugin.builder()
                 .withConventions("foo/baz", "1.0.0", "Foo")
-                .resolveFunctionParamsSupplier((m, s, o) -> resolveFunctionParams)
-                .pluginFunctionParamsSupplier((m, s, o) -> pluginFunctionParams)
+                .additionalResolveFunctionParamsSupplier((m, s, o) -> resolveFunctionParams)
+                .additionalPluginFunctionParamsSupplier((m, s, o) -> pluginFunctionParams)
                 .build();
 
         assertThat(plugin.getInputConfig().get().getSymbol().getNamespace(), equalTo("foo/baz"));
