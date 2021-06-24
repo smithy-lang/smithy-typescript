@@ -180,7 +180,7 @@ final class StructureGenerator implements Runnable {
         writer.writeShapeDocs(shape);
 
         // Find symbol references with the "extends" property, and add SmithyException.
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/smithy-client");
+        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
         String extendsFrom = Stream.concat(
                 Stream.of("__SmithyException"),
                 symbol.getReferences().stream()
