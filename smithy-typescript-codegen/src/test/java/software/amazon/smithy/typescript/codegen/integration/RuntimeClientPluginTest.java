@@ -92,12 +92,14 @@ public class RuntimeClientPluginTest {
         assertThat(plugin.getResolveFunction().get().getSymbol().getNamespace(), equalTo("foo/baz"));
         assertThat(plugin.getResolveFunction().get().getSymbol().getName(), equalTo("resolveFooConfig"));
 
-        assertThat(plugin.getResolveFunctionParameters(null, null, null), equalTo(resolveFunctionParams));
+        assertThat(plugin.getAdditionalResolveFunctionParameters(null, null, null),
+                equalTo(resolveFunctionParams));
 
         assertThat(plugin.getPluginFunction().get().getSymbol().getNamespace(), equalTo("foo/baz"));
         assertThat(plugin.getPluginFunction().get().getSymbol().getName(), equalTo("getFooPlugin"));
 
-        assertThat(plugin.getPluginFunctionParameters(null, null, null), equalTo(pluginFunctionParams));
+        assertThat(plugin.getAdditionalPluginFunctionParameters(null, null, null),
+                equalTo(pluginFunctionParams));
 
         assertThat(plugin.getInputConfig().get().getSymbol().getDependencies().get(0).getPackageName(),
                    equalTo("foo/baz"));

@@ -314,7 +314,8 @@ final class ServiceGenerator implements Runnable {
             for (RuntimeClientPlugin plugin : runtimePlugins) {
                 if (plugin.getResolveFunction().isPresent()) {
                     configVariable++;
-                    Map<String, Object> paramsMap = plugin.getResolveFunctionParameters(model, service, null);
+                    Map<String, Object> paramsMap = plugin.getAdditionalResolveFunctionParameters(
+                            model, service, null);
                     List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
 
                     String additionalParamsString = additionalParameters.isEmpty()

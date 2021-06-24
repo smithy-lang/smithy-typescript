@@ -186,7 +186,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * @return Returns the optionally present map of parameters. The key is the key
      * for a parameter, and value is the value for a parameter.
      */
-    public Map<String, Object> getResolveFunctionParameters(
+    public Map<String, Object> getAdditionalResolveFunctionParameters(
         Model model,
         ServiceShape service,
         OperationShape operation
@@ -234,7 +234,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * @return Returns the optionally present map of parameters. The key is the key
      * for a parameter, and value is the value for a parameter.
      */
-    public Map<String, Object> getPluginFunctionParameters(
+    public Map<String, Object> getAdditionalPluginFunctionParameters(
         Model model,
         ServiceShape service,
         OperationShape operation

@@ -249,7 +249,8 @@ final class CommandGenerator implements Runnable {
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
             plugin.getPluginFunction().ifPresent(symbol -> {
-                Map<String, Object> paramsMap = plugin.getPluginFunctionParameters(model, service, operation);
+                Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
+                        model, service, operation);
                 List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
 
                 String additionalParamsString = additionalParameters.isEmpty()
