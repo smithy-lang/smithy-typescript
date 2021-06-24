@@ -59,6 +59,12 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     AWS_SDK_UTIL_WAITERS("dependencies", "@aws-sdk/util-waiter",  SdkVersion.LIVE, false),
 
+    // Conditionally added when httpChecksumRequired trait exists
+    MD5_BROWSER("dependencies", "@aws-sdk/md5-js", SdkVersion.LIVE, false),
+    STREAM_HASHER_NODE("dependencies", "@aws-sdk/hash-stream-node", SdkVersion.LIVE, false),
+    STREAM_HASHER_BROWSER("dependencies", "@aws-sdk/hash-blob-browser", SdkVersion.LIVE, false),
+    BODY_CHECKSUM("dependencies", "@aws-sdk/middleware-apply-body-checksum", SdkVersion.LIVE, false),
+
     // Conditionally added when using an HTTP application protocol.
     AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", SdkVersion.LIVE, false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", SdkVersion.LIVE, false),
