@@ -101,7 +101,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @param model Model the operation belongs to.
          * @param service Service the operation belongs to.
          * @param operation Operation to test.
-         * @return Returns the map of parameters to be passed to a function.
+         * @return Returns the map of parameters to be passed to a function. The key is the key
+         * for a parameter, and value is the value for a parameter.
          */
         Map<String, Object> apply(Model model, ServiceShape service, OperationShape operation);
     }
@@ -182,7 +183,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * @param model Model the operation belongs to.
      * @param service Service the operation belongs to.
      * @param operation Operation to test against.
-     * @return Returns the optionally present map of parameters.
+     * @return Returns the optionally present map of parameters. The key is the key
+     * for a parameter, and value is the value for a parameter.
      */
     public Map<String, Object> getResolveFunctionParameters(
         Model model,
@@ -229,7 +231,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * @param model Model the operation belongs to.
      * @param service Service the operation belongs to.
      * @param operation Operation to test against.
-     * @return Returns the optionally present map of parameters.
+     * @return Returns the optionally present map of parameters. The key is the key
+     * for a parameter, and value is the value for a parameter.
      */
     public Map<String, Object> getPluginFunctionParameters(
         Model model,
