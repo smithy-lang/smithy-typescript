@@ -847,7 +847,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 Shape wrapperShape = this.workingShape;
                 node.getElements().forEach(element -> {
                     // Swap the working shape to the member of the collection.
-                    this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    // This isn't necessary if the shape is a document.
+                    if (wrapperShape instanceof CollectionShape) {
+                        this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    }
                     writer.call(() -> element.accept(this)).write("\n");
                 });
                 this.workingShape = wrapperShape;
@@ -1039,7 +1042,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 Shape wrapperShape = this.workingShape;
                 node.getElements().forEach(element -> {
                     // Swap the working shape to the member of the collection.
-                    this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    // This isn't necessary if the shape is a document.
+                    if (wrapperShape instanceof CollectionShape) {
+                        this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    }
                     writer.call(() -> element.accept(this)).write("\n");
                 });
                 this.workingShape = wrapperShape;
