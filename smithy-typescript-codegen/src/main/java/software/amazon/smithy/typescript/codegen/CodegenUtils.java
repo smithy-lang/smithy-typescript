@@ -160,6 +160,8 @@ public final class CodegenUtils {
                     }
                 } else if (value instanceof String) {
                     functionParametersList.add(String.format("%s: '%s'", key, value));
+                } else if (value instanceof Boolean) {
+                    functionParametersList.add(String.format("%s: %s", key, value));
                 } else {
                     // Future support for param type should be added in else if.
                     throw new CodegenException("Plugin function parameters not supported for type "
