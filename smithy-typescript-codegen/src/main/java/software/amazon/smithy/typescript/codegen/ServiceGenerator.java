@@ -320,7 +320,7 @@ final class ServiceGenerator implements Runnable {
 
                     String additionalParamsString = additionalParameters.isEmpty()
                             ? ""
-                            : ", " + String.join(", ", additionalParameters);
+                            : ", { " + String.join(", ", additionalParameters) + "}";
                     writer.write("let $L = $T($L$L);",
                                  generateConfigVariable(configVariable),
                                  plugin.getResolveFunction().get(),
