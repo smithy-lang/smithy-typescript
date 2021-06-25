@@ -599,6 +599,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  input: $T,\n"
                        + "  context: $L\n"
                        + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
+
+            // Get the hostname, path, port, and scheme from client's resolved endpoint. Then construct the request from
+            // them. The client's resolved endpoint can be default one or supplied by users.
+            writer.write("const {hostname, protocol = $S, port, path: basePath} = await context.endpoint();", "https");
+
             writeRequestHeaders(context, operation, bindingIndex);
             writeResolvedPath(context, operation, bindingIndex, trait);
             boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
@@ -616,10 +621,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (hasHostPrefix) {
                 HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
             }
-
-            // Get the hostname, port, and scheme from client's resolved endpoint. Then construct the request from
-            // them. The client's resolved endpoint can be default one or supplied by users.
-            writer.write("const {hostname, protocol = \"https\", port} = await context.endpoint();");
             writer.openBlock("return new $T({", "});", requestType, () -> {
                 writer.write("protocol,");
                 if (hasHostPrefix) {
@@ -683,7 +684,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         List<HttpBinding> labelBindings = bindingIndex.getRequestBindings(operation, Location.LABEL);
 
         // Always write the bound path, but only the actual segments.
-        writer.write("let resolvedPath = $S;", "/" + trait.getUri().getSegments().stream()
+        writer.write("let resolvedPath = `$L` + $S;",
+                "${basePath?.endsWith('/') ? basePath.slice(0, -1) : (basePath || '')}",
+                "/" + trait.getUri().getSegments().stream()
                 .map(Segment::toString)
                 .collect(Collectors.joining("/")));
 
