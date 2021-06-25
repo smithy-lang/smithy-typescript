@@ -235,6 +235,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // Create a client with a custom request handler that intercepts requests.
             writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
                     writer.write("...clientParams,");
+                    testCase.getHost().ifPresent(host -> {
+                        writer.write("endpoint: \"https://$L\",", host);
+                    });
                     writer.write("requestHandler: new RequestSerializationTestHandler(),");
             });
 
