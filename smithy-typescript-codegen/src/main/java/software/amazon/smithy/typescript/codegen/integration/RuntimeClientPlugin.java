@@ -15,8 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +28,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
-import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -49,9 +48,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final SymbolReference inputConfig;
     private final SymbolReference resolvedConfig;
     private final SymbolReference resolveFunction;
-    private final List<String> additionalResolveFunctionParameters;
+    private final FunctionParamsSupplier additionalResolveFunctionParamsSupplier;
     private final SymbolReference pluginFunction;
-    private final List<String> additionalPluginFunctionParameters;
+    private final FunctionParamsSupplier additionalPluginFunctionParamsSupplier;
     private final SymbolReference destroyFunction;
     private final BiPredicate<Model, ServiceShape> servicePredicate;
     private final OperationPredicate operationPredicate;
@@ -60,20 +59,12 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         inputConfig = builder.inputConfig;
         resolvedConfig = builder.resolvedConfig;
         resolveFunction = builder.resolveFunction;
-        additionalResolveFunctionParameters = ListUtils.copyOf(builder.additionalResolveFunctionParameters);
+        additionalResolveFunctionParamsSupplier = builder.additionalResolveFunctionParamsSupplier;
         pluginFunction = builder.pluginFunction;
-        additionalPluginFunctionParameters = ListUtils.copyOf(builder.additionalPluginFunctionParameters);
+        additionalPluginFunctionParamsSupplier = builder.additionalPluginFunctionParamsSupplier;
         destroyFunction = builder.destroyFunction;
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
-
-        if (!additionalResolveFunctionParameters.isEmpty() && resolveFunction == null) {
-            throw new IllegalStateException("Additional parameters can only be set if a resolve function is set.");
-        }
-
-        if (!additionalPluginFunctionParameters.isEmpty() && pluginFunction == null) {
-            throw new IllegalStateException("Additional parameters can only be set if a plugin function is set.");
-        }
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -100,6 +91,20 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @return Returns true if middleware should be applied to the operation.
          */
         boolean test(Model model, ServiceShape service, OperationShape operation);
+    }
+
+    @FunctionalInterface
+    public interface FunctionParamsSupplier {
+        /**
+         * Returns parameters to be passed to a function which can be computed dynamically.
+         *
+         * @param model Model the operation belongs to.
+         * @param service Service the operation belongs to.
+         * @param operation Operation to test.
+         * @return Returns the map of parameters to be passed to a function. The key is the key
+         * for a parameter, and value is the value for a parameter.
+         */
+        Map<String, Object> apply(Model model, ServiceShape service, OperationShape operation);
     }
 
     /**
@@ -163,7 +168,6 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      *
      * @return Returns the optionally present resolve function.
      * @see #getInputConfig()
-     * @see #getAdditionalResolveFunctionParameters()
      * @see #getResolvedConfig()
      */
     public Optional<SymbolReference> getResolveFunction() {
@@ -173,14 +177,24 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     /**
      * Gets a list of additional parameters to be supplied to the
      * resolve function. These parameters are to be supplied to resolve
-     * function as Nth(N &gt; 1) positional arguments. The list is empty if
-     * there are no additional parameters.
+     * function as second argument. The map is empty if there are
+     * no additional parameters.
      *
-     * @return Returns the optionally present list of parameters.
-     * @see #getResolveFunction()
+     * @param model Model the operation belongs to.
+     * @param service Service the operation belongs to.
+     * @param operation Operation to test against.
+     * @return Returns the optionally present map of parameters. The key is the key
+     * for a parameter, and value is the value for a parameter.
      */
-    public List<String> getAdditionalResolveFunctionParameters() {
-        return additionalResolveFunctionParameters;
+    public Map<String, Object> getAdditionalResolveFunctionParameters(
+        Model model,
+        ServiceShape service,
+        OperationShape operation
+    ) {
+        if (additionalResolveFunctionParamsSupplier != null) {
+            return additionalResolveFunctionParamsSupplier.apply(model, service, operation);
+        }
+        return new HashMap<String, Object>();
     }
 
     /**
@@ -211,14 +225,24 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     /**
      * Gets a list of additional parameters to be supplied to the
      * plugin function. These parameters are to be supplied to plugin
-     * function as an options hash. The list is empty if
-     * there are no additional parameters.
+     * function as second argument. The map is empty if there are
+     * no additional parameters.
      *
-     * @return Returns the optionally present list of parameters.
-     * @see #getPluginFunction()
+     * @param model Model the operation belongs to.
+     * @param service Service the operation belongs to.
+     * @param operation Operation to test against.
+     * @return Returns the optionally present map of parameters. The key is the key
+     * for a parameter, and value is the value for a parameter.
      */
-    public List<String> getAdditionalPluginFunctionParameters() {
-        return additionalPluginFunctionParameters;
+    public Map<String, Object> getAdditionalPluginFunctionParameters(
+        Model model,
+        ServiceShape service,
+        OperationShape operation
+    ) {
+        if (additionalPluginFunctionParamsSupplier != null) {
+            return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
+        }
+        return new HashMap<String, Object>();
     }
 
     /**
@@ -284,7 +308,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                 .inputConfig(inputConfig)
                 .resolvedConfig(resolvedConfig)
                 .resolveFunction(resolveFunction)
+                .additionalResolveFunctionParamsSupplier(additionalResolveFunctionParamsSupplier)
                 .pluginFunction(pluginFunction)
+                .additionalPluginFunctionParamsSupplier(additionalPluginFunctionParamsSupplier)
                 .destroyFunction(destroyFunction);
 
         // Set these directly since their setters have mutual side-effects.
@@ -300,9 +326,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                + "inputConfig=" + inputConfig
                + ", resolvedConfig=" + resolvedConfig
                + ", resolveFunction=" + resolveFunction
-               + ", additionalResolveFunctionParameters=" + additionalResolveFunctionParameters
                + ", pluginFunction=" + pluginFunction
-               + ", additionalPluginFunctionParameters=" + additionalPluginFunctionParameters
                + ", destroyFunction=" + destroyFunction
                + '}';
     }
@@ -319,9 +343,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         return Objects.equals(inputConfig, that.inputConfig)
                && Objects.equals(resolvedConfig, that.resolvedConfig)
                && Objects.equals(resolveFunction, that.resolveFunction)
-               && Objects.equals(additionalResolveFunctionParameters, that.additionalResolveFunctionParameters)
+               && Objects.equals(additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier)
                && Objects.equals(pluginFunction, that.pluginFunction)
-               && Objects.equals(additionalPluginFunctionParameters, that.additionalPluginFunctionParameters)
+               && Objects.equals(additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier)
                && Objects.equals(destroyFunction, that.destroyFunction)
                && servicePredicate.equals(that.servicePredicate)
                && operationPredicate.equals(that.operationPredicate);
@@ -339,9 +363,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private SymbolReference inputConfig;
         private SymbolReference resolvedConfig;
         private SymbolReference resolveFunction;
-        private List<String> additionalResolveFunctionParameters = new ArrayList<>();
+        private FunctionParamsSupplier additionalResolveFunctionParamsSupplier;
         private SymbolReference pluginFunction;
-        private List<String> additionalPluginFunctionParameters = new ArrayList<>();
+        private FunctionParamsSupplier additionalPluginFunctionParamsSupplier;
         private SymbolReference destroyFunction;
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
         private OperationPredicate operationPredicate = (model, service, operation) -> false;
@@ -433,13 +457,17 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * {@link #inputConfig} must also be set.
          *
          * @param resolveFunction Function used to convert input to resolved.
-         * @param additionalParameters Additional parameters to be generated as resolve function input.
+         * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed
+         * as resolve function input.
          * @return Returns the builder.
          * @see #getResolveFunction()
          */
-        public Builder resolveFunction(SymbolReference resolveFunction, String... additionalParameters) {
+        public Builder resolveFunction(
+                SymbolReference resolveFunction,
+                FunctionParamsSupplier additionalResolveFunctionParamsSupplier
+        ) {
             this.resolveFunction = resolveFunction;
-            this.additionalResolveFunctionParameters = ListUtils.of(additionalParameters);
+            this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
             return this;
         }
 
@@ -466,27 +494,37 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * {@link #inputConfig} must also be set.
          *
          * @param resolveFunction Function used to convert input to resolved.
-         * @param additionalParameters Additional parameters to be generated as resolve function input.
+         * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed
+         * as resolve function input.
          * @return Returns the builder.
          * @see #getResolveFunction()
          */
-        public Builder resolveFunction(Symbol resolveFunction, String... additionalParameters) {
-            return resolveFunction(SymbolReference.builder().symbol(resolveFunction).build(), additionalParameters);
+        public Builder resolveFunction(
+            Symbol resolveFunction,
+            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
+        ) {
+            return resolveFunction(
+                SymbolReference.builder().symbol(resolveFunction).build(),
+                additionalResolveFunctionParamsSupplier
+            );
         }
 
         /**
-         * Set additional positional input parameters to resolve function. Set
-         * this with no arguments to remove the current parameters.
+         * Set function which returns input parameters to resolve function. Set
+         * function to return empty map to remove the current parameters.
          *
          * <p>If this is set, then all of {@link #resolveFunction},
          * {@link #resolvedConfig} and {@link #inputConfig} must also be set.
          *
-         * @param additionalParameters Additional parameters to be generated as resolve function input.
+         * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed
+         * as resolve function input.
          * @return Returns the builder.
          * @see #getResolveFunction()
          */
-        public Builder additionalResolveFunctionParameters(String... additionalParameters) {
-            this.additionalResolveFunctionParameters = ListUtils.of(additionalParameters);
+        public Builder additionalResolveFunctionParamsSupplier(
+            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
+        ) {
+            this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
             return this;
         }
 
@@ -508,13 +546,16 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * commands to use a specific middleware function.
          *
          * @param pluginFunction Plugin function symbol to invoke.
-         * @param additionalParameters Additional parameters to be generated as plugin function input.
+         * @param pluginFunctionParamsSupplier Function which returns params to be passed as plugin function input.
          * @return Returns the builder.
          * @see #getPluginFunction()
          */
-        public Builder pluginFunction(SymbolReference pluginFunction, String... additionalParameters) {
+        public Builder pluginFunction(
+                SymbolReference pluginFunction,
+                FunctionParamsSupplier pluginFunctionParamsSupplier
+        ) {
             this.pluginFunction = pluginFunction;
-            this.additionalPluginFunctionParameters = ListUtils.of(additionalParameters);
+            this.additionalPluginFunctionParamsSupplier = pluginFunctionParamsSupplier;
             return this;
         }
 
@@ -535,24 +576,34 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * use a specific middleware function.
          *
          * @param pluginFunction Plugin function symbol to invoke.
-         * @param additionalParameters Additional parameters to be generated as plugin function input.
+         * @param additionalPluginFunctionParamsSupplier Function which returns params to be passed
+         * as plugin function input.
          * @return Returns the builder.
          * @see #getPluginFunction()
          */
-        public Builder pluginFunction(Symbol pluginFunction, String... additionalParameters) {
-            return pluginFunction(SymbolReference.builder().symbol(pluginFunction).build(), additionalParameters);
+        public Builder pluginFunction(
+            Symbol pluginFunction,
+            FunctionParamsSupplier additionalPluginFunctionParamsSupplier
+        ) {
+            return pluginFunction(
+                SymbolReference.builder().symbol(pluginFunction).build(),
+                additionalPluginFunctionParamsSupplier
+            );
         }
 
         /**
-         * Set additional positional input parameters to plugin function. Set
-         * this with no arguments to remove the current parameters.
+         * Set function which returns input parameters to plugin function. Set
+         * function to return empty map to remove the current parameters.
          *
-         * @param additionalParameters Additional parameters to be generated as plugin function input.
+         * @param additionalPluginFunctionParamsSupplier Function which returns params to be passed
+         * as plugin function input.
          * @return Returns the builder.
          * @see #getPluginFunction()
          */
-        public Builder additionalPluginFunctionParameters(String... additionalParameters) {
-            this.additionalPluginFunctionParameters = ListUtils.of(additionalParameters);
+        public Builder additionalPluginFunctionParamsSupplier(
+            FunctionParamsSupplier additionalPluginFunctionParamsSupplier
+        ) {
+            this.additionalPluginFunctionParamsSupplier = additionalPluginFunctionParamsSupplier;
             return this;
         }
 

@@ -17,7 +17,9 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.EventStreamIndex;
@@ -133,6 +135,40 @@ public final class CodegenUtils {
         writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
                 + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
         writer.write("export interface $1L extends $1LType {}", typeName);
+    }
+
+    /**
+     * Returns the list of function parameter key-value pairs to be written for
+     * provided parameters map.
+     *
+     * @param paramsMap Map of paramters to generate a parameters string for.
+     * @return The list of parameters to be written.
+     */
+    static List<String> getFunctionParametersList(Map<String, Object> paramsMap) {
+        List<String> functionParametersList = new ArrayList<String>();
+
+        if (!paramsMap.isEmpty()) {
+            for (Map.Entry<String, Object> param : paramsMap.entrySet()) {
+                String key = param.getKey();
+                Object value = param.getValue();
+                if (value instanceof Symbol) {
+                    String symbolName = ((Symbol) value).getName();
+                    if (key.equals(symbolName)) {
+                        functionParametersList.add(key);
+                    } else {
+                        functionParametersList.add(String.format("%s: %s", key, symbolName));
+                    }
+                } else if (value instanceof String) {
+                    functionParametersList.add(String.format("%s: '%s'", key, value));
+                } else {
+                    // Future support for param type should be added in else if.
+                    throw new CodegenException("Plugin function parameters not supported for type "
+                            + value.getClass());
+                }
+            }
+        }
+
+        return functionParametersList;
     }
 
     /**

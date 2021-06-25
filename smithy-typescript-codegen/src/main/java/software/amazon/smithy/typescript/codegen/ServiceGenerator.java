@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -313,7 +314,10 @@ final class ServiceGenerator implements Runnable {
             for (RuntimeClientPlugin plugin : runtimePlugins) {
                 if (plugin.getResolveFunction().isPresent()) {
                     configVariable++;
-                    List<String> additionalParameters = plugin.getAdditionalResolveFunctionParameters();
+                    Map<String, Object> paramsMap = plugin.getAdditionalResolveFunctionParameters(
+                            model, service, null);
+                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+
                     String additionalParamsString = additionalParameters.isEmpty()
                             ? ""
                             : ", " + String.join(", ", additionalParameters);

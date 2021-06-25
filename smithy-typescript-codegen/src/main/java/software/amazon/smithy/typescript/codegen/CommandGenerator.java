@@ -19,6 +19,7 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStre
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -248,7 +249,10 @@ final class CommandGenerator implements Runnable {
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
             plugin.getPluginFunction().ifPresent(symbol -> {
-                List<String> additionalParameters = plugin.getAdditionalPluginFunctionParameters();
+                Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
+                        model, service, operation);
+                List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+
                 String additionalParamsString = additionalParameters.isEmpty()
                     ? ""
                     : ", { " + String.join(", ", additionalParameters) + "}";

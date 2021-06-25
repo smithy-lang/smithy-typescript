@@ -3,6 +3,9 @@ package software.amazon.smithy.typescript.codegen.integration;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -67,10 +70,17 @@ public class RuntimeClientPluginTest {
 
     @Test
     public void configuresWithDefaultConventions() {
+        Map<String, Object> resolveFunctionParams = new HashMap<String, Object>() {{
+                put("resolveFunctionParam", "resolveFunctionParam");
+        }};
+        Map<String, Object> pluginFunctionParams = new HashMap<String, Object>() {{
+                put("pluginFunctionParam", "pluginFunctionParam");
+        }};
+
         RuntimeClientPlugin plugin = RuntimeClientPlugin.builder()
                 .withConventions("foo/baz", "1.0.0", "Foo")
-                .additionalResolveFunctionParameters("resolveFunctionParam")
-                .additionalPluginFunctionParameters("pluginFunctionParam")
+                .additionalResolveFunctionParamsSupplier((m, s, o) -> resolveFunctionParams)
+                .additionalPluginFunctionParamsSupplier((m, s, o) -> pluginFunctionParams)
                 .build();
 
         assertThat(plugin.getInputConfig().get().getSymbol().getNamespace(), equalTo("foo/baz"));
@@ -82,12 +92,14 @@ public class RuntimeClientPluginTest {
         assertThat(plugin.getResolveFunction().get().getSymbol().getNamespace(), equalTo("foo/baz"));
         assertThat(plugin.getResolveFunction().get().getSymbol().getName(), equalTo("resolveFooConfig"));
 
-        assertThat(plugin.getAdditionalResolveFunctionParameters(), equalTo(ListUtils.of("resolveFunctionParam")));
+        assertThat(plugin.getAdditionalResolveFunctionParameters(null, null, null),
+                equalTo(resolveFunctionParams));
 
         assertThat(plugin.getPluginFunction().get().getSymbol().getNamespace(), equalTo("foo/baz"));
         assertThat(plugin.getPluginFunction().get().getSymbol().getName(), equalTo("getFooPlugin"));
 
-        assertThat(plugin.getAdditionalPluginFunctionParameters(), equalTo(ListUtils.of("pluginFunctionParam")));
+        assertThat(plugin.getAdditionalPluginFunctionParameters(null, null, null),
+                equalTo(pluginFunctionParams));
 
         assertThat(plugin.getInputConfig().get().getSymbol().getDependencies().get(0).getPackageName(),
                    equalTo("foo/baz"));
