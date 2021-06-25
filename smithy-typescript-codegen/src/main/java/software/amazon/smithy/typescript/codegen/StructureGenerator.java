@@ -15,12 +15,17 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeInlineStreamingMemberType;
+
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
@@ -215,17 +220,17 @@ final class StructureGenerator implements Runnable {
 
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
             writer.writeDocs("@internal");
-            writer.openBlock("export const validate = ($L: $L, path: string = \"\"): __ValidationFailure[] => {", "}",
-                    objectParam, symbol.getName(),
-                    () -> {
-                        // TODO: move this somewhere so it only gets run once.
-                        // Putting it at the top of the namespace can result in runtime errors when
-                        // you have mutually recursive structures because the validator of one will
-                        // be defined before the validator of the other exists at all.
-                        structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
-                        structuredMemberWriter.writeValidateMethodContents(writer, objectParam);
-                    }
-            );
+            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, shape);
+            writer.writeInline("export const validate = ($L: ", objectParam);
+            if (blobStreamingMembers.isEmpty()) {
+                writer.writeInline("$L", symbol.getName());
+            } else {
+                writeInlineStreamingMemberType(writer, symbol, blobStreamingMembers.get(0));
+            }
+            writer.openBlock(", path: string = \"\"): __ValidationFailure[] => {", "}", () -> {
+                structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
+                structuredMemberWriter.writeValidateMethodContents(writer, objectParam);
+            });
         });
     }
 }

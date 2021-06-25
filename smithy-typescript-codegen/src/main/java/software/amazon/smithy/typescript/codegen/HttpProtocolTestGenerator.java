@@ -293,15 +293,20 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // We use a partial here so that we don't have to define the entire service, but still get the advantages
             // the type checker, including excess property checking. Later on we'll use `as` to cast this to the
             // full service so that we can actually use it.
-            writer.openBlock("const testService: Partial<$T> = {", "};", serviceSymbol, () -> {
-                writer.write("$L: testFunction as $T,", operationSymbol.getName(), operationSymbol);
+            writer.openBlock("const testService: Partial<$T<{}>> = {", "};", serviceSymbol, () -> {
+                writer.write("$L: testFunction as $T<{}>,", operationSymbol.getName(), operationSymbol);
             });
 
             String getHandlerName = "get" + handlerSymbol.getName();
             writer.addImport(getHandlerName, null, "./server/");
+            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
 
             // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
-            writer.write("const handler = $L(testService as $T);", getHandlerName, serviceSymbol);
+            writer.openBlock(
+                    "const handler = $L(testService as $T<{}>, (ctx: {}, failures: __ValidationFailure[]) => {",
+                    "});", getHandlerName, serviceSymbol,
+                    () -> writer.write("if (failures) { throw failures; } return undefined;")
+            );
 
             // Construct a new http request according to the test case definition.
             writer.openBlock("const request = new HttpRequest({", "});", () -> {
@@ -609,7 +614,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         writer.addImport("serializeFrameworkException", null,
                 "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
-        writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException);", handlerSymbol);
+        writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+        writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException, "
+                + "(ctx: {}, f: __ValidationFailure[]) => { if (f) { throw f; } return undefined;});", handlerSymbol);
         writer.write("let r = await handler.handle(request, {})").write("");
         writeHttpResponseAssertions(testCase);
     }
