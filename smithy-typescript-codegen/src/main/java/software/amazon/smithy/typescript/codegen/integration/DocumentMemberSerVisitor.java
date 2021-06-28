@@ -148,12 +148,17 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
 
     @Override
     public String floatShape(FloatShape shape) {
-        return serializeUnmodified();
+        return handleFloat();
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return serializeUnmodified();
+        return handleFloat();
+    }
+
+    private String handleFloat() {
+        context.getWriter().addImport("serializeFloat", "__serializeFloat", "@aws-sdk/smithy-client");
+        return "__serializeFloat(" + dataSource + ")";
     }
 
     @Override

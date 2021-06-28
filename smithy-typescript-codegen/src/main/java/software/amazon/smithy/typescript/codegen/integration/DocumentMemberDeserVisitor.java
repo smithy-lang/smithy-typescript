@@ -150,17 +150,22 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String floatShape(FloatShape shape) {
-        return expectNumber();
+        return handleFloat();
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return expectNumber();
+        return handleFloat();
     }
 
     private String expectNumber() {
         context.getWriter().addImport("expectNumber", "__expectNumber", "@aws-sdk/smithy-client");
         return "__expectNumber(" + dataSource + ")";
+    }
+
+    private String handleFloat() {
+        context.getWriter().addImport("handleFloat", "__handleFloat", "@aws-sdk/smithy-client");
+        return "__handleFloat(" + dataSource + ")";
     }
 
     @Override
