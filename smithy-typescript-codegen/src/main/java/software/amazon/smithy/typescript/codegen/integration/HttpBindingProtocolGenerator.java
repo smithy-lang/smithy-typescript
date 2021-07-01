@@ -2470,7 +2470,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             dataSource = "Buffer.from(" + dataSource + ", 'base64').toString('ascii')";
         }
 
-        return HttpProtocolGeneratorUtils.getStringOutputParam(context, target, dataSource);
+        return HttpProtocolGeneratorUtils.getStringOutputParam(
+                context, target, dataSource, !isGuaranteedString(bindingType));
+    }
+
+    private boolean isGuaranteedString(Location bindingType) {
+        return bindingType != Location.PAYLOAD && bindingType != Location.DOCUMENT;
     }
 
     /**

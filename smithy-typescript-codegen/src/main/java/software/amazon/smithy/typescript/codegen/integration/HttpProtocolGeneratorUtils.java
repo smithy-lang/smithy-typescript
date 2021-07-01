@@ -158,9 +158,11 @@ public final class HttpProtocolGeneratorUtils {
      * @param shape The shape that represents the value being received.
      * @param dataSource The in-code location of the data to provide an output of
      *   ({@code output.foo}, {@code entry}, etc.)
+     * @param useExpect Whether or not to wrap the string in expectString. This should
+     *   only be false if the value is guaranteed to be a string already.
      * @return Returns a value or expression of the output string.
      */
-    static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource) {
+    static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource, boolean useExpect) {
         // Handle media type generation, defaulting to a standard String.
         Optional<MediaTypeTrait> mediaTypeTrait = shape.getTrait(MediaTypeTrait.class);
         if (mediaTypeTrait.isPresent()) {
@@ -173,7 +175,28 @@ public final class HttpProtocolGeneratorUtils {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
             }
         }
-        return dataSource;
+
+        if (!useExpect) {
+            return dataSource;
+        }
+        context.getWriter().addImport("expectString", "__expectString", "@aws-sdk/smithy-client");
+        return "__expectString(" + dataSource + ")";
+    }
+
+    /**
+     * Given a String output, determine its media type and generate an output value
+     * provider for it.
+     *
+     * <p>This currently only supports using the LazyJsonString for {@code "application/json"}.
+     *
+     * @param context The generation context.
+     * @param shape The shape that represents the value being received.
+     * @param dataSource The in-code location of the data to provide an output of
+     *   ({@code output.foo}, {@code entry}, etc.)
+     * @return Returns a value or expression of the output string.
+     */
+    static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource) {
+        return getStringOutputParam(context, shape, dataSource, true);
     }
 
     /**

@@ -124,46 +124,48 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
-        return deserializeUnmodified();
+        context.getWriter().addImport("expectBoolean", "__expectBoolean", "@aws-sdk/smithy-client");
+        return "__expectBoolean(" + dataSource + ")";
     }
 
     @Override
     public String byteShape(ByteShape shape) {
-        return deserializeUnmodified();
+        return expectNumber();
     }
 
     @Override
     public String shortShape(ShortShape shape) {
-        return deserializeUnmodified();
+        return expectNumber();
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return deserializeUnmodified();
+        return expectNumber();
     }
 
     @Override
     public String longShape(LongShape shape) {
-        return deserializeUnmodified();
+        return expectNumber();
     }
 
     @Override
     public String floatShape(FloatShape shape) {
-        return deserializeUnmodified();
+        return expectNumber();
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return deserializeUnmodified();
+        return expectNumber();
+    }
+
+    private String expectNumber() {
+        context.getWriter().addImport("expectNumber", "__expectNumber", "@aws-sdk/smithy-client");
+        return "__expectNumber(" + dataSource + ")";
     }
 
     @Override
     public String stringShape(StringShape shape) {
-        return HttpProtocolGeneratorUtils.getStringOutputParam(context, shape, deserializeUnmodified());
-    }
-
-    private String deserializeUnmodified() {
-        return dataSource;
+        return HttpProtocolGeneratorUtils.getStringOutputParam(context, shape, dataSource);
     }
 
     @Override
