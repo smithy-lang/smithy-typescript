@@ -847,7 +847,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 Shape wrapperShape = this.workingShape;
                 node.getElements().forEach(element -> {
                     // Swap the working shape to the member of the collection.
-                    this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    // This isn't necessary if the shape is a document.
+                    if (wrapperShape instanceof CollectionShape) {
+                        this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    }
                     writer.call(() -> element.accept(this)).write("\n");
                 });
                 this.workingShape = wrapperShape;
@@ -1039,7 +1042,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 Shape wrapperShape = this.workingShape;
                 node.getElements().forEach(element -> {
                     // Swap the working shape to the member of the collection.
-                    this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    // This isn't necessary if the shape is a document.
+                    if (wrapperShape instanceof CollectionShape) {
+                        this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
+                    }
                     writer.call(() -> element.accept(this)).write("\n");
                 });
                 this.workingShape = wrapperShape;
@@ -1134,6 +1140,21 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // Handle blobs needing to be converted from strings to their input type of UInt8Array.
             if (workingShape.isBlobShape()) {
                 writer.write("Uint8Array.from($S, c => c.charCodeAt(0)),", node.getValue());
+            } else if (workingShape.isFloatShape() || workingShape.isDoubleShape()) {
+                switch (node.getValue()) {
+                    case "NaN":
+                        writer.write("NaN,");
+                        break;
+                    case "Infinity":
+                        writer.write("Infinity,");
+                        break;
+                    case "-Infinity":
+                        writer.write("-Infinity,");
+                        break;
+                    default:
+                        throw new CodegenException(String.format(
+                                "Unexpected string value for `%s`: \"%s\"", workingShape.getId(), node.getValue()));
+                }
             } else {
                 writer.write("$S,", node.getValue());
             }
