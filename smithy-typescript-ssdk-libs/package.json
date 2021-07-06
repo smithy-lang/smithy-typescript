@@ -1,7 +1,7 @@
 {
   "name": "smithy-typescript-ssdk",
   "private": true,
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Smithy TypeScript SSDK packages",
   "main": "index.js",
   "scripts": {

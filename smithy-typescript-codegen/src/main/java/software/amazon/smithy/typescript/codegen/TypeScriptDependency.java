@@ -88,7 +88,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Server dependency for SSDKs
-    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "^1.0.0-alpha.0", false);
+    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "^1.0.0-alpha.1", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";
