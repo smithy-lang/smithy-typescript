@@ -1,6 +1,6 @@
 {
   "name": "@aws-smithy/server-common",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Base components for Smithy services",
   "main": "./dist/cjs/index.js",
   "types": "./dist/types/index.d.ts",
