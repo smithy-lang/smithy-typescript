@@ -17,9 +17,6 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -339,19 +336,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         Map<String, List<String>> query = testCase.getQueryParams().stream()
             .map(pair -> {
                 String[] split = pair.split("=");
-                String key;
-                String value = "";
-                try {
-                    // The strings we're given are url encoded, so we need to decode them. In an actual implementation
-                    // the request we're given will have already decoded these.
-                    key = URLDecoder.decode(split[0], StandardCharsets.UTF_8.toString());
-                    if (split.length > 1) {
-                        value = URLDecoder.decode(split[1], StandardCharsets.UTF_8.toString());
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-                return Pair.of(key, value);
+                return Pair.of(split[0], split.length > 1 ? split[1] : "");
             })
             // Query lists/sets will just use the same key repeatedly, so here we collect all the values that
             // share a key.
