@@ -5,10 +5,13 @@
   "description": "Smithy TypeScript SSDK packages",
   "main": "index.js",
   "scripts": {
-    "clean": "yarn clear-build-cache && yarn clear-build-info && lerna clean -y",
+    "clean": "yarn clear-build-cache && yarn clear-build-info && yarn clear-node-modules",
+    "clear-node-modules": "rimraf ./*/node_modules",
     "clear-build-cache": "rimraf ./*/dist ./*/types, ./*/*.tgz",
     "clear-build-info": "rimraf **/*.tsbuildinfo",
-    "build": "lerna run build",
+    "build": "yarn build:server-common && yarn build:server-apigateway",
+    "build:server-common": "cd server-common && yarn install && yarn build",
+    "build:server-apigateway": "cd server-apigateway && yarn install && yarn build",
     "pretest": "yarn build",
     "test": "jest",
     "lint": "yarn run eslint **/src/**/*.ts",
@@ -26,7 +29,6 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.4",
-    "lerna": "3.22.1",
     "jest": "^26.1.0",
     "ts-jest": "^26.4.1",
     "yarn": "1.22.10",
