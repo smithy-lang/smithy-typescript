@@ -1689,9 +1689,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.openBlock("if (query[$S] !== undefined) {", "}", binding.getLocationName(), () -> {
                 Shape target = context.getModel().expectShape(binding.getMember().getTarget());
                 if (target instanceof CollectionShape) {
-                    writer.write("const decoded = Array.isArray(query[$1S]) ? (query[$1S] as string[])"
-                            + ".map(e => decodeURIComponent(e)) : [decodeURIComponent(query[$1S] as string)];",
-                            binding.getLocationName());
+                    writer.write("const queryValue = Array.isArray(query[$1S]) ? (query[$1S] as string[])"
+                            + " : [query[$1S] as string];", binding.getLocationName());
                 } else {
                     writer.addImport("SerializationException",
                             "__SerializationException",
@@ -1701,10 +1700,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             () -> {
                                 writer.write("throw new __SerializationException();");
                             });
-                    writer.write("const decoded = decodeURIComponent(query[$1S] as string);",
+                    writer.write("const queryValue = query[$1S] as string;",
                             binding.getLocationName());
                 }
-                String queryValue = getOutputValue(context, binding.getLocation(), "decoded",
+                String queryValue = getOutputValue(context, binding.getLocation(), "queryValue",
                         binding.getMember(), target);
                 writer.write("contents.$L = $L;", memberName, queryValue);
             });
@@ -1721,12 +1720,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             valueType = "string[]";
         }
         writer.write("let parsedQuery: { [key: string]: $L } = {}", valueType);
-        String parsedValue = getOutputValue(context, mappedBinding.getLocation(),
-                "decoded", target.getValue(), valueShape);
         writer.openBlock("for (const [key, value] of Object.entries(query)) {", "}", () -> {
+            final String parsedValue;
             if (valueShape instanceof CollectionShape) {
-                writer.write("const decoded = Array.isArray(value) ? (value as string[])"
-                        + ".map(e => decodeURIComponent(e)) : [decodeURIComponent(value as string)];");
+                writer.write("const valueArray = Array.isArray(value) ? (value as string[]) : [value as string];");
+                parsedValue = getOutputValue(context, mappedBinding.getLocation(),
+                        "valueArray", target.getValue(), valueShape);
             } else {
                 writer.addImport("SerializationException",
                         "__SerializationException",
@@ -1735,9 +1734,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         () -> {
                             writer.write("throw new __SerializationException();");
                         });
-                writer.write("const decoded = decodeURIComponent(value as string);");
+                parsedValue = getOutputValue(context, mappedBinding.getLocation(),
+                                "value as string", target.getValue(), valueShape);
             }
-            writer.write("parsedQuery[decodeURIComponent(key)] = $L;", parsedValue);
+            writer.write("parsedQuery[key] = $L;", parsedValue);
         });
         String memberName = context.getSymbolProvider().toMemberName(mappedBinding.getMember());
         writer.write("contents.$L = parsedQuery;", memberName);
