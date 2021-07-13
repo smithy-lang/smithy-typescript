@@ -96,9 +96,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         ReservedWords reservedWords = new ReservedWordsBuilder()
                 .loadWords(TypeScriptCodegenPlugin.class.getResource("reserved-words.txt"))
                 .build();
+        ReservedWords memberReservedWords = new ReservedWordsBuilder()
+                .loadWords(TypeScriptCodegenPlugin.class.getResource("reserved-words-members.txt"))
+                .build();
 
         escaper = ReservedWordSymbolProvider.builder()
                 .nameReservedWords(reservedWords)
+                .memberReservedWords(memberReservedWords)
                 // Only escape words when the symbol has a definition file to
                 // prevent escaping intentional references to built-in types.
                 .escapePredicate((shape, symbol) -> !StringUtils.isEmpty(symbol.getDefinitionFile()))
