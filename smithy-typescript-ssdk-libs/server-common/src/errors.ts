@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { SmithyException } from "@aws-sdk/types";
+import { SmithyException } from "@aws-sdk/smithy-client";
 
 export type SmithyFrameworkException = InternalFailureException | UnknownOperationException | SerializationException;
 

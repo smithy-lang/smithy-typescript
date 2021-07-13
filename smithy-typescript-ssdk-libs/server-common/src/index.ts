@@ -18,7 +18,8 @@ export * from "./errors";
 export * from "./validation";
 
 import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { SerdeContext, SmithyException } from "@aws-sdk/types";
+import { SmithyException } from "@aws-sdk/smithy-client";
+import { SerdeContext } from "@aws-sdk/types";
 
 export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 
