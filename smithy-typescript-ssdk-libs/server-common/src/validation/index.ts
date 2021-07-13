@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { SmithyException } from "@aws-sdk/smithy-client";
+import { SmithyException } from "@aws-sdk/types";
 
 export * from "./validators";
 
