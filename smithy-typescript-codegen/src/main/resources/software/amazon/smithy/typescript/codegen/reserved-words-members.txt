@@ -1,0 +1,24 @@
+# TypeScript reserved words for members.
+#
+# Smithy's rules around the names of types are already pretty strict and
+# mostly compatible with TypeScript's naming conventions. Furthermore, the
+# code generator will automatically uppercase every instance where a
+# TypeScript type is generated from a Smithy type. This makes the majority
+# of all of the reserved words in TypeScript something that will never be
+# encountered when generating code. However, it's possible that other
+# SymbolProvider implementations could be used that do emit reserved
+# words for identifiers, hence this code is useful as an extra layer of
+# protection.
+#
+# Adding new reserved words to this list could potentially result in a
+# breaking change to previously generated clients, so adding new reserved words
+# is discouraged. Ideally we could have just automatically added an alias for
+# built-in types that conflict with generated types, but, unfortunately, it's
+# not currently possible to alias a built-in TypeScript or JavaScript type.
+#
+# When a reserved word is encountered, this implementation will
+# continue to prefix the word with "_" until it's no longer considered
+# reserved.
+
+# Prevent prototype pollution
+__proto__
