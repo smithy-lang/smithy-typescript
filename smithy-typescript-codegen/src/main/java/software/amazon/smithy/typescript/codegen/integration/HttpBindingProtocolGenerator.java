@@ -506,6 +506,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         .forEach(serializingDocumentShapes::add);
             }
 
+            calculateContentLength(context);
+
             writer.openBlock("return new $T({", "});", responseType, () -> {
                 writer.write("headers,");
                 writer.write("body,");
@@ -517,6 +519,20 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         for (ShapeId errorShapeId : operation.getErrors()) {
             serializingErrorShapes.add(context.getModel().expectShape(errorShapeId).asStructureShape().get());
         }
+    }
+
+    private void calculateContentLength(GenerationContext context) {
+        TypeScriptWriter writer = context.getWriter();
+        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
+        writer.addImport("calculateBodyLength", null, "@aws-sdk/util-body-length-node");
+        writer.openBlock("if (body && Object.keys(headers).map((str) => str.toLowerCase())"
+                + ".indexOf('content-length') === -1) {", "}", () -> {
+            writer.write("const length = calculateBodyLength(body);");
+            writer.openBlock("if (length !== undefined) {", "}", () -> {
+                writer.write("headers = { ...headers, 'content-length': String(length) };");
+            });
+        });
+
     }
 
     private void generateErrorSerializer(GenerationContext context, StructureShape error) {
@@ -846,7 +862,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
 
         // Headers are always present either from the default document or the payload.
-        writer.openBlock("const headers: any = {", "};", () -> {
+        writer.openBlock("let headers: any = {", "};", () -> {
             writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
 
