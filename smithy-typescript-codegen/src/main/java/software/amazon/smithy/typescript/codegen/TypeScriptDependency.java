@@ -16,9 +16,19 @@
 package software.amazon.smithy.typescript.codegen;
 
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
@@ -30,58 +40,58 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public enum TypeScriptDependency implements SymbolDependencyContainer {
 
-    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/client-documentation-generator", SdkVersion.LIVE, true),
-    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", SdkVersion.LIVE, true),
-    AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", SdkVersion.LIVE, true),
-    INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", SdkVersion.LIVE, true),
-    CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", SdkVersion.LIVE, true),
+    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/client-documentation-generator", true),
+    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
+    AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", true),
+    INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", true),
+    CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", true),
     TYPES_NODE("devDependencies", "@types/node", "^12.7.5", true),
 
-    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", SdkVersion.LIVE, true),
-    MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", SdkVersion.LIVE, true),
-    MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", SdkVersion.LIVE, true),
-    MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", SdkVersion.LIVE, true),
+    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", true),
+    MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", true),
+    MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", true),
+    MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", true),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "^1.1.0", true),
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "^1.1.0", true),
-    AWS_SDK_HASH_NODE("dependencies", "@aws-sdk/hash-node", SdkVersion.LIVE, true),
+    AWS_SDK_HASH_NODE("dependencies", "@aws-sdk/hash-node", true),
 
-    AWS_SDK_URL_PARSER("dependencies", "@aws-sdk/url-parser", SdkVersion.LIVE, true),
+    AWS_SDK_URL_PARSER("dependencies", "@aws-sdk/url-parser", true),
 
-    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", SdkVersion.LIVE, true),
-    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", SdkVersion.LIVE, true),
+    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", true),
+    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", true),
 
-    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", SdkVersion.LIVE, true),
-    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", SdkVersion.LIVE, true),
+    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", true),
+    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", true),
 
-    AWS_SDK_UTIL_UTF8_BROWSER("dependencies", "@aws-sdk/util-utf8-browser", SdkVersion.LIVE, true),
-    AWS_SDK_UTIL_UTF8_NODE("dependencies", "@aws-sdk/util-utf8-node", SdkVersion.LIVE, true),
+    AWS_SDK_UTIL_UTF8_BROWSER("dependencies", "@aws-sdk/util-utf8-browser", true),
+    AWS_SDK_UTIL_UTF8_NODE("dependencies", "@aws-sdk/util-utf8-node", true),
 
-    AWS_SDK_UTIL_WAITERS("dependencies", "@aws-sdk/util-waiter",  SdkVersion.LIVE, false),
+    AWS_SDK_UTIL_WAITERS("dependencies", "@aws-sdk/util-waiter",  false),
 
     // Conditionally added when httpChecksumRequired trait exists
-    MD5_BROWSER("dependencies", "@aws-sdk/md5-js", SdkVersion.LIVE, false),
-    STREAM_HASHER_NODE("dependencies", "@aws-sdk/hash-stream-node", SdkVersion.LIVE, false),
-    STREAM_HASHER_BROWSER("dependencies", "@aws-sdk/hash-blob-browser", SdkVersion.LIVE, false),
-    BODY_CHECKSUM("dependencies", "@aws-sdk/middleware-apply-body-checksum", SdkVersion.LIVE, false),
+    MD5_BROWSER("dependencies", "@aws-sdk/md5-js", false),
+    STREAM_HASHER_NODE("dependencies", "@aws-sdk/hash-stream-node", false),
+    STREAM_HASHER_BROWSER("dependencies", "@aws-sdk/hash-blob-browser", false),
+    BODY_CHECKSUM("dependencies", "@aws-sdk/middleware-apply-body-checksum", false),
 
     // Conditionally added when using an HTTP application protocol.
-    AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", SdkVersion.LIVE, false),
-    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", SdkVersion.LIVE, false),
-    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", SdkVersion.LIVE, false),
+    AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", false),
+    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", false),
+    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@aws-sdk/eventstream-serde-config-resolver",
-            SdkVersion.LIVE, false),
-    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@aws-sdk/eventstream-serde-node", SdkVersion.LIVE, false),
-    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@aws-sdk/eventstream-serde-browser", SdkVersion.LIVE, false),
+            false),
+    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@aws-sdk/eventstream-serde-node", false),
+    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@aws-sdk/eventstream-serde-browser", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^5.2.2", false),
     TYPES_BIG_JS("devDependencies", "@types/big.js", "^4.0.5", false),
 
     // Conditionally added when interacting with specific protocol test bodyMediaType values.
-    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", SdkVersion.LIVE, false),
+    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", false),
 
     // Conditionally added when XML parser needs to be used.
     XML_PARSER("dependencies", "fast-xml-parser", "3.19.0", false),
@@ -99,6 +109,10 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     public final String packageName;
     public final String version;
     public final SymbolDependency dependency;
+
+    TypeScriptDependency(String type, String name, boolean unconditional) {
+        this(type, name, SdkVersion.getVersion(name), unconditional);
+    }
 
     TypeScriptDependency(String type, String name, String version, boolean unconditional) {
         this.dependency = SymbolDependency.builder()
@@ -157,11 +171,44 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     }
 
     /**
-     * Holds package-wide constants, such as the current version of the AWS SDK for JS v3.
+     * Reads the versions of AWS-published libraries from smithy-aws-typescript-codegen, if it's available
+     * on the classpath.
      */
     private static final class SdkVersion {
-        static final String LIVE = "3.18.0";
+        private static final Logger LOGGER = Logger.getLogger(SdkVersion.class.getName());
+        private static final String PROPERTIES_PATH =
+                "/software/amazon/smithy/aws/typescript/codegen/sdkVersions.properties";
+        private static final Map<String, String> VERSIONS;
 
-        private SdkVersion() {}
+        static {
+            Map<String, String> tmpVersions;
+            try {
+                URL versionsUrl = SdkVersion.class.getResource(PROPERTIES_PATH);
+                if (versionsUrl == null) {
+                    throw new IOException();
+                }
+                Properties p = new Properties();
+                try (Reader r =
+                        new BufferedReader(new InputStreamReader(versionsUrl.openStream(), StandardCharsets.UTF_8))) {
+                    p.load(r);
+                }
+                final Map<String, String> versions = new HashMap<>(p.size());
+                p.forEach((k, v) -> {
+                    if (versions.put(k.toString(), v.toString()) != null) {
+                        throw new IllegalArgumentException(String.format("Multiple versions defined for %s", k));
+                    }
+                });
+                tmpVersions = Collections.unmodifiableMap(versions);
+            } catch (IOException e) {
+                LOGGER.info("Could not read AWS dependency versions from smithy-aws-typescript-codegen, "
+                        + "will use 'latest' for AWS dependencies");
+                tmpVersions = Collections.emptyMap();
+            }
+            VERSIONS = tmpVersions;
+        }
+
+        private static String getVersion(String packageName) {
+            return VERSIONS.getOrDefault(packageName, "latest");
+        }
     }
 }
