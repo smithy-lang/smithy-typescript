@@ -8,6 +8,7 @@ export const getRuntimeConfig = (config: ${clientConfigName}) => {
   const clientSharedValues = getSharedRuntimeConfig(config);
   return {
     ...clientSharedValues,
+    ...config,
     runtime: "node",
 ${customizations}
   };

@@ -8,6 +8,7 @@ export const getRuntimeConfig = (config: ${clientConfigName}) => {
   const browserDefaults = getBrowserRuntimeConfig(config);
   return {
     ...browserDefaults,
+    ...config,
     runtime: "react-native",
 ${customizations}
   };

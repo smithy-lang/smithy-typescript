@@ -188,7 +188,6 @@ final class RuntimeConfigGenerator {
         delegator.useFileWriter(target.getTargetFilename(), writer -> {
             // Inject customizations into the ~template.
             writer.indent().onSection("customizations", original -> {
-                // writer.indent();
                 // Start with defaults, use a TreeMap for keeping entries sorted.
                 Map<String, Consumer<TypeScriptWriter>> configs =
                         new TreeMap<>(getDefaultRuntimeConfigs(target));
