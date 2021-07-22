@@ -170,7 +170,6 @@ final class PaginationGenerator implements Runnable {
                 writer.write("hasNext = !!(token);");
             });
 
-            writer.write("// @ts-ignore");
             writer.write("return undefined;");
         });
     }
