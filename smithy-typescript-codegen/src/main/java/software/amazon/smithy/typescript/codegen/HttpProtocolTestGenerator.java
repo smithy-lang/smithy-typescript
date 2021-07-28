@@ -57,6 +57,9 @@ import software.amazon.smithy.model.traits.HttpPrefixHeadersTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.protocoltests.traits.AppliesTo;
+import software.amazon.smithy.protocoltests.traits.HttpMalformedRequestTestCase;
+import software.amazon.smithy.protocoltests.traits.HttpMalformedRequestTestsTrait;
+import software.amazon.smithy.protocoltests.traits.HttpMalformedResponseDefinition;
 import software.amazon.smithy.protocoltests.traits.HttpMessageTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpRequestTestsTrait;
@@ -73,11 +76,12 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * Generates HTTP protocol test cases to be run using Jest.
  *
  * <p>Protocol tests are defined for HTTP protocols using the
- * {@code smithy.test#httpRequestTests} and {@code smithy.test#httpResponseTests}
- * traits. When found on operations or errors attached to operations, a
- * protocol test case will be generated that asserts that the protocol
- * serialization and deserialization code creates the correct HTTP requests
- * and responses for a specific set of parameters.
+ * {@code smithy.test#httpRequestTests}, {@code smithy.test#httpResponseTests}
+ * and {@code smithy.test#httpMalformedRequestTests} traits. When found on
+ * operations or errors attached to operations, a protocol test case will be
+ * generated that asserts that the protocol serialization and deserialization
+ * code creates the correct HTTP requests and responses for a specific set of
+ * parameters.
  *
  * TODO: try/catch and if/else are still cumbersome with TypeScriptWriter.
  */
@@ -96,6 +100,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private final Set<String> additionalStubs = new TreeSet<>();
     private final ProtocolGenerator protocolGenerator;
     private final TestFilter testFilter;
+    private final MalformedRequestTestFilter malformedRequestTestFilter;
     private final GenerationContext context;
 
     private TypeScriptWriter writer;
@@ -103,7 +108,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
     public HttpProtocolTestGenerator(
             GenerationContext context,
             ProtocolGenerator protocolGenerator,
-            TestFilter testFilter
+            TestFilter testFilter,
+            MalformedRequestTestFilter malformedRequestTestFilter
     ) {
         this.settings = context.getSettings();
         this.model = context.getModel();
@@ -113,7 +119,16 @@ public final class HttpProtocolTestGenerator implements Runnable {
         this.protocolGenerator = protocolGenerator;
         serviceSymbol = symbolProvider.toSymbol(service);
         this.testFilter = testFilter;
+        this.malformedRequestTestFilter = malformedRequestTestFilter;
         this.context = context;
+    }
+
+    public HttpProtocolTestGenerator(
+            GenerationContext context,
+            ProtocolGenerator protocolGenerator,
+            TestFilter testFilter
+    ) {
+        this(context, protocolGenerator, testFilter, (service, operation, testCase, typeScriptSettings) -> false);
     }
 
     public HttpProtocolTestGenerator(
@@ -186,6 +201,12 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     onlyIfProtocolMatches(testCase, () -> generateServerResponseTest(operation, testCase));
                 }
             });
+            // 3. Generate malformed request test cases
+            operation.getTrait(HttpMalformedRequestTestsTrait.class).ifPresent(trait -> {
+                for (HttpMalformedRequestTestCase testCase : trait.getTestCases()) {
+                    onlyIfProtocolMatches(testCase, () -> generateMalformedRequestTest(operation, testCase));
+                }
+            });
             // 3. Generate test cases for each error on each operation.
             for (StructureShape error : operationIndex.getErrors(operation)) {
                 if (!error.hasTag("client-only")) {
@@ -204,6 +225,16 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private <T extends HttpMessageTestCase> void onlyIfProtocolMatches(T testCase, Runnable runnable) {
         if (testCase.getProtocol().equals(protocol)) {
             LOGGER.fine(() -> format("Generating protocol test case for %s.%s", service.getId(), testCase.getId()));
+            initializeWriterIfNeeded();
+            runnable.run();
+        }
+    }
+
+    // Only generate test cases when its protocol matches the target protocol.
+    private void onlyIfProtocolMatches(HttpMalformedRequestTestCase testCase, Runnable runnable) {
+        if (testCase.getProtocol().equals(protocol)) {
+            LOGGER.fine(() -> format("Generating malformed request test case for %s.%s",
+                    service.getId(), testCase.getId()));
             initializeWriterIfNeeded();
             runnable.run();
         }
@@ -278,7 +309,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         Map<String, String> headers = testCase.getHeaders().entrySet().stream()
                 .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
                 .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
-        String queryParameters = Node.prettyPrintJson(buildQueryBag(testCase));
+        String queryParameters = Node.prettyPrintJson(buildQueryBag(testCase.getQueryParams()));
         String headerParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(headers));
         String body = testCase.getBody().orElse(null);
 
@@ -290,26 +321,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Create a mock function to set in place of the server operation function so we can capture
             // input and other information.
-            writer.write("let testFunction = jest.fn();");
+            writer.write("const testFunction = jest.fn();");
             writer.write("testFunction.mockReturnValue(Promise.resolve({}));");
 
-            // We use a partial here so that we don't have to define the entire service, but still get the advantages
-            // the type checker, including excess property checking. Later on we'll use `as` to cast this to the
-            // full service so that we can actually use it.
-            writer.openBlock("const testService: Partial<$T<{}>> = {", "};", serviceSymbol, () -> {
-                writer.write("$L: testFunction as $T<{}>,", operationSymbol.getName(), operationSymbol);
-            });
-
-            String getHandlerName = "get" + handlerSymbol.getName();
-            writer.addImport(getHandlerName, null, "./server/");
-            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
-
-            // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
-            writer.openBlock(
-                    "const handler = $L(testService as $T<{}>, (ctx: {}, failures: __ValidationFailure[]) => {",
-                    "});", getHandlerName, serviceSymbol,
-                    () -> writer.write("if (failures) { throw failures; } return undefined;")
-            );
+            boolean usesDefaultValidation = !context.getSettings().isDisableDefaultValidation();
+            setupStubService(operationSymbol, serviceSymbol, handlerSymbol, usesDefaultValidation);
 
             // Construct a new http request according to the test case definition.
             writer.openBlock("const request = new HttpRequest({", "});", () -> {
@@ -333,10 +349,84 @@ public final class HttpProtocolTestGenerator implements Runnable {
         });
     }
 
-    private ObjectNode buildQueryBag(HttpRequestTestCase testCase) {
+    private void generateMalformedRequestTest(OperationShape operation, HttpMalformedRequestTestCase testCase) {
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
+
+        Map<String, String> requestHeaders = testCase.getRequest().getHeaders().entrySet().stream()
+                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
+        String queryParameters = Node.prettyPrintJson(buildQueryBag(testCase.getRequest().getQueryParams()));
+        String requestHeaderParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(requestHeaders));
+        String requestBody = testCase.getRequest().getBody().orElse(null);
+
+        String testName = testCase.getId() + ":MalformedRequest";
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+        openTestBlock(operation, testCase, testName, () -> {
+            Symbol serviceSymbol = symbolProvider.toSymbol(service);
+            Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+
+            // Create a mock function to set in place of the server operation function so we can capture
+            // input and other information.
+            writer.write("const testFunction = jest.fn();");
+            writer.openBlock("testFunction.mockImplementation(() => {", "});", () -> {
+                writer.write("throw new Error($S);", "This request should have been rejected.");
+            });
+
+            boolean usesDefaultValidation = !context.getSettings().isDisableDefaultValidation();
+            setupStubService(operationSymbol, serviceSymbol, handlerSymbol, usesDefaultValidation);
+
+            // Construct a new http request according to the test case definition.
+            writer.openBlock("const request = new HttpRequest({", "});", () -> {
+                writer.write("method: $S,", testCase.getRequest().getMethod());
+                writer.write("hostname: $S,", testCase.getRequest().getHost().orElse("foo.example.com"));
+                writer.write("path: $S,", testCase.getRequest().getUri());
+                writer.write("query: $L,", queryParameters);
+                writer.write("headers: $L,", requestHeaderParameters);
+                if (requestBody != null) {
+                    writer.write("body: Readable.from([$S]),", requestBody);
+                }
+            });
+            writer.write("const r = await handler.handle(request, {});").write("");
+
+            // Assert that the function has been called exactly once.
+            writer.write("expect(testFunction.mock.calls.length).toBe(0);");
+
+            writeHttpResponseAssertions(testCase.getResponse());
+        });
+    }
+
+    private void setupStubService(Symbol operationSymbol,
+                                  Symbol serviceSymbol,
+                                  Symbol handlerSymbol,
+                                  boolean usesDefaultValidation) {
+        // We use a partial here so that we don't have to define the entire service, but still get the advantages
+        // the type checker, including excess property checking. Later on we'll use `as` to cast this to the
+        // full service so that we can actually use it.
+        writer.openBlock("const testService: Partial<$T<{}>> = {", "};", serviceSymbol, () -> {
+            writer.write("$L: testFunction as $T<{}>,", operationSymbol.getName(), operationSymbol);
+        });
+
+        String getHandlerName = "get" + handlerSymbol.getName();
+        writer.addImport(getHandlerName, null, "./server/");
+
+        if (!usesDefaultValidation) {
+            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+
+            // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
+            writer.openBlock(
+                    "const handler = $L(testService as $T<{}>, (ctx: {}, failures: __ValidationFailure[]) => {",
+                    "});", getHandlerName, serviceSymbol,
+                    () -> writer.write("if (failures) { throw failures; } return undefined;")
+            );
+        } else {
+            writer.write("const handler = $L(testService as $T<{}>);", getHandlerName, serviceSymbol);
+        }
+    }
+
+    private ObjectNode buildQueryBag(List<String> queryParams) {
         // The query params in the test definition is a list of strings that looks like
         // "Foo=Bar", so we need to split the keys from the values.
-        Map<String, List<String>> query = testCase.getQueryParams().stream()
+        Map<String, List<String>> query = queryParams.stream()
             .map(pair -> {
                 String[] split = pair.split("=");
                 String key;
@@ -377,13 +467,37 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         writeHttpHeaderAssertions(testCase);
         writeHttpQueryAssertions(testCase);
-        writeHttpBodyAssertions(testCase);
+        testCase.getBody().ifPresent(body -> {
+            writeHttpBodyAssertions(body, testCase.getBodyMediaType().orElse("UNKNOWN"), true);
+        });
     }
 
     private void writeHttpResponseAssertions(HttpResponseTestCase testCase) {
         writer.write("expect(r.statusCode).toBe($L);", testCase.getCode());
         writeHttpHeaderAssertions(testCase);
-        writeHttpBodyAssertions(testCase);
+        testCase.getBody().ifPresent(body -> {
+            writeHttpBodyAssertions(body, testCase.getBodyMediaType().orElse("UNKNOWN"), false);
+        });
+    }
+
+    private void writeHttpResponseAssertions(HttpMalformedResponseDefinition responseDefinition) {
+        writer.write("expect(r.statusCode).toBe($L);", responseDefinition.getCode());
+        responseDefinition.getHeaders().forEach((header, value) -> {
+            header = header.toLowerCase();
+            writer.write("expect(r.headers[$S]).toBeDefined();", header);
+            writer.write("expect(r.headers[$S]).toBe($S);", header, value);
+        });
+        writer.write("");
+        responseDefinition.getBody().ifPresent(body -> {
+            // only one of messageRegex or contents can be present, as it's modeled as a union
+            // so only one of these will execute in practice
+            body.getMessageRegex().ifPresent(regex -> {
+                writeHttpBodyMessageAssertion(regex, body.getMediaType());
+            });
+            body.getContents().ifPresent(contents -> {
+                writeHttpBodyAssertions(contents, body.getMediaType(), false);
+            });
+        });
     }
 
     private void writeHttpQueryAssertions(HttpRequestTestCase testCase) {
@@ -426,37 +540,46 @@ public final class HttpProtocolTestGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeHttpBodyAssertions(HttpMessageTestCase testCase) {
-        testCase.getBody().ifPresent(body -> {
-            // If we expect an empty body, expect it to be falsy.
-            if (body.isEmpty()) {
-                writer.write("expect(r.body).toBeFalsy();");
-                return;
-            }
+    private void writeHttpBodyAssertions(String body, String mediaType, boolean isClientTest) {
+        // If we expect an empty body, expect it to be falsy.
+        if (body.isEmpty()) {
+            writer.write("expect(r.body).toBeFalsy();");
+            return;
+        }
 
-            // Fast fail if we don't have a body.
-            writer.write("expect(r.body).toBeDefined();");
+        // Fast fail if we don't have a body.
+        writer.write("expect(r.body).toBeDefined();");
 
-            // Otherwise load a media type specific comparator and do a comparison.
-            String mediaType = testCase.getBodyMediaType().orElse("UNKNOWN");
-            String comparatorInvoke = registerBodyComparatorStub(mediaType);
+        // Otherwise load a media type specific comparator and do a comparison.
+        String comparatorInvoke = registerBodyComparatorStub(mediaType);
 
-            // If this is a request case then we know we're generating a client test,
-            // because a request case for servers would be comparing parsed objects. We
-            // need to know which is which here to be able to grab the utf8Encoder from
-            // the right place.
-            if (testCase instanceof HttpRequestTestCase) {
-                writer.write("const utf8Encoder = client.config.utf8Encoder;");
-            } else {
-                writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8-node");
-                writer.write("const utf8Encoder = __utf8Encoder;");
-            }
+        // If this is a request case then we know we're generating a client test,
+        // because a request case for servers would be comparing parsed objects. We
+        // need to know which is which here to be able to grab the utf8Encoder from
+        // the right place.
+        if (isClientTest) {
+            writer.write("const utf8Encoder = client.config.utf8Encoder;");
+        } else {
+            writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8-node");
+            writer.write("const utf8Encoder = __utf8Encoder;");
+        }
 
-            // Handle escaping strings with quotes inside them.
-            writer.write("const bodyString = `$L`;", body.replace("\"", "\\\""));
-            writer.write("const unequalParts: any = $L;", comparatorInvoke);
-            writer.write("expect(unequalParts).toBeUndefined();");
-        });
+        // Handle escaping strings with quotes inside them.
+        writer.write("const bodyString = `$L`;", body.replace("\"", "\\\""));
+        writer.write("const unequalParts: any = $L;", comparatorInvoke);
+        writer.write("expect(unequalParts).toBeUndefined();");
+    }
+
+    private void writeHttpBodyMessageAssertion(String messageRegex, String mediaType) {
+        // Fast fail if we don't have a body.
+        writer.write("expect(r.body).toBeDefined();");
+
+        // Otherwise load a media type specific matcher
+        String comparatorInvoke = registerMessageRegexStub(mediaType);
+
+        writer.writeInline("expect(")
+                .writeInline(comparatorInvoke, messageRegex)
+                .write(").toEqual(true);");
     }
 
     private String registerBodyComparatorStub(String mediaType) {
@@ -489,6 +612,18 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
                 return "compareEquivalentUnknownTypeBodies(utf8Encoder, bodyString, r.body)";
+        }
+    }
+
+    private String registerMessageRegexStub(String mediaType) {
+        // Load an additional stub to handle body comparisons for the
+        // set of bodyMediaType values we know of.
+        switch (mediaType) {
+            case "application/json":
+                additionalStubs.add("malformed-request-test-regex-json-stub.ts");
+                return "matchMessageInJsonBody(r.body.toString(), $S)";
+            default:
+                throw new IllegalArgumentException("Unsupported media type for message body regex check: " + mediaType);
         }
     }
 
@@ -815,6 +950,20 @@ public final class HttpProtocolTestGenerator implements Runnable {
         }
     }
 
+    private void openTestBlock(
+            OperationShape operation,
+            HttpMalformedRequestTestCase testCase,
+            String testName,
+            Runnable f
+    ) {
+        // Skipped tests are still generated, just not run.
+        if (malformedRequestTestFilter.skip(service, operation, testCase, settings)) {
+            writer.openBlock("it.skip($S, async() => {", "});\n", testName, f);
+        } else {
+            writer.openBlock("it($S, async () => {", "});\n", testName, f);
+        }
+    }
+
     /**
      * Supports writing out TS specific input types in the generated code
      * through visiting the target shape at the same time as the node. If
@@ -1012,6 +1161,32 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 ServiceShape service,
                 OperationShape operation,
                 HttpMessageTestCase testCase,
+                TypeScriptSettings settings
+        );
+    }
+
+    /**
+     * Functional interface for skipping malformed request tests.
+     */
+    @FunctionalInterface
+    public interface MalformedRequestTestFilter {
+        /**
+         * A function that determines whether or not to skip a malformed request test.
+         *
+         * <p>A test might be temporarily skipped if it's a known failure that
+         * will be addressed later, or if the test in question asserts a
+         * serialized message that can have multiple valid forms.
+         *
+         * @param service The service for which tests are being generated.
+         * @param operation The operation for which tests are being generated.
+         * @param testCase The malformed request test case in question.
+         * @param settings The settings being used to generate the test service.
+         * @return True if the test should be skipped, false otherwise.
+         */
+        boolean skip(
+                ServiceShape service,
+                OperationShape operation,
+                HttpMalformedRequestTestCase testCase,
                 TypeScriptSettings settings
         );
     }
