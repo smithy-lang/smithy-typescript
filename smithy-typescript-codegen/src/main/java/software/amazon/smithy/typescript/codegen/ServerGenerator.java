@@ -219,6 +219,7 @@ final class ServerGenerator {
         writer.addImport("OperationOutput", "__OperationOutput", "@aws-smithy/server-common");
         writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
+        writer.addImport("isFrameworkException", "__isFrameworkException", "@aws-smithy/server-common");
 
         writer.openBlock("async function handle<S, O extends keyof S & string, Context>(",
                 "): Promise<__HttpResponse> {",
@@ -241,6 +242,9 @@ final class ServerGenerator {
             });
         });
         writer.indent();
+        writer.openBlock("if (__isFrameworkException(error)) {", "};", () -> {
+            writer.write("return serializeFrameworkException(error, serdeContextBase);");
+        });
         writer.write("return serializeFrameworkException(new __SerializationException(), "
                 + "serdeContextBase);");
         writer.closeBlock("}");

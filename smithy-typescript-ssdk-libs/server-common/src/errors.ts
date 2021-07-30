@@ -15,7 +15,19 @@
 
 import { SmithyException } from "@aws-sdk/smithy-client";
 
-export type SmithyFrameworkException = InternalFailureException | UnknownOperationException | SerializationException;
+export type SmithyFrameworkException =
+  | InternalFailureException
+  | UnknownOperationException
+  | SerializationException
+  | UnsupportedMediaTypeException
+  | NotAcceptableException;
+
+export const isFrameworkException = (error: any): error is SmithyFrameworkException => {
+  if (!error.hasOwnProperty("$frameworkError")) {
+    return false;
+  }
+  return error.$frameworkError;
+};
 
 export class InternalFailureException implements SmithyException {
   readonly name = "InternalFailure";
@@ -26,14 +38,28 @@ export class InternalFailureException implements SmithyException {
 
 export class UnknownOperationException implements SmithyException {
   readonly name = "UnknownOperationException";
-  readonly $fault = "server";
+  readonly $fault = "client";
   readonly statusCode = 404;
   readonly $frameworkError = true;
 }
 
 export class SerializationException implements SmithyException {
   readonly name = "SerializationException";
-  readonly $fault = "server";
+  readonly $fault = "client";
   readonly statusCode = 400;
+  readonly $frameworkError = true;
+}
+
+export class UnsupportedMediaTypeException implements SmithyException {
+  readonly name = "UnsupportedMediaTypeException";
+  readonly $fault = "client";
+  readonly statusCode = 415;
+  readonly $frameworkError = true;
+}
+
+export class NotAcceptableException implements SmithyException {
+  readonly name = "NotAcceptableException";
+  readonly $fault = "client";
+  readonly statusCode = 406;
   readonly $frameworkError = true;
 }

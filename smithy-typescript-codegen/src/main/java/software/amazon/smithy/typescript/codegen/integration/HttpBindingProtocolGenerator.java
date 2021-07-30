@@ -1651,6 +1651,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  output: $T,\n"
                 + "  context: $L\n"
                 + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
+            handleContentType(context, operation, bindingIndex);
+            handleAccept(context, operation, bindingIndex);
             // Start deserializing the response.
             writer.openBlock("const contents: $T = {", "};", inputType, () -> {
                 // Only set a type and the members if we have output.
@@ -1675,6 +1677,95 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
+    }
+
+    private void handleContentType(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex
+    ) {
+        // Don't enforce any restrictions on a blob bodies if they don't have a
+        // modeled media type. There are plenty of valid reasons for wanting to
+        // accept a range of media types in this case, like supporting multiple
+        // image/video formats.
+        if (bodyIsBlobWithoutMediaType(context, bindingIndex.getRequestBindings(operation).values())) {
+            return;
+        }
+
+        TypeScriptWriter writer = context.getWriter();
+        writer.addImport("UnsupportedMediaTypeException",
+                "__UnsupportedMediaTypeException",
+                "@aws-smithy/server-common");
+        Optional<String> optionalContentType = bindingIndex.determineRequestContentType(
+                operation, getDocumentContentType());
+        writer.write("const contentTypeHeaderKey: string | undefined = Object.keys(output.headers)"
+                + ".find(key => key.toLowerCase() === 'content-type');");
+        writer.openBlock("if (contentTypeHeaderKey !== undefined && contentTypeHeaderKey !== null) {", "};", () -> {
+            writer.write("const contentType = output.headers[contentTypeHeaderKey];");
+            if (optionalContentType.isPresent() || operation.getInput().isPresent()) {
+                String contentType = optionalContentType.orElse(getDocumentContentType());
+                // If the operation accepts a content type, it must be either unset or the expected value.
+                writer.openBlock("if (contentType !== undefined && contentType !== $S) {", "};", contentType, () -> {
+                    writer.write("throw new __UnsupportedMediaTypeException();");
+                });
+            } else {
+                // If the operation doesn't accept a content type, it must not be set.
+                writer.openBlock("if (contentType !== undefined) {", "};", () -> {
+                    writer.write("throw new __UnsupportedMediaTypeException();");
+                });
+            }
+        });
+    }
+
+    private void handleAccept(
+            GenerationContext context,
+            OperationShape operation,
+            HttpBindingIndex bindingIndex
+    ) {
+        // Don't enforce any restrictions on a blob bodies if they don't have a
+        // modeled media type. There are plenty of valid reasons for wanting to
+        // accept a range of media types in this case, like supporting multiple
+        // image/video formats.
+        if (bodyIsBlobWithoutMediaType(context, bindingIndex.getResponseBindings(operation).values())) {
+            return;
+        }
+
+        TypeScriptWriter writer = context.getWriter();
+        Optional<String> optionalContentType = bindingIndex.determineResponseContentType(
+                operation, getDocumentContentType());
+        writer.addImport("NotAcceptableException",
+                "__NotAcceptableException",
+                "@aws-smithy/server-common");
+        writer.write("const acceptHeaderKey: string | undefined = Object.keys(output.headers)"
+                + ".find(key => key.toLowerCase() === 'accept');");
+        writer.openBlock("if (acceptHeaderKey !== undefined && acceptHeaderKey !== null) {", "};", () -> {
+            writer.write("const accept = output.headers[acceptHeaderKey];");
+            if (optionalContentType.isPresent() || operation.getOutput().isPresent()) {
+                String contentType = optionalContentType.orElse(getDocumentContentType());
+                // If the operation will return a content type, ensure that the accept matches.
+                writer.openBlock("if (accept !== undefined && accept !== $S) {", "};", contentType, () -> {
+                    writer.write("throw new __NotAcceptableException();");
+                });
+            } else {
+                // If the operation won't return a content-type, ensure that accept isn't set.
+                writer.openBlock("if (accept !== undefined) {", "};", () -> {
+                    writer.write("throw new __NotAcceptableException();");
+                });
+            }
+        });
+    }
+
+    private boolean bodyIsBlobWithoutMediaType(
+            GenerationContext context,
+            Collection<HttpBinding> bindings
+    ) {
+        for (HttpBinding binding : bindings)  {
+            if (binding.getLocation() == Location.PAYLOAD) {
+                Shape target = context.getModel().expectShape(binding.getMember().getTarget());
+                return !target.hasTrait(MediaTypeTrait.class) && target.isBlobShape();
+            }
+        }
+        return false;
     }
 
     private void readQueryString(
