@@ -1679,6 +1679,22 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write("");
     }
 
+    /**
+     * Writes out handling for the content-type header. The following rules apply:
+     *
+     *  - The content-type header may always be omitted.
+     *  - If the input shape has a member with the httpPaylaod trait then the following apply:
+     *      - If the target is a shape with the mediaType trait, the value of the content-type header must
+     *        match if present.
+     *      - If the target is a blob shape without a media type, the content-type header may have any value.
+     *      - Otherwise the content-type header must match the implied content type of the target shape, e.g.
+     *        text/plain for a string.
+     *  - If the input shape has no members with the httpPayload trait, but does have members bound to
+     *    the document, the content-type header must match the default protocol document content type if
+     *    present.
+     *  - If the input shape has no members bound to the payload / document, the content-type header
+     *    must not be set.
+     */
     private void handleContentType(
             GenerationContext context,
             OperationShape operation,
@@ -1717,6 +1733,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
     }
 
+    /**
+     * Writes out handling for the accept header. The following rules apply:
+     *
+     *  - The accept header may always be omitted.
+     *  - If the output shape has a member with the httpPaylaod trait then the following apply:
+     *      - If the target is a shape with the mediaType trait, the value of the accept header must
+     *        match if present.
+     *      - If the target is a blob shape without a media type, the accept header may have any value.
+     *      - Otherwise the accept header must match the implied content type of the target shape, e.g.
+     *        text/plain for a string.
+     *  - If the output shape has no members with the httpPayload trait, the accept header must match
+     *    the default protocol document content type if present.
+     */
     private void handleAccept(
             GenerationContext context,
             OperationShape operation,
@@ -1740,18 +1769,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + ".find(key => key.toLowerCase() === 'accept');");
         writer.openBlock("if (acceptHeaderKey !== undefined && acceptHeaderKey !== null) {", "};", () -> {
             writer.write("const accept = output.headers[acceptHeaderKey];");
-            if (optionalContentType.isPresent() || operation.getOutput().isPresent()) {
-                String contentType = optionalContentType.orElse(getDocumentContentType());
-                // If the operation will return a content type, ensure that the accept matches.
-                writer.openBlock("if (accept !== undefined && accept !== $S) {", "};", contentType, () -> {
-                    writer.write("throw new __NotAcceptableException();");
-                });
-            } else {
-                // If the operation won't return a content-type, ensure that accept isn't set.
-                writer.openBlock("if (accept !== undefined) {", "};", () -> {
-                    writer.write("throw new __NotAcceptableException();");
-                });
-            }
+            String contentType = optionalContentType.orElse(getDocumentContentType());
+            // Validate that the content type matches the protocol default, or what's modeled if there's
+            // a modeled type.
+            writer.openBlock("if (accept !== undefined && accept !== $S) {", "};", contentType, () -> {
+                writer.write("throw new __NotAcceptableException();");
+            });
         });
     }
 
