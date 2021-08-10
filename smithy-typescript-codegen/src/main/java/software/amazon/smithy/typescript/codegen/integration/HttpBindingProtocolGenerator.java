@@ -1683,7 +1683,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Writes out handling for the content-type header. The following rules apply:
      *
      *  - The content-type header may always be omitted.
-     *  - If the input shape has a member with the httpPaylaod trait then the following apply:
+     *  - If the input shape has a member with the httpPayload trait then the following apply:
      *      - If the target is a shape with the mediaType trait, the value of the content-type header must
      *        match if present.
      *      - If the target is a blob shape without a media type, the content-type header may have any value.
@@ -1737,7 +1737,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * Writes out handling for the accept header. The following rules apply:
      *
      *  - The accept header may always be omitted.
-     *  - If the output shape has a member with the httpPaylaod trait then the following apply:
+     *  - If the output shape has a member with the httpPayload trait then the following apply:
      *      - If the target is a shape with the mediaType trait, the value of the accept header must
      *        match if present.
      *      - If the target is a blob shape without a media type, the accept header may have any value.
