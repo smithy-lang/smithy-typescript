@@ -130,42 +130,42 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String byteShape(ByteShape shape) {
-        return expectNumber();
+        return expectInteger();
     }
 
     @Override
     public String shortShape(ShortShape shape) {
-        return expectNumber();
+        return expectInteger();
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return expectNumber();
+        return expectInteger();
     }
 
     @Override
     public String longShape(LongShape shape) {
-        return expectNumber();
+        return expectInteger();
     }
 
     @Override
     public String floatShape(FloatShape shape) {
-        return handleFloat();
+        return limitedParseFloat();
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return handleFloat();
+        return limitedParseFloat();
     }
 
-    private String expectNumber() {
-        context.getWriter().addImport("expectNumber", "__expectNumber", "@aws-sdk/smithy-client");
-        return "__expectNumber(" + dataSource + ")";
+    private String expectInteger() {
+        context.getWriter().addImport("expectInt", "__expectInt", "@aws-sdk/smithy-client");
+        return "__expectInt(" + dataSource + ")";
     }
 
-    private String handleFloat() {
-        context.getWriter().addImport("handleFloat", "__handleFloat", "@aws-sdk/smithy-client");
-        return "__handleFloat(" + dataSource + ")";
+    private String limitedParseFloat() {
+        context.getWriter().addImport("limitedParseFloat", "__limitedParseFloat", "@aws-sdk/smithy-client");
+        return "__limitedParseFloat(" + dataSource + ")";
     }
 
     @Override

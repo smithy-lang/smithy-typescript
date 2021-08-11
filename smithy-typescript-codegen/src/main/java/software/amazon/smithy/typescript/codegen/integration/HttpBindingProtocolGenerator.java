@@ -1135,7 +1135,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             dataSource = "Array.from(" + dataSource + ".values())";
         }
         String collectionTargetValue = getInputValue(context, bindingType, "_entry", targetMember, collectionTarget);
-        String iteratedParam = "(" + dataSource + " || []).map(_entry => " + collectionTargetValue + ")";
+        String iteratedParam = "(" + dataSource + " || []).map(_entry => " + collectionTargetValue + " as any)";
         switch (bindingType) {
             case HEADER:
                 return iteratedParam + ".join(', ')";
@@ -2565,7 +2565,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Shape target
     ) {
         if (target instanceof NumberShape) {
-            return getNumberOutputParam(bindingType, dataSource, target);
+            return getNumberOutputParam(context, bindingType, dataSource, target);
         } else if (target instanceof BooleanShape) {
             return getBooleanOutputParam(context, bindingType, dataSource);
         } else if (target instanceof StringShape) {
@@ -2691,7 +2691,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case QUERY_PARAMS:
             case QUERY:
-                return String.format("%1$s.map(_entry => %2$s)",
+                return String.format("%1$s.map(_entry => %2$s as any)",
                         dataSource, collectionTargetValue);
             case LABEL:
                 dataSource = "(" + dataSource + " || \"\")";
@@ -2699,7 +2699,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 outputParam = "" + dataSource + ".split('/')";
 
                 // Iterate over each entry and do deser work.
-                outputParam += ".map(_entry => " + collectionTargetValue + ")";
+                outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
 
                 return outputParam;
             case HEADER:
@@ -2722,7 +2722,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
 
                 // Iterate over each entry and do deser work.
-                outputParam += ".map(_entry => " + collectionTargetValue + ")";
+                outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
 
                 return outputParam;
             default:
@@ -2770,15 +2770,22 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output number.
      */
-    private String getNumberOutputParam(Location bindingType, String dataSource, Shape target) {
+    private String getNumberOutputParam(
+            GenerationContext context,
+            Location bindingType,
+            String dataSource,
+            Shape target
+    ) {
         switch (bindingType) {
             case QUERY:
             case LABEL:
             case HEADER:
                 if (target instanceof FloatShape || target instanceof DoubleShape) {
-                    return "parseFloat(" + dataSource + ")";
+                    context.getWriter().addImport("strictParseFloat", "__strictParseFloat", "@aws-sdk/smithy-client");
+                    return "__strictParseFloat(" + dataSource + ")";
                 }
-                return "parseInt(" + dataSource + ", 10)";
+                context.getWriter().addImport("strictParseInt", "__strictParseInt", "@aws-sdk/smithy-client");
+                return "__strictParseInt(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected number binding location `" + bindingType + "`");
         }
