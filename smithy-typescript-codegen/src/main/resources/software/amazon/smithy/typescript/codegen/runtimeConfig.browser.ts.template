@@ -4,7 +4,7 @@ import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shar
 /**
  * @internal
  */
-export const getRuntimeConfig = (config: ${clientConfigName} = {}) => {
+export const getRuntimeConfig = (config: ${clientConfigName}) => {
   const clientSharedValues = getSharedRuntimeConfig(config);
   return {
     ...clientSharedValues,

@@ -86,23 +86,29 @@ public class RuntimeConfigGeneratorTest {
 
         // Does the runtimeConfig.shared.ts file expand the template properties properly?
         String runtimeConfigSharedContents = manifest.getFileString("runtimeConfig.shared.ts").get();
+        assertThat(runtimeConfigSharedContents,
+                containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
         assertThat(runtimeConfigSharedContents, containsString("apiVersion: \"1.0.0\","));
-        assertThat(runtimeConfigSharedContents, containsString("syn: 'ack2',"));
-        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
+        assertThat(runtimeConfigSharedContents, containsString("config?.syn ?? syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
 
         // Does the runtimeConfig.ts file expand the template properties properly?
         String runtimeConfigContents = manifest.getFileString("runtimeConfig.ts").get();
         assertThat(runtimeConfigContents,
                    containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
-        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
+        assertThat(runtimeConfigSharedContents,
+                containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
+        assertThat(runtimeConfigContents, containsString("config?.syn ?? syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
 
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
         String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.browser.ts").get();
         assertThat(runtimeConfigBrowserContents,
                    containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
-        assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
-        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
+        assertThat(runtimeConfigSharedContents,
+                containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
+        assertThat(runtimeConfigContents, containsString("config?.syn ?? syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
 
         // Does the runtimeConfig.native.ts file expand the browser template properties properly?
         String runtimeConfigNativeContents = manifest.getFileString("runtimeConfig.native.ts").get();
@@ -111,7 +117,9 @@ public class RuntimeConfigGeneratorTest {
         assertThat(runtimeConfigNativeContents,
                 containsString(
                         "import { getRuntimeConfig as getBrowserRuntimeConfig } from \"./runtimeConfig.browser\";"));
-        assertThat(runtimeConfigContents, containsString("syn: 'ack2',"));
-        assertThat(runtimeConfigSharedContents, containsString("foo: 'bar',"));
+        assertThat(runtimeConfigSharedContents,
+                containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
+        assertThat(runtimeConfigContents, containsString("config?.syn ?? syn: 'ack2',"));
+        assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
     }
 }
