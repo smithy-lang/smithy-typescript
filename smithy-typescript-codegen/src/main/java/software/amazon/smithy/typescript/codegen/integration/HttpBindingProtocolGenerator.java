@@ -273,7 +273,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.openBlock("const mux = new httpbinding.HttpBindingMux<$S, $S>([", "]);",
                 context.getService().getId().getName(),
-                operation.getId().getName(),
+                context.getSymbolProvider().toSymbol(operation).getName(),
                 () -> {
                     HttpTrait httpTrait = operation.expectTrait(HttpTrait.class);
                     generateUriSpec(context, operation, httpTrait);
@@ -287,10 +287,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
 
         String serviceName = context.getService().getId().getName();
+        String operationName = context.getSymbolProvider().toSymbol(operation).getName();
 
         writer.openBlock("new httpbinding.UriSpec<$S, $S>(", "),",
                 serviceName,
-                operation.getId().getName(),
+                operationName,
                 () -> {
                     writer.write("'$L',", httpTrait.getMethod());
                     writer.openBlock("[", "],", () -> {
@@ -323,8 +324,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             }
                         });
                     });
-                    writer.writeInline("{ service: $S, operation: $S }",
-                            serviceName, operation.getId().getName());
+                    writer.writeInline("{ service: $S, operation: $S }", serviceName, operationName);
                 });
     }
 
@@ -404,7 +404,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>, "
                             + "customizer: __ValidationCustomizer<$S>): "
                             + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
-                    operationHandlerSymbol.getName(), inputType, outputType, operation.getId().getName());
+                    operationHandlerSymbol.getName(), inputType, outputType, operationSymbol.getName());
         } else {
             writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>): "
                             + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
@@ -418,7 +418,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.addImport("generateValidationSummary", "__generateValidationSummary", "@aws-smithy/server-common");
             writer.addImport("generateValidationMessage", "__generateValidationMessage", "@aws-smithy/server-common");
             writer.openBlock("const customizer: __ValidationCustomizer<$S> = (ctx, failures) => {", "};",
-                operation.getId().getName(),
+                operationSymbol.getName(),
                 () -> {
                     writeDefaultValidationCustomizer(writer);
                 }
@@ -451,8 +451,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             SymbolProvider symbolProvider
     ) {
         return operation -> {
-            Symbol symbol = symbolProvider.toSymbol(operation).expectProperty("serializerType", Symbol.class);
-            writer.write("case $S: return new $T();", operation.getId().getName(), symbol);
+            Symbol operationSymbol = symbolProvider.toSymbol(operation);
+            Symbol symbol = operationSymbol.expectProperty("serializerType", Symbol.class);
+            writer.write("case $S: return new $T();", operationSymbol.getName(), symbol);
         };
     }
 
