@@ -36,7 +36,7 @@ final class ServerGenerator {
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         writer.writeInline("export type $L = ", serviceSymbol.expectProperty("operations", Symbol.class).getName());
         for (Iterator<OperationShape> iter = operations.iterator(); iter.hasNext();) {
-            writer.writeInline("$S", iter.next().getId().getName());
+            writer.writeInline("$S", symbolProvider.toSymbol(iter.next()).getName());
             if (iter.hasNext()) {
                 writer.writeInline(" | ");
             }
@@ -109,14 +109,13 @@ final class ServerGenerator {
                 });
                 writer.openBlock("switch (target.operation) {", "}", () -> {
                     for (OperationShape operation : operations) {
-                        String opName = operation.getId().getName();
                         Symbol operationSymbol = symbolProvider.toSymbol(operation);
                         Symbol inputSymbol = operationSymbol.expectProperty("inputType", Symbol.class);
-                        writer.openBlock("case $S : {", "}", opName, () -> {
+                        writer.openBlock("case $S : {", "}", operationSymbol.getName(), () -> {
                             writer.write("return handle(request, context, $1S, this.serializerFactory($1S), "
-                                    + "this.service.$2L, this.serializeFrameworkException, $3T.validate, "
+                                    + "this.service.$1L, this.serializeFrameworkException, $2T.validate, "
                                     + "this.validationCustomizer);",
-                                    opName, operationSymbol.getName(), inputSymbol);
+                                    operationSymbol.getName(), inputSymbol);
                         });
                     }
                 });
@@ -133,9 +132,9 @@ final class ServerGenerator {
         writeSerdeContextBase(writer);
         writeHandleFunction(writer);
 
-        String operationName = operation.getId().getName();
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
+        String operationName = operationSymbol.getName();
 
         Symbol inputSymbol = operationSymbol.expectProperty("inputType", Symbol.class);
         Symbol outputSymbol = operationSymbol.expectProperty("outputType", Symbol.class);

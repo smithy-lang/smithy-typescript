@@ -165,7 +165,7 @@ final class ServerCommandGenerator implements Runnable {
 
         writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
         writer.openBlock("export class $L implements __OperationSerializer<$T<any>, $S, $T> {", "}",
-                serializerName, serverSymbol, operation.getId().getName(), errorsType, () -> {
+                serializerName, serverSymbol, operationSymbol.getName(), errorsType, () -> {
             String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
             String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
             writer.addImport(serializerFunction, null,
