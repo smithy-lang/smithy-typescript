@@ -197,7 +197,7 @@ final class RuntimeConfigGenerator {
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
                 configs.forEach((key, value) -> {
-                    writer.indent(indentation).disableNewlines().openBlock("$1L: config.$1L ?? ", ",\n", key,
+                    writer.indent(indentation).disableNewlines().openBlock("$1L: config?.$1L ?? ", ",\n", key,
                         () -> {
                             value.accept(writer);
                         });

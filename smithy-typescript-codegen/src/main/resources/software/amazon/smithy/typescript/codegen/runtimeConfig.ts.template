@@ -5,7 +5,7 @@ import { emitWarningIfUnsupportedVersion } from "@aws-sdk/smithy-client";
 /**
  * @internal
  */
-export const getRuntimeConfig = (config: ${clientConfigName} = {}) => {
+export const getRuntimeConfig = (config: ${clientConfigName}) => {
   emitWarningIfUnsupportedVersion(process.version);
   const clientSharedValues = getSharedRuntimeConfig(config);
   return {
