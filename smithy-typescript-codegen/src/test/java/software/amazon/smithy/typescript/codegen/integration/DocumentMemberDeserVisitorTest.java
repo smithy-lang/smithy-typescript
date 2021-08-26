@@ -69,12 +69,12 @@ public class DocumentMemberDeserVisitorTest {
 
         return ListUtils.of(new Object[][]{
                 {BooleanShape.builder().id(id).build(), "__expectBoolean(" + DATA_SOURCE + ")"},
-                {ByteShape.builder().id(id).build(), "__expectInt(" + DATA_SOURCE + ")"},
-                {DoubleShape.builder().id(id).build(), "__limitedParseFloat(" + DATA_SOURCE + ")"},
-                {FloatShape.builder().id(id).build(), "__limitedParseFloat(" + DATA_SOURCE + ")"},
-                {IntegerShape.builder().id(id).build(), "__expectInt(" + DATA_SOURCE + ")"},
-                {LongShape.builder().id(id).build(), "__expectInt(" + DATA_SOURCE + ")"},
-                {ShortShape.builder().id(id).build(), "__expectInt(" + DATA_SOURCE + ")"},
+                {ByteShape.builder().id(id).build(), "__expectByte(" + DATA_SOURCE + ")"},
+                {DoubleShape.builder().id(id).build(), "__limitedParseDouble(" + DATA_SOURCE + ")"},
+                {FloatShape.builder().id(id).build(), "__limitedParseFloat32(" + DATA_SOURCE + ")"},
+                {IntegerShape.builder().id(id).build(), "__expectInt32(" + DATA_SOURCE + ")"},
+                {LongShape.builder().id(id).build(), "__expectLong(" + DATA_SOURCE + ")"},
+                {ShortShape.builder().id(id).build(), "__expectShort(" + DATA_SOURCE + ")"},
                 {StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")"},
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
