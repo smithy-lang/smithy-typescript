@@ -2207,12 +2207,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!documentBindings.isEmpty()) {
             // If the response has document bindings, the body can be parsed to a JavaScript object.
-            String bodyLocation = "(await parseBody(output.body, context))";
+            writer.addImport("expectObject", "__expectObject", "@aws-sdk/smithy-client");
+            writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
+            String bodyLocation = "(__expectObject(await parseBody(output.body, context)))";
             // Use the protocol specific error location for retrieving contents.
             if (operationOrError instanceof StructureShape) {
                 bodyLocation = getErrorBodyLocation(context, bodyLocation);
             }
-            writer.write("const data: any = $L;", bodyLocation);
+            writer.write("const data: { [key: string] : any } = __expectNonNull($L, $S);", bodyLocation, "body");
 
             if (isInput) {
                 deserializeInputDocumentBody(context, operationOrError.asOperationShape().get(), documentBindings);
@@ -2280,8 +2282,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // If payload is non-streaming Blob, only need to collect stream to binary data (Uint8Array).
             writer.write("const data: any = await collectBody(output.body, context);");
         } else if (target instanceof StructureShape || target instanceof UnionShape) {
-            // If payload is Structure or Union, they we need to parse the string into JavaScript object.
-            writer.write("const data: any = await parseBody(output.body, context);");
+            // If payload is Structure or Union, then we need to parse the string into JavaScript object.
+            writer.addImport("expectObject", "__expectObject", "@aws-sdk/smithy-client");
+            writer.write("const data: object | undefined = __expectObject(await parseBody(output.body, context));");
         } else if (target instanceof StringShape || target instanceof DocumentShape) {
             // If payload is String or Document, we need to collect body and convert binary to string.
             writer.write("const data: any = await collectBodyString(output.body, context);");
