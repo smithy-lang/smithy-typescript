@@ -130,42 +130,38 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String byteShape(ByteShape shape) {
-        return expectInteger();
+        context.getWriter().addImport("expectByte", "__expectByte", "@aws-sdk/smithy-client");
+        return "__expectByte(" + dataSource + ")";
     }
 
     @Override
     public String shortShape(ShortShape shape) {
-        return expectInteger();
+        context.getWriter().addImport("expectShort", "__expectShort", "@aws-sdk/smithy-client");
+        return "__expectShort(" + dataSource + ")";
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return expectInteger();
+        context.getWriter().addImport("expectInt32", "__expectInt32", "@aws-sdk/smithy-client");
+        return "__expectInt32(" + dataSource + ")";
     }
 
     @Override
     public String longShape(LongShape shape) {
-        return expectInteger();
+        context.getWriter().addImport("expectLong", "__expectLong", "@aws-sdk/smithy-client");
+        return "__expectLong(" + dataSource + ")";
     }
 
     @Override
     public String floatShape(FloatShape shape) {
-        return limitedParseFloat();
+        context.getWriter().addImport("limitedParseFloat32", "__limitedParseFloat32", "@aws-sdk/smithy-client");
+        return "__limitedParseFloat32(" + dataSource + ")";
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return limitedParseFloat();
-    }
-
-    private String expectInteger() {
-        context.getWriter().addImport("expectInt", "__expectInt", "@aws-sdk/smithy-client");
-        return "__expectInt(" + dataSource + ")";
-    }
-
-    private String limitedParseFloat() {
-        context.getWriter().addImport("limitedParseFloat", "__limitedParseFloat", "@aws-sdk/smithy-client");
-        return "__limitedParseFloat(" + dataSource + ")";
+        context.getWriter().addImport("limitedParseDouble", "__limitedParseDouble", "@aws-sdk/smithy-client");
+        return "__limitedParseDouble(" + dataSource + ")";
     }
 
     @Override
