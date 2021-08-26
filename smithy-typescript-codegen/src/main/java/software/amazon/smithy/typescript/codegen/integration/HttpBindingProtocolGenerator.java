@@ -2781,12 +2781,34 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case QUERY:
             case LABEL:
             case HEADER:
-                if (target instanceof FloatShape || target instanceof DoubleShape) {
-                    context.getWriter().addImport("strictParseFloat", "__strictParseFloat", "@aws-sdk/smithy-client");
-                    return "__strictParseFloat(" + dataSource + ")";
+                switch (target.getType()) {
+                    case DOUBLE:
+                        context.getWriter().addImport(
+                                "strictParseDouble", "__strictParseDouble", "@aws-sdk/smithy-client");
+                        return "__strictParseDouble(" + dataSource + ")";
+                    case FLOAT:
+                        context.getWriter().addImport(
+                                "strictParseFloat", "__strictParseFloat", "@aws-sdk/smithy-client");
+                        return "__strictParseFloat(" + dataSource + ")";
+                    case LONG:
+                        context.getWriter().addImport(
+                                "strictParseLong", "__strictParseLong", "@aws-sdk/smithy-client");
+                        return "__strictParseLong(" + dataSource + ")";
+                    case INTEGER:
+                        context.getWriter().addImport(
+                                "strictParseInt32", "__strictParseInt32", "@aws-sdk/smithy-client");
+                        return "__strictParseInt32(" + dataSource + ")";
+                    case SHORT:
+                        context.getWriter().addImport(
+                                "strictParseShort", "__strictParseShort", "@aws-sdk/smithy-client");
+                        return "__strictParseShort(" + dataSource + ")";
+                    case BYTE:
+                        context.getWriter().addImport(
+                                "strictParseByte", "__strictParseByte", "@aws-sdk/smithy-client");
+                        return "__strictParseByte(" + dataSource + ")";
+                    default:
+                        throw new CodegenException("Unexpected number shape `" + target.getType() + "`");
                 }
-                context.getWriter().addImport("strictParseInt", "__strictParseInt", "@aws-sdk/smithy-client");
-                return "__strictParseInt(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected number binding location `" + bindingType + "`");
         }
