@@ -49,10 +49,12 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.validation.LongValidator;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
@@ -116,6 +118,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         model = context.getModel();
         nonTraits = context.getModelWithoutTraitShapes();
         service = settings.getService(model);
+
+        if (settings.getArtifactType().equals(ArtifactType.SSDK))  {
+            LongValidator validator = new LongValidator(settings);
+            List<ValidationEvent> events = validator.validate(model);
+            System.err.println("Model contained SSDK-specific validation events: \n"
+                    + events.stream().map(ValidationEvent::toString).sorted().collect(Collectors.joining("\n")));
+        }
+
         fileManifest = context.getFileManifest();
         LOGGER.info(() -> String.format("Generating TypeScript %s for service %s",
                 settings.generateClient() ? "client" : "server", service.getId()));
