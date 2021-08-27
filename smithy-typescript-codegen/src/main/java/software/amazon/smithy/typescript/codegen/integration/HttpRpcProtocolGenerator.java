@@ -114,13 +114,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "): Promise<$T> => {", "};", requestType, () -> {
             // Get the hostname, port, and scheme from client's resolved endpoint. Then construct the request from
             // them. The client's resolved endpoint can be default one or supplied by users.
-            writer.write("const {hostname, protocol = \"https\", port} = await context.endpoint();");
+            writer.write("const {hostname, protocol = \"https\", port, path: basePath} = await context.endpoint();");
             writer.openBlock("const contents: any = {", "};", () -> {
                 writer.write("protocol,");
                 writer.write("hostname,");
                 writer.write("port,");
                 writer.write("method: \"POST\",");
-                writer.write("path,");
+                writer.write("path: basePath.endsWith(\"/\") ? basePath.slice(0, -1) + path : basePath + path,");
                 writer.write("headers,");
             });
             writer.openBlock("if (resolvedHostname !== undefined) {", "}", () -> {
