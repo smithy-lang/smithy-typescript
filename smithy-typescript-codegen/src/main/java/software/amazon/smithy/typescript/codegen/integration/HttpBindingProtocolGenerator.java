@@ -2579,7 +2579,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, bindingType, member, format);
+            return HttpProtocolGeneratorUtils.getTimestampOutputParam(
+                    context.getWriter(), dataSource, bindingType, member, format,
+                    requiresNumericEpochSecondsInPayload());
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
@@ -2933,4 +2935,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             StructureShape error,
             List<HttpBinding> documentBindings
     );
+
+    /**
+     * @return true if this protocol disallows string epoch timestamps in payloads.
+     */
+    protected abstract boolean requiresNumericEpochSecondsInPayload();
 }
