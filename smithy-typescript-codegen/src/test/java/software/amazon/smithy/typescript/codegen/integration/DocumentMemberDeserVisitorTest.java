@@ -99,7 +99,6 @@ public class DocumentMemberDeserVisitorTest {
                 {SetShape.builder().id(id).member(member).build(), delegate, source},
                 {MapShape.builder().id(id).key(key).value(value).build(), delegate, source},
                 {StructureShape.builder().id(id).build(), delegate, source},
-                {UnionShape.builder().id(id).addMember(member).build(), delegate, source},
                 {
                     TimestampShape.builder().id(id).build(),
                     "__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
@@ -114,6 +113,12 @@ public class DocumentMemberDeserVisitorTest {
                     TimestampShape.builder().id(id).build(),
                     "__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
                     source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.HTTP_DATE)).build()
+                },
+                {
+                    UnionShape.builder().id(id).addMember(member).build(),
+                    "deserialize" + ProtocolGenerator.getSanitizedName(PROTOCOL) + "Foo"
+                        + "(__expectUnion(" + DATA_SOURCE + "), context)",
+                    source
                 },
         });
     }

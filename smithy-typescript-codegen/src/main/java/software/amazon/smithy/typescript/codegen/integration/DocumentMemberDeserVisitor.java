@@ -271,13 +271,18 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public final String unionShape(UnionShape shape) {
-        return getDelegateDeserializer(shape);
+        context.getWriter().addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
+        return getDelegateDeserializer(shape, "__expectUnion(" + dataSource + ")");
     }
 
     private String getDelegateDeserializer(Shape shape) {
+        return getDelegateDeserializer(shape, dataSource);
+    }
+
+    private String getDelegateDeserializer(Shape shape, String customDataSource) {
         // Use the shape for the function name.
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
         return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
-                + "(" + dataSource + ", context)";
+                + "(" + customDataSource + ", context)";
     }
 }
