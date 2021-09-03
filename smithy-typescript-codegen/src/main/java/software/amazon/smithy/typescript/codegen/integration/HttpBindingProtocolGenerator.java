@@ -2281,10 +2281,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof BlobShape) {
             // If payload is non-streaming Blob, only need to collect stream to binary data (Uint8Array).
             writer.write("const data: any = await collectBody(output.body, context);");
-        } else if (target instanceof StructureShape || target instanceof UnionShape) {
-            // If payload is Structure or Union, then we need to parse the string into JavaScript object.
+        } else if (target instanceof StructureShape) {
+            // If payload is a Structure, then we need to parse the string into JavaScript object.
             writer.addImport("expectObject", "__expectObject", "@aws-sdk/smithy-client");
-            writer.write("const data: object | undefined = __expectObject(await parseBody(output.body, context));");
+            writer.write("const data: { [key: string]: any } | undefined "
+                    + "= __expectObject(await parseBody(output.body, context));");
+        } else if (target instanceof UnionShape) {
+            // If payload is a Union, then we need to parse the string into JavaScript object.
+            writer.addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
+            writer.write("const data: { [key: string]: any } | undefined "
+                    + "= __expectUnion(await parseBody(output.body, context));");
         } else if (target instanceof StringShape || target instanceof DocumentShape) {
             // If payload is String or Document, we need to collect body and convert binary to string.
             writer.write("const data: any = await collectBodyString(output.body, context);");
