@@ -88,35 +88,44 @@ public final class HttpProtocolGeneratorUtils {
      * Given a format and a source of data, generate an output value provider for the
      * timestamp.
      *
+     * @param writer The current writer (so that imports may be added)
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
      * @param bindingType How this value is bound to the operation output.
      * @param shape The shape that represents the value being received.
      * @param format The timestamp format to provide.
+     * @param requireNumericEpochSecondsInPayload if true, paylaod epoch seconds are not allowed to be coerced
+     *                                            from strings.
      * @return Returns a value or expression of the output timestamp.
      */
-    public static String getTimestampOutputParam(String dataSource, Location bindingType, Shape shape, Format format) {
-        String modifiedSource;
+    public static String getTimestampOutputParam(TypeScriptWriter writer,
+                                                 String dataSource,
+                                                 Location bindingType,
+                                                 Shape shape,
+                                                 Format format,
+                                                 boolean requireNumericEpochSecondsInPayload) {
+        // This has always explicitly wrapped the dataSource in "new Date(..)", so it could never generate
+        // an expression that evaluates to null. Codegen relies on this.
+        writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
         switch (format) {
             case DATE_TIME:
+                writer.addImport("parseRfc3339DateTime", "__parseRfc3339DateTime", "@aws-sdk/smithy-client");
+                return String.format("__expectNonNull(__parseRfc3339DateTime(%s))", dataSource);
             case HTTP_DATE:
-                modifiedSource = dataSource;
-                break;
+                writer.addImport("parseRfc7231DateTime", "__parseRfc7231DateTime", "@aws-sdk/smithy-client");
+                return String.format("__expectNonNull(__parseRfc7231DateTime(%s))", dataSource);
             case EPOCH_SECONDS:
-                modifiedSource = dataSource;
-                // Make sure we turn a header, label, or query's forced string into a number.
-                if (bindingType.equals(Location.HEADER) || bindingType.equals(Location.QUERY)
-                        || bindingType.equals(Location.LABEL)) {
-                    modifiedSource = "parseInt(" + modifiedSource + ", 10)";
+                writer.addImport("parseEpochTimestamp", "__parseEpochTimestamp", "@aws-sdk/smithy-client");
+                String modifiedDataSource = dataSource;
+                if (requireNumericEpochSecondsInPayload
+                        && (bindingType == Location.DOCUMENT || bindingType == Location.PAYLOAD)) {
+                    writer.addImport("expectNumber", "__expectNumber", "@aws-sdk/smithy-client");
+                    modifiedDataSource = String.format("__expectNumber(%s)", dataSource);
                 }
-                // Convert whole and decimal numbers to milliseconds.
-                modifiedSource = "Math.round(" + modifiedSource + " * 1000)";
-                break;
+                return String.format("__expectNonNull(__parseEpochTimestamp(%s))", modifiedDataSource);
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
         }
-
-        return "new Date(" + modifiedSource + ")";
     }
 
     /**

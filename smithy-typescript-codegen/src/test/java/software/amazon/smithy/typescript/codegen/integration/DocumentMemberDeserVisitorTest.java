@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.ByteShape;
@@ -31,8 +32,10 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -53,14 +56,23 @@ public class DocumentMemberDeserVisitorTest {
 
     @ParameterizedTest
     @MethodSource("validMemberTargetTypes")
-    public void providesExpectedDefaults(Shape shape, String expected) {
-        DocumentMemberDeserVisitor visitor = new DocumentMemberDeserVisitor(mockContext, DATA_SOURCE, FORMAT);
+    public void providesExpectedDefaults(Shape shape, String expected, MemberShape memberShape) {
+        Shape fakeStruct = StructureShape.builder().id("com.smithy.example#Enclosing").addMember(memberShape).build();
+        mockContext.setModel(Model.builder().addShapes(shape, fakeStruct).build());
+        DocumentMemberDeserVisitor visitor =
+                new DocumentMemberDeserVisitor(mockContext, DATA_SOURCE, FORMAT) {
+                    @Override
+                    protected MemberShape getMemberShape() {
+                        return memberShape;
+                    }
+                };
         assertThat(expected, equalTo(shape.accept(visitor)));
     }
 
     public static Collection<Object[]> validMemberTargetTypes() {
         String id = "com.smithy.example#Foo";
         String targetId = id + "Target";
+        MemberShape source = MemberShape.builder().id("com.smithy.example#Enclosing$sourceMember").target(id).build();
         MemberShape member = MemberShape.builder().id(id + "$member").target(targetId).build();
         MemberShape key = MemberShape.builder().id(id + "$key").target(targetId).build();
         MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
@@ -68,25 +80,41 @@ public class DocumentMemberDeserVisitorTest {
                 + "(" + DATA_SOURCE + ", context)";
 
         return ListUtils.of(new Object[][]{
-                {BooleanShape.builder().id(id).build(), "__expectBoolean(" + DATA_SOURCE + ")"},
-                {ByteShape.builder().id(id).build(), "__expectByte(" + DATA_SOURCE + ")"},
-                {DoubleShape.builder().id(id).build(), "__limitedParseDouble(" + DATA_SOURCE + ")"},
-                {FloatShape.builder().id(id).build(), "__limitedParseFloat32(" + DATA_SOURCE + ")"},
-                {IntegerShape.builder().id(id).build(), "__expectInt32(" + DATA_SOURCE + ")"},
-                {LongShape.builder().id(id).build(), "__expectLong(" + DATA_SOURCE + ")"},
-                {ShortShape.builder().id(id).build(), "__expectShort(" + DATA_SOURCE + ")"},
-                {StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")"},
+                {BooleanShape.builder().id(id).build(), "__expectBoolean(" + DATA_SOURCE + ")", source},
+                {ByteShape.builder().id(id).build(), "__expectByte(" + DATA_SOURCE + ")", source},
+                {DoubleShape.builder().id(id).build(), "__limitedParseDouble(" + DATA_SOURCE + ")", source},
+                {FloatShape.builder().id(id).build(), "__limitedParseFloat32(" + DATA_SOURCE + ")", source},
+                {IntegerShape.builder().id(id).build(), "__expectInt32(" + DATA_SOURCE + ")", source},
+                {LongShape.builder().id(id).build(), "__expectLong(" + DATA_SOURCE + ")", source},
+                {ShortShape.builder().id(id).build(), "__expectShort(" + DATA_SOURCE + ")", source},
+                {StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")", source},
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                    "new __LazyJsonString(" + DATA_SOURCE + ")"
+                    "new __LazyJsonString(" + DATA_SOURCE + ")",
+                    source
                 },
-                {BlobShape.builder().id(id).build(), "context.base64Decoder(" + DATA_SOURCE + ")"},
-                {DocumentShape.builder().id(id).build(), delegate},
-                {ListShape.builder().id(id).member(member).build(), delegate},
-                {SetShape.builder().id(id).member(member).build(), delegate},
-                {MapShape.builder().id(id).key(key).value(value).build(), delegate},
-                {StructureShape.builder().id(id).build(), delegate},
-                {UnionShape.builder().id(id).addMember(member).build(), delegate},
+                {BlobShape.builder().id(id).build(), "context.base64Decoder(" + DATA_SOURCE + ")", source},
+                {DocumentShape.builder().id(id).build(), delegate, source},
+                {ListShape.builder().id(id).member(member).build(), delegate, source},
+                {SetShape.builder().id(id).member(member).build(), delegate, source},
+                {MapShape.builder().id(id).key(key).value(value).build(), delegate, source},
+                {StructureShape.builder().id(id).build(), delegate, source},
+                {UnionShape.builder().id(id).addMember(member).build(), delegate, source},
+                {
+                    TimestampShape.builder().id(id).build(),
+                    "__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
+                    source
+                },
+                {
+                    TimestampShape.builder().id(id).build(),
+                    "__expectNonNull(__parseRfc3339DateTime(" + DATA_SOURCE + "))",
+                    source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.DATE_TIME)).build()
+                },
+                {
+                    TimestampShape.builder().id(id).build(),
+                    "__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
+                    source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.HTTP_DATE)).build()
+                },
         });
     }
 
