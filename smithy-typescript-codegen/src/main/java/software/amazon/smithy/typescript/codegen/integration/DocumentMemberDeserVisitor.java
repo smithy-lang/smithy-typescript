@@ -90,21 +90,6 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
     }
 
     /**
-     * @return the member this visitor is being run against. Used to discover member-applied
-     * traits, such as @timestampFormat. Can be, and defaults, to, null.
-     */
-    protected MemberShape getMemberShape() {
-        return null;
-    }
-
-    /**
-     * @return true if string-formatted epoch seconds in payloads are disallowed. Defaults to false.
-     */
-    protected boolean requiresNumericEpochSecondsInPayload() {
-        return false;
-    }
-
-    /**
      * Gets the generation context.
      *
      * @return The generation context.
@@ -223,25 +208,8 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
     @Override
     public String timestampShape(TimestampShape shape) {
         HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-        Format format;
-        if (getMemberShape() == null) {
-            format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
-        } else {
-            if (!shape.getId().equals(getMemberShape().getTarget())) {
-                throw new IllegalArgumentException(
-                        String.format("Encountered timestamp shape %s that was not the target of member shape %s",
-                                shape.getId(), getMemberShape().getId()));
-            }
-            format = httpIndex.determineTimestampFormat(getMemberShape(), Location.DOCUMENT, defaultTimestampFormat);
-        }
-
-        return HttpProtocolGeneratorUtils.getTimestampOutputParam(
-                context.getWriter(),
-                dataSource,
-                Location.DOCUMENT,
-                shape,
-                format,
-                requiresNumericEpochSecondsInPayload());
+        Format format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
+        return HttpProtocolGeneratorUtils.getTimestampOutputParam(dataSource, Location.DOCUMENT, shape, format);
     }
 
     @Override

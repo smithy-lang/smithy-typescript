@@ -39,16 +39,13 @@ public class HttpProtocolGeneratorUtilsTest {
     @Test
     public void givesCorrectTimestampDeserialization() {
         TimestampShape shape = TimestampShape.builder().id("com.smithy.example#Foo").build();
-        TypeScriptWriter writer = new TypeScriptWriter("foo");
 
-        assertThat("__expectNonNull(__parseRfc3339DateTime(" + DATA_SOURCE + "))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.DATE_TIME, false)));
-        assertThat("__expectNonNull(__parseEpochTimestamp(__expectNumber(" + DATA_SOURCE + ")))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS, true)));
-        assertThat("__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS, false)));
-        assertThat("__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.HTTP_DATE, false)));
+        assertThat("new Date(" + DATA_SOURCE + ")",
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, Location.DOCUMENT, shape, Format.DATE_TIME)));
+        assertThat("new Date(Math.round(" + DATA_SOURCE + " * 1000))",
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS)));
+        assertThat("new Date(" + DATA_SOURCE + ")",
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(DATA_SOURCE, Location.DOCUMENT, shape, Format.HTTP_DATE)));
     }
 
     @Test
