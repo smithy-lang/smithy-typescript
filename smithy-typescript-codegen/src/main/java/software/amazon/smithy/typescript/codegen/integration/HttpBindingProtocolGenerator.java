@@ -1081,7 +1081,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case HEADER:
                 // Encode these to base64 if a MediaType is present.
                 if (target.hasTrait(MediaTypeTrait.ID)) {
-                    return "Buffer.from(" + baseParam + ").toString('base64')";
+                    return "context.base64Encoder(Buffer.from(" + baseParam + "))";
                 }
             default:
                 return baseParam;
@@ -2643,7 +2643,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         // Decode these to base64 if a MediaType is present.
         if (bindingType == Location.HEADER && target.hasTrait(MediaTypeTrait.ID)) {
-            dataSource = "Buffer.from(" + dataSource + ", 'base64').toString('ascii')";
+            dataSource = "Buffer.from(context.base64Decoder(" + dataSource + ")).toString('utf8')";
         }
 
         return HttpProtocolGeneratorUtils.getStringOutputParam(
