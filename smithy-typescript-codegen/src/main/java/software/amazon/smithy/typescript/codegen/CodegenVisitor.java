@@ -70,8 +70,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
             "jest.config.js", "jest.config.js",
+            "tsconfig.json", "tsconfig.json",
             "tsconfig.es.json", "tsconfig.es.json",
-            "tsconfig.json", "tsconfig.json"
+            "tsconfig.types.json", "tsconfig.types.json"
     );
     private static final ShapeId VALIDATION_EXCEPTION_SHAPE =
             ShapeId.fromParts("smithy.framework", "ValidationException");
