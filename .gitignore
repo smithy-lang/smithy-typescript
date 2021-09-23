@@ -29,3 +29,6 @@ wrapper/
 smithy-typescript-integ-tests/dist
 smithy-typescript-integ-tests/node_modules
 smithy-typescript-integ-tests/yarn.lock
+
+# Issue https://github.com/awslabs/smithy-typescript/issues/425
+smithy-typescript-codegen/bin/
