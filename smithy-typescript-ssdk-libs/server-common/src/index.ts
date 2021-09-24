@@ -14,6 +14,7 @@
  */
 
 export * as httpbinding from "./httpbinding";
+export * from "./accept";
 export * from "./errors";
 export * from "./validation";
 
