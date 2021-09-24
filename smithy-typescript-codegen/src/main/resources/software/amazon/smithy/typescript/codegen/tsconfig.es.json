@@ -4,8 +4,6 @@
     "target": "es5",
     "module": "esnext",
     "moduleResolution": "node",
-    "declaration": false,
-    "declarationDir": null,
     "lib": [
       "dom",
       "es5",
