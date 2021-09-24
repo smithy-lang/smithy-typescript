@@ -3,7 +3,7 @@
   "description": "${packageDescription}",
   "version": "${packageVersion}",
   "scripts": {
-    "build": "yarn build:cjs && yarn build:es && build:types",
+    "build": "yarn build:cjs && yarn build:es && yarn build:types",
     "build:cjs": "tsc -p tsconfig.json",
     "build:docs": "yarn clean:docs && typedoc ./",
     "build:es": "tsc -p tsconfig.es.json",
