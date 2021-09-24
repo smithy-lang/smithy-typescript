@@ -1746,6 +1746,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *        text/plain for a string.
      *  - If the output shape has no members with the httpPayload trait, the accept header must match
      *    the default protocol document content type if present.
+     *
+     *  Note: matching is performed based on the rules in https://datatracker.ietf.org/doc/html/rfc7231#section-5.3.2
+     *        and any match is considered acceptable, regardless of the supplied accept-params.
      */
     private void handleAccept(
             GenerationContext context,
@@ -1766,6 +1769,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("NotAcceptableException",
                 "__NotAcceptableException",
                 "@aws-smithy/server-common");
+        writer.addImport("acceptMatches", "__acceptMatches", "@aws-smithy/server-common");
         writer.write("const acceptHeaderKey: string | undefined = Object.keys(output.headers)"
                 + ".find(key => key.toLowerCase() === 'accept');");
         writer.openBlock("if (acceptHeaderKey !== undefined && acceptHeaderKey !== null) {", "};", () -> {
@@ -1773,9 +1777,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             String contentType = optionalContentType.orElse(getDocumentContentType());
             // Validate that the content type matches the protocol default, or what's modeled if there's
             // a modeled type.
-            writer.openBlock("if (accept !== undefined && accept !== $S) {", "};", contentType, () -> {
-                writer.write("throw new __NotAcceptableException();");
-            });
+            writer.openBlock("if (!__acceptMatches(accept, $S)) {", "};", contentType,
+                    () -> writer.write("throw new __NotAcceptableException();"));
         });
     }
 
