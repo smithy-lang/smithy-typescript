@@ -435,9 +435,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         public String formatModuleName(Shape shape, String name) {
             // All shapes except for the service and operations are stored in models.
             if (shape.getType() == ShapeType.SERVICE) {
-                return "./" + name;
+                return "./" + CodegenUtils.SOURCE_FOLDER + "/" + name;
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return "./commands/" + name;
+                return "./" + CodegenUtils.SOURCE_FOLDER + "/commands/" + name;
             } else if (visitedModels.containsKey(shape)) {
                 return visitedModels.get(shape);
             }
