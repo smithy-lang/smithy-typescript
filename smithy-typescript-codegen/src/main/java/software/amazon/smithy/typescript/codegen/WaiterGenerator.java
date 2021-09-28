@@ -64,7 +64,7 @@ class WaiterGenerator implements Runnable {
     }
 
     public static String getOutputFileLocation(String waiterName) {
-        return CodegenUtils.SOURCE_FOLDER + "/waiters/waitFor" + waiterName + ".ts";
+        return "waiters/waitFor" + waiterName + ".ts";
     }
 
     private void generateWaiter() {

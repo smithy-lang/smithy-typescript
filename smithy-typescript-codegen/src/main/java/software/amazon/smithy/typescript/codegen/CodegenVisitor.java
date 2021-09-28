@@ -430,7 +430,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         for (OperationShape operation : containedOperations) {
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
-                String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
+                String outputFilename = CodegenUtils.SOURCE_FOLDER + "/" + PaginationGenerator.getOutputFilelocation(operation);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
                                 nonModularName).run());
@@ -439,7 +439,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
 
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
-                    String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
+                    String outputFilename = CodegenUtils.SOURCE_FOLDER + "/" + WaiterGenerator.getOutputFileLocation(waiterName);
                     writers.useFileWriter(outputFilename, waiterWriter ->
                             new WaiterGenerator(waiterName, waiter, service, operation, waiterWriter,
                                     symbolProvider).run());
@@ -448,7 +448,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (hasPaginatedOperation) {
-            writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
+            writers.useFileWriter(CodegenUtils.SOURCE_FOLDER + "/" + PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
                             nonModularName,
                             serviceSymbol,
