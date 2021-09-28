@@ -115,20 +115,23 @@ final class IndexGenerator {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
-                String modulePath = PaginationGenerator.getOutputFilelocation(operation);
-                writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+                String modulePath = PaginationGenerator.getOutputFilelocation(operation)
+                    .replaceFirst(CodegenUtils.SOURCE_FOLDER, "");
+                writer.write("export * from \".$L\";", modulePath.replace(".ts", ""));
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
-                    String modulePath = WaiterGenerator.getOutputFileLocation(waiterName);
-                    writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+                    String modulePath = WaiterGenerator.getOutputFileLocation(waiterName)
+                        .replaceFirst(CodegenUtils.SOURCE_FOLDER, "");
+                    writer.write("export * from \".$L\";", modulePath.replace(".ts", ""));
                 });
             }
         }
         if (hasPaginatedOperation) {
-            String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
-            writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+            String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE
+                .replaceFirst(CodegenUtils.SOURCE_FOLDER, "");
+            writer.write("export * from \".$L\";", modulePath.replace(".ts", ""));
         }
 
         // Write each custom export.
