@@ -11,7 +11,7 @@
     "incremental": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "outDir": "dist/cjs",
+    "outDir": "dist-cjs",
     "removeComments": true
   },
   "typedocOptions": {
