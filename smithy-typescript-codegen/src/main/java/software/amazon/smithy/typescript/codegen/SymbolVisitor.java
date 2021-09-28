@@ -407,8 +407,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER + namespace;
-        return createSymbolBuilder(shape, typeName, prefixedNamespace)
+        String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER + 
+            (namespace.startsWith(".") ? namespace.substring(1): namespace);
+        return createSymbolBuilder(shape, typeName, namespace)
                 .definitionFile(toFilename(prefixedNamespace));
     }
 
@@ -436,14 +437,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         public String formatModuleName(Shape shape, String name) {
             // All shapes except for the service and operations are stored in models.
             if (shape.getType() == ShapeType.SERVICE) {
-                return name;
+                return "./" + name;
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return "/commands/" + name;
+                return "./commands/" + name;
             } else if (visitedModels.containsKey(shape)) {
                 return visitedModels.get(shape);
             }
             // Add models into buckets no bigger than chunk size.
-            String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
+            String path = "./" + SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
             visitedModels.put(shape, path);
             currentBucketSize++;
             if (currentBucketSize == chunkSize) {
