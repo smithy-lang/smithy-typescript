@@ -75,15 +75,12 @@ class WaiterGenerator implements Runnable {
         writer.addImport("checkExceptions", "checkExceptions", WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterConfiguration", "WaiterConfiguration", WAITABLE_UTIL_PACKAGE);
 
-        String serviceSymbolName = serviceSymbol.getName();
-        writer.addImport(serviceSymbolName, serviceSymbolName, serviceSymbol.getNamespace());
-
         // generates (deprecated) WaitFor....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
                 + " @deprecated Use waitUntil" + waiterName + " instead. "
                 + "waitFor" + waiterName + " does not throw error in non-success cases.");
-        writer.openBlock("export const waitFor$L = async (params: WaiterConfiguration<$L>, input: $T): "
-                + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbolName, inputSymbol, () -> {
+        writer.openBlock("export const waitFor$L = async (params: WaiterConfiguration<$T>, input: $T): "
+                + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
                             waiter.getMaxDelay());
             writer.write("return createWaiter({...serviceDefaults, ...params}, input, checkState);");
@@ -93,8 +90,8 @@ class WaiterGenerator implements Runnable {
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
                 + " @param params - Waiter configuration options.\n"
                 + " @param input - The input to " + operationSymbol.getName() + " for polling.");
-        writer.openBlock("export const waitUntil$L = async (params: WaiterConfiguration<$L>, input: $T): "
-                + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbolName, inputSymbol, () -> {
+        writer.openBlock("export const waitUntil$L = async (params: WaiterConfiguration<$T>, input: $T): "
+                + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
             writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
                     waiter.getMaxDelay());
             writer.write("const result = await createWaiter({...serviceDefaults, ...params}, input, checkState);");
@@ -103,8 +100,8 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateAcceptors() {
-        writer.openBlock("const checkState = async (client: $L, input: $T): Promise<WaiterResult> => {", "}",
-                serviceSymbol.getName(), inputSymbol, () -> {
+        writer.openBlock("const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {", "}",
+                serviceSymbol, inputSymbol, () -> {
                     writer.write("let reason;");
                     writer.openBlock("try {", "}", () -> {
                         writer.write("let result: any = await client.send(new $T(input))", operationSymbol);
