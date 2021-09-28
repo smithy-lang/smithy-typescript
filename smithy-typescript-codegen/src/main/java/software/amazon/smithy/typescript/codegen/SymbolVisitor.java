@@ -455,13 +455,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
+            String modelPrefix = "./" + CodegenUtils.SOURCE_FOLDER + SHAPE_NAMESPACE_PREFIX;
             model.shapes()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
-                    .filter(namespace -> namespace.startsWith(SHAPE_NAMESPACE_PREFIX))
+                    .filter(namespace -> namespace.startsWith(modelPrefix))
                     .distinct()
                     .sorted(Comparator.naturalOrder())
                     .forEach(namespace -> writer.write(
-                        "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
+                        "export * from $S;", namespace.replaceFirst(modelPrefix, "./")));
             fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/models/index.ts", writer.toString());
         }
     }
