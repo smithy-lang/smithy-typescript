@@ -421,7 +421,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      */
     static final class ModuleNameDelegator {
         static final int DEFAULT_CHUNK_SIZE = 300;
-        static final String SHAPE_NAMESPACE_PREFIX = "./models/";
+        static final String SHAPE_NAMESPACE_PREFIX = CodegenUtils.SOURCE_FOLDER + "/models/";
 
         private final Map<Shape, String> visitedModels = new HashMap<>();
         private int bucketCount = 0;
@@ -461,7 +461,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                     .sorted(Comparator.naturalOrder())
                     .forEach(namespace -> writer.write(
                         "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
-            fileManifest.writeFile("models/index.ts", writer.toString());
+            fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/models/index.ts", writer.toString());
         }
     }
 }
