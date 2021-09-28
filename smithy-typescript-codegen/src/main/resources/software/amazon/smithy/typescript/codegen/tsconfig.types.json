@@ -4,5 +4,6 @@
     "removeComments": false,
     "declaration": true,
     "declarationDir": "dist-types"
-  }
+  },
+  "exclude": ["test/**/*", "dist-types/**/*"]
 }
