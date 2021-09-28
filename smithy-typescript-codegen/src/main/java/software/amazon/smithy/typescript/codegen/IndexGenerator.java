@@ -61,7 +61,7 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models/index\";");
-        fileManifest.writeFile("index.ts", writer.toString());
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
