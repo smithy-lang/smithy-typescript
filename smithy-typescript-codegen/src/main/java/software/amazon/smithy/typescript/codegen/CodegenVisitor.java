@@ -418,7 +418,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Generate the non-modular service client.
         Symbol serviceSymbol = symbolProvider.toSymbol(shape);
         String nonModularName = serviceSymbol.getName().replace("Client", "");
-        String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
+        String filename = CodegenUtils.SOURCE_FOLDER + "/" + serviceSymbol.getDefinitionFile().replace("Client", "");
         writers.useFileWriter(filename, writer -> new NonModularServiceGenerator(
                 settings, model, symbolProvider, nonModularName, writer, applicationProtocol).run());
 
