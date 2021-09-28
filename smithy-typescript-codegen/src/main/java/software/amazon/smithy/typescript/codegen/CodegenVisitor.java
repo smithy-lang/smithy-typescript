@@ -373,7 +373,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
-            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
+            String fileName = CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
             writers.useFileWriter(fileName, writer -> {
                 ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
                 context.setProtocolName(protocolGenerator.getName());
