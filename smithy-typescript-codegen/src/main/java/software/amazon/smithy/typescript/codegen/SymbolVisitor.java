@@ -407,8 +407,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        return createSymbolBuilder(shape, typeName, namespace)
-                .definitionFile(toFilename(namespace));
+        return createSymbolBuilder(shape, typeName, "./" + CodegenUtils.SOURCE_FOLDER + "/" + namespace)
+                .definitionFile(toFilename(CodegenUtils.SOURCE_FOLDER + "/" + namespace));
     }
 
     private String toFilename(String namespace) {
@@ -421,7 +421,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      */
     static final class ModuleNameDelegator {
         static final int DEFAULT_CHUNK_SIZE = 300;
-        static final String SHAPE_NAMESPACE_PREFIX = "./" + CodegenUtils.SOURCE_FOLDER + "/models/";
+        static final String SHAPE_NAMESPACE_PREFIX = "./models/";
 
         private final Map<Shape, String> visitedModels = new HashMap<>();
         private int bucketCount = 0;
@@ -435,9 +435,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         public String formatModuleName(Shape shape, String name) {
             // All shapes except for the service and operations are stored in models.
             if (shape.getType() == ShapeType.SERVICE) {
-                return "./" + CodegenUtils.SOURCE_FOLDER + "/" + name;
+                return name;
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return "./" + CodegenUtils.SOURCE_FOLDER + "/commands/" + name;
+                return "/commands/" + name;
             } else if (visitedModels.containsKey(shape)) {
                 return visitedModels.get(shape);
             }
