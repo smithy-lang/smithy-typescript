@@ -70,7 +70,10 @@ final class NonModularServiceGenerator implements Runnable {
 
         // Generate the client and extend from the modular client.
         writer.writeShapeDocs(service);
-        writer.openBlock("export class $L extends $T {", "}", nonModularName, serviceSymbol, () -> {
+        String serviceSymbolName = serviceSymbol.getName();
+        writer.addImport(serviceSymbolName, serviceSymbolName,
+                "./" + CodegenUtils.SOURCE_FOLDER + serviceSymbol.getNamespace().substring(1));
+        writer.openBlock("export class $L extends $L {", "}", nonModularName, serviceSymbolName, () -> {
             Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
             for (OperationShape operation : containedOperations) {
                 Symbol operationSymbol = symbolProvider.toSymbol(operation);
