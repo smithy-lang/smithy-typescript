@@ -135,6 +135,6 @@ final class IndexGenerator {
         for (TypeScriptIntegration integration : integrations) {
             integration.writeAdditionalExports(settings, model, symbolProvider, writer);
         }
-        fileManifest.writeFile("index.ts", writer.toString());
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
     }
 }
