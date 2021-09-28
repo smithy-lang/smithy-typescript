@@ -407,8 +407,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        return createSymbolBuilder(shape, typeName, "./" + CodegenUtils.SOURCE_FOLDER + "/" + namespace)
-                .definitionFile(toFilename("./" + CodegenUtils.SOURCE_FOLDER + "/" + namespace));
+        String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER + namespace;
+        return createSymbolBuilder(shape, typeName, prefixedNamespace)
+                .definitionFile(toFilename(prefixedNamespace));
     }
 
     private String toFilename(String namespace) {
