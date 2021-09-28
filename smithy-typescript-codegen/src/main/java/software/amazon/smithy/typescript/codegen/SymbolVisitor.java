@@ -408,7 +408,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
         return createSymbolBuilder(shape, typeName, "./" + CodegenUtils.SOURCE_FOLDER + "/" + namespace)
-                .definitionFile(toFilename(CodegenUtils.SOURCE_FOLDER + "/" + namespace));
+                .definitionFile(toFilename("./" + CodegenUtils.SOURCE_FOLDER + "/" + namespace));
     }
 
     private String toFilename(String namespace) {
@@ -421,7 +421,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      */
     static final class ModuleNameDelegator {
         static final int DEFAULT_CHUNK_SIZE = 300;
-        static final String SHAPE_NAMESPACE_PREFIX = "./models/";
+        static final String SHAPE_NAMESPACE_PREFIX = "/models/";
 
         private final Map<Shape, String> visitedModels = new HashMap<>();
         private int bucketCount = 0;
