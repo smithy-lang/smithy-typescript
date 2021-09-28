@@ -76,8 +76,7 @@ class WaiterGenerator implements Runnable {
         writer.addImport("WaiterConfiguration", "WaiterConfiguration", WAITABLE_UTIL_PACKAGE);
 
         String serviceSymbolName = serviceSymbol.getName();
-        writer.addImport(serviceSymbolName, serviceSymbolName,
-                "./" + CodegenUtils.SOURCE_FOLDER + serviceSymbol.getNamespace().substring(1));
+        writer.addImport(serviceSymbolName, serviceSymbolName, serviceSymbol.getNamespace());
 
         // generates (deprecated) WaitFor....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"

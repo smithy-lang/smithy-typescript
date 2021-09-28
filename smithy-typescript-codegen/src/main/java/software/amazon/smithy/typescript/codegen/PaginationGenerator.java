@@ -89,17 +89,12 @@ final class PaginationGenerator implements Runnable {
                 outputSymbol.getNamespace());
         String nonModularLocation = serviceSymbol.getNamespace()
                 .replace(serviceSymbol.getName(), nonModularServiceName);
-        writer.addImport(nonModularServiceName,
-                nonModularServiceName,
-                "./" + CodegenUtils.SOURCE_FOLDER + nonModularLocation.substring(1));
-        writer.addImport(serviceSymbol.getName(),
-                serviceSymbol.getName(),
-                "./" + CodegenUtils.SOURCE_FOLDER + serviceSymbol.getNamespace().substring(1));
+        writer.addImport(nonModularServiceName, nonModularServiceName, nonModularLocation);
+        writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
 
         // Import Pagination types
         writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
-        writer.addImport(paginationType, paginationType,
-            "./" + CodegenUtils.SOURCE_FOLDER + "/" + PAGINATION_INTERFACE_FILE.replace(".ts", ""));
+        writer.addImport(paginationType, paginationType, "./" + PAGINATION_INTERFACE_FILE.replace(".ts", ""));
 
         writeCommandRequest();
         writeMethodRequest();
@@ -117,12 +112,8 @@ final class PaginationGenerator implements Runnable {
     ) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         String nonModularLocation = service.getNamespace().replace(service.getName(), nonModularServiceName);
-        writer.addImport(nonModularServiceName,
-            nonModularServiceName,
-            "./" + CodegenUtils.SOURCE_FOLDER + nonModularLocation.substring(1));
-        writer.addImport(service.getName(),
-            service.getName(),
-            "./" + CodegenUtils.SOURCE_FOLDER + service.getNamespace().substring(1));
+        writer.addImport(nonModularServiceName, nonModularServiceName, nonModularLocation);
+        writer.addImport(service.getName(), service.getName(), service.getNamespace());
 
         writer.openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
                 "}", nonModularServiceName, () -> {

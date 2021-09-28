@@ -409,7 +409,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
         String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER + 
             (namespace.startsWith(".") ? namespace.substring(1): namespace);
-        return createSymbolBuilder(shape, typeName, namespace)
+        return createSymbolBuilder(shape, typeName, prefixedNamespace)
                 .definitionFile(toFilename(prefixedNamespace));
     }
 
@@ -456,7 +456,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
-            String modelPrefix = "./" + CodegenUtils.SOURCE_FOLDER + SHAPE_NAMESPACE_PREFIX;
+            String modelPrefix = "./" + CodegenUtils.SOURCE_FOLDER + "/" + SHAPE_NAMESPACE_PREFIX;
             model.shapes()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                     .filter(namespace -> namespace.startsWith(modelPrefix))

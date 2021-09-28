@@ -98,10 +98,9 @@ final class CommandGenerator implements Runnable {
         String configType = ServiceGenerator.getResolvedConfigTypeName(serviceSymbol);
 
         // Add required imports.
-        String serviceSymbolName = "./" + CodegenUtils.SOURCE_FOLDER + serviceSymbol.getNamespace().substring(1);
-        writer.addImport(configType, configType, serviceSymbolName);
-        writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbolName);
-        writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbolName);
+        writer.addImport(configType, configType, serviceSymbol.getNamespace());
+        writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbol.getNamespace());
+        writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbol.getNamespace());
         writer.addImport("Command", "$Command", "@aws-sdk/smithy-client");
         writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", "@aws-sdk/types");
         writer.addImport("Handler", "Handler", "@aws-sdk/types");
