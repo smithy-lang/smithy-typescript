@@ -89,6 +89,14 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     }
 
     /**
+     * @return the member this visitor is being run against. Used to discover member-applied
+     * traits, such as @xmlName. Can be, and defaults, to, null.
+     */
+    protected MemberShape getMemberShape() {
+        return null;
+    }
+
+    /**
      * Gets the generation context.
      *
      * @return The generation context.

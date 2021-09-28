@@ -24,7 +24,7 @@ const compareEquivalentXmlBodies = (
       parsedObjToReturn[key] = parsedObjToReturn[textNodeName];
       delete parsedObjToReturn[textNodeName];
     }
-    return parsedObjToReturn;
+    return parsedObj;
   };
 
   const expectedParts = parseXmlBody(expectedBody);
