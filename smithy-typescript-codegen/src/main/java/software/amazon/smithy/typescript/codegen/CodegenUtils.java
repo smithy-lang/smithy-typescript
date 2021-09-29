@@ -36,7 +36,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public final class CodegenUtils {
 
-    public static String SOURCE_FOLDER = "src";
+    public static final String SOURCE_FOLDER = "src";
 
     private CodegenUtils() {}
 
