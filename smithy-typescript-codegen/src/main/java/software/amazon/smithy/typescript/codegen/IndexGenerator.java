@@ -89,6 +89,10 @@ final class IndexGenerator {
         fileManifest.writeFile("server/index.ts", writer.toString());
     }
 
+    private static String getModulePath(String fileLocation) {
+        return fileLocation.replaceFirst(CodegenUtils.SOURCE_FOLDER, "").replace(".ts", "");
+    }
+
     private static void writeClientExports(
             TypeScriptSettings settings,
             Model model,
@@ -115,23 +119,20 @@ final class IndexGenerator {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
-                String modulePath = PaginationGenerator.getOutputFilelocation(operation)
-                    .replaceFirst(CodegenUtils.SOURCE_FOLDER, "");
-                writer.write("export * from \".$L\";", modulePath.replace(".ts", ""));
+                String modulePath = getModulePath(PaginationGenerator.getOutputFilelocation(operation));
+                writer.write("export * from \".$L\";", modulePath);
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
-                    String modulePath = WaiterGenerator.getOutputFileLocation(waiterName)
-                        .replaceFirst(CodegenUtils.SOURCE_FOLDER, "");
-                    writer.write("export * from \".$L\";", modulePath.replace(".ts", ""));
+                    String modulePath = getModulePath(WaiterGenerator.getOutputFileLocation(waiterName));
+                    writer.write("export * from \".$L\";", modulePath);
                 });
             }
         }
         if (hasPaginatedOperation) {
-            String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE
-                .replaceFirst(CodegenUtils.SOURCE_FOLDER, "");
-            writer.write("export * from \".$L\";", modulePath.replace(".ts", ""));
+            String modulePath = getModulePath(PaginationGenerator.PAGINATION_INTERFACE_FILE);
+            writer.write("export * from \".$L\";", modulePath);
         }
 
         // Write each custom export.
