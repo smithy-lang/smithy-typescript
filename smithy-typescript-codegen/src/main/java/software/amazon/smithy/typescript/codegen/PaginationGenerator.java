@@ -30,7 +30,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class PaginationGenerator implements Runnable {
 
-    static final String PAGINATION_INTERFACE_FILE = "pagination/Interfaces.ts";
+    static final String PAGINATION_INTERFACE_FILE = CodegenUtils.SOURCE_FOLDER + "/pagination/Interfaces.ts";
 
     private final TypeScriptWriter writer;
     private final PaginationInfo paginatedInfo;
@@ -89,9 +89,7 @@ final class PaginationGenerator implements Runnable {
                 outputSymbol.getNamespace());
         String nonModularLocation = serviceSymbol.getNamespace()
                 .replace(serviceSymbol.getName(), nonModularServiceName);
-        writer.addImport(nonModularServiceName,
-                nonModularServiceName,
-                nonModularLocation);
+        writer.addImport(nonModularServiceName, nonModularServiceName, nonModularLocation);
         writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
 
         // Import Pagination types
@@ -104,7 +102,7 @@ final class PaginationGenerator implements Runnable {
     }
 
     static String getOutputFilelocation(OperationShape operation) {
-        return "pagination/" + operation.getId().getName() + "Paginator.ts";
+        return CodegenUtils.SOURCE_FOLDER + "/pagination/" + operation.getId().getName() + "Paginator.ts";
     }
 
     static void generateServicePaginationInterfaces(

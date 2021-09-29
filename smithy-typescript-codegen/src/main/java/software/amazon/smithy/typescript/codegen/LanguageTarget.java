@@ -68,6 +68,6 @@ public enum LanguageTarget {
     abstract String getTemplateFileName();
 
     String getTargetFilename() {
-        return getTemplateFileName().replace(".template", "");
+        return CodegenUtils.SOURCE_FOLDER + "/" + getTemplateFileName().replace(".template", "");
     }
 }

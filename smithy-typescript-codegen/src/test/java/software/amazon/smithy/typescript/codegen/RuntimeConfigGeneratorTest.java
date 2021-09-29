@@ -79,13 +79,13 @@ public class RuntimeConfigGeneratorTest {
         generator.generate(LanguageTarget.SHARED);
         delegator.flushWriters();
 
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.ts"));
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.browser.ts"));
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.native.ts"));
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.shared.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.native.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.shared.ts"));
 
         // Does the runtimeConfig.shared.ts file expand the template properties properly?
-        String runtimeConfigSharedContents = manifest.getFileString("runtimeConfig.shared.ts").get();
+        String runtimeConfigSharedContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.shared.ts").get();
         assertThat(runtimeConfigSharedContents,
                 containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
         assertThat(runtimeConfigSharedContents, containsString("apiVersion: \"1.0.0\","));
@@ -93,7 +93,7 @@ public class RuntimeConfigGeneratorTest {
         assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
 
         // Does the runtimeConfig.ts file expand the template properties properly?
-        String runtimeConfigContents = manifest.getFileString("runtimeConfig.ts").get();
+        String runtimeConfigContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts").get();
         assertThat(runtimeConfigContents,
                    containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
         assertThat(runtimeConfigSharedContents,
@@ -102,7 +102,7 @@ public class RuntimeConfigGeneratorTest {
         assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
 
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
-        String runtimeConfigBrowserContents = manifest.getFileString("runtimeConfig.browser.ts").get();
+        String runtimeConfigBrowserContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts").get();
         assertThat(runtimeConfigBrowserContents,
                    containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
         assertThat(runtimeConfigSharedContents,
@@ -111,7 +111,7 @@ public class RuntimeConfigGeneratorTest {
         assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
 
         // Does the runtimeConfig.native.ts file expand the browser template properties properly?
-        String runtimeConfigNativeContents = manifest.getFileString("runtimeConfig.native.ts").get();
+        String runtimeConfigNativeContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.native.ts").get();
         assertThat(runtimeConfigNativeContents,
                 containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
         assertThat(runtimeConfigNativeContents,

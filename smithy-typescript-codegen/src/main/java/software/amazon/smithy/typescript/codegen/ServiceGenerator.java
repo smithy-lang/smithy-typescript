@@ -92,7 +92,8 @@ final class ServiceGenerator implements Runnable {
     @Override
     public void run() {
         writer.addImport("Client", "__Client", "@aws-sdk/smithy-client");
-        writer.addImport("getRuntimeConfig", "__getRuntimeConfig", "./runtimeConfig");
+        writer.addImport("getRuntimeConfig", "__getRuntimeConfig",
+                "./" + CodegenUtils.SOURCE_FOLDER + "/runtimeConfig");
 
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any

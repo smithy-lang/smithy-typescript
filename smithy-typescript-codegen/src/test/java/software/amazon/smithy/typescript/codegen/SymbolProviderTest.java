@@ -36,9 +36,9 @@ public class SymbolProviderTest {
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("Hello"));
-        assertThat(symbol.getNamespace(), equalTo("./models/models_0"));
+        assertThat(symbol.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
         assertThat(symbol.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol.getDefinitionFile(), equalTo("./models/models_0.ts"));
+        assertThat(symbol.getDefinitionFile(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0.ts"));
     }
 
     @Test
@@ -61,15 +61,15 @@ public class SymbolProviderTest {
         SymbolVisitor.writeModelIndex(model, provider, manifest);
 
         assertThat(symbol1.getName(), equalTo("Hello"));
-        assertThat(symbol1.getNamespace(), equalTo("./models/models_0"));
+        assertThat(symbol1.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
         assertThat(symbol1.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol1.getDefinitionFile(), equalTo("./models/models_0.ts"));
+        assertThat(symbol1.getDefinitionFile(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0.ts"));
 
         assertThat(symbol2.getName(), equalTo("Hello"));
-        assertThat(symbol2.getNamespace(), equalTo("./models/models_0"));
+        assertThat(symbol2.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
         assertThat(symbol2.getNamespaceDelimiter(), equalTo("/"));
-        assertThat(symbol2.getDefinitionFile(), equalTo("./models/models_0.ts"));
-        assertThat(manifest.getFileString("models/index.ts").get(),
+        assertThat(symbol2.getDefinitionFile(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0.ts"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/models/index.ts").get(),
                 containsString("export * from \"./models_0\";"));
     }
 
@@ -114,7 +114,7 @@ public class SymbolProviderTest {
 
         // Normal structure with escaping.
         assertThat(structSymbol.getName(), equalTo("_Object"));
-        assertThat(structSymbol.getNamespace(), equalTo("./models/models_0"));
+        assertThat(structSymbol.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
 
         // Reference to built-in type with no escaping.
         assertThat(memberSymbol.getName(), equalTo("string"));
@@ -197,7 +197,8 @@ public class SymbolProviderTest {
         Symbol commandSymbol = provider.toSymbol(command);
 
         assertThat(commandSymbol.getName(), equalTo("GetFooCommand"));
-        assertThat(commandSymbol.getNamespace(), equalTo("./commands/GetFooCommand"));
+        assertThat(commandSymbol.getNamespace(),
+                equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand"));
     }
 
     @Test

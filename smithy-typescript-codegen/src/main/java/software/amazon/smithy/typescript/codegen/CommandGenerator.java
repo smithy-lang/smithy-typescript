@@ -295,7 +295,8 @@ final class CommandGenerator implements Runnable {
                     ? ProtocolGenerator.getSerFunctionName(symbol, protocolGenerator.getName())
                     : ProtocolGenerator.getDeserFunctionName(symbol, protocolGenerator.getName());
             writer.addImport(serdeFunctionName, serdeFunctionName,
-                             "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
             writer.write("return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
         }
     }

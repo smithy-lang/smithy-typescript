@@ -89,7 +89,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public final class HttpProtocolTestGenerator implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(HttpProtocolTestGenerator.class.getName());
-    private static final String TEST_CASE_FILE_TEMPLATE = "tests/functional/%s.spec.ts";
+    private static final String TEST_CASE_FILE_TEMPLATE = "test/functional/%s.spec.ts";
 
     private final TypeScriptSettings settings;
     private final Model model;
