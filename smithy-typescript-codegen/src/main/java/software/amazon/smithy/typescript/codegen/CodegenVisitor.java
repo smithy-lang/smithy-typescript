@@ -236,7 +236,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             String baseName = protocol.getName().toLowerCase(Locale.US)
                     .replace("-", "_")
                     .replace(".", "_");
-            String protocolTestFileName = String.format("tests/functional/%s.spec.ts", baseName);
+            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
             context.setDeferredWriter(() -> writers.checkoutFileWriter(protocolTestFileName));
             protocolGenerator.generateProtocolTests(context);
         }
