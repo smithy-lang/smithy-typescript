@@ -407,8 +407,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        return createSymbolBuilder(shape, typeName, namespace)
-                .definitionFile(toFilename(namespace));
+        String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER
+            + (namespace.startsWith(".") ? namespace.substring(1) : namespace);
+        return createSymbolBuilder(shape, typeName, prefixedNamespace)
+                .definitionFile(toFilename(prefixedNamespace));
     }
 
     private String toFilename(String namespace) {
@@ -421,7 +423,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      */
     static final class ModuleNameDelegator {
         static final int DEFAULT_CHUNK_SIZE = 300;
-        static final String SHAPE_NAMESPACE_PREFIX = "./models/";
+        static final String SHAPE_NAMESPACE_PREFIX = "/models/";
 
         private final Map<Shape, String> visitedModels = new HashMap<>();
         private int bucketCount = 0;
@@ -442,7 +444,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 return visitedModels.get(shape);
             }
             // Add models into buckets no bigger than chunk size.
-            String path = SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
+            String path = "." + SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
             visitedModels.put(shape, path);
             currentBucketSize++;
             if (currentBucketSize == chunkSize) {
@@ -454,14 +456,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
+            String modelPrefix = "./" + CodegenUtils.SOURCE_FOLDER + SHAPE_NAMESPACE_PREFIX;
             model.shapes()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
-                    .filter(namespace -> namespace.startsWith(SHAPE_NAMESPACE_PREFIX))
+                    .filter(namespace -> namespace.startsWith(modelPrefix))
                     .distinct()
                     .sorted(Comparator.naturalOrder())
                     .forEach(namespace -> writer.write(
-                        "export * from $S;", namespace.replaceFirst(SHAPE_NAMESPACE_PREFIX, "./")));
-            fileManifest.writeFile("models/index.ts", writer.toString());
+                        "export * from $S;", namespace.replaceFirst(modelPrefix, "./")));
+            fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/models/index.ts", writer.toString());
         }
     }
 }

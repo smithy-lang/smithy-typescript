@@ -57,10 +57,10 @@ final class PackageJsonGenerator {
         if (settings.generateClient()) {
             // Add the Node vs Browser hook.
             node = node.withMember("browser", Node.objectNode()
-                    .withMember("./runtimeConfig", "./runtimeConfig.browser"));
+                    .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.browser"));
             // Add the ReactNative hook.
             node = node.withMember("react-native", Node.objectNode()
-                    .withMember("./runtimeConfig", "./runtimeConfig.native"));
+                    .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.native"));
         }
 
         // Set the package to private if required.

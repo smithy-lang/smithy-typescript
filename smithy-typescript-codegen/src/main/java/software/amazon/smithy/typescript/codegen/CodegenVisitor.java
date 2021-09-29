@@ -236,7 +236,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             String baseName = protocol.getName().toLowerCase(Locale.US)
                     .replace("-", "_")
                     .replace(".", "_");
-            String protocolTestFileName = String.format("tests/functional/%s.spec.ts", baseName);
+            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
             context.setDeferredWriter(() -> writers.checkoutFileWriter(protocolTestFileName));
             protocolGenerator.generateProtocolTests(context);
         }
@@ -373,7 +373,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
-            String fileName = "protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
+            String fileName = CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
             writers.useFileWriter(fileName, writer -> {
                 ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
                 context.setProtocolName(protocolGenerator.getName());

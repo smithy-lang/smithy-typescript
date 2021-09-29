@@ -9,20 +9,14 @@
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
     "clean": "yarn clean:dist && yarn clean:docs",
-    "clean:dist": "rimraf ./dist",
+    "clean:dist": "rimraf ./dist-*",
     "clean:docs": "rimraf ./docs",
-    "downlevel-dts": "downlevel-dts dist/types dist/types/ts3.4",
+    "downlevel-dts": "downlevel-dts dist-types dist-types/ts3.4",
     "test": "jest --coverage --passWithNoTests"
   },
-  "main": "./dist/cjs/index.js",
-  "types": "./dist/types/index.d.ts",
-  "module": "./dist/es/index.js",
-  "browser": {
-    "./runtimeConfig": "./runtimeConfig.browser"
-  },
-  "react-native": {
-    "./runtimeConfig": "./runtimeConfig.native"
-  },
+  "main": "./dist-cjs/index.js",
+  "types": "./dist-types/index.d.ts",
+  "module": "./dist-es/index.js",
   "sideEffects": false,
   "dependencies": {
     "tslib": "^2.3.0"
@@ -40,7 +34,7 @@
   },
   "typesVersions": {
     "<4.0": {
-      "dist/types/*": ["dist/types/ts3.4/*"]
+      "dist-types/*": ["dist-types/ts3.4/*"]
     }
   }
 }

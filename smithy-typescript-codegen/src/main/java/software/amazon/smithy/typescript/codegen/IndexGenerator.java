@@ -61,7 +61,7 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models/index\";");
-        fileManifest.writeFile("index.ts", writer.toString());
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
@@ -87,6 +87,10 @@ final class IndexGenerator {
         }
         writer.write("export * from \"./$L\"", symbol.getName());
         fileManifest.writeFile("server/index.ts", writer.toString());
+    }
+
+    private static String getModulePath(String fileLocation) {
+        return fileLocation.replaceFirst(CodegenUtils.SOURCE_FOLDER, "").replace(".ts", "");
     }
 
     private static void writeClientExports(
@@ -115,26 +119,26 @@ final class IndexGenerator {
             writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 hasPaginatedOperation = true;
-                String modulePath = PaginationGenerator.getOutputFilelocation(operation);
-                writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+                String modulePath = getModulePath(PaginationGenerator.getOutputFilelocation(operation));
+                writer.write("export * from \".$L\";", modulePath);
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
-                    String modulePath = WaiterGenerator.getOutputFileLocation(waiterName);
-                    writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+                    String modulePath = getModulePath(WaiterGenerator.getOutputFileLocation(waiterName));
+                    writer.write("export * from \".$L\";", modulePath);
                 });
             }
         }
         if (hasPaginatedOperation) {
-            String modulePath = PaginationGenerator.PAGINATION_INTERFACE_FILE;
-            writer.write("export * from \"./$L\";", modulePath.replace(".ts", ""));
+            String modulePath = getModulePath(PaginationGenerator.PAGINATION_INTERFACE_FILE);
+            writer.write("export * from \".$L\";", modulePath);
         }
 
         // Write each custom export.
         for (TypeScriptIntegration integration : integrations) {
             integration.writeAdditionalExports(settings, model, symbolProvider, writer);
         }
-        fileManifest.writeFile("index.ts", writer.toString());
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
     }
 }

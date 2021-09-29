@@ -89,7 +89,11 @@ final class TypeScriptDelegator {
     void useShapeWriter(Shape shape, SymbolProvider provider, Consumer<TypeScriptWriter> writerConsumer) {
         // Checkout/create the appropriate writer for the shape.
         Symbol symbol = provider.toSymbol(shape);
-        TypeScriptWriter writer = checkoutWriter(symbol.getDefinitionFile());
+        String fileName = symbol.getDefinitionFile();
+        if (!fileName.startsWith("./" + CodegenUtils.SOURCE_FOLDER)) {
+            fileName = "./" + CodegenUtils.SOURCE_FOLDER + "/" + fileName;
+        }
+        TypeScriptWriter writer = checkoutWriter(fileName);
 
         // Add any needed DECLARE symbols.
         writer.addImportReferences(symbol, SymbolReference.ContextOption.DECLARE);
