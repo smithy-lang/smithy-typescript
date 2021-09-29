@@ -444,7 +444,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 return visitedModels.get(shape);
             }
             // Add models into buckets no bigger than chunk size.
-            String path = "./" + SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
+            String path = "." + SHAPE_NAMESPACE_PREFIX + "models_" + bucketCount;
             visitedModels.put(shape, path);
             currentBucketSize++;
             if (currentBucketSize == chunkSize) {
@@ -456,7 +456,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
-            String modelPrefix = "./" + CodegenUtils.SOURCE_FOLDER + "/" + SHAPE_NAMESPACE_PREFIX;
+            String modelPrefix = "./" + CodegenUtils.SOURCE_FOLDER + SHAPE_NAMESPACE_PREFIX;
             model.shapes()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                     .filter(namespace -> namespace.startsWith(modelPrefix))
