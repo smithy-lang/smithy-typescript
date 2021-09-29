@@ -36,13 +36,13 @@ public class CodegenVisitorTest {
 
         // Did we generate the runtime config files?
         // note that asserting the contents of runtime config files is handled in its own unit tests.
-        Assertions.assertTrue(manifest.hasFile("package.json"));
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.browser.ts"));
-        Assertions.assertTrue(manifest.hasFile("runtimeConfig.ts"));
-        Assertions.assertTrue(manifest.hasFile("index.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/package.json"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/index.ts"));
 
         // Does the package.json file point to the runtime config?
-        String packageJsonContents = manifest.getFileString("package.json").get();
+        String packageJsonContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/package.json").get();
         ObjectNode packageJson = Node.parse(packageJsonContents).expectObjectNode();
         assertThat(packageJson.expectObjectMember("browser").getStringMember("./runtimeConfig"),
                    equalTo(Optional.of(Node.from("./runtimeConfig.browser"))));
@@ -69,8 +69,8 @@ public class CodegenVisitorTest {
 
         new TypeScriptCodegenPlugin().execute(context);
 
-        Assertions.assertTrue(manifest.hasFile("Foo.ts"));
-        assertThat(manifest.getFileString("Foo.ts").get(), containsString("export class Foo"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Foo.ts"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.ts").get(), containsString("export class Foo"));
     }
 
     @Test
@@ -91,12 +91,12 @@ public class CodegenVisitorTest {
                 .build();
         new TypeScriptCodegenPlugin().execute(context);
 
-        Assertions.assertTrue(manifest.hasFile("Example.ts"));
-        assertThat(manifest.getFileString("Example.ts").get(),
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Example.ts"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Example.ts").get(),
                    containsString("export class Example extends ExampleClient"));
 
-        Assertions.assertTrue(manifest.hasFile("ExampleClient.ts"));
-        assertThat(manifest.getFileString("ExampleClient.ts").get(), containsString("export class ExampleClient"));
+        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts").get(), containsString("export class ExampleClient"));
     }
 
     @Test

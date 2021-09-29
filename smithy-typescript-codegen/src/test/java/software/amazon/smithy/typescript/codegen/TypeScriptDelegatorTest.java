@@ -31,7 +31,7 @@ public class TypeScriptDelegatorTest {
         delegator.useShapeWriter(fooShape, writer -> writer.write("Hello!"));
         delegator.flushWriters();
 
-        assertThat(manifest.getFileString("Foo.txt").get(), equalTo("Hello!\n"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo("Hello!\n"));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class TypeScriptDelegatorTest {
         delegator.useShapeWriter(fooShape, writer -> writer.write("Goodbye!"));
         delegator.flushWriters();
 
-        assertThat(manifest.getFileString("Foo.txt").get(), equalTo("Hello!\n\nGoodbye!\n"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo("Hello!\n\nGoodbye!\n"));
     }
 
     @Test

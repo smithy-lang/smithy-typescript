@@ -69,7 +69,7 @@ public class SymbolProviderTest {
         assertThat(symbol2.getNamespace(), equalTo("./models/models_0"));
         assertThat(symbol2.getNamespaceDelimiter(), equalTo("/"));
         assertThat(symbol2.getDefinitionFile(), equalTo("./models/models_0.ts"));
-        assertThat(manifest.getFileString("models/index.ts").get(),
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/models/index.ts").get(),
                 containsString("export * from \"./models_0\";"));
     }
 
