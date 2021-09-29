@@ -36,16 +36,16 @@ public class CodegenVisitorTest {
 
         // Did we generate the runtime config files?
         // note that asserting the contents of runtime config files is handled in its own unit tests.
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/package.json"));
+        Assertions.assertTrue(manifest.hasFile("package.json"));
         Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts"));
         Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts"));
         Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/index.ts"));
 
         // Does the package.json file point to the runtime config?
-        String packageJsonContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/package.json").get();
+        String packageJsonContents = manifest.getFileString("package.json").get();
         ObjectNode packageJson = Node.parse(packageJsonContents).expectObjectNode();
-        assertThat(packageJson.expectObjectMember("browser").getStringMember("./runtimeConfig"),
-                   equalTo(Optional.of(Node.from("./runtimeConfig.browser"))));
+        assertThat(packageJson.expectObjectMember("browser").getStringMember("./dist-es/runtimeConfig"),
+                   equalTo(Optional.of(Node.from("./dist-es/runtimeConfig.browser"))));
     }
 
     @Test

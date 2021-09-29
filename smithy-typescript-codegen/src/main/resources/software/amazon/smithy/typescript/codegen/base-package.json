@@ -17,12 +17,6 @@
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",
   "module": "./dist-es/index.js",
-  "browser": {
-    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-  },
-  "react-native": {
-    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
-  },
   "sideEffects": false,
   "dependencies": {
     "tslib": "^2.3.0"
