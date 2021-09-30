@@ -86,7 +86,7 @@ final class IndexGenerator {
             writer.write("export * from \"./operations/$L\";", symbolProvider.toSymbol(operation).getName());
         }
         writer.write("export * from \"./$L\"", symbol.getName());
-        fileManifest.writeFile("server/index.ts", writer.toString());
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/server/index.ts", writer.toString());
     }
 
     private static String getModulePath(String fileLocation) {

@@ -169,9 +169,11 @@ final class ServerCommandGenerator implements Runnable {
             String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
             String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
             writer.addImport(serializerFunction, null,
-                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                    "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
             writer.addImport(deserializerFunction, null,
-                    "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                    "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
             writer.write("serialize = $L;", serializerFunction);
             writer.write("deserialize = $L;", deserializerFunction);
             writer.write("");
@@ -222,7 +224,8 @@ final class ServerCommandGenerator implements Runnable {
         Symbol errorSymbol = symbolProvider.toSymbol(model.expectShape(errorId));
         String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
         writer.addImport(serializerFunction, null,
-                "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
         writer.openBlock("case $S: {", "}", errorId.getName(), () -> {
             writer.write("return $L(error, ctx);", serializerFunction);
         });
