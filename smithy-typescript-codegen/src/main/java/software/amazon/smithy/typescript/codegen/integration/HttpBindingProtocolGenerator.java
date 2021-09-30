@@ -336,7 +336,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.addImport("serializeFrameworkException", null,
-                "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+            "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+            + ProtocolGenerator.getSanitizedName(getName()));
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
@@ -390,7 +391,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.addImport("serializeFrameworkException", null,
-                "./protocols/" + ProtocolGenerator.getSanitizedName(getName()));
+                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                + ProtocolGenerator.getSanitizedName(getName()));
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
 

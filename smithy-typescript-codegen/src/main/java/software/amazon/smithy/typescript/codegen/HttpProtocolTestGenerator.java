@@ -751,7 +751,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
         writer.addImport("serializeFrameworkException", null,
-                "./protocols/" + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
+                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
         writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
         writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException, "
                 + "(ctx: {}, f: __ValidationFailure[]) => { if (f) { throw f; } return undefined;});", handlerSymbol);
