@@ -118,8 +118,10 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        return createSymbolBuilder(shape, typeName, namespace)
-                .definitionFile(toFilename(namespace));
+        String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER
+            + (namespace.startsWith(".") ? namespace.substring(1) : namespace);
+        return createSymbolBuilder(shape, typeName, prefixedNamespace)
+                .definitionFile(toFilename(prefixedNamespace));
     }
 
     private Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
@@ -137,9 +139,9 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
 
         public String formatModuleName(Shape shape, String name) {
             if (shape.getType() == ShapeType.SERVICE) {
-                return "./server/" + name;
+                return "/server/" + name;
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return "./server/operations/" + name;
+                return "/server/operations/" + name;
             }
 
             throw new IllegalArgumentException("Unsupported shape type: " + shape.getType());
