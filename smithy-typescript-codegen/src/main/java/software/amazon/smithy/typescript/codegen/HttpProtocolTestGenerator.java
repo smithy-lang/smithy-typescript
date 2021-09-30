@@ -407,7 +407,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         });
 
         String getHandlerName = "get" + handlerSymbol.getName();
-        writer.addImport(getHandlerName, null, "./server/");
+        writer.addImport(getHandlerName, null, "./" + CodegenUtils.SOURCE_FOLDER + "/server/");
 
         if (!usesDefaultValidation) {
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
