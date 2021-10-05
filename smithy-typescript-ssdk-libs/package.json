@@ -25,9 +25,9 @@
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.4",
+    "@types/jest": "^27.0.2",
     "lerna": "3.22.1",
-    "jest": "^26.1.0",
+    "jest": "^27.2.4",
     "ts-jest": "^26.4.1",
     "yarn": "1.22.10",
     "prettier": "2.2.1",
