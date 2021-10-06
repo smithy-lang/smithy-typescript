@@ -166,6 +166,19 @@ public final class TypeScriptWriter extends CodeWriter {
     }
 
     /**
+     * default import from a module, annotated with @ts-ignore.
+     *
+     * @param name Name of default import.
+     * @param from Module to default import from.
+     * @param reason The reason for ignoring the import
+     * @return Returns the writer.
+     */
+    public TypeScriptWriter addIgnoredDefaultImport(String name, String from, String reason) {
+        imports.addIgnoredDefaultImport(name, from, reason);
+        return this;
+    }
+
+    /**
      * Imports a type using an alias from a module only if necessary.
      *
      * @param name Type to import.
