@@ -109,6 +109,16 @@ public class ImportDeclarationsTest {
     }
 
     @Test
+    public void canImportDefaultImportWithIgnore() {
+        ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
+        declarations.addIgnoredDefaultImport("foo", "@types/foo", "I want to");
+        String result = declarations.toString();
+
+        assertThat(result, containsString("// @ts-ignore: I want to\nimport foo from \"@types/foo\"; // eslint-disable-line"));
+    }
+
+
+    @Test
     public void canImportDefaultImportWithNamedImport() {
         ImportDeclarations declarations = new ImportDeclarations("/foo/bar");
         declarations.addDefaultImport("foo", "@types/foo");

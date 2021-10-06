@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -30,7 +31,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class ImportDeclarations {
 
     private final Path relativize;
-    private final Map<String, String> defaultImports = new TreeMap<>();
+    private final Map<String, Pair<String, Ignore>> defaultImports = new TreeMap<>();
     private final Map<String, Map<String, String>> namedImports = new TreeMap<>();
 
     ImportDeclarations(String relativize) {
@@ -43,10 +44,18 @@ final class ImportDeclarations {
     }
 
     ImportDeclarations addDefaultImport(String name, String module) {
+        return addDefaultImport(name, module, Ignore.notIgnored());
+    }
+
+    ImportDeclarations addIgnoredDefaultImport(String name, String module, String reason) {
+        return addDefaultImport(name, module, Ignore.ignored(reason));
+    }
+
+    private ImportDeclarations addDefaultImport(String name, String module, Ignore ignore) {
         module = getRelativizedModule(relativize, module);
 
         if (!module.isEmpty() && (relativize == null || !module.equals(relativize.toString()))) {
-            defaultImports.put(module, name);
+            defaultImports.put(module, new Pair<>(name, ignore));
         }
 
         return this;
@@ -71,14 +80,22 @@ final class ImportDeclarations {
         StringBuilder result = new StringBuilder();
 
         if (!defaultImports.isEmpty()) {
-            for (Map.Entry<String, String> importEntry : defaultImports.entrySet()) {
+            for (Map.Entry<String, Pair<String, Ignore>> importEntry : defaultImports.entrySet()) {
+                boolean ignore = importEntry.getValue().getRight().ignore;
+                if (ignore) {
+                    result.append("// @ts-ignore: ").append(importEntry.getValue().getRight().reason).append("\n");
+                }
                 result.append("import ")
-                        .append(importEntry.getValue())
+                        .append(importEntry.getValue().getLeft())
                         .append(" from \"")
                         .append(importEntry.getKey())
-                        .append("\";\n");
+                        .append("\";");
+                if (ignore) {
+                    result.append(" // eslint-disable-line");
+                }
+                result.append('\n');
             }
-            result.append("\n");
+            result.append('\n');
         }
 
         if (!namedImports.isEmpty()) {
@@ -132,5 +149,24 @@ final class ImportDeclarations {
             }
         }
         return module;
+    }
+
+    private static final class Ignore {
+        final boolean ignore;
+        final String reason;
+
+        private Ignore(boolean ignore, String reason) {
+            this.ignore = ignore;
+            this.reason = reason;
+        }
+
+        static Ignore notIgnored() {
+            return new Ignore(false, null);
+        }
+
+        static Ignore ignored(String reason) {
+            return new Ignore(true, reason);
+        }
+
     }
 }
