@@ -27,10 +27,12 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.pattern.SmithyPattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
@@ -321,6 +323,7 @@ public final class HttpProtocolGeneratorUtils {
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
+        OperationIndex operationIndex = OperationIndex.of(context.getModel());
         Set<StructureShape> errorShapes = new TreeSet<>();
 
         Symbol symbol = symbolProvider.toSymbol(operation);
@@ -352,8 +355,8 @@ public final class HttpProtocolGeneratorUtils {
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
-                new TreeSet<>(operation.getErrors()).forEach(errorId -> {
-                    StructureShape error = context.getModel().expectShape(errorId).asStructureShape().get();
+                new TreeSet<>(operationIndex.getErrors(operation, context.getService())).forEach(error -> {
+                    final ShapeId errorId = error.getId();
                     // Track errors bound to the operation so their deserializers may be generated.
                     errorShapes.add(error);
                     Symbol errorSymbol = symbolProvider.toSymbol(error);

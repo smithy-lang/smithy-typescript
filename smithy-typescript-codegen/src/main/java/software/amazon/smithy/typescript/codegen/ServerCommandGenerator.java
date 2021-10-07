@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -49,6 +49,7 @@ final class ServerCommandGenerator implements Runnable {
     private final Symbol errorsType;
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
+    private final List<StructureShape> errors;
 
     ServerCommandGenerator(
             TypeScriptSettings settings,
@@ -72,6 +73,7 @@ final class ServerCommandGenerator implements Runnable {
         inputType = operationSymbol.expectProperty("inputType", Symbol.class);
         outputType = operationSymbol.expectProperty("outputType", Symbol.class);
         errorsType = operationSymbol.expectProperty("errorsType", Symbol.class);
+        errors = Collections.unmodifiableList(operationIndex.getErrors(operation, settings.getService()));
     }
 
     @Override
@@ -135,12 +137,12 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     private void writeErrorType() {
-        if (operation.getErrors().isEmpty()) {
+        if (errors.isEmpty()) {
             writer.write("export type $L = never;", errorsType.getName());
         } else {
             writer.writeInline("export type $L = ", errorsType.getName());
-            for (Iterator<ShapeId> iter = operation.getErrors().iterator(); iter.hasNext();) {
-                writer.writeInline("$T", symbolProvider.toSymbol(model.expectShape(iter.next())));
+            for (Iterator<StructureShape> iter = errors.iterator(); iter.hasNext();) {
+                writer.writeInline("$T", symbolProvider.toSymbol(iter.next()));
                 if (iter.hasNext()) {
                     writer.writeInline(" | ");
                 }
@@ -185,12 +187,12 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeErrorChecker() {
         writer.openBlock("isOperationError(error: any): error is $T {", "};", errorsType, () -> {
-            if (operation.getErrors().isEmpty()) {
+            if (errors.isEmpty()) {
                 writer.write("return false;");
             } else {
                 writer.writeInline("const names: $T['name'][] = [", errorsType);
-                for (Iterator<ShapeId> iter = operation.getErrors().iterator(); iter.hasNext();) {
-                    writer.writeInline("$S", iter.next().getName());
+                for (Iterator<StructureShape> iter = errors.iterator(); iter.hasNext();) {
+                    writer.writeInline("$S", iter.next().getId().getName());
                     if (iter.hasNext()) {
                         writer.writeInline(", ");
                     }
@@ -206,12 +208,12 @@ final class ServerCommandGenerator implements Runnable {
         writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
         writer.openBlock("serializeError(error: $T, ctx: ServerSerdeContext): Promise<$T> {", "}",
                 errorsType, applicationProtocol.getResponseType(), () -> {
-            if (operation.getErrors().isEmpty()) {
+            if (errors.isEmpty()) {
                 writer.write("throw error;");
             } else {
                 writer.openBlock("switch (error.name) {", "}", () -> {
-                    for (ShapeId errorId : operation.getErrors()) {
-                        writeErrorHandlerCase(errorId);
+                    for (StructureShape error : errors) {
+                        writeErrorHandlerCase(error);
                     }
                     writer.openBlock("default: {", "}", () -> writer.write("throw error;"));
                 });
@@ -220,13 +222,13 @@ final class ServerCommandGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeErrorHandlerCase(ShapeId errorId) {
-        Symbol errorSymbol = symbolProvider.toSymbol(model.expectShape(errorId));
+    private void writeErrorHandlerCase(StructureShape error) {
+        Symbol errorSymbol = symbolProvider.toSymbol(error);
         String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
         writer.addImport(serializerFunction, null,
                 "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
                 + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
-        writer.openBlock("case $S: {", "}", errorId.getName(), () -> {
+        writer.openBlock("case $S: {", "}", error.getId().getName(), () -> {
             writer.write("return $L(error, ctx);", serializerFunction);
         });
     }

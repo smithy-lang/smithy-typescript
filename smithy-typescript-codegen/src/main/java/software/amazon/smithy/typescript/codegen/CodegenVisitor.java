@@ -262,7 +262,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         List<String> unvalidatedOperations = TopDownIndex.of(model)
                 .getContainedOperations(service)
                 .stream()
-                .filter(o -> operationIndex.getErrors(o).stream()
+                .filter(o -> operationIndex.getErrors(o, service).stream()
                                 .noneMatch(e -> e.getId().equals(VALIDATION_EXCEPTION_SHAPE)))
                 .map(s -> s.getId().toString())
                 .sorted()
@@ -467,12 +467,13 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     private void generateServerErrors(ServiceShape service) {
+        final OperationIndex operationIndex = OperationIndex.of(model);
+
         TopDownIndex.of(model)
                 .getContainedOperations(service)
                 .stream()
-                .flatMap(o -> o.getErrors().stream())
+                .flatMap(o -> operationIndex.getErrors(o, service).stream())
                 .distinct()
-                .map(id -> model.expectShape(id).asStructureShape().orElseThrow(IllegalArgumentException::new))
                 .sorted()
                 .forEachOrdered(error -> writers.useShapeWriter(service, symbolProvider, writer -> {
                     new ServerErrorGenerator(settings, model, error, symbolProvider, writer).run();
