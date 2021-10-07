@@ -111,7 +111,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         // Get each structure that's used an error.
         OperationIndex operationIndex = OperationIndex.of(model);
         model.shapes(OperationShape.class).forEach(operationShape -> {
-            errorShapes.addAll(operationIndex.getErrors(operationShape));
+            errorShapes.addAll(operationIndex.getErrors(operationShape, settings.getService()));
         });
 
         moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);

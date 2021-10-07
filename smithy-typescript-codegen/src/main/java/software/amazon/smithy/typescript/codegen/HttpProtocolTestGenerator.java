@@ -174,7 +174,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 }
             });
             // 3. Generate test cases for each error on each operation.
-            for (StructureShape error : operationIndex.getErrors(operation)) {
+            for (StructureShape error : operationIndex.getErrors(operation, service)) {
                 if (!error.hasTag("server-only")) {
                     error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
                         for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
@@ -208,7 +208,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 }
             });
             // 3. Generate test cases for each error on each operation.
-            for (StructureShape error : operationIndex.getErrors(operation)) {
+            for (StructureShape error : operationIndex.getErrors(operation, service)) {
                 if (!error.hasTag("client-only")) {
                     error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
                         for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {

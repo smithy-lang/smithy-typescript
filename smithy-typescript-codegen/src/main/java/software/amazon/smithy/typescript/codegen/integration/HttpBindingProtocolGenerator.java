@@ -37,6 +37,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.pattern.SmithyPattern.Segment;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -50,7 +51,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.NumberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
@@ -519,9 +519,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
         writer.write("");
 
-        for (ShapeId errorShapeId : operation.getErrors()) {
-            serializingErrorShapes.add(context.getModel().expectShape(errorShapeId).asStructureShape().get());
-        }
+        serializingErrorShapes.addAll(OperationIndex.of(context.getModel()).getErrors(operation, context.getService()));
     }
 
     private void calculateContentLength(GenerationContext context) {
