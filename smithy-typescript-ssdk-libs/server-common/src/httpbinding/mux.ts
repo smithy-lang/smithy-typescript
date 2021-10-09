@@ -129,7 +129,12 @@ export class UriSpec<S extends string, O extends string> {
         return false;
       }
       if (querySegment.type === "query_literal") {
-        if (querySegment.value && querySegment.value !== req.query[querySegment.key]) {
+        const input_query_value = req.query[querySegment.key];
+        if (Array.isArray(input_query_value)) {
+          if (querySegment.value && !input_query_value.includes(querySegment.value)) {
+            return false;
+          }
+        } else if (querySegment.value && querySegment.value !== input_query_value) {
           return false;
         }
       }

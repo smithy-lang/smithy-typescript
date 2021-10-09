@@ -18,7 +18,10 @@ import { HttpRequest } from "@aws-sdk/protocol-http";
 import { HttpBindingMux, UriSpec } from ".";
 
 describe("simple matching", () => {
-  const router = new HttpBindingMux<"Test", "A" | "LessSpecificA" | "Greedy" | "MiddleGreedy" | "Delete">([
+  const router = new HttpBindingMux<
+    "Test",
+    "A" | "LessSpecificA" | "Greedy" | "MiddleGreedy" | "Delete" | "QueryKeyOnly"
+  >([
     new UriSpec("GET", [{ type: "path_literal", value: "a" }, { type: "path" }, { type: "path" }], [], {
       service: "Test",
       operation: "A",
@@ -46,6 +49,10 @@ describe("simple matching", () => {
       ],
       { service: "Test", operation: "Delete" }
     ),
+    new UriSpec("GET", [{ type: "path_literal", value: "query_key_only" }], [{ type: "query_literal", key: "foo" }], {
+      service: "Test",
+      operation: "QueryKeyOnly",
+    }),
   ]);
 
   const matches: { [idx: string]: HttpRequest[] } = {
@@ -69,8 +76,18 @@ describe("simple matching", () => {
     ],
     "Test#Delete": [
       new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar", baz: "quux" } }),
+      new HttpRequest({ method: "DELETE", path: "/", query: { foo: ["bar"], baz: "quux" } }),
+      new HttpRequest({ method: "DELETE", path: "/", query: { foo: ["bar", "corge"], baz: "quux" } }),
+      new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar", baz: "quux" } }),
       new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar", baz: null } }),
       new HttpRequest({ method: "DELETE", path: "", query: { foo: "bar", baz: ["quux", "grault"] } }),
+    ],
+    "Test#QueryKeyOnly": [
+      new HttpRequest({ method: "GET", path: "/query_key_only", query: { foo: "bar" } }),
+      new HttpRequest({ method: "GET", path: "/query_key_only", query: { foo: null } }),
+      new HttpRequest({ method: "GET", path: "/query_key_only", query: { foo: "" } }),
+      // this is actually what /query_key_only?foo will look like behind APIGateway
+      new HttpRequest({ method: "GET", path: "/query_key_only", query: { foo: [""] } }),
     ],
   };
 
@@ -87,7 +104,6 @@ describe("simple matching", () => {
     new HttpRequest({ method: "GET", path: "/mg/q" }),
     new HttpRequest({ method: "GET", path: "/mg/z" }),
     new HttpRequest({ method: "GET", path: "/mg/a/b/z/c" }),
-    new HttpRequest({ method: "DELETE", path: "/", query: { foo: ["bar", "corge"], baz: "quux" } }),
     new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar" } }),
     new HttpRequest({ method: "DELETE", path: "/", query: { baz: "quux" } }),
     new HttpRequest({ method: "DELETE", path: "/" }),
