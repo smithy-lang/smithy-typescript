@@ -1829,13 +1829,22 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     writer.addImport("SerializationException",
                             "__SerializationException",
                             "@aws-smithy/server-common");
-                    writer.openBlock("if (Array.isArray(query[$1S])) {", "}",
+                    writer.write("let queryValue: string;");
+                    writer.openBlock("if (Array.isArray(query[$S])) {", "}",
                             binding.getLocationName(),
                             () -> {
-                                writer.write("throw new __SerializationException();");
+                                writer.openBlock("if (query[$S].length === 1) {", "}",
+                                    binding.getLocationName(),
+                                    () -> {
+                                        writer.write("queryValue = query[$S][0];", binding.getLocationName());
+                                    });
+                                writer.openBlock("else {", "}", () -> {
+                                    writer.write("throw new __SerializationException();");
+                                });
                             });
-                    writer.write("const queryValue = query[$1S] as string;",
-                            binding.getLocationName());
+                    writer.openBlock("else {", "}", () -> {
+                        writer.write("queryValue = query[$S] as string;", binding.getLocationName());
+                    });
                 }
                 String queryValue = getOutputValue(context, binding.getLocation(), "queryValue",
                         binding.getMember(), target);
@@ -1855,6 +1864,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
         writer.write("let parsedQuery: { [key: string]: $L } = {}", valueType);
         writer.openBlock("for (const [key, value] of Object.entries(query)) {", "}", () -> {
+            writer.write("let queryValue: string;");
             final String parsedValue;
             if (valueShape instanceof CollectionShape) {
                 writer.write("const valueArray = Array.isArray(value) ? (value as string[]) : [value as string];");
@@ -1866,10 +1876,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         "@aws-smithy/server-common");
                 writer.openBlock("if (Array.isArray(value)) {", "}",
                         () -> {
-                            writer.write("throw new __SerializationException();");
+                            writer.openBlock("if (value.length === 1) {", "}",
+                                    () -> {
+                                        writer.write("queryValue = value[0];");
+                                    });
+                            writer.openBlock("else {", "}", () -> {
+                                writer.write("throw new __SerializationException();");
+                            });
                         });
+                writer.openBlock("else {", "}", () -> {
+                    writer.write("queryValue = value as string;");
+                });
                 parsedValue = getOutputValue(context, mappedBinding.getLocation(),
-                                "value as string", target.getValue(), valueShape);
+                                "queryValue", target.getValue(), valueShape);
             }
             writer.write("parsedQuery[key] = $L;", parsedValue);
         });
