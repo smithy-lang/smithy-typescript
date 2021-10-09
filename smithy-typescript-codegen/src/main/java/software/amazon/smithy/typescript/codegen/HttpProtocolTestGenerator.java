@@ -449,13 +449,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         ObjectNode.Builder nodeBuilder = ObjectNode.objectNodeBuilder();
         for (Map.Entry<String, List<String>> entry : query.entrySet()) {
-            // The value of the query bag can either be a single string or a list, so we need to ensure individual
-            // values are written out as individual strings.
-            if (entry.getValue().size() == 1) {
-                nodeBuilder.withMember(entry.getKey(), StringNode.from(entry.getValue().get(0)));
-            } else {
-                nodeBuilder.withMember(entry.getKey(), ArrayNode.fromStrings(entry.getValue()));
-            }
+            nodeBuilder.withMember(entry.getKey(), ArrayNode.fromStrings(entry.getValue()));
         }
         return nodeBuilder.build();
     }
