@@ -142,6 +142,20 @@ describe("pattern validation", () => {
       path: "aField",
     });
   });
+  it("is not vulnerable to ReDoS", () => {
+    const validator = new PatternValidator("^([0-9]+)+$");
+    expect(
+      validator.validate(
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000000000!",
+        "aField"
+      )
+    ).toEqual({
+      constraintType: "pattern",
+      constraintValues: "^([0-9]+)+$",
+      failureValue: "000000000000000000000000000000000000000000000000000000000000000000000000000000000000!",
+      path: "aField",
+    });
+  });
 });
 
 describe("range validation", () => {
