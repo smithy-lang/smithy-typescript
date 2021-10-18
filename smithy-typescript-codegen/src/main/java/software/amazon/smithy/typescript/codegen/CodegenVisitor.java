@@ -448,6 +448,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (hasPaginatedOperation) {
+            writers.useFileWriter(PaginationGenerator.PAGINATION_INDEX_FILE, paginationWriter ->
+                    PaginationGenerator.writeIndex(model, service, paginationWriter));
             writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
                             nonModularName,
