@@ -15,9 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -30,7 +29,6 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
-import software.amazon.smithy.waiters.Waiter;
 
 /**
  * Generates an index to export the service client and each command.
@@ -76,21 +74,14 @@ final class IndexGenerator {
             FileManifest fileManifest
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
-
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
 
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        for (OperationShape operation : containedOperations) {
-            writer.write("export * from \"./operations/$L\";", symbolProvider.toSymbol(operation).getName());
-        }
+        // Write export statement for operations.
+        writer.write("export * from \"./operations\";");
+
         writer.write("export * from \"./$L\"", symbol.getName());
         fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/server/index.ts", writer.toString());
-    }
-
-    private static String getModulePath(String fileLocation) {
-        return fileLocation.replaceFirst(CodegenUtils.SOURCE_FOLDER, "").replace(".ts", "");
     }
 
     private static void writeClientExports(
@@ -104,35 +95,28 @@ final class IndexGenerator {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
 
-        // Write export statement for modular client
-        writer.write("export * from \"./" + symbol.getName() + "\";");
+        // Write export statement for bare-bones client.
+        writer.write("export * from \"./$L\";", symbol.getName());
 
-        // Get non-modular client and write its export statement
-        String nonModularName = symbol.getName().replace("Client", "");
-        writer.write("export * from \"./" + nonModularName + "\";");
+        // Write export statement for aggregated client.
+        String aggregatedClientName = symbol.getName().replace("Client", "");
+        writer.write("export * from \"./$L\";", aggregatedClientName);
 
-        // write export statements for each command in /commands directory
+        // Write export statement for commands.
+        writer.write("export * from \"./commands\";");
+
         TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        boolean hasPaginatedOperation = false;
-        for (OperationShape operation : containedOperations) {
-            writer.write("export * from \"./commands/" + symbolProvider.toSymbol(operation).getName() + "\";");
-            if (operation.hasTrait(PaginatedTrait.ID)) {
-                hasPaginatedOperation = true;
-                String modulePath = getModulePath(PaginationGenerator.getOutputFilelocation(operation));
-                writer.write("export * from \".$L\";", modulePath);
-            }
-            if (operation.hasTrait(WaitableTrait.ID)) {
-                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
-                waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
-                    String modulePath = getModulePath(WaiterGenerator.getOutputFileLocation(waiterName));
-                    writer.write("export * from \".$L\";", modulePath);
-                });
-            }
+        List<OperationShape> operations = new ArrayList<OperationShape>();
+        operations.addAll(topDownIndex.getContainedOperations(service));
+
+        // Export pagination, if present.
+        if (operations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
+            writer.write("export * from \"./pagination\";");
         }
-        if (hasPaginatedOperation) {
-            String modulePath = getModulePath(PaginationGenerator.PAGINATION_INTERFACE_FILE);
-            writer.write("export * from \".$L\";", modulePath);
+
+        // Export waiters, if present.
+        if (operations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
+            writer.write("export * from \"./waiters\";");
         }
 
         // Write each custom export.
