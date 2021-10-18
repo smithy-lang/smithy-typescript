@@ -60,7 +60,7 @@ final class IndexGenerator {
         }
 
         // write export statement for models
-        writer.write("export * from \"./models/index\";");
+        writer.write("export * from \"./models\";");
         fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
     }
 
