@@ -483,21 +483,20 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     private void generateCommands(ServiceShape shape) {
-        // Generate index for commands
-        CommandIndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest);
-
         // Generate each operation for the service.
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
         for (OperationShape operation : containedOperations) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
+                CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
                 writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         runtimePlugins, protocolGenerator, applicationProtocol).run());
             }
 
             if (settings.generateServerSdk()) {
+                ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
                 writers.useShapeWriter(operation, symbolProvider, commandWriter -> new ServerCommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         protocolGenerator, applicationProtocol).run());

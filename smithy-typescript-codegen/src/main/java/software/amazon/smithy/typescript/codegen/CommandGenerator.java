@@ -21,11 +21,15 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStream
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -299,5 +303,22 @@ final class CommandGenerator implements Runnable {
                 + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
             writer.write("return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
         }
+    }
+
+    static void writeIndex(
+            Model model,
+            ServiceShape service,
+            SymbolProvider symbolProvider,
+            FileManifest fileManifest
+    ) {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        for (OperationShape operation : containedOperations) {
+            writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
+        }
+
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/commands/index.ts", writer.toString());
     }
 }

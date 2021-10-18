@@ -22,12 +22,17 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -231,5 +236,22 @@ final class ServerCommandGenerator implements Runnable {
         writer.openBlock("case $S: {", "}", error.getId().getName(), () -> {
             writer.write("return $L(error, ctx);", serializerFunction);
         });
+    }
+
+    static void writeIndex(
+            Model model,
+            ServiceShape service,
+            SymbolProvider symbolProvider,
+            FileManifest fileManifest
+    ) {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        for (OperationShape operation : containedOperations) {
+            writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
+        }
+
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/server/operations/index.ts", writer.toString());
     }
 }
