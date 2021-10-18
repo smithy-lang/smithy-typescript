@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import java.util.Set;
 import java.util.TreeSet;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -35,8 +36,6 @@ import software.amazon.smithy.waiters.Waiter;
 
 @SmithyInternalApi
 class WaiterGenerator implements Runnable {
-    static final String WAITABLE_FOLDER = CodegenUtils.SOURCE_FOLDER + "/waiters/";
-    static final String WAITABLE_INDEX_FILE = WAITABLE_FOLDER + "index.ts";
     static final String WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS.packageName;
 
     private final String waiterName;
@@ -71,7 +70,7 @@ class WaiterGenerator implements Runnable {
     }
 
     public static String getOutputFileLocation(String waiterName) {
-        return WAITABLE_FOLDER + "waitFor" + waiterName + ".ts";
+        return CodegenUtils.SOURCE_FOLDER + "/waiters/waitFor" + waiterName + ".ts";
     }
 
     private void generateWaiter() {
@@ -210,8 +209,10 @@ class WaiterGenerator implements Runnable {
     static void writeIndex(
             Model model,
             ServiceShape service,
-            TypeScriptWriter writer
+            FileManifest fileManifest
     ) {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         for (OperationShape operation : containedOperations) {
@@ -223,5 +224,7 @@ class WaiterGenerator implements Runnable {
                 });
             }
         }
+
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/waiters/index.ts", writer.toString());
     }
 }

@@ -445,8 +445,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
-            writers.useFileWriter(PaginationGenerator.PAGINATION_INDEX_FILE, paginationWriter ->
-                    PaginationGenerator.writeIndex(model, service, paginationWriter));
+            PaginationGenerator.writeIndex(model, service, fileManifest);
             writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
                             aggregatedClientName,
@@ -455,8 +454,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
-            writers.useFileWriter(WaiterGenerator.WAITABLE_INDEX_FILE, waiterWriter ->
-                    WaiterGenerator.writeIndex(model, service, waiterWriter));
+            WaiterGenerator.writeIndex(model, service, fileManifest);
         }
     }
 
