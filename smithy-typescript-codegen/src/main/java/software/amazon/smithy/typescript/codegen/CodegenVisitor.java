@@ -490,6 +490,9 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     private void generateCommands(ServiceShape shape) {
+        // Generate index for commands
+        CommandIndexGenerator.writeIndex(settings, model, symbolProvider, fileManifest);
+
         // Generate each operation for the service.
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
