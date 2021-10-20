@@ -42,8 +42,8 @@ public class IndexGeneratorTest {
         String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/index.ts").get();
         assertThat(contents, containsString("export * from \"./Example\";"));
         assertThat(contents, containsString("export * from \"./ExampleClient\";"));
-        assertThat(contents, containsString("export * from \"./commands/GetFooCommand\";"));
-        assertThat(contents, containsString("export * from \"./models/index\";"));
+        assertThat(contents, containsString("export * from \"./commands\";"));
+        assertThat(contents, containsString("export * from \"./models\";"));
         assertThat(contents, containsString("export * from \"./foo\";"));
     }
 }

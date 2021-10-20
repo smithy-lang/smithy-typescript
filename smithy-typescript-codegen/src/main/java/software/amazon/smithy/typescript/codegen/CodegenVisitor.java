@@ -411,33 +411,30 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     }
 
     private void generateClient(ServiceShape shape) {
-        // Generate the modular service client.
+        // Generate the bare-bones service client.
         writers.useShapeWriter(shape, writer -> new ServiceGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
 
-        // Generate the non-modular service client.
+        // Generate the aggregated service client.
         Symbol serviceSymbol = symbolProvider.toSymbol(shape);
-        String nonModularName = serviceSymbol.getName().replace("Client", "");
+        String aggregatedClientName = serviceSymbol.getName().replace("Client", "");
         String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
         writers.useFileWriter(filename, writer -> new NonModularServiceGenerator(
-                settings, model, symbolProvider, nonModularName, writer, applicationProtocol).run());
+                settings, model, symbolProvider, aggregatedClientName, writer, applicationProtocol).run());
 
         // Generate each operation for the service.
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        boolean hasPaginatedOperation = false;
 
         for (OperationShape operation : containedOperations) {
             if (operation.hasTrait(PaginatedTrait.ID)) {
-                hasPaginatedOperation = true;
                 String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
                 writers.useFileWriter(outputFilename, paginationWriter ->
                         new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
-                                nonModularName).run());
+                                aggregatedClientName).run());
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
-
                 waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
                     String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
                     writers.useFileWriter(outputFilename, waiterWriter ->
@@ -447,12 +444,17 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             }
         }
 
-        if (hasPaginatedOperation) {
+        if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
+            PaginationGenerator.writeIndex(model, service, fileManifest);
             writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
-                            nonModularName,
+                            aggregatedClientName,
                             serviceSymbol,
                             paginationWriter));
+        }
+
+        if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
+            WaiterGenerator.writeIndex(model, service, fileManifest);
         }
     }
 
@@ -487,12 +489,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         for (OperationShape operation : containedOperations) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
+                CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
                 writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         runtimePlugins, protocolGenerator, applicationProtocol).run());
             }
 
             if (settings.generateServerSdk()) {
+                ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
                 writers.useShapeWriter(operation, symbolProvider, commandWriter -> new ServerCommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         protocolGenerator, applicationProtocol).run());

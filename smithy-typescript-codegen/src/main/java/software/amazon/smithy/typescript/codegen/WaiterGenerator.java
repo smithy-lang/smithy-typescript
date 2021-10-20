@@ -15,10 +15,15 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Set;
+import java.util.TreeSet;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.jmespath.JmespathExpression;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -26,6 +31,7 @@ import software.amazon.smithy.waiters.Acceptor;
 import software.amazon.smithy.waiters.AcceptorState;
 import software.amazon.smithy.waiters.Matcher;
 import software.amazon.smithy.waiters.PathMatcher;
+import software.amazon.smithy.waiters.WaitableTrait;
 import software.amazon.smithy.waiters.Waiter;
 
 @SmithyInternalApi
@@ -193,4 +199,32 @@ class WaiterGenerator implements Runnable {
         throw new CodegenException("Hit an invalid acceptor state to codegen " + resultantState.toString());
     }
 
+    private static String getModulePath(String fileLocation) {
+        return fileLocation.substring(
+            fileLocation.lastIndexOf("/") + 1,
+            fileLocation.length()
+        ).replace(".ts", "");
+    }
+
+    static void writeIndex(
+            Model model,
+            ServiceShape service,
+            FileManifest fileManifest
+    ) {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        for (OperationShape operation : containedOperations) {
+            if (operation.hasTrait(WaitableTrait.ID)) {
+                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
+                waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
+                    String outputFilepath = WaiterGenerator.getOutputFileLocation(waiterName);
+                    writer.write("export * from \"./$L\"", getModulePath(outputFilepath));
+                });
+            }
+        }
+
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/waiters/index.ts", writer.toString());
+    }
 }

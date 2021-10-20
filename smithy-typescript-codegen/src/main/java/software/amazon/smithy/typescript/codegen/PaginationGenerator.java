@@ -17,14 +17,19 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.PaginatedIndex;
 import software.amazon.smithy.model.knowledge.PaginationInfo;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
@@ -121,7 +126,34 @@ final class PaginationGenerator implements Runnable {
         });
     }
 
-     private String destructurePath(String path) {
+    private static String getModulePath(String fileLocation) {
+        return fileLocation.substring(
+            fileLocation.lastIndexOf("/") + 1,
+            fileLocation.length()
+        ).replace(".ts", "");
+    }
+
+    static void writeIndex(
+            Model model,
+            ServiceShape service,
+            FileManifest fileManifest
+    ) {
+        TypeScriptWriter writer = new TypeScriptWriter("");
+        writer.write("export * from \"./$L\"", getModulePath(PAGINATION_INTERFACE_FILE));
+
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        for (OperationShape operation : containedOperations) {
+            if (operation.hasTrait(PaginatedTrait.ID)) {
+                String outputFilepath = PaginationGenerator.getOutputFilelocation(operation);
+                writer.write("export * from \"./$L\"", getModulePath(outputFilepath));
+            }
+        }
+
+        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/pagination/index.ts", writer.toString());
+    }
+
+    private String destructurePath(String path) {
         return "."  + path.replace(".", "!.");
     }
 
