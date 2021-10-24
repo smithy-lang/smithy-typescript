@@ -44,6 +44,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class ServerCommandGenerator implements Runnable {
 
+    static final String COMMANDS_FOLDER = "operations";
+
     private final TypeScriptSettings settings;
     private final Model model;
     private final OperationShape operation;
@@ -256,7 +258,7 @@ final class ServerCommandGenerator implements Runnable {
         }
 
         fileManifest.writeFile(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "operations", "index.ts")
+            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, COMMANDS_FOLDER, "index.ts")
                 .toString(),
             writer.toString());
     }
