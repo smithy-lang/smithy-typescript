@@ -35,7 +35,7 @@ import software.amazon.smithy.utils.StringUtils;
  * not be removed by tree-shaking.
  */
 @SmithyInternalApi
-final class NonModularServiceGenerator implements Runnable {
+final class ServiceAggregatedClientGenerator implements Runnable {
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -46,7 +46,7 @@ final class NonModularServiceGenerator implements Runnable {
     private final Symbol serviceSymbol;
     private final ApplicationProtocol applicationProtocol;
 
-    NonModularServiceGenerator(
+    ServiceAggregatedClientGenerator(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,

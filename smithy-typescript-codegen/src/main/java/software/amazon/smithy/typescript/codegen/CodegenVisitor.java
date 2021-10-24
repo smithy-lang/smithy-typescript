@@ -419,7 +419,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         Symbol serviceSymbol = symbolProvider.toSymbol(shape);
         String aggregatedClientName = serviceSymbol.getName().replace("Client", "");
         String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
-        writers.useFileWriter(filename, writer -> new NonModularServiceGenerator(
+        writers.useFileWriter(filename, writer -> new ServiceAggregatedClientGenerator(
                 settings, model, symbolProvider, aggregatedClientName, writer, applicationProtocol).run());
 
         // Generate each operation for the service.
