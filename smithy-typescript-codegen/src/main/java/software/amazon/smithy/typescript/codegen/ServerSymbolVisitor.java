@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import static software.amazon.smithy.typescript.codegen.TypeScriptDependency.SERVER_COMMON;
 
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -38,6 +39,7 @@ import software.amazon.smithy.utils.StringUtils;
  */
 @SmithyInternalApi
 final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements SymbolProvider {
+    static final String SERVER_FOLDER = "server";
     private static final Logger LOGGER = Logger.getLogger(ServerSymbolVisitor.class.getName());
 
     private final Model model;
@@ -139,9 +141,9 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
 
         public String formatModuleName(Shape shape, String name) {
             if (shape.getType() == ShapeType.SERVICE) {
-                return "/server/" + name;
+                return Paths.get(SERVER_FOLDER, name).toString();
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return "/server/operations/" + name;
+                return Paths.get(SERVER_FOLDER, "operations", name).toString();
             }
 
             throw new IllegalArgumentException("Unsupported shape type: " + shape.getType());

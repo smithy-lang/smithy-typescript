@@ -255,6 +255,9 @@ final class ServerCommandGenerator implements Runnable {
             writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
         }
 
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/server/operations/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "operations", "index.ts")
+                .toString(),
+            writer.toString());
     }
 }
