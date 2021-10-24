@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
@@ -36,6 +37,7 @@ import software.amazon.smithy.waiters.Waiter;
 
 @SmithyInternalApi
 class WaiterGenerator implements Runnable {
+    static final String WAITERS_FOLDER = "waiters";
     static final String WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS.packageName;
 
     private final String waiterName;
@@ -70,7 +72,7 @@ class WaiterGenerator implements Runnable {
     }
 
     public static String getOutputFileLocation(String waiterName) {
-        return CodegenUtils.SOURCE_FOLDER + "/waiters/waitFor" + waiterName + ".ts";
+        return Paths.get(CodegenUtils.SOURCE_FOLDER, WAITERS_FOLDER, "waitFor" + waiterName + ".ts").toString();
     }
 
     private void generateWaiter() {
@@ -225,6 +227,8 @@ class WaiterGenerator implements Runnable {
             }
         }
 
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/waiters/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, WAITERS_FOLDER,  "index.ts").toString(),
+            writer.toString());
     }
 }
