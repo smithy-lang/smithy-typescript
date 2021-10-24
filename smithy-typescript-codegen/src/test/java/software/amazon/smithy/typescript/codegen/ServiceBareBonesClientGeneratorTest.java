@@ -12,7 +12,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 
-public class ServiceGeneratorTest {
+public class ServiceBareBonesClientGeneratorTest {
     @Test
     public void hasHooksForService() {
         // TODO
@@ -44,7 +44,7 @@ public class ServiceGeneratorTest {
             }
         });
 
-        new ServiceGenerator(settings, model, symbolProvider, writer, integrations,
+        new ServiceBareBonesClientGenerator(settings, model, symbolProvider, writer, integrations,
                              Collections.emptyList(), applicationProtocol).run();
 
         assertThat(writer.toString(), containsString("  /**\n"

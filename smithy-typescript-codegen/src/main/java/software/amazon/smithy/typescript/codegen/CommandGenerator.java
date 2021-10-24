@@ -99,7 +99,7 @@ final class CommandGenerator implements Runnable {
 
     private void generateClientCommand() {
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
-        String configType = ServiceGenerator.getResolvedConfigTypeName(serviceSymbol);
+        String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
 
         // Add required imports.
         writer.addImport(configType, configType, serviceSymbol.getNamespace());

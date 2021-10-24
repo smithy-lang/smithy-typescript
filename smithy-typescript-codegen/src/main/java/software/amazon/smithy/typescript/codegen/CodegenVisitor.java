@@ -412,7 +412,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
     private void generateClient(ServiceShape shape) {
         // Generate the bare-bones service client.
-        writers.useShapeWriter(shape, writer -> new ServiceGenerator(
+        writers.useShapeWriter(shape, writer -> new ServiceBareBonesClientGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
 
         // Generate the aggregated service client.
