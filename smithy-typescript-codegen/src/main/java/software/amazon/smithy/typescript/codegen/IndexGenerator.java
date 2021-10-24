@@ -60,7 +60,7 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models\";");
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
+        fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
@@ -126,6 +126,6 @@ final class IndexGenerator {
         for (TypeScriptIntegration integration : integrations) {
             integration.writeAdditionalExports(settings, model, symbolProvider, writer);
         }
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
+        fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 }
