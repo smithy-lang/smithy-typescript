@@ -36,7 +36,7 @@ import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * Generates a service client and configuration using plugins.
+ * Generates a bare-bones client and configuration for service using plugins.
  */
 @SmithyInternalApi
 final class ServiceBareBonesClientGenerator implements Runnable {
