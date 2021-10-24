@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     public void run() {
         writer.addImport("Client", "__Client", "@aws-sdk/smithy-client");
         writer.addImport("getRuntimeConfig", "__getRuntimeConfig",
-                "./" + CodegenUtils.SOURCE_FOLDER + "/runtimeConfig");
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig").toString());
 
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any
