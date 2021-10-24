@@ -16,7 +16,6 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
-
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
