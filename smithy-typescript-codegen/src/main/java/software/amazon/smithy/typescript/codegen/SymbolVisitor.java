@@ -440,7 +440,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             if (shape.getType() == ShapeType.SERVICE) {
                 return Paths.get(".", name).toString();
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return Paths.get(".", "commands", name).toString();
+                return Paths.get(".", CommandGenerator.COMMANDS_FOLDER, name).toString();
             } else if (visitedModels.containsKey(shape)) {
                 return visitedModels.get(shape);
             }

@@ -46,6 +46,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class CommandGenerator implements Runnable {
 
+    static final String COMMANDS_FOLDER = "commands";
     static final String COMMAND_PROPERTIES_SECTION = "command_properties";
     static final String COMMAND_BODY_EXTRA_SECTION = "command_body_extra";
     static final String COMMAND_CONSTRUCTOR_SECTION = "command_constructor";
@@ -320,6 +321,8 @@ final class CommandGenerator implements Runnable {
             writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
         }
 
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/commands/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, CommandGenerator.COMMANDS_FOLDER, "index.ts").toString(),
+            writer.toString());
     }
 }
