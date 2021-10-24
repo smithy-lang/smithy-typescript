@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -299,8 +300,8 @@ final class CommandGenerator implements Runnable {
                     ? ProtocolGenerator.getSerFunctionName(symbol, protocolGenerator.getName())
                     : ProtocolGenerator.getDeserFunctionName(symbol, protocolGenerator.getName());
             writer.addImport(serdeFunctionName, serdeFunctionName,
-                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
             writer.write("return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
         }
     }

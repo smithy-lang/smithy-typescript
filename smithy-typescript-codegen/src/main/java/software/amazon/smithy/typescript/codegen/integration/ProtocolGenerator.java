@@ -38,6 +38,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public interface ProtocolGenerator {
+    String PROTOCOLS_FOLDER = "protocols";
+
     /**
      * Sanitizes the name of the protocol so it can be used as a symbol
      * in TypeScript.
