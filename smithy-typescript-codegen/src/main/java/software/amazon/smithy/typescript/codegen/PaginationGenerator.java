@@ -47,7 +47,7 @@ final class PaginationGenerator implements Runnable {
 
     private final String operationName;
     private final String methodName;
-    private final String nonModularServiceName;
+    private final String aggregatedClientName;
     private final String paginationType;
 
     PaginationGenerator(
@@ -56,7 +56,7 @@ final class PaginationGenerator implements Runnable {
             OperationShape operation,
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
-            String nonModularServiceName
+            String aggregatedClientName
     ) {
 
         this.writer = writer;
@@ -67,11 +67,11 @@ final class PaginationGenerator implements Runnable {
         this.outputSymbol = symbolProvider.toSymbol(operation).expectProperty("outputType", Symbol.class);
 
         this.operationName = operation.getId().getName();
-        this.nonModularServiceName = nonModularServiceName;
+        this.aggregatedClientName = aggregatedClientName;
 
         // e.g. listObjects
         this.methodName = Character.toLowerCase(operationName.charAt(0)) + operationName.substring(1);
-        this.paginationType = this.nonModularServiceName + "PaginationConfiguration";
+        this.paginationType = this.aggregatedClientName + "PaginationConfiguration";
 
         PaginatedIndex paginatedIndex = PaginatedIndex.of(model);
         Optional<PaginationInfo> paginationInfo = paginatedIndex.getPaginationInfo(service, operation);
@@ -92,9 +92,9 @@ final class PaginationGenerator implements Runnable {
         writer.addImport(outputSymbol.getName(),
                 outputSymbol.getName(),
                 outputSymbol.getNamespace());
-        String nonModularLocation = serviceSymbol.getNamespace()
-                .replace(serviceSymbol.getName(), nonModularServiceName);
-        writer.addImport(nonModularServiceName, nonModularServiceName, nonModularLocation);
+        String aggregatedClientLocation = serviceSymbol.getNamespace()
+                .replace(serviceSymbol.getName(), aggregatedClientName);
+        writer.addImport(aggregatedClientName, aggregatedClientName, aggregatedClientLocation);
         writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
 
         // Import Pagination types
@@ -111,18 +111,18 @@ final class PaginationGenerator implements Runnable {
     }
 
     static void generateServicePaginationInterfaces(
-            String nonModularServiceName,
+            String aggregatedClientName,
             Symbol service,
             TypeScriptWriter writer
     ) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
-        String nonModularLocation = service.getNamespace().replace(service.getName(), nonModularServiceName);
-        writer.addImport(nonModularServiceName, nonModularServiceName, nonModularLocation);
+        String aggregatedClientLocation = service.getNamespace().replace(service.getName(), aggregatedClientName);
+        writer.addImport(aggregatedClientName, aggregatedClientName, aggregatedClientLocation);
         writer.addImport(service.getName(), service.getName(), service.getNamespace());
 
         writer.openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
-                "}", nonModularServiceName, () -> {
-            writer.write("client: $L | $L;", nonModularServiceName, service.getName());
+                "}", aggregatedClientName, () -> {
+            writer.write("client: $L | $L;", aggregatedClientName, service.getName());
         });
     }
 
@@ -183,7 +183,7 @@ final class PaginationGenerator implements Runnable {
                     writer.write("input[$S] = config.pageSize;", pageSize);
                 }
 
-                writer.openBlock("if (config.client instanceof $L) {", "}", nonModularServiceName, () -> {
+                writer.openBlock("if (config.client instanceof $L) {", "}", aggregatedClientName, () -> {
                     writer.write("page = await makePagedRequest(config.client, input, ...additionalArguments);");
                 });
                 writer.openBlock("else if (config.client instanceof $L) {", "}", serviceTypeName, () -> {
@@ -191,7 +191,7 @@ final class PaginationGenerator implements Runnable {
                 });
                 writer.openBlock("else {", "}", () -> {
                     writer.write("throw new Error(\"Invalid client, expected $L | $L\");",
-                            nonModularServiceName, serviceTypeName);
+                            aggregatedClientName, serviceTypeName);
                 });
 
                 writer.write("yield page;");
@@ -214,7 +214,7 @@ final class PaginationGenerator implements Runnable {
         writer.writeDocs("@private");
         writer.openBlock(
                 "const makePagedRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
-                "}", nonModularServiceName, inputSymbol.getName(),
+                "}", aggregatedClientName, inputSymbol.getName(),
                 outputSymbol.getName(), () -> {
             writer.write("// @ts-ignore");
             writer.write("return await client.$L(input, ...args);", methodName);
