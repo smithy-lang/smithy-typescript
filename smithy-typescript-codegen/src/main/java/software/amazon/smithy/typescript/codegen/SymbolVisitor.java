@@ -408,8 +408,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        String prefixedNamespace = "./" + CodegenUtils.SOURCE_FOLDER
-            + (namespace.startsWith(".") ? namespace.substring(1) : namespace);
+        String prefixedNamespace = Paths.get(".", CodegenUtils.SOURCE_FOLDER,
+            (namespace.startsWith(".") ? namespace.substring(1) : namespace)).toString();
         return createSymbolBuilder(shape, typeName, prefixedNamespace)
                 .definitionFile(toFilename(prefixedNamespace));
     }
