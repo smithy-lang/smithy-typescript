@@ -36,10 +36,10 @@ import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * Generates a service client and configuration using plugins.
+ * Generates a bare-bones client and configuration for service using plugins.
  */
 @SmithyInternalApi
-final class ServiceGenerator implements Runnable {
+final class ServiceBareBonesClientGenerator implements Runnable {
 
     static final String CLIENT_CONFIG_SECTION = "client_config";
     static final String CLIENT_PROPERTIES_SECTION = "client_properties";
@@ -59,7 +59,7 @@ final class ServiceGenerator implements Runnable {
     private final List<RuntimeClientPlugin> runtimePlugins;
     private final ApplicationProtocol applicationProtocol;
 
-    ServiceGenerator(
+    ServiceBareBonesClientGenerator(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,

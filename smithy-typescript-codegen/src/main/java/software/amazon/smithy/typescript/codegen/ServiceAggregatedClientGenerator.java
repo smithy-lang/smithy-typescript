@@ -27,30 +27,30 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
- * Generates a non-modular service client.
+ * Generates aggregated client for service.
  *
- * <p>This client extends from the modular client and provides named methods
+ * <p>This client extends from the bare-bones client and provides named methods
  * for every operation in the service. Using this client means that all
  * operations of a service are considered referenced, meaning they will
  * not be removed by tree-shaking.
  */
 @SmithyInternalApi
-final class NonModularServiceGenerator implements Runnable {
+final class ServiceAggregatedClientGenerator implements Runnable {
 
     private final TypeScriptSettings settings;
     private final Model model;
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
-    private final String nonModularName;
+    private final String aggregateClientName;
     private final Symbol serviceSymbol;
     private final ApplicationProtocol applicationProtocol;
 
-    NonModularServiceGenerator(
+    ServiceAggregatedClientGenerator(
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            String nonModularName,
+            String aggregateClientName,
             TypeScriptWriter writer,
             ApplicationProtocol applicationProtocol
     ) {
@@ -59,7 +59,7 @@ final class NonModularServiceGenerator implements Runnable {
         this.service = settings.getService(model);
         this.symbolProvider = symbolProvider;
         this.writer = writer;
-        this.nonModularName = nonModularName;
+        this.aggregateClientName = aggregateClientName;
         this.applicationProtocol = applicationProtocol;
         serviceSymbol = symbolProvider.toSymbol(service);
     }
@@ -68,9 +68,9 @@ final class NonModularServiceGenerator implements Runnable {
     public void run() {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
 
-        // Generate the client and extend from the modular client.
+        // Generate the client and extend from the bare-bones client.
         writer.writeShapeDocs(service);
-        writer.openBlock("export class $L extends $T {", "}", nonModularName, serviceSymbol, () -> {
+        writer.openBlock("export class $L extends $T {", "}", aggregateClientName, serviceSymbol, () -> {
             Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
             for (OperationShape operation : containedOperations) {
                 Symbol operationSymbol = symbolProvider.toSymbol(operation);
