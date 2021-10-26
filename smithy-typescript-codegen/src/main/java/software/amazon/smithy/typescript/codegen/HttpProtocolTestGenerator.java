@@ -20,6 +20,7 @@ import static java.lang.String.format;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -407,7 +408,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
         });
 
         String getHandlerName = "get" + handlerSymbol.getName();
-        writer.addImport(getHandlerName, null, "./" + CodegenUtils.SOURCE_FOLDER + "/server/");
+        writer.addImport(getHandlerName, null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER).toString());
 
         if (!usesDefaultValidation) {
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
@@ -745,8 +747,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
         writer.addImport("serializeFrameworkException", null,
-                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
         writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
         writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException, "
                 + "(ctx: {}, f: __ValidationFailure[]) => { if (f) { throw f; } return undefined;});", handlerSymbol);

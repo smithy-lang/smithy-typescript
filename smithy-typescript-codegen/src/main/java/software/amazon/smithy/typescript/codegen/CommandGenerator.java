@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +46,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class CommandGenerator implements Runnable {
 
+    static final String COMMANDS_FOLDER = "commands";
     static final String COMMAND_PROPERTIES_SECTION = "command_properties";
     static final String COMMAND_BODY_EXTRA_SECTION = "command_body_extra";
     static final String COMMAND_CONSTRUCTOR_SECTION = "command_constructor";
@@ -299,8 +301,8 @@ final class CommandGenerator implements Runnable {
                     ? ProtocolGenerator.getSerFunctionName(symbol, protocolGenerator.getName())
                     : ProtocolGenerator.getDeserFunctionName(symbol, protocolGenerator.getName());
             writer.addImport(serdeFunctionName, serdeFunctionName,
-                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
             writer.write("return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
         }
     }
@@ -319,6 +321,8 @@ final class CommandGenerator implements Runnable {
             writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
         }
 
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/commands/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, CommandGenerator.COMMANDS_FOLDER, "index.ts").toString(),
+            writer.toString());
     }
 }

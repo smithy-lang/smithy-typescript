@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -68,6 +69,6 @@ public enum LanguageTarget {
     abstract String getTemplateFileName();
 
     String getTargetFilename() {
-        return CodegenUtils.SOURCE_FOLDER + "/" + getTemplateFileName().replace(".template", "");
+        return Paths.get(CodegenUtils.SOURCE_FOLDER, getTemplateFileName().replace(".template", "")).toString();
     }
 }

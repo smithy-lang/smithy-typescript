@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -373,8 +374,8 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (protocolGenerator != null) {
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
-            String fileName = CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts";
+            String fileName = Paths.get(CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts").toString();
             writers.useFileWriter(fileName, writer -> {
                 ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
                 context.setProtocolName(protocolGenerator.getName());

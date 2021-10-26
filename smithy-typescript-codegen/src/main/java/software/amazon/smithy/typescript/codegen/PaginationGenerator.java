@@ -16,6 +16,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,7 +36,9 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class PaginationGenerator implements Runnable {
 
-    static final String PAGINATION_INTERFACE_FILE = CodegenUtils.SOURCE_FOLDER + "/pagination/Interfaces.ts";
+    static final String PAGINATION_FOLDER = "pagination";
+    static final String PAGINATION_INTERFACE_FILE =
+        Paths.get(CodegenUtils.SOURCE_FOLDER, PAGINATION_FOLDER, "Interfaces.ts").toString();
 
     private final TypeScriptWriter writer;
     private final PaginationInfo paginatedInfo;
@@ -99,7 +102,8 @@ final class PaginationGenerator implements Runnable {
 
         // Import Pagination types
         writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
-        writer.addImport(paginationType, paginationType, "./" + PAGINATION_INTERFACE_FILE.replace(".ts", ""));
+        writer.addImport(paginationType, paginationType,
+            Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", "")).toString());
 
         writeCommandRequest();
         writeMethodRequest();
@@ -107,7 +111,8 @@ final class PaginationGenerator implements Runnable {
     }
 
     static String getOutputFilelocation(OperationShape operation) {
-        return CodegenUtils.SOURCE_FOLDER + "/pagination/" + operation.getId().getName() + "Paginator.ts";
+        return Paths.get(CodegenUtils.SOURCE_FOLDER, PAGINATION_FOLDER,
+                operation.getId().getName() + "Paginator.ts").toString();
     }
 
     static void generateServicePaginationInterfaces(
@@ -150,7 +155,9 @@ final class PaginationGenerator implements Runnable {
             }
         }
 
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/pagination/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, PAGINATION_FOLDER, "index.ts").toString(),
+            writer.toString());
     }
 
     private String destructurePath(String path) {

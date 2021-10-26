@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import software.amazon.smithy.build.FileManifest;
@@ -59,7 +60,7 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models\";");
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
+        fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
@@ -81,7 +82,9 @@ final class IndexGenerator {
         writer.write("export * from \"./operations\";");
 
         writer.write("export * from \"./$L\"", symbol.getName());
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/server/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts").toString(),
+            writer.toString());
     }
 
     private static void writeClientExports(
@@ -123,6 +126,6 @@ final class IndexGenerator {
         for (TypeScriptIntegration integration : integrations) {
             integration.writeAdditionalExports(settings, model, symbolProvider, writer);
         }
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/index.ts", writer.toString());
+        fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 }

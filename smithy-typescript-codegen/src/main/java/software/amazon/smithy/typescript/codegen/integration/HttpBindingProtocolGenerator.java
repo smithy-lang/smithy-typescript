@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
 
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -336,8 +337,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.addImport("serializeFrameworkException", null,
-            "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-            + ProtocolGenerator.getSanitizedName(getName()));
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(getName())).toString());
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
@@ -391,8 +392,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.addImport("serializeFrameworkException", null,
-                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                + ProtocolGenerator.getSanitizedName(getName()));
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(getName())).toString());
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
 

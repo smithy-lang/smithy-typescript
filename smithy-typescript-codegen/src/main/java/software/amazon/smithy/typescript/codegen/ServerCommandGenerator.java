@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
 
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 final class ServerCommandGenerator implements Runnable {
+
+    static final String COMMANDS_FOLDER = "operations";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -175,12 +178,14 @@ final class ServerCommandGenerator implements Runnable {
                 serializerName, serverSymbol, operationSymbol.getName(), errorsType, () -> {
             String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
             String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
+
             writer.addImport(serializerFunction, null,
-                    "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
             writer.addImport(deserializerFunction, null,
-                    "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                    + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
+
             writer.write("serialize = $L;", serializerFunction);
             writer.write("deserialize = $L;", deserializerFunction);
             writer.write("");
@@ -231,8 +236,8 @@ final class ServerCommandGenerator implements Runnable {
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
         writer.addImport(serializerFunction, null,
-                "./" + CodegenUtils.SOURCE_FOLDER + "/protocols/"
-                + ProtocolGenerator.getSanitizedName(protocolGenerator.getName()));
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
         writer.openBlock("case $S: {", "}", error.getId().getName(), () -> {
             writer.write("return $L(error, ctx);", serializerFunction);
         });
@@ -252,6 +257,9 @@ final class ServerCommandGenerator implements Runnable {
             writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
         }
 
-        fileManifest.writeFile(CodegenUtils.SOURCE_FOLDER + "/server/operations/index.ts", writer.toString());
+        fileManifest.writeFile(
+            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, COMMANDS_FOLDER, "index.ts")
+                .toString(),
+            writer.toString());
     }
 }
