@@ -4,4 +4,4 @@
 
 ### Features
 
-* Update SDK dependencies
+- Update SDK dependencies
