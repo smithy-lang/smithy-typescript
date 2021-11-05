@@ -409,7 +409,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         String getHandlerName = "get" + handlerSymbol.getName();
         writer.addImport(getHandlerName, null,
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER).toString());
+            Paths.get(".", CodegenUtils.TEST_FOLDER, ServerSymbolVisitor.SERVER_FOLDER).toString());
 
         if (!usesDefaultValidation) {
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
@@ -747,7 +747,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
         writer.addImport("serializeFrameworkException", null,
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+            Paths.get(".", CodegenUtils.TEST_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
                 ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
         writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
         writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException, "
