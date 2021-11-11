@@ -155,7 +155,7 @@ final class CommandGenerator implements Runnable {
             + "\n"
             + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
             + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
-            + String.format("@see {@link %s | config} for command's `input` shape.%n", configName);
+            + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
     }
 
     private void generateCommandConstructor() {
