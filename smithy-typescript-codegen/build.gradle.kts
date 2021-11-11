@@ -17,8 +17,18 @@ description = "Generates TypeScript code from Smithy models"
 extra["displayName"] = "Smithy :: Typescript :: Codegen"
 extra["moduleName"] = "software.amazon.smithy.typescript.codegen"
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        "classpath"("software.amazon.smithy:smithy-cli:${rootProject.extra["smithyVersion"]}")
+    }
+}
+
+
 dependencies {
-    api("software.amazon.smithy:smithy-codegen-core:[1.12.0, 2.0[")
-    api("software.amazon.smithy:smithy-waiters:[1.12.0, 2.0[")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.12.0, 2.0[")
+    api("software.amazon.smithy:smithy-codegen-core:${rootProject.extra["smithyVersion"]}")
+    api("software.amazon.smithy:smithy-waiters:${rootProject.extra["smithyVersion"]}")
+    implementation("software.amazon.smithy:smithy-protocol-test-traits:${rootProject.extra["smithyVersion"]}")
 }
