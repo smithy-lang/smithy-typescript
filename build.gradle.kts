@@ -25,7 +25,7 @@ plugins {
 
 allprojects {
     group = "software.amazon.smithy.typescript"
-    version = "0.7.0"
+    version = "0.8.0"
 }
 
 extra["smithyVersion"] = "[1.14.0,1.15.0["
