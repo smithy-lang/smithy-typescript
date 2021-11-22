@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.8.0 (2021-11-23)
+
+### Features
+
+* Updated Smithy version dependency to be more specific. ([#465](https://github.com/awslabs/smithy-typescript/pull/465))
+* Updated Smithy version to `1.14.x`. ([#468](https://github.com/awslabs/smithy-typescript/pull/468))
+
+### Bug Fixes
+
+* Fixed the generated comment for link to client config. ([#466](https://github.com/awslabs/smithy-typescript/pull/466))
+
 ## 0.7.0 (2021-11-03)
 
 ### Features
