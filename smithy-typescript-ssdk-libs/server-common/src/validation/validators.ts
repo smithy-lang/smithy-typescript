@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import RE2 from "re2";
+import { RE2 } from "re2-wasm";
 
 import {
   EnumValidationFailure,
@@ -271,7 +271,7 @@ export class PatternValidator implements SingleConstraintValidator<string, Patte
       return null;
     }
 
-    if (!input.match(this.pattern)) {
+    if (!this.pattern.match(input)) {
       return {
         constraintType: "pattern",
         constraintValues: this.inputPattern,
