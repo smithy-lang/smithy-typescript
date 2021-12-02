@@ -164,6 +164,14 @@ public final class CodegenUtils {
                     functionParametersList.add(String.format("%s: '%s'", key, value));
                 } else if (value instanceof Boolean) {
                     functionParametersList.add(String.format("%s: %s", key, value));
+                } else if (value instanceof List) {
+                    if(!((List)value).isEmpty() && !(((List)value).get(0) instanceof String)) {
+                        throw new CodegenException("Plugin function parameters not supported for type List<"
+                            + ((List)value).get(0).getClass() + ">");
+                    }
+                    functionParametersList.add(String.format("%s: [%s]",
+                        key, ((List<String>)value).stream()
+                            .collect(Collectors.joining("\", \"", "\"", "\""))));
                 } else {
                     // Future support for param type should be added in else if.
                     throw new CodegenException("Plugin function parameters not supported for type "
