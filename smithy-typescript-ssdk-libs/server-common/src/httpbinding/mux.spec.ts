@@ -36,7 +36,12 @@ describe("simple matching", () => {
     }),
     new UriSpec(
       "GET",
-      [{ type: "path_literal", value: "mg" }, { type: "greedy" }, { type: "path_literal", value: "z" }],
+      [
+        { type: "path_literal", value: "mg" },
+        { type: "greedy" },
+        { type: "path_literal", value: "y" },
+        { type: "path_literal", value: "z" },
+      ],
       [],
       { service: "Test", operation: "MiddleGreedy" }
     ),
@@ -71,8 +76,10 @@ describe("simple matching", () => {
       new HttpRequest({ method: "GET", path: "/greedy/a/b/c/d", query: { abc: "def" } }),
     ],
     "Test#MiddleGreedy": [
-      new HttpRequest({ method: "GET", path: "/mg/a/z" }),
-      new HttpRequest({ method: "GET", path: "/mg/a/b/c/d/z", query: { abc: "def" } }),
+      new HttpRequest({ method: "GET", path: "/mg/a/y/z" }),
+      new HttpRequest({ method: "GET", path: "/mg/a/b/c/d/y/z", query: { abc: "def" } }),
+      new HttpRequest({ method: "GET", path: "/mg/a/b/y/c/d/y/z", query: { abc: "def" } }),
+      new HttpRequest({ method: "GET", path: "/mg/a/b/y/z/d/y/z", query: { abc: "def" } }),
     ],
     "Test#Delete": [
       new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar", baz: "quux" } }),
@@ -103,6 +110,10 @@ describe("simple matching", () => {
     new HttpRequest({ method: "GET", path: "/mg" }),
     new HttpRequest({ method: "GET", path: "/mg/q" }),
     new HttpRequest({ method: "GET", path: "/mg/z" }),
+    new HttpRequest({ method: "GET", path: "/mg/y/z" }),
+    new HttpRequest({ method: "GET", path: "/mg/a/z" }),
+    new HttpRequest({ method: "GET", path: "/mg/a/y/z/a" }),
+    new HttpRequest({ method: "GET", path: "/mg/a/y/a" }),
     new HttpRequest({ method: "GET", path: "/mg/a/b/z/c" }),
     new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar" } }),
     new HttpRequest({ method: "DELETE", path: "/", query: { baz: "quux" } }),
