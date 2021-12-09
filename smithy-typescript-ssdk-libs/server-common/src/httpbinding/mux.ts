@@ -78,7 +78,7 @@ export class UriSpec<S extends string, O extends string> {
     const requestPathSegments = req.path.split("/").filter((s) => s.length > 0);
 
     let requestPathIdx = 0;
-    path_loop: for (let i = 0; i < this.pathSegments.length; i++) {
+    for (let i = 0; i < this.pathSegments.length; i++) {
       if (requestPathIdx === requestPathSegments.length) {
         // there are more pathSegments but we have reached the end of the requestPath
         return false;
@@ -88,24 +88,16 @@ export class UriSpec<S extends string, O extends string> {
         return false;
       }
       if (pathSegment.type === "greedy") {
-        if (i === this.pathSegments.length - 1) {
-          // greedy label at the end of pathSegments swallows the remaining path segments
-          requestPathIdx = requestPathSegments.length;
-          break path_loop;
-        }
-        let matched = false;
-        if (i < this.pathSegments.length - 1) {
-          const nextSegment = this.pathSegments[i + 1];
-          while (!matched && ++requestPathIdx < requestPathSegments.length) {
-            if (this.matchesSegment(requestPathSegments[requestPathIdx], nextSegment)) {
-              matched = true;
-            }
-          }
-        }
-        if (!matched) {
-          // the next segment after our greedy label did not match any of the remaining request segments
+        // greedy labels match greedily, and a greedy label cannot be followed by another greedy label
+        // so just consume as many segments as needed to leave an equal number of segments
+        // at the end of the request path as we have segments in the pattern
+        const remainingSegments = this.pathSegments.length - i - 1;
+        const newRequestPathIdx = requestPathSegments.length - remainingSegments;
+        if (requestPathIdx === newRequestPathIdx) {
+          // greedy labels must consume at least one segment
           return false;
         }
+        requestPathIdx = newRequestPathIdx;
       } else {
         requestPathIdx++;
       }
