@@ -73,6 +73,7 @@ final class PackageJsonGenerator {
         template = template.replace("${package}", settings.getPackageName());
         template = template.replace("${packageDescription}", settings.getPackageDescription());
         template = template.replace("${packageVersion}", settings.getPackageVersion());
+        template = template.replace("${packageManager}", settings.getPackageManager().getCommand());
         manifest.writeFile("package.json", template);
     }
 }
