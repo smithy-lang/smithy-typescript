@@ -74,6 +74,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -83,6 +84,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
+    private static final Set<Character> REGEX_CHARS = SetUtils.of('.', '*', '+', '?', '^', '$', '{', '}', '(',
+            ')', '|', '[', ']', '\\');
 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
@@ -1921,7 +1924,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 pathRegexBuilder.append(")");
             } else {
-                pathRegexBuilder.append(segment.getContent());
+                segment.getContent()
+                        .chars()
+                        .forEach(c -> {
+                            if (REGEX_CHARS.contains((char) c)) {
+                                pathRegexBuilder.append('\\');
+                            }
+                            pathRegexBuilder.append((char) c);
+                        });
             }
         }
         writer.write("const pathRegex = new RegExp($S);", pathRegexBuilder.toString());
