@@ -1,4 +1,4 @@
-// derived from https://github.com/aws/aws-sdk-js-v3/blob/b0e1422630/packages/middleware-host-header/src/index.ts
+// derived from https://github.com/aws/aws-sdk-js-v3/blob/e35f78c97fa6710ff9c444351893f0f06755e771/packages/middleware-endpoint-discovery/src/endpointDiscoveryMiddleware.ts
 
 import { HttpRequest } from "@aws-sdk/protocol-http";
 import {
@@ -8,7 +8,7 @@ import {
   Pluggable,
 } from "@aws-sdk/types";
 
-interface PluginOptions {
+interface HttpApiKeyAuthMiddlewareConfig {
   /**
    * Where to put the API key.
    *
@@ -50,6 +50,10 @@ export interface HttpApiKeyAuthResolvedConfig {
   apiKey?: string;
 }
 
+// We have to provide a resolve function when we have config, even if it doesn't
+// actually do anything to the input value. "If any of inputConfig, resolvedConfig,
+// or resolveFunction are set, then all of inputConfig, resolvedConfig, and
+// resolveFunction must be set."
 export function resolveHttpApiKeyAuthConfig<T>(
   input: T & PreviouslyResolved & HttpApiKeyAuthInputConfig
 ): T & HttpApiKeyAuthResolvedConfig {
@@ -71,33 +75,40 @@ export function resolveHttpApiKeyAuthConfig<T>(
  */
 export const httpApiKeyAuthMiddleware =
   <Input extends object, Output extends object>(
-    resolvedConfig: HttpApiKeyAuthResolvedConfig,
-    options: PluginOptions
+    pluginConfig: HttpApiKeyAuthResolvedConfig,
+    middlewareConfig: HttpApiKeyAuthMiddlewareConfig
   ): BuildMiddleware<Input, Output> =>
   (next) =>
   async (args) => {
     if (!HttpRequest.isInstance(args.request)) return next(args);
 
-    const { request } = args;
-
     // This middleware will not be injected if the operation has the @optionalAuth trait.
-    if (!resolvedConfig.apiKey) {
+    if (!pluginConfig.apiKey) {
       throw new Error(
         "API key authorization is required but no API key was provided in the client configuration"
       );
     }
 
-    if (options.in === "header") {
-      // Set the header, even if it's already been set.
-      request.headers[options.name.toLowerCase()] = options.scheme
-        ? `${options.scheme} ${resolvedConfig.apiKey}`
-        : resolvedConfig.apiKey;
-    } else if (options.in === "query") {
-      // Set the query parameter, even if it's already been set.
-      request.query[options.name] = resolvedConfig.apiKey;
-    }
-
-    return next(args);
+    return next({
+      ...args,
+      request: {
+        ...args.request,
+        headers: {
+          ...args.request.headers,
+          ...(middlewareConfig.in === "header" && {
+            // Set the header, even if it's already been set.
+            [middlewareConfig.name.toLowerCase()]: middlewareConfig.scheme
+              ? `${middlewareConfig.scheme} ${pluginConfig.apiKey}`
+              : pluginConfig.apiKey,
+          }),
+        },
+        query: {
+          ...args.request.query,
+          // Set the query parameter, even if it's already been set.
+          ...(middlewareConfig.in === "query" && { [middlewareConfig.name]: pluginConfig.apiKey }),
+        },
+      },
+    });
   };
 
 export const httpApiKeyAuthMiddlewareOptions: BuildHandlerOptions &
@@ -110,12 +121,12 @@ export const httpApiKeyAuthMiddlewareOptions: BuildHandlerOptions &
 };
 
 export const getHttpApiKeyAuthPlugin = (
-  resolvedConfig: HttpApiKeyAuthResolvedConfig,
-  options: PluginOptions
+  pluginConfig: HttpApiKeyAuthResolvedConfig,
+  middlewareConfig: HttpApiKeyAuthMiddlewareConfig
 ): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
     clientStack.add(
-      httpApiKeyAuthMiddleware(resolvedConfig, options),
+      httpApiKeyAuthMiddleware(pluginConfig, middlewareConfig),
       httpApiKeyAuthMiddlewareOptions
     );
   },
