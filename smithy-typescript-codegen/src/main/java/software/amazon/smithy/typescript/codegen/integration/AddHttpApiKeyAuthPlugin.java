@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
@@ -129,6 +130,12 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         writerFactory.accept(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", "HttpApiKeyAuth", "index.spec.ts").toString(),
                 writer -> {
+                        writer.addDependency(SymbolDependency.builder()
+                                .dependencyType("devDependencies")
+                                .packageName("@types/jest")
+                                .version("latest")
+                                .build());
+
                         String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.spec.ts");
                         writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.spec.ts");
                         writer.write("$L", source);
