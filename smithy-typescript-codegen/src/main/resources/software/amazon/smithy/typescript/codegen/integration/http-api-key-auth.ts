@@ -83,10 +83,10 @@ export const httpApiKeyAuthMiddleware =
     if (!HttpRequest.isInstance(args.request)) return next(args);
 
     // This middleware will not be injected if the operation has the @optionalAuth trait.
+    // We don't know if we're the only auth middleware, so let the service deal with the
+    // absence of the API key (or let other middleware do its job).
     if (!pluginConfig.apiKey) {
-      throw new Error(
-        "API key authorization is required but no API key was provided in the client configuration"
-      );
+      return next(args);
     }
 
     return next({

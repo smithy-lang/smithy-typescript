@@ -80,7 +80,7 @@ describe("httpApiKeyAuthMiddleware", () => {
       ).toBe("exampleApiKey");
     });
 
-    it("should throw an error if the api key has not been set", async () => {
+    it("should skip if the api key has not been set", async () => {
       const middleware = httpApiKeyAuthMiddleware(
         {},
         {
@@ -92,14 +92,12 @@ describe("httpApiKeyAuthMiddleware", () => {
 
       const handler = middleware(mockNextHandler, {});
 
-      await expect(
-        handler({
-          input: {},
-          request: new HttpRequest({}),
-        })
-      ).rejects.toThrow("no API key was provided");
+      await handler({
+        input: {},
+        request: new HttpRequest({}),
+      });
 
-      expect(mockNextHandler.mock.calls.length).toEqual(0);
+      expect(mockNextHandler.mock.calls.length).toEqual(1);
     });
 
     it("should skip if the request is not an HttpRequest", async () => {
