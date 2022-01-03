@@ -70,7 +70,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
      * A mapping of static resource files to copy over to a new filename.
      */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
-            "jest.config.js", "jest.config.js",
             "tsconfig.json", "tsconfig.json",
             "tsconfig.es.json", "tsconfig.es.json",
             "tsconfig.types.json", "tsconfig.types.json"
