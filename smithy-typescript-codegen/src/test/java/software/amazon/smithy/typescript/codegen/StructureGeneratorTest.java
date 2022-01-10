@@ -481,7 +481,6 @@ public class StructureGeneratorTest {
         String contents = testStructureCodegen(file, expectedType);
 
         assertThat(contents, containsString("as __SmithyException"));
-        assertThat(contents, containsString("namespace Err {"));
     }
 
     @Test
