@@ -20,6 +20,8 @@ include(":smithy-typescript-codegen-test")
 pluginManagement {
     repositories {
         mavenLocal()
-        gradlePluginPortal()
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
     }
 }
