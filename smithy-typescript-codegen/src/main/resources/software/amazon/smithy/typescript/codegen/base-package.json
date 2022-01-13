@@ -19,6 +19,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@tsconfig/recommended": "1.0.1",
     "downlevel-dts": "0.7.0",
     "rimraf": "^3.0.0",
     "typedoc": "^0.19.2",
