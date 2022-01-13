@@ -72,6 +72,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
             "typedoc.json", "typedoc.json",
             "tsconfig.json", "tsconfig.json",
+            "tsconfig.cjs.json", "tsconfig.cjs.json",
             "tsconfig.es.json", "tsconfig.es.json",
             "tsconfig.types.json", "tsconfig.types.json"
     );
