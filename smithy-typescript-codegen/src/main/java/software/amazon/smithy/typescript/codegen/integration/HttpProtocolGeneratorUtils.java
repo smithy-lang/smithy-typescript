@@ -16,18 +16,21 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.pattern.SmithyPattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -311,6 +314,7 @@ public final class HttpProtocolGeneratorUtils {
      * @param errorCodeGenerator A consumer
      * @param shouldParseErrorBody Flag indicating whether need to parse response body in this dispatcher function
      * @param bodyErrorLocationModifier A function that returns the location of an error in a body given a data source.
+     * @param operationErrorsToShapes A map of error names to their {@link ShapeId}.
      * @return A set of all error structure shapes for the operation that were dispatched to.
      */
     static Set<StructureShape> generateErrorDispatcher(
@@ -319,11 +323,11 @@ public final class HttpProtocolGeneratorUtils {
             SymbolReference responseType,
             Consumer<GenerationContext> errorCodeGenerator,
             boolean shouldParseErrorBody,
-            BiFunction<GenerationContext, String, String> bodyErrorLocationModifier
+            BiFunction<GenerationContext, String, String> bodyErrorLocationModifier,
+            BiFunction<GenerationContext, OperationShape, Map<String, ShapeId>> operationErrorsToShapes
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
-        OperationIndex operationIndex = OperationIndex.of(context.getModel());
         Set<StructureShape> errorShapes = new TreeSet<>();
 
         Symbol symbol = symbolProvider.toSymbol(operation);
@@ -355,14 +359,14 @@ public final class HttpProtocolGeneratorUtils {
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
-                new TreeSet<>(operationIndex.getErrors(operation, context.getService())).forEach(error -> {
-                    final ShapeId errorId = error.getId();
+                operationErrorsToShapes.apply(context, operation).forEach((name, errorId) -> {
+                    StructureShape error = context.getModel().expectShape(errorId).asStructureShape().get();
                     // Track errors bound to the operation so their deserializers may be generated.
                     errorShapes.add(error);
                     Symbol errorSymbol = symbolProvider.toSymbol(error);
                     String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                             context.getProtocolName()) + "Response";
-                    writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
+                    writer.openBlock("case $S:\ncase $S:", "  break;", name, errorId.toString(), () -> {
                         // Dispatch to the error deserialization function.
                         String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
                         writer.openBlock("response = {", "}", () -> {
@@ -443,5 +447,25 @@ public final class HttpProtocolGeneratorUtils {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
             });
         });
+    }
+
+    /**
+     * Returns a map of error names to their {@link ShapeId}.
+     *
+     * @param context   the generation context
+     * @param operation the operation shape to retrieve errors for
+     * @return map of error names to {@link ShapeId}
+     */
+    public static Map<String, ShapeId> getOperationErrors(GenerationContext context, OperationShape operation) {
+        return operation.getErrors().stream()
+                .collect(Collectors.toMap(
+                        shapeId -> shapeId.getName(context.getService()),
+                        Function.identity(),
+                        (x, y) -> {
+                            if (!x.equals(y)) {
+                                throw new CodegenException(String.format("conflicting error shape ids: %s, %s", x, y));
+                            }
+                            return x;
+                        }, TreeMap::new));
     }
 }
