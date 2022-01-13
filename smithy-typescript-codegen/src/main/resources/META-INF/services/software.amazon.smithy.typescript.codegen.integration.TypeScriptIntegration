@@ -1,2 +1,3 @@
 software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency
 software.amazon.smithy.typescript.codegen.integration.AddChecksumRequiredDependency
+software.amazon.smithy.typescript.codegen.integration.AddDefaultsModeDependency
