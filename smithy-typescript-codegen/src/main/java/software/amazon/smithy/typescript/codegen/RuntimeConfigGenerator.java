@@ -44,9 +44,9 @@ final class RuntimeConfigGenerator {
     private final Map<String, Consumer<TypeScriptWriter>> nodeRuntimeConfigDefaults = MapUtils.of(
             "requestHandler", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-                writer.addImport("NodeHttpHandler", "NodeHttpHandler",
+                writer.addImport("NodeHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
-                writer.write("new NodeHttpHandler()");
+                writer.write("new RequestHandler(defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
@@ -94,9 +94,9 @@ final class RuntimeConfigGenerator {
     private final Map<String, Consumer<TypeScriptWriter>> browserRuntimeConfigDefaults = MapUtils.of(
             "requestHandler", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
-                writer.addImport("FetchHttpHandler", "FetchHttpHandler",
+                writer.addImport("FetchHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
-                writer.write("new FetchHttpHandler()");
+                writer.write("new RequestHandler(defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
