@@ -4,7 +4,7 @@
   "version": "${packageVersion}",
   "scripts": {
     "build": "${packageManager} build:cjs && ${packageManager} build:es && ${packageManager} build:types",
-    "build:cjs": "tsc -p tsconfig.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:docs": "typedoc",
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
@@ -19,6 +19,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@tsconfig/recommended": "1.0.1",
     "downlevel-dts": "0.7.0",
     "rimraf": "^3.0.0",
     "typedoc": "^0.19.2",
