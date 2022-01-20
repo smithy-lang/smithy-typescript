@@ -26,7 +26,7 @@
 # continue to prefix the word with "_" until it's no longer considered
 # reserved.
 #
-# See: https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md#221-reserved-words
+# See: https://github.com/Microsoft/TypeScript/blob/main/src/compiler/types.ts#L113
 
 # Reserved and cannot be used as identifiers
 break
@@ -66,7 +66,7 @@ void
 while
 with
 
-# Not valid for identifiers
+# Not valid for identifiers (strict mode reserved words)
 implements
 interface
 let
@@ -76,6 +76,35 @@ protected
 public
 static
 yield
+
+# contextual keywords
+abstract
+as
+asserts
+assert
+any
+async
+await
+constructor
+declare
+get
+infer
+intrinsic
+is
+keyof
+module
+namespace
+never
+readonly
+require
+type
+undefined
+unique
+unknown
+from
+global
+override
+of
 
 # Not valid for user defined type names.
 any
