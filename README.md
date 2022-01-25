@@ -17,13 +17,19 @@ are as follows:
 2. Create a `build.gradle.kts` file with the following contents:
 
    ```kotlin
-   plugins {
-       id("software.amazon.smithy").version("0.4.3")
-   }
+    plugins {
+        id("software.amazon.smithy").version("0.6.0")
+    }
 
-   dependencies {
-       implementation("software.amazon.smithy:smithy-typescript-codegen:0.1.0")
-   }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation("software.amazon.smithy:smithy-model:[1.16.0, 2.0[")
+        implementation("software.amazon.smithy:smithy-typescript-codegen:0.8.0")
+    }
    ```
 
 3. Create a `smithy-build.json` file with the following contents,
@@ -32,29 +38,56 @@ are as follows:
    create.:
 
    ```json
-   {
-       "version": "1.0",
-       "plugins": {
-           "typescript-codegen": {
-               "service": "example.weather#Weather",
-               "package": "weather",
-               "packageVersion": "0.0.1",
-               "packageJson": {
-                   "license": "Apache-2.0"
-               }
-           }
-       }
-   }
+    {
+        "version": "1.0",
+        "plugins": {
+            "typescript-codegen": {
+                "service": "smithy.example#ExampleService",
+                "targetNamespace": "SmithyExample",
+                "package": "smithyexample",
+                "packageVersion": "0.0.1",
+                "packageJson": {
+                    "license": "Apache-2.0"
+                }
+            }
+        }
+    }
 
    ```
 
 4. Create a directory named `model`. This is where all of your Smithy models
    will go.
 
-5. Run `gradle build` (alternatively, you can use a
+5. Create a file in the `model` directory named `main.smithy` with the following contents:
+
+    ```
+    namespace smithy.example
+
+    service ExampleService {
+        version: "2022-01-01",
+        operations: [EchoOperation]
+    }
+
+    operation Echo {
+        input: EchoInput,
+        output: EchoOutput,
+    }
+
+    @input
+    structure EchoInput {
+        message: String,
+    }
+
+    @output
+    structure EchoOutput {
+        message: String
+    }
+    ```
+
+6. Run `gradle build` (alternatively, you can use a
    [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)).
 
-6. The generated client can be found in `build/smithyprojections/foo-client/source/typescript-codegen`.
+7. The generated client can be found in `build/smithyprojections/foo-client/source/typescript-codegen`.
 
 See [the Smithy documentation](https://awslabs.github.io/smithy/guides/building-models/gradle-plugin.html)
 for more information on build Smithy projects with Gradle.
