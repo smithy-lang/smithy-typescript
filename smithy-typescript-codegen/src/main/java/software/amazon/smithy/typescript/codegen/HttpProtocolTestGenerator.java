@@ -761,8 +761,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
             StructureShape error,
             HttpResponseTestCase testCase
     ) {
-        Symbol errorSymbol = symbolProvider.toSymbol(error);
-
         // Use a compound test_case name so we generate unique tests
         // for each error on each operation safely. This is useful in validating
         // that operation parsers are all correctly identifying errors and that
@@ -776,12 +774,12 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.write("try {\n"
                        + "  await client.send(command);\n"
                        + "} catch (err) {\n"
-                       + "  if (err.name !== \"$T\") {\n"
+                       + "  if (err.name !== \"$1L\") {\n"
                        + "    console.log(err);\n"
-                       + "    fail(`Expected a $L to be thrown, got $${err.name} instead`);\n"
+                       + "    fail(`Expected a $1L to be thrown, got $${err.name} instead`);\n"
                        + "    return;\n"
                        + "  }\n"
-                       + "  const r: any = err;", errorSymbol, error.getId().getName())
+                       + "  const r: any = err;", error.getId().getName())
                     .indent()
                     .call(() -> writeResponseAssertions(error, testCase))
                     .write("return;")

@@ -168,10 +168,6 @@ final class StructureGenerator implements Runnable {
      *   $fault: "client";
      *   resourceType: string | undefined;
      * }
-     *
-     * export namespace NoSuchResource {
-     *   export const filterSensitiveLog = (obj: NoSuchResource): any => ({...obj});
-     * }
      * }</pre>
      */
     private void renderErrorStructure() {
@@ -197,7 +193,6 @@ final class StructureGenerator implements Runnable {
         structuredMemberWriter.writeMembers(writer, shape);
         writer.closeBlock("}"); // interface
         writer.write("");
-        renderStructureNamespace(structuredMemberWriter, false);
     }
 
     private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {

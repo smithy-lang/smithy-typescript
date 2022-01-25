@@ -3,16 +3,14 @@
   "description": "${packageDescription}",
   "version": "${packageVersion}",
   "scripts": {
-    "build": "${packageManager} build:cjs && ${packageManager} build:es && ${packageManager} build:types",
-    "build:cjs": "tsc -p tsconfig.json",
-    "build:docs": "${packageManager} clean:docs && typedoc ./",
+    "build": "concurrently '${packageManager}:build:cjs' '${packageManager}:build:es' '${packageManager}:build:types'",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:docs": "typedoc",
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
-    "clean": "${packageManager} clean:dist && ${packageManager} clean:docs",
-    "clean:dist": "rimraf ./dist-*",
-    "clean:docs": "rimraf ./docs",
-    "downlevel-dts": "downlevel-dts dist-types dist-types/ts3.4",
-    "test": "jest --coverage --passWithNoTests"
+    "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "clean": "rimraf ./dist-*",
+    "prepack": "${packageManager} clean && ${packageManager} build"
   },
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",
@@ -22,15 +20,15 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@tsconfig/recommended": "1.0.1",
+    "concurrently": "7.0.0",
     "downlevel-dts": "0.7.0",
-    "jest": "^26.1.0",
     "rimraf": "^3.0.0",
-    "ts-jest": "^26.4.1",
     "typedoc": "^0.19.2",
     "typescript": "~4.3.5"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=12.0.0"
   },
   "typesVersions": {
     "<4.0": {

@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
@@ -163,6 +164,9 @@ final class StructuredMemberWriter {
         } else if (structureTarget.hasTrait(StreamingTrait.class) && structureTarget.isUnionShape()) {
             // disable logging for StreamingTrait
             writer.write("'STREAMING_CONTENT'");
+        } else if (structureTarget.hasTrait(ErrorTrait.class)) {
+            // Sensitive logs are not filtered from errors.
+            writer.write("$L", structureParam);
         } else {
             // Call filterSensitiveLog on Structure.
             writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);

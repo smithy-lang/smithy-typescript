@@ -69,6 +69,9 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     AWS_SDK_UTIL_WAITERS("dependencies", "@aws-sdk/util-waiter",  false),
 
+    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@aws-sdk/util-defaults-mode-node", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@aws-sdk/util-defaults-mode-browser", true),
+
     // Conditionally added when httpChecksumRequired trait exists
     MD5_BROWSER("dependencies", "@aws-sdk/md5-js", false),
     STREAM_HASHER_NODE("dependencies", "@aws-sdk/hash-stream-node", false),
@@ -98,7 +101,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Server dependency for SSDKs
-    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.3", false);
+    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.4", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";
