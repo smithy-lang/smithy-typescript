@@ -141,7 +141,7 @@ final class StructureGenerator implements Runnable {
     }
 
     /**
-     * Error structures generate interfaces that extend from SmithyException
+     * Error structures generate interfaces that extend from SdkException
      * and add the appropriate fault property.
      *
      * <p>Given the following Smithy structure:
@@ -160,10 +160,10 @@ final class StructureGenerator implements Runnable {
      *
      * <pre>{@code
      * import {
-     *     SmithyException as __SmithyException
+     *     SdkException as __SdkException
      * } from "@aws-sdk/types";
      *
-     * export interface NoSuchResource extends __SmithyException, $MetadataBearer {
+     * export interface NoSuchResource extends __SdkException, $MetadataBearer {
      *   name: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
@@ -175,10 +175,10 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.writeShapeDocs(shape);
 
-        // Find symbol references with the "extends" property, and add SmithyException.
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
+        // Find symbol references with the "extends" property, and add SdkException.
+        writer.addImport("SdkException", "__SdkException", "@aws-sdk/types");
         String extendsFrom = Stream.concat(
-                Stream.of("__SmithyException"),
+                Stream.of("__SdkException"),
                 symbol.getReferences().stream()
                         .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
                         .map(SymbolReference::getAlias)

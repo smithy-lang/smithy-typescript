@@ -344,13 +344,13 @@ public final class HttpProtocolGeneratorUtils {
                         });
             }
 
-            // Error responses must be at least SmithyException and MetadataBearer implementations.
-            writer.addImport("SmithyException", "__SmithyException",
+            // Error responses must be at least SdkException and MetadataBearer implementations.
+            writer.addImport("SdkException", "__SdkException",
                     TypeScriptDependency.AWS_SDK_TYPES.packageName);
             writer.addImport("MetadataBearer", "__MetadataBearer",
                     TypeScriptDependency.AWS_SDK_TYPES.packageName);
             // These responses will also have additional properties, so enable that on the interface.
-            writer.write("let response: __SmithyException & __MetadataBearer & {[key: string]: any};");
+            writer.write("let response: __SdkException & __MetadataBearer & {[key: string]: any};");
             writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
