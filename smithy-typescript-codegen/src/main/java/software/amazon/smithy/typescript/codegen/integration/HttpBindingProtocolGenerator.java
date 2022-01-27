@@ -2063,16 +2063,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};",
                 errorDeserMethodName, outputName, errorSymbol, () -> {
-            writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
-                writer.write("name: $S,", error.getId().getName());
-                writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                HttpProtocolGeneratorUtils.writeRetryableTrait(writer, error, ",");
-                writer.write("$$metadata: deserializeMetadata($L),", outputName);
-                // Set all the members to undefined to meet type constraints.
-                new TreeMap<>(error.getAllMembers())
-                        .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
-            });
-
+            writer.write("const contents: Partial<$T> = {};", errorSymbol);
             readResponseHeaders(context, error, bindingIndex, outputName);
             List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
@@ -2080,7 +2071,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
-            writer.write("return contents;");
+            writer.openBlock("return new $T(", ");", errorSymbol, () -> {
+                writer.write("deserializeMetadata($L),", outputName);
+                writer.write("contents");
+            });
         });
 
         writer.write("");

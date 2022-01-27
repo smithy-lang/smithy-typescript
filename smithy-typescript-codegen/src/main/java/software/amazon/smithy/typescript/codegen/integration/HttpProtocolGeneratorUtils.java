@@ -362,15 +362,14 @@ public final class HttpProtocolGeneratorUtils {
                     Symbol errorSymbol = symbolProvider.toSymbol(error);
                     String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                             context.getProtocolName()) + "Response";
-                    writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
-                        // Dispatch to the error deserialization function.
-                        String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
-                        writer.openBlock("response = {", "}", () -> {
-                            writer.write("...await $L($L, context),", errorDeserMethodName, outputParam);
-                            writer.write("name: errorCode,");
-                            writer.write("$$metadata: deserializeMetadata(output),");
-                        });
-                    });
+                     // Dispatch to the error deserialization function.
+                     String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
+                    writer.write("case $S:", errorId.getName());
+                    writer.write("case $S:", errorId.toString());
+                    writer.indent()
+                            .write("response = await $L($L, context);", errorDeserMethodName, outputParam)
+                            .write("throw response;")
+                            .dedent();
                 });
 
                 // Build a generic error the best we can for ones we don't know about.

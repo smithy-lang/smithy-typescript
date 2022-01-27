@@ -26,7 +26,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -406,15 +405,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     getErrorBodyLocation(context, "body"));
 
             // Then load it into the object with additional error and response properties.
-            writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
-                writer.write("name: $S,", error.getId().getName());
-                writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                HttpProtocolGeneratorUtils.writeRetryableTrait(writer, error, ",");
-                writer.write("$$metadata: deserializeMetadata($L),", outputReference);
-                writer.write("...deserialized,");
+            writer.openBlock("return new $T(", ");", errorSymbol, () -> {
+                writer.write("deserializeMetadata($L),", outputReference);
+                writer.write("deserialized");
             });
-
-            writer.write("return contents;");
         });
 
         writer.write("");

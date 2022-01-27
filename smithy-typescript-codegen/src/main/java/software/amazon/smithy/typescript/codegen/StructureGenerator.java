@@ -18,9 +18,10 @@ package software.amazon.smithy.typescript.codegen;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeInlineStreamingMemberType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+// import java.util.stream.Stream;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -159,14 +160,25 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is generated:
      *
      * <pre>{@code
-     * import {
-     *     SmithyException as __SmithyException
-     * } from "@aws-sdk/types";
+     * import { SdkException as __SdkException } from "@aws-sdk/smithy-client";
+     * import { ResponseMetadata as __ResponseMetadata } from "@aws-sdk/smithy-client";
      *
-     * export interface NoSuchResource extends __SmithyException, $MetadataBearer {
+     * export interface NoSuchResource extends __SdkException {
      *   name: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
+     * }
+     *
+     * export class NoSuchResource extends __SdkException {
+     *   constructor(responseMetadata: __ResponseMetadata, deserialized: any) {
+     *     super({
+     *       name: "NoSuchResource",
+     *       $fault: "client",
+     *       $metadata: responseMetadata,
+     *     });
+     *     Object.setPrototypeOf(this, NoSuchResource.prototype);
+     *     Object.assign(this, { ...deserialized });
+     *   }
      * }
      * }</pre>
      */
@@ -175,24 +187,41 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.writeShapeDocs(shape);
 
+        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
         // Find symbol references with the "extends" property, and add SmithyException.
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
-        String extendsFrom = Stream.concat(
-                Stream.of("__SmithyException"),
-                symbol.getReferences().stream()
-                        .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
-                        .map(SymbolReference::getAlias)
-                ).collect(Collectors.joining(", "));
+        writer.addImport("SdkException", "__SdkException", "@aws-sdk/smithy-client");
 
-        writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
+        writer.openBlock("export interface $L extends __SdkException {", symbol.getName());
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
         HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
-        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
+        Collection<MemberShape> allMembers = shape.getAllMembers().values().stream().filter((memberShape) -> {
+            // Error message may exists in "Message" or "message" shape regardless of the model.
+            // So SDK always set it to "message" property of "__SdkException" TypeScript interface
+            String memberName = memberShape.getMemberName();
+            return !memberName.toLowerCase().equals("message");
+        }).collect(Collectors.toList());
+        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider, allMembers);
         structuredMemberWriter.writeMembers(writer, shape);
         writer.closeBlock("}"); // interface
         writer.write("");
+        renderErrorStructureClass(symbol, errorTrait);
+        writer.write("");
+    }
+
+    private void renderErrorStructureClass(Symbol symbol, ErrorTrait errorTrait) {
+        writer.openBlock("export class $L extends __SdkException {", symbol.getName());
+        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
+        writer.openBlock("constructor(responseMetadata: __ResponseMetadata, deserialized: any) {", "}", () -> {
+            writer.openBlock("super({", "});", () -> {
+                writer.write("name: $S,", shape.getId().getName());
+                writer.write("$$fault: $S,", errorTrait.getValue());
+                writer.write("$$metadata: responseMetadata,");
+            });
+            writer.write("Object.setPrototypeOf(this, $L.prototype);", symbol.getName());
+            writer.write("Object.assign(this, { ...deserialized });");
+        });
+        writer.closeBlock("}"); // class
     }
 
     private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {
