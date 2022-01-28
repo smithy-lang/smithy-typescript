@@ -195,10 +195,10 @@ final class StructureGenerator implements Runnable {
         writer.write("$$fault: $S;", errorTrait.getValue());
         HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         Collection<MemberShape> allMembers = shape.getAllMembers().values().stream().filter((memberShape) -> {
-            // Error message may exists in "Message" or "message" shape regardless of the model.
-            // So these members are ignored and left to deserializers to parse them and inject to error object.
+            // since any error interface must extend from JavaScript Error interface, message member is already required
+            // in the JavaScript Error interface
             String memberName = memberShape.getMemberName();
-            return !memberName.toLowerCase().equals("message");
+            return !memberName.equals("message");
         }).collect(Collectors.toList());
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider, allMembers);
         structuredMemberWriter.writeMembers(writer, shape);
