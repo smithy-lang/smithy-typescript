@@ -2063,7 +2063,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};",
                 errorDeserMethodName, outputName, errorSymbol, () -> {
-            writer.write("const contents: Partial<$T> = {};", errorSymbol);
+            writer.write("const contents: any = {};");
             readResponseHeaders(context, error, bindingIndex, outputName);
             List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
@@ -2071,10 +2071,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
-            writer.openBlock("return new $T(", ");", errorSymbol, () -> {
+            writer.openBlock("const exception = new $T(", ");", errorSymbol, () -> {
                 writer.write("deserializeMetadata($L),", outputName);
                 writer.write("contents");
             });
+            writer.addImport("decorateSdkException", "__decorateSdkException",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.write("return __decorateSdkException(exception);");
         });
 
         writer.write("");

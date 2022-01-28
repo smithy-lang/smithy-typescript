@@ -344,13 +344,9 @@ public final class HttpProtocolGeneratorUtils {
                         });
             }
 
-            // Error responses must be at least SmithyException and MetadataBearer implementations.
-            writer.addImport("SmithyException", "__SmithyException",
-                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
-            writer.addImport("MetadataBearer", "__MetadataBearer",
-                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
-            // These responses will also have additional properties, so enable that on the interface.
-            writer.write("let response: __SmithyException & __MetadataBearer & {[key: string]: any};");
+            // Error responses must be at least SdkException interface
+            writer.addImport("SdkException", "__SdkException", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.write("let response: __SdkException;");
             writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
@@ -367,8 +363,7 @@ public final class HttpProtocolGeneratorUtils {
                     writer.write("case $S:", errorId.getName());
                     writer.write("case $S:", errorId.toString());
                     writer.indent()
-                            .write("response = await $L($L, context);", errorDeserMethodName, outputParam)
-                            .write("throw response;")
+                            .write("throw await $L($L, context);", errorDeserMethodName, outputParam)
                             .dedent();
                 });
 
@@ -384,23 +379,15 @@ public final class HttpProtocolGeneratorUtils {
 
                         // Get the protocol specific error location for retrieving contents.
                         String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.write("errorCode = $1L.code || $1L.Code || errorCode;", errorLocation);
-                        writer.openBlock("response = {", "} as any;", () -> {
-                            writer.write("...$L,", errorLocation);
-                            writer.write("name: `$${errorCode}`,");
-                            writer.write("message: $1L.message || $1L.Message || errorCode,", errorLocation);
+                        writer.openBlock("response = new __SdkException({", "});", () -> {
+                            writer.write("name: $1L.code || $1L.Code || errorCode,", errorLocation);
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output)");
-                        }).dedent();
+                        });
+                        writer.addImport("decorateSdkException", "__decorateSdkException",
+                                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                        writer.write("throw __decorateSdkException(response, parsedBody);");
             });
-
-            // Attempt to pull out the exception message for clearer JS errors,
-            // and then clean up the response object.
-            writer.write("const message = response.message || response.Message || errorCode;");
-            writer.write("response.message = message;");
-            writer.write("delete response.Message;");
-
-            writer.write("return Promise.reject(Object.assign(new Error(message), response));");
         });
         writer.write("");
 
