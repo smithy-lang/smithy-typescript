@@ -344,9 +344,9 @@ public final class HttpProtocolGeneratorUtils {
                         });
             }
 
-            // Error responses must be at least SdkException interface
-            writer.addImport("SdkException", "__SdkException", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-            writer.write("let response: __SdkException;");
+            // Error responses must be at least ServiceException interface
+            writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.write("let response: __ServiceException;");
             writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
@@ -379,14 +379,14 @@ public final class HttpProtocolGeneratorUtils {
 
                         // Get the protocol specific error location for retrieving contents.
                         String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.openBlock("response = new __SdkException({", "});", () -> {
+                        writer.openBlock("response = new __ServiceException({", "});", () -> {
                             writer.write("name: $1L.code || $1L.Code || errorCode,", errorLocation);
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output)");
                         });
-                        writer.addImport("decorateSdkException", "__decorateSdkException",
+                        writer.addImport("decorateServiceException", "__decorateServiceException",
                                 TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-                        writer.write("throw __decorateSdkException(response, parsedBody);");
+                        writer.write("throw __decorateServiceException(response, $L);", errorLocation);
             });
         });
         writer.write("");

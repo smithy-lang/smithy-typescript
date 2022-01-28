@@ -2075,9 +2075,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writer.write("deserializeMetadata($L),", outputName);
                 writer.write("contents");
             });
-            writer.addImport("decorateSdkException", "__decorateSdkException",
+            writer.addImport("decorateServiceException", "__decorateServiceException",
                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-            writer.write("return __decorateSdkException(exception);");
+            writer.write("return __decorateServiceException(exception);");
         });
 
         writer.write("");

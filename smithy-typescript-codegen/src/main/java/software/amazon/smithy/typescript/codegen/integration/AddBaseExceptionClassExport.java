@@ -23,7 +23,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * Re-export the SdkException class from index.ts.
+ * Re-export the ServiceException class from index.ts.
  */
 @SmithyInternalApi
 public final class AddBaseExceptionClassExport implements TypeScriptIntegration {
@@ -35,6 +35,6 @@ public final class AddBaseExceptionClassExport implements TypeScriptIntegration 
             SymbolProvider symbolProvider,
             TypeScriptWriter writer
     ) {
-        writer.write("export { SdkException } from $S;", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+        writer.write("export { ServiceException } from $S;", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
     }
 }

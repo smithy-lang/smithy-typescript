@@ -159,16 +159,16 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is generated:
      *
      * <pre>{@code
-     * import { SdkException as __SdkException } from "@aws-sdk/smithy-client";
+     * import { ServiceException as __ServiceException } from "@aws-sdk/smithy-client";
      * import { ResponseMetadata as __ResponseMetadata } from "@aws-sdk/smithy-client";
      *
-     * export interface NoSuchResource extends __SdkException {
+     * export interface NoSuchResource extends __ServiceException {
      *   name: "NoSuchResource";
      *   $fault: "client";
      *   resourceType: string | undefined;
      * }
      *
-     * export class NoSuchResource extends __SdkException {
+     * export class NoSuchResource extends __ServiceException {
      *   constructor(responseMetadata: __ResponseMetadata, deserialized: any) {
      *     super({
      *       name: "NoSuchResource",
@@ -188,9 +188,9 @@ final class StructureGenerator implements Runnable {
 
         writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
         // Find symbol references with the "extends" property, and add SmithyException.
-        writer.addImport("SdkException", "__SdkException", "@aws-sdk/smithy-client");
+        writer.addImport("ServiceException", "__ServiceException", "@aws-sdk/smithy-client");
 
-        writer.openBlock("export interface $L extends __SdkException {", symbol.getName());
+        writer.openBlock("export interface $L extends __ServiceException {", symbol.getName());
         writer.write("name: $S;", shape.getId().getName());
         writer.write("$$fault: $S;", errorTrait.getValue());
         HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
@@ -209,7 +209,7 @@ final class StructureGenerator implements Runnable {
     }
 
     private void renderErrorStructureClass(Symbol symbol, ErrorTrait errorTrait) {
-        writer.openBlock("export class $L extends __SdkException {", symbol.getName());
+        writer.openBlock("export class $L extends __ServiceException {", symbol.getName());
         writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
         writer.openBlock("constructor(responseMetadata: __ResponseMetadata, deserialized: any) {", "}", () -> {
             writer.openBlock("super({", "});", () -> {

@@ -17,12 +17,12 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -38,12 +38,12 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -59,12 +59,12 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -80,13 +80,13 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesOptionalNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-member-no-message.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  foo?: string;\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -102,13 +102,13 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesRequiredNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-member-no-message.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  foo: string | undefined;\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -124,14 +124,14 @@ public class StructureGeneratorTest {
     @Test
     public void generatesEmptyRetryableTrait() {
         testErrorStructureCodegen("error-test-retryable.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  $retryable: {\n"
                                   + "  };\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -147,7 +147,7 @@ public class StructureGeneratorTest {
     @Test
     public void generatesRetryableTraitWithThrottling() {
         testErrorStructureCodegen("error-test-retryable-throttling.smithy",
-                                  "export interface Err extends __SdkException {\n"
+                                  "export interface Err extends __ServiceException {\n"
                                   + "  name: \"Err\";\n"
                                   + "  $fault: \"client\";\n"
                                   + "  $retryable: {\n"
@@ -155,7 +155,7 @@ public class StructureGeneratorTest {
                                   + "  };\n"
                                   + "}\n"
                                   + "\n"
-                                  + "export class Err extends __SdkException {\n"
+                                  + "export class Err extends __ServiceException {\n"
                                   + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
@@ -582,7 +582,7 @@ public class StructureGeneratorTest {
     private void testErrorStructureCodegen(String file, String expectedType) {
         String contents = testStructureCodegen(file, expectedType);
 
-        assertThat(contents, containsString("as __SdkException"));
+        assertThat(contents, containsString("as __ServiceException"));
     }
 
     @Test
