@@ -21,7 +21,6 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeInline
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-// import java.util.stream.Stream;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
