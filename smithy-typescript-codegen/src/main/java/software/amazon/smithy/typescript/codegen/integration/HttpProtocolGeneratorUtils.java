@@ -345,7 +345,8 @@ public final class HttpProtocolGeneratorUtils {
             }
 
             // Error responses must be at least ServiceException interface
-            writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.addImport("ServiceException", "__ServiceException",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
             writer.write("let response: __ServiceException;");
             writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
@@ -359,7 +360,7 @@ public final class HttpProtocolGeneratorUtils {
                     String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                             context.getProtocolName()) + "Response";
                      // Dispatch to the error deserialization function.
-                     String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
+                    String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
                     writer.write("case $S:", errorId.getName());
                     writer.write("case $S:", errorId.toString());
                     writer.indent()
