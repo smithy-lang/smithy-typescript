@@ -196,7 +196,7 @@ final class StructureGenerator implements Runnable {
         HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         Collection<MemberShape> allMembers = shape.getAllMembers().values().stream().filter((memberShape) -> {
             // Error message may exists in "Message" or "message" shape regardless of the model.
-            // So SDK always set it to "message" property of "__SdkException" TypeScript interface
+            // So these members are ignored and left to deserializers to parse them and inject to error object.
             String memberName = memberShape.getMemberName();
             return !memberName.toLowerCase().equals("message");
         }).collect(Collectors.toList());
