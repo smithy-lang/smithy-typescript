@@ -187,7 +187,6 @@ final class StructureGenerator implements Runnable {
         writer.writeShapeDocs(shape);
 
         writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
-        // Find symbol references with the "extends" property, and add SmithyException.
         writer.addImport("ServiceException", "__ServiceException", "@aws-sdk/smithy-client");
 
         writer.openBlock("export interface $L extends __ServiceException {", symbol.getName());
