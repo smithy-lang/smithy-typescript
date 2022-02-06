@@ -2071,13 +2071,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
-            writer.openBlock("const exception = new $T(", ");", errorSymbol, () -> {
-                writer.write("deserializeMetadata($L),", outputName);
-                writer.write("contents");
+            writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
+                writer.write("$$metadata: deserializeMetadata($L),", outputName);
+                writer.write("...contents");
             });
+            String errorLocation = this.getErrorBodyLocation(context, "parsedBody");
             writer.addImport("decorateServiceException", "__decorateServiceException",
                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-            writer.write("return __decorateServiceException(exception);");
+            writer.write("return __decorateServiceException(exception, $L);", errorLocation);
         });
 
         writer.write("");

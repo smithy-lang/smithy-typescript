@@ -18,7 +18,6 @@ package software.amazon.smithy.typescript.codegen;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeInlineStreamingMemberType;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -140,88 +139,6 @@ final class StructureGenerator implements Runnable {
         renderStructureNamespace(config, includeValidation);
     }
 
-    /**
-     * Error structures generate interfaces that extend from SmithyException
-     * and add the appropriate fault property.
-     *
-     * <p>Given the following Smithy structure:
-     *
-     * <pre>{@code
-     * namespace smithy.example
-     *
-     * @error("client")
-     * structure NoSuchResource {
-     *     @required
-     *     resourceType: String
-     * }
-     * }</pre>
-     *
-     * <p>The following TypeScript is generated:
-     *
-     * <pre>{@code
-     * import { ServiceException as __ServiceException } from "@aws-sdk/smithy-client";
-     * import { ResponseMetadata as __ResponseMetadata } from "@aws-sdk/smithy-client";
-     *
-     * export interface NoSuchResource extends __ServiceException {
-     *   name: "NoSuchResource";
-     *   $fault: "client";
-     *   resourceType: string | undefined;
-     * }
-     *
-     * export class NoSuchResource extends __ServiceException {
-     *   constructor(responseMetadata: __ResponseMetadata, deserialized: any) {
-     *     super({
-     *       name: "NoSuchResource",
-     *       $fault: "client",
-     *       $metadata: responseMetadata,
-     *     });
-     *     Object.setPrototypeOf(this, NoSuchResource.prototype);
-     *     Object.assign(this, { ...deserialized });
-     *   }
-     * }
-     * }</pre>
-     */
-    private void renderErrorStructure() {
-        ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
-        Symbol symbol = symbolProvider.toSymbol(shape);
-        writer.writeShapeDocs(shape);
-
-        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
-        writer.addImport("ServiceException", "__ServiceException", "@aws-sdk/smithy-client");
-
-        writer.openBlock("export interface $L extends __ServiceException {", symbol.getName());
-        writer.write("name: $S;", shape.getId().getName());
-        writer.write("$$fault: $S;", errorTrait.getValue());
-        HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
-        Collection<MemberShape> allMembers = shape.getAllMembers().values().stream().filter((memberShape) -> {
-            // since any error interface must extend from JavaScript Error interface, message member is already required
-            // in the JavaScript Error interface
-            String memberName = memberShape.getMemberName();
-            return !memberName.equals("message");
-        }).collect(Collectors.toList());
-        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider, allMembers);
-        structuredMemberWriter.writeMembers(writer, shape);
-        writer.closeBlock("}"); // interface
-        writer.write("");
-        renderErrorStructureClass(symbol, errorTrait);
-        writer.write("");
-    }
-
-    private void renderErrorStructureClass(Symbol symbol, ErrorTrait errorTrait) {
-        writer.openBlock("export class $L extends __ServiceException {", symbol.getName());
-        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
-        writer.openBlock("constructor(responseMetadata: __ResponseMetadata, deserialized: any) {", "}", () -> {
-            writer.openBlock("super({", "});", () -> {
-                writer.write("name: $S,", shape.getId().getName());
-                writer.write("$$fault: $S,", errorTrait.getValue());
-                writer.write("$$metadata: responseMetadata,");
-            });
-            writer.write("Object.setPrototypeOf(this, $L.prototype);", symbol.getName());
-            writer.write("Object.assign(this, { ...deserialized });");
-        });
-        writer.closeBlock("}"); // class
-    }
-
     private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
@@ -254,5 +171,66 @@ final class StructureGenerator implements Runnable {
                 structuredMemberWriter.writeValidateMethodContents(writer, objectParam);
             });
         });
+    }
+
+    /**
+     * Error structures generate interfaces that extend from SmithyException
+     * and add the appropriate fault property.
+     *
+     * <p>Given the following Smithy structure:
+     *
+     * <pre>{@code
+     * namespace smithy.example
+     *
+     * @error("client")
+     * structure NoSuchResource {
+     *     @required
+     *     resourceType: String
+     * }
+     * }</pre>
+     *
+     * <p>The following TypeScript is generated:
+     *
+     * <pre>{@code
+     * import { ServiceException as __BaseException } from "@aws-sdk/smithy-client";
+     * import { ExceptionOptionType as __ExceptionOptionType } from "@aws-sdk/smithy-client";
+     *
+     * export class NoSuchResource extends __BaseException {
+     *   name: "NoSuchResource";
+     *   $fault: "client";
+     *   resourceType: string | undefined;
+     *   // @internal
+     *   constructor(opts: __ExceptionOptionType<NoSuchResource, __BaseException>) {
+     *     super({
+     *       name: "NoSuchResource",
+     *       $fault: "client",
+     *       ...opts
+     *     });
+     *     Object.setPrototypeOf(this, NoSuchResource.prototype);
+     *     this.resourceType = opts.resourceType;
+     *   }
+     * }
+     * }</pre>
+     */
+    private void renderErrorStructure() {
+        ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
+        Symbol symbol = symbolProvider.toSymbol(shape);
+        writer.writeShapeDocs(shape);
+        boolean isServerSdk = this.includeValidation;
+        writer.openBlock("export class $L extends $L {", symbol.getName(), "__BaseException");
+        writer.write("readonly name: $1S = $1S;", shape.getId().getName());
+        writer.write("readonly $$fault: $1S = $1S;", errorTrait.getValue());
+        if (!isServerSdk) {
+            HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
+        }
+        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
+                shape.getAllMembers().values());
+        // since any error interface must extend from JavaScript Error interface, message member is already
+        // required in the JavaScript Error interface
+        structuredMemberWriter.skipMembers.add("message");
+        structuredMemberWriter.writeMembers(writer, shape);
+        structuredMemberWriter.writeErrorConstructor(writer, shape, isServerSdk);
+        writer.closeBlock("}");
+        writer.write("");
     }
 }

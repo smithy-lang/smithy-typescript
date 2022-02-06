@@ -17,20 +17,19 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -38,20 +37,19 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -59,20 +57,19 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -80,21 +77,21 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesOptionalNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-member-no-message.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
                                   + "  foo?: string;\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
+                                  + "    this.foo = opts.foo;\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -102,21 +99,21 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesRequiredNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-member-no-message.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
                                   + "  foo: string | undefined;\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
+                                  + "    this.foo = opts.foo;\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -124,22 +121,21 @@ public class StructureGeneratorTest {
     @Test
     public void generatesEmptyRetryableTrait() {
         testErrorStructureCodegen("error-test-retryable.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "  $retryable: {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  $retryable = {\n"
                                   + "  };\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -147,23 +143,22 @@ public class StructureGeneratorTest {
     @Test
     public void generatesRetryableTraitWithThrottling() {
         testErrorStructureCodegen("error-test-retryable-throttling.smithy",
-                                  "export interface Err extends __ServiceException {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "  $retryable: {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  $retryable = {\n"
                                   + "    throttling: true,\n"
                                   + "  };\n"
-                                  + "}\n"
-                                  + "\n"
-                                  + "export class Err extends __ServiceException {\n"
-                                  + "  constructor(responseMetadata: __ResponseMetadata, deserialized: any) {\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
                                   + "    super({\n"
                                   + "      name: \"Err\",\n"
                                   + "      $fault: \"client\",\n"
-                                  + "      $metadata: responseMetadata,\n"
+                                  + "      ...opts\n"
                                   + "    });\n"
                                   + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                                  + "    Object.assign(this, { ...deserialized });\n"
                                   + "  }\n"
                                   + "}\n");
     }
@@ -582,7 +577,7 @@ public class StructureGeneratorTest {
     private void testErrorStructureCodegen(String file, String expectedType) {
         String contents = testStructureCodegen(file, expectedType);
 
-        assertThat(contents, containsString("as __ServiceException"));
+        assertThat(contents, containsString("as __BaseException"));
     }
 
     @Test

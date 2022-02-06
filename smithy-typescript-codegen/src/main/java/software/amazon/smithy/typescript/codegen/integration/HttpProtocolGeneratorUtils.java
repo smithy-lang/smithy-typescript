@@ -291,7 +291,7 @@ public final class HttpProtocolGeneratorUtils {
         Optional<RetryableTrait> retryableTrait = error.getTrait(RetryableTrait.class);
         if (retryableTrait.isPresent()) {
             String textAfterBlock = String.format("}%s", separator);
-            writer.openBlock("$$retryable: {", textAfterBlock, () -> {
+            writer.openBlock("$$retryable = {", textAfterBlock, () -> {
                 if (retryableTrait.get().getThrottling()) {
                     writer.write("throttling: true,");
                 }

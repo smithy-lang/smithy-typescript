@@ -406,13 +406,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     getErrorBodyLocation(context, "body"));
 
             // Then load it into the object with additional error and response properties.
-            writer.openBlock("const exception = new $T(", ");", errorSymbol, () -> {
-                writer.write("deserializeMetadata($L),", outputReference);
-                writer.write("deserialized");
+            writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
+                writer.write("$$metadata: deserializeMetadata($L),", outputReference);
+                writer.write("...deserialized");
             });
             writer.addImport("decorateServiceException", "__decorateServiceException",
                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-            writer.write("return __decorateServiceException(exception);");
+            writer.write("return __decorateServiceException(exception, body);");
         });
 
         writer.write("");
