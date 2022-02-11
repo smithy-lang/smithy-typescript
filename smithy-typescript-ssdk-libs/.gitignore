@@ -3,3 +3,4 @@
 **/*.d.ts
 **/yarn-error.log
 coverage
+**/.turbo
