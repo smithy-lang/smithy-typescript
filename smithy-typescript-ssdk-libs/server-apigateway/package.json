@@ -9,7 +9,10 @@
     "pretest": "yarn build",
     "build": "tsc -p tsconfig.json",
     "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
-    "test": "jest"
+    "test": "jest --passWithNoTests",
+    "clean": "rimraf dist",
+    "lint": "yarn run eslint -c ../.eslintrc.js **/src/**/*.ts",
+    "format": "prettier --config ../prettier.config.js --write **/*.{ts,js,md,json}"
   },
   "repository": {
     "type": "git",
@@ -19,8 +22,8 @@
   "author": "AWS Smithy Team",
   "license": "Apache-2.0",
   "dependencies": {
-    "@aws-sdk/protocol-http": "3.40.0",
-    "@aws-sdk/types": "3.40.0",
+    "@aws-sdk/protocol-http": "^3.40.0",
+    "@aws-sdk/types": "^3.40.0",
     "@types/aws-lambda": "^8.10.72",
     "tslib": "^1.8.0"
   },
