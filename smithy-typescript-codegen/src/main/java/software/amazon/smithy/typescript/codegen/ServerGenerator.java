@@ -208,7 +208,7 @@ final class ServerGenerator {
         writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
+        writer.addImport("SmithyException", "__SmithyException", "@aws-smithy/server-common");
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
     }
 

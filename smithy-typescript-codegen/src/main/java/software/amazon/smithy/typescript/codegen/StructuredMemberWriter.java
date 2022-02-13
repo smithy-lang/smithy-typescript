@@ -130,13 +130,13 @@ final class StructuredMemberWriter {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
         if (isServerSdk) {
-            // TODO: change to import from @aws-smithy/server-common
-            writer.addImport("ClientException", "__BaseException", "@aws-sdk/smithy-client");
+            writer.addImport("SmithyException", "__BaseException", TypeScriptDependency.SERVER_COMMON.packageName);
         } else {
-            writer.addImport("ServiceException", "__BaseException", "@aws-sdk/smithy-client");
+            writer.addImport("ServiceException", "__BaseException", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
             writer.writeDocs("@internal");
         }
-        writer.addImport("ExceptionOptionType", "__ExceptionOptionType", "@aws-sdk/smithy-client");
+        writer.addImport("ExceptionOptionType", "__ExceptionOptionType",
+                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
         writer.openBlock("constructor(opts: __ExceptionOptionType<$L, __BaseException>) {", symbol.getName());
         writer.openBlock("super({", "});", () -> {
             writer.write("name: $S,", shape.getId().getName());

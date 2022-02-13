@@ -363,7 +363,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.indent();
 
         generateServiceMux(context);
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
+        writer.addImport("SmithyException", "__SmithyException", "@aws-smithy/server-common");
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __SmithyException> = "
                         + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
             writer.openBlock("switch (op) {", "}", () -> {
