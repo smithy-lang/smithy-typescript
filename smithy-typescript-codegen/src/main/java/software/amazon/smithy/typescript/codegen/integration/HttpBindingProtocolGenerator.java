@@ -2075,7 +2075,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writer.write("$$metadata: deserializeMetadata($L),", outputName);
                 writer.write("...contents");
             });
-            String errorLocation = this.getErrorBodyLocation(context, "parsedBody");
+            String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
             writer.addImport("decorateServiceException", "__decorateServiceException",
                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
             writer.write("return __decorateServiceException(exception, $L);", errorLocation);
