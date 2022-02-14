@@ -1,5 +1,37 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.9.0 (2022-02-14)
+
+### Features
+* Updated Smithy version to `1.17.x`. ([#505](https://github.com/awslabs/smithy-typescript/pull/505))
+* Added support for `@httpApiKeyAuth`. ([#473](https://github.com/awslabs/smithy-typescript/pull/473))
+* Added a default `prepack` script to generated packages. ([#479](https://github.com/awslabs/smithy-typescript/pull/479))
+* Added TypeScript contextual keywords to the reserved words list.
+  ([#500](https://github.com/awslabs/smithy-typescript/pull/500))
+* Changed generated builds to run concurrently. ([#498](https://github.com/awslabs/smithy-typescript/pull/498))
+* Added support for `defaultsMode`. ([#495](https://github.com/awslabs/smithy-typescript/pull/495))
+* Updated generated packages to use `@tsconfig/recommended`.
+  ([#493](https://github.com/awslabs/smithy-typescript/pull/493))
+* Removed `filterSensitiveLog` from exceptions. ([#488](https://github.com/awslabs/smithy-typescript/pull/488))
+* Bumped SSDK library versions to 1.0.0-alpha4. ([#480](https://github.com/awslabs/smithy-typescript/pull/480))
+* Removed test dependencies and configuration from generated packages.
+  ([#483](https://github.com/awslabs/smithy-typescript/pull/483))
+* Updated minimum supported Node version to 12.
+  ([#481](https://github.com/awslabs/smithy-typescript/pull/481),
+   [#482](https://github.com/awslabs/smithy-typescript/pull/482))
+* Added option to configure package manager, supporting `yarn` and `npm`.
+  ([#476](https://github.com/awslabs/smithy-typescript/pull/476))
+* Switched pattern validation to re2-wasm to avoid native dependency.
+  ([#467](https://github.com/awslabs/smithy-typescript/pull/467))
+
+### Bug Fixes
+* Updated protocol tests to check for `ErrorName`. ([#490](https://github.com/awslabs/smithy-typescript/pull/490))
+* Added escaping for regex literals in path segments. ([#477](https://github.com/awslabs/smithy-typescript/pull/477))
+* Fix greedy label matching. ([#474](https://github.com/awslabs/smithy-typescript/pull/474))
+
+### Documentation
+* Updated README example. ([#501](https://github.com/awslabs/smithy-typescript/pull/501))
+
 ## 0.8.0 (2021-11-23)
 
 ### Features
