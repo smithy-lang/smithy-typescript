@@ -114,6 +114,10 @@ describe("length validation", () => {
       });
     });
   }
+
+  it("properly assesses string length", () => {
+    expect(new LengthValidator(3, 3).validate("👍👍👍", "threeEmojis")).toBeNull();
+  });
 });
 
 describe("pattern validation", () => {

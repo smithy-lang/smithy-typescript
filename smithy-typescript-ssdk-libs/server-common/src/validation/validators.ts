@@ -174,7 +174,7 @@ export class EnumValidator implements SingleConstraintValidator<string, EnumVali
   }
 }
 
-type LengthCheckable = { length: number } | { [key: string]: any };
+type LengthCheckable = string | { length: number } | { [key: string]: any };
 
 export class LengthValidator implements SingleConstraintValidator<LengthCheckable, LengthValidationFailure> {
   private readonly min?: number;
@@ -194,7 +194,9 @@ export class LengthValidator implements SingleConstraintValidator<LengthCheckabl
     }
 
     let length: number;
-    if (LengthValidator.hasLength(input)) {
+    if (typeof input === "string") {
+      length = [...input].length; // string length is defined by the number of code points
+    } else if (LengthValidator.hasLength(input)) {
       length = input.length;
     } else {
       length = Object.keys(input).length;
