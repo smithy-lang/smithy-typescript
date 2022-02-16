@@ -11,7 +11,8 @@
     "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
     "test": "jest",
     "clean": "rimraf dist",
-    "format": "prettier --config ../prettier.config.js --write **/*.{ts,js,md,json}"
+    "lint": "yarn run eslint -c ../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\""
   },
   "repository": {
     "type": "git",

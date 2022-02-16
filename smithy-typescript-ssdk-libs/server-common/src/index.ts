@@ -17,6 +17,7 @@ export * as httpbinding from "./httpbinding";
 export * from "./accept";
 export * from "./errors";
 export * from "./validation";
+export * from "./unique";
 
 import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
 import { SmithyException } from "@aws-sdk/smithy-client";
