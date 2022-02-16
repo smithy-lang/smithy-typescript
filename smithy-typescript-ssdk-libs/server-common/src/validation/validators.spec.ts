@@ -231,4 +231,12 @@ describe("uniqueItems", () => {
       path: "aField",
     });
   });
+  describe("supports objects", () => {
+    expect(validator.validate([{ a: 1 }, { b: 2 }], "aField")).toBeNull();
+    expect(validator.validate([{ a: 1 }, { b: 2 }, { a: 1 }], "aField")).toEqual({
+      constraintType: "uniqueItems",
+      failureValue: [{ a: 1 }],
+      path: "aField",
+    });
+  });
 });

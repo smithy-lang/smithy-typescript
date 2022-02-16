@@ -15,6 +15,7 @@
 
 import { RE2 } from "re2-wasm";
 
+import { findDuplicates } from "../unique";
 import {
   EnumValidationFailure,
   LengthValidationFailure,
@@ -300,17 +301,9 @@ export class UniqueItemsValidator implements SingleConstraintValidator<Array<any
       return null;
     }
 
-    const repeats = new Set<any>();
-    const uniqueValues = new Set<any>();
-    for (const i of input) {
-      if (uniqueValues.has(i)) {
-        repeats.add(i);
-      } else {
-        uniqueValues.add(i);
-      }
-    }
+    const repeats = findDuplicates(input);
 
-    if (repeats.size > 0) {
+    if (repeats.length > 0) {
       return {
         constraintType: "uniqueItems",
         path: path,
