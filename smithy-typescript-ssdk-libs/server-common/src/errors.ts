@@ -41,57 +41,37 @@ export const isFrameworkException = (error: any): error is SmithyFrameworkExcept
   return error.$frameworkError;
 };
 
-export class InternalFailureException extends SmithyException {
+export class InternalFailureException {
   readonly name = "InternalFailure";
   readonly $fault = "server";
   readonly statusCode = 500;
   readonly $frameworkError = true;
-  constructor() {
-    super({ name: "InternalFailure", $fault: "server" });
-    Object.setPrototypeOf(this, InternalFailureException.prototype);
-  }
 }
 
-export class UnknownOperationException extends SmithyException {
+export class UnknownOperationException {
   readonly name = "UnknownOperationException";
   readonly $fault = "client";
   readonly statusCode = 404;
   readonly $frameworkError = true;
-  constructor() {
-    super({ name: "UnknownOperationException", $fault: "client" });
-    Object.setPrototypeOf(this, UnknownOperationException.prototype);
-  }
 }
 
-export class SerializationException extends SmithyException {
+export class SerializationException {
   readonly name = "SerializationException";
   readonly $fault = "client";
   readonly statusCode = 400;
   readonly $frameworkError = true;
-  constructor() {
-    super({ name: "SerializationException", $fault: "client" });
-    Object.setPrototypeOf(this, SerializationException.prototype);
-  }
 }
 
-export class UnsupportedMediaTypeException extends SmithyException {
+export class UnsupportedMediaTypeException {
   readonly name = "UnsupportedMediaTypeException";
   readonly $fault = "client";
   readonly statusCode = 415;
   readonly $frameworkError = true;
-  constructor() {
-    super({ name: "UnsupportedMediaTypeException", $fault: "client" });
-    Object.setPrototypeOf(this, UnsupportedMediaTypeException.prototype);
-  }
 }
 
-export class NotAcceptableException extends SmithyException {
+export class NotAcceptableException {
   readonly name = "NotAcceptableException";
   readonly $fault = "client";
   readonly statusCode = 406;
   readonly $frameworkError = true;
-  constructor() {
-    super({ name: "NotAcceptableException", $fault: "client" });
-    Object.setPrototypeOf(this, NotAcceptableException.prototype);
-  }
 }

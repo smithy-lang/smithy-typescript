@@ -174,8 +174,9 @@ final class StructureGenerator implements Runnable {
     }
 
     /**
-     * Error structures generate interfaces that extend from SmithyException
-     * and add the appropriate fault property.
+     * Error structures generate classes that extend from ServiceException
+     * (SmithyException is case of server SDK), and add the appropriate fault
+     * property.
      *
      * <p>Given the following Smithy structure:
      *
@@ -192,8 +193,10 @@ final class StructureGenerator implements Runnable {
      * <p>The following TypeScript is generated:
      *
      * <pre>{@code
-     * import { ServiceException as __BaseException } from "@aws-sdk/smithy-client";
      * import { ExceptionOptionType as __ExceptionOptionType } from "@aws-sdk/smithy-client";
+     * import { ServiceException as __BaseException } from "@aws-sdk/smithy-client";
+     * // In server SDK:
+     * // import { SmithyException as __BaseException } from "@aws-smithy/server-common";
      *
      * export class NoSuchResource extends __BaseException {
      *   name: "NoSuchResource";
