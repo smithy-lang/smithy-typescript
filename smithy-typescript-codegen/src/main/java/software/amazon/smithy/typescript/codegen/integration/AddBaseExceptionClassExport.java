@@ -35,6 +35,11 @@ public final class AddBaseExceptionClassExport implements TypeScriptIntegration 
             SymbolProvider symbolProvider,
             TypeScriptWriter writer
     ) {
-        writer.write("export { ServiceException } from $S;", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+        boolean isServerSdk = settings.generateServerSdk();
+        if (isServerSdk) {
+            writer.write("export {SmithyException} from $S;", TypeScriptDependency.SERVER_COMMON.packageName);
+        } else {
+            writer.write("export { ServiceException } from $S;", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+        }
     }
 }
