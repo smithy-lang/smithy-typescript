@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-export class SmithyException extends Error {
+export class ServiceException extends Error {
   /**
    * Whether the client or server are at fault.
    */
@@ -21,7 +21,7 @@ export class SmithyException extends Error {
 
   constructor(options: { name: string; $fault: "client" | "server"; message?: string }) {
     super(options.message);
-    Object.setPrototypeOf(this, SmithyException.prototype);
+    Object.setPrototypeOf(this, ServiceException.prototype);
     this.name = options.name;
     this.$fault = options.$fault;
   }

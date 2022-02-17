@@ -21,14 +21,14 @@ export * from "./validation";
 import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
 import { SerdeContext } from "@aws-sdk/types";
 
-import { SmithyException } from "./errors";
+import { ServiceException } from "./errors";
 
 export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 
 export type OperationInput<T> = T extends Operation<infer I, any, any> ? I : never;
 export type OperationOutput<T> = T extends Operation<any, infer O, any> ? O : never;
 
-export interface OperationSerializer<T, K extends keyof T, E extends SmithyException> {
+export interface OperationSerializer<T, K extends keyof T, E extends ServiceException> {
   serialize(input: OperationOutput<T[K]>, ctx: ServerSerdeContext): Promise<HttpResponse>;
   deserialize(input: HttpRequest, ctx: SerdeContext): Promise<OperationInput<T[K]>>;
   isOperationError(error: any): error is E;

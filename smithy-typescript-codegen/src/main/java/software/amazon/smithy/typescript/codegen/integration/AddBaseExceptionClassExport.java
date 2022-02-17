@@ -15,7 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -40,8 +39,9 @@ public final class AddBaseExceptionClassExport implements TypeScriptIntegration 
         boolean isClientSdk = settings.generateClient();
         if (isClientSdk) {
             ServiceShape service = settings.getService(model);
-            Symbol symbol = symbolProvider.toSymbol(service);
-            writer.write("export { ServiceException as $LServiceException } from $S;", symbol.getName(),
+            String clientName = symbolProvider.toSymbol(service).getName();
+            String serviceName = clientName.replaceAll("(Client)$", "");
+            writer.write("export { ServiceException as $LServiceException } from $S;", serviceName,
                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
         }
     }

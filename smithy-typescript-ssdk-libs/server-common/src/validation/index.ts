@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { SmithyException } from "../errors";
+import { ServiceException } from "../errors";
 
 export * from "./validators";
 
@@ -76,7 +76,7 @@ export interface ValidationContext<O extends string> {
 export type ValidationCustomizer<O extends string> = (
   context: ValidationContext<O>,
   failures: ValidationFailure[]
-) => SmithyException | undefined;
+) => ServiceException | undefined;
 
 export const generateValidationSummary = (failures: readonly ValidationFailure[]): string => {
   const failingPaths = new Set(failures.map((failure) => failure.path));

@@ -130,7 +130,7 @@ final class StructuredMemberWriter {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
         if (isServerSdk) {
-            writer.addImport("SmithyException", "__BaseException", TypeScriptDependency.SERVER_COMMON.packageName);
+            writer.addImport("ServiceException", "__BaseException", TypeScriptDependency.SERVER_COMMON.packageName);
         } else {
             writer.addImport("ServiceException", "__BaseException", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
             writer.writeDocs("@internal");
