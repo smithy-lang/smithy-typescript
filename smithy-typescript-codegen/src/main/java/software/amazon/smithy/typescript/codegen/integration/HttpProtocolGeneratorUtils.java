@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,7 @@ import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.pattern.SmithyPattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -344,10 +346,9 @@ public final class HttpProtocolGeneratorUtils {
                         });
             }
 
-            // Error responses must be at least ServiceException interface
-            writer.addImport("ServiceException", "__ServiceException",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-            writer.write("let response: __ServiceException;");
+            // Error responses must be at least BaseException interface
+            SymbolReference baseExceptionReference = getClientBaseException(context);
+            writer.write("let response: $T;", baseExceptionReference);
             writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
@@ -380,7 +381,7 @@ public final class HttpProtocolGeneratorUtils {
 
                         // Get the protocol specific error location for retrieving contents.
                         String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.openBlock("response = new __ServiceException({", "});", () -> {
+                        writer.openBlock("response = new $T({", "});", baseExceptionReference, () -> {
                             writer.write("name: $1L.code || $1L.Code || errorCode,", errorLocation);
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output)");
@@ -430,5 +431,25 @@ public final class HttpProtocolGeneratorUtils {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
             });
         });
+    }
+
+    /**
+     * Construct a symbol reference of client's base exception class.
+     */
+    private static SymbolReference getClientBaseException(GenerationContext context) {
+        ServiceShape service = context.getService();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        String serviceExceptionName = symbolProvider.toSymbol(service).getName()
+                        .replaceAll("(Client)$", "ServiceException");
+        String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
+        Symbol serviceExceptionSymbol = Symbol.builder()
+                            .name(serviceExceptionName)
+                            .namespace(namespace, "/")
+                            .definitionFile(namespace + ".ts").build();
+        return SymbolReference.builder()
+                .options(SymbolReference.ContextOption.USE)
+                .alias("__BaseException")
+                .symbol(serviceExceptionSymbol)
+                .build();
     }
 }

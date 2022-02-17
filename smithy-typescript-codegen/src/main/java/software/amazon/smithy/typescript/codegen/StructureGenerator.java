@@ -174,8 +174,8 @@ final class StructureGenerator implements Runnable {
     }
 
     /**
-     * Error structures generate classes that extend from ServiceException
-     * (ServiceException is case of server SDK), and add the appropriate fault
+     * Error structures generate classes that extend from service base exception
+     * (ServiceException in case of server SDK), and add the appropriate fault
      * property.
      *
      * <p>Given the following Smithy structure:
@@ -194,7 +194,7 @@ final class StructureGenerator implements Runnable {
      *
      * <pre>{@code
      * import { ExceptionOptionType as __ExceptionOptionType } from "@aws-sdk/smithy-client";
-     * import { ServiceException as __BaseException } from "@aws-sdk/smithy-client";
+     * import { FooServiceException as __BaseException } from "./FooServiceException";
      * // In server SDK:
      * // import { ServiceException as __BaseException } from "@aws-smithy/server-common";
      *
@@ -220,7 +220,7 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.writeShapeDocs(shape);
         boolean isServerSdk = this.includeValidation;
-        writer.openBlock("export class $L extends $L {", symbol.getName(), "__BaseException");
+        writer.openBlock("export class $T extends $L {", symbol, "__BaseException");
         writer.write("readonly name: $1S = $1S;", shape.getId().getName());
         writer.write("readonly $$fault: $1S = $1S;", errorTrait.getValue());
         if (!isServerSdk) {

@@ -2040,7 +2040,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
-
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
                 context, operation, responseType, this::writeErrorCodeParser,
