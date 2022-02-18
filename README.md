@@ -28,13 +28,13 @@ are as follows:
 
     dependencies {
         implementation("software.amazon.smithy:smithy-model:[1.16.0, 2.0[")
-        implementation("software.amazon.smithy:smithy-typescript-codegen:0.8.0")
+        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.8.0")
     }
    ```
 
 3. Create a `smithy-build.json` file with the following contents,
-   substituting "example.foo#MyClient" with the name of the service
-   to generate and "foo" with the name of the TypeScript package to
+   substituting "smithy.example#ExampleService" with the name of the service
+   to generate and "smithyexample" with the name of the TypeScript package to
    create.:
 
    ```json
@@ -65,7 +65,7 @@ are as follows:
 
     service ExampleService {
         version: "2022-01-01",
-        operations: [EchoOperation]
+        operations: [Echo]
     }
 
     operation Echo {
