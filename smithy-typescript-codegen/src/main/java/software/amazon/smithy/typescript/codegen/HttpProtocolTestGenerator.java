@@ -1034,7 +1034,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         public Void objectNode(ObjectNode node) {
             // Short circuit document types, as the direct value is what we want.
             if (workingShape.isDocumentShape()) {
-                writer.writeInline(Node.prettyPrintJson(node));
+                writer.writeInline(Node.prettyPrintJson(node)).writeInline(",");
                 return null;
             }
 
@@ -1256,7 +1256,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         public Void objectNode(ObjectNode node) {
             // Short circuit document types, as the direct value is what we want.
             if (workingShape.isDocumentShape()) {
-                writer.writeInline(Node.prettyPrintJson(node));
+                writer.writeInline(Node.prettyPrintJson(node)).writeInline(",");
                 return null;
             }
 
