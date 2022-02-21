@@ -363,8 +363,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.indent();
 
         generateServiceMux(context);
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
-        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __SmithyException> = "
+        writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
+        writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __ServiceException> = "
                         + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
             writer.openBlock("switch (op) {", "}", () -> {
                 operations.stream()
@@ -2040,7 +2040,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
-
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
                 context, operation, responseType, this::writeErrorCodeParser,
@@ -2063,16 +2062,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  context: __SerdeContext\n"
                        + "): Promise<$T> => {", "};",
                 errorDeserMethodName, outputName, errorSymbol, () -> {
-            writer.openBlock("const contents: $T = {", "};", errorSymbol, () -> {
-                writer.write("name: $S,", error.getId().getName());
-                writer.write("$$fault: $S,", error.getTrait(ErrorTrait.class).get().getValue());
-                HttpProtocolGeneratorUtils.writeRetryableTrait(writer, error, ",");
-                writer.write("$$metadata: deserializeMetadata($L),", outputName);
-                // Set all the members to undefined to meet type constraints.
-                new TreeMap<>(error.getAllMembers())
-                        .forEach((memberName, memberShape) -> writer.write("$L: undefined,", memberName));
-            });
-
+            writer.write("const contents: any = {};");
             readResponseHeaders(context, error, bindingIndex, outputName);
             List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
@@ -2080,7 +2070,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
-            writer.write("return contents;");
+            writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
+                writer.write("$$metadata: deserializeMetadata($L),", outputName);
+                writer.write("...contents");
+            });
+            String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
+            writer.addImport("decorateServiceException", "__decorateServiceException",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.write("return __decorateServiceException(exception, $L);", errorLocation);
         });
 
         writer.write("");

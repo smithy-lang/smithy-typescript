@@ -13,7 +13,19 @@
  *  permissions and limitations under the License.
  */
 
-import { SmithyException } from "@aws-sdk/smithy-client";
+export class ServiceException extends Error {
+  /**
+   * Whether the client or server are at fault.
+   */
+  readonly $fault: "client" | "server";
+
+  constructor(options: { name: string; $fault: "client" | "server"; message?: string }) {
+    super(options.message);
+    Object.setPrototypeOf(this, ServiceException.prototype);
+    this.name = options.name;
+    this.$fault = options.$fault;
+  }
+}
 
 export type SmithyFrameworkException =
   | InternalFailureException
@@ -29,35 +41,35 @@ export const isFrameworkException = (error: any): error is SmithyFrameworkExcept
   return error.$frameworkError;
 };
 
-export class InternalFailureException implements SmithyException {
+export class InternalFailureException {
   readonly name = "InternalFailure";
   readonly $fault = "server";
   readonly statusCode = 500;
   readonly $frameworkError = true;
 }
 
-export class UnknownOperationException implements SmithyException {
+export class UnknownOperationException {
   readonly name = "UnknownOperationException";
   readonly $fault = "client";
   readonly statusCode = 404;
   readonly $frameworkError = true;
 }
 
-export class SerializationException implements SmithyException {
+export class SerializationException {
   readonly name = "SerializationException";
   readonly $fault = "client";
   readonly statusCode = 400;
   readonly $frameworkError = true;
 }
 
-export class UnsupportedMediaTypeException implements SmithyException {
+export class UnsupportedMediaTypeException {
   readonly name = "UnsupportedMediaTypeException";
   readonly $fault = "client";
   readonly statusCode = 415;
   readonly $frameworkError = true;
 }
 
-export class NotAcceptableException implements SmithyException {
+export class NotAcceptableException {
   readonly name = "NotAcceptableException";
   readonly $fault = "client";
   readonly statusCode = 406;

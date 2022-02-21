@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,7 @@ import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.pattern.SmithyPattern;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -291,7 +293,7 @@ public final class HttpProtocolGeneratorUtils {
         Optional<RetryableTrait> retryableTrait = error.getTrait(RetryableTrait.class);
         if (retryableTrait.isPresent()) {
             String textAfterBlock = String.format("}%s", separator);
-            writer.openBlock("$$retryable: {", textAfterBlock, () -> {
+            writer.openBlock("$$retryable = {", textAfterBlock, () -> {
                 if (retryableTrait.get().getThrottling()) {
                     writer.write("throttling: true,");
                 }
@@ -344,13 +346,9 @@ public final class HttpProtocolGeneratorUtils {
                         });
             }
 
-            // Error responses must be at least SmithyException and MetadataBearer implementations.
-            writer.addImport("SmithyException", "__SmithyException",
-                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
-            writer.addImport("MetadataBearer", "__MetadataBearer",
-                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
-            // These responses will also have additional properties, so enable that on the interface.
-            writer.write("let response: __SmithyException & __MetadataBearer & {[key: string]: any};");
+            // Error responses must be at least BaseException interface
+            SymbolReference baseExceptionReference = getClientBaseException(context);
+            writer.write("let response: $T;", baseExceptionReference);
             writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
@@ -362,15 +360,13 @@ public final class HttpProtocolGeneratorUtils {
                     Symbol errorSymbol = symbolProvider.toSymbol(error);
                     String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                             context.getProtocolName()) + "Response";
-                    writer.openBlock("case $S:\ncase $S:", "  break;", errorId.getName(), errorId.toString(), () -> {
-                        // Dispatch to the error deserialization function.
-                        String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
-                        writer.openBlock("response = {", "}", () -> {
-                            writer.write("...await $L($L, context),", errorDeserMethodName, outputParam);
-                            writer.write("name: errorCode,");
-                            writer.write("$$metadata: deserializeMetadata(output),");
-                        });
-                    });
+                     // Dispatch to the error deserialization function.
+                    String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
+                    writer.write("case $S:", errorId.getName());
+                    writer.write("case $S:", errorId.toString());
+                    writer.indent()
+                            .write("throw await $L($L, context);", errorDeserMethodName, outputParam)
+                            .dedent();
                 });
 
                 // Build a generic error the best we can for ones we don't know about.
@@ -385,23 +381,15 @@ public final class HttpProtocolGeneratorUtils {
 
                         // Get the protocol specific error location for retrieving contents.
                         String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.write("errorCode = $1L.code || $1L.Code || errorCode;", errorLocation);
-                        writer.openBlock("response = {", "} as any;", () -> {
-                            writer.write("...$L,", errorLocation);
-                            writer.write("name: `$${errorCode}`,");
-                            writer.write("message: $1L.message || $1L.Message || errorCode,", errorLocation);
+                        writer.openBlock("response = new $T({", "});", baseExceptionReference, () -> {
+                            writer.write("name: $1L.code || $1L.Code || errorCode,", errorLocation);
                             writer.write("$$fault: \"client\",");
                             writer.write("$$metadata: deserializeMetadata(output)");
-                        }).dedent();
+                        });
+                        writer.addImport("decorateServiceException", "__decorateServiceException",
+                                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                        writer.write("throw __decorateServiceException(response, $L);", errorLocation);
             });
-
-            // Attempt to pull out the exception message for clearer JS errors,
-            // and then clean up the response object.
-            writer.write("const message = response.message || response.Message || errorCode;");
-            writer.write("response.message = message;");
-            writer.write("delete response.Message;");
-
-            writer.write("return Promise.reject(Object.assign(new Error(message), response));");
         });
         writer.write("");
 
@@ -443,5 +431,25 @@ public final class HttpProtocolGeneratorUtils {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
             });
         });
+    }
+
+    /**
+     * Construct a symbol reference of client's base exception class.
+     */
+    private static SymbolReference getClientBaseException(GenerationContext context) {
+        ServiceShape service = context.getService();
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        String serviceExceptionName = symbolProvider.toSymbol(service).getName()
+                        .replaceAll("(Client)$", "ServiceException");
+        String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
+        Symbol serviceExceptionSymbol = Symbol.builder()
+                            .name(serviceExceptionName)
+                            .namespace(namespace, "/")
+                            .definitionFile(namespace + ".ts").build();
+        return SymbolReference.builder()
+                .options(SymbolReference.ContextOption.USE)
+                .alias("__BaseException")
+                .symbol(serviceExceptionSymbol)
+                .build();
     }
 }

@@ -63,7 +63,7 @@ final class ServerGenerator {
             writer.write("private readonly service: $T<Context>;", serviceSymbol);
             writer.write("private readonly mux: __Mux<$S, $T>;", serviceShape.getId().getName(), operationsType);
             writer.write("private readonly serializerFactory: <T extends $T>(operation: T) => "
-                            + "__OperationSerializer<$T<Context>, T, __SmithyException>;",
+                            + "__OperationSerializer<$T<Context>, T, __ServiceException>;",
                     operationsType, serviceSymbol);
             writer.write("private readonly serializeFrameworkException: (e: __SmithyFrameworkException, "
                             + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>;");
@@ -87,7 +87,7 @@ final class ServerGenerator {
                 writer.write("service: $T<Context>,", serviceSymbol);
                 writer.write("mux: __Mux<$S, $T>,", serviceShape.getId().getName(), operationsType);
                 writer.write("serializerFactory:<T extends $T>(op: T) => "
-                                + "__OperationSerializer<$T<Context>, T, __SmithyException>,",
+                                + "__OperationSerializer<$T<Context>, T, __ServiceException>,",
                         operationsType, serviceSymbol);
                 writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, ctx: __ServerSerdeContext) "
                         + "=> Promise<__HttpResponse>,");
@@ -208,7 +208,7 @@ final class ServerGenerator {
         writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
-        writer.addImport("SmithyException", "__SmithyException", "@aws-sdk/types");
+        writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
     }
 
@@ -226,7 +226,7 @@ final class ServerGenerator {
                     writer.write("request: __HttpRequest,");
                     writer.write("context: Context,");
                     writer.write("operationName: O,");
-                    writer.write("serializer: __OperationSerializer<S, O, __SmithyException>,");
+                    writer.write("serializer: __OperationSerializer<S, O, __ServiceException>,");
                     writer.write("operation: __Operation<__OperationInput<S[O]>, __OperationOutput<S[O]>, Context>,");
                     writer.write("serializeFrameworkException: (e: __SmithyFrameworkException, "
                             + "ctx: __ServerSerdeContext) => Promise<__HttpResponse>,");

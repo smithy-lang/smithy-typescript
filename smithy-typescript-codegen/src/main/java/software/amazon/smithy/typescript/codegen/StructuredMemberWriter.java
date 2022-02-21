@@ -124,22 +124,29 @@ final class StructuredMemberWriter {
     }
 
     /**
-     * Writes a constructor function that takes in an object allowing modeled fields to be initialized.
+     * Writes constructor of SDK exception classes.
      */
-    void writeConstructor(TypeScriptWriter writer, Shape shape) {
-        writer.openBlock("constructor(opts: {", "}) {", () -> {
-            writeMembers(writer, shape);
+    void writeErrorConstructor(TypeScriptWriter writer, Shape shape, boolean isServerSdk) {
+        ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
+        Symbol symbol = symbolProvider.toSymbol(shape);
+        if (!isServerSdk) {
+            writer.writeDocs("@internal");
+        }
+        writer.addImport("ExceptionOptionType", "__ExceptionOptionType",
+                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+        writer.openBlock("constructor(opts: __ExceptionOptionType<$L, __BaseException>) {", symbol.getName());
+        writer.openBlock("super({", "});", () -> {
+            writer.write("name: $S,", shape.getId().getName());
+            writer.write("$$fault: $S,", errorTrait.getValue());
+            writer.write("...opts");
         });
-        writer.indent();
-
+        writer.write("Object.setPrototypeOf(this, $L.prototype);", symbol.getName());
         for (MemberShape member : members) {
             if (skipMembers.contains(member.getMemberName())) {
                 continue;
             }
-
             writer.write("this.${1L} = opts.${1L};", getSanitizedMemberName(member));
         }
-
         writer.closeBlock("}");
     }
 

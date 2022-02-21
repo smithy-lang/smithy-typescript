@@ -17,53 +17,150 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
-                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "}");
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "  }\n"
+                                  + "}\n");
     }
 
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
-                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "  message?: string;\n"
-                                  + "}");
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "  }\n"
+                                  + "}\n");
     }
 
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
-                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "  message: string | undefined;\n"
-                                  + "}");
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "  }\n"
+                                  + "}\n");
+    }
+
+    @Test
+    public void properlyGeneratesOptionalNonMessageMemberOfException() {
+        testErrorStructureCodegen("error-test-optional-member-no-message.smithy",
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  foo?: string;\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "    this.foo = opts.foo;\n"
+                                  + "  }\n"
+                                  + "}\n");
+    }
+
+    @Test
+    public void properlyGeneratesRequiredNonMessageMemberOfException() {
+        testErrorStructureCodegen("error-test-required-member-no-message.smithy",
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  foo: string | undefined;\n"
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "    this.foo = opts.foo;\n"
+                                  + "  }\n"
+                                  + "}\n");
     }
 
     @Test
     public void generatesEmptyRetryableTrait() {
         testErrorStructureCodegen("error-test-retryable.smithy",
-                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "  $retryable: {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  $retryable = {\n"
                                   + "  };\n"
-                                  + "}");
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "  }\n"
+                                  + "}\n");
     }
 
     @Test
     public void generatesRetryableTraitWithThrottling() {
         testErrorStructureCodegen("error-test-retryable-throttling.smithy",
-                                  "export interface Err extends __SmithyException, $MetadataBearer {\n"
-                                  + "  name: \"Err\";\n"
-                                  + "  $fault: \"client\";\n"
-                                  + "  $retryable: {\n"
+                                  "export class Err extends __BaseException {\n"
+                                  + "  readonly name: \"Err\" = \"Err\";\n"
+                                  + "  readonly $fault: \"client\" = \"client\";\n"
+                                  + "  $retryable = {\n"
                                   + "    throttling: true,\n"
                                   + "  };\n"
-                                  + "}");
+                                  + "  /**\n"
+                                  + "   * @internal\n"
+                                  + "   */\n"
+                                  + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
+                                  + "    super({\n"
+                                  + "      name: \"Err\",\n"
+                                  + "      $fault: \"client\",\n"
+                                  + "      ...opts\n"
+                                  + "    });\n"
+                                  + "    Object.setPrototypeOf(this, Err.prototype);\n"
+                                  + "  }\n"
+                                  + "}\n");
     }
 
     @Test
@@ -480,7 +577,7 @@ public class StructureGeneratorTest {
     private void testErrorStructureCodegen(String file, String expectedType) {
         String contents = testStructureCodegen(file, expectedType);
 
-        assertThat(contents, containsString("as __SmithyException"));
+        assertThat(contents, containsString("as __BaseException"));
     }
 
     @Test

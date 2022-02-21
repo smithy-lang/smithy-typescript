@@ -60,6 +60,12 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models\";");
+
+        // Write each custom export.
+        for (TypeScriptIntegration integration : integrations) {
+            integration.writeAdditionalExports(settings, model, symbolProvider, writer);
+        }
+
         fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 
@@ -121,11 +127,5 @@ final class IndexGenerator {
         if (operations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
             writer.write("export * from \"./waiters\";");
         }
-
-        // Write each custom export.
-        for (TypeScriptIntegration integration : integrations) {
-            integration.writeAdditionalExports(settings, model, symbolProvider, writer);
-        }
-        fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 }

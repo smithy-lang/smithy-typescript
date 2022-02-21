@@ -370,7 +370,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         if (settings.generateServerSdk()) {
             generateServiceInterface(shape);
-            generateServerErrors(shape);
         }
 
         if (protocolGenerator != null) {
@@ -468,20 +467,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, writer);
             ServerGenerator.generateServiceHandler(symbolProvider, shape, operations, writer);
         });
-    }
-
-    private void generateServerErrors(ServiceShape service) {
-        final OperationIndex operationIndex = OperationIndex.of(model);
-
-        TopDownIndex.of(model)
-                .getContainedOperations(service)
-                .stream()
-                .flatMap(o -> operationIndex.getErrors(o, service).stream())
-                .distinct()
-                .sorted()
-                .forEachOrdered(error -> writers.useShapeWriter(service, symbolProvider, writer -> {
-                    new ServerErrorGenerator(settings, model, error, symbolProvider, writer).run();
-                }));
     }
 
     private void generateCommands(ServiceShape shape) {
