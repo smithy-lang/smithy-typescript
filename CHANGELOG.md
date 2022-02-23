@@ -1,5 +1,17 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.10.0 (2022-03-02)
+
+### Features
+* Bumped SSDK library versions to 1.0.0-alpha5. ([#520](https://github.com/awslabs/smithy-typescript/pull/520))
+* Added support for `List<String>` in function parameters list. ([#516](https://github.com/awslabs/smithy-typescript/pull/516))
+* Updated generation of exceptions for easier handling. ([#502](https://github.com/awslabs/smithy-typescript/pull/502))
+* Updated clean script to delete *.tsbuildinfo. ([#514](https://github.com/awslabs/smithy-typescript/pull/514))
+
+### Bug Fixes
+* Fixed scripts for npm by extracting run command out. ([#519](https://github.com/awslabs/smithy-typescript/pull/519))
+* Fixed the generation of collections of documents in protocol tests. ([#513](https://github.com/awslabs/smithy-typescript/pull/513))
+
 ## 0.9.0 (2022-02-14)
 
 ### Features
