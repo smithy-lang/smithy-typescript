@@ -1,5 +1,15 @@
 # server-apigateway Changelog
 
+## 1.0.0-alpha.5 (2022-02-23)
+
+### Features
+
+- Updated SDK dependencies.
+
+### Other
+
+- Converted from lerna to turborepo. ([#506](https://github.com/awslabs/smithy-typescript/pull/506))
+
 ## 1.0.0-alpha.4 (2022-01-03)
 
 ### Features
