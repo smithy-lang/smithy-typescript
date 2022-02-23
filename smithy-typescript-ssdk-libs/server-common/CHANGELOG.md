@@ -1,5 +1,21 @@
 # server-common Changelog
 
+## 1.0.0-alpha.5 (2022-02-23)
+
+### Features
+
+- Defined ServiceException as base class for service side exception. ([#502](https://github.com/awslabs/smithy-typescript/pull/502))
+- Updated SDK dependencies.
+
+### Bug Fixes
+
+- Fix the uniqueItems implementation to accommodate non-primitive values. ([#511](https://github.com/awslabs/smithy-typescript/pull/511))
+- Fixed the implementation of length validation for strings. ([#510](https://github.com/awslabs/smithy-typescript/pull/510))
+
+### Other
+
+- Converted from lerna to turborepo. ([#506](https://github.com/awslabs/smithy-typescript/pull/506))
+
 ## 1.0.0-alpha.4 (2022-01-03)
 
 ### Features
