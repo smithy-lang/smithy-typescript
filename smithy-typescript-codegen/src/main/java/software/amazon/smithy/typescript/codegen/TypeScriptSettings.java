@@ -395,7 +395,7 @@ public final class TypeScriptSettings {
 
     public enum PackageManager {
         YARN("yarn"),
-        NPM("npm run-script");
+        NPM("npm");
 
         private final String command;
 
