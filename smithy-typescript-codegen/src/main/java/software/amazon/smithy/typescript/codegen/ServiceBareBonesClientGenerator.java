@@ -226,9 +226,10 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                              + "@internal");
             writer.write("urlParser?: __UrlParser;\n");
 
+            writer.addImport("BodyLengthCalculator", "__BodyLengthCalculator", "@aws-sdk/types");
             writer.writeDocs("A function that can calculate the length of a request body.\n"
                             + "@internal");
-            writer.write("bodyLengthChecker?: (body: any) => number | undefined;\n");
+            writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");
 
             writer.addImport("StreamCollector", "__StreamCollector", "@aws-sdk/types");
             writer.writeDocs("A function that converts a stream into an array of bytes.\n"
