@@ -333,7 +333,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConstructor() {
-        writer.openBlock("constructor(configuration: $L) {", "}", configType, () -> {
+        writer.openBlock("constructor(configuration: $L = {}) {", "}", configType, () -> {
             // Hook for adding/changing the client constructor.
             writer.pushState(CLIENT_CONSTRUCTOR_SECTION);
 
