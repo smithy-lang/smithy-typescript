@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -27,7 +28,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.model.traits.HttpPayloadTrait;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -104,31 +105,33 @@ public final class CodegenUtils {
         return contextInterfaceList;
     }
 
-    static List<MemberShape> getBlobStreamingMembers(Model model, StructureShape shape) {
-        return shape.getAllMembers().values().stream()
-                .filter(memberShape -> {
-                    // Streaming blobs need to have their types modified
-                    // See `writeStreamingMemberType`
-                    Shape target = model.expectShape(memberShape.getTarget());
-                    return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
-                })
-                .collect(Collectors.toList());
+    static Optional<MemberShape> getBlobInputPayloadMember(Model model, StructureShape shape) {
+        List<MemberShape> unstructuredPayloadMembers = shape.getAllMembers().values().stream()
+            .filter(memberShape -> {
+                // Binary payload needs to have their types modified
+                // See `writeBlobInputPayloadMemberType`
+                Shape target = model.expectShape(memberShape.getTarget());
+                return  memberShape.hasTrait(HttpPayloadTrait.class) && target.isBlobShape();
+            })
+            .collect(Collectors.toList());
+        return unstructuredPayloadMembers.isEmpty() ? Optional.empty() : Optional.of(unstructuredPayloadMembers.get(0));
     }
 
     /**
-     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
+     * Ease the input http payload member restriction so that users don't need to construct a stream or uint8array
+     * buffer every time.
      * This type decoration is allowed in Smithy because it makes input type more permissive than output type
      * for the same member.
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
-    static void writeStreamingMemberType(
+    static void writeBlobInputPayloadMemberType(
             TypeScriptWriter writer,
             Symbol containerSymbol,
             String typeName,
-            MemberShape streamingMember
+            MemberShape unstructuredPayloadMember
     ) {
-        String memberName = streamingMember.getMemberName();
-        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
+        String memberName = unstructuredPayloadMember.getMemberName();
+        String optionalSuffix = unstructuredPayloadMember.isRequired() ? "" : "?";
         writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName, containerSymbol, memberName, () -> {
             writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
                     containerSymbol.getName(), memberName));

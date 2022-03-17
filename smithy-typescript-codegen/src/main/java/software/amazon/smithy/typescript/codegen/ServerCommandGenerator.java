@@ -15,8 +15,8 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobInputPayloadMember;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeBlobInputPayloadMemberType;
 
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -102,11 +102,12 @@ final class ServerCommandGenerator implements Runnable {
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
-            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
-            if (blobStreamingMembers.isEmpty()) {
-                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
+            Optional<MemberShape> unstructuredPayloadMember = getBlobInputPayloadMember(model, input);
+            if (unstructuredPayloadMember.isPresent()) {
+                writeBlobInputPayloadMemberType(writer, symbolProvider.toSymbol(input), typeName,
+                                unstructuredPayloadMember.get());
             } else {
-                writeStreamingMemberType(writer, symbolProvider.toSymbol(input), typeName, blobStreamingMembers.get(0));
+                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             }
             renderNamespace(typeName, input);
         } else {

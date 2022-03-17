@@ -15,10 +15,10 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobInputPayloadMember;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeInlineStreamingMemberType;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -159,12 +159,12 @@ final class StructureGenerator implements Runnable {
 
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
             writer.writeDocs("@internal");
-            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, shape);
+            Optional<MemberShape> unstructuredPayloadMember = getBlobInputPayloadMember(model, shape);
             writer.writeInline("export const validate = ($L: ", objectParam);
-            if (blobStreamingMembers.isEmpty()) {
-                writer.writeInline("$L", symbol.getName());
+            if (unstructuredPayloadMember.isPresent()) {
+                writeInlineStreamingMemberType(writer, symbol, unstructuredPayloadMember.get());
             } else {
-                writeInlineStreamingMemberType(writer, symbol, blobStreamingMembers.get(0));
+                writer.writeInline("$L", symbol.getName());
             }
             writer.openBlock(", path: string = \"\"): __ValidationFailure[] => {", "}", () -> {
                 structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
