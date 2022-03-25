@@ -15,9 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobInputPayloadMember;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeBlobInputPayloadMemberType;
-
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,7 +28,6 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -102,13 +98,7 @@ final class ServerCommandGenerator implements Runnable {
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
-            Optional<MemberShape> unstructuredPayloadMember = getBlobInputPayloadMember(model, input);
-            if (unstructuredPayloadMember.isPresent()) {
-                writeBlobInputPayloadMemberType(writer, symbolProvider.toSymbol(input), typeName,
-                                unstructuredPayloadMember.get());
-            } else {
-                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
-            }
+            writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             renderNamespace(typeName, input);
         } else {
             // If the input is non-existent, then use an empty object.
