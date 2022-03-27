@@ -151,7 +151,8 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
             TypeScriptWriter writer
     ) {
         boolean isClientSdk = settings.generateClient();
-        if (isClientSdk) {
+        ServiceShape service = settings.getService(model);
+        if (isClientSdk && hasEffectiveHttpApiKeyAuthTrait(model, service)) {
             writer.write("export * from \"./middleware/$1L\";", getMiddlewarePath());
         }
     }
