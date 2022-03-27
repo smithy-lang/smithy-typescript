@@ -58,19 +58,20 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
      */
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
+        String middlewarePath = getMiddlewarePath();
         return ListUtils.of(
             // Add the config if the service uses HTTP API key authorization.
             RuntimeClientPlugin.builder()
                     .inputConfig(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth", "/")
+                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + middlewarePath, "/")
                             .name("HttpApiKeyAuthInputConfig")
                             .build())
                     .resolvedConfig(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth", "/")
+                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + middlewarePath, "/")
                             .name("HttpApiKeyAuthResolvedConfig")
                             .build())
                     .resolveFunction(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth", "/")
+                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + middlewarePath, "/")
                             .name("resolveHttpApiKeyAuthConfig")
                             .build())
                     .servicePredicate((m, s) -> hasEffectiveHttpApiKeyAuthTrait(m, s))
@@ -79,7 +80,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
             // Add the middleware to operations that use HTTP API key authorization.
             RuntimeClientPlugin.builder()
                     .pluginFunction(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth", "/")
+                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + middlewarePath, "/")
                             .name("getHttpApiKeyAuthPlugin")
                             .build())
                     .additionalPluginFunctionParamsSupplier((m, s, o) -> new HashMap<String, Object>() {{
@@ -119,7 +120,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
 
         // Write the middleware source.
         writerFactory.accept(
-                Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", "HttpApiKeyAuth", "index.ts").toString(),
+                Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", getMiddlewarePath(), "index.ts").toString(),
                 writer -> {
                         String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.ts");
                         writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.ts");
@@ -128,7 +129,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
 
         // Write the middleware tests.
         writerFactory.accept(
-                Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", "HttpApiKeyAuth", "index.spec.ts").toString(),
+                Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", getMiddlewarePath(), "index.spec.ts").toString(),
                 writer -> {
                         writer.addDependency(SymbolDependency.builder()
                                 .dependencyType("devDependencies")
@@ -140,6 +141,23 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                         writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.spec.ts");
                         writer.write("$L", source);
                 });
+    }
+
+    @Override
+    public void writeAdditionalExports(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
+    ) {
+        boolean isClientSdk = settings.generateClient();
+        if (isClientSdk) {
+            writer.write("export * from \"./middleware/$1L\";", getMiddlewarePath());
+        }
+    }
+
+    private String getMiddlewarePath() {
+        return "HttpApiKeyAuth";
     }
 
     // The service has the effective trait if it's in the "effective auth schemes" response
