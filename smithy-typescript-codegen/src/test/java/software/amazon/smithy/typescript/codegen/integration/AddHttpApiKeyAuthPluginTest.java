@@ -71,6 +71,10 @@ public class AddHttpApiKeyAuthPluginTest {
         // Make sure that the middleware file was written and exports the plugin symbol.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth/index.ts").get(),
                 containsString("export const getHttpApiKeyAuthPlugin"));
+
+        // Ensure that the middleware was being exported in the index file.
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/index.ts").get(),
+                containsString("from \"./middleware/HttpApiKeyAuth\""));  
     }
 
     private MockManifest generate(String filename)
@@ -124,5 +128,9 @@ public class AddHttpApiKeyAuthPluginTest {
         // Make sure that the middleware file was not written.
         assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth/index.ts"),
                 is(false));
+
+        // Ensure that the middleware was not being exported in the index file.
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/index.ts").get(),
+            not(containsString("from \"./middleware/HttpApiKeyAuth\""))); 
     }
 }
