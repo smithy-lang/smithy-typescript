@@ -133,14 +133,11 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
-        // Output types should always be MetadataBearers, possibly in addition
-        // to a defined output shape.
-        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         if (outputShape.isPresent()) {
-            writer.write("export interface $L extends $T, __MetadataBearer {}",
+            writer.write("export interface $L extends $T {}",
                     typeName, symbolProvider.toSymbol(outputShape.get()));
         } else {
-            writer.write("export interface $L extends __MetadataBearer {}", typeName);
+            writer.write("export interface $L {}", typeName);
         }
     }
 
