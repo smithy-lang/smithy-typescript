@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.11.0 (2022-04-04)
+
+### Features
+* Removed MetadataBearer from output type. ([#530](https://github.com/awslabs/smithy-typescript/pull/530))
+* Updated Smithy version to `1.19.x`. ([#531](https://github.com/awslabs/smithy-typescript/pull/531))
+* Updated `typescript` to `~4.6.2`. ([#527](https://github.com/awslabs/smithy-typescript/pull/527))
+* Set bodyLengthChecker type to BodyLengthCalculator. ([#524](https://github.com/awslabs/smithy-typescript/pull/524))
+
+### Bug Fixes
+* Added missing export for `httpApiKeyAuth` middleware. ([#528](https://github.com/awslabs/smithy-typescript/pull/528))
+
 ## 0.10.0 (2022-03-02)
 
 ### Features
