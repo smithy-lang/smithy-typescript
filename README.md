@@ -28,7 +28,7 @@ are as follows:
 
     dependencies {
         implementation("software.amazon.smithy:smithy-model:[1.17.0, 2.0[")
-        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.10.0")
+        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.11.0")
     }
    ```
 
