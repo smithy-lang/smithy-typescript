@@ -21,7 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
@@ -63,10 +66,17 @@ public final class TypeScriptWriter extends CodeWriter {
     private final String moduleNameString;
     private final ImportDeclarations imports;
     private final List<SymbolDependency> dependencies = new ArrayList<>();
+    private final Set<String> attributions = new TreeSet<>();
+    private final boolean includeAttribution;
 
     public TypeScriptWriter(String moduleName) {
+        this(moduleName, false);
+    }
+
+    public TypeScriptWriter(String moduleName, boolean includeAttribution) {
         this.moduleName = Paths.get(moduleName);
         moduleNameString = moduleName;
+        this.includeAttribution = includeAttribution;
         imports = new ImportDeclarations(moduleName);
 
         setIndentText("  ");
@@ -286,6 +296,44 @@ public final class TypeScriptWriter extends CodeWriter {
         return this;
     }
 
+    /**
+     * Works the same as the super method, but also looks up the call stack to find
+     * the caller (usually a Generator) class and note it down as a contributor
+     * to the file being written.
+     *
+     * This will produce a comment at the head of the file indicating that the file is generated
+     * and the contributing classes.
+     *
+     * @param content Content to write.
+     * @param args String arguments to use for formatting.
+     */
+    @Override
+    public TypeScriptWriter write(Object content, Object... args) {
+        if (includeAttribution) {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            String callerClassName = Arrays.stream(stackTrace)
+                    .map(element -> {
+                        String fullClassName = element.getClassName();
+                        if (fullClassName.endsWith(TypeScriptWriter.class.getSimpleName())) {
+                            // ignore own class.
+                            return null;
+                        }
+                        if (!fullClassName.contains("smithy.typescript.codegen")) {
+                            // ignore non-smithy-ts portions of the call stack.
+                            return null;
+                        }
+                        String[] names = fullClassName.split("\\.");
+                        return names[names.length - 1];
+                    })
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+            addAttribution(callerClassName);
+        }
+        super.write(content, args);
+        return this;
+    }
+
     Collection<SymbolDependency> getDependencies() {
         return dependencies;
     }
@@ -297,12 +345,27 @@ public final class TypeScriptWriter extends CodeWriter {
         String strippedContents = StringUtils.stripStart(contents, null);
         String strippedImportString = StringUtils.strip(importString, null);
 
+        String codeGenContributors = String.join(", ", attributions);
+        if (codeGenContributors.isEmpty()) {
+            codeGenContributors = "unspecified";
+        }
+        String attributionComment = includeAttribution ? "// smithy-codegen: " + codeGenContributors + "\n" : "";
+
         // Don't add an additional new line between explicit imports and managed imports.
         if (!strippedImportString.isEmpty() && strippedContents.startsWith("import ")) {
-            return strippedImportString + "\n" + strippedContents;
+            return attributionComment + strippedImportString + "\n" + strippedContents;
         }
 
-        return importString + contents;
+        return attributionComment + importString + contents;
+    }
+
+    /**
+     * @param attribution - identifies a contributing Generator class.
+     */
+    private void addAttribution(String attribution) {
+        if (attribution != null) {
+            attributions.add(attribution);
+        }
     }
 
     /**

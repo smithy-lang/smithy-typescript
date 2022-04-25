@@ -241,12 +241,13 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     static void writeIndex(
+            TypeScriptSettings settings,
             Model model,
             ServiceShape service,
             SymbolProvider symbolProvider,
             FileManifest fileManifest
     ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
+        TypeScriptWriter writer = new TypeScriptWriter("", settings.isWithAttribution());
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));

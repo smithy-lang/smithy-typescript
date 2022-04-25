@@ -139,11 +139,12 @@ final class PaginationGenerator implements Runnable {
     }
 
     static void writeIndex(
+            TypeScriptSettings settings,
             Model model,
             ServiceShape service,
             FileManifest fileManifest
     ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
+        TypeScriptWriter writer = new TypeScriptWriter("", settings.isWithAttribution());
         writer.write("export * from \"./$L\"", getModulePath(PAGINATION_INTERFACE_FILE));
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);

@@ -1,11 +1,20 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.Test;
 
 public class TypeScriptWriterTest {
+    private static class ExampleGenerator {
+        final TypeScriptWriter writer = new TypeScriptWriter("", true);
+        public String doWrite() {
+            writer.write("");
+            return writer.toString();
+        }
+    }
+
     @Test
     public void writesDocStrings() {
         TypeScriptWriter writer = new TypeScriptWriter("foo");
@@ -45,6 +54,23 @@ public class TypeScriptWriterTest {
         String result = writer.toString();
 
         assertThat(result, equalTo("/**\n * This is *\\/ valid documentation.\n */\n"));
+    }
+
+    @Test
+    public void includesAttribution() {
+        TypeScriptWriter writer = new TypeScriptWriter("", true);
+        writer.write("");
+        String result = writer.toString();
+
+        assertThat(result, containsString("// smithy-codegen: TypeScriptWriterTest"));
+    }
+
+    @Test
+    public void includesAttributionCallerClass() {
+        ExampleGenerator caller = new ExampleGenerator();
+        String result = caller.doWrite();
+
+        assertThat(result, containsString("// smithy-codegen: TypeScriptWriterTest$ExampleGenerator"));
     }
 
     @Test

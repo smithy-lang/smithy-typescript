@@ -47,7 +47,7 @@ final class IndexGenerator {
         List<TypeScriptIntegration> integrations,
         ProtocolGenerator protocolGenerator
     ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
+        TypeScriptWriter writer = new TypeScriptWriter("", settings.isWithAttribution());
 
         if (settings.generateClient()) {
             writeClientExports(settings, model, symbolProvider, writer, fileManifest, integrations);
@@ -80,7 +80,7 @@ final class IndexGenerator {
             SymbolProvider symbolProvider,
             FileManifest fileManifest
     ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
+        TypeScriptWriter writer = new TypeScriptWriter("", settings.isWithAttribution());
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
 

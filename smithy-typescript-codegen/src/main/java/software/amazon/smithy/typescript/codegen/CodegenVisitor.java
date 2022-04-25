@@ -194,7 +194,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         for (Shape shape : TopologicalIndex.of(prunedModel).getRecursiveShapes()) {
             shape.accept(this);
         }
-        SymbolVisitor.writeModelIndex(prunedModel, symbolProvider, fileManifest);
+        SymbolVisitor.writeModelIndex(settings, prunedModel, symbolProvider, fileManifest);
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
@@ -446,7 +446,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
-            PaginationGenerator.writeIndex(model, service, fileManifest);
+            PaginationGenerator.writeIndex(settings, model, service, fileManifest);
             writers.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
                     PaginationGenerator.generateServicePaginationInterfaces(
                             aggregatedClientName,
@@ -455,7 +455,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
-            WaiterGenerator.writeIndex(model, service, fileManifest);
+            WaiterGenerator.writeIndex(settings, model, service, fileManifest);
         }
     }
 
@@ -476,14 +476,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         for (OperationShape operation : containedOperations) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
-                CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
+                CommandGenerator.writeIndex(settings, model, service, symbolProvider, fileManifest);
                 writers.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         runtimePlugins, protocolGenerator, applicationProtocol).run());
             }
 
             if (settings.generateServerSdk()) {
-                ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
+                ServerCommandGenerator.writeIndex(settings, model, service, symbolProvider, fileManifest);
                 writers.useShapeWriter(operation, symbolProvider, commandWriter -> new ServerCommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         protocolGenerator, applicationProtocol).run());

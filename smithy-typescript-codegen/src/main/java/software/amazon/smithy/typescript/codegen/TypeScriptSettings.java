@@ -54,6 +54,7 @@ public final class TypeScriptSettings {
     private static final String PROTOCOL = "protocol";
     private static final String PRIVATE = "private";
     private static final String PACKAGE_MANAGER = "packageManager";
+    private static final String WITH_ATTRIBUTION = "withAttribution";
 
     private String packageName;
     private String packageDescription = "";
@@ -66,6 +67,7 @@ public final class TypeScriptSettings {
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
     private PackageManager packageManager = PackageManager.YARN;
+    private boolean withAttribution = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -101,6 +103,7 @@ public final class TypeScriptSettings {
                 config.getStringMember(PACKAGE_MANAGER)
                     .map(s -> PackageManager.fromString(s.getValue()))
                     .orElse(PackageManager.YARN));
+        settings.setWithAttribution(config.getBooleanMemberOrDefault(WITH_ATTRIBUTION, false));
 
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
@@ -359,6 +362,14 @@ public final class TypeScriptSettings {
      */
     public void setProtocol(ShapeId protocol) {
         this.protocol = Objects.requireNonNull(protocol);
+    }
+
+    public boolean isWithAttribution() {
+        return withAttribution;
+    }
+
+    public void setWithAttribution(boolean withAttribution) {
+        this.withAttribution = withAttribution;
     }
 
     /**

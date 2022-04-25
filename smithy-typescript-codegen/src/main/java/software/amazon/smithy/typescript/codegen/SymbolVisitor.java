@@ -118,8 +118,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
     }
 
-    static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
-        ModuleNameDelegator.writeModelIndex(model, symbolProvider, fileManifest);
+    static void writeModelIndex(TypeScriptSettings settings,
+                                Model model,
+                                SymbolProvider symbolProvider,
+                                FileManifest fileManifest) {
+        ModuleNameDelegator.writeModelIndex(settings, model, symbolProvider, fileManifest);
     }
 
     @Override
@@ -455,8 +458,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return path;
         }
 
-        static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
-            TypeScriptWriter writer = new TypeScriptWriter("");
+        static void writeModelIndex(TypeScriptSettings settings,
+                                    Model model,
+                                    SymbolProvider symbolProvider,
+                                    FileManifest fileManifest) {
+            TypeScriptWriter writer = new TypeScriptWriter("", settings.isWithAttribution());
             String modelPrefix = Paths.get(".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX).toString();
             model.shapes()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())

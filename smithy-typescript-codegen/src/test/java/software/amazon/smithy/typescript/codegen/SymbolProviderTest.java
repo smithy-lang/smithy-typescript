@@ -58,7 +58,7 @@ public class SymbolProviderTest {
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
         MockManifest manifest = new MockManifest();
-        SymbolVisitor.writeModelIndex(model, provider, manifest);
+        SymbolVisitor.writeModelIndex(settings, model, provider, manifest);
 
         assertThat(symbol1.getName(), equalTo("Hello"));
         assertThat(symbol1.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));

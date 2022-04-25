@@ -151,7 +151,7 @@ final class TypeScriptDelegator {
 
         TypeScriptWriter writer = writers.computeIfAbsent(formattedFilename, f -> {
             String moduleName = filename.endsWith(".ts") ? filename.substring(0, filename.length() - 3) : filename;
-            return new TypeScriptWriter(moduleName);
+            return new TypeScriptWriter(moduleName, settings.isWithAttribution());
         });
 
         // Add newlines/separators between types in the same file.

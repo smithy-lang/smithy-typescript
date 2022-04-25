@@ -6,6 +6,7 @@
             "targetNamespace": "Weather",
             "package": "weather",
             "packageVersion": "0.0.1",
+            "withAttribution": true,
             "packageJson": {
                 "license": "Apache-2.0"
             }
