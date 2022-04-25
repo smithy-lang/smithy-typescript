@@ -202,9 +202,9 @@ final class PaginationGenerator implements Runnable {
                 });
 
                 writer.write("yield page;");
+                writer.write("const prevToken = token;");
                 writer.write("token = page$L;", destructurePath(outputTokenName));
-
-                writer.write("hasNext = !!(token);");
+                writer.write("hasNext = !!(token && (!config.stopOnSameToken || token !== prevToken));");
             });
 
             writer.write("// @ts-ignore");
