@@ -68,7 +68,7 @@ final class StructuredMemberWriter {
         this.members = new LinkedHashSet<>(members);
     }
 
-    void writeMembers(TypeScriptWriter writer, Shape shape) {
+    void writeMembers(TypeScriptWriter writer, Shape shape, Boolean generateServerSdk) {
         int position = -1;
         for (MemberShape member : members) {
             if (skipMembers.contains(member.getMemberName())) {
@@ -79,7 +79,7 @@ final class StructuredMemberWriter {
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
-            String typeSuffix = isRequiredMember(member) ? " | undefined" : "";
+            String typeSuffix = isRequiredMember(member) && !generateServerSdk ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                          symbolProvider.toSymbol(member), typeSuffix);
 

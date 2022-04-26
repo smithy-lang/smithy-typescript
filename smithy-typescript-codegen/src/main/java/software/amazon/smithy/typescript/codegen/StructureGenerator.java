@@ -40,7 +40,7 @@ final class StructureGenerator implements Runnable {
     private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
     private final StructureShape shape;
-    private final boolean includeValidation;
+    private final boolean generateServerSdk;
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
@@ -53,12 +53,12 @@ final class StructureGenerator implements Runnable {
                        SymbolProvider symbolProvider,
                        TypeScriptWriter writer,
                        StructureShape shape,
-                       boolean includeValidation) {
+                       boolean generateServerSdk) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;
-        this.includeValidation = includeValidation;
+        this.generateServerSdk = generateServerSdk;
     }
 
     @Override
@@ -133,13 +133,13 @@ final class StructureGenerator implements Runnable {
 
         StructuredMemberWriter config = new StructuredMemberWriter(
                 model, symbolProvider, shape.getAllMembers().values());
-        config.writeMembers(writer, shape);
+        config.writeMembers(writer, shape, generateServerSdk);
         writer.closeBlock("}");
         writer.write("");
-        renderStructureNamespace(config, includeValidation);
+        renderStructureNamespace(config, generateServerSdk);
     }
 
-    private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {
+    private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean generateServerSdk) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             String objectParam = "obj";
@@ -151,7 +151,7 @@ final class StructureGenerator implements Runnable {
                 }
             );
 
-            if (!includeValidation) {
+            if (!generateServerSdk) {
                 return;
             }
 
@@ -219,7 +219,7 @@ final class StructureGenerator implements Runnable {
         ErrorTrait errorTrait = shape.getTrait(ErrorTrait.class).orElseThrow(IllegalStateException::new);
         Symbol symbol = symbolProvider.toSymbol(shape);
         writer.writeShapeDocs(shape);
-        boolean isServerSdk = this.includeValidation;
+        boolean isServerSdk = this.generateServerSdk;
         writer.openBlock("export class $T extends $L {", symbol, "__BaseException");
         writer.write("readonly name: $1S = $1S;", shape.getId().getName());
         writer.write("readonly $$fault: $1S = $1S;", errorTrait.getValue());
@@ -231,7 +231,7 @@ final class StructureGenerator implements Runnable {
         // since any error interface must extend from JavaScript Error interface, message member is already
         // required in the JavaScript Error interface
         structuredMemberWriter.skipMembers.add("message");
-        structuredMemberWriter.writeMembers(writer, shape);
+        structuredMemberWriter.writeMembers(writer, shape, isServerSdk);
         structuredMemberWriter.writeErrorConstructor(writer, shape, isServerSdk);
         writer.closeBlock("}");
         writer.write("");
