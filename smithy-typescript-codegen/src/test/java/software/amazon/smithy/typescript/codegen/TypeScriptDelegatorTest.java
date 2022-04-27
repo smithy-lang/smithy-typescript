@@ -3,6 +3,7 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static software.amazon.smithy.typescript.codegen.TypeScriptWriter.CODEGEN_INDICATOR;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class TypeScriptDelegatorTest {
         delegator.useShapeWriter(fooShape, writer -> writer.write("Hello!"));
         delegator.flushWriters();
 
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo("Hello!\n"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo(CODEGEN_INDICATOR + "Hello!\n"));
     }
 
     @Test
@@ -60,7 +61,7 @@ public class TypeScriptDelegatorTest {
         delegator.useShapeWriter(fooShape, writer -> writer.write("Goodbye!"));
         delegator.flushWriters();
 
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo("Hello!\n\nGoodbye!\n"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo(CODEGEN_INDICATOR + "Hello!\n\nGoodbye!\n"));
     }
 
     @Test

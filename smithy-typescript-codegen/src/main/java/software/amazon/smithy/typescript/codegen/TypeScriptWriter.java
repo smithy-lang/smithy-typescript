@@ -56,6 +56,7 @@ import software.amazon.smithy.utils.StringUtils;
  */
 @SmithyUnstableApi
 public final class TypeScriptWriter extends CodeWriter {
+    public static final String CODEGEN_INDICATOR = "// smithy-typescript generated code\n";
 
     private static final Logger LOGGER = Logger.getLogger(TypeScriptWriter.class.getName());
 
@@ -299,10 +300,10 @@ public final class TypeScriptWriter extends CodeWriter {
 
         // Don't add an additional new line between explicit imports and managed imports.
         if (!strippedImportString.isEmpty() && strippedContents.startsWith("import ")) {
-            return strippedImportString + "\n" + strippedContents;
+            return CODEGEN_INDICATOR + strippedImportString + "\n" + strippedContents;
         }
 
-        return importString + contents;
+        return CODEGEN_INDICATOR + importString + contents;
     }
 
     /**
