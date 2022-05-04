@@ -29,6 +29,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.validation.IsTypeScriptFileExtension;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
@@ -59,7 +60,8 @@ final class TypeScriptDelegator {
      * Writes all of the pending writers and clears out the history of writers.
      */
     void flushWriters() {
-        writers.forEach((filename, writer) -> fileManifest.writeFile(filename, writer.toString()));
+        writers.forEach((filename, writer) ->
+                fileManifest.writeFile(filename, writer.toString(IsTypeScriptFileExtension.check(filename))));
         writers.clear();
     }
 

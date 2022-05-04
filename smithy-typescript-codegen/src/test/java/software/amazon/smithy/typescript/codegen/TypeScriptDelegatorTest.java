@@ -1,12 +1,5 @@
 package software.amazon.smithy.typescript.codegen;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static software.amazon.smithy.typescript.codegen.TypeScriptWriter.CODEGEN_INDICATOR;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -17,6 +10,13 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 
 public class TypeScriptDelegatorTest {
     @Test
@@ -32,7 +32,7 @@ public class TypeScriptDelegatorTest {
         delegator.useShapeWriter(fooShape, writer -> writer.write("Hello!"));
         delegator.flushWriters();
 
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo(CODEGEN_INDICATOR + "Hello!\n"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo("Hello!\n"));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class TypeScriptDelegatorTest {
         delegator.useShapeWriter(fooShape, writer -> writer.write("Goodbye!"));
         delegator.flushWriters();
 
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo(CODEGEN_INDICATOR + "Hello!\n\nGoodbye!\n"));
+        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.txt").get(), equalTo("Hello!\n\nGoodbye!\n"));
     }
 
     @Test

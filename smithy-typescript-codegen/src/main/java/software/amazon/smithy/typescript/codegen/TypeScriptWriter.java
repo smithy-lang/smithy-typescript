@@ -293,17 +293,26 @@ public final class TypeScriptWriter extends CodeWriter {
 
     @Override
     public String toString() {
+        return toString(true);
+    }
+
+    /**
+     * @param withAttribution - whether to include the {@link TypeScriptWriter#CODEGEN_INDICATOR} comment.
+     * @return buffered code string.
+     */
+    public String toString(boolean withAttribution) {
         String contents = super.toString();
         String importString = imports.toString();
         String strippedContents = StringUtils.stripStart(contents, null);
         String strippedImportString = StringUtils.strip(importString, null);
+        String attribution = withAttribution ? CODEGEN_INDICATOR : "";
 
         // Don't add an additional new line between explicit imports and managed imports.
         if (!strippedImportString.isEmpty() && strippedContents.startsWith("import ")) {
-            return CODEGEN_INDICATOR + strippedImportString + "\n" + strippedContents;
+            return attribution + strippedImportString + "\n" + strippedContents;
         }
 
-        return CODEGEN_INDICATOR + importString + contents;
+        return attribution + importString + contents;
     }
 
     /**
