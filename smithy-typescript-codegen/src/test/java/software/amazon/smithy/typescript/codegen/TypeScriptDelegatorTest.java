@@ -1,11 +1,5 @@
 package software.amazon.smithy.typescript.codegen;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -16,6 +10,13 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 
 public class TypeScriptDelegatorTest {
     @Test

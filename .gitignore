@@ -22,6 +22,9 @@ build/
 */*/out/
 wrapper/
 
+# local scripting
+Makefile
+
 # Visual Studio Code
 .vscode/*
 
