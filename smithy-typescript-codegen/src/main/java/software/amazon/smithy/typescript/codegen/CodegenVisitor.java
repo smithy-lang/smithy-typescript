@@ -50,6 +50,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.model.transform.ModelTransformer;
 import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -108,18 +109,14 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
 
         // Preprocess model using integrations.
-        TypeScriptSettings typescriptSettings = TypeScriptSettings.from(
-                context.getModel(), context.getSettings(), artifactType);
+        settings = TypeScriptSettings.from(context.getModel(), context.getSettings(), artifactType);
+        Model modifiedModel = context.getModel();
         for (TypeScriptIntegration integration : integrations) {
-            Model modifiedModel = integration.preprocessModel(context, typescriptSettings);
-            if (modifiedModel != context.getModel()) {
-                context = context.toBuilder().model(modifiedModel).build();
-                typescriptSettings = TypeScriptSettings.from(modifiedModel, context.getSettings(), artifactType);
-            }
+            modifiedModel = integration.preprocessModel(modifiedModel, settings);
         }
-        settings = typescriptSettings;
-        model = context.getModel();
-        nonTraits = context.getModelWithoutTraitShapes();
+        model = modifiedModel;
+        nonTraits = ModelTransformer.create().getModelWithoutTraitShapes(model);
+
         service = settings.getService(model);
 
         if (settings.getArtifactType().equals(ArtifactType.SSDK))  {
