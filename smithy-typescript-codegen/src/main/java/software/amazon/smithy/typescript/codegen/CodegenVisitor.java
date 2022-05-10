@@ -347,7 +347,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     @Override
     public Void operationShape(OperationShape operation) {
         if (settings.generateServerSdk()) {
-            writers.useShapeWriter(operation, symbolProvider, w -> {
+            writers.useShapeWriter(operation, w -> {
                 ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
             });
         }
@@ -395,11 +395,11 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                     protocolGenerator.generateRequestDeserializers(serverContext);
                     protocolGenerator.generateResponseSerializers(serverContext);
                     protocolGenerator.generateFrameworkErrorSerializer(serverContext);
-                    writers.useShapeWriter(shape, symbolProvider, w -> {
+                    writers.useShapeWriter(shape, w -> {
                         protocolGenerator.generateServiceHandlerFactory(serverContext.withWriter(w));
                     });
                     for (OperationShape operation: TopDownIndex.of(model).getContainedOperations(service)) {
-                        writers.useShapeWriter(operation, symbolProvider, w -> {
+                        writers.useShapeWriter(operation, w -> {
                             protocolGenerator.generateOperationHandlerFactory(serverContext.withWriter(w), operation);
                         });
                     }
@@ -462,7 +462,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private void generateServiceInterface(ServiceShape shape) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = new TreeSet<>(topDownIndex.getContainedOperations(shape));
-        writers.useShapeWriter(shape, symbolProvider, writer -> {
+        writers.useShapeWriter(shape, writer -> {
             ServerGenerator.generateOperationsType(symbolProvider, shape, operations, writer);
             ServerGenerator.generateServerInterfaces(symbolProvider, shape, operations, writer);
             ServerGenerator.generateServiceHandler(symbolProvider, shape, operations, writer);
@@ -484,7 +484,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
             if (settings.generateServerSdk()) {
                 ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
-                writers.useShapeWriter(operation, symbolProvider, commandWriter -> new ServerCommandGenerator(
+                writers.useShapeWriter(operation, commandWriter -> new ServerCommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         protocolGenerator, applicationProtocol).run());
             }
