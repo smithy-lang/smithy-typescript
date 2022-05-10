@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -61,12 +60,12 @@ public interface TypeScriptIntegration {
      * <p>This can be used to remove unsupported features, remove traits
      * from shapes (e.g., make members optional), etc.
      *
-     * @param context Plugin context.
+     * @param model Model being generated.
      * @param settings Setting used to generate.
      * @return Returns the updated model.
      */
-    default Model preprocessModel(PluginContext context, TypeScriptSettings settings) {
-        return context.getModel();
+    default Model preprocessModel(Model model, TypeScriptSettings settings) {
+        return model;
     }
 
     /**
