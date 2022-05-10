@@ -282,35 +282,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         return null;
     }
 
-    /**
-     * Renders structures as interfaces.
-     *
-     * <p>A namespace is created with the same name as the structure to
-     * provide helper functionality for checking if a given value is
-     * known to be of the same type as the structure. This will be
-     * even more useful if/when inheritance is added to Smithy.
-     *
-     * <p>Note that the {@code required} trait on structures is used to
-     * determine whether or not a generated TypeScript interface uses
-     * required members. This is typically not recommended in other languages
-     * since it's documented as backward-compatible for a model to migrate a
-     * required property to optional. This becomes an issue when an older
-     * client consumes a service that has relaxed a member to become optional.
-     * In the case of sending data from the client to the server, the client
-     * likely either is still operating under the assumption that the property
-     * is required, or the client can set a property explicitly to
-     * {@code undefined} to fix any TypeScript compilation errors. In the
-     * case of deserializing a value from a service to the client, the
-     * deserializers will need to set previously required properties to
-     * undefined too.
-     *
-     * <p>The generator will explicitly state that a required property can
-     * be set to {@code undefined}. This makes it clear that undefined checks
-     * need to be made when using {@code --strictNullChecks}, but has no
-     * effect otherwise.
-     *
-     * @param shape Shape being generated.
-     */
     @Override
     public Void structureShape(StructureShape shape) {
         writers.useShapeWriter(shape, writer ->
@@ -318,12 +289,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         return null;
     }
 
-    /**
-     * Renders a TypeScript union.
-     *
-     * @param shape Shape to render as a union.
-     * @see UnionGenerator
-     */
     @Override
     public Void unionShape(UnionShape shape) {
         writers.useShapeWriter(shape, writer ->
