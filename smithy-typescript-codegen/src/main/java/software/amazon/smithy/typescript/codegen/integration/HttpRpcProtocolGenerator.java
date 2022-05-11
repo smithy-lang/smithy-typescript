@@ -39,6 +39,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     public static final Logger LOGGER = Logger.getLogger(HttpRpcProtocolGenerator.class.getName());
+    private static final ApplicationProtocol APPLICATION_PROTOCOL
+            = ApplicationProtocol.createDefaultHttpApplicationProtocol();
 
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
@@ -56,8 +58,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     @Override
-    public ApplicationProtocol getApplicationProtocol() {
-        return ApplicationProtocol.createDefaultHttpApplicationProtocol();
+    public final ApplicationProtocol getApplicationProtocol() {
+        return APPLICATION_PROTOCOL;
     }
 
     /**
