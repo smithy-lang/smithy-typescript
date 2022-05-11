@@ -76,9 +76,9 @@ public interface ProtocolGenerator {
     }
 
     /**
-     * Creates an application protocol for the generator.
+     * Gets the application protocol for the generator.
      *
-     * @return Returns the created application protocol.
+     * @return Returns the application protocol.
      */
     ApplicationProtocol getApplicationProtocol();
 

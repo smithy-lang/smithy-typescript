@@ -86,7 +86,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
     private static final Set<Character> REGEX_CHARS = SetUtils.of('.', '*', '+', '?', '^', '$', '{', '}', '(',
             ')', '|', '[', ']', '\\');
-
+    private static final ApplicationProtocol APPLICATION_PROTOCOL
+            = ApplicationProtocol.createDefaultHttpApplicationProtocol();
     private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
     private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
     private final Set<StructureShape> serializingErrorShapes = new TreeSet<>();
@@ -108,8 +109,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     @Override
-    public ApplicationProtocol getApplicationProtocol() {
-        return ApplicationProtocol.createDefaultHttpApplicationProtocol();
+    public final ApplicationProtocol getApplicationProtocol() {
+        return APPLICATION_PROTOCOL;
     }
 
     /**
