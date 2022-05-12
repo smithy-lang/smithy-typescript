@@ -6,7 +6,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 
 /**
- * This SymbolProvider is used to test that CodegenVisitor actually decorates
+ * This SymbolProvider is used to test that TypeScriptCodegenPlugin actually decorates
  * the provided SymbolProvider using integrations found on the classpath. It is
  * enabled by setting "__customServiceName" in the provided settings object.
  */

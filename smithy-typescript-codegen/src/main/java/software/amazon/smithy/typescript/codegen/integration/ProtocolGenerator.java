@@ -16,7 +16,6 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collection;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -27,6 +26,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
+import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -271,8 +271,8 @@ public interface ProtocolGenerator {
         private Model model;
         private ServiceShape service;
         private SymbolProvider symbolProvider;
+        private TypeScriptDelegator writerDelegator;
         private TypeScriptWriter writer;
-        private Supplier<TypeScriptWriter> writerSupplier;
         private String protocolName;
 
         public TypeScriptSettings getSettings() {
@@ -307,24 +307,32 @@ public interface ProtocolGenerator {
             this.symbolProvider = symbolProvider;
         }
 
-        public TypeScriptWriter getWriter() {
-            if (writerSupplier != null && writer == null) {
-                writer = writerSupplier.get();
+        // TODO: Potential refactoring.
+        // Consider whether to use a Builder pattern here (also with toBuilder instead of copy),
+        // where the constructor asserts that both writer/writerDelegator are not set, instead of unsetting the other.
+        // Or consider specialized GenerationContextWithWriter/GenerationContextWithWriterDelegator to use in
+        // corresponding ProtocolGenerator methods that need writer v/s writerDelegator.
+        // OR better refactor to add something like a `areProtocolTestsPresent()` so `generateProtocolTests` is called
+        // and `writer` created only if needed.
+        public TypeScriptDelegator getWriterDelegator() {
+            return writerDelegator;
+        }
+
+        public void setWriterDelegator(TypeScriptDelegator writerDelegator) {
+            this.writerDelegator = writerDelegator;
+            if (writerDelegator != null) {
+                this.writer = null;
             }
+        }
+
+        public TypeScriptWriter getWriter() {
             return writer;
         }
 
         public void setWriter(TypeScriptWriter writer) {
             this.writer = writer;
             if (writer != null) {
-                this.writerSupplier = null;
-            }
-        }
-
-        public void setDeferredWriter(Supplier<TypeScriptWriter> writerSupplier) {
-            this.writerSupplier = writerSupplier;
-            if (writerSupplier != null) {
-                this.writer = null;
+                this.writerDelegator = null;
             }
         }
 
@@ -342,8 +350,8 @@ public interface ProtocolGenerator {
             copy.setModel(model);
             copy.setService(service);
             copy.setSymbolProvider(symbolProvider);
+            copy.setWriterDelegator(writerDelegator);
             copy.setWriter(writer);
-            copy.setDeferredWriter(writerSupplier);
             copy.setProtocolName(protocolName);
             return copy;
         }

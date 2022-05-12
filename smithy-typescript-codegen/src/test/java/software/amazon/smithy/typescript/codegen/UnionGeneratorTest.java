@@ -40,7 +40,7 @@ public class UnionGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptWriter writer = new TypeScriptWriter("./Example");
         new UnionGenerator(model, symbolProvider, writer, unionShape).run();
         String output = writer.toString();

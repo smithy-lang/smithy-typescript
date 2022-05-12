@@ -32,7 +32,7 @@ public class SymbolProviderTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("Hello"));
@@ -54,7 +54,7 @@ public class SymbolProviderTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
         MockManifest manifest = new MockManifest();
@@ -85,7 +85,7 @@ public class SymbolProviderTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
         assertThat(symbol.getName(), equalTo("_Pick"));
@@ -107,7 +107,7 @@ public class SymbolProviderTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
 
         Symbol structSymbol = provider.toSymbol(struct);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -139,7 +139,7 @@ public class SymbolProviderTest {
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
 
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol listSymbol = provider.toSymbol(list);
 
         assertThat(listSymbol.getName(), equalTo("(_Record)[]"));
@@ -157,7 +157,7 @@ public class SymbolProviderTest {
                 .build());
 
         Shape command = model.expectShape(ShapeId.from("smithy.example#GetFoo"));
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol commandSymbol = provider.toSymbol(command);
 
         assertThat(commandSymbol.getName(), equalTo("GetFooCommand"));
@@ -184,7 +184,7 @@ public class SymbolProviderTest {
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
 
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
 
         assertThat(memberSymbol.getName(), equalTo("__LazyJsonString | string"));
