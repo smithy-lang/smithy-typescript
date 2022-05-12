@@ -124,21 +124,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
         this.context = context;
     }
 
-    public HttpProtocolTestGenerator(
-            GenerationContext context,
-            ProtocolGenerator protocolGenerator,
-            TestFilter testFilter
-    ) {
-        this(context, protocolGenerator, testFilter, (service, operation, testCase, typeScriptSettings) -> false);
-    }
-
-    public HttpProtocolTestGenerator(
-            GenerationContext context,
-            ProtocolGenerator protocolGenerator
-    ) {
-        this(context, protocolGenerator, (service, operation, testCase, typeScriptSettings) -> false);
-    }
-
     @Override
     public void run() {
         OperationIndex operationIndex = OperationIndex.of(model);
@@ -243,7 +228,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void initializeWriterIfNeeded() {
         if (writer == null) {
-            writer = context.getWriter();
+            context.getWriterDelegator().useFileWriter(createTestCaseFilename(), writer -> this.writer = writer);
             writer.addDependency(TypeScriptDependency.AWS_SDK_TYPES);
             writer.addDependency(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP);
             // Add the template to each generated test.

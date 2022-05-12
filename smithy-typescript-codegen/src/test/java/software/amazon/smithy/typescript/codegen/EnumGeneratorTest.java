@@ -29,7 +29,7 @@ public class EnumGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(model, settings).toSymbol(shape);
+        Symbol symbol = new SymbolVisitor(model, settings).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export enum Baz {"));
@@ -54,7 +54,7 @@ public class EnumGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        Symbol symbol = TypeScriptCodegenPlugin.createSymbolProvider(model, settings).toSymbol(shape);
+        Symbol symbol = new SymbolVisitor(model, settings).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export type Baz = \"BAR\" | \"FOO\""));

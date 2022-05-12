@@ -15,29 +15,18 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
-import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.codegen.core.SymbolContainer;
-import software.amazon.smithy.codegen.core.SymbolDependency;
-import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.Prelude;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
-import software.amazon.smithy.utils.CodeWriter;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -53,28 +42,39 @@ import software.amazon.smithy.utils.StringUtils;
  * relativized.
  *
  * <p>Dependencies introduced via a TypeScriptWriter are added to the package.json
- * file if the writer is a part of the {@link TypeScriptDelegator} of the {@link CodegenVisitor}.
+ * file if the writer is a part of the {@link TypeScriptDelegator} of the {@link DirectedTypeScriptCodegen}.
  */
 @SmithyUnstableApi
-public final class TypeScriptWriter extends CodeWriter {
+public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, ImportDeclarations> {
     public static final String CODEGEN_INDICATOR = "// smithy-typescript generated code\n";
 
-    private static final Logger LOGGER = Logger.getLogger(TypeScriptWriter.class.getName());
-
-    private final Path moduleName;
-    private final String moduleNameString;
-    private final ImportDeclarations imports;
-    private final List<SymbolDependency> dependencies = new ArrayList<>();
+    private final String moduleName;
+    private final boolean withAttribution;
 
     public TypeScriptWriter(String moduleName) {
-        this.moduleName = Paths.get(moduleName);
-        moduleNameString = moduleName;
-        imports = new ImportDeclarations(moduleName);
+        this(moduleName, true);
+    }
+
+    private TypeScriptWriter(String moduleName, boolean withAttribution) {
+        super(new ImportDeclarations(moduleName));
+        this.moduleName = moduleName;
 
         setIndentText("  ");
         trimTrailingSpaces(true);
         trimBlankLines();
         putFormatter('T', new TypeScriptSymbolFormatter());
+
+        this.withAttribution = withAttribution;
+    }
+
+    public static final class TypeScriptWriterFactory implements SymbolWriter.Factory<TypeScriptWriter> {
+
+        @Override
+        public TypeScriptWriter apply(String filename, String namespace) {
+            boolean withAttribution = filename.endsWith(".ts");
+            String moduleName = filename.endsWith(".ts") ? filename.substring(0, filename.length() - 3) : filename;
+            return new TypeScriptWriter(moduleName, withAttribution);
+        }
     }
 
     /**
@@ -83,88 +83,7 @@ public final class TypeScriptWriter extends CodeWriter {
      * @return Returns the module name.
      */
     public String getModuleName() {
-        return moduleNameString;
-    }
-
-    /**
-     * Imports one or more symbols if necessary, using the name of the
-     * symbol and only "USE" references.
-     *
-     * @param container Container of symbols to add.
-     * @return Returns the writer.
-     */
-    public TypeScriptWriter addUseImports(SymbolContainer container) {
-        for (Symbol symbol : container.getSymbols()) {
-            addImport(symbol, symbol.getName(), SymbolReference.ContextOption.USE);
-        }
-        return this;
-    }
-
-    /**
-     * Imports a symbol reference if necessary, using the alias of the
-     * reference and only associated "USE" references.
-     *
-     * @param symbolReference Symbol reference to import.
-     * @return Returns the writer.
-     */
-    public TypeScriptWriter addUseImports(SymbolReference symbolReference) {
-        return addImport(symbolReference.getSymbol(), symbolReference.getAlias(), SymbolReference.ContextOption.USE);
-    }
-
-    /**
-     * Imports a symbol if necessary using an alias and list of context options.
-     *
-     * @param symbol Symbol to optionally import.
-     * @param alias The alias to refer to the symbol by.
-     * @param options The list of context options (e.g., is it a USE or DECLARE symbol).
-     * @return Returns the writer.
-     */
-    public TypeScriptWriter addImport(Symbol symbol, String alias, SymbolReference.ContextOption... options) {
-        LOGGER.finest(() -> {
-            StringJoiner stackTrace = new StringJoiner("\n");
-            for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
-                stackTrace.add(element.toString());
-            }
-            return String.format(
-                    "Adding TypeScript import %s as `%s` (%s); Stack trace: %s",
-                    symbol, alias, Arrays.toString(options), stackTrace);
-        });
-
-        // Always add dependencies.
-        dependencies.addAll(symbol.getDependencies());
-
-        if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
-            addImport(symbol.getName(), alias, symbol.getNamespace());
-        }
-
-        // Just because the direct symbol wasn't imported doesn't mean that the
-        // symbols it needs to be declared don't need to be imported.
-        addImportReferences(symbol, options);
-
-        return this;
-    }
-
-    void addImportReferences(Symbol symbol, SymbolReference.ContextOption... options) {
-        for (SymbolReference reference : symbol.getReferences()) {
-            for (SymbolReference.ContextOption option : options) {
-                if (reference.hasOption(option)) {
-                    addImport(reference.getSymbol(), reference.getAlias(), options);
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * default import using an alias from a module only if necessary.
-     *
-     * @param name Name of default import.
-     * @param from Module to default import from.
-     * @return Returns the writer.
-     */
-    public TypeScriptWriter addDefaultImport(String name, String from) {
-        imports.addDefaultImport(name, from);
-        return this;
+        return moduleName;
     }
 
     /**
@@ -176,7 +95,7 @@ public final class TypeScriptWriter extends CodeWriter {
      * @return Returns the writer.
      */
     public TypeScriptWriter addIgnoredDefaultImport(String name, String from, String reason) {
-        imports.addIgnoredDefaultImport(name, from, reason);
+        getImportContainer().addIgnoredDefaultImport(name, from, reason);
         return this;
     }
 
@@ -189,7 +108,7 @@ public final class TypeScriptWriter extends CodeWriter {
      * @return Returns the writer.
      */
     public TypeScriptWriter addImport(String name, String as, String from) {
-        imports.addImport(name, as, from);
+        getImportContainer().addImport(name, as, from);
         return this;
     }
 
@@ -280,36 +199,10 @@ public final class TypeScriptWriter extends CodeWriter {
                && !Prelude.isPreludeShape(member.getTarget());
     }
 
-    /**
-     * Adds one or more dependencies to the generated code.
-     *
-     * <p>The dependencies of all writers created by the {@link TypeScriptDelegator}
-     * are merged together to eventually generate a package.json file.
-     *
-     * @param dependencies TypeScriptDependency to add.
-     * @return Returns the writer.
-     */
-    public TypeScriptWriter addDependency(SymbolDependencyContainer dependencies) {
-        this.dependencies.addAll(dependencies.getDependencies());
-        return this;
-    }
-
-    Collection<SymbolDependency> getDependencies() {
-        return dependencies;
-    }
-
     @Override
     public String toString() {
-        return toString(true);
-    }
-
-    /**
-     * @param withAttribution - whether to include the {@link TypeScriptWriter#CODEGEN_INDICATOR} comment.
-     * @return buffered code string.
-     */
-    public String toString(boolean withAttribution) {
         String contents = super.toString();
-        String importString = imports.toString();
+        String importString = getImportContainer().toString();
         String strippedContents = StringUtils.stripStart(contents, null);
         String strippedImportString = StringUtils.strip(importString, null);
         String attribution = withAttribution ? CODEGEN_INDICATOR : "";

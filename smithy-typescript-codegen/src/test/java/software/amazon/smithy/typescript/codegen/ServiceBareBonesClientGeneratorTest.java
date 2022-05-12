@@ -27,7 +27,7 @@ public class ServiceBareBonesClientGeneratorTest {
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         ApplicationProtocol applicationProtocol = ApplicationProtocol.createDefaultHttpApplicationProtocol();
 
         List<TypeScriptIntegration> integrations = new ArrayList<>();
