@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.ImportContainer;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -28,13 +30,16 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * Internal class used for aggregating imports of a file.
  */
 @SmithyInternalApi
-final class ImportDeclarations {
+final class ImportDeclarations implements ImportContainer {
 
+    // TODO: remove this
+    private final String moduleNameString;
     private final Path relativize;
     private final Map<String, Pair<String, Ignore>> defaultImports = new TreeMap<>();
     private final Map<String, Map<String, String>> namedImports = new TreeMap<>();
 
     ImportDeclarations(String relativize) {
+        this.moduleNameString = relativize;
         if (!relativize.startsWith("./")) {
             relativize = "./" + relativize;
         }
@@ -73,6 +78,13 @@ final class ImportDeclarations {
         }
 
         return this;
+    }
+
+    @Override
+    public void importSymbol(Symbol symbol, String alias) {
+        if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
+            addImport(symbol.getName(), alias, symbol.getNamespace());
+        }
     }
 
     @Override

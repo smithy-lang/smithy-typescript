@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import software.amazon.smithy.codegen.core.SmithyIntegration;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -27,6 +28,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.SmithyUnstableApi;
@@ -37,7 +39,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * adding custom code, etc.
  */
 @SmithyUnstableApi
-public interface TypeScriptIntegration {
+public interface TypeScriptIntegration
+        extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
     /**
      * Gets the sort order of the customization from -128 to 127.
      *
@@ -50,6 +53,8 @@ public interface TypeScriptIntegration {
      *
      * @return Returns the sort order, defaulting to 0.
      */
+
+    // TODO: Remove in favor of priority
     default byte getOrder() {
         return 0;
     }

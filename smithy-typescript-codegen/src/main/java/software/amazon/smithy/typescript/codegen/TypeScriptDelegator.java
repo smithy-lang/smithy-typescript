@@ -26,6 +26,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -33,7 +34,7 @@ import software.amazon.smithy.typescript.codegen.validation.IsTypeScriptFileExte
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
-final class TypeScriptDelegator {
+final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -49,6 +50,7 @@ final class TypeScriptDelegator {
             SymbolProvider symbolProvider,
             List<TypeScriptIntegration> integrations
     ) {
+        super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
         this.settings = settings;
         this.model = model;
         this.fileManifest = fileManifest;
@@ -56,25 +58,30 @@ final class TypeScriptDelegator {
         this.integrations = integrations;
     }
 
-    /**
-     * Writes all of the pending writers and clears out the history of writers.
-     */
-    void flushWriters() {
+    @Override
+    public void flushWriters() {
+//        for (Map.Entry<String, W> entry : getWriters().entrySet()) {
+//            fileManifest.writeFile(entry.getKey(), entry.getValue().toString());
+//        }
+//
+//        writers.clear();
+
         writers.forEach((filename, writer) ->
                 fileManifest.writeFile(filename, writer.toString(IsTypeScriptFileExtension.check(filename))));
         writers.clear();
     }
 
     /**
-     * Gets all of the dependencies that have been registered in writers owned by the
-     * delegator.
+     * Gets all of the dependencies that have been registered in writers owned by the delegator, along with any
+     * unconditional dependencies.
      *
      * @return Returns all the dependencies.
      */
-    List<SymbolDependency> getDependencies() {
+    @Override
+    public List<SymbolDependency> getDependencies() {
         // Always add unconditional dependencies.
         List<SymbolDependency> resolved = new ArrayList<>(TypeScriptDependency.getUnconditionalDependencies());
-        writers.values().forEach(s -> resolved.addAll(s.getDependencies()));
+        resolved.addAll(super.getDependencies());
         return resolved;
     }
 
@@ -87,7 +94,7 @@ final class TypeScriptDelegator {
      * @param shape Shape to create the writer for.
      * @param writerConsumer Consumer that accepts and works with the file.
      */
-    void useShapeWriter(Shape shape, Consumer<TypeScriptWriter> writerConsumer) {
+    public void useShapeWriter(Shape shape, Consumer<TypeScriptWriter> writerConsumer) {
         // Checkout/create the appropriate writer for the shape.
         Symbol symbol = symbolProvider.toSymbol(shape);
         String fileName = symbol.getDefinitionFile();
@@ -109,16 +116,16 @@ final class TypeScriptDelegator {
         writer.popState();
     }
 
-    /**
-     * Gets a previously created writer or creates a new one if needed
-     * and adds a new line if the writer already exists.
-     *
-     * @param filename Name of the file to create.
-     * @param writerConsumer Consumer that accepts and works with the file.
-     */
-    void useFileWriter(String filename, Consumer<TypeScriptWriter> writerConsumer) {
-        writerConsumer.accept(checkoutWriter(filename));
-    }
+//    /**
+//     * Gets a previously created writer or creates a new one if needed
+//     * and adds a new line if the writer already exists.
+//     *
+//     * @param filename Name of the file to create.
+//     * @param writerConsumer Consumer that accepts and works with the file.
+//     */
+//    void useFileWriter(String filename, Consumer<TypeScriptWriter> writerConsumer) {
+//        writerConsumer.accept(checkoutWriter(filename));
+//    }
 
     /**
      * Gets a previously created writer or creates a new one if needed

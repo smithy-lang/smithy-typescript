@@ -18,8 +18,9 @@ package software.amazon.smithy.typescript.codegen;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -35,9 +36,35 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
-        new CodegenVisitor(context, ArtifactType.CLIENT).execute();
+        CodegenDirector<TypeScriptWriter, TypeScriptIntegration, TypeScriptCodegenContext, TypeScriptSettings> runner
+                = new CodegenDirector<>();
+
+        runner.directedCodegen(new DirectedTypeScriptCodegen());
+
+        // Set the SmithyIntegration class to look for and apply using SPI.
+        runner.integrationClass(TypeScriptIntegration.class);
+
+        // Set the FileManifest and Model from the plugin.
+        runner.fileManifest(context.getFileManifest());
+        runner.model(context.getModel());
+
+        // Create the TypeScriptSettings object from the plugin settings.
+//        TypeScriptSettings settings = runner.settings(TypeScriptSettings.class, context.getSettings());
+        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
+//        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings(), TypeScriptSettings.ArtifactType.CLIENT);
+        runner.settings(settings);
+
+        runner.service(settings.getService());
+
+        // Configure the director to perform some common model transforms.
+        runner.performDefaultCodegenTransforms();
+        runner.createDedicatedInputsAndOutputs();
+
+        // Run it!
+        runner.run();
     }
 
+    // TODO: Look to remove it
     @Deprecated
     public static SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
         return new SymbolVisitor(model, settings);
