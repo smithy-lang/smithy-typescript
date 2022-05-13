@@ -75,14 +75,14 @@ public interface TypeScriptIntegration {
      * <p>This can be used to customize the names of shapes, the package
      * that code is generated into, add dependencies, add imports, etc.
      *
-     * @param settings Setting used to generate.
      * @param model Model being generated.
+     * @param settings Setting used to generate.
      * @param symbolProvider The original {@code SymbolProvider}.
      * @return The decorated {@code SymbolProvider}.
      */
     default SymbolProvider decorateSymbolProvider(
-            TypeScriptSettings settings,
             Model model,
+            TypeScriptSettings settings,
             SymbolProvider symbolProvider
     ) {
         return symbolProvider;

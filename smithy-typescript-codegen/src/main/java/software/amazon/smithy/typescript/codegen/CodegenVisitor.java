@@ -136,7 +136,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         // Decorate the symbol provider using integrations.
         SymbolProvider resolvedProvider = artifactType.createSymbolProvider(model, settings);
         for (TypeScriptIntegration integration : integrations) {
-            resolvedProvider = integration.decorateSymbolProvider(settings, model, resolvedProvider);
+            resolvedProvider = integration.decorateSymbolProvider(model, settings, resolvedProvider);
         }
         symbolProvider = SymbolProvider.cache(resolvedProvider);
 
