@@ -13,8 +13,8 @@ import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegrati
 public final class SymbolDecoratorIntegration implements TypeScriptIntegration {
     @Override
     public SymbolProvider decorateSymbolProvider(
-            TypeScriptSettings settings,
             Model model,
+            TypeScriptSettings settings,
             SymbolProvider symbolProvider
     ) {
         String name = settings.getPluginSettings().getStringMemberOrDefault("__customServiceName", null);

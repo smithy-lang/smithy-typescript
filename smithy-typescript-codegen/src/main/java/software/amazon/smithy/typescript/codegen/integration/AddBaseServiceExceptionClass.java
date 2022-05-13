@@ -90,8 +90,8 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
      */
     @Override
     public SymbolProvider decorateSymbolProvider(
-            TypeScriptSettings settings,
             Model model,
+            TypeScriptSettings settings,
             SymbolProvider symbolProvider
     ) {
         return shape -> {
