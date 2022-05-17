@@ -82,6 +82,7 @@ final class ImportDeclarations implements ImportContainer {
 
     @Override
     public void importSymbol(Symbol symbol, String alias) {
+        // TODO: is this if needed?
         if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
             addImport(symbol.getName(), alias, symbol.getNamespace());
         }

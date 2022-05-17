@@ -58,7 +58,9 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
 
         // Configure the director to perform some common model transforms.
         runner.performDefaultCodegenTransforms();
-        runner.createDedicatedInputsAndOutputs();
+
+        // TODO: How is smithy-typescript currently dealing with no input/output?
+//        runner.createDedicatedInputsAndOutputs();
 
         // Run it!
         runner.run();

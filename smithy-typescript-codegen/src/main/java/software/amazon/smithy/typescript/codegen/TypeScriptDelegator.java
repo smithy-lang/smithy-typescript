@@ -15,34 +15,24 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
-import software.amazon.smithy.typescript.codegen.validation.IsTypeScriptFileExtension;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
 
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final FileManifest fileManifest;
-    private final SymbolProvider symbolProvider;
-    private final List<TypeScriptIntegration> integrations;
-    private final Map<String, TypeScriptWriter> writers = new HashMap<>();
+    TypeScriptDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
+        super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
+    }
 
+    // TODO: remove
     TypeScriptDelegator(
             TypeScriptSettings settings,
             Model model,
@@ -51,24 +41,6 @@ final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
             List<TypeScriptIntegration> integrations
     ) {
         super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
-        this.settings = settings;
-        this.model = model;
-        this.fileManifest = fileManifest;
-        this.symbolProvider = symbolProvider;
-        this.integrations = integrations;
-    }
-
-    @Override
-    public void flushWriters() {
-//        for (Map.Entry<String, W> entry : getWriters().entrySet()) {
-//            fileManifest.writeFile(entry.getKey(), entry.getValue().toString());
-//        }
-//
-//        writers.clear();
-
-        writers.forEach((filename, writer) ->
-                fileManifest.writeFile(filename, writer.toString(IsTypeScriptFileExtension.check(filename))));
-        writers.clear();
     }
 
     /**
@@ -83,74 +55,5 @@ final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
         List<SymbolDependency> resolved = new ArrayList<>(TypeScriptDependency.getUnconditionalDependencies());
         resolved.addAll(super.getDependencies());
         return resolved;
-    }
-
-    /**
-     * Gets a previously created writer or creates a new one if needed.
-     *
-     * <p>Any imports required by the given symbol are automatically registered
-     * with the writer.
-     *
-     * @param shape Shape to create the writer for.
-     * @param writerConsumer Consumer that accepts and works with the file.
-     */
-    public void useShapeWriter(Shape shape, Consumer<TypeScriptWriter> writerConsumer) {
-        // Checkout/create the appropriate writer for the shape.
-        Symbol symbol = symbolProvider.toSymbol(shape);
-        String fileName = symbol.getDefinitionFile();
-        TypeScriptWriter writer = checkoutWriter(fileName);
-
-        // Add any needed DECLARE symbols.
-        writer.addImportReferences(symbol, SymbolReference.ContextOption.DECLARE);
-        symbol.getDependencies().forEach(writer::addDependency);
-
-        writer.pushState();
-
-        // Allow integrations to do things like add onSection callbacks.
-        // These onSection callbacks are removed when popState is called.
-        for (TypeScriptIntegration integration : integrations) {
-            integration.onShapeWriterUse(settings, model, symbolProvider, writer, shape);
-        }
-
-        writerConsumer.accept(writer);
-        writer.popState();
-    }
-
-//    /**
-//     * Gets a previously created writer or creates a new one if needed
-//     * and adds a new line if the writer already exists.
-//     *
-//     * @param filename Name of the file to create.
-//     * @param writerConsumer Consumer that accepts and works with the file.
-//     */
-//    void useFileWriter(String filename, Consumer<TypeScriptWriter> writerConsumer) {
-//        writerConsumer.accept(checkoutWriter(filename));
-//    }
-
-    /**
-     * Gets a previously created writer or creates a new one if needed
-     * and adds a new line if the writer already exists.
-     *
-     * @param filename Name of the file to create.
-     */
-    TypeScriptWriter checkoutFileWriter(String filename) {
-        return checkoutWriter(filename);
-    }
-
-    private TypeScriptWriter checkoutWriter(String filename) {
-        String formattedFilename = Paths.get(filename).normalize().toString();
-        boolean needsNewline = writers.containsKey(formattedFilename);
-
-        TypeScriptWriter writer = writers.computeIfAbsent(formattedFilename, f -> {
-            String moduleName = filename.endsWith(".ts") ? filename.substring(0, filename.length() - 3) : filename;
-            return new TypeScriptWriter(moduleName);
-        });
-
-        // Add newlines/separators between types in the same file.
-        if (needsNewline) {
-            writer.write("\n");
-        }
-
-        return writer;
     }
 }

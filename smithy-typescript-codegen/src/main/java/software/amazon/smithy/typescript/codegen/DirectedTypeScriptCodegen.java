@@ -20,14 +20,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.directed.CreateContextDirective;
 import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
+import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
 import software.amazon.smithy.codegen.core.directed.DirectedCodegen;
 import software.amazon.smithy.codegen.core.directed.GenerateEnumDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateErrorDirective;
@@ -35,6 +40,7 @@ import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -43,6 +49,7 @@ import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.waiters.WaitableTrait;
 import software.amazon.smithy.waiters.Waiter;
@@ -51,6 +58,19 @@ import software.amazon.smithy.waiters.Waiter;
 final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodegenContext, TypeScriptSettings, TypeScriptIntegration> {
 
     private static final Logger LOGGER = Logger.getLogger(DirectedTypeScriptCodegen.class.getName());
+
+    /**
+     * A mapping of static resource files to copy over to a new filename.
+     */
+    private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
+            "typedoc.json", "typedoc.json",
+            "tsconfig.json", "tsconfig.json",
+            "tsconfig.cjs.json", "tsconfig.cjs.json",
+            "tsconfig.es.json", "tsconfig.es.json",
+            "tsconfig.types.json", "tsconfig.types.json"
+    );
+    private static final ShapeId VALIDATION_EXCEPTION_SHAPE =
+            ShapeId.fromParts("smithy.framework", "ValidationException");
 
     @Override
     public SymbolProvider createSymbolProvider(CreateSymbolProviderDirective<TypeScriptSettings> directive) {
@@ -89,11 +109,15 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
                 .protocolGenerator(protocolGenerator)
                 .applicationProtocol(applicationProtocol)
 
+//                //TODO: fix delegator constructor
+//                .writerDelegator(new TypeScriptDelegator(
+//                        directive.settings(), directive.model(),
+//                        directive.fileManifest(), directive.symbolProvider(),
+//                        directive.integrations())) // TODO: integrations?
+
                 //TODO: fix delegator constructor
-                .writerDelegator(new TypeScriptDelegator(
-                        directive.settings(), directive.model(),
-                        directive.fileManifest(), directive.symbolProvider(),
-                        directive.integrations())) // TODO: integrations?
+                .writerDelegator(new TypeScriptDelegator(directive.fileManifest(), directive.symbolProvider()))
+
                 .build();
     }
 
@@ -339,5 +363,122 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
             );
             generator.run();
         });
+    }
+
+    @Override
+    public void customizeBeforeIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        // Write shared / static content.
+        STATIC_FILE_COPIES.forEach((from, to) -> {
+            LOGGER.fine(() -> "Writing contents of `" + from + "` to `" + to + "`");
+            directive.fileManifest().writeFile(from, getClass(), to);
+        });
+
+        // TODO: do all of these parts below are before/after?
+        SymbolVisitor.writeModelIndex(directive.connectedShapes().values(), directive.symbolProvider(), directive.fileManifest());
+
+        // Generate the client Node and Browser configuration files. These
+        // files are switched between in package.json based on the targeted
+        // environment.
+        if (directive.settings().generateClient()) {
+            // For now these are only generated for clients.
+            // TODO: generate ssdk config
+            RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
+                    directive.settings(),
+                    directive.model(),
+                    directive.symbolProvider(),
+                    directive.context().writerDelegator(),
+                    directive.context().integrations());
+            for (LanguageTarget target : LanguageTarget.values()) {
+                LOGGER.fine("Generating " + target + " runtime configuration");
+                configGenerator.generate(target);
+            }
+        }
+
+        // Write each custom file.
+        for (TypeScriptIntegration integration : directive.context().integrations()) {
+            LOGGER.finer(() -> "Calling writeAdditionalFiles on " + integration.getClass().getCanonicalName());
+            integration.writeAdditionalFiles(
+                    directive.settings(),
+                    directive.model(),
+                    directive.symbolProvider(),
+                    directive.context().writerDelegator()::useFileWriter);
+        }
+
+        // Generate index for client.
+        IndexGenerator.writeIndex(
+                directive.settings(),
+                directive.model(),
+                directive.symbolProvider(),
+                directive.fileManifest(),
+                directive.context().integrations(),
+                directive.context().protocolGenerator());
+
+        if (directive.settings().generateServerSdk()) {
+            checkValidationSettings(directive.settings(), directive.model(), directive.service());
+            // Generate index for server
+            IndexGenerator.writeServerIndex(
+                    directive.settings(),
+                    directive.model(),
+                    directive.symbolProvider(),
+                    directive.fileManifest());
+        }
+
+        // Generate protocol tests IFF found in the model.
+        ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
+        if (protocolGenerator != null) {
+            ShapeId protocol = protocolGenerator.getProtocol();
+            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+            context.setProtocolName(protocolGenerator.getName());
+            context.setIntegrations(directive.context().integrations());
+            context.setModel(directive.model());
+            context.setService(directive.service());
+            context.setSettings(directive.settings());
+            context.setSymbolProvider(directive.symbolProvider());
+            String baseName = protocol.getName().toLowerCase(Locale.US)
+                    .replace("-", "_")
+                    .replace(".", "_");
+            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
+
+            // TODO: what to do here?
+//            context.setDeferredWriter(() -> directive.context().writerDelegator().checkoutFileWriter(protocolTestFileName));
+
+//            protocolGenerator.generateProtocolTests(context);
+        }
+
+    }
+
+    private void checkValidationSettings(TypeScriptSettings settings, Model model, ServiceShape service) {
+        if (settings.isDisableDefaultValidation()) {
+            return;
+        }
+
+        final OperationIndex operationIndex = OperationIndex.of(model);
+
+        List<String> unvalidatedOperations = TopDownIndex.of(model)
+                .getContainedOperations(service)
+                .stream()
+                .filter(o -> operationIndex.getErrors(o, service).stream()
+                        .noneMatch(e -> e.getId().equals(VALIDATION_EXCEPTION_SHAPE)))
+                .map(s -> s.getId().toString())
+                .sorted()
+                .collect(Collectors.toList());
+
+        if (!unvalidatedOperations.isEmpty()) {
+            throw new CodegenException(String.format("Every operation must have the %s error attached unless %s is set "
+                                                     + "to 'true' in the plugin settings. Operations without %s errors attached: %s",
+                    VALIDATION_EXCEPTION_SHAPE,
+                    TypeScriptSettings.DISABLE_DEFAULT_VALIDATION,
+                    VALIDATION_EXCEPTION_SHAPE,
+                    unvalidatedOperations));
+        }
+    }
+
+    @Override
+    public void customizeAfterIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        LOGGER.fine("Generating package.json files");
+        PackageJsonGenerator.writePackageJson(
+                directive.settings(),
+                directive.fileManifest(),
+                SymbolDependency.gatherDependencies(directive.context().writerDelegator().getDependencies().stream()));
     }
 }

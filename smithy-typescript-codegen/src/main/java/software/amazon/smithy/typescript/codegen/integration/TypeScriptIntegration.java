@@ -74,25 +74,6 @@ public interface TypeScriptIntegration
     }
 
     /**
-     * Updates the {@link SymbolProvider} used when generating code.
-     *
-     * <p>This can be used to customize the names of shapes, the package
-     * that code is generated into, add dependencies, add imports, etc.
-     *
-     * @param model Model being generated.
-     * @param settings Setting used to generate.
-     * @param symbolProvider The original {@code SymbolProvider}.
-     * @return The decorated {@code SymbolProvider}.
-     */
-    default SymbolProvider decorateSymbolProvider(
-            Model model,
-            TypeScriptSettings settings,
-            SymbolProvider symbolProvider
-    ) {
-        return symbolProvider;
-    }
-
-    /**
      * Called each time a writer is used that defines a shape.
      *
      * <p>This method could be called multiple times for the same writer
