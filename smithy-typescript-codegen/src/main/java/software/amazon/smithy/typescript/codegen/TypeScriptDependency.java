@@ -40,7 +40,6 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public enum TypeScriptDependency implements SymbolDependencyContainer {
 
-    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/service-client-documentation-generator", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
     AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", true),
