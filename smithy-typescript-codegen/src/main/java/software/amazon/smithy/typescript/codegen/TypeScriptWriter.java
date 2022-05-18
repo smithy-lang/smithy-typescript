@@ -50,8 +50,9 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
 
     private final boolean withAttribution;
 
+    // TODO: see if this can be removed
     public TypeScriptWriter(String moduleName) {
-        this(moduleName, false);
+        this(moduleName, true);
     }
 
     private TypeScriptWriter(String moduleName, boolean withAttribution) {

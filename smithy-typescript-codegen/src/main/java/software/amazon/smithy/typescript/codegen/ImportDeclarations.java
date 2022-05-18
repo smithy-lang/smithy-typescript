@@ -39,10 +39,10 @@ final class ImportDeclarations implements ImportContainer {
     private final Map<String, Map<String, String>> namedImports = new TreeMap<>();
 
     ImportDeclarations(String relativize) {
-        this.moduleNameString = relativize;
         if (!relativize.startsWith("./")) {
             relativize = "./" + relativize;
         }
+        this.moduleNameString = relativize;
 
         // Strip off the filename of what's being relativized since it isn't needed.
         this.relativize = Paths.get(relativize).getParent();
