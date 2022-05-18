@@ -310,20 +310,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol structureShape(StructureShape shape) {
-        Symbol.Builder builder = createObjectSymbolBuilder(shape);
-
-        // Errors won't be re-used in locations where being a MetadataBearer is an issue.
-        if (errorShapes.contains(shape)) {
-            SymbolReference reference = SymbolReference.builder()
-                    .options(SymbolReference.ContextOption.DECLARE)
-                    .alias("$MetadataBearer")
-                    .symbol(TypeScriptDependency.AWS_SDK_TYPES.createSymbol("MetadataBearer"))
-                    .putProperty(IMPLEMENTS_INTERFACE_PROPERTY, true)
-                    .build();
-            builder.addReference(reference);
-        }
-
-        return builder.build();
+        return createObjectSymbolBuilder(shape).build();
     }
 
     private Symbol.Builder addSmithyUseImport(Symbol.Builder builder, String name, String as) {
