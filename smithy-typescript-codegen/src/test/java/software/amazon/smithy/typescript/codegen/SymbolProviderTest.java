@@ -3,7 +3,6 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
@@ -143,42 +142,6 @@ public class SymbolProviderTest {
         Symbol listSymbol = provider.toSymbol(list);
 
         assertThat(listSymbol.getName(), equalTo("(_Record)[]"));
-    }
-
-    @Test
-    public void errorStructuresAreMetadataBearers() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("output-structure.smithy"))
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
-
-        Shape input = model.expectShape(ShapeId.from("smithy.example#GetFooInput"));
-        Shape output = model.expectShape(ShapeId.from("smithy.example#GetFooOutput"));
-        Shape error = model.expectShape(ShapeId.from("smithy.example#GetFooError"));
-        SymbolProvider provider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
-        Symbol inputSymbol = provider.toSymbol(input);
-        Symbol outputSymbol = provider.toSymbol(output);
-        Symbol errorSymbol = provider.toSymbol(error);
-
-        // Input and Output does not use MetadataBearer
-        assertThat(inputSymbol.getReferences().stream()
-                .filter(ref -> ref.getProperty("extends").isPresent())
-                .count(), equalTo(0L));
-        assertThat(outputSymbol.getReferences().stream()
-                 .filter(ref -> ref.getAlias().equals("$MetadataBearer"))
-                 .count(), equalTo(0L));
-
-        // Output uses MetadataBearer
-        assertThat(errorSymbol.getReferences().stream()
-                .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
-                .count(), greaterThan(0L));
-        assertThat(errorSymbol.getReferences().stream()
-                 .filter(ref -> ref.getAlias().equals("$MetadataBearer"))
-                 .count(), greaterThan(0L));
     }
 
     @Test
