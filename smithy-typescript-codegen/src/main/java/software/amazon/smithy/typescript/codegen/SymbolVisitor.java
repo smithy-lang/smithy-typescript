@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import static java.lang.String.format;
 
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,8 +119,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
     }
 
-    static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
-        ModuleNameDelegator.writeModelIndex(model, symbolProvider, fileManifest);
+    static void writeModelIndex(Collection<Shape> shapes, SymbolProvider symbolProvider, FileManifest fileManifest) {
+        ModuleNameDelegator.writeModelIndex(shapes, symbolProvider, fileManifest);
     }
 
     @Override
@@ -442,19 +443,21 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return path;
         }
 
-        static void writeModelIndex(Model model, SymbolProvider symbolProvider, FileManifest fileManifest) {
+        static void writeModelIndex(Collection<Shape> shapes, SymbolProvider symbolProvider,
+                                    FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
             String modelPrefix = Paths.get(".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX).toString();
-            model.shapes()
+            shapes.stream()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                     .filter(namespace -> namespace.startsWith(modelPrefix))
                     .distinct()
                     .sorted(Comparator.naturalOrder())
                     .forEach(namespace -> writer.write(
-                        "export * from $S;", namespace.replaceFirst(modelPrefix, ".")));
+                            "export * from $S;", namespace.replaceFirst(modelPrefix, ".")));
             fileManifest.writeFile(
-                Paths.get(CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX, "index.ts").toString(),
-                writer.toString());
+                    Paths.get(CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX, "index.ts").toString(),
+                    writer.toString());
         }
+
     }
 }

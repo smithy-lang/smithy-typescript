@@ -50,7 +50,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
-import software.amazon.smithy.model.transform.ModelTransformer;
 import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -85,7 +84,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final ServiceShape service;
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
-    private final Model nonTraits;
     private final TypeScriptDelegator writers;
     private final List<TypeScriptIntegration> integrations = new ArrayList<>();
     private final List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
@@ -115,7 +113,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             modifiedModel = integration.preprocessModel(modifiedModel, settings);
         }
         model = modifiedModel;
-        nonTraits = ModelTransformer.create().getModelWithoutTraitShapes(model);
 
         service = settings.getService(model);
 
@@ -179,19 +176,18 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Generate models that are connected to the service being generated.
         LOGGER.fine("Walking shapes from " + service.getId() + " to find shapes to generate");
-        // Walk the tree.
-        Collection<Shape> shapeSet = new Walker(nonTraits).walkShapes(service);
-
-        Model prunedModel = Model.builder().addShapes(shapeSet).build();
-
-        // Generate models from shapes.
-        for (Shape shape : TopologicalIndex.of(prunedModel).getOrderedShapes()) {
-            shape.accept(this);
+        Collection<Shape> shapes = new Walker(model).walkShapes(service);
+        for (Shape shape : TopologicalIndex.of(model).getOrderedShapes()) {
+            if (shapes.contains(shape)) {
+                shape.accept(this);
+            }
         }
-        for (Shape shape : TopologicalIndex.of(prunedModel).getRecursiveShapes()) {
-            shape.accept(this);
+        for (Shape shape : TopologicalIndex.of(model).getRecursiveShapes()) {
+            if (shapes.contains(shape)) {
+                shape.accept(this);
+            }
         }
-        SymbolVisitor.writeModelIndex(prunedModel, symbolProvider, fileManifest);
+        SymbolVisitor.writeModelIndex(shapes, symbolProvider, fileManifest);
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted

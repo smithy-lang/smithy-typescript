@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -57,7 +58,7 @@ public class SymbolProviderTest {
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
         MockManifest manifest = new MockManifest();
-        SymbolVisitor.writeModelIndex(model, provider, manifest);
+        SymbolVisitor.writeModelIndex(Arrays.asList(shape1, shape2), provider, manifest);
 
         assertThat(symbol1.getName(), equalTo("Hello"));
         assertThat(symbol1.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
