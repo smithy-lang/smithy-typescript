@@ -91,9 +91,6 @@ final class TypeScriptDelegator {
         // Checkout/create the appropriate writer for the shape.
         Symbol symbol = symbolProvider.toSymbol(shape);
         String fileName = symbol.getDefinitionFile();
-        if (!fileName.startsWith(Paths.get(".", CodegenUtils.SOURCE_FOLDER).toString())) {
-            fileName = Paths.get(".", CodegenUtils.SOURCE_FOLDER, fileName).toString();
-        }
         TypeScriptWriter writer = checkoutWriter(fileName);
 
         // Add any needed DECLARE symbols.
