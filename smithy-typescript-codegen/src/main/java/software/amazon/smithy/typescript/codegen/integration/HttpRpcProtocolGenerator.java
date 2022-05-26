@@ -15,17 +15,24 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -347,12 +354,18 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
+        String contextType = "__SerdeContext";
+
+        if (isStreamingUnion(context, operation)) {
+            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
+            contextType = "__SerdeContext & __EventStreamSerdeContext";
+        }
 
         // Handle the general response.
         writer.openBlock("export const $L = async(\n"
                        + "  output: $T,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): Promise<$T> => {", "}", methodName, responseType, outputType, () -> {
+                       + "  context: $L\n"
+                       + "): Promise<$T> => {", "}", methodName, responseType, contextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode >= 300) {", "}", () -> {
                 writer.write("return $L(output, context);", errorMethodName);
@@ -420,22 +433,57 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
     }
 
+    private boolean isStreamingUnion(GenerationContext context, OperationShape operation) {
+        if (operation.getOutput().isPresent()) {
+            ShapeId shapeId = operation.getOutput().get();
+            StructureShape outputShape = context.getModel().expectShape(shapeId).asStructureShape().get();
+
+            Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
+            Optional<MemberShape> first = memberValues.stream().findFirst();
+            Set<UnionShape> unionShapesWithTrait =
+                    context.getModel().getUnionShapesWithTrait(StreamingTrait.class);
+            boolean hasStreamingUnion = first.isPresent()
+                    && memberValues.size() == 1
+                    && unionShapesWithTrait
+                    .stream()
+                    .map(Shape::getId)
+                    .collect(Collectors.toSet())
+                    .contains(first.get().getTarget());
+
+            return hasStreamingUnion;
+        }
+        return false;
+    }
+
     private void readResponseBody(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
         OptionalUtils.ifPresentOrElse(
                 operation.getOutput(),
                 outputId -> {
                     // We only need to load the body and prepare a contents object if there is a response.
-                    writer.write("const data: any = await parseBody(output.body, context)");
-                    writer.write("let contents: any = {};");
-
                     // If there's an output present, we know it's a structure.
                     StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
 
-                    // Track output shapes so their deserializers may be generated.
-                    deserializingDocumentShapes.add(outputShape);
+                    Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
+                    Optional<MemberShape> first = memberValues.stream().findFirst();
+                    boolean useEventStreamDeserializer = isStreamingUnion(context, operation);
 
-                    deserializeOutputDocument(context, operation, outputShape);
+                    if (useEventStreamDeserializer) {
+                        writer.write("const contents: any = {};");
+                        HttpProtocolGeneratorUtils.generateRpcEventStreamDeserializer(
+                                context,
+                                outputShape,
+                                first.get().getMemberName(),
+                                "contents." + first.get().getMemberName()
+                        );
+                        deserializingDocumentShapes.add(outputShape);
+                    } else {
+                        writer.write("const data: any = await parseBody(output.body, context)");
+                        // Track output shapes so their deserializers may be generated.
+                        deserializingDocumentShapes.add(outputShape);
+                        writer.write("let contents: any = {};");
+                        deserializeOutputDocument(context, operation, outputShape);
+                    }
                 },
                 () -> {
                     // If there is no output, the body still needs to be collected so the process can exit.

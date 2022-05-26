@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +37,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.RetryableTrait;
@@ -432,6 +434,77 @@ public final class HttpProtocolGeneratorUtils {
             }
             writer.openBlock("if (!__isValidHostname(resolvedHostname)) {", "}", () -> {
                 writer.write("throw new Error(\"ValidationError: prefixed hostname must be hostname compatible.\");");
+            });
+        });
+    }
+
+    static void generateRpcEventStreamDeserializer(GenerationContext context,
+                                                   Shape target,
+                                                   String memberName,
+                                                   String assignTo) {
+        TypeScriptWriter writer = context.getWriter();
+        Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+
+        writer.openBlock(assignTo + " = context.eventStreamMarshaller.deserialize(", ");", () -> {
+            writer.write("output.body,");
+            writer.openBlock("async event => {", "}", () -> {
+                writer.write("const eventName = Object.keys(event)[0];");
+                writer.openBlock("const parsedEvent = {", "};", () -> {
+                    writer.openBlock("$L: {", "}", memberName, () -> {
+                        writer.write("[eventName]: JSON.parse(Buffer.from(event[eventName].body).toString()),");
+                    });
+                });
+                String deserFunctionName = ProtocolGenerator.getDeserFunctionName(
+                        targetSymbol, context.getProtocolName());
+                writer.write("return " + deserFunctionName + "(parsedEvent, context)." + memberName);
+            });
+        });
+    }
+
+    static void generateHttpBindingEventStreamDeserializer(GenerationContext context,
+                                                           Shape target,
+                                                           String assignTo,
+                                                           Collection<StructureShape> deserializingEventShapes,
+                                                           Collection<UnionShape> deserializeEventUnions) {
+        TypeScriptWriter writer = context.getWriter();
+        writer.openBlock(assignTo + " = context.eventStreamMarshaller.deserialize(", ");", () -> {
+            writer.write("output.body,");
+            writer.openBlock("async event => {", "}", () -> {
+                writer.write("const eventName = Object.keys(event)[0];");
+                writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
+                    writer.write(
+                            "(accummulator, curr) => { accummulator[curr[0]] = curr[1].value; return accummulator; },");
+                    writer.write("{} as {[key: string]: any}");
+                });
+                writer.openBlock("const eventMessage = {", "};", () -> {
+                    writer.write("headers: eventHeaders,");
+                    writer.write("body: event[eventName].body");
+                });
+                writer.openBlock("const parsedEvent = {", "};", () -> {
+                    writer.write("[eventName]: eventMessage");
+                });
+                Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+                StringBuilder deserFunctionBuilder = new StringBuilder(ProtocolGenerator.getDeserFunctionName(
+                        targetSymbol, context.getProtocolName())).append("_event");
+                if (target instanceof StructureShape) {
+                    // Single-event stream. Save the structure and generate event-specific deser later.
+                    if (deserializingEventShapes != null) {
+                        deserializingEventShapes.add(target.asStructureShape().get());
+                    }
+                    // For single-event stream, supply event message to corresponding event structure deser.
+                    deserFunctionBuilder.append("(eventMessage, context)");
+                } else if (target instanceof UnionShape) {
+                    // Multi-event stream. Save the union and generate dispatcher later.
+                    if (deserializeEventUnions != null) {
+                        deserializeEventUnions.add(target.asUnionShape().get());
+                    }
+                    // For multi-event stream, supply event name to event pairs to the events union deser.
+                    deserFunctionBuilder.append("(parsedEvent, context)");
+                } else {
+                    throw new CodegenException(String.format("Unexpected shape targeted by eventstream: `%s`",
+                            target.getType()));
+                }
+                writer.write("return await $L;", deserFunctionBuilder.toString());
             });
         });
     }

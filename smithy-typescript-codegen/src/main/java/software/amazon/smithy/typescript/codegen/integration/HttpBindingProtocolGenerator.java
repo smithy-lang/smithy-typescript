@@ -2355,8 +2355,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Handle streaming shapes differently.
         if (target.hasTrait(StreamingTrait.class)) {
             if (target instanceof UnionShape) {
-                // If payload is a event stream, return it after calling event stream deser function.
-                generateEventStreamDeserializer(context, binding.getMember(), target);
+                // If payload is an event stream, return it after calling event stream deser function.
+                HttpProtocolGeneratorUtils.generateHttpBindingEventStreamDeserializer(
+                        context, target, "const data: any",
+                        deserializingEventShapes,
+                        deserializeEventUnions
+                );
                 writer.write("contents.$L = data;", binding.getMemberName());
                 // Don't generate non-eventstream payload shape again.
                 return null;

@@ -44,6 +44,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -271,7 +272,8 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public final String unionShape(UnionShape shape) {
-        context.getWriter().addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
+        TypeScriptWriter writer = context.getWriter();
+        writer.addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
         return getDelegateDeserializer(shape, "__expectUnion(" + dataSource + ")");
     }
 
