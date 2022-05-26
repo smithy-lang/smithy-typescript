@@ -3,13 +3,12 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
-import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -36,10 +35,10 @@ public class CodegenVisitorTest {
 
         // Did we generate the runtime config files?
         // note that asserting the contents of runtime config files is handled in its own unit tests.
-        Assertions.assertTrue(manifest.hasFile("package.json"));
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts"));
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts"));
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/index.ts"));
+        assertTrue(manifest.hasFile("package.json"));
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts"));
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts"));
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/index.ts"));
 
         // Does the package.json file point to the runtime config?
         String packageJsonContents = manifest.getFileString("package.json").get();
@@ -69,8 +68,8 @@ public class CodegenVisitorTest {
 
         new TypeScriptCodegenPlugin().execute(context);
 
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Foo.ts"));
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Foo.ts").get(), containsString("export class Foo"));
+        assertTrue(manifest.hasFile("Foo.ts"));
+        assertThat(manifest.getFileString("Foo.ts").get(), containsString("export class Foo"));
     }
 
     @Test
@@ -91,11 +90,11 @@ public class CodegenVisitorTest {
                 .build();
         new TypeScriptCodegenPlugin().execute(context);
 
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Example.ts"));
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Example.ts"));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Example.ts").get(),
                    containsString("export class Example extends ExampleClient"));
 
-        Assertions.assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts"));
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts"));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts").get(), containsString("export class ExampleClient"));
     }
 
