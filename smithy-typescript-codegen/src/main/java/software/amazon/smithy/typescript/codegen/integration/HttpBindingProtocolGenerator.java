@@ -935,7 +935,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     /**
      * Given a context and operation, should a default input body be written. By default no body will be written
-     * if there are no members bound to the input.
+     * if there are no members bound to the input in the payload.
      *
      * @param context The generation context.
      * @param operation The operation whose input is being serialized.
@@ -943,7 +943,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @return True if a default body should be generated.
      */
     protected boolean shouldWriteDefaultInputBody(GenerationContext context, OperationShape operation) {
-        return HttpBindingIndex.of(context.getModel()).getRequestBindings(operation).isEmpty();
+        return HttpBindingIndex.of(context.getModel()).getRequestBindings(operation, Location.PAYLOAD).size() > 0;
     }
 
     /**
