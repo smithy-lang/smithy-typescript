@@ -31,7 +31,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * Holds context related to code generation.
  */
 @SmithyUnstableApi
-public final class TypeScriptCodegenContext implements CodegenContext<TypeScriptSettings, TypeScriptWriter> {
+public final class TypeScriptCodegenContext
+        implements CodegenContext<TypeScriptSettings, TypeScriptWriter, TypeScriptIntegration> {
 
     private final Model model;
     private final TypeScriptSettings settings;
@@ -80,7 +81,7 @@ public final class TypeScriptCodegenContext implements CodegenContext<TypeScript
         return writerDelegator;
     }
 
-    // TODO: should this move to CodegenContext base class with new generic parameter?
+    @Override
     public List<TypeScriptIntegration> integrations() {
         return integrations;
     }
