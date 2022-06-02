@@ -15,7 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.nio.file.Paths;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -70,9 +69,6 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
 
         @Override
         public TypeScriptWriter apply(String filename, String namespace) {
-            if (!filename.startsWith(Paths.get(CodegenUtils.SOURCE_FOLDER).normalize().toString())) {
-                filename = Paths.get(CodegenUtils.SOURCE_FOLDER, filename).toString();
-            }
             boolean attribution = filename.endsWith(".ts") || filename.endsWith(".tsx");
             // TODO: Attribution accounts for tsx too, but moduleName doesn't.
             String moduleName = filename.endsWith(".ts") ? filename.substring(0, filename.length() - 3) : filename;
