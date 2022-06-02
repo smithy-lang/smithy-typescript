@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -431,18 +430,18 @@ final class DirectedTypeScriptCodegen
         // Generate protocol tests IFF found in the model.
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         if (protocolGenerator != null) {
-            ShapeId protocol = protocolGenerator.getProtocol();
-            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-            context.setProtocolName(protocolGenerator.getName());
-            context.setIntegrations(directive.context().integrations());
-            context.setModel(directive.model());
-            context.setService(directive.service());
-            context.setSettings(directive.settings());
-            context.setSymbolProvider(directive.symbolProvider());
-            String baseName = protocol.getName().toLowerCase(Locale.US)
-                    .replace("-", "_")
-                    .replace(".", "_");
-            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
+//            ShapeId protocol = protocolGenerator.getProtocol();
+//            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+//            context.setProtocolName(protocolGenerator.getName());
+//            context.setIntegrations(directive.context().integrations());
+//            context.setModel(directive.model());
+//            context.setService(directive.service());
+//            context.setSettings(directive.settings());
+//            context.setSymbolProvider(directive.symbolProvider());
+//            String baseName = protocol.getName().toLowerCase(Locale.US)
+//                    .replace("-", "_")
+//                    .replace(".", "_");
+//            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
 
             // TODO: what to do here?
 //            context.setDeferredWriter(() -> directive.context().writerDelegator().checkoutFileWriter

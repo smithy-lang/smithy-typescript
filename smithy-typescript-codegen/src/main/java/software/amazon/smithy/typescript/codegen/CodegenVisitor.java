@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -220,19 +219,17 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
 
         // Generate protocol tests IFF found in the model.
         if (protocolGenerator != null) {
-            ShapeId protocol = protocolGenerator.getProtocol();
-            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-            context.setProtocolName(protocolGenerator.getName());
-            context.setModel(model);
-            context.setService(service);
-            context.setSettings(settings);
-            context.setSymbolProvider(symbolProvider);
-            String baseName = protocol.getName().toLowerCase(Locale.US)
-                    .replace("-", "_")
-                    .replace(".", "_");
-            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
-//            context.setDeferredWriter(() -> writers.checkoutFileWriter(protocolTestFileName));
-//            protocolGenerator.generateProtocolTests(context);
+//            ShapeId protocol = protocolGenerator.getProtocol();
+//            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+//            context.setProtocolName(protocolGenerator.getName());
+//            context.setModel(model);
+//            context.setService(service);
+//            context.setSettings(settings);
+//            context.setSymbolProvider(symbolProvider);
+//            String baseName = protocol.getName().toLowerCase(Locale.US)
+//                    .replace("-", "_")
+//                    .replace(".", "_");
+//            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
         }
 
         // Write each pending writer.
