@@ -26,7 +26,6 @@ import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -71,45 +70,6 @@ public interface TypeScriptIntegration
      */
     default Model preprocessModel(Model model, TypeScriptSettings settings) {
         return model;
-    }
-
-    /**
-     * Called each time a writer is used that defines a shape.
-     *
-     * <p>This method could be called multiple times for the same writer
-     * but for different shapes. It gives an opportunity to intercept code
-     * sections of a {@link TypeScriptWriter} by name using the shape for
-     * context. For example:
-     *
-     * <pre>
-     * {@code
-     * public final class MyIntegration implements TypeScriptIntegration {
-     *     public onWriterUse(TypeScriptSettings settings, Model model, SymbolProvider symbolProvider,
-     *             TypeScriptWriter writer, Shape definedShape) {
-     *         writer.onSection("example", text -&gt; writer.write("Intercepted: " + text"));
-     *     }
-     * }
-     * }</pre>
-     *
-     * <p>Any mutations made on the writer (for example, adding
-     * section interceptors) are removed after the callback has completed;
-     * the callback is invoked in between pushing and popping state from
-     * the writer.
-     *
-     * @param settings Settings used to generate.
-     * @param model Model to generate from.
-     * @param symbolProvider Symbol provider used for codegen.
-     * @param writer Writer that will be used.
-     * @param definedShape Shape that is being defined in the writer.
-     */
-    default void onShapeWriterUse(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
-            Shape definedShape
-    ) {
-        // pass
     }
 
     /**
