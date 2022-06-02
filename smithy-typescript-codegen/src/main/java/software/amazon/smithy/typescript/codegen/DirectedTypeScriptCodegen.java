@@ -99,7 +99,6 @@ final class DirectedTypeScriptCodegen
                 ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
                 : protocolGenerator.getApplicationProtocol();
 
-        // TODO: consider taking directive in the constructor and have all the logic there, instead of builder
         return TypeScriptCodegenContext.builder()
                 .model(directive.model())
                 .settings(directive.settings())

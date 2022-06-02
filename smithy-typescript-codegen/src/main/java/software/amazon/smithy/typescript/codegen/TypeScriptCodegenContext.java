@@ -26,14 +26,12 @@ import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
-import software.amazon.smithy.utils.ToSmithyBuilder;
 
 /**
  * Holds context related to code generation.
  */
 @SmithyUnstableApi
-public final class TypeScriptCodegenContext
-        implements CodegenContext<TypeScriptSettings, TypeScriptWriter>, ToSmithyBuilder<TypeScriptCodegenContext> {
+public final class TypeScriptCodegenContext implements CodegenContext<TypeScriptSettings, TypeScriptWriter> {
 
     private final Model model;
     private final TypeScriptSettings settings;
@@ -97,20 +95,6 @@ public final class TypeScriptCodegenContext
 
     public ApplicationProtocol applicationProtocol() {
         return applicationProtocol;
-    }
-
-    @Override
-    public SmithyBuilder<TypeScriptCodegenContext> toBuilder() {
-        return builder()
-                .model(model)
-                .settings(settings)
-                .symbolProvider(symbolProvider)
-                .fileManifest(fileManifest)
-                .writerDelegator(writerDelegator)
-                .integrations(integrations)
-                .runtimePlugins(runtimePlugins)
-                .protocolGenerator(protocolGenerator)
-                .applicationProtocol(applicationProtocol);
     }
 
     /**
