@@ -109,16 +109,7 @@ final class DirectedTypeScriptCodegen
                 .runtimePlugins(runtimePlugins)
                 .protocolGenerator(protocolGenerator)
                 .applicationProtocol(applicationProtocol)
-
-//                //TODO: fix delegator constructor
-//                .writerDelegator(new TypeScriptDelegator(
-//                        directive.settings(), directive.model(),
-//                        directive.fileManifest(), directive.symbolProvider(),
-//                        directive.integrations())) // TODO: integrations?
-
-                //TODO: fix delegator constructor
                 .writerDelegator(new TypeScriptDelegator(directive.fileManifest(), directive.symbolProvider()))
-
                 .build();
     }
 

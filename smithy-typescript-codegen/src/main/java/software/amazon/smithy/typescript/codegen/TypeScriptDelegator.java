@@ -21,25 +21,12 @@ import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
 
     TypeScriptDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
-        super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
-    }
-
-    // TODO: remove
-    TypeScriptDelegator(
-            TypeScriptSettings settings,
-            Model model,
-            FileManifest fileManifest,
-            SymbolProvider symbolProvider,
-            List<TypeScriptIntegration> integrations
-    ) {
         super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
     }
 

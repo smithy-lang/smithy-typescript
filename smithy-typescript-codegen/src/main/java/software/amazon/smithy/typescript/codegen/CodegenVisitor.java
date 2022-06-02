@@ -139,7 +139,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                 ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
                 : protocolGenerator.getApplicationProtocol();
 
-        writers = new TypeScriptDelegator(settings, model, fileManifest, symbolProvider, integrations);
+        writers = new TypeScriptDelegator(fileManifest, symbolProvider);
     }
 
     private ProtocolGenerator resolveProtocolGenerator(
