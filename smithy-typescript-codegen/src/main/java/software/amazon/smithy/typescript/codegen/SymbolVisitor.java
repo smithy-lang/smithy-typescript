@@ -175,7 +175,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      *
      * <pre>{@code
      * interface MyStructureShape {
-     *   memberPointingToMap: {[key: string]: string};
+     *   memberPointingToMap: Record<string, string>;
      * }
      * }</pre>
      *
