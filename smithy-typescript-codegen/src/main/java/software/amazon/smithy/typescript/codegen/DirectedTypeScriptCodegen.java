@@ -55,7 +55,8 @@ import software.amazon.smithy.waiters.WaitableTrait;
 import software.amazon.smithy.waiters.Waiter;
 
 @SmithyUnstableApi
-final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodegenContext, TypeScriptSettings, TypeScriptIntegration> {
+final class DirectedTypeScriptCodegen
+        implements DirectedCodegen<TypeScriptCodegenContext, TypeScriptSettings, TypeScriptIntegration> {
 
     private static final Logger LOGGER = Logger.getLogger(DirectedTypeScriptCodegen.class.getName());
 
@@ -78,7 +79,8 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
     }
 
     @Override
-    public TypeScriptCodegenContext createContext(CreateContextDirective<TypeScriptSettings, TypeScriptIntegration> directive) {
+    public TypeScriptCodegenContext createContext(CreateContextDirective<TypeScriptSettings,
+            TypeScriptIntegration> directive) {
 
         List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
         directive.integrations().forEach(integration -> {
@@ -205,7 +207,7 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
         }
 
         if (settings.generateServerSdk()) {
-            for (OperationShape operation: directive.operations()) {
+            for (OperationShape operation : directive.operations()) {
                 delegator.useShapeWriter(operation, w -> {
                     ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
                 });
@@ -281,7 +283,7 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
         ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
 
         // Generate each operation for the service.
-        for (OperationShape operation :  directive.operations()) {
+        for (OperationShape operation : directive.operations()) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
                 CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
@@ -299,7 +301,8 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
         }
     }
 
-    private void generateServiceInterface(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+    private void generateServiceInterface(GenerateServiceDirective<TypeScriptCodegenContext,
+            TypeScriptSettings> directive) {
         ServiceShape service = directive.shape();
         SymbolProvider symbolProvider = directive.symbolProvider();
         Set<OperationShape> operations = directive.operations();
@@ -366,7 +369,8 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
     }
 
     @Override
-    public void customizeBeforeIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+    public void customizeBeforeIntegrations(
+            CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         // Write shared / static content.
         STATIC_FILE_COPIES.forEach((from, to) -> {
             LOGGER.fine(() -> "Writing contents of `" + from + "` to `" + to + "`");
@@ -374,7 +378,8 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
         });
 
         // TODO: do all of these parts below are before/after?
-        SymbolVisitor.writeModelIndex(directive.connectedShapes().values(), directive.symbolProvider(), directive.fileManifest());
+        SymbolVisitor.writeModelIndex(directive.connectedShapes().values(), directive.symbolProvider(),
+                directive.fileManifest());
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
@@ -440,7 +445,8 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
             String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
 
             // TODO: what to do here?
-//            context.setDeferredWriter(() -> directive.context().writerDelegator().checkoutFileWriter(protocolTestFileName));
+//            context.setDeferredWriter(() -> directive.context().writerDelegator().checkoutFileWriter
+//            (protocolTestFileName));
 
 //            protocolGenerator.generateProtocolTests(context);
         }
@@ -465,7 +471,8 @@ final class DirectedTypeScriptCodegen implements DirectedCodegen<TypeScriptCodeg
 
         if (!unvalidatedOperations.isEmpty()) {
             throw new CodegenException(String.format("Every operation must have the %s error attached unless %s is set "
-                                                     + "to 'true' in the plugin settings. Operations without %s errors attached: %s",
+                                                     + "to 'true' in the plugin settings. Operations without %s "
+                                                     + "errors attached: %s",
                     VALIDATION_EXCEPTION_SHAPE,
                     TypeScriptSettings.DISABLE_DEFAULT_VALIDATION,
                     VALIDATION_EXCEPTION_SHAPE,
