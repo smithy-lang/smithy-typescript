@@ -1351,6 +1351,32 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     );
 
     /**
+     * Writes the code needed to serialize an event payload as a protocol-specific document.
+     *
+     * <p>Implementations of this method are expected to set a value to the ${@code message.body} property.
+     * The value set is expected to by a JavaScript ${@code Uint8Array} type and is to be encoded as the
+     * event payload.
+     *
+     * <p>Two parameters will be available in scope:
+     * <ul>
+     *   <li>{@code message: <T>}: The partially constructed event message.</li>
+     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
+     * </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * message.body = context.utf8Decoder(JSON.stringify(bodyParams));
+     * }</pre>
+     * @param context The generation context.
+     * @param payloadShape The payload shape. Only structure and union shape is serialized as document.
+     */
+    protected abstract void serializeInputEventDocumentPayload(
+            GenerationContext context,
+            Shape payloadShape
+    );
+
+    /**
      * Writes the code needed to serialize a protocol output document.
      *
      * <p>Implementations of this method are expected to set a value to the
@@ -1611,25 +1637,24 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventPayloadTrait.class)).collect(Collectors.toList());
-        List<MemberShape> documentMembers = event.getAllMembers().values().stream()
-                .filter(member -> !member.hasTrait(EventHeaderTrait.class)
-                        && !member.hasTrait(EventPayloadTrait.class))
+                .filter(member -> member.hasTrait(EventPayloadTrait.class))
                 .collect(Collectors.toList());
-        if (!payloadMembers.isEmpty()) {
-            // Write event payload if exists. There is at most 1 payload member.
+        Shape payloadShape = payloadMembers.isEmpty()
+                        ? event
+                        : model.expectShape(payloadMembers.get(0).getTarget());
+        if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
+            // Since event itself must be a structure shape, so string or blob payload member must has eventPayload
+            // trait explicitly.
             MemberShape payloadMember = payloadMembers.get(0);
-            String memberName = payloadMember.getMemberName();
+            String payloadMemberName = payloadMember.getMemberName();
             writer.write("message.body = $L || message.body;",
-                    getInputValue(context, Location.PAYLOAD, "input." + memberName, payloadMember,
+                    getInputValue(context, Location.PAYLOAD, "input." + payloadMemberName, payloadMember,
                             model.expectShape(payloadMember.getTarget())));
-        } else if (!documentMembers.isEmpty()) {
-            // Write event document bindings if exist.
-            SymbolProvider symbolProvider = context.getSymbolProvider();
-            Symbol symbol = symbolProvider.toSymbol(event);
-            // Use normal structure serializer instead of event serializer to serialize document body.
-            String serFunctionName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
-            writer.write("message.body = $L(input, context);", serFunctionName);
+        } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
+            serializeInputEventDocumentPayload(context, payloadShape);
+        } else {
+            throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
+                    payloadShape.getType()));
         }
     }
 
