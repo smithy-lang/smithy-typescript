@@ -20,7 +20,7 @@ import * as util from "util";
  * A shortcut for JSON and Smithy primitives, as well as documents and Smithy-
  * modeled structures composed of those primitives
  */
-export type Input = { [key: string]: Input } | Array<Input> | Date | Uint8Array | string | number | boolean | null;
+export type Input = Record<string, Input> | Array<Input> | Date | Uint8Array | string | number | boolean | null;
 
 /**
  * Returns an array of duplicated values in the input. This is equivalent to using

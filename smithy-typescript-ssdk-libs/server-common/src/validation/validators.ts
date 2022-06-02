@@ -90,13 +90,13 @@ export class CompositeCollectionValidator<T> implements MultiConstraintValidator
   }
 }
 
-export class CompositeMapValidator<T> implements MultiConstraintValidator<{ [key: string]: T }> {
-  private readonly referenceValidator: MultiConstraintValidator<{ [key: string]: T }>;
+export class CompositeMapValidator<T> implements MultiConstraintValidator<Record<string, T>> {
+  private readonly referenceValidator: MultiConstraintValidator<Record<string, T>>;
   private readonly keyValidator: MultiConstraintValidator<string>;
   private readonly valueValidator: MultiConstraintValidator<T>;
 
   constructor(
-    referenceValidator: MultiConstraintValidator<{ [key: string]: T }>,
+    referenceValidator: MultiConstraintValidator<Record<string, T>>,
     keyValidator: MultiConstraintValidator<string>,
     valueValidator: MultiConstraintValidator<T>
   ) {
@@ -105,7 +105,7 @@ export class CompositeMapValidator<T> implements MultiConstraintValidator<{ [key
     this.valueValidator = valueValidator;
   }
 
-  validate(input: { [key: string]: T } | undefined | null, path: string): ValidationFailure[] {
+  validate(input: Record<string, T> | undefined | null, path: string): ValidationFailure[] {
     const retVal: ValidationFailure[] = [];
     retVal.push(...this.referenceValidator.validate(input, path));
     if (input !== null && input !== undefined) {
@@ -175,7 +175,7 @@ export class EnumValidator implements SingleConstraintValidator<string, EnumVali
   }
 }
 
-type LengthCheckable = string | { length: number } | { [key: string]: any };
+type LengthCheckable = string | { length: number } | Record<string, any>;
 
 export class LengthValidator implements SingleConstraintValidator<LengthCheckable, LengthValidationFailure> {
   private readonly min?: number;
