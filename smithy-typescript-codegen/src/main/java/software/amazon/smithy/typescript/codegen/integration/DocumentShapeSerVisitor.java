@@ -175,7 +175,7 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *
      * <p>The function signature for this body will have two parameters available in scope:
      * <ul>
-     *   <li>{@code input: { [key: string]: Field }}: the type generated for the MapShape shape parameter.</li>
+     *   <li>{@code input: Record<string, Field>}: the type generated for the MapShape shape parameter.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
@@ -403,7 +403,7 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      *
      * <pre>{@code
      * const serializeAws_restJson1_1FieldMap = (
-     *   input: { [key: string]: Field },
+     *   input: Record<string, Field>,
      *   context: SerdeContext
      * ): any => {
      *   let mapParams: any = {};

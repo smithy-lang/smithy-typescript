@@ -1867,7 +1867,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (valueShape instanceof CollectionShape) {
             valueType = "string[]";
         }
-        writer.write("let parsedQuery: { [key: string]: $L } = {}", valueType);
+        writer.write("let parsedQuery: Record<string, $L> = {}", valueType);
         writer.openBlock("for (const [key, value] of Object.entries(query)) {", "}", () -> {
             writer.write("let queryValue: string;");
             final String parsedValue;
@@ -2315,12 +2315,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         } else if (target instanceof StructureShape) {
             // If payload is a Structure, then we need to parse the string into JavaScript object.
             writer.addImport("expectObject", "__expectObject", "@aws-sdk/smithy-client");
-            writer.write("const data: { [key: string]: any } | undefined "
+            writer.write("const data: Record<string, any> | undefined "
                     + "= __expectObject(await parseBody(output.body, context));");
         } else if (target instanceof UnionShape) {
             // If payload is a Union, then we need to parse the string into JavaScript object.
             writer.addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
-            writer.write("const data: { [key: string]: any } | undefined "
+            writer.write("const data: Record<string, any> | undefined "
                     + "= __expectUnion(await parseBody(output.body, context));");
         } else if (target instanceof StringShape || target instanceof DocumentShape) {
             // If payload is String or Document, we need to collect body and convert binary to string.

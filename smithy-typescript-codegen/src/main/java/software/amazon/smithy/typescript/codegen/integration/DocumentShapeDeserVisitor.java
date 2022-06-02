@@ -177,7 +177,7 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
-     * <p>The function signature specifies a {@code { [key: string]: Field }} return type.
+     * <p>The function signature specifies a {@code Record<string, Field>} return type.
      *
      * <p>This function would generate the following:
      *
@@ -408,7 +408,7 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      * const deserializeAws_restJson1_1FieldMap = (
      *   output: any,
      *   context: SerdeContext
-     * ): { [key: string]: Field } => {
+     * ): Record<string, Field> => {
      *   let mapParams: any = {};
      *   Object.keys(output).forEach(key => {
      *     mapParams[key] = deserializeAws_restJson1_1Field(output[key], context);

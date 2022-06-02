@@ -184,7 +184,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol mapShape(MapShape shape) {
         Symbol reference = toSymbol(shape.getValue());
-        return createSymbolBuilder(shape, format("{ [key: string]: %s }", reference.getName()), null)
+        return createSymbolBuilder(shape, format("Record<string, %s>", reference.getName()), null)
                 .addReference(reference)
                 .build();
     }
