@@ -2404,7 +2404,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
                     writer.write(
                             "(accummulator, curr) => {accummulator[curr[0]] = curr[1].value; return accummulator; },");
-                    writer.write("{} as {[key: string]: any}");
+                    writer.write("{} as Record<string, any>");
                 });
                 writer.openBlock("const eventMessage = {", "};", () -> {
                     writer.write("headers: eventHeaders,");
