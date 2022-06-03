@@ -77,7 +77,7 @@ export function convertVersion1Response(response: HttpResponse): APIGatewayProxy
   };
 }
 function convertResponseHeaders(headers: HeaderBag) {
-  const retVal: { [key: string]: string[] } = {};
+  const retVal: Record<string, string[]> = {};
   for (const [key, val] of Object.entries(headers)) {
     retVal[key] = val.split(",").map((v) => v.trim());
   }
@@ -93,7 +93,7 @@ function hasVersion(event: any): event is Record<"version", string> {
 }
 
 function convertMultiValueHeaders(multiValueHeaders: APIGatewayProxyEventMultiValueHeaders | null) {
-  const retVal: { [key: string]: string } = {};
+  const retVal: Record<string, string> = {};
 
   if (multiValueHeaders === null) {
     return retVal;
@@ -112,7 +112,7 @@ function convertMultiValueHeaders(multiValueHeaders: APIGatewayProxyEventMultiVa
 // but first we need to split up generated client and servers so we can have different
 // language version targets.
 function convertHeaders(headers: APIGatewayProxyEventHeaders): HeaderBag {
-  const retVal: { [key: string]: string } = {};
+  const retVal: Record<string, string> = {};
 
   for (const [key, val] of Object.entries(headers)) {
     if (val !== undefined) {
@@ -128,7 +128,7 @@ function convertMultiValueQueryStringParameters(params: APIGatewayProxyEventMult
     return undefined;
   }
 
-  const retVal: { [key: string]: string[] } = {};
+  const retVal: Record<string, string[]> = {};
 
   for (const [key, val] of Object.entries(params)) {
     if (val !== undefined) {
