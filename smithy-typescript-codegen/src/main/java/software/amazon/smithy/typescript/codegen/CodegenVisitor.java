@@ -18,7 +18,6 @@ package software.amazon.smithy.typescript.codegen;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.SmithyIntegration;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -84,26 +84,27 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
     private final FileManifest fileManifest;
     private final SymbolProvider symbolProvider;
     private final TypeScriptDelegator writers;
-    private final List<TypeScriptIntegration> integrations = new ArrayList<>();
+    private final List<TypeScriptIntegration> integrations;
     private final List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
     CodegenVisitor(PluginContext context, ArtifactType artifactType) {
         // Load all integrations.
+        List<TypeScriptIntegration> unsortedIntegrations = new ArrayList<>();
         ClassLoader loader = context.getPluginClassLoader().orElse(getClass().getClassLoader());
         LOGGER.info("Attempting to discover TypeScriptIntegration from the classpath...");
         ServiceLoader.load(TypeScriptIntegration.class, loader)
                 .forEach(integration -> {
                     LOGGER.info(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
-                    integrations.add(integration);
+                    unsortedIntegrations.add(integration);
                     integration.getClientPlugins().forEach(runtimePlugin -> {
                         LOGGER.info(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
                         runtimePlugins.add(runtimePlugin);
                     });
                 });
         // Sort the integrations in specified order.
-        integrations.sort(Comparator.comparingInt(TypeScriptIntegration::getOrder));
+        integrations = SmithyIntegration.sort(unsortedIntegrations);
 
         // Preprocess model using integrations.
         settings = TypeScriptSettings.from(context.getModel(), context.getSettings(), artifactType);

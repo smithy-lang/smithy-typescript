@@ -40,23 +40,6 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public interface TypeScriptIntegration
         extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
-    /**
-     * Gets the sort order of the customization from -128 to 127.
-     *
-     * <p>Customizations are applied according to this sort order. Lower values
-     * are executed before higher values (for example, -128 comes before 0,
-     * comes before 127). Customizations default to 0, which is the middle point
-     * between the minimum and maximum order values. The customization
-     * applied later can override the runtime configurations that provided
-     * by customizations applied earlier.
-     *
-     * @return Returns the sort order, defaulting to 0.
-     */
-
-    // TODO: Remove in favor of priority
-    default byte getOrder() {
-        return 0;
-    }
 
     /**
      * Preprocess the model before code generation.
