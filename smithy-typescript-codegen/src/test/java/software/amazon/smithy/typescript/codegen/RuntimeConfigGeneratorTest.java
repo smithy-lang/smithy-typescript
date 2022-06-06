@@ -45,10 +45,6 @@ public class RuntimeConfigGeneratorTest {
 
         integrations.add(new TypeScriptIntegration() {
             @Override
-            public byte getOrder() {
-                return 1;
-            }
-            @Override
             public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
                     TypeScriptSettings settings,
                     Model model,
