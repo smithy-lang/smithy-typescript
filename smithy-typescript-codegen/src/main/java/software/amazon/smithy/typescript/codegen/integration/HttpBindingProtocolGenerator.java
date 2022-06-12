@@ -1357,8 +1357,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * The value set is expected to by a JavaScript ${@code Uint8Array} type and is to be encoded as the
      * event payload.
      *
-     * <p>Two parameters will be available in scope:
+     * <p>Three parameters will be available in scope:
      * <ul>
+     *   <li>{@code body}: The serialized event payload object to needs to be serialized</li>
      *   <li>{@code message: <T>}: The partially constructed event message.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
@@ -1366,15 +1367,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * <p>For example:
      *
      * <pre>{@code
-     * message.body = context.utf8Decoder(JSON.stringify(bodyParams));
+     * message.body = context.utf8Decoder(JSON.stringify(body));
      * }</pre>
      * @param context The generation context.
-     * @param payloadShape The payload shape. Only structure and union shape is serialized as document.
      */
-    protected abstract void serializeInputEventDocumentPayload(
-            GenerationContext context,
-            Shape payloadShape
-    );
+    protected abstract void serializeInputEventDocumentPayload(GenerationContext context);
 
     /**
      * Writes the code needed to serialize a protocol output document.
@@ -1640,7 +1637,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 .filter(member -> member.hasTrait(EventPayloadTrait.class))
                 .collect(Collectors.toList());
         Shape payloadShape = payloadMembers.isEmpty()
-                        ? event
+                        ? event // implicit payload
                         : model.expectShape(payloadMembers.get(0).getTarget());
         if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
             // Since event itself must be a structure shape, so string or blob payload member must has eventPayload
@@ -1651,7 +1648,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     getInputValue(context, Location.PAYLOAD, "input." + payloadMemberName, payloadMember,
                             model.expectShape(payloadMember.getTarget())));
         } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
-            serializeInputEventDocumentPayload(context, payloadShape);
+            // handle implicit event payload by removing members with eventHeader trait.
+            List<MemberShape> headerMembers = event.getAllMembers().values().stream()
+                    .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
+            for (MemberShape headerMember : headerMembers) {
+                String memberName = headerMember.getMemberName();
+                writer.write("delete input[$S]", memberName);
+            }
+            SymbolProvider symbolProvider = context.getSymbolProvider();
+            Symbol symbol = symbolProvider.toSymbol(payloadShape);
+            String serFunctionName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
+            writer.write("const body = $L(input, context);", serFunctionName);
+            serializeInputEventDocumentPayload(context);
         } else {
             throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
                     payloadShape.getType()));
