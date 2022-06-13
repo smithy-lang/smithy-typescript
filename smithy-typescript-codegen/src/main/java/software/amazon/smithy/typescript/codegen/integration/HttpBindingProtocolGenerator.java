@@ -2245,7 +2245,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (operationOrError instanceof StructureShape) {
                 bodyLocation = getErrorBodyLocation(context, bodyLocation);
             }
-            writer.write("const data: { [key: string] : any } = __expectNonNull($L, $S);", bodyLocation, "body");
+            writer.write("const data: Record<string, any> = __expectNonNull($L, $S);", bodyLocation, "body");
 
             if (isInput) {
                 deserializeInputDocumentBody(context, operationOrError.asOperationShape().get(), documentBindings);
