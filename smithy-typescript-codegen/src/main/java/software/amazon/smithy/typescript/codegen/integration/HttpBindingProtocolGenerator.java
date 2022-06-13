@@ -1359,7 +1359,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *
      * <p>Three parameters will be available in scope:
      * <ul>
-     *   <li>{@code body}: The serialized event payload object to needs to be serialized</li>
+     *   <li>{@code body}: The serialized event payload object that needs to be transformed to binary data</li>
      *   <li>{@code message: <T>}: The partially constructed event message.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
@@ -1649,11 +1649,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             model.expectShape(payloadMember.getTarget())));
         } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
             // handle implicit event payload by removing members with eventHeader trait.
-            List<MemberShape> headerMembers = event.getAllMembers().values().stream()
-                    .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
-            for (MemberShape headerMember : headerMembers) {
-                String memberName = headerMember.getMemberName();
-                writer.write("delete input[$S]", memberName);
+            for (MemberShape memberShape : event.members()) {
+                if (memberShape.hasTrait(EventHeaderTrait.class)) {
+                    writer.write("delete input[$S]", memberShape.getMemberName());
+                }
             }
             SymbolProvider symbolProvider = context.getSymbolProvider();
             Symbol symbol = symbolProvider.toSymbol(payloadShape);
