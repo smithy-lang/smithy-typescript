@@ -455,17 +455,16 @@ public final class HttpProtocolGeneratorUtils {
                     });
                 });
                 String deserFunctionName = ProtocolGenerator.getDeserFunctionName(
-                        targetSymbol, context.getProtocolName());
+                    targetSymbol, context.getProtocolName()
+                );
                 writer.write("return " + deserFunctionName + "(parsedEvent, context)." + memberName);
             });
         });
     }
 
     static void generateHttpBindingEventStreamDeserializer(GenerationContext context,
-                                                           Shape target,
-                                                           String assignTo,
-                                                           Collection<StructureShape> deserializingEventShapes,
-                                                           Collection<UnionShape> deserializeEventUnions) {
+                                                           UnionShape target,
+                                                           String assignTo) {
         TypeScriptWriter writer = context.getWriter();
         writer.openBlock(assignTo + " = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
@@ -484,27 +483,11 @@ public final class HttpProtocolGeneratorUtils {
                     writer.write("[eventName]: eventMessage");
                 });
                 Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
-                StringBuilder deserFunctionBuilder = new StringBuilder(ProtocolGenerator.getDeserFunctionName(
-                        targetSymbol, context.getProtocolName())).append("_event");
-                if (target instanceof StructureShape) {
-                    // Single-event stream. Save the structure and generate event-specific deser later.
-                    if (deserializingEventShapes != null) {
-                        deserializingEventShapes.add(target.asStructureShape().get());
-                    }
-                    // For single-event stream, supply event message to corresponding event structure deser.
-                    deserFunctionBuilder.append("(eventMessage, context)");
-                } else if (target instanceof UnionShape) {
-                    // Multi-event stream. Save the union and generate dispatcher later.
-                    if (deserializeEventUnions != null) {
-                        deserializeEventUnions.add(target.asUnionShape().get());
-                    }
-                    // For multi-event stream, supply event name to event pairs to the events union deser.
-                    deserFunctionBuilder.append("(parsedEvent, context)");
-                } else {
-                    throw new CodegenException(String.format("Unexpected shape targeted by eventstream: `%s`",
-                            target.getType()));
-                }
-                writer.write("return await $L;", deserFunctionBuilder.toString());
+                String deserFunctionName =
+                    ProtocolGenerator.getDeserFunctionName(targetSymbol, context.getProtocolName()) +
+                    "_event" +
+                    "(parsedEvent, context)";
+                writer.write("return await $L;", deserFunctionName);
             });
         });
     }

@@ -272,8 +272,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public final String unionShape(UnionShape shape) {
-        TypeScriptWriter writer = context.getWriter();
-        writer.addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
         return getDelegateDeserializer(shape, "__expectUnion(" + dataSource + ")");
     }
 
