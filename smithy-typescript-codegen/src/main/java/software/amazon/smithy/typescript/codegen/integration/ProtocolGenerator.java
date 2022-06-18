@@ -348,12 +348,6 @@ public interface ProtocolGenerator {
             return copy;
         }
 
-        public GenerationContext withSymbolProvider(SymbolProvider newProvider) {
-            GenerationContext copyContext = copy();
-            copyContext.setSymbolProvider(newProvider);
-            return copyContext;
-        }
-
         public GenerationContext withWriter(TypeScriptWriter newWriter) {
             GenerationContext copyContext = copy();
             copyContext.setWriter(newWriter);
