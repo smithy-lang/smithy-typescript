@@ -223,7 +223,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             ShapeId protocol = protocolGenerator.getProtocol();
             ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
             context.setProtocolName(protocolGenerator.getName());
-            context.setIntegrations(integrations);
             context.setModel(model);
             context.setService(service);
             context.setSettings(settings);
@@ -337,7 +336,6 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             writers.useFileWriter(fileName, writer -> {
                 ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
                 context.setProtocolName(protocolGenerator.getName());
-                context.setIntegrations(integrations);
                 context.setModel(model);
                 context.setService(shape);
                 context.setSettings(settings);
