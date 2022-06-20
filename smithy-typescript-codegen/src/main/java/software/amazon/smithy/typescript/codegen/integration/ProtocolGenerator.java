@@ -16,7 +16,6 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -274,7 +273,6 @@ public interface ProtocolGenerator {
         private SymbolProvider symbolProvider;
         private TypeScriptWriter writer;
         private Supplier<TypeScriptWriter> writerSupplier;
-        private List<TypeScriptIntegration> integrations;
         private String protocolName;
 
         public TypeScriptSettings getSettings() {
@@ -330,14 +328,6 @@ public interface ProtocolGenerator {
             }
         }
 
-        public List<TypeScriptIntegration> getIntegrations() {
-            return integrations;
-        }
-
-        public void setIntegrations(List<TypeScriptIntegration> integrations) {
-            this.integrations = integrations;
-        }
-
         public String getProtocolName() {
             return protocolName;
         }
@@ -354,15 +344,8 @@ public interface ProtocolGenerator {
             copy.setSymbolProvider(symbolProvider);
             copy.setWriter(writer);
             copy.setDeferredWriter(writerSupplier);
-            copy.setIntegrations(integrations);
             copy.setProtocolName(protocolName);
             return copy;
-        }
-
-        public GenerationContext withSymbolProvider(SymbolProvider newProvider) {
-            GenerationContext copyContext = copy();
-            copyContext.setSymbolProvider(newProvider);
-            return copyContext;
         }
 
         public GenerationContext withWriter(TypeScriptWriter newWriter) {
