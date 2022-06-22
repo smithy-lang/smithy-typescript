@@ -45,9 +45,11 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.validation.LongValidator;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.waiters.WaitableTrait;
@@ -140,7 +142,18 @@ final class DirectedTypeScriptCodegen
     @Override
     public void generateService(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         TypeScriptSettings settings = directive.settings();
+        Model model = directive.model();
+        ServiceShape service = directive.shape();
         TypeScriptDelegator delegator = directive.context().writerDelegator();
+
+        if (settings.generateServerSdk())  {
+            checkValidationSettings(settings, model, service);
+
+            LongValidator validator = new LongValidator(settings);
+            List<ValidationEvent> events = validator.validate(model);
+            System.err.println("Model contained SSDK-specific validation events: \n"
+                    + events.stream().map(ValidationEvent::toString).sorted().collect(Collectors.joining("\n")));
+        }
 
         if (settings.generateClient()) {
             generateClient(directive);
@@ -154,8 +167,6 @@ final class DirectedTypeScriptCodegen
         }
 
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
-        ServiceShape service = directive.shape();
-        Model model = directive.model();
         SymbolProvider symbolProvider = directive.symbolProvider();
         List<TypeScriptIntegration> integrations = directive.context().integrations();
         if (protocolGenerator != null) {
@@ -407,7 +418,6 @@ final class DirectedTypeScriptCodegen
                 directive.context().protocolGenerator());
 
         if (directive.settings().generateServerSdk()) {
-            checkValidationSettings(directive.settings(), directive.model(), directive.service());
             // Generate index for server
             IndexGenerator.writeServerIndex(
                     directive.settings(),
