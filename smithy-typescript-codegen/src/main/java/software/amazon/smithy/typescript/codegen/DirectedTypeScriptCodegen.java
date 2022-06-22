@@ -74,7 +74,7 @@ final class DirectedTypeScriptCodegen
 
     @Override
     public SymbolProvider createSymbolProvider(CreateSymbolProviderDirective<TypeScriptSettings> directive) {
-        return new SymbolVisitor(directive.model(), directive.settings());
+        return directive.settings().getArtifactType().createSymbolProvider(directive.model(), directive.settings());
     }
 
     @Override

@@ -17,7 +17,8 @@ package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
+import software.amazon.smithy.codegen.core.directed.CodegenDirector;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -33,6 +34,32 @@ public class TypeScriptServerCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
-        new CodegenVisitor(context, ArtifactType.SSDK).execute();
+        CodegenDirector<TypeScriptWriter, TypeScriptIntegration, TypeScriptCodegenContext, TypeScriptSettings> runner
+                = new CodegenDirector<>();
+
+        runner.directedCodegen(new DirectedTypeScriptCodegen());
+
+        // Set the SmithyIntegration class to look for and apply using SPI.
+        runner.integrationClass(TypeScriptIntegration.class);
+
+        // Set the FileManifest and Model from the plugin.
+        runner.fileManifest(context.getFileManifest());
+        runner.model(context.getModel());
+
+        // Create the TypeScriptSettings object from the plugin settings.
+        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings(),
+                TypeScriptSettings.ArtifactType.SSDK);
+        runner.settings(settings);
+
+        runner.service(settings.getService());
+
+        // Configure the director to perform some common model transforms.
+        runner.performDefaultCodegenTransforms();
+
+        // TODO: How is smithy-typescript currently dealing with no input/output?
+//        runner.createDedicatedInputsAndOutputs();
+
+        // Run it!
+        runner.run();
     }
 }

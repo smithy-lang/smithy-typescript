@@ -49,10 +49,8 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
         runner.model(context.getModel());
 
         // Create the TypeScriptSettings object from the plugin settings.
-//        TypeScriptSettings settings = runner.settings(TypeScriptSettings.class, context.getSettings());
-        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings());
-//        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings(),
-//                TypeScriptSettings.ArtifactType.CLIENT);
+        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings(),
+                TypeScriptSettings.ArtifactType.CLIENT);
         runner.settings(settings);
 
         runner.service(settings.getService());
