@@ -24,7 +24,7 @@ import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
-final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
+public final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
 
     TypeScriptDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
         super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());

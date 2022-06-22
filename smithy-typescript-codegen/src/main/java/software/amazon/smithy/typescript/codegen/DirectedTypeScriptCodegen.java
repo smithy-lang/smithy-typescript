@@ -140,7 +140,6 @@ final class DirectedTypeScriptCodegen
     @Override
     public void generateService(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         TypeScriptSettings settings = directive.settings();
-        ServiceShape shape = directive.shape();
         TypeScriptDelegator delegator = directive.context().writerDelegator();
 
         if (settings.generateClient()) {
@@ -160,7 +159,7 @@ final class DirectedTypeScriptCodegen
         SymbolProvider symbolProvider = directive.symbolProvider();
         List<TypeScriptIntegration> integrations = directive.context().integrations();
         if (protocolGenerator != null) {
-            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + shape.getId());
+            LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + service.getId());
             String fileName = Paths.get(CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
                     ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts").toString();
             delegator.useFileWriter(fileName, writer -> {
@@ -168,7 +167,7 @@ final class DirectedTypeScriptCodegen
                 context.setProtocolName(protocolGenerator.getName());
                 context.setIntegrations(integrations);
                 context.setModel(model);
-                context.setService(shape);
+                context.setService(service);
                 context.setSettings(settings);
                 context.setSymbolProvider(symbolProvider);
                 context.setWriter(writer);
@@ -182,7 +181,7 @@ final class DirectedTypeScriptCodegen
                     protocolGenerator.generateRequestDeserializers(serverContext);
                     protocolGenerator.generateResponseSerializers(serverContext);
                     protocolGenerator.generateFrameworkErrorSerializer(serverContext);
-                    delegator.useShapeWriter(shape, w -> {
+                    delegator.useShapeWriter(service, w -> {
                         protocolGenerator.generateServiceHandlerFactory(serverContext.withWriter(w));
                     });
                     for (OperationShape operation : TopDownIndex.of(model).getContainedOperations(service)) {
@@ -420,24 +419,15 @@ final class DirectedTypeScriptCodegen
         // Generate protocol tests IFF found in the model.
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         if (protocolGenerator != null) {
-//            ShapeId protocol = protocolGenerator.getProtocol();
-//            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
-//            context.setProtocolName(protocolGenerator.getName());
-//            context.setIntegrations(directive.context().integrations());
-//            context.setModel(directive.model());
-//            context.setService(directive.service());
-//            context.setSettings(directive.settings());
-//            context.setSymbolProvider(directive.symbolProvider());
-//            String baseName = protocol.getName().toLowerCase(Locale.US)
-//                    .replace("-", "_")
-//                    .replace(".", "_");
-//            String protocolTestFileName = String.format("test/functional/%s.spec.ts", baseName);
-
-            // TODO: what to do here?
-//            context.setDeferredWriter(() -> directive.context().writerDelegator().checkoutFileWriter
-//            (protocolTestFileName));
-
-//            protocolGenerator.generateProtocolTests(context);
+            ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
+            context.setProtocolName(protocolGenerator.getName());
+            context.setIntegrations(directive.context().integrations());
+            context.setModel(directive.model());
+            context.setService(directive.service());
+            context.setSettings(directive.settings());
+            context.setSymbolProvider(directive.symbolProvider());
+            context.setWriterDelegator(directive.context().writerDelegator());
+            protocolGenerator.generateProtocolTests(context);
         }
 
     }
