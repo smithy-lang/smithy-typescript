@@ -376,7 +376,6 @@ final class DirectedTypeScriptCodegen
             directive.fileManifest().writeFile(from, getClass(), to);
         });
 
-        // TODO: do all of these parts below are before/after?
         SymbolVisitor.writeModelIndex(directive.connectedShapes().values(), directive.symbolProvider(),
                 directive.fileManifest());
 

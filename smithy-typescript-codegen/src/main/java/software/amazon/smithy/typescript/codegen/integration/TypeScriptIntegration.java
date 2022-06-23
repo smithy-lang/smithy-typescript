@@ -42,20 +42,6 @@ public interface TypeScriptIntegration
         extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
 
     /**
-     * Preprocess the model before code generation.
-     *
-     * <p>This can be used to remove unsupported features, remove traits
-     * from shapes (e.g., make members optional), etc.
-     *
-     * @param model Model being generated.
-     * @param settings Setting used to generate.
-     * @return Returns the updated model.
-     */
-    default Model preprocessModel(Model model, TypeScriptSettings settings) {
-        return model;
-    }
-
-    /**
      * Writes additional files.
      *
      * <pre>

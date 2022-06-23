@@ -49,7 +49,6 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
 
     private final boolean withAttribution;
 
-    // TODO: see if this can be removed
     public TypeScriptWriter(String moduleName) {
         this(moduleName, true);
     }
@@ -69,10 +68,9 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
 
         @Override
         public TypeScriptWriter apply(String filename, String namespace) {
-            boolean attribution = filename.endsWith(".ts") || filename.endsWith(".tsx");
-            // TODO: Attribution accounts for tsx too, but moduleName doesn't.
+            boolean withAttribution = filename.endsWith(".ts");
             String moduleName = filename.endsWith(".ts") ? filename.substring(0, filename.length() - 3) : filename;
-            return new TypeScriptWriter(moduleName, attribution);
+            return new TypeScriptWriter(moduleName, withAttribution);
         }
     }
 
@@ -97,7 +95,6 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @param from Module to import the type from.
      * @return Returns the writer.
      */
-    // TODO: see what references of this method call can be changed to use Symbol instead of String name
     public TypeScriptWriter addImport(String name, String as, String from) {
         getImportContainer().addImport(name, as, from);
         return this;

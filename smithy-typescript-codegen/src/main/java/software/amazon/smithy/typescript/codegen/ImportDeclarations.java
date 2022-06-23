@@ -32,7 +32,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class ImportDeclarations implements ImportContainer {
 
-    // TODO: remove this
     private final String moduleNameString;
     private final Path relativize;
     private final Map<String, Pair<String, Ignore>> defaultImports = new TreeMap<>();
@@ -82,7 +81,6 @@ final class ImportDeclarations implements ImportContainer {
 
     @Override
     public void importSymbol(Symbol symbol, String alias) {
-        // TODO: is this if needed?
         if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
             addImport(symbol.getName(), alias, symbol.getNamespace());
         }
