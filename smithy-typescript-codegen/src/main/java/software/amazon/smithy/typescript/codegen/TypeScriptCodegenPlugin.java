@@ -17,9 +17,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
-import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
-import software.amazon.smithy.model.Model;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -63,11 +61,5 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
 
         // Run it!
         runner.run();
-    }
-
-    // TODO: Look to remove it
-    @Deprecated
-    public static SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
-        return new SymbolVisitor(model, settings);
     }
 }

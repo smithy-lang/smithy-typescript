@@ -64,7 +64,7 @@ public class RuntimeConfigGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptDelegator delegator = new TypeScriptDelegator(manifest, symbolProvider);
         RuntimeConfigGenerator generator = new RuntimeConfigGenerator(
                 settings, model, symbolProvider, delegator, integrations);

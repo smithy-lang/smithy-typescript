@@ -22,7 +22,7 @@ public class IndexGeneratorTest {
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
-        SymbolProvider symbolProvider = TypeScriptCodegenPlugin.createSymbolProvider(model, settings);
+        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         MockManifest manifest = new MockManifest();
         List<TypeScriptIntegration> integrations = new ArrayList<>();
         integrations.add(new TypeScriptIntegration() {

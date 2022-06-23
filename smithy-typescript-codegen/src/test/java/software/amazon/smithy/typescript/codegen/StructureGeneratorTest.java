@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.node.Node;
@@ -594,7 +595,7 @@ public class StructureGeneratorTest {
                 .build());
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model, settings), writer, struct).run();
+        new StructureGenerator(model, new SymbolVisitor(model, settings), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));
@@ -625,7 +626,7 @@ public class StructureGeneratorTest {
                 .build());
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, TypeScriptCodegenPlugin.createSymbolProvider(model, settings), writer, struct).run();
+        new StructureGenerator(model, new SymbolVisitor(model, settings), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));
