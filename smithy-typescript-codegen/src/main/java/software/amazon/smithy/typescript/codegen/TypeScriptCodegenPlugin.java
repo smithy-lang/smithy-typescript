@@ -56,8 +56,9 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
         // Configure the director to perform some common model transforms.
         runner.performDefaultCodegenTransforms();
 
-        // TODO: How is smithy-typescript currently dealing with no input/output?
-//        runner.createDedicatedInputsAndOutputs();
+        // TODO: Not using below because it would break existing AWS SDKs. Maybe it should be configurable
+        // so generic SDKs call this by default, but AWS SDKs can opt-out of it via a setting.
+        // runner.createDedicatedInputsAndOutputs();
 
         // Run it!
         runner.run();
