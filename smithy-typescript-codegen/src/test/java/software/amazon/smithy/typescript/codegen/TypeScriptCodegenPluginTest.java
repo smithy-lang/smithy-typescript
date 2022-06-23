@@ -13,7 +13,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 
-public class CodegenVisitorTest {
+public class TypeScriptCodegenPluginTest {
     @Test
     public void generatesRuntimeConfigFiles() {
         Model model = Model.assembler()

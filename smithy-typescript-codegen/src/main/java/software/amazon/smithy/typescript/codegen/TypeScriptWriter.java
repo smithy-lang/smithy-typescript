@@ -41,7 +41,7 @@ import software.amazon.smithy.utils.StringUtils;
  * relativized.
  *
  * <p>Dependencies introduced via a TypeScriptWriter are added to the package.json
- * file if the writer is a part of the {@link TypeScriptDelegator} of the {@link CodegenVisitor}.
+ * file if the writer is a part of the {@link TypeScriptDelegator} of the {@link DirectedTypeScriptCodegen}.
  */
 @SmithyUnstableApi
 public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, ImportDeclarations> {

@@ -213,7 +213,7 @@ public interface TypeScriptIntegration
      * {@code
      * public final class MyIntegration implements TypeScriptIntegration {
      *
-     *     private static final Logger LOGGER = Logger.getLogger(CodegenVisitor.class.getName());
+     *     private static final Logger LOGGER = Logger.getLogger(MyIntegration.class.getName());
      *
      *     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
      *             TypeScriptSettings settings,
