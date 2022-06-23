@@ -312,6 +312,8 @@ public interface ProtocolGenerator {
         // where the constructor asserts that both writer/writerDelegator are not set, instead of unsetting the other.
         // Or consider specialized GenerationContextWithWriter/GenerationContextWithWriterDelegator to use in
         // corresponding ProtocolGenerator methods that need writer v/s writerDelegator.
+        // OR better refactor to add something like a `areProtocolTestsPresent()` so `generateProtocolTests` is called
+        // and `writer` created only if needed.
         public TypeScriptDelegator getWriterDelegator() {
             return writerDelegator;
         }
