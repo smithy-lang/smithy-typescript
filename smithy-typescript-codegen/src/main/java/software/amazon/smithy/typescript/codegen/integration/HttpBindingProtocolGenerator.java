@@ -80,21 +80,14 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * Abstract implementation useful for all protocols that use HTTP bindings.
  */
 @SmithyUnstableApi
-public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator {
+public abstract class HttpBindingProtocolGenerator extends ProtocolGeneratorSharedBaseMethods {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
     private static final Set<Character> REGEX_CHARS = SetUtils.of('.', '*', '+', '?', '^', '$', '{', '}', '(',
             ')', '|', '[', ']', '\\');
     private static final ApplicationProtocol APPLICATION_PROTOCOL
             = ApplicationProtocol.createDefaultHttpApplicationProtocol();
-    private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
-    private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
-    private final Set<StructureShape> serializingErrorShapes = new TreeSet<>();
-    private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
-    private final Set<StructureShape> serializeEventShapes = new TreeSet<>();
-    private final Set<StructureShape> deserializingEventShapes = new TreeSet<>();
-    private final Set<UnionShape> serializeEventUnions = new TreeSet<>();
-    private final Set<UnionShape> deserializeEventUnions = new TreeSet<>();
+
     private final boolean isErrorCodeInBody;
 
     /**
@@ -111,13 +104,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     public final ApplicationProtocol getApplicationProtocol() {
         return APPLICATION_PROTOCOL;
     }
-
-    /**
-     * Gets the default serde format for timestamps.
-     *
-     * @return Returns the default format.
-     */
-    protected abstract Format getDocumentTimestampFormat();
 
     /**
      * Gets the default content-type when a document is synthesized in the body.
@@ -150,14 +136,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
-        serializeEventUnions.forEach(eventUnion -> generateSerializingEventUnion(context, eventUnion));
-        deserializeEventUnions.forEach(eventUnion -> generateDeserializingEventUnion(context, eventUnion));
-        serializeEventShapes.forEach(event -> generateEventSerializer(context, event));
-        deserializingEventShapes.forEach(event -> generateEventDeserializer(context, event));
-        deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
-        serializingErrorShapes.forEach(error -> generateErrorSerializer(context, error));
-        generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
-        generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
+        serializationEventUnions.forEach(eventUnion -> generateSerializingEventUnion(context, eventUnion));
+        deserializationEventUnions.forEach(eventUnion -> generateDeserializingEventUnion(context, eventUnion));
+        serializationEventShapes.forEach(event -> generateEventSerializer(context, event));
+        deserializationEventShapes.forEach(event -> generateEventDeserializer(context, event));
+        deserializationErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
+        serializationErrorShapes.forEach(error -> generateErrorSerializer(context, error));
+        generateDocumentBodyShapeSerializers(context, serializationDocumentShapes);
+        generateDocumentBodyShapeDeserializers(context, deserializationDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
         HttpProtocolGeneratorUtils.generateCollectBody(context);
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
@@ -510,7 +496,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bodyBindings.stream()
                         .map(HttpBinding::getMember)
                         .map(member -> context.getModel().expectShape(member.getTarget()))
-                        .forEach(serializingDocumentShapes::add);
+                        .forEach(serializationDocumentShapes::add);
             }
 
             calculateContentLength(context);
@@ -523,7 +509,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         });
         writer.write("");
 
-        serializingErrorShapes.addAll(OperationIndex.of(context.getModel()).getErrors(operation, context.getService()));
+        serializationErrorShapes.addAll(
+            OperationIndex.of(context.getModel())
+                .getErrors(operation, context.getService())
+        );
     }
 
     private void calculateContentLength(GenerationContext context) {
@@ -575,7 +564,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             bodyBindings.stream()
                     .map(HttpBinding::getMember)
                     .map(member -> context.getModel().expectShape(member.getTarget()))
-                    .forEach(serializingDocumentShapes::add);
+                    .forEach(serializationDocumentShapes::add);
         }
 
         writer.openBlock("return new $T({", "});", responseType, () -> {
@@ -635,7 +624,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 bodyBindings.stream()
                         .map(HttpBinding::getMember)
                         .map(member -> context.getModel().expectShape(member.getTarget()))
-                        .forEach(serializingDocumentShapes::add);
+                        .forEach(serializationDocumentShapes::add);
             }
 
             boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
@@ -1173,7 +1162,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case PAYLOAD:
                 if (target.isUnionShape() && target.hasTrait(StreamingTrait.class)) {
-                    this.serializeEventUnions.add(target.asUnionShape().get());
+                    this.serializationEventUnions.add(target.asUnionShape().get());
                     Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
                     String eventSerializer = ProtocolGenerator.getSerFunctionName(targetSymbol,
                             context.getProtocolName());
@@ -1555,7 +1544,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 events.getAllMembers().forEach((memberName, memberShape) -> {
                     StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
                     // Prepare event shapes to generate event serializers.
-                    serializeEventShapes.add(target);
+                    serializationEventShapes.add(target);
                     // Dispatch to special event deserialize function
                     Symbol eventSymbol = symbolProvider.toSymbol(target);
                     String eventSerMethodName =
@@ -1732,7 +1721,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
-                deserializingDocumentShapes.add(target);
+                deserializationDocumentShapes.add(target);
             });
             writer.write("return Promise.resolve(contents);");
         });
@@ -2090,7 +2079,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
-                deserializingDocumentShapes.add(target);
+                deserializationDocumentShapes.add(target);
             });
             writer.write("return Promise.resolve(contents);");
         });
@@ -2099,7 +2088,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
                 context, operation, responseType, this::writeErrorCodeParser,
                 isErrorCodeInBody, this::getErrorBodyLocation);
-        deserializingErrorShapes.addAll(errorShapes);
+        deserializationErrorShapes.addAll(errorShapes);
     }
 
     private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
@@ -2123,7 +2112,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
-                deserializingDocumentShapes.add(target);
+                deserializationDocumentShapes.add(target);
             });
             writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
                 writer.write("$$metadata: deserializeMetadata($L),", outputName);
@@ -2355,7 +2344,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Handle streaming shapes differently.
         if (target.hasTrait(StreamingTrait.class)) {
             if (target instanceof UnionShape) {
-                // If payload is a event stream, return it after calling event stream deser function.
+                // If payload is an event stream, return it after calling event stream deser function.
                 generateEventStreamDeserializer(context, binding.getMember(), target);
                 writer.write("contents.$L = data;", binding.getMemberName());
                 // Don't generate non-eventstream payload shape again.
@@ -2454,30 +2443,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("const data: any = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
             writer.openBlock("async event => {", "}", () -> {
-                writer.write("const eventName = Object.keys(event)[0];");
-                writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
-                    writer.write(
-                            "(accummulator, curr) => {accummulator[curr[0]] = curr[1].value; return accummulator; },");
-                    writer.write("{} as Record<string, any>");
-                });
-                writer.openBlock("const eventMessage = {", "};", () -> {
-                    writer.write("headers: eventHeaders,");
-                    writer.write("body: event[eventName].body");
-                });
-                writer.openBlock("const parsedEvent = {", "};", () -> {
-                    writer.write("[eventName]: eventMessage");
-                });
+                writer.addImport("deserEventStream", "__deserEventStream", "@aws-sdk/smithy-client");
+                writer.write("const parsedEvent = __deserEventStream(event);");
                 Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
                 StringBuilder deserFunctionBuilder = new StringBuilder(ProtocolGenerator.getDeserFunctionName(
                         targetSymbol, context.getProtocolName())).append("_event");
                 if (target instanceof StructureShape) {
                     // Single-event stream. Save the structure and generate event-specific deser later.
-                    this.deserializingEventShapes.add(target.asStructureShape().get());
+                    this.deserializationEventShapes.add(target.asStructureShape().get());
                     // For single-event stream, supply event message to corresponding event structure deser.
                     deserFunctionBuilder.append("(eventMessage, context)");
                 } else if (target instanceof UnionShape) {
                     // Multi-event stream. Save the union and generate dispatcher later.
-                    this.deserializeEventUnions.add(target.asUnionShape().get());
+                    this.deserializationEventUnions.add(target.asUnionShape().get());
                     // For multi-event stream, supply event name to event pairs to the events union deser.
                     deserFunctionBuilder.append("(parsedEvent, context)");
                 } else {
@@ -2511,7 +2489,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             events.getAllMembers().forEach((name, member) -> {
                 StructureShape target = model.expectShape(member.getTarget(), StructureShape.class);
                 // Prepare event for generating event deserializers.
-                deserializingEventShapes.add(target);
+                deserializationEventShapes.add(target);
                 writer.openBlock("if (output[$S] !== undefined) {", "}", name, () -> {
                     writer.openBlock("return {", "};", () -> {
                         // Dispatch to special event deserialize function
@@ -2553,7 +2531,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         // If this is an error event, we need to generate the error deserializer.
-        deserializingErrorShapes.add(event);
+        deserializationErrorShapes.add(event);
         Symbol errorSymbol = symbolProvider.toSymbol(event);
         String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                 context.getProtocolName()) + "Response";
@@ -2571,344 +2549,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    // Parse members from event headers.
-    private void readEventHeaders(GenerationContext context, StructureShape event) {
-        TypeScriptWriter writer = context.getWriter();
-        Model model = context.getModel();
-        List<MemberShape> headerMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
-        for (MemberShape headerMember : headerMembers) {
-            String memberName = headerMember.getMemberName();
-            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", memberName, () -> {
-                Shape target = model.expectShape(headerMember.getTarget());
-                String headerValue = getOutputValue(context, Location.HEADER,
-                        "output.headers['" + memberName + "']", headerMember, target);
-                writer.write("contents.$L = $L;", memberName, headerValue);
-            });
-        }
-    }
-
-    private void readEventBody(GenerationContext context, StructureShape event) {
-        TypeScriptWriter writer = context.getWriter();
-        // Parse members from event payload.
-        List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventPayloadTrait.class)).collect(Collectors.toList());
-        List<MemberShape> documentMembers = event.getAllMembers().values().stream()
-                .filter(member -> !member.hasTrait(EventHeaderTrait.class)
-                        && !member.hasTrait(EventPayloadTrait.class))
-                .collect(Collectors.toList());
-        if (!payloadMembers.isEmpty()) {
-            //There's only one event payload member
-            MemberShape payloadMember = payloadMembers.get(0);
-            readEventPayload(context, payloadMember);
-        } else if (!documentMembers.isEmpty()) {
-            // Parse member from event body using original event structure deser.
-            SymbolProvider symbolProvider = context.getSymbolProvider();
-            Symbol symbol = symbolProvider.toSymbol(event);
-            // If response has document binding, the body can be parsed to JavaScript object.
-            writer.write("const data: any = await parseBody(output.body, context);");
-            // Deser the event document with the original event(structure) shape deser function
-            writer.openBlock("contents = {", "} as any;", () -> {
-                writer.write("...contents,");
-                writer.write("...$L(data, context)",
-                        ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()));
-            });
-            //need original structure shape deserializer to deserialize event body.
-            deserializingDocumentShapes.add(event);
-        }
-    }
-
-    private void readEventPayload(GenerationContext context, MemberShape payloadMember) {
-        TypeScriptWriter writer = context.getWriter();
-        Model model = context.getModel();
-        Shape payloadTarget = model.expectShape(payloadMember.getTarget());
-        String memberName = payloadMember.getMemberName();
-        if (payloadTarget instanceof BlobShape) {
-            // If event payload is a blob, only need to collect stream to binary data(Uint8Array).
-            writer.write("contents.$L = output.body;", memberName);
-        } else if (payloadTarget instanceof StructureShape || payloadTarget instanceof UnionShape) {
-            // If body is Structure or Union, they we need to parse the string into JavaScript object.
-            writer.write("contents.$L = await parseBody(output.body, context);", memberName);
-        } else if (payloadTarget instanceof StringShape) {
-            // If payload is string, we need to collect body and encode binary to string.
-            writer.write("contents.$L = await collectBodyString(output.body, context);", memberName);
-        } else {
-            throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
-                    payloadTarget.getType()));
-        }
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * shape. This may use native types (like generating a Date for timestamps,)
-     * converters (like a base64Decoder,) or invoke complex type deserializers to
-     * manipulate the dataSource into the proper output content.
-     *
-     * @param context The generation context.
-     * @param bindingType How this value is bound to the operation output.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param member The member that points to the value being provided.
-     * @param target The shape of the value being provided.
-     * @return Returns a value or expression of the output value.
-     */
-    private String getOutputValue(
-            GenerationContext context,
-            Location bindingType,
-            String dataSource,
-            MemberShape member,
-            Shape target
-    ) {
-        if (target instanceof NumberShape) {
-            return getNumberOutputParam(context, bindingType, dataSource, target);
-        } else if (target instanceof BooleanShape) {
-            return getBooleanOutputParam(context, bindingType, dataSource);
-        } else if (target instanceof StringShape) {
-            return getStringOutputParam(context, bindingType, dataSource, target);
-        } else if (target instanceof DocumentShape) {
-            return dataSource;
-        } else if (target instanceof TimestampShape) {
-            HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-            Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
-            return HttpProtocolGeneratorUtils.getTimestampOutputParam(
-                    context.getWriter(), dataSource, bindingType, member, format,
-                    requiresNumericEpochSecondsInPayload());
-        } else if (target instanceof BlobShape) {
-            return getBlobOutputParam(bindingType, dataSource);
-        } else if (target instanceof CollectionShape) {
-            return getCollectionOutputParam(context, bindingType, dataSource, (CollectionShape) target);
-        } else if (target instanceof StructureShape || target instanceof UnionShape) {
-            return getNamedMembersOutputParam(context, bindingType, dataSource, target);
-        }
-
-        throw new CodegenException(String.format(
-                "Unsupported %s binding of %s to %s in %s using the %s protocol",
-                bindingType, member.getMemberName(), target.getType(), member.getContainer(), getName()));
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * boolean. By default, this checks strict equality to 'true' in headers and passes
-     * through for documents.
-     *
-     * @param bindingType How this value is bound to the operation output.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @return Returns a value or expression of the output boolean.
-     */
-    private String getBooleanOutputParam(GenerationContext context, Location bindingType, String dataSource) {
-        switch (bindingType) {
-            case QUERY:
-            case LABEL:
-            case HEADER:
-                context.getWriter().addImport("parseBoolean", "__parseBoolean", "@aws-sdk/smithy-client");
-                return String.format("__parseBoolean(%s)", dataSource);
-            default:
-                throw new CodegenException("Unexpected boolean binding location `" + bindingType + "`");
-        }
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * string. By default, this base64 decodes content in headers if there is a
-     * mediaType applied to the string, and passes through for all other cases.
-     *
-     * @param context The generation context.
-     * @param bindingType How this value is bound to the operation input.
-     * @param dataSource The in-code location of the data to provide an input of
-     *                   ({@code input.foo}, {@code entry}, etc.)
-     * @param target The shape of the value being provided.
-     * @return Returns a value or expression of the input string.
-     */
-    private String getStringOutputParam(
-            GenerationContext context,
-            Location bindingType,
-            String dataSource,
-            Shape target
-    ) {
-        // Decode these to base64 if a MediaType is present.
-        if (bindingType == Location.HEADER && target.hasTrait(MediaTypeTrait.ID)) {
-            dataSource = "Buffer.from(context.base64Decoder(" + dataSource + ")).toString('utf8')";
-        }
-
-        return HttpProtocolGeneratorUtils.getStringOutputParam(
-                context, target, dataSource, !isGuaranteedString(bindingType));
-    }
-
-    private boolean isGuaranteedString(Location bindingType) {
-        return bindingType != Location.PAYLOAD && bindingType != Location.DOCUMENT;
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * blob. By default, this base64 decodes content in headers and passes through
-     * for payloads.
-     *
-     * @param bindingType How this value is bound to the operation output.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @return Returns a value or expression of the output blob.
-     */
-    private String getBlobOutputParam(Location bindingType, String dataSource) {
-        switch (bindingType) {
-            case PAYLOAD:
-                return dataSource;
-            case QUERY:
-            case LABEL:
-            case HEADER:
-                // Decode these from base64.
-                return "context.base64Decoder(" + dataSource + ")";
-            default:
-                throw new CodegenException("Unexpected blob binding location `" + bindingType + "`");
-        }
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * collection. By default, this splits a comma separated string in headers.
-     *
-     * @param context The generation context.
-     * @param bindingType How this value is bound to the operation output.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param target The shape of the value being provided.
-     * @return Returns a value or expression of the output collection.
-     */
-    private String getCollectionOutputParam(
-            GenerationContext context,
-            Location bindingType,
-            String dataSource,
-            CollectionShape target
-    ) {
-        MemberShape targetMember = target.getMember();
-        Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
-        String collectionTargetValue = getOutputValue(context, bindingType, "_entry.trim()",
-                targetMember, collectionTarget);
-        String outputParam;
-        switch (bindingType) {
-            case QUERY_PARAMS:
-            case QUERY:
-                return String.format("%1$s.map(_entry => %2$s as any)",
-                        dataSource, collectionTargetValue);
-            case LABEL:
-                dataSource = "(" + dataSource + " || \"\")";
-                // Split these values on slashes.
-                outputParam = "" + dataSource + ".split('/')";
-
-                // Iterate over each entry and do deser work.
-                outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
-
-                return outputParam;
-            case HEADER:
-                dataSource = "(" + dataSource + " || \"\")";
-                // Split these values on commas.
-                outputParam = "" + dataSource + ".split(',')";
-
-                // Headers that have HTTP_DATE formatted timestamps already contain a ","
-                // in their formatted entry, so split on every other "," instead.
-                if (collectionTarget.isTimestampShape()) {
-                    // Check if our member resolves to the HTTP_DATE format.
-                    HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-                    Format format = httpIndex.determineTimestampFormat(targetMember, bindingType, Format.HTTP_DATE);
-
-                    if (format == Format.HTTP_DATE) {
-                        TypeScriptWriter writer = context.getWriter();
-                        writer.addImport("splitEvery", "__splitEvery", "@aws-sdk/smithy-client");
-                        outputParam = "__splitEvery(" + dataSource + ", ',', 2)";
-                    }
-                }
-
-                // Iterate over each entry and do deser work.
-                outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
-
-                return outputParam;
-            default:
-                throw new CodegenException("Unexpected collection binding location `" + bindingType + "`");
-        }
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * shape. This redirects to a deserialization function for documents and payloads,
-     * and fails otherwise.
-     *
-     * @param context The generation context.
-     * @param bindingType How this value is bound to the operation output.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param target The shape of the value being provided.
-     * @return Returns a value or expression of the output shape.
-     */
-    private String getNamedMembersOutputParam(
-            GenerationContext context,
-            Location bindingType,
-            String dataSource,
-            Shape target
-    ) {
-        switch (bindingType) {
-            case PAYLOAD:
-                // Redirect to a deserialization function.
-                Symbol symbol = context.getSymbolProvider().toSymbol(target);
-                return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
-                               + "(" + dataSource + ", context)";
-            default:
-                throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
-        }
-    }
-
-    /**
-     * Given context and a source of data, generate an output value provider for the
-     * number. By default, invokes parseInt on byte/short/integer/long types in headers,
-     * invokes parseFloat on float/double types in headers, and fails otherwise.
-     *
-     * @param bindingType How this value is bound to the operation output.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param target The shape of the value being provided.
-     * @return Returns a value or expression of the output number.
-     */
-    private String getNumberOutputParam(
-            GenerationContext context,
-            Location bindingType,
-            String dataSource,
-            Shape target
-    ) {
-        switch (bindingType) {
-            case QUERY:
-            case LABEL:
-            case HEADER:
-                switch (target.getType()) {
-                    case DOUBLE:
-                        context.getWriter().addImport(
-                                "strictParseDouble", "__strictParseDouble", "@aws-sdk/smithy-client");
-                        return "__strictParseDouble(" + dataSource + ")";
-                    case FLOAT:
-                        context.getWriter().addImport(
-                                "strictParseFloat", "__strictParseFloat", "@aws-sdk/smithy-client");
-                        return "__strictParseFloat(" + dataSource + ")";
-                    case LONG:
-                        context.getWriter().addImport(
-                                "strictParseLong", "__strictParseLong", "@aws-sdk/smithy-client");
-                        return "__strictParseLong(" + dataSource + ")";
-                    case INTEGER:
-                        context.getWriter().addImport(
-                                "strictParseInt32", "__strictParseInt32", "@aws-sdk/smithy-client");
-                        return "__strictParseInt32(" + dataSource + ")";
-                    case SHORT:
-                        context.getWriter().addImport(
-                                "strictParseShort", "__strictParseShort", "@aws-sdk/smithy-client");
-                        return "__strictParseShort(" + dataSource + ")";
-                    case BYTE:
-                        context.getWriter().addImport(
-                                "strictParseByte", "__strictParseByte", "@aws-sdk/smithy-client");
-                        return "__strictParseByte(" + dataSource + ")";
-                    default:
-                        throw new CodegenException("Unexpected number shape `" + target.getType() + "`");
-                }
-            default:
-                throw new CodegenException("Unexpected number binding location `" + bindingType + "`");
-        }
-    }
 
     /**
      * Writes the code that loads an optional {@code errorCode} String with the content used
@@ -3028,8 +2668,5 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             List<HttpBinding> documentBindings
     );
 
-    /**
-     * @return true if this protocol disallows string epoch timestamps in payloads.
-     */
-    protected abstract boolean requiresNumericEpochSecondsInPayload();
+
 }

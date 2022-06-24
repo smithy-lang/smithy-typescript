@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -44,15 +43,12 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * Abstract implementation useful for all HTTP protocols without bindings.
  */
 @SmithyUnstableApi
-public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
+public abstract class HttpRpcProtocolGenerator extends ProtocolGeneratorSharedBaseMethods {
 
     public static final Logger LOGGER = Logger.getLogger(HttpRpcProtocolGenerator.class.getName());
     private static final ApplicationProtocol APPLICATION_PROTOCOL
         = ApplicationProtocol.createDefaultHttpApplicationProtocol();
 
-    private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
-    private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
-    private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
     private final boolean isErrorCodeInBody;
 
     /**
@@ -101,9 +97,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
-        deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
-        generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
-        generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
+        deserializationErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
+        generateDocumentBodyShapeSerializers(context, serializationDocumentShapes);
+        generateDocumentBodyShapeDeserializers(context, deserializationDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
         HttpProtocolGeneratorUtils.generateCollectBody(context);
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
@@ -248,7 +244,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 .asStructureShape().get();
 
             // Track input shapes so their serializers may be generated.
-            serializingDocumentShapes.add(inputShape);
+            serializationDocumentShapes.add(inputShape);
 
             // Write the default `body` property.
             context.getWriter().write("let body: any;");
@@ -382,7 +378,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     writer.write("...contents,");
                 });
             });
-            writer.write("return Promise.resolve(response);");
+            writer.write("return response;");
         });
         writer.write("");
 
@@ -390,7 +386,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
             context, operation, responseType, this::writeErrorCodeParser,
             isErrorCodeInBody, this::getErrorBodyLocation);
-        deserializingErrorShapes.addAll(errorShapes);
+        deserializationErrorShapes.addAll(errorShapes);
     }
 
     private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
@@ -401,7 +397,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             context.getProtocolName()) + "Response";
 
         // Add the error shape to the list to generate functions for, since we'll use that.
-        deserializingDocumentShapes.add(error);
+        deserializationDocumentShapes.add(error);
         String outputReference = isErrorCodeInBody ? "parsedOutput" : "output";
         writer.openBlock("const $L = async (\n"
             + "  $L: any,\n"
@@ -437,21 +433,25 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     private boolean isStreamingUnionOutput(GenerationContext context, OperationShape operation) {
         if (operation.getOutput().isPresent()) {
             ShapeId shapeId = operation.getOutput().get();
-            StructureShape outputShape = context.getModel().expectShape(shapeId).asStructureShape().get();
+            Optional<StructureShape> structureShape = context.getModel().expectShape(shapeId).asStructureShape();
+            if (structureShape.isPresent()) {
+                StructureShape outputShape = structureShape.get();
 
-            Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
-            Optional<MemberShape> first = memberValues.stream().findFirst();
-            Set<UnionShape> unionShapesWithTrait =
-                context.getModel().getUnionShapesWithTrait(StreamingTrait.class);
-            boolean hasStreamingUnion = first.isPresent()
-                && memberValues.size() == 1
-                && unionShapesWithTrait
-                .stream()
-                .map(Shape::getId)
-                .collect(Collectors.toSet())
-                .contains(first.get().getTarget());
+                Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
+                Optional<MemberShape> first = memberValues.stream().findFirst();
+                Set<UnionShape> unionShapesWithTrait =
+                    context.getModel().getUnionShapesWithTrait(StreamingTrait.class);
 
-            return hasStreamingUnion;
+                boolean hasStreamingUnion = first.isPresent()
+                    && memberValues.size() == 1
+                    && unionShapesWithTrait
+                    .stream()
+                    .map(Shape::getId)
+                    .collect(Collectors.toSet())
+                    .contains(first.get().getTarget());
+
+                return hasStreamingUnion;
+            }
         }
         return false;
     }
@@ -464,21 +464,22 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 // We only need to load the body and prepare a contents object if there is a response.
                 // If there's an output present, we know it's a structure.
                 StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
-
-                Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
-                Optional<MemberShape> first = memberValues.stream().findFirst();
                 boolean useEventStreamDeserializer = isStreamingUnionOutput(context, operation);
 
                 // Track output shapes so their deserializers may be generated.
-                deserializingDocumentShapes.add(outputShape);
+                deserializationDocumentShapes.add(outputShape);
 
                 if (useEventStreamDeserializer) {
                     writer.write("const contents: any = {};");
+                    Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
+                    Optional<MemberShape> first = memberValues.stream().findFirst();
+                    String memberName = first.get().getMemberName();
+
                     generateRpcEventStreamDeserializer(
                         context,
                         outputShape,
-                        first.get().getMemberName(),
-                        "contents." + first.get().getMemberName()
+                        memberName,
+                        "contents." + memberName
                     );
                 } else {
                     writer.write("const data: any = await parseBody(output.body, context)");
@@ -492,26 +493,25 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             });
     }
 
-    private static void generateRpcEventStreamDeserializer(GenerationContext context,
-                                                           Shape target,
-                                                           String memberName,
-                                                           String assignTo) {
+    private void generateRpcEventStreamDeserializer(GenerationContext context,
+                                                    StructureShape event,
+                                                    String memberName,
+                                                    String assignTo) {
         TypeScriptWriter writer = context.getWriter();
-        Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+        Symbol targetSymbol = context.getSymbolProvider().toSymbol(event);
 
         writer.openBlock(assignTo + " = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
             writer.openBlock("async event => {", "}", () -> {
-                writer.write("const eventName = Object.keys(event)[0];");
-                writer.openBlock("const parsedEvent = {", "};", () -> {
-                    writer.openBlock("$L: {", "}", memberName, () -> {
-                        writer.write("[eventName]: JSON.parse(Buffer.from(event[eventName].body).toString()),");
-                    });
-                });
+                writer.addImport("deserEventStream", "__deserEventStream", "@aws-sdk/smithy-client");
+
+                writer.write("const parsedEvent = __deserEventStream(event);");
                 String deserFunctionName = ProtocolGenerator.getDeserFunctionName(
                     targetSymbol, context.getProtocolName()
                 );
-                writer.write("return " + deserFunctionName + "(parsedEvent, context)." + memberName);
+                writer.write("return $1L({ $2L: parsedEvent }, context).$2L;",
+                    deserFunctionName, memberName
+                );
             });
         });
     }

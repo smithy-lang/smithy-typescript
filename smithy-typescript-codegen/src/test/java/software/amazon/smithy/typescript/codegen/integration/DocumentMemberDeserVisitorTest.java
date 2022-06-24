@@ -66,7 +66,7 @@ public class DocumentMemberDeserVisitorTest {
                         return memberShape;
                     }
                 };
-        assertThat(expected, equalTo(shape.accept(visitor)));
+        assertThat(shape.accept(visitor), equalTo(expected));
     }
 
     public static Collection<Object[]> validMemberTargetTypes() {
