@@ -506,9 +506,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.openBlock(assignTo + " = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
             writer.openBlock("async event => {", "}", () -> {
-                writer.addImport("deserEventStream", "__deserEventStream", "@aws-sdk/smithy-client");
+                writer.addImport("toEventMessage", "__toEventMessage", "@aws-sdk/smithy-client");
 
-                writer.write("const parsedEvent = __deserEventStream(event);");
+                writer.write("const parsedEvent = __toEventMessage(event);");
                 String deserFunctionName = ProtocolGenerator.getDeserFunctionName(
                     targetSymbol, context.getProtocolName()
                 );
