@@ -2455,8 +2455,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("const data: any = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
             writer.openBlock("async event => {", "}", () -> {
-                writer.addImport("deserEventStream", "__deserEventStream", "@aws-sdk/smithy-client");
-                writer.write("const parsedEvent = __deserEventStream(event);");
+                writer.addImport("toEventMessage", "__toEventMessage", "@aws-sdk/smithy-client");
+                writer.write("const parsedEvent = __toEventMessage(event);");
                 Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
                 StringBuilder deserFunctionBuilder = new StringBuilder(ProtocolGenerator.getDeserFunctionName(
                         targetSymbol, context.getProtocolName())).append("_event");
