@@ -43,12 +43,14 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * Abstract implementation useful for all HTTP protocols without bindings.
  */
 @SmithyUnstableApi
-public abstract class HttpRpcProtocolGenerator extends ProtocolGeneratorSharedBaseMethods {
+public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
     public static final Logger LOGGER = Logger.getLogger(HttpRpcProtocolGenerator.class.getName());
     private static final ApplicationProtocol APPLICATION_PROTOCOL
         = ApplicationProtocol.createDefaultHttpApplicationProtocol();
-
+    private final Set<Shape> serializationDocumentShapes = new TreeSet<>();
+    private final Set<Shape> deserializationDocumentShapes = new TreeSet<>();
+    private final Set<StructureShape> deserializationErrorShapes = new TreeSet<>();
     private final boolean isErrorCodeInBody;
 
     /**
