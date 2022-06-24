@@ -2560,125 +2560,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
 
-    /**
-     * Writes the code that loads an optional {@code errorCode} String with the content used
-     * to dispatch errors to specific serializers. If an error code cannot be load, the code
-     * must return {@code undefined} so default value can be injected in default case.
-     *
-     * <p>Two variables will be in scope:
-     *   <ul>
-     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
-     *          <ul>
-     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
-     *              {@code false}</li>
-     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
-     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
-     *          </ul>
-     *       </li>
-     *       <li>{@code context}: the SerdeContext.</li>
-     *   </ul>
-     *
-     * <p>For example:
-     *
-     * <pre>{@code
-     * const errorCode = output.headers["x-amzn-errortype"].split(':')[0];
-     * }</pre>
-     *
-     * @param context The generation context.
-     */
-    protected abstract void writeErrorCodeParser(GenerationContext context);
-
-    /**
-     * Provides where within the passed output variable the actual error resides. This is useful
-     * for protocols that wrap the specific error in additional elements within the body.
-     *
-     * @param context The generation context.
-     * @param outputLocation The name of the variable containing the output body.
-     * @return A string of the variable containing the error body within the output.
-     */
-    protected String getErrorBodyLocation(GenerationContext context, String outputLocation) {
-        return outputLocation;
-    }
-
-    /**
-     * Writes the code needed to deserialize a protocol input document.
-     *
-     * <p>Implementations of this method are expected to set members in the
-     * {@code contents} variable that represents the type generated for the
-     * response. This variable will already be defined in scope.
-     *
-     * <p>The contents of the response body will be available in a {@code data} variable.
-     *
-     * <p>For example:
-     *
-     * <pre>{@code
-     * if (data.fieldList !== undefined) {
-     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
-     * }
-     * }</pre>
-     * @param context The generation context.
-     * @param operation The operation whose input document is being deserialized.
-     * @param documentBindings The bindings to read from the document.
-     */
-    protected abstract void deserializeInputDocumentBody(
-            GenerationContext context,
-            OperationShape operation,
-            List<HttpBinding> documentBindings
-    );
-
-    /**
-     * Writes the code needed to deserialize a protocol output document.
-     *
-     * <p>Implementations of this method are expected to set members in the
-     * {@code contents} variable that represents the type generated for the
-     * response. This variable will already be defined in scope.
-     *
-     * <p>The contents of the response body will be available in a {@code data} variable.
-     *
-     * <p>For example:
-     *
-     * <pre>{@code
-     * if (data.fieldList !== undefined) {
-     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
-     * }
-     * }</pre>
-     * @param context The generation context.
-     * @param operation The operation whose output document is being deserialized.
-     * @param documentBindings The bindings to read from the document.
-     */
-    protected abstract void deserializeOutputDocumentBody(
-            GenerationContext context,
-            OperationShape operation,
-            List<HttpBinding> documentBindings
-    );
-
-    /**
-     * Writes the code needed to deserialize a protocol error document.
-     *
-     * <p>Implementations of this method are expected to set members in the
-     * {@code contents} variable that represents the type generated for the
-     * response. This variable will already be defined in scope.
-     *
-     * <p>The contents of the response body will be available in a {@code data} variable.
-     *
-     * <p>For example:
-     *
-     * <pre>{@code
-     * if (data.fieldList !== undefined) {
-     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
-     * }
-     * }</pre>
-     * @param context The generation context.
-     * @param error The error being deserialized.
-     * @param documentBindings The bindings to read from the document.
-     */
-    protected abstract void deserializeErrorDocumentBody(
-            GenerationContext context,
-            StructureShape error,
-            List<HttpBinding> documentBindings
-    );
-
-
     // Parse members from event headers.
     protected void readEventHeaders(ProtocolGenerator.GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
@@ -3031,18 +2912,131 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
+     * Writes the code that loads an {@code errorCode} String with the content used
+     * to dispatch errors to specific serializers.
+     *
+     * <p>Two variables will be in scope:
+     *   <ul>
+     *       <li>{@code output} or {@code parsedOutput}: a value of the HttpResponse type.
+     *          <ul>
+     *              <li>{@code output} is a raw HttpResponse, available when {@code isErrorCodeInBody} is set to
+     *              {@code false}</li>
+     *              <li>{@code parsedOutput} is a HttpResponse type with body parsed to JavaScript object, available
+     *              when {@code isErrorCodeInBody} is set to {@code true}</li>
+     *          </ul>
+     *       </li>
+     *       <li>{@code context}: the SerdeContext.</li>
+     *   </ul>
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * errorCode = output.headers["x-amzn-errortype"].split(':')[0];
+     * }</pre>
+     *
+     * @param context The generation context.
+     */
+    protected abstract void writeErrorCodeParser(GenerationContext context);
+
+    /**
+     * Provides where within the passed output variable the actual error resides. This is useful
+     * for protocols that wrap the specific error in additional elements within the body.
+     *
+     * @param context The generation context.
+     * @param outputLocation The name of the variable containing the output body.
+     * @return A string of the variable containing the error body within the output.
+     */
+    protected String getErrorBodyLocation(GenerationContext context, String outputLocation) {
+        return outputLocation;
+    }
+
+    /**
+     * Writes the code needed to deserialize a protocol input document.
+     *
+     * <p>Implementations of this method are expected to set members in the
+     * {@code contents} variable that represents the type generated for the
+     * response. This variable will already be defined in scope.
+     *
+     * <p>The contents of the response body will be available in a {@code data} variable.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (data.fieldList !== undefined) {
+     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param operation The operation whose input document is being deserialized.
+     * @param documentBindings The bindings to read from the document.
+     */
+    protected abstract void deserializeInputDocumentBody(
+            GenerationContext context,
+            OperationShape operation,
+            List<HttpBinding> documentBindings
+    );
+
+    /**
+     * Writes the code needed to deserialize a protocol output document.
+     *
+     * <p>Implementations of this method are expected to set members in the
+     * {@code contents} variable that represents the type generated for the
+     * response. This variable will already be defined in scope.
+     *
+     * <p>The contents of the response body will be available in a {@code data} variable.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (data.fieldList !== undefined) {
+     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param operation The operation whose output document is being deserialized.
+     * @param documentBindings The bindings to read from the document.
+     */
+    protected abstract void deserializeOutputDocumentBody(
+            GenerationContext context,
+            OperationShape operation,
+            List<HttpBinding> documentBindings
+    );
+
+    /**
+     * Writes the code needed to deserialize a protocol error document.
+     *
+     * <p>Implementations of this method are expected to set members in the
+     * {@code contents} variable that represents the type generated for the
+     * response. This variable will already be defined in scope.
+     *
+     * <p>The contents of the response body will be available in a {@code data} variable.
+     *
+     * <p>For example:
+     *
+     * <pre>{@code
+     * if (data.fieldList !== undefined) {
+     *   contents.fieldList = deserializeAws_restJson1_1FieldList(data.fieldList, context);
+     * }
+     * }</pre>
+     * @param context The generation context.
+     * @param error The error being deserialized.
+     * @param documentBindings The bindings to read from the document.
+     */
+    protected abstract void deserializeErrorDocumentBody(
+            GenerationContext context,
+            StructureShape error,
+            List<HttpBinding> documentBindings
+    );
+
+    /**
      * @return true if this protocol disallows string epoch timestamps in payloads.
      */
-    protected boolean requiresNumericEpochSecondsInPayload() {
-        return true;
-    }
+    protected abstract boolean requiresNumericEpochSecondsInPayload();
 
     /**
      * Gets the default serde format for timestamps.
      *
      * @return Returns the default format.
      */
-    protected TimestampFormatTrait.Format getDocumentTimestampFormat() {
-        return TimestampFormatTrait.Format.EPOCH_SECONDS;
-    }
+    protected abstract TimestampFormatTrait.Format getDocumentTimestampFormat();
 }
