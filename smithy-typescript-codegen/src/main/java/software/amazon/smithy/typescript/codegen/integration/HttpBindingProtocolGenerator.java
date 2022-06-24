@@ -1733,6 +1733,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializationDocumentShapes.add(target);
             });
+            // TODO: can be `return response;` in async function.
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
@@ -2091,6 +2092,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializationDocumentShapes.add(target);
             });
+            // TODO: can be `return response;` in async function.
             writer.write("return Promise.resolve(contents);");
         });
         writer.write("");
@@ -2561,7 +2563,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
 
     // Parse members from event headers.
-    protected void readEventHeaders(ProtocolGenerator.GenerationContext context, StructureShape event) {
+    private void readEventHeaders(ProtocolGenerator.GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         List<MemberShape> headerMembers = event.getAllMembers().values().stream()
@@ -2577,7 +2579,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    protected void readEventBody(ProtocolGenerator.GenerationContext context, StructureShape event) {
+    private void readEventBody(ProtocolGenerator.GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
         // Parse members from event payload.
         List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
@@ -2607,7 +2609,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
     }
 
-    protected void readEventPayload(ProtocolGenerator.GenerationContext context, MemberShape payloadMember) {
+    private void readEventPayload(ProtocolGenerator.GenerationContext context, MemberShape payloadMember) {
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         Shape payloadTarget = model.expectShape(payloadMember.getTarget());
@@ -2641,7 +2643,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output value.
      */
-    protected String getOutputValue(
+    private String getOutputValue(
         ProtocolGenerator.GenerationContext context,
         HttpBinding.Location bindingType,
         String dataSource,
@@ -2690,9 +2692,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *                   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output boolean.
      */
-    protected String getBooleanOutputParam(ProtocolGenerator.GenerationContext context,
-                                           HttpBinding.Location bindingType,
-                                           String dataSource) {
+    private String getBooleanOutputParam(ProtocolGenerator.GenerationContext context,
+                                         HttpBinding.Location bindingType,
+                                         String dataSource) {
         switch (bindingType) {
             case QUERY:
             case LABEL:
@@ -2716,7 +2718,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the input string.
      */
-    protected String getStringOutputParam(
+    private String getStringOutputParam(
         ProtocolGenerator.GenerationContext context,
         HttpBinding.Location bindingType,
         String dataSource,
@@ -2731,7 +2733,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             context, target, dataSource, !isGuaranteedString(bindingType));
     }
 
-    protected boolean isGuaranteedString(HttpBinding.Location bindingType) {
+    private boolean isGuaranteedString(HttpBinding.Location bindingType) {
         return bindingType != HttpBinding.Location.PAYLOAD && bindingType != HttpBinding.Location.DOCUMENT;
     }
 
@@ -2745,7 +2747,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *                   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output blob.
      */
-    protected String getBlobOutputParam(HttpBinding.Location bindingType, String dataSource) {
+    private String getBlobOutputParam(HttpBinding.Location bindingType, String dataSource) {
         switch (bindingType) {
             case PAYLOAD:
                 return dataSource;
@@ -2770,7 +2772,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output collection.
      */
-    protected String getCollectionOutputParam(
+    private String getCollectionOutputParam(
         ProtocolGenerator.GenerationContext context,
         HttpBinding.Location bindingType,
         String dataSource,
@@ -2840,7 +2842,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output shape.
      */
-    protected String getNamedMembersOutputParam(
+    private String getNamedMembersOutputParam(
         ProtocolGenerator.GenerationContext context,
         HttpBinding.Location bindingType,
         String dataSource,
@@ -2868,7 +2870,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @param target The shape of the value being provided.
      * @return Returns a value or expression of the output number.
      */
-    protected String getNumberOutputParam(
+    private String getNumberOutputParam(
         ProtocolGenerator.GenerationContext context,
         HttpBinding.Location bindingType,
         String dataSource,

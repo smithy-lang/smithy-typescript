@@ -380,7 +380,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     writer.write("...contents,");
                 });
             });
-            writer.write("return response;");
+            // TODO: can be `return response;` in async function.
+            writer.write("return Promise.resolve(response);");
         });
         writer.write("");
 

@@ -18,7 +18,7 @@ package software.amazon.smithy.typescript.codegen.validation;
 import java.util.regex.Pattern;
 
 /**
- * @deprecated use the one from Smithy-Typescript instead.
+ * TODO: deprecate and remove the copy of this utility in JS SDK V3 codegen.
  */
 public final class PropertyAccessor {
     /**
@@ -49,7 +49,7 @@ public final class PropertyAccessor {
      * @param propertyName - property being accessed.
      * @return e.g. someObject.prop or someObject['property name'] or reluctantly someObject[`bad"property"name`].
      */
-    public static String access(String variable, String propertyName) {
+    public static String get(String variable, String propertyName) {
         return variable + getPropertyAccessor(propertyName);
     }
 }
