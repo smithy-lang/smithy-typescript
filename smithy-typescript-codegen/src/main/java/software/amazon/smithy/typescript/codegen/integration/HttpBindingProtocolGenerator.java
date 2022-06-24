@@ -65,7 +65,6 @@ import software.amazon.smithy.model.traits.HttpQueryTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
@@ -2455,8 +2454,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("const data: any = context.eventStreamMarshaller.deserialize(", ");", () -> {
             writer.write("output.body,");
             writer.openBlock("async event => {", "}", () -> {
-                writer.addImport("toEventMessage", "__toEventMessage", "@aws-sdk/smithy-client");
-                writer.write("const parsedEvent = __toEventMessage(event);");
+                writer.write("const eventName = Object.keys(event)[0];");
+                writer.openBlock("const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
+                    writer.write(
+                        "(accummulator, curr) => {accummulator[curr[0]] = curr[1].value; return accummulator; },");
+                    writer.write("{} as Record<string, any>");
+                });
+                writer.openBlock("const eventMessage = {", "};", () -> {
+                    writer.write("headers: eventHeaders,");
+                    writer.write("body: event[eventName].body");
+                });
+                writer.openBlock("const parsedEvent = {", "};", () -> {
+                    writer.write("[eventName]: eventMessage");
+                });
                 Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
                 StringBuilder deserFunctionBuilder = new StringBuilder(ProtocolGenerator.getDeserFunctionName(
                         targetSymbol, context.getProtocolName())).append("_event");
@@ -2660,7 +2670,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             return dataSource;
         } else if (target instanceof TimestampShape) {
             HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-            TimestampFormatTrait.Format format = httpIndex.determineTimestampFormat(
+            Format format = httpIndex.determineTimestampFormat(
                 member, bindingType,
                 getDocumentTimestampFormat()
             );
@@ -2807,14 +2817,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 if (collectionTarget.isTimestampShape()) {
                     // Check if our member resolves to the HTTP_DATE format.
                     HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-                    TimestampFormatTrait.Format format =
+                    Format format =
                         httpIndex.determineTimestampFormat(
                             targetMember,
                             bindingType,
-                            TimestampFormatTrait.Format.HTTP_DATE
+                            Format.HTTP_DATE
                         );
 
-                    if (format == TimestampFormatTrait.Format.HTTP_DATE) {
+                    if (format == Format.HTTP_DATE) {
                         TypeScriptWriter writer = context.getWriter();
                         writer.addImport("splitEvery", "__splitEvery", "@aws-sdk/smithy-client");
                         outputParam = "__splitEvery(" + dataSource + ", ',', 2)";
@@ -3040,5 +3050,5 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      *
      * @return Returns the default format.
      */
-    protected abstract TimestampFormatTrait.Format getDocumentTimestampFormat();
+    protected abstract Format getDocumentTimestampFormat();
 }
