@@ -67,24 +67,27 @@ final class StructureGenerator implements Runnable {
     private final TypeScriptWriter writer;
     private final StructureShape shape;
     private final boolean includeValidation;
+    private final boolean backwardCompatibleRequiredMember;
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
-        this(model, symbolProvider, writer, shape, false);
+        this(model, symbolProvider, writer, shape, false, true);
     }
 
     StructureGenerator(Model model,
                        SymbolProvider symbolProvider,
                        TypeScriptWriter writer,
                        StructureShape shape,
-                       boolean includeValidation) {
+                       boolean includeValidation,
+                       boolean backwardCompatibleRequiredMember) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;
         this.includeValidation = includeValidation;
+        this.backwardCompatibleRequiredMember = backwardCompatibleRequiredMember;
     }
 
     @Override
@@ -158,7 +161,7 @@ final class StructureGenerator implements Runnable {
         }
 
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
+                model, symbolProvider, shape.getAllMembers().values(), this.backwardCompatibleRequiredMember);
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
@@ -255,7 +258,7 @@ final class StructureGenerator implements Runnable {
             HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
-                shape.getAllMembers().values());
+                shape.getAllMembers().values(), this.backwardCompatibleRequiredMember);
         // since any error interface must extend from JavaScript Error interface, message member is already
         // required in the JavaScript Error interface
         structuredMemberWriter.skipMembers.add("message");

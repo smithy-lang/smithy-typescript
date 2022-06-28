@@ -60,12 +60,18 @@ final class StructuredMemberWriter {
     Collection<MemberShape> members;
     String memberPrefix = "";
     boolean noDocs;
+    boolean backwardCompatible;
     final Set<String> skipMembers = new HashSet<>();
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
+        this(model, symbolProvider, members, true);
+    }
+
+    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members, boolean backwardCompatible) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = new LinkedHashSet<>(members);
+        this.backwardCompatible = backwardCompatible;
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
@@ -79,7 +85,7 @@ final class StructuredMemberWriter {
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
-            String typeSuffix = isRequiredMember(member) ? " | undefined" : "";
+            String typeSuffix = backwardCompatible && isRequiredMember(member) ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                          symbolProvider.toSymbol(member), typeSuffix);
 

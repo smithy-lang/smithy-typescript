@@ -43,6 +43,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public final class TypeScriptSettings {
 
     static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
+    static final String BACKWARD_COMPATIBLE_REQUIRED_MEMBER = "backwardCompatibleRequiredMember";
     static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
@@ -65,6 +66,7 @@ public final class TypeScriptSettings {
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
+    private boolean backwardCompatibleRequiredMember = true;
     private PackageManager packageManager = PackageManager.YARN;
 
     @Deprecated
@@ -105,6 +107,7 @@ public final class TypeScriptSettings {
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
+        settings.setBackwardCompatibleRequiredMember(config.getBooleanMemberOrDefault(BACKWARD_COMPATIBLE_REQUIRED_MEMBER));
 
         settings.setPluginSettings(config);
         return settings;
@@ -293,6 +296,19 @@ public final class TypeScriptSettings {
 
     public void setDisableDefaultValidation(boolean disableDefaultValidation) {
         this.disableDefaultValidation = disableDefaultValidation;
+    }
+
+    /**
+     * Returns whether or not required members are backward-compatible.
+     *
+     * @return true if required members are backward-compatible. Default: true
+     */
+    public boolean isBackwardCompatibleRequiredMember() {
+        return backwardCompatibleRequiredMember;
+    }
+
+    public void setBackwardCompatibleRequiredMember(boolean backwardCompatibleRequiredMember) {
+        this.backwardCompatibleRequiredMember = backwardCompatibleRequiredMember;
     }
 
     /**
