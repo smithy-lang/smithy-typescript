@@ -67,7 +67,8 @@ final class StructuredMemberWriter {
         this(model, symbolProvider, members, true);
     }
 
-    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members, boolean backwardCompatible) {
+    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members,
+            boolean backwardCompatible) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = new LinkedHashSet<>(members);

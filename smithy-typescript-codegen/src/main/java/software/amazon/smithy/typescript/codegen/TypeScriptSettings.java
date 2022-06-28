@@ -107,7 +107,8 @@ public final class TypeScriptSettings {
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
-        settings.setBackwardCompatibleRequiredMember(config.getBooleanMemberOrDefault(BACKWARD_COMPATIBLE_REQUIRED_MEMBER));
+        settings.setBackwardCompatibleRequiredMember(
+                config.getBooleanMemberOrDefault(BACKWARD_COMPATIBLE_REQUIRED_MEMBER));
 
         settings.setPluginSettings(config);
         return settings;
