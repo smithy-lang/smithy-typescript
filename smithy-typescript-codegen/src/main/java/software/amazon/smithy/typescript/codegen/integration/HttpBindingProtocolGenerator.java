@@ -15,8 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
-import static software.amazon.smithy.model.knowledge.HttpBinding.Location;
-
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +35,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.HttpBinding;
+import software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -1584,7 +1583,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writer.openBlock("headers: {", "},", () -> {
                     //fix headers required by event stream
                     writer.write("\":event-type\": { type: \"string\", value: $S },", symbol.getName());
-                    writer.write("\":message-type\": { type: \"string\", value: \"event\" }");
+                    writer.write("\":message-type\": { type: \"string\", value: \"event\" },");
+                    writeEventContentTypeHeader(context, event);
                 });
                 writer.write("body: new Uint8Array()");
             });
@@ -1592,6 +1592,31 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeEventBody(context, event);
             writer.write("return message;");
         });
+    }
+
+    private void writeEventContentTypeHeader(GenerationContext context, StructureShape event) {
+        TypeScriptWriter writer = context.getWriter();
+        Shape payloadShape = getEventPayloadShape(context, event);
+        if (payloadShape instanceof BlobShape) {
+            writer.write("\":content-type\": { type: \"string\", value: \"application/octet-stream\" },");
+        } else if (payloadShape instanceof StringShape) {
+            writer.write("\":content-type\": { type: \"string\", value: \"text/plain\" },");
+        } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
+            writer.write("\":content-type\": { type: \"string\", value: $S },", getDocumentContentType());
+        } else {
+            throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
+                    payloadShape.getType()));
+        }
+    }
+
+    private Shape getEventPayloadShape(GenerationContext context, StructureShape event) {
+        Model model = context.getModel();
+        List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
+                .filter(member -> member.hasTrait(EventPayloadTrait.class))
+                .collect(Collectors.toList());
+        return payloadMembers.isEmpty()
+                        ? event // implicit payload
+                        : model.expectShape(payloadMembers.get(0).getTarget());
     }
 
     private void writeEventHeaders(GenerationContext context, StructureShape event) {
@@ -1633,16 +1658,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private void writeEventBody(GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
-        List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventPayloadTrait.class))
-                .collect(Collectors.toList());
-        Shape payloadShape = payloadMembers.isEmpty()
-                        ? event // implicit payload
-                        : model.expectShape(payloadMembers.get(0).getTarget());
+        Shape payloadShape = getEventPayloadShape(context, event);
         if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
             // Since event itself must be a structure shape, so string or blob payload member must has eventPayload
             // trait explicitly.
-            MemberShape payloadMember = payloadMembers.get(0);
+            MemberShape payloadMember = event.getAllMembers().values().stream()
+                    .filter(member -> member.hasTrait(EventPayloadTrait.class))
+                    .collect(Collectors.toList()).get(0);
             String payloadMemberName = payloadMember.getMemberName();
             writer.write("message.body = $L || message.body;",
                     getInputValue(context, Location.PAYLOAD, "input." + payloadMemberName, payloadMember,
