@@ -508,7 +508,19 @@ public class StructureGeneratorTest {
                                 + "})");
     }
 
+    @Test
+    public void properlyGeneratesRequiredMessageMemberNotBackwardCompatible() {
+        testStructureCodegenBase("test-required-member.smithy",
+                                "export interface GetFooOutput {\n"
+                                + "  someRequiredMember: string;\n"
+                                + "}\n", false);
+    }
+
     private String testStructureCodegen(String file, String expectedType) {
+        return testStructureCodegenBase(file, expectedType, true);
+    }
+
+    private String testStructureCodegenBase(String file, String expectedType, boolean backwardCompatibleRequiredMember) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource(file))
                 .assemble()
@@ -521,6 +533,7 @@ public class StructureGeneratorTest {
                         .withMember("service", Node.from("smithy.example#Example"))
                         .withMember("package", Node.from("example"))
                         .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("backwardCompatibleRequiredMember", Node.from(backwardCompatibleRequiredMember))
                         .build())
                 .build();
 
