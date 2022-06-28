@@ -2889,8 +2889,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code that loads an {@code errorCode} String with the content used
-     * to dispatch errors to specific serializers.
+     * Writes the code that loads an optional {@code errorCode} String with the content used
+     * to dispatch errors to specific serializers. If an error code cannot be load, the code
+     * must return {@code undefined} so default value can be injected in default case.
      *
      * <p>Two variables will be in scope:
      *   <ul>
@@ -2908,7 +2909,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * <p>For example:
      *
      * <pre>{@code
-     * errorCode = output.headers["x-amzn-errortype"].split(':')[0];
+     * const errorCode = output.headers["x-amzn-errortype"].split(':')[0];
      * }</pre>
      *
      * @param context The generation context.

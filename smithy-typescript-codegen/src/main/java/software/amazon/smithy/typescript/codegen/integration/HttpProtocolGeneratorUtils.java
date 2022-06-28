@@ -349,7 +349,6 @@ public final class HttpProtocolGeneratorUtils {
             // Error responses must be at least BaseException interface
             SymbolReference baseExceptionReference = getClientBaseException(context);
             writer.write("let response: $T;", baseExceptionReference);
-            writer.write("let errorCode: string = \"UnknownError\";");
             errorCodeGenerator.accept(context);
             writer.openBlock("switch (errorCode) {", "}", () -> {
                 // Generate the case statement for each error, invoking the specific deserializer.
@@ -381,10 +380,14 @@ public final class HttpProtocolGeneratorUtils {
 
                         // Get the protocol specific error location for retrieving contents.
                         String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
+                        writer.write("const $$metadata = deserializeMetadata(output);");
+                        writer.write("const statusCode = $$metadata.httpStatusCode ? $$metadata.httpStatusCode"
+                                + " + '' : undefined;");
                         writer.openBlock("response = new $T({", "});", baseExceptionReference, () -> {
-                            writer.write("name: $1L.code || $1L.Code || errorCode,", errorLocation);
+                            writer.write("name: $1L.code || $1L.Code || errorCode || statusCode || 'UnknowError',",
+                                    errorLocation);
                             writer.write("$$fault: \"client\",");
-                            writer.write("$$metadata: deserializeMetadata(output)");
+                            writer.write("$$metadata");
                         });
                         writer.addImport("decorateServiceException", "__decorateServiceException",
                                 TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
