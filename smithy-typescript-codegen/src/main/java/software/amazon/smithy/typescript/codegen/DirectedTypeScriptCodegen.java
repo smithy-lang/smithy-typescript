@@ -176,7 +176,6 @@ final class DirectedTypeScriptCodegen
             delegator.useFileWriter(fileName, writer -> {
                 ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
                 context.setProtocolName(protocolGenerator.getName());
-                context.setIntegrations(integrations);
                 context.setModel(model);
                 context.setService(service);
                 context.setSettings(settings);
@@ -187,17 +186,15 @@ final class DirectedTypeScriptCodegen
                     protocolGenerator.generateResponseDeserializers(context);
                 }
                 if (context.getSettings().generateServerSdk()) {
-                    ProtocolGenerator.GenerationContext serverContext =
-                            context.withSymbolProvider(symbolProvider);
-                    protocolGenerator.generateRequestDeserializers(serverContext);
-                    protocolGenerator.generateResponseSerializers(serverContext);
-                    protocolGenerator.generateFrameworkErrorSerializer(serverContext);
+                    protocolGenerator.generateRequestDeserializers(context);
+                    protocolGenerator.generateResponseSerializers(context);
+                    protocolGenerator.generateFrameworkErrorSerializer(context);
                     delegator.useShapeWriter(service, w -> {
-                        protocolGenerator.generateServiceHandlerFactory(serverContext.withWriter(w));
+                        protocolGenerator.generateServiceHandlerFactory(context.withWriter(w));
                     });
                     for (OperationShape operation : TopDownIndex.of(model).getContainedOperations(service)) {
                         delegator.useShapeWriter(operation, w -> {
-                            protocolGenerator.generateOperationHandlerFactory(serverContext.withWriter(w), operation);
+                            protocolGenerator.generateOperationHandlerFactory(context.withWriter(w), operation);
                         });
                     }
                 }
@@ -430,7 +427,6 @@ final class DirectedTypeScriptCodegen
         if (protocolGenerator != null) {
             ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
             context.setProtocolName(protocolGenerator.getName());
-            context.setIntegrations(directive.context().integrations());
             context.setModel(directive.model());
             context.setService(directive.service());
             context.setSettings(directive.settings());
