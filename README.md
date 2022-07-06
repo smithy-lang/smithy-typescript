@@ -17,6 +17,15 @@ are as follows:
 2. Create a `build.gradle.kts` file with the following contents:
 
    ```kotlin
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+        dependencies {
+            "classpath"("software.amazon.smithy:smithy-cli:[1.19.0,1.20.0[")
+        }
+    }
+
     plugins {
         id("software.amazon.smithy").version("0.6.0")
     }
@@ -27,7 +36,7 @@ are as follows:
     }
 
     dependencies {
-        implementation("software.amazon.smithy:smithy-model:[1.17.0, 2.0[")
+        implementation("software.amazon.smithy:smithy-model:[1.19.0,1.20.0[")
         implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.11.0")
     }
    ```
