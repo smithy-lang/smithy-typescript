@@ -20,19 +20,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
-import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -434,29 +432,11 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     }
 
     private boolean isStreamingUnionOutput(GenerationContext context, OperationShape operation) {
-        if (operation.getOutput().isPresent()) {
-            ShapeId shapeId = operation.getOutput().get();
-            Optional<StructureShape> structureShape = context.getModel().expectShape(shapeId).asStructureShape();
-            if (structureShape.isPresent()) {
-                StructureShape outputShape = structureShape.get();
-
-                Collection<MemberShape> memberValues = outputShape.getAllMembers().values();
-                Optional<MemberShape> first = memberValues.stream().findFirst();
-                Set<UnionShape> unionShapesWithTrait =
-                    context.getModel().getUnionShapesWithTrait(StreamingTrait.class);
-
-                boolean hasStreamingUnion = first.isPresent()
-                    && memberValues.size() == 1
-                    && unionShapesWithTrait
-                    .stream()
-                    .map(Shape::getId)
-                    .collect(Collectors.toSet())
-                    .contains(first.get().getTarget());
-
-                return hasStreamingUnion;
-            }
-        }
-        return false;
+        EventStreamIndex eventStreamTrait = EventStreamIndex.of(context.getModel());
+        boolean targetIsUnion = eventStreamTrait.getOutputInfo(operation).map(
+            info -> info.getEventStreamTarget() instanceof UnionShape
+        ).orElse(false);
+        return targetIsUnion;
     }
 
     private void readResponseBody(GenerationContext context, OperationShape operation) {
