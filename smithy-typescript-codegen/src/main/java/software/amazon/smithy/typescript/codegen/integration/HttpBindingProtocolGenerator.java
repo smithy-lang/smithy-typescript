@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -2326,8 +2327,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Handle streaming shapes differently.
         if (target.hasTrait(StreamingTrait.class)) {
-            // If payload is streaming, return raw low-level stream directly.
-            writer.write("const data: any = output.body;");
+            // If payload is streaming, return low-level stream with the stream utility functions mixin.
+            writer.write("const data: any = context.sdkStreamMixin(output.body);");
         } else if (target instanceof BlobShape) {
             // If payload is non-streaming Blob, only need to collect stream to binary data (Uint8Array).
             writer.write("const data: any = await collectBody(output.body, context);");

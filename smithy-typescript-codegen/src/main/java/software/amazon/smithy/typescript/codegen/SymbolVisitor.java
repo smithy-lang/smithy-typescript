@@ -138,9 +138,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol blobShape(BlobShape shape) {
         if (shape.hasTrait(StreamingTrait.class)) {
-            // Note: `Readable` needs an import and a dependency.
-            return createSymbolBuilder(shape, "Readable | ReadableStream | Blob", null)
+            // Note: `Readable` and `SdkStream` needs an import and a dependency.
+            return createSymbolBuilder(shape, "SdkStream<Readable | ReadableStream | Blob>", null)
                     .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
+                    .addReference(Symbol.builder().name("SdkStream").namespace(
+                            TypeScriptDependency.AWS_SDK_TYPES.packageName, "/").build())
                     .build();
         }
 
