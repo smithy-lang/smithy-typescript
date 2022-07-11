@@ -115,6 +115,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
+     * Gets the default serde format for timestamps.
+     *
+     * @return Returns the default format.
+     */
+    protected abstract Format getDocumentTimestampFormat();
+
+    /**
      * Gets the default content-type when a document is synthesized in the body.
      *
      * @return Returns the default content-type.
@@ -2924,8 +2931,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Writes the code that loads an {@code errorCode} String with the content used
-     * to dispatch errors to specific serializers.
+     * Writes the code that loads an optional {@code errorCode} String with the content used
+     * to dispatch errors to specific serializers. If an error code cannot be load, the code
+     * must return {@code undefined} so default value can be injected in default case.
      *
      * <p>Two variables will be in scope:
      *   <ul>
@@ -2943,7 +2951,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * <p>For example:
      *
      * <pre>{@code
-     * errorCode = output.headers["x-amzn-errortype"].split(':')[0];
+     * const errorCode = output.headers["x-amzn-errortype"].split(':')[0];
      * }</pre>
      *
      * @param context The generation context.
@@ -3044,11 +3052,4 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @return true if this protocol disallows string epoch timestamps in payloads.
      */
     protected abstract boolean requiresNumericEpochSecondsInPayload();
-
-    /**
-     * Gets the default serde format for timestamps.
-     *
-     * @return Returns the default format.
-     */
-    protected abstract Format getDocumentTimestampFormat();
 }
