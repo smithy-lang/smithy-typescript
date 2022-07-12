@@ -28,6 +28,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -75,12 +76,14 @@ public final class CodegenUtils {
 
     /**
      * Get context type for command deserializer function.
+     * @param settings The TypeScript settings
      * @param writer The code writer.
      * @param model The model for the service containing the given command.
      * @param operation The operation shape for given command.
      * @return The TypeScript type for the deserializer context
      */
     public static String getOperationDeserializerContextType(
+            TypeScriptSettings settings,
             TypeScriptWriter writer,
             Model model,
             OperationShape operation
@@ -90,8 +93,14 @@ public final class CodegenUtils {
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
+            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
+                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
             contextInterfaceList.add("__EventStreamSerdeContext");
+        }
+        if (AddSdkStreamMixinDependency.hasStreamingBlobDeser(settings, model, operation)) {
+            writer.addImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext",
+                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            contextInterfaceList.add("__SdkStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
     }

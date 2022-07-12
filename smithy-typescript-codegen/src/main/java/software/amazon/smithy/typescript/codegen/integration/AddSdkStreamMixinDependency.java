@@ -41,7 +41,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * runtime-specific stream implementations.
  */
 @SmithyInternalApi
-public final class SdkStreamUtilsMixin implements TypeScriptIntegration {
+public final class AddSdkStreamMixinDependency implements TypeScriptIntegration {
 
     @Override
     public void addConfigInterfaceFields(
@@ -50,7 +50,7 @@ public final class SdkStreamUtilsMixin implements TypeScriptIntegration {
         SymbolProvider symbolProvider,
         TypeScriptWriter writer
     ) {
-        if (!hasStreamingBlobResponse(model, settings.getService(model))) {
+        if (!hasStreamingBlobDeser(settings, model)) {
             return;
         }
 
@@ -68,7 +68,7 @@ public final class SdkStreamUtilsMixin implements TypeScriptIntegration {
         SymbolProvider symbolProvider,
         LanguageTarget target
     ) {
-        if (!hasStreamingBlobResponse(model, settings.getService(model))) {
+        if (!hasStreamingBlobDeser(settings, model)) {
             return Collections.emptyMap();
         }
         switch (target) {
@@ -91,16 +91,29 @@ public final class SdkStreamUtilsMixin implements TypeScriptIntegration {
         }
     }
 
-    private static boolean hasStreamingBlobResponse(Model model, ServiceShape serviceShape) {
+    private static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model) {
+        ServiceShape serviceShape = settings.getService(model);
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(serviceShape);
         for (OperationShape operation : operations) {
-            StructureShape outputShape = model.expectShape(operation.getOutputShape()).asStructureShape().get();
-            for (MemberShape member : outputShape.members()) {
-                Shape shape = model.expectShape(member.getTarget());
-                if (shape instanceof BlobShape && shape.hasTrait(StreamingTrait.class)) {
-                    return true;
-                }
+            if (hasStreamingBlobDeser(settings, model, operation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model, OperationShape operation) {
+        StructureShape ioShapeToDeser;
+        if (settings.generateServerSdk()) {
+            ioShapeToDeser = model.expectShape(operation.getInputShape()).asStructureShape().get();
+        } else {
+            ioShapeToDeser = model.expectShape(operation.getOutputShape()).asStructureShape().get();
+        }
+        for (MemberShape member : ioShapeToDeser.members()) {
+            Shape shape = model.expectShape(member.getTarget());
+            if (shape instanceof BlobShape && shape.hasTrait(StreamingTrait.class)) {
+                return true;
             }
         }
         return false;
