@@ -371,7 +371,8 @@ final class CommandGenerator implements Runnable {
                 .write("private deserialize(")
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
-                    .write("context: $L", CodegenUtils.getOperationDeserializerContextType(writer, model, operation))
+                    .write("context: $L",
+                            CodegenUtils.getOperationDeserializerContextType(settings, writer, model, operation))
                 .dedent()
                 .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
                 .write("");

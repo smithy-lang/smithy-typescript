@@ -2025,7 +2025,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
-        String contextType = CodegenUtils.getOperationDeserializerContextType(writer, context.getModel(), operation);
+        String contextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
+                context.getModel(), operation);
 
         // Handle the general response.
         writer.openBlock("export const $L = async(\n"
