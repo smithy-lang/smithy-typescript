@@ -380,8 +380,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
-        String serdeContextType = CodegenUtils.getOperationDeserializerContextType(writer, context.getModel(),
-                operation);
+        String serdeContextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
+                context.getModel(), operation);
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
 
