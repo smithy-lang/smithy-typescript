@@ -326,7 +326,7 @@ public class EventStreamGenerator {
                 + "  context: $L\n"
                 + "): AsyncIterable<$T> => {", "}", methodName, contextType, eventsUnionSymbol, () -> {
             writer.openBlock("return context.eventStreamMarshaller.deserialize(", ");", () -> {
-                writer.write("output.body,");
+                writer.write("output,");
                 writer.openBlock("async event => {", "}", () -> {
                     writer.write("const eventName = Object.keys(event)[0];");
                     writer.openBlock(
