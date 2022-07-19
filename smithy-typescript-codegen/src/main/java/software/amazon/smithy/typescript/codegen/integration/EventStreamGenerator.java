@@ -53,6 +53,32 @@ public class EventStreamGenerator {
         return shape instanceof UnionShape && shape.hasTrait(StreamingTrait.class);
     }
 
+    public static boolean hasEventStreamInput(GenerationContext context, OperationShape operation) {
+        Model model = context.getModel();
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
+        return eventStreamIndex.getInputInfo(operation).isPresent();
+    }
+
+    public static UnionShape getEventStreamInputShape(GenerationContext context, OperationShape operation) {
+        Model model = context.getModel();
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
+        EventStreamInfo eventStreamInfo = eventStreamIndex.getInputInfo(operation).get();
+        return eventStreamInfo.getEventStreamTarget().asUnionShape().get();
+    }
+
+    public static boolean hasEventStreamOutput(GenerationContext context, OperationShape operation) {
+        Model model = context.getModel();
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
+        return eventStreamIndex.getOutputInfo(operation).isPresent();
+    }
+
+    public static UnionShape getEventStreamOutputShape(GenerationContext context, OperationShape operation) {
+        Model model = context.getModel();
+        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
+        EventStreamInfo eventStreamInfo = eventStreamIndex.getOutputInfo(operation).get();
+        return eventStreamInfo.getEventStreamTarget().asUnionShape().get();
+    }
+
     /**
      * Generate eventstream serializers, and related serializers for events.
      * @param context Code generation context instance.
@@ -74,13 +100,11 @@ public class EventStreamGenerator {
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
-        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         TreeSet<UnionShape> eventUnionsToSerialize = new TreeSet<>();
         TreeSet<StructureShape> eventShapesToMarshall = new TreeSet<>();
         for (OperationShape operation : operations) {
-            if (eventStreamIndex.getInputInfo(operation).isPresent()) {
-                EventStreamInfo eventStreamInfo = eventStreamIndex.getInputInfo(operation).get();
-                UnionShape eventsUnion = eventStreamInfo.getEventStreamTarget().asUnionShape().get();
+            if (hasEventStreamInput(context, operation)) {
+                UnionShape eventsUnion = getEventStreamInputShape(context, operation);
                 eventUnionsToSerialize.add(eventsUnion);
                 Set<StructureShape> eventShapes = eventsUnion.members().stream()
                         .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
@@ -124,13 +148,11 @@ public class EventStreamGenerator {
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
-        EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         TreeSet<UnionShape> eventUnionsToDeserialize = new TreeSet<>();
         TreeSet<StructureShape> eventShapesToUnmarshall = new TreeSet<>();
         for (OperationShape operation : operations) {
-            if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-                EventStreamInfo eventStreamInfo = eventStreamIndex.getOutputInfo(operation).get();
-                UnionShape eventsUnion = eventStreamInfo.getEventStreamTarget().asUnionShape().get();
+            if (hasEventStreamOutput(context, operation)) {
+                UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
                 eventUnionsToDeserialize.add(eventsUnion);
                 Set<StructureShape> eventShapes = eventsUnion.members().stream()
                         .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
@@ -162,7 +184,7 @@ public class EventStreamGenerator {
         writer.openBlock("const $L = (\n"
                 + "  input: any,\n"
                 + "  context: $L\n"
-                + "): any => {", "}", methodName, getEventStreamSerializerContextType(context, eventsUnion), () -> {
+                + "): any => {", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
             writer.openBlock("const eventMarshallingVisitor = (event: any): __Message => $T.visit(event, {", "});",
                     eventsUnionSymbol, () -> {
                         eventsUnion.getAllMembers().forEach((memberName, memberShape) -> {
@@ -186,7 +208,7 @@ public class EventStreamGenerator {
         return getSerFunctionName(context, shape) + "_event";
     }
 
-    private String getEventStreamSerializerContextType(GenerationContext context, UnionShape eventsUnion) {
+    private String getEventStreamSerdeContextType(GenerationContext context, UnionShape eventsUnion) {
         TypeScriptWriter writer = context.getWriter();
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         String contextType = "__SerdeContext";
@@ -354,7 +376,7 @@ public class EventStreamGenerator {
         Symbol eventsUnionSymbol = getSymbol(context, eventsUnion);
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
-        String contextType = getEventStreamSerializerContextType(context, eventsUnion);
+        String contextType = getEventStreamSerdeContextType(context, eventsUnion);
         writer.openBlock("const $L = (\n"
                 + "  output: any,\n"
                 + "  context: $L\n"
