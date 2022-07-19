@@ -146,6 +146,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     @Override
     public void generateSharedComponents(GenerationContext context) {
+        deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
+        serializingErrorShapes.forEach(error -> generateErrorSerializer(context, error));
         Model model = context.getModel();
         ServiceShape service = context.getService();
         eventStreamGenerator.generateEventStreamSerializers(
@@ -154,7 +156,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             getDocumentContentType(),
             (dataSource, member) -> {
                 Shape target = model.expectShape(member.getTarget());
-                return getOutputValue(context, Location.HEADER, dataSource, member, target);
+                return getInputValue(context, Location.HEADER, dataSource, member, target);
             },
             (dataSource, member) -> {
                 Shape target = model.expectShape(member.getTarget());
@@ -166,28 +168,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         );
         // Error shapes that only referred in the error event of an eventstream
         Set<StructureShape> errorEventShapes = new TreeSet<>();
-        // Shapes referred by the eventstream's events' document payload, behaves similar to normal response document.
-        Set<Shape> eventDocumentPayloadShapes = new TreeSet<>();
         eventStreamGenerator.generateEventStreamDeserializers(
             context,
             service,
             errorEventShapes,
-            eventDocumentPayloadShapes,
+            deserializingDocumentShapes,
             isErrorCodeInBody,
             (dataSource, member) -> {
                 Shape target = model.expectShape(member.getTarget());
                 return getOutputValue(context, Location.HEADER, dataSource, member, target);
             }
         );
-
-        deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
         errorEventShapes.removeIf(deserializingErrorShapes::contains);
         errorEventShapes.forEach(error -> generateErrorDeserializer(context, error));
-        serializingErrorShapes.forEach(error -> generateErrorSerializer(context, error));
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
-        eventDocumentPayloadShapes.removeIf(deserializingDocumentShapes::contains);
-        generateDocumentBodyShapeDeserializers(context, eventDocumentPayloadShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
         HttpProtocolGeneratorUtils.generateCollectBody(context);
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
