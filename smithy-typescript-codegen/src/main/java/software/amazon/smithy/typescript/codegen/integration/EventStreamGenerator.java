@@ -45,12 +45,35 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
+/**
+ * Evnetstream code generator.
+ */
 @SmithyUnstableApi
 public class EventStreamGenerator {
     public static boolean isEventStreamShape(Shape shape) {
         return shape instanceof UnionShape && shape.hasTrait(StreamingTrait.class);
     }
 
+    /**
+     * Generate eventstream serializers, and related serializers for events.
+     * @param context Code generation context instance.
+     * @param service The service shape.
+     * @param documentContentType The default content-type value of current protocol.
+     * @param getEventHeaderInputValue The function that given a source of data, generate an input value provider for a
+     *                                  given shape that bind to event header. It takes 2 parameters: dataSource--the
+     *                                  in-code location of the data to provide an input of ({@code input.foo},
+     *                                  {@code entry}, etc.); member--the member that points to the value being
+     *                                  provided. The function retuns a value or expression of the input value.
+     * @param getEventPayloadInputValue The function that given a source of data, generate an input value provider for a
+     *                                  given shape that bind to event payload. It takes 2 parameters: dataSource--the
+     *                                  in-code location of the data to provide an input of ({@code input.foo},
+     *                                  {@code entry}, etc.); member--the member that points to the value being
+     *                                  provided. The function retuns a value or expression of the input value.
+     * @param serializeInputEventDocumentPayload Function writes the code needed to serialize an event payload as a
+     *                                          protocol-specific document.
+     * @param documentShapesToSerialize The set of shapes that needs to be serialized as document payload.
+     *                                  Shapes that referred by event will be added.
+     */
     public void generateEventStreamSerializers(
         GenerationContext context,
         ServiceShape service,
@@ -94,6 +117,25 @@ public class EventStreamGenerator {
         });
     }
 
+    /**
+     * Generate eventstream deserializers, and related deserializers for events.
+     * @param context Code generation context instance.
+     * @param service The service shape.
+     * @param errorShapesToDeserialize A set of error shapes referred by events will be added to this set.
+     * @param eventShapesToDeserialize A set of event shapes that needs to be treated as regular structure shapes will
+     *                                  be added to this set.
+     * @param isErrorCodeInBody A boolean that indicates if the error code for the implementing protocol is located in
+     *                          the error response body, meaning this generator will parse the body before attempting to
+     *                          load an error code.
+     * @param getEventHeaderOutputValue The function that given a source of data, generate an output value provider for
+     *                                  a given shape that bind to event header. This may use native types (like
+     *                                  generating a Date for timestamps,) converters (like a base64Decoder,) or invoke
+     *                                  complex type deserializers to manipulate the dataSource into the proper output
+     *                                  content. It takes 2 parameters: dataSource--the in-code location of the data to
+     *                                  provide an output of ({@code output.foo}, {@code entry}, etc.); member--the
+     *                                  member that points to the value being provided. The function retuns a value or
+     *                                  expression of the output value.
+     */
     public void generateEventStreamDeserializers(
         GenerationContext context,
         ServiceShape service,
