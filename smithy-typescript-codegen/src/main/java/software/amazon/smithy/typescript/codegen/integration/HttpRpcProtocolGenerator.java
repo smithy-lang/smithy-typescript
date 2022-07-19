@@ -114,8 +114,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             },
             (ctxt) -> {
                 TypeScriptWriter writer = ctxt.getWriter();
-                writer.write("message.body = context.utf8Decoder(body);");
-            }
+                writer.write("body = context.utf8Decoder(body);");
+            },
+            serializingDocumentShapes
         );
          // Error shapes that only referred in the error event of an eventstream
          Set<StructureShape> errorEventShapes = new TreeSet<>();
@@ -275,15 +276,22 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             // If there's an input present, we know it's a structure.
             StructureShape inputShape = context.getModel().expectShape(operation.getInput().get())
                     .asStructureShape().get();
-
-            if (!EventStreamGenerator.hasEventStreamInput(context, operation)) {
+            TypeScriptWriter writer = context.getWriter();
+             // Write the default `body` property.
+             writer.write("let body: any;");
+            if (EventStreamGenerator.hasEventStreamInput(context, operation)) {
+                // There must only one eventstream member in request structure.
+                MemberShape member = inputShape.members().stream().collect(Collectors.toList()).get(0);
+                Shape target = context.getModel().expectShape(member.getTarget());
+                Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
+                String serFunctionName = ProtocolGenerator.getSerFunctionName(targetSymbol, context.getProtocolName());
+                String memberName = member.getMemberName();
+                writer.write("body = $L(input.$L, context);", serFunctionName, memberName);
+            } else {
                 // Track input shapes so their serializers may be generated.
                 serializingDocumentShapes.add(inputShape);
+                serializeInputDocument(context, operation, inputShape);
             }
-
-            // Write the default `body` property.
-            context.getWriter().write("let body: any;");
-            serializeInputDocument(context, operation, inputShape);
             return true;
         }
 
