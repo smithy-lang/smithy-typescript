@@ -164,7 +164,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             },
             (ctxt) -> {
                 this.serializeInputEventDocumentPayload(ctxt);
-            }
+            },
+            serializingDocumentShapes
         );
         // Error shapes that only referred in the error event of an eventstream
         Set<StructureShape> errorEventShapes = new TreeSet<>();

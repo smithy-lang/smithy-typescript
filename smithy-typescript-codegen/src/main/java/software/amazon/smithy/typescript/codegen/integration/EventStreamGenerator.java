@@ -57,7 +57,8 @@ public class EventStreamGenerator {
         String documentContentType,
         BiFunction<String, MemberShape, String> getEventHeaderInputValue,
         BiFunction<String, MemberShape, String> getEventPayloadInputValue,
-        Consumer<GenerationContext> serializeInputEventDocumentPayload
+        Consumer<GenerationContext> serializeInputEventDocumentPayload,
+        Set<Shape> documentShapesToSerialize
     ) {
         Model model = context.getModel();
 
@@ -88,7 +89,8 @@ public class EventStreamGenerator {
                 documentContentType,
                 getEventHeaderInputValue,
                 getEventPayloadInputValue,
-                serializeInputEventDocumentPayload);
+                serializeInputEventDocumentPayload,
+                documentShapesToSerialize);
         });
     }
 
@@ -190,7 +192,8 @@ public class EventStreamGenerator {
         String documentContentType,
         BiFunction<String, MemberShape, String> getEventHeaderInputValue,
         BiFunction<String, MemberShape, String> getEventPayloadInputValue,
-        Consumer<GenerationContext> serializeInputEventDocumentPayload
+        Consumer<GenerationContext> serializeInputEventDocumentPayload,
+        Set<Shape> documentShapesToSerialize
     ) {
         String methodName = getEventSerFunctionName(context, event);
         Symbol symbol = getSymbol(context, event);
@@ -207,7 +210,8 @@ public class EventStreamGenerator {
                 writeEventContentTypeHeader(context, event, documentContentType);
             });
             writeEventHeaders(context, event, getEventHeaderInputValue);
-            writeEventBody(context, event, getEventPayloadInputValue, serializeInputEventDocumentPayload);
+            writeEventBody(context, event, getEventPayloadInputValue, serializeInputEventDocumentPayload,
+                    documentShapesToSerialize);
             writer.openBlock("return { headers, body };");
         });
     }
@@ -285,7 +289,8 @@ public class EventStreamGenerator {
         GenerationContext context,
         StructureShape event,
         BiFunction<String, MemberShape, String> getEventPayloadInputValue,
-        Consumer<GenerationContext> serializeInputEventDocumentPayload
+        Consumer<GenerationContext> serializeInputEventDocumentPayload,
+        Set<Shape> documentShapesToSerialize
     ) {
         TypeScriptWriter writer = context.getWriter();
         Shape payloadShape = getEventPayloadShape(context, event);
@@ -307,7 +312,8 @@ public class EventStreamGenerator {
             }
             Symbol symbol = getSymbol(context, payloadShape);
             String serFunctionName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
-            writer.write("const body = $L(input, context);", serFunctionName);
+            documentShapesToSerialize.add(payloadShape);
+            writer.write("let body = $L(input, context);", serFunctionName);
             serializeInputEventDocumentPayload.accept(context);
         } else {
             throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
