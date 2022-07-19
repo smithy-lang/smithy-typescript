@@ -1370,21 +1370,20 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Writes the code needed to serialize an event payload as a protocol-specific document.
      *
-     * <p>Implementations of this method are expected to set a value to the ${@code message.body} property.
-     * The value set is expected to by a JavaScript ${@code Uint8Array} type and is to be encoded as the
+     * <p>Implementations of this method are expected to set a value to the instantiated ${@code body} variable.
+     * The value set is expected to be a JavaScript ${@code Uint8Array} type and is to be encoded as the
      * event payload.
      *
      * <p>Three parameters will be available in scope:
      * <ul>
      *   <li>{@code body}: The serialized event payload object that needs to be transformed to binary data</li>
-     *   <li>{@code message: <T>}: The partially constructed event message.</li>
      *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
      * </ul>
      *
      * <p>For example:
      *
      * <pre>{@code
-     * message.body = context.utf8Decoder(JSON.stringify(body));
+     * body = context.utf8Decoder(JSON.stringify(body));
      * }</pre>
      * @param context The generation context.
      */
@@ -2220,13 +2219,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Handle streaming shapes differently.
         if (target.hasTrait(StreamingTrait.class)) {
-            // if (target instanceof UnionShape) {
-            //     // If payload is a event stream, return it after calling event stream deser function.
-            //     generateEventStreamDeserializer(context, binding.getMember(), target);
-            //     writer.write("contents.$L = data;", binding.getMemberName());
-            //     // Don't generate non-eventstream payload shape again.
-            //     return null;
-            // }
             // If payload is streaming, return raw low-level stream directly.
             writer.write("const data: any = output.body;");
         } else if (target instanceof BlobShape) {
