@@ -360,26 +360,12 @@ public class EventStreamGenerator {
             writer.openBlock("return context.eventStreamMarshaller.deserialize(", ");", () -> {
                 writer.write("output,");
                 writer.openBlock("async event => {", "}", () -> {
-                    writer.write("const eventName = Object.keys(event)[0];");
-                    writer.openBlock(
-                                "const eventHeaders = Object.entries(event[eventName].headers).reduce(", ");", () -> {
-                        writer.write(
-                            "(headers, [header, {value}]) => {headers[header] = value; return headers; },");
-                        writer.write("{} as Record<string, any>");
-                    });
-                    writer.openBlock("const eventMessage = {", "};", () -> {
-                        writer.write("headers: eventHeaders,");
-                        writer.write("body: event[eventName].body");
-                    });
-                    writer.openBlock("const parsedEvent = {", "};", () -> {
-                        writer.write("[eventName]: eventMessage");
-                    });
                     eventsUnion.getAllMembers().forEach((name, member) -> {
                         StructureShape event = model.expectShape(member.getTarget(), StructureShape.class);
-                        writer.openBlock("if (parsedEvent[$S] != null) {", "}", name, () -> {
+                        writer.openBlock("if (event[$S] != null) {", "}", name, () -> {
                             writer.openBlock("return {", "};", () -> {
                                 String eventDeserMethodName = getEventDeserFunctionName(context, event);
-                                writer.write("$1L: await $2L(parsedEvent[$1S], context),", name, eventDeserMethodName);
+                                writer.write("$1L: await $2L(event[$1S], context),", name, eventDeserMethodName);
                             });
                         });
                     });
