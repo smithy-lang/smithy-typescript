@@ -148,22 +148,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     public void generateSharedComponents(GenerationContext context) {
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
         serializingErrorShapes.forEach(error -> generateErrorSerializer(context, error));
-        Model model = context.getModel();
         ServiceShape service = context.getService();
         eventStreamGenerator.generateEventStreamSerializers(
             context,
             service,
             getDocumentContentType(),
-            (dataSource, member) -> {
-                Shape target = model.expectShape(member.getTarget());
-                return getInputValue(context, Location.HEADER, dataSource, member, target);
-            },
-            (dataSource, member) -> {
-                Shape target = model.expectShape(member.getTarget());
-                return getInputValue(context, Location.PAYLOAD, dataSource, member, target);
-            },
-            (ctxt) -> {
-                this.serializeInputEventDocumentPayload(ctxt);
+            () -> {
+                this.serializeInputEventDocumentPayload(context);
             },
             serializingDocumentShapes
         );
@@ -174,11 +165,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             service,
             errorEventShapes,
             deserializingDocumentShapes,
-            isErrorCodeInBody,
-            (dataSource, member) -> {
-                Shape target = model.expectShape(member.getTarget());
-                return getOutputValue(context, Location.HEADER, dataSource, member, target);
-            }
+            isErrorCodeInBody
         );
         errorEventShapes.removeIf(deserializingErrorShapes::contains);
         errorEventShapes.forEach(error -> generateErrorDeserializer(context, error));
