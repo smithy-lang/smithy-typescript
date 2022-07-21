@@ -104,16 +104,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             context,
             service,
             getDocumentContentType(),
-            (datasouce, member) -> {
-                // TODO: runtime validating is not supported in RPC protocols.
-                // TODO: event headers marshalling for RPC protocols is not yet defined.
-                return datasouce;
-            },
-            (datasource, member) -> {
-                return datasource;
-            },
-            (ctxt) -> {
-                TypeScriptWriter writer = ctxt.getWriter();
+            () -> {
+                TypeScriptWriter writer = context.getWriter();
                 writer.write("body = context.utf8Decoder(body);");
             },
             serializingDocumentShapes
@@ -125,10 +117,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
              service,
              errorEventShapes,
              deserializingDocumentShapes,
-             isErrorCodeInBody,
-             (dataSource, member) -> {
-                 return dataSource;
-             }
+             isErrorCodeInBody
          );
         errorEventShapes.removeIf(deserializingErrorShapes::contains);
         errorEventShapes.forEach(error -> generateErrorDeserializer(context, error));
