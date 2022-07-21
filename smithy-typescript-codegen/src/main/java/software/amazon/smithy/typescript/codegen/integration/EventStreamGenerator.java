@@ -237,8 +237,10 @@ public class EventStreamGenerator {
         String documentContentType
     ) {
         TypeScriptWriter writer = context.getWriter();
-        Optional<MemberShape> payloadMember = getEventPayloadMember(event);
-        Shape payloadShape = context.getModel().expectShape(payloadMember.get().getTarget());
+        Optional<MemberShape> payloadMemberOptional = getEventPayloadMember(event);
+        Shape payloadShape = payloadMemberOptional.map((member) -> {
+            return context.getModel().expectShape(member.getTarget());
+        }).orElse(event);
         if (payloadShape instanceof BlobShape) {
             writer.write("\":content-type\": { type: \"string\", value: \"application/octet-stream\" },");
         } else if (payloadShape instanceof StringShape) {
@@ -312,10 +314,10 @@ public class EventStreamGenerator {
     ) {
         TypeScriptWriter writer = context.getWriter();
         Optional<MemberShape> payloadMemberOptional = getEventPayloadMember(event);
+        writer.write("let body = new Uint8Array();");
         if (payloadMemberOptional.isPresent()) {
             Shape payloadShape = context.getModel().expectShape(payloadMemberOptional.get().getTarget());
             String payloadMemberName = payloadMemberOptional.get().getMemberName();
-            writer.write("let body = new Uint8Array();");
             writer.openBlock("if (input.$L != null) {", "}", payloadMemberName, () -> {
                 if (payloadShape instanceof BlobShape) {
                     writer.write("body = input.$L;", payloadMemberName);
