@@ -196,12 +196,30 @@ final class CommandGenerator implements Runnable {
                 writer.write("commandName,");
                 writer.openBlock("inputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
-                        input -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(input)),
+                        input -> {
+                            Symbol inputSymbol = symbolProvider.toSymbol(input);
+                            String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
+                            writer.addImport(
+                                filterFunctionName,
+                                filterFunctionName,
+                                inputSymbol.getNamespace()
+                            );
+                            writer.writeInline(filterFunctionName);
+                        },
                         () -> writer.writeInline("(input: any) => input"));
                 });
                 writer.openBlock("outputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
-                        output -> writer.writeInline("$T.filterSensitiveLog", symbolProvider.toSymbol(output)),
+                        output -> {
+                            Symbol outputSymbol = symbolProvider.toSymbol(output);
+                            String filterFunctionName = outputSymbol.getName() + "FilterSensitiveLog";
+                            writer.addImport(
+                                filterFunctionName,
+                                filterFunctionName,
+                                outputSymbol.getNamespace()
+                            );
+                            writer.writeInline(filterFunctionName);
+                        },
                         () -> writer.writeInline("(output: any) => output"));
                 });
             });

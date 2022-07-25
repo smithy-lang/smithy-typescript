@@ -176,7 +176,12 @@ final class StructuredMemberWriter {
             writer.write("$L", structureParam);
         } else {
             // Call filterSensitiveLog on Structure.
-            writer.write("$T.filterSensitiveLog($L)", symbolProvider.toSymbol(structureTarget), structureParam);
+            Symbol symbol = symbolProvider.toSymbol(structureTarget);
+            String filterFunctionName = symbol.getName() + "FilterSensitiveLog";
+            if (!symbol.getNamespace().contains(writer.getModuleName())) {
+                writer.addImport(filterFunctionName, filterFunctionName, symbol.getNamespace());
+            }
+            writer.write("$L($L)", filterFunctionName, structureParam);
         }
     }
 

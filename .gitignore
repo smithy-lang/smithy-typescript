@@ -21,6 +21,7 @@ build/
 */out/
 */*/out/
 wrapper/
+.attach_pid*
 
 # local scripting
 Makefile
