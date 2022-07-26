@@ -105,18 +105,19 @@ import software.amazon.smithy.utils.StringUtils;
  *     if (value.bear !== undefined) return visitor.bear(value.bear);
  *     return visitor._(value.$unknown[0], value.$unknown[1]);
  *   }
- *
- *   export const filterSensitiveLog = (obj: Attacker) => {
- *     if (obj.lion !== undefined)
- *       return { lion: Lion.filterSensitiveLog(obj.lion) };
- *     if (obj.tiger !== undefined)
- *       return { tiger: Tiger.filterSensitiveLog(obj.tiger) };
- *     if (obj.bear !== undefined)
- *       return { bear: Bear.filterSensitiveLog(obj.bear) };
- *     if (obj.$unknown !== undefined)
- *       return { [obj.$unknown[0]]: 'UNKNOWN' };
- *   }
  * }
+ *
+ * export const AttackerFilterSensitiveLog = (obj: Attacker) => {
+ *   if (obj.lion !== undefined)
+ *     return { lion: Lion.filterSensitiveLog(obj.lion) };
+ *   if (obj.tiger !== undefined)
+ *     return { tiger: Tiger.filterSensitiveLog(obj.tiger) };
+ *   if (obj.bear !== undefined)
+ *     return { bear: Bear.filterSensitiveLog(obj.bear) };
+ *   if (obj.$unknown !== undefined)
+ *     return { [obj.$unknown[0]]: 'UNKNOWN' };
+ * }
+ *
  * }</pre>
  *
  * <p>Important: Tagged unions in TypeScript are intentionally designed
@@ -177,11 +178,11 @@ final class UnionGenerator implements Runnable {
             writeUnionMemberInterfaces();
             writeVisitorType();
             writeVisitorFunction();
-            writeFilterSensitiveLog();
             if (includeValidation) {
                 writeValidate();
             }
         });
+        writeFilterSensitiveLog(symbol.getName());
     }
 
     private void writeUnionMemberInterfaces() {
@@ -240,10 +241,11 @@ final class UnionGenerator implements Runnable {
         writer.write("");
     }
 
-    private void writeFilterSensitiveLog() {
+    private void writeFilterSensitiveLog(String namespace) {
         String objectParam = "obj";
         writer.writeDocs("@internal");
-        writer.openBlock("export const filterSensitiveLog = ($L: $L): any => {", "}",
+        writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
+            namespace,
             objectParam, symbol.getName(),
             () -> {
                 for (MemberShape member : shape.getAllMembers().values()) {

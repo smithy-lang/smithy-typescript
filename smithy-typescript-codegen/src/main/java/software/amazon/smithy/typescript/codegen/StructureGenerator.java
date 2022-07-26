@@ -120,9 +120,7 @@ final class StructureGenerator implements Runnable {
      *   age?: number | null;
      * }
      *
-     * export namespace Person {
-     *   export const filterSensitiveLog = (obj: Person): any => ({...obj});
-     * }
+     * export const PersonFilterSensitiveLog = (obj: Person): any => ({...obj});
      * }</pre>
      *
      * <p>If validation is enabled, it generates the following:
@@ -133,12 +131,14 @@ final class StructureGenerator implements Runnable {
      *   age?: number | null;
      * }
      *
+     * export const PersonFilterSensitiveLog = (obj: Person): any => ({...obj});
+     *
      * export namespace Person {
-     *   export const filterSensitiveLog = (obj: Person): any => ({...obj});
      *   export const validate = (obj: Person): ValidationFailure[] => {
      *       // validation
      *   }
      * }
+     *
      * }</pre>
      */
     private void renderNonErrorStructure() {
@@ -167,20 +167,22 @@ final class StructureGenerator implements Runnable {
 
     private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-            String objectParam = "obj";
-            writer.writeDocs("@internal");
-            writer.openBlock("export const filterSensitiveLog = ($L: $L): any => ({", "})",
-                objectParam, symbol.getName(),
-                () -> {
-                    structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
-                }
-            );
-
-            if (!includeValidation) {
-                return;
+        String objectParam = "obj";
+        writer.writeDocs("@internal");
+        writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => ({", "})",
+            symbol.getName(),
+            objectParam,
+            symbol.getName(),
+            () -> {
+                structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
             }
+        );
 
+        if (!includeValidation) {
+            return;
+        }
+
+        writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             structuredMemberWriter.writeMemberValidatorCache(writer, "memberValidators");
 
             writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
