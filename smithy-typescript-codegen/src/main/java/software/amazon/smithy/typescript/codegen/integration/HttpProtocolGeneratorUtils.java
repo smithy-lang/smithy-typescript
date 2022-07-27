@@ -370,28 +370,28 @@ public final class HttpProtocolGeneratorUtils {
 
                 // Build a generic error the best we can for ones we don't know about.
                 writer.write("default:").indent();
-                        if (shouldParseErrorBody) {
-                            // Body is already parsed above
-                            writer.write("const parsedBody = parsedOutput.body;");
-                        } else {
-                            // Body is not parsed above, so parse it here
-                            writer.write("const parsedBody = await parseBody(output.body, context);");
-                        }
+                if (shouldParseErrorBody) {
+                    // Body is already parsed above
+                    writer.write("const parsedBody = parsedOutput.body;");
+                } else {
+                    // Body is not parsed above, so parse it here
+                    writer.write("const parsedBody = await parseBody(output.body, context);");
+                }
 
-                        // Get the protocol specific error location for retrieving contents.
-                        String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.write("const $$metadata = deserializeMetadata(output);");
-                        writer.write("const statusCode = $$metadata.httpStatusCode ? $$metadata.httpStatusCode"
-                                + " + '' : undefined;");
-                        writer.openBlock("response = new $T({", "});", baseExceptionReference, () -> {
-                            writer.write("name: $1L.code || $1L.Code || errorCode || statusCode || 'UnknowError',",
-                                    errorLocation);
-                            writer.write("$$fault: \"client\",");
-                            writer.write("$$metadata");
-                        });
-                        writer.addImport("decorateServiceException", "__decorateServiceException",
-                                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-                        writer.write("throw __decorateServiceException(response, $L);", errorLocation);
+                // Get the protocol specific error location for retrieving contents.
+                String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
+                writer.write("const $$metadata = deserializeMetadata(output);");
+                writer.write("const statusCode = $$metadata.httpStatusCode ? $$metadata.httpStatusCode"
+                        + " + '' : undefined;");
+                writer.openBlock("response = new $T({", "});", baseExceptionReference, () -> {
+                    writer.write("name: $1L.code || $1L.Code || errorCode || statusCode || 'UnknowError',",
+                            errorLocation);
+                    writer.write("$$fault: \"client\",");
+                    writer.write("$$metadata");
+                });
+                writer.addImport("decorateServiceException", "__decorateServiceException",
+                        TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                writer.write("throw __decorateServiceException(response, $L);", errorLocation);
             });
         });
         writer.write("");
