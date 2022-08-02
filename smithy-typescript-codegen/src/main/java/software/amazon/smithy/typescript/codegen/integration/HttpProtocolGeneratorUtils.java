@@ -348,51 +348,64 @@ public final class HttpProtocolGeneratorUtils {
 
             // Error responses must be at least BaseException interface
             SymbolReference baseExceptionReference = getClientBaseException(context);
-            writer.write("let response: $T;", baseExceptionReference);
             errorCodeGenerator.accept(context);
-            writer.openBlock("switch (errorCode) {", "}", () -> {
-                // Generate the case statement for each error, invoking the specific deserializer.
-                new TreeSet<>(operationIndex.getErrors(operation, context.getService())).forEach(error -> {
-                    final ShapeId errorId = error.getId();
-                    // Track errors bound to the operation so their deserializers may be generated.
-                    errorShapes.add(error);
-                    Symbol errorSymbol = symbolProvider.toSymbol(error);
-                    String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
+
+            TreeSet<StructureShape> structureShapes = new TreeSet<>(
+                operationIndex.getErrors(operation, context.getService())
+            );
+
+            Runnable defaultErrorHandler = () -> {
+                if (shouldParseErrorBody) {
+                    // Body is already parsed above
+                    writer.write("const parsedBody = parsedOutput.body;");
+                } else {
+                    // Body is not parsed above, so parse it here
+                    writer.write("const parsedBody = await parseBody(output.body, context);");
+                }
+
+                writer.addImport("throwDefaultError", "throwDefaultError", "@aws-sdk/smithy-client");
+
+                // Get the protocol specific error location for retrieving contents.
+                String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
+                writer.openBlock("throwDefaultError({", "})", () -> {
+                    writer.write("output,");
+                    if (errorLocation.equals("parsedBody")) {
+                        writer.write("parsedBody,");
+                    } else {
+                        writer.write("parsedBody: $L,", errorLocation);
+                    }
+                    writer.write("exceptionCtor: $T,", baseExceptionReference);
+                    writer.write("errorCode");
+                });
+            };
+
+            if (!structureShapes.isEmpty()) {
+                writer.openBlock("switch (errorCode) {", "}", () -> {
+                    // Generate the case statement for each error, invoking the specific deserializer.
+
+                    structureShapes.forEach(error -> {
+                        final ShapeId errorId = error.getId();
+                        // Track errors bound to the operation so their deserializers may be generated.
+                        errorShapes.add(error);
+                        Symbol errorSymbol = symbolProvider.toSymbol(error);
+                        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
                             context.getProtocolName()) + "Response";
-                     // Dispatch to the error deserialization function.
-                    String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
-                    writer.write("case $S:", errorId.getName());
-                    writer.write("case $S:", errorId.toString());
-                    writer.indent()
+                        // Dispatch to the error deserialization function.
+                        String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
+                        writer.write("case $S:", errorId.getName());
+                        writer.write("case $S:", errorId.toString());
+                        writer.indent()
                             .write("throw await $L($L, context);", errorDeserMethodName, outputParam)
                             .dedent();
+                    });
+
+                    // Build a generic error the best we can for ones we don't know about.
+                    writer.write("default:").indent();
+                    defaultErrorHandler.run();
                 });
-
-                // Build a generic error the best we can for ones we don't know about.
-                writer.write("default:").indent();
-                        if (shouldParseErrorBody) {
-                            // Body is already parsed above
-                            writer.write("const parsedBody = parsedOutput.body;");
-                        } else {
-                            // Body is not parsed above, so parse it here
-                            writer.write("const parsedBody = await parseBody(output.body, context);");
-                        }
-
-                        // Get the protocol specific error location for retrieving contents.
-                        String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                        writer.write("const $$metadata = deserializeMetadata(output);");
-                        writer.write("const statusCode = $$metadata.httpStatusCode ? $$metadata.httpStatusCode"
-                                + " + '' : undefined;");
-                        writer.openBlock("response = new $T({", "});", baseExceptionReference, () -> {
-                            writer.write("name: $1L.code || $1L.Code || errorCode || statusCode || 'UnknowError',",
-                                    errorLocation);
-                            writer.write("$$fault: \"client\",");
-                            writer.write("$$metadata");
-                        });
-                        writer.addImport("decorateServiceException", "__decorateServiceException",
-                                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-                        writer.write("throw __decorateServiceException(response, $L);", errorLocation);
-            });
+            } else {
+                defaultErrorHandler.run();
+            }
         });
         writer.write("");
 
