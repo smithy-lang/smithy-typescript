@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -1662,15 +1661,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             handleContentType(context, operation, bindingIndex);
             handleAccept(context, operation, bindingIndex);
             // Start deserializing the response.
-            writer.openBlock("const contents: $T = {", "};", inputType, () -> {
-                // Only set a type and the members if we have output.
-                operation.getInput().ifPresent(shapeId -> {
-                    // Set all the members to undefined to meet type constraints.
-                    StructureShape target = model.expectShape(shapeId).asStructureShape().get();
-                    new TreeMap<>(target.getAllMembers())
-                            .forEach((memberName, memberShape) -> writer.write(
-                                    "$L: undefined,", memberName));
-                });
+            writer.openBlock("const contents: any = map({", "});", () -> {
                 readRequestHeaders(context, operation, bindingIndex, "output");
             });
             readQueryString(context, operation, bindingIndex);
