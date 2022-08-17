@@ -20,6 +20,8 @@ list UserList {
 union TestUnion {
     bar: String,
 
-    @sensitive
-    sensitiveBar: String
+    sensitiveBar: SensitiveString
 }
+
+@sensitive
+string SensitiveString

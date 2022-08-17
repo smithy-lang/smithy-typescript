@@ -12,6 +12,8 @@ operation GetFoo {
 structure GetFooInput {
     username: String,
 
-    @sensitive
-    password: String
+    password: SensitiveString
 }
+
+@sensitive
+string SensitiveString
