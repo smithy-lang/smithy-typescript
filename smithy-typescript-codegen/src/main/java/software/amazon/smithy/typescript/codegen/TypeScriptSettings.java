@@ -93,7 +93,7 @@ public final class TypeScriptSettings {
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
         settings.setPackageVersion(config.expectStringMember(PACKAGE_VERSION).getValue());
         settings.setPackageDescription(config.getStringMemberOrDefault(
-                PACKAGE_DESCRIPTION, settings.getPackageName() + " client"));
+                PACKAGE_DESCRIPTION, settings.getDefaultDescription()));
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
@@ -108,6 +108,20 @@ public final class TypeScriptSettings {
 
         settings.setPluginSettings(config);
         return settings;
+    }
+
+    private String getDefaultDescription() {
+        String description = getPackageName();
+        switch (artifactType) {
+            case CLIENT:
+                description += " client";
+                break;
+            case SSDK:
+                description += " server";
+                break;
+            default:
+        }
+        return description;
     }
 
     // TODO: this seems reusable across generators.
