@@ -30,6 +30,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class PackageJsonGenerator {
 
+    public static final String PACKAGE_JSON_FILENAME = "package.json";
+
     private PackageJsonGenerator() {}
 
     static void writePackageJson(
@@ -74,6 +76,6 @@ final class PackageJsonGenerator {
         template = template.replace("${packageDescription}", settings.getPackageDescription());
         template = template.replace("${packageVersion}", settings.getPackageVersion());
         template = template.replace("${packageManager}", settings.getPackageManager().getCommand());
-        manifest.writeFile("package.json", template);
+        manifest.writeFile(PACKAGE_JSON_FILENAME, template);
     }
 }
