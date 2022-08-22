@@ -14,6 +14,8 @@ structure GetFooInput {
 }
 
 list PhoneNumbersList {
-    @sensitive
-    member: String
+    member: SensitiveString
 }
+
+@sensitive
+string SensitiveString

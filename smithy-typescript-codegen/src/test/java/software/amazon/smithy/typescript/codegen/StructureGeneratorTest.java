@@ -224,17 +224,6 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void filtersSensitiveMemberPointingToStructure() {
-        testStructureCodegen("test-sensitive-member-pointing-to-structure.smithy",
-                                "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
-                                + "  ...obj,\n"
-                                + "  ...(obj.sensitiveFoo && { sensitiveFoo:\n"
-                                + "    SENSITIVE_STRING\n"
-                                + "  }),\n"
-                                + "})");
-    }
-
-    @Test
     public void callsFilterForUnionWithSensitiveData() {
         testStructureCodegen("test-union-with-sensitive-data.smithy",
                                 "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
@@ -340,17 +329,6 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void filtersSensitiveMemberPointingToUnion() {
-        testStructureCodegen("test-sensitive-member-pointing-to-union.smithy",
-                                "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
-                                + "  ...obj,\n"
-                                + "  ...(obj.sensitiveFoo && { sensitiveFoo:\n"
-                                + "    SENSITIVE_STRING\n"
-                                + "  }),\n"
-                                + "})");
-    }
-
-    @Test
     public void callsFilterForListWithStructureWithSensitiveData() {
         testStructureCodegen("test-list-with-structure-with-sensitive-data.smithy",
                                 "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
@@ -434,17 +412,6 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void filtersSensitiveMemberPointingToList() {
-        testStructureCodegen("test-sensitive-member-pointing-to-list.smithy",
-                                "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
-                                + "  ...obj,\n"
-                                + "  ...(obj.sensitiveFoo && { sensitiveFoo:\n"
-                                + "    SENSITIVE_STRING\n"
-                                + "  }),\n"
-                                + "})");
-    }
-
-    @Test
     public void callsFilterForMapWithStructureWithSensitiveData() {
         testStructureCodegen("test-map-with-structure-with-sensitive-data.smithy",
                             "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
@@ -519,17 +486,6 @@ public class StructureGeneratorTest {
                             "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
                             + "  ...obj,\n"
                             + "  ...(obj.foo && { foo:\n"
-                            + "    SENSITIVE_STRING\n"
-                            + "  }),\n"
-                            + "})");
-    }
-
-    @Test
-    public void filtersSensitiveMemberPointingToMap() {
-        testStructureCodegen("test-sensitive-member-pointing-to-map.smithy",
-                            "export const GetFooInputFilterSensitiveLog = (obj: GetFooInput): any => ({\n"
-                            + "  ...obj,\n"
-                            + "  ...(obj.sensitiveFoo && { sensitiveFoo:\n"
                             + "    SENSITIVE_STRING\n"
                             + "  }),\n"
                             + "})");

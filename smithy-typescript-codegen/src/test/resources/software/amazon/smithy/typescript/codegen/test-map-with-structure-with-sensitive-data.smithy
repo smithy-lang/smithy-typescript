@@ -21,6 +21,8 @@ map UserMap {
 structure User {
     username: String,
 
-    @sensitive
-    password: String
+    password: SensitiveString
 }
+
+@sensitive
+string SensitiveString

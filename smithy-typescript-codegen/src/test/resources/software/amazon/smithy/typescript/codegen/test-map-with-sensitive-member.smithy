@@ -16,6 +16,8 @@ structure GetFooInput {
 map PhoneNumbersMap {
     key: String,
     
-    @sensitive
-    value: String
+    value: SensitiveString
 }
+
+@sensitive
+string SensitiveString

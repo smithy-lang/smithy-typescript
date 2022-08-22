@@ -32,6 +32,7 @@ import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.loader.Prelude;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
@@ -265,12 +266,18 @@ public final class TypeScriptWriter extends CodeWriter {
         return member.getMemberTrait(model, DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
-                    if (member.getMemberTrait(model, DeprecatedTrait.class).isPresent()) {
+                    if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
                         docs = "@deprecated\n\n" + docs;
                     }
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
+    }
+
+    private boolean isTargetDeprecated(Model model, MemberShape member) {
+        return model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class).isPresent()
+               // don't consider deprecated prelude shapes (like PrimitiveBoolean)
+               && !Prelude.isPreludeShape(member.getTarget());
     }
 
     /**
