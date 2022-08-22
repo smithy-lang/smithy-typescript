@@ -1,5 +1,13 @@
 # server-common Changelog
 
+## 1.0.0-alpha.6 (2022-08-22)
+
+### Features
+
+- Used Record type in place of Object in SSDK libs. ([#558](https://github.com/awslabs/smithy-typescript/pull/558))
+- Updated shelljs, minimist dependencies. ([#497](https://github.com/awslabs/smithy-typescript/pull/497), [#529](https://github.com/awslabs/smithy-typescript/pull/529))
+- Updated SDK dependencies.
+
 ## 1.0.0-alpha.5 (2022-02-23)
 
 ### Features
