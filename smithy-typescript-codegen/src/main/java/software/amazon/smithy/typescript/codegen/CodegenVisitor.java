@@ -235,6 +235,10 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
             protocolGenerator.generateProtocolTests(context);
         }
 
+        if (settings.getEnableDefaultReadme()) {
+            ReadmeGenerator.generateDefault(settings, model, writers::checkoutFileWriter);
+        }
+
         // Write each pending writer.
         LOGGER.fine("Flushing TypeScript writers");
         List<SymbolDependency> dependencies = writers.getDependencies();

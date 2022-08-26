@@ -1,0 +1,45 @@
+<!-- generated file, do not edit directly -->
+
+# ${packageName}
+
+[![NPM version](https://img.shields.io/npm/v/${packageName}/latest.svg)](https://www.npmjs.com/package/${packageName})
+[![NPM downloads](https://img.shields.io/npm/dm/${packageName}.svg)](https://www.npmjs.com/package/${packageName})
+
+## Description
+
+SDK for JavaScript ${serviceId} Server
+
+${documentation}
+
+## Installing
+To install this package, simply type add or install ${packageName}
+using your favorite package manager:
+- `npm install ${packageName}`
+- `yarn add ${packageName}`
+- `pnpm add ${packageName}`
+
+## Getting Started
+
+Below is an example service handler created for the ${commandName} operation.
+
+```ts
+
+import {ServiceHandler} from "@aws-smithy/server-common";
+import {${commandName}ServerInput, ${commandName}ServerOutput} from "${packageName}";
+import {convertEvent, convertVersion1Response} from "@aws-smithy/server-apigateway";
+
+const ${commandName}Operation: Operation<${commandName}ServerInput, ${commandName}ServerOutput> = async (input, _) => {
+  // Populate your business logic
+};
+
+const serviceHandler: ServiceHandler<HandlerContext> = get${commandName}Handler(${commandName}Operation);
+```
+
+## Contributing
+
+This client code is generated automatically. Any modifications will be overwritten the next time the `${packageName}` package is updated.
+## License
+
+This SDK is distributed under the
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0),
+see LICENSE for more information.

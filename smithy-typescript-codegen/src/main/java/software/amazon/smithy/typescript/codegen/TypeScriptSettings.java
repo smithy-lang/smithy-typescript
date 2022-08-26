@@ -54,6 +54,7 @@ public final class TypeScriptSettings {
     private static final String PROTOCOL = "protocol";
     private static final String PRIVATE = "private";
     private static final String PACKAGE_MANAGER = "packageManager";
+    private static final String ENABLE_DEFAULT_README = "enableDefaultReadme";
 
     private String packageName;
     private String packageDescription = "";
@@ -66,6 +67,7 @@ public final class TypeScriptSettings {
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
     private PackageManager packageManager = PackageManager.YARN;
+    private boolean enableDefaultReadme;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -97,6 +99,8 @@ public final class TypeScriptSettings {
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
+        settings.setEnableDefaultReadme(
+                config.getBooleanMember(ENABLE_DEFAULT_README).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
                 config.getStringMember(PACKAGE_MANAGER)
                     .map(s -> PackageManager.fromString(s.getValue()))
@@ -251,6 +255,14 @@ public final class TypeScriptSettings {
         this.isPrivate = isPrivate;
     }
 
+    public boolean getEnableDefaultReadme() {
+        return enableDefaultReadme;
+    }
+
+    public void setEnableDefaultReadme(boolean enableDefaultReadme) {
+        this.enableDefaultReadme = enableDefaultReadme;
+    }
+
     /**
      * Returns if the generated package will be a client.
      *
@@ -381,10 +393,11 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE)),
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, ENABLE_DEFAULT_README)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, DISABLE_DEFAULT_VALIDATION));
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, DISABLE_DEFAULT_VALIDATION,
+                              ENABLE_DEFAULT_README));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
