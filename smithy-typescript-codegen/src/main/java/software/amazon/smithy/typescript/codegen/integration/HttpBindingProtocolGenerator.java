@@ -2295,6 +2295,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBinding binding
     ) {
         TypeScriptWriter writer = context.getWriter();
+        boolean isClientSdk = context.getSettings().generateClient();
 
         // There can only be one payload binding.
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
@@ -2303,7 +2304,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (target.hasTrait(StreamingTrait.class)) {
             writer.write("const data: any = output.body;");
             // If payload is streaming blob, return low-level stream with the stream utility functions mixin.
-            if (target instanceof BlobShape) {
+            if (isClientSdk && target instanceof BlobShape) {
                 writer.write("context.sdkStreamMixin(data);");
             }
         } else if (target instanceof BlobShape) {

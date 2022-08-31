@@ -117,7 +117,7 @@ public final class CodegenUtils {
         return shape.getAllMembers().values().stream()
                 .filter(memberShape -> {
                     // Streaming blobs need to have their types modified
-                    // See `writeStreamingCommandTypeToSer`
+                    // See `writeClientCommandStreamingInputType`
                     Shape target = model.expectShape(memberShape.getTarget());
                     return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
                 })
@@ -125,14 +125,14 @@ public final class CodegenUtils {
     }
 
     /**
-     * Generate the type of the command output of server sdk or the input of the client sdk given the streaming blob
+     * Generate the type of the command input of the client sdk given the streaming blob
      * member of the shape. The generated type eases the streaming member requirement so that users don't need to
      * construct a stream every time.
      * This type decoration is allowed in Smithy because it makes, for the same member, the type to be serialized is
      * more permissive than the type to be deserialized.
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
-    static void writeStreamingCommandTypeToSer(
+    static void writeClientCommandStreamingInputType(
             TypeScriptWriter writer,
             Symbol containerSymbol,
             String typeName,
@@ -140,10 +140,12 @@ public final class CodegenUtils {
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName, containerSymbol, memberName, () -> {
-            writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
-                    containerSymbol.getName(), memberName));
-            writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix, containerSymbol);
+        writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName,
+                containerSymbol, memberName, () -> {
+                        writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
+                                containerSymbol.getName(), memberName));
+                        writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix,
+                                containerSymbol);
         });
         writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
                 + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
@@ -151,27 +153,22 @@ public final class CodegenUtils {
     }
 
     /**
-     * Generate the type of the command input of server sdk or the output of the client sdk given the streaming blob
+     * Generate the type of the command output of the client sdk given the streaming blob
      * member of the shape. The type marks the streaming blob member to contain the utility methods to transform the
      * stream to string, buffer or WHATWG stream API.
      */
-    static void writeStreamingCommandTypeFromDeser(
+    static void writeClientCommandStreamingOutputType(
             TypeScriptWriter writer,
             Symbol containerSymbol,
             String typeName,
-            MemberShape streamingMember,
-            TypeScriptSettings settings
+            MemberShape streamingMember
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        boolean isClientSdk = settings.generateClient();
-        if (isClientSdk) {
-            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        }
-        String metadataBearerType = isClientSdk ? "__MetadataBearer & " : "";
+        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        writer.openBlock("type $LType = $LOmit<$T, $S> & {", "};",
-                typeName, metadataBearerType, containerSymbol, memberName, () -> {
+        writer.openBlock("type $LType = __MetadataBearer & Omit<$T, $S> & {", "};",
+                typeName, containerSymbol, memberName, () -> {
                         writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
                                 containerSymbol.getName(), memberName));
                         writer.write("$1L$2L: __SdkStream<Required<$3T>[$1S]>;", memberName, optionalSuffix,

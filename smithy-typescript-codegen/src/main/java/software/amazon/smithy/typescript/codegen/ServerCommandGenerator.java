@@ -15,9 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingCommandTypeFromDeser;
-
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,7 +28,6 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -101,13 +97,7 @@ final class ServerCommandGenerator implements Runnable {
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
-            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
-            if (blobStreamingMembers.isEmpty()) {
-                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
-            } else {
-                writeStreamingCommandTypeFromDeser(writer, symbolProvider.toSymbol(input), typeName,
-                        blobStreamingMembers.get(0), settings);
-            }
+            writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(inputShape.get()));
             renderNamespace(typeName, input);
         } else {
             // If the input is non-existent, then use an empty object.
@@ -134,7 +124,6 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
         if (outputShape.isPresent()) {
-            //TODO: refer to writeStreamingCommandTypeToSer when streaming is supported.
             writer.write("export interface $L extends $T {}",
                     typeName, symbolProvider.toSymbol(outputShape.get()));
         } else {

@@ -16,8 +16,8 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingCommandTypeFromDeser;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingCommandTypeToSer;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingInputType;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingOutputType;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -247,7 +247,7 @@ final class CommandGenerator implements Runnable {
             if (blobStreamingMembers.isEmpty()) {
                 writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             } else {
-                writeStreamingCommandTypeToSer(writer, symbolProvider.toSymbol(input), typeName,
+                writeClientCommandStreamingInputType(writer, symbolProvider.toSymbol(input), typeName,
                         blobStreamingMembers.get(0));
             }
         } else {
@@ -267,8 +267,8 @@ final class CommandGenerator implements Runnable {
                 writer.write("export interface $L extends $T, __MetadataBearer {}",
                         typeName, symbolProvider.toSymbol(outputShape.get()));
             } else {
-                writeStreamingCommandTypeFromDeser(writer, symbolProvider.toSymbol(output), typeName,
-                        blobStreamingMembers.get(0), settings);
+                writeClientCommandStreamingOutputType(writer, symbolProvider.toSymbol(output), typeName,
+                        blobStreamingMembers.get(0));
             }
         } else {
             writer.write("export interface $L extends __MetadataBearer {}", typeName);
