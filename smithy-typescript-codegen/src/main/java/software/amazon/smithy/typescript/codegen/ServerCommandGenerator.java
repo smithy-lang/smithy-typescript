@@ -16,7 +16,7 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingCommandTypeFromDeser;
 
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -98,7 +98,6 @@ final class ServerCommandGenerator implements Runnable {
         writer.write("");
     }
 
-    // TODO: Flip these so that metadata is attached to input and streaming customization is attached to output.
     private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
@@ -106,7 +105,8 @@ final class ServerCommandGenerator implements Runnable {
             if (blobStreamingMembers.isEmpty()) {
                 writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             } else {
-                writeStreamingMemberType(writer, symbolProvider.toSymbol(input), typeName, blobStreamingMembers.get(0));
+                writeStreamingCommandTypeFromDeser(writer, symbolProvider.toSymbol(input), typeName,
+                        blobStreamingMembers.get(0), settings);
             }
             renderNamespace(typeName, input);
         } else {
@@ -134,6 +134,7 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
         if (outputShape.isPresent()) {
+            //TODO: refer to writeStreamingCommandTypeToSer when streaming is supported.
             writer.write("export interface $L extends $T {}",
                     typeName, symbolProvider.toSymbol(outputShape.get()));
         } else {

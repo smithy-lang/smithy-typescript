@@ -117,7 +117,7 @@ public final class CodegenUtils {
         return shape.getAllMembers().values().stream()
                 .filter(memberShape -> {
                     // Streaming blobs need to have their types modified
-                    // See `writeStreamingMemberType`
+                    // See `writeStreamingCommandTypeToSer`
                     Shape target = model.expectShape(memberShape.getTarget());
                     return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
                 })
@@ -125,12 +125,14 @@ public final class CodegenUtils {
     }
 
     /**
-     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
-     * This type decoration is allowed in Smithy because it makes input type more permissive than output type
-     * for the same member.
+     * Generate the type of the command output of server sdk or the input of the client sdk given the streaming blob
+     * member of the shape. The generated type eases the streaming member requirement so that users don't need to
+     * construct a stream every time.
+     * This type decoration is allowed in Smithy because it makes, for the same member, the type to be serialized is
+     * more permissive than the type to be deserialized.
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
-    static void writeStreamingMemberType(
+    static void writeStreamingCommandTypeToSer(
             TypeScriptWriter writer,
             Symbol containerSymbol,
             String typeName,
@@ -142,6 +144,38 @@ public final class CodegenUtils {
             writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
                     containerSymbol.getName(), memberName));
             writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix, containerSymbol);
+        });
+        writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
+                + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
+        writer.write("export interface $1L extends $1LType {}", typeName);
+    }
+
+    /**
+     * Generate the type of the command input of server sdk or the output of the client sdk given the streaming blob
+     * member of the shape. The type marks the streaming blob member to contain the utility methods to transform the
+     * stream to string, buffer or WHATWG stream API.
+     */
+    static void writeStreamingCommandTypeFromDeser(
+            TypeScriptWriter writer,
+            Symbol containerSymbol,
+            String typeName,
+            MemberShape streamingMember,
+            TypeScriptSettings settings
+    ) {
+        String memberName = streamingMember.getMemberName();
+        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
+        boolean isClientSdk = settings.generateClient();
+        if (isClientSdk) {
+            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        }
+        String metadataBearerType = isClientSdk ? "__MetadataBearer & " : "";
+        writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.openBlock("type $LType = $LOmit<$T, $S> & {", "};",
+                typeName, metadataBearerType, containerSymbol, memberName, () -> {
+                        writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
+                                containerSymbol.getName(), memberName));
+                        writer.write("$1L$2L: __SdkStream<Required<$3T>[$1S]>;", memberName, optionalSuffix,
+                                containerSymbol);
         });
         writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
                 + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
