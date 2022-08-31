@@ -2301,8 +2301,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Handle streaming shapes differently.
         if (target.hasTrait(StreamingTrait.class)) {
-            // If payload is streaming, return low-level stream with the stream utility functions mixin.
-            writer.write("const data: any = context.sdkStreamMixin(output.body);");
+            writer.write("const data: any = output.body;");
+            // If payload is streaming blob, return low-level stream with the stream utility functions mixin.
+            if (target instanceof BlobShape) {
+                writer.write("context.sdkStreamMixin(data);");
+            }
         } else if (target instanceof BlobShape) {
             // If payload is non-streaming Blob, only need to collect stream to binary data (Uint8Array).
             writer.write("const data: any = await collectBody(output.body, context);");
