@@ -51,7 +51,9 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.validation.ValidationEvent;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
+import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -323,6 +325,7 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
         }
         if (settings.generateClient() || settings.generateServerSdk()) {
             generateCommands(shape);
+            generateEndpointV2(shape);
         }
 
         if (settings.generateServerSdk()) {
@@ -443,5 +446,15 @@ class CodegenVisitor extends ShapeVisitor.Default<Void> {
                         protocolGenerator, applicationProtocol).run());
             }
         }
+    }
+
+    private void generateEndpointV2(ServiceShape shape) {
+        if (!shape.hasTrait(EndpointRuleSetTrait.class)) {
+            return;
+        }
+
+        new EndpointsV2Generator(
+            settings, model, fileManifest
+        ).run();
     }
 }

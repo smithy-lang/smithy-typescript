@@ -31,6 +31,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -169,7 +170,15 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         if (!inputTypes.isEmpty()) {
             writer.indent();
             for (SymbolReference symbolReference : inputTypes) {
-                writer.write("& $T", symbolReference);
+                if (service.hasTrait(EndpointRuleSetTrait.class)
+                    && symbolReference.getAlias().equals("EndpointInputConfig")) {
+                    writer.write("& $T<$L>", symbolReference, "EndpointParameters");
+                } else {
+                    writer.write("& $T", symbolReference);
+                }
+            }
+            if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                writer.write("& ClientInputEndpointParameters");
             }
             writer.dedent();
         }
@@ -189,7 +198,17 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.indent();
             runtimePlugins.stream()
                     .flatMap(p -> OptionalUtils.stream(p.getResolvedConfig()))
-                    .forEach(symbol -> writer.write("& $T", symbol));
+                    .forEach(symbol -> {
+                        if (service.hasTrait(EndpointRuleSetTrait.class)
+                            && symbol.getAlias().equals("EndpointResolvedConfig")) {
+                            writer.write("& $T<$L>", symbol, "EndpointParameters");
+                        } else {
+                            writer.write("& $T", symbol);
+                        }
+                    });
+            if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                writer.write("& ClientResolvedEndpointParameters");
+            }
             writer.dedent();
         }
 
@@ -329,6 +348,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                                  generateConfigVariable(configVariable - 1),
                                  additionalParamsString);
                 }
+            }
+
+            if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                configVariable++;
+                writer.write("let $L = $L($L);",
+                    generateConfigVariable(configVariable),
+                    "resolveClientEndpointParameters",
+                    generateConfigVariable(configVariable - 1));
             }
 
             writer.write("super($L);", generateConfigVariable(configVariable));

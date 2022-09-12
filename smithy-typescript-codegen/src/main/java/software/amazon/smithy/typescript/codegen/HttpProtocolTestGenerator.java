@@ -389,7 +389,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
             });
             writer.write("const r = await handler.handle(request, {});").write("");
 
-            // Assert that the function has been called exactly once.
             writer.write("expect(testFunction.mock.calls.length).toBe(0);");
 
             writeHttpResponseAssertions(testCase.getResponse());

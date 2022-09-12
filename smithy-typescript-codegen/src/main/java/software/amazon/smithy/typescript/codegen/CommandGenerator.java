@@ -35,6 +35,9 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameMap;
+import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -184,6 +187,46 @@ final class CommandGenerator implements Runnable {
 
             // Add customizations.
             addCommandSpecificPlugins();
+
+            // EndpointsV2
+            if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                writer.addImport(
+                    "getEndpointPlugin",
+                    "getEndpointPlugin",
+                    "@aws-sdk/middleware-endpoint"
+                );
+                writer.openBlock(
+                    "this.middlewareStack.use(getEndpointPlugin(configuration, {",
+                    "}));",
+                    () -> {
+                        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
+                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
+                            writer.write(
+                                "$L: { type: \"builtInParams\", name: \"$L\" },",
+                                name, EndpointsParamNameMap.getLocalName(name)
+                            );
+                        });
+                        parameterFinder.getClientContextParams().forEach((name, type) -> {
+                            writer.write(
+                                "$L: { type: \"clientContextParams\", name: \"$L\" },",
+                                name, EndpointsParamNameMap.getLocalName(name)
+                            );
+                        });
+                        parameterFinder.getStaticContextParamValues(operation).forEach((name, value) -> {
+                            writer.write(
+                                "$L: { type: \"staticContextParams\", value: $L },",
+                                name, value
+                            );
+                        });
+                        parameterFinder.getContextParams(operation).forEach((name, type) -> {
+                            writer.write(
+                                "$L: { type: \"contextParams\", name: \"$L\" },",
+                                name, EndpointsParamNameMap.getLocalName(name)
+                            );
+                        });
+                    }
+                );
+            }
 
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
