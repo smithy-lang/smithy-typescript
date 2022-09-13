@@ -32,6 +32,7 @@ import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait;
 import software.amazon.smithy.model.traits.OptionalAuthTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.IoUtils;
@@ -134,6 +135,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         writerFactory.accept(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", INTEGRATION_NAME, "index.ts").toString(),
                 writer -> {
+                        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_MIDDLEWARE);
                         String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.ts");
                         writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.ts");
                         writer.write("$L", source);

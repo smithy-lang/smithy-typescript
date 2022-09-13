@@ -84,6 +84,9 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", false),
 
+    // Conditionally added when setting the auth middleware.
+    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@aws-sdk/util-middleware", false),
+
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@aws-sdk/eventstream-serde-config-resolver",
             false),
