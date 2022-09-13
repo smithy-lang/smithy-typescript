@@ -51,6 +51,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", true),
     MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", true),
     MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", true),
+    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@aws-sdk/middleware-endpoint", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "2.0.0", true),
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "2.0.0", true),
