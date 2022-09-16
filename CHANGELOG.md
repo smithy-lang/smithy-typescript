@@ -1,5 +1,27 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.12.0 (2022-09-19)
+
+### Features
+* Migrated the code generator to use Smithy's new and recommended DirectedCodegen. ([#585](https://github.com/awslabs/smithy-typescript/pull/585))
+* Added support for endpoints v2. ([#586](https://github.com/awslabs/smithy-typescript/pull/586))
+* Updated Smithy version to `1.25.x` which bring Smithy IDL v2 support. ([#589](https://github.com/awslabs/smithy-typescript/pull/589))
+* Updated SSDK library version to `1.0.0-alpha6`. ([#583](https://github.com/awslabs/smithy-typescript/pull/583))
+* Added different package description for client v/s server. ([#582](https://github.com/awslabs/smithy-typescript/pull/582))
+* Overrode typescript version for typedoc. ([#561](https://github.com/awslabs/smithy-typescript/pull/561))
+* Removed namespaces that only contain log filters. ([#574](https://github.com/awslabs/smithy-typescript/pull/574))
+* Added support for event stream for RPC protocols. ([#573](https://github.com/awslabs/smithy-typescript/pull/573))
+* Added fallback to status code for unmodeled errors. ([#565](https://github.com/awslabs/smithy-typescript/pull/565))
+* Added support for generating protocol specific event payload. ([#554](https://github.com/awslabs/smithy-typescript/pull/554))
+* Used Record type instead of Object. ([#556](https://github.com/awslabs/smithy-typescript/pull/556), [#557](https://github.com/awslabs/smithy-typescript/pull/557), [#558](https://github.com/awslabs/smithy-typescript/pull/558), [#562](https://github.com/awslabs/smithy-typescript/pull/562))
+* Removed explicit reference to MetadataBearer from error shapes. ([#545](https://github.com/awslabs/smithy-typescript/pull/545))
+* Added codegen indicator comment to generated files. ([#538](https://github.com/awslabs/smithy-typescript/pull/538))
+* Added check to stop pagination on same token. ([#534](https://github.com/awslabs/smithy-typescript/pull/534))
+
+### Bug Fixes
+* Fixed code generation for server protocol tests. ([#577](https://github.com/awslabs/smithy-typescript/pull/577))
+* Fixed missing Content-Type header in some events. ([#567](https://github.com/awslabs/smithy-typescript/pull/567))
+
 ## 0.11.0 (2022-04-04)
 
 ### Features
