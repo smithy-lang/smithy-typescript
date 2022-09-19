@@ -183,7 +183,7 @@ final class CommandGenerator implements Runnable {
         }
         writer.addImport("EndpointParameterInstructions", null, "@aws-sdk/middleware-endpoint");
         writer.openBlock(
-            "public static instructions(): EndpointParameterInstructions {", "}",
+            "public static getEndpointParameterInstructions(): EndpointParameterInstructions {", "}",
             () -> {
                 writer.openBlock(
                     "return {", "};",
@@ -246,7 +246,7 @@ final class CommandGenerator implements Runnable {
                     "this.middlewareStack.use(getEndpointPlugin(configuration, ",
                     "));",
                     () -> {
-                        writer.write("$L.instructions()", symbol.getName());
+                        writer.write("$L.getEndpointParameterInstructions()", symbol.getName());
                     }
                 );
             }
