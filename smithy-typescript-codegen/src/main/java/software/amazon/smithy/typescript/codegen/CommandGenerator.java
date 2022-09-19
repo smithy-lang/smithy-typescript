@@ -119,26 +119,31 @@ final class CommandGenerator implements Runnable {
         String name = symbol.getName();
         writer.writeShapeDocs(operation, shapeDoc -> shapeDoc + "\n" + getCommandExample(serviceSymbol.getName(),
                 configType, name, inputType.getName(), outputType.getName()));
-        writer.openBlock("export class $L extends $$Command<$T, $T, $L> {", "}", name, inputType, outputType,
-                configType, () -> {
+        writer.openBlock(
+            "export class $L extends $$Command<$T, $T, $L> {", "}",
+            name, inputType, outputType,
+            configType, () -> {
 
-            // Section for adding custom command properties.
-            writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
-            writer.pushState(COMMAND_PROPERTIES_SECTION).popState();
-            writer.write("// End section: $L", COMMAND_PROPERTIES_SECTION);
-            writer.write("");
+                // Section for adding custom command properties.
+                writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
+                writer.pushState(COMMAND_PROPERTIES_SECTION).popState();
+                writer.write("// End section: $L", COMMAND_PROPERTIES_SECTION);
+                writer.write("");
+                generateEndpointParameterInstructionProvider();
+                writer.write("");
 
-            generateCommandConstructor();
-            writer.write("");
-            generateCommandMiddlewareResolver(configType);
-            writeSerde();
+                generateCommandConstructor();
+                writer.write("");
+                generateCommandMiddlewareResolver(configType);
+                writeSerde();
 
-            // Hook for adding more methods to the command.
-            writer.write("// Start section: $L", COMMAND_BODY_EXTRA_SECTION)
+                // Hook for adding more methods to the command.
+                writer.write("// Start section: $L", COMMAND_BODY_EXTRA_SECTION)
                     .pushState(COMMAND_BODY_EXTRA_SECTION)
                     .popState()
                     .write("// End section: $L", COMMAND_BODY_EXTRA_SECTION);
-        });
+            }
+        );
     }
 
     private String getCommandExample(String serviceName, String configName, String commandName, String commandInput,
@@ -172,32 +177,16 @@ final class CommandGenerator implements Runnable {
         });
     }
 
-    private void generateCommandMiddlewareResolver(String configType) {
-        Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
-        writer.writeDocs("@internal");
-        writer.write("resolveMiddleware(")
-                .indent()
-                .write("clientStack: MiddlewareStack<$L, $L>,", "ServiceInputTypes", "ServiceOutputTypes")
-                .write("configuration: $L,", configType)
-                .write("options?: $T", applicationProtocol.getOptionsType())
-                .dedent();
-        writer.openBlock("): Handler<$T, $T> {", "}", inputType, outputType, () -> {
-            // Add serialization and deserialization plugin.
-            writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
-
-            // Add customizations.
-            addCommandSpecificPlugins();
-
-            // EndpointsV2
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                writer.addImport(
-                    "getEndpointPlugin",
-                    "getEndpointPlugin",
-                    "@aws-sdk/middleware-endpoint"
-                );
+    private void generateEndpointParameterInstructionProvider() {
+        if (!service.hasTrait(EndpointRuleSetTrait.class)) {
+            return;
+        }
+        writer.addImport("EndpointParameterInstructions", null, "@aws-sdk/middleware-endpoint");
+        writer.openBlock(
+            "public static getEndpointParameterInstructions(): EndpointParameterInstructions {", "}",
+            () -> {
                 writer.openBlock(
-                    "this.middlewareStack.use(getEndpointPlugin(configuration, {",
-                    "}));",
+                    "return {", "};",
                     () -> {
                         RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
                         parameterFinder.getBuiltInParams().forEach((name, type) -> {
@@ -224,6 +213,40 @@ final class CommandGenerator implements Runnable {
                                 name, EndpointsParamNameMap.getLocalName(name)
                             );
                         });
+                    }
+                );
+            }
+        );
+    }
+
+    private void generateCommandMiddlewareResolver(String configType) {
+        Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
+        writer.writeDocs("@internal");
+        writer.write("resolveMiddleware(")
+                .indent()
+                .write("clientStack: MiddlewareStack<$L, $L>,", "ServiceInputTypes", "ServiceOutputTypes")
+                .write("configuration: $L,", configType)
+                .write("options?: $T", applicationProtocol.getOptionsType())
+                .dedent();
+        writer.openBlock("): Handler<$T, $T> {", "}", inputType, outputType, () -> {
+            // Add serialization and deserialization plugin.
+            writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
+
+            // Add customizations.
+            addCommandSpecificPlugins();
+
+            // EndpointsV2
+            if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                writer.addImport(
+                    "getEndpointPlugin",
+                    "getEndpointPlugin",
+                    "@aws-sdk/middleware-endpoint"
+                );
+                writer.openBlock(
+                    "this.middlewareStack.use(getEndpointPlugin(configuration, ",
+                    "));",
+                    () -> {
+                        writer.write("$L.getEndpointParameterInstructions()", symbol.getName());
                     }
                 );
             }
