@@ -72,8 +72,9 @@ public final class EndpointsV2Generator implements Runnable {
                 Map<String, String> clientContextParams =
                     new RuleSetParameterFinder(service).getClientContextParams();
 
-                clientContextParams.forEach((k, v) -> {
-                    writer.write("$L?: $L,", k, v);
+                ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                    parameters.accept(new RuleSetParametersVisitor(writer, clientContextParams));
                 });
             }
         );
