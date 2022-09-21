@@ -66,11 +66,13 @@ import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SetUtils;
@@ -93,8 +95,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
     private final boolean isErrorCodeInBody;
     private final EventStreamGenerator eventStreamGenerator = new EventStreamGenerator();
-
     private final LinkedHashMap<String, String> headerBuffer = new LinkedHashMap<>();
+    private final Set<String> contextParamDeduplicationControlSet = SetUtils.of(
+        "Bucket"
+    );
 
     /**
      * Creates a Http binding protocol generator.
@@ -725,12 +729,34 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> labelBindings = bindingIndex.getRequestBindings(operation, Location.LABEL);
 
+        final boolean useEndpointsV2 = context.getService().hasTrait(EndpointRuleSetTrait.class);
+        final Map<String, String> contextParams = useEndpointsV2
+            ? new RuleSetParameterFinder(context.getService())
+                .getContextParams(context.getModel().getShape(operation.getInputShape()).get())
+            : Collections.emptyMap();
+
         // Always write the bound path, but only the actual segments.
         writer.write("let resolvedPath = `$L` + $S;",
                 "${basePath?.endsWith('/') ? basePath.slice(0, -1) : (basePath || '')}",
                 "/" + trait.getUri().getSegments().stream()
-                .map(Segment::toString)
-                .collect(Collectors.joining("/")));
+                    .filter(segment -> {
+                        if (!useEndpointsV2) {
+                            // only applicable in Endpoints 2.0
+                            return true;
+                        }
+                        String content = segment.getContent();
+                        boolean isContextParam = contextParams.containsKey(content);
+
+                        // If the endpoint also contains the uri segment, e.g. Bucket, we
+                        // do not want to include it in the operation URI to be resolved.
+                        // We use this logic plus a temporary control-list, since it is not yet known
+                        // how many services and param names will have this issue.
+
+                        return !(isContextParam && contextParamDeduplicationControlSet.contains(content));
+                    })
+                    .map(Segment::toString)
+                    .collect(Collectors.joining("/"))
+        );
 
         // Handle any label bindings.
         if (!labelBindings.isEmpty()) {
