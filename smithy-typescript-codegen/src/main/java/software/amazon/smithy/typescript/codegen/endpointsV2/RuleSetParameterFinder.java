@@ -22,8 +22,9 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.NodeVisitor;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
-import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.rulesengine.traits.ClientContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
@@ -65,7 +66,7 @@ public class RuleSetParameterFinder {
             clientContextParamsTrait.getParameters().forEach((name, definition) -> {
                 map.put(
                     name,
-                    definition.getType().toString() // "boolean" and "string" are directly usable in TS.
+                    definition.getType().toString().toLowerCase() // "boolean" and "string" are directly usable in TS.
                 );
             });
         }
@@ -76,46 +77,58 @@ public class RuleSetParameterFinder {
      * "The staticContextParams trait defines one or more context parameters that MUST
      * be bound to the specified values. This trait MUST target an operation shape."
      */
-    public Map<String, String> getStaticContextParams(OperationShape operation) {
+    public Map<String, String> getStaticContextParams(Shape operationInput) {
         Map<String, String> map = new HashMap<>();
-        Optional<StaticContextParamsTrait> trait = operation.getTrait(StaticContextParamsTrait.class);
-        if (trait.isPresent()) {
-            StaticContextParamsTrait staticContextParamsTrait = trait.get();
-            staticContextParamsTrait.getParameters().forEach((name, definition) -> {
-                map.put(
-                    name,
-                    definition.getValue().getType().toString()
-                );
+
+        if (operationInput.isStructureShape()) {
+            operationInput.getAllMembers().forEach((String memberName, MemberShape member) -> {
+                Optional<StaticContextParamsTrait> trait = member.getTrait(StaticContextParamsTrait.class);
+                if (trait.isPresent()) {
+                    StaticContextParamsTrait staticContextParamsTrait = trait.get();
+                    staticContextParamsTrait.getParameters().forEach((name, definition) -> {
+                        map.put(
+                            name,
+                            definition.getValue().getType().toString()
+                        );
+                    });
+                }
             });
         }
+
         return map;
     }
 
     /**
      * Get map of params to actual values instead of the value type.
      */
-    public Map<String, String> getStaticContextParamValues(OperationShape operation) {
+    public Map<String, String> getStaticContextParamValues(Shape operationInput) {
         Map<String, String> map = new HashMap<>();
-        Optional<StaticContextParamsTrait> trait = operation.getTrait(StaticContextParamsTrait.class);
-        if (trait.isPresent()) {
-            StaticContextParamsTrait staticContextParamsTrait = trait.get();
-            staticContextParamsTrait.getParameters().forEach((name, definition) -> {
-                String value;
-                if (definition.getValue().isStringNode()) {
-                    value = "`" + definition.getValue().expectStringNode().toString() + "`";
-                } else if (definition.getValue().isBooleanNode()) {
-                    value = definition.getValue().expectBooleanNode().toString();
-                } else {
-                    throw new RuntimeException("unexpected type "
-                        + definition.getValue().getType().toString()
-                        + " received as staticContextParam.");
+
+        if (operationInput.isStructureShape()) {
+            operationInput.getAllMembers().forEach((String memberName, MemberShape member) -> {
+                Optional<StaticContextParamsTrait> trait = member.getTrait(StaticContextParamsTrait.class);
+                if (trait.isPresent()) {
+                    StaticContextParamsTrait staticContextParamsTrait = trait.get();
+                    staticContextParamsTrait.getParameters().forEach((name, definition) -> {
+                        String value;
+                        if (definition.getValue().isStringNode()) {
+                            value = "`" + definition.getValue().expectStringNode().toString() + "`";
+                        } else if (definition.getValue().isBooleanNode()) {
+                            value = definition.getValue().expectBooleanNode().toString();
+                        } else {
+                            throw new RuntimeException("unexpected type "
+                                + definition.getValue().getType().toString()
+                                + " received as staticContextParam.");
+                        }
+                        map.put(
+                            name,
+                            value
+                        );
+                    });
                 }
-                map.put(
-                    name,
-                    value
-                );
             });
         }
+
         return map;
     }
 
@@ -125,17 +138,23 @@ public class RuleSetParameterFinder {
      * The targeted endpoint parameter MUST be a type that is compatible with member’s
      * shape targeted by the trait.
      */
-    public Map<String, String> getContextParams(OperationShape operation) {
+    public Map<String, String> getContextParams(Shape operationInput) {
         Map<String, String> map = new HashMap<>();
-        Optional<ContextParamTrait> trait = operation.getTrait(ContextParamTrait.class);
-        if (trait.isPresent()) {
-            ContextParamTrait staticContextParamsTrait = trait.get();
-            String name = staticContextParamsTrait.getName();
-            map.put(
-                name,
-                "unknown"
-            );
+
+        if (operationInput.isStructureShape()) {
+            operationInput.getAllMembers().forEach((String memberName, MemberShape member) -> {
+                Optional<ContextParamTrait> trait = member.getTrait(ContextParamTrait.class);
+                if (trait.isPresent()) {
+                    ContextParamTrait contextParamTrait = trait.get();
+                    String name = contextParamTrait.getName();
+                    map.put(
+                        name,
+                        "unknown"
+                    );
+                }
+            });
         }
+
         return map;
     }
 

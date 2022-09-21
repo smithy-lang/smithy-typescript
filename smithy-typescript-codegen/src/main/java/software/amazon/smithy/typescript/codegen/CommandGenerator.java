@@ -34,6 +34,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameMap;
@@ -201,13 +202,14 @@ final class CommandGenerator implements Runnable {
                                 name, EndpointsParamNameMap.getLocalName(name)
                             );
                         });
-                        parameterFinder.getStaticContextParamValues(operation).forEach((name, value) -> {
+                        Shape operationInput = model.getShape(operation.getInputShape()).get();
+                        parameterFinder.getStaticContextParamValues(operationInput).forEach((name, value) -> {
                             writer.write(
                                 "$L: { type: \"staticContextParams\", value: $L },",
                                 name, value
                             );
                         });
-                        parameterFinder.getContextParams(operation).forEach((name, type) -> {
+                        parameterFinder.getContextParams(operationInput).forEach((name, type) -> {
                             writer.write(
                                 "$L: { type: \"contextParams\", name: \"$L\" },",
                                 name, EndpointsParamNameMap.getLocalName(name)

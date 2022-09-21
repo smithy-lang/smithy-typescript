@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
+import java.util.HashMap;
 import java.util.Map;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.NodeVisitor;
@@ -25,9 +26,16 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 
 public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
     private final TypeScriptWriter writer;
+    private final Map<String, String> clientContextParams;
 
     public RuleSetParametersVisitor(TypeScriptWriter writer) {
         this.writer = writer;
+        this.clientContextParams = new HashMap<>();
+    }
+
+    public RuleSetParametersVisitor(TypeScriptWriter writer, Map<String, String> clientContextParams) {
+        this.writer = writer;
+        this.clientContextParams = clientContextParams;
     }
 
     @Override
@@ -38,7 +46,10 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
             Node param = entry.getValue();
 
             ParameterGenerator parameterGenerator = new ParameterGenerator(key, param);
-            writer.write(parameterGenerator.toCodeString());
+
+            if (clientContextParams.isEmpty() || clientContextParams.containsKey(key)) {
+                writer.write(parameterGenerator.toCodeString());
+            }
         }
         return null;
     }
