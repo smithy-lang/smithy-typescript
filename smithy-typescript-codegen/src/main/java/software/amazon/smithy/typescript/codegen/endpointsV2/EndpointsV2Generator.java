@@ -73,7 +73,7 @@ public final class EndpointsV2Generator implements Runnable {
                     new RuleSetParameterFinder(service).getClientContextParams();
 
                 clientContextParams.forEach((k, v) -> {
-                    writer.write("$L: $L,", k, v);
+                    writer.write("$L?: $L,", k, v);
                 });
             }
         );
@@ -115,23 +115,30 @@ public final class EndpointsV2Generator implements Runnable {
     private void generateEndpointResolver() {
         TypeScriptWriter writer = new TypeScriptWriter("");
 
-        writer.addImport("EndpointV2", "EndpointV2", "@aws-sdk/types");
-        writer.addImport("Logger", "Logger", "@aws-sdk/types");
+        writer.addImport("EndpointV2", null, "@aws-sdk/types");
+        writer.addImport("Logger", null, "@aws-sdk/types");
 
-        writer.addImport("endpointProvider", "endpointProvider", "@aws-sdk/util-endpoints");
-        writer.addImport("EndpointParameters", "EndpointParameters", "../endpoint/EndpointParameters");
-        writer.addImport("ruleSet", "ruleSet", "../endpoint/ruleset");
+        writer.addImport("EndpointParams", null, "@aws-sdk/util-endpoints");
+        writer.addImport("resolveEndpoint", null, "@aws-sdk/util-endpoints");
+        writer.addImport("EndpointParameters", null, "../endpoint/EndpointParameters");
+        writer.addImport("ruleSet", null, "../endpoint/ruleset");
 
         writer.openBlock(
             "export const defaultEndpointResolver = ",
             "",
             () -> {
                 writer.openBlock(
-                    "(param: EndpointParameters, context: { logger?: Logger } = {}): EndpointV2 => {",
+                    "(endpointParams: EndpointParameters, context: { logger?: Logger } = {}): EndpointV2 => {",
                     "};",
                     () -> {
-                        // TODO(endpointsV2) cache
-                        writer.write("return endpointProvider(param, ruleSet, context);");
+                        writer.openBlock(
+                            "return resolveEndpoint(ruleSet, {",
+                            "});",
+                            () -> {
+                                writer.write("endpointParams: endpointParams as EndpointParams,");
+                                writer.write("logger: context.logger,");
+                            }
+                        );
                     }
                 );
             }
@@ -149,10 +156,10 @@ public final class EndpointsV2Generator implements Runnable {
     private void generateEndpointRuleset() {
         TypeScriptWriter writer = new TypeScriptWriter("");
 
-        writer.addImport("RuleSet", "RuleSet", "@aws-sdk/util-endpoints");
+        writer.addImport("RuleSetObject", null, "@aws-sdk/util-endpoints");
 
         writer.openBlock(
-            "export const ruleSet: RuleSet = ",
+            "export const ruleSet: RuleSetObject = ",
             "",
             () -> {
                 new RuleSetSerializer(
