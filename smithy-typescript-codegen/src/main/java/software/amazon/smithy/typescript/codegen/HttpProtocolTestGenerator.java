@@ -575,7 +575,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             case "application/xml":
                 writer.addDependency(TypeScriptDependency.XML_PARSER);
                 writer.addDependency(TypeScriptDependency.HTML_ENTITIES);
-                writer.addImport("parse", "xmlParse", "fast-xml-parser");
+                writer.addImport("XMLParser", null, "fast-xml-parser");
                 writer.addImport("decodeHTML", "decodeHTML", "entities");
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
