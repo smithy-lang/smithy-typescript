@@ -104,12 +104,9 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
     }
 
     public static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model, OperationShape operation) {
-        StructureShape ioShapeToDeser;
-        if (settings.generateServerSdk()) {
-            ioShapeToDeser = model.expectShape(operation.getInputShape()).asStructureShape().get();
-        } else {
-            ioShapeToDeser = model.expectShape(operation.getOutputShape()).asStructureShape().get();
-        }
+        StructureShape ioShapeToDeser = (settings.generateServerSdk())
+          ? model.expectShape(operation.getInputShape()).asStructureShape().get()
+          : model.expectShape(operation.getOutputShape()).asStructureShape().get();
         for (MemberShape member : ioShapeToDeser.members()) {
             Shape shape = model.expectShape(member.getTarget());
             if (shape instanceof BlobShape && shape.hasTrait(StreamingTrait.class)) {
