@@ -167,16 +167,15 @@ public final class CodegenUtils {
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        writer.openBlock("type $LType = __MetadataBearer & Omit<$T, $S> & {", "};",
-                typeName, containerSymbol, memberName, () -> {
-                        writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
-                                containerSymbol.getName(), memberName));
-                        writer.write("$1L$2L: __SdkStream<Required<$3T>[$1S]>;", memberName, optionalSuffix,
-                                containerSymbol);
-        });
-        writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
-                + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
-        writer.write("export interface $1L extends $1LType {}", typeName);
+        writer.addImport("WithSdkStreamMixin", "__WithSdkStreamMixin", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+
+
+        writer.write(
+            "export interface $L extends __WithSdkStreamMixin<$T, $S>, __MetadataBearer {}",
+            typeName,
+            containerSymbol,
+            memberName
+        );
     }
 
     /**
