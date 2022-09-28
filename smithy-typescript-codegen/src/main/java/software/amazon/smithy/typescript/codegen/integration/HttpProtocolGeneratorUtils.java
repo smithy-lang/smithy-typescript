@@ -342,7 +342,7 @@ public final class HttpProtocolGeneratorUtils {
                 writer.openBlock("const parsedOutput: any = {", "};",
                         () -> {
                             writer.write("...output,");
-                            writer.write("body: await parseBody(output.body, context)");
+                            writer.write("body: await parseBody(output.body, { ...context, $$isError: true })");
                         });
             }
 
