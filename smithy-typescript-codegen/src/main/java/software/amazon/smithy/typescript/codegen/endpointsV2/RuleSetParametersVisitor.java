@@ -23,19 +23,32 @@ import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 
-
+/**
+ * Writes endpoint ruleset params into a client-specific config resolver step, applying defaults as needed.
+ */
 public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
     private final TypeScriptWriter writer;
     private final Map<String, String> clientContextParams;
+    private boolean useLocalNames = false;
+    private boolean writeDefaults = false;
 
     public RuleSetParametersVisitor(TypeScriptWriter writer) {
         this.writer = writer;
         this.clientContextParams = new HashMap<>();
     }
 
-    public RuleSetParametersVisitor(TypeScriptWriter writer, Map<String, String> clientContextParams) {
+    public RuleSetParametersVisitor(TypeScriptWriter writer,
+                                    Map<String, String> clientContextParams,
+                                    boolean useLocalNames) {
         this.writer = writer;
         this.clientContextParams = clientContextParams;
+        this.useLocalNames = useLocalNames;
+    }
+
+    public RuleSetParametersVisitor(TypeScriptWriter writer, boolean writeDefaults) {
+        this(writer);
+        this.writeDefaults = writeDefaults;
+        this.useLocalNames = true;
     }
 
     @Override
@@ -43,11 +56,19 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
         Map<StringNode, Node> members = node.getMembers();
         for (Map.Entry<StringNode, Node> entry : members.entrySet()) {
             String key = entry.getKey().getValue();
+            String localKey = key;
             Node param = entry.getValue();
+            if (useLocalNames) {
+                localKey = EndpointsParamNameMap.getLocalName(key);
+            }
 
-            ParameterGenerator parameterGenerator = new ParameterGenerator(key, param);
+            ParameterGenerator parameterGenerator = new ParameterGenerator(localKey, param);
 
-            if (clientContextParams.isEmpty() || clientContextParams.containsKey(key)) {
+            if (writeDefaults) {
+                if (parameterGenerator.hasDefault()) {
+                    writer.write(parameterGenerator.defaultAsCodeString());
+                }
+            } else if (clientContextParams.isEmpty() || clientContextParams.containsKey(key)) {
                 writer.write(parameterGenerator.toCodeString());
             }
         }
