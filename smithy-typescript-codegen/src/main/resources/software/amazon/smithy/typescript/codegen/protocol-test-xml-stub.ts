@@ -8,15 +8,19 @@ const compareEquivalentXmlBodies = (
 ): Object => {
   const parseConfig = {
     attributeNamePrefix: "",
+    htmlEntities: true,
     ignoreAttributes: false,
+    ignoreDeclaration: true,
     parseTagValue: false,
     trimValues: false,
-    tagValueProcessor: (val: any, tagName: any) =>
-      val.trim() === "" ? "" : decodeHTML(val),
+    tagValueProcessor: (_, val) => (val.trim() === "" && val.includes("\n") ? "" : undefined),
   };
 
   const parseXmlBody = (body: string) => {
-    const parsedObj = new XMLParser(parseConfig).parse(body);
+    const parser = new XMLParser(parseConfig);
+    parser.addEntity("#xD", "\r");
+    parser.addEntity("#10", "\n");
+    const parsedObj = parser.parse(body);
     const textNodeName = "#text";
     const key = Object.keys(parsedObj)[0];
     const parsedObjToReturn = parsedObj[key];
