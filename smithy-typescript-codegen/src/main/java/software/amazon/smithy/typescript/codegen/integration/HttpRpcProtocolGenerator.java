@@ -412,7 +412,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
                 context, operation, responseType, this::writeErrorCodeParser,
-                isErrorCodeInBody, this::getErrorBodyLocation);
+                isErrorCodeInBody, this::getErrorBodyLocation, this::getOperationErrors);
         deserializingErrorShapes.addAll(errorShapes);
     }
 
