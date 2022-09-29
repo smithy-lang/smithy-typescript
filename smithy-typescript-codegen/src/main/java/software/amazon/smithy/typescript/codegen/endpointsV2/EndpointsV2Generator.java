@@ -69,12 +69,14 @@ public final class EndpointsV2Generator implements Runnable {
             "export interface ClientInputEndpointParameters {",
             "}",
             () -> {
-                Map<String, String> clientContextParams =
-                    new RuleSetParameterFinder(service).getClientContextParams();
+                RuleSetParameterFinder ruleSetParameterFinder = new RuleSetParameterFinder(service);
+
+                Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
+                clientInputParams.putAll(ruleSetParameterFinder.getBuiltInParams());
 
                 ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                 ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                    parameters.accept(new RuleSetParametersVisitor(writer, clientContextParams));
+                    parameters.accept(new RuleSetParametersVisitor(writer, clientInputParams, true));
                 });
             }
         );
@@ -89,6 +91,10 @@ public final class EndpointsV2Generator implements Runnable {
             () -> {
                 writer.openBlock("return {", "}", () -> {
                     writer.write("...options,");
+                    ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                    ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                        parameters.accept(new RuleSetParametersVisitor(writer, true));
+                    });
                 });
             }
         );

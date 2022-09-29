@@ -40,7 +40,6 @@ public class ParameterGenerator {
             .orElseThrow(() -> new RuntimeException("param node is not object node."));
 
         Optional<BooleanNode> requiredNode = paramNode.getBooleanMember("required");
-
         requiredNode.ifPresent(booleanNode -> required = booleanNode.getValue());
 
         Optional<StringNode> type = paramNode.getStringMember("type");
@@ -63,6 +62,36 @@ public class ParameterGenerator {
         return param.expectObjectNode().containsMember("builtIn");
     }
 
+    public boolean hasDefault() {
+        return param.expectObjectNode().containsMember("default");
+    }
+
+    public String defaultAsCodeString() {
+        if (!hasDefault()) {
+            return "";
+        }
+        String buffer = "";
+        buffer += parameterName;
+        buffer += ": ";
+        buffer += "options." + parameterName + " ?? ";
+        ObjectNode paramNode = param.expectObjectNode();
+        StringNode type = paramNode.expectStringMember("type");
+
+        switch (type.getValue()) {
+            case "String":
+                buffer += "\"" + paramNode.expectStringMember("default").getValue() + "\"";
+                break;
+            case "Boolean":
+                buffer += paramNode.expectBooleanMember("default").getValue() ? "true" : "false";
+                break;
+            default:
+                // required by linter
+        }
+
+        buffer += ",";
+        return buffer;
+    }
+
     public Map.Entry<String, String> getNameAndType() {
         return new AbstractMap.SimpleEntry<>(
             parameterName,
@@ -76,7 +105,7 @@ public class ParameterGenerator {
     public String toCodeString() {
         String buffer = "";
         buffer += parameterName;
-        if (!required) {
+        if (!required || hasDefault()) {
             buffer += "?";
         }
         buffer += ": ";
