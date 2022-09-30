@@ -44,6 +44,7 @@ import software.amazon.smithy.model.shapes.ByteShape;
 import software.amazon.smithy.model.shapes.DocumentShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
+import software.amazon.smithy.model.shapes.IntEnumShape;
 import software.amazon.smithy.model.shapes.IntegerShape;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
@@ -291,6 +292,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return createSymbolBuilder(shape, "string").build();
     }
 
+    @Override
+    public Symbol intEnumShape(IntEnumShape shape) {
+        return createObjectSymbolBuilder(shape).build();
+    }
+
     private Symbol createEnumSymbol(StringShape shape, EnumTrait enumTrait) {
         return createObjectSymbolBuilder(shape)
                 .putProperty(EnumTrait.class.getName(), enumTrait)
@@ -338,6 +344,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
         Symbol targetSymbol = toSymbol(targetShape);
 
+        if (targetShape.isIntEnumShape()) {
+            return createMemberSymbolWithIntEnumTarget(targetSymbol);
+        }
+
         if (targetSymbol.getProperties().containsKey(EnumTrait.class.getName())) {
             return createMemberSymbolWithEnumTarget(targetSymbol);
         }
@@ -352,10 +362,24 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return targetSymbol;
     }
 
+    // Enums are considered "open", meaning it is a backward compatible change to add new
+    // members. Adding the `string` variant allows for previously generated clients to be
+    // able to handle unknown enum values that may be added in the future.
     private Symbol createMemberSymbolWithEnumTarget(Symbol targetSymbol) {
         return targetSymbol.toBuilder()
                 .namespace(null, "/")
                 .name(targetSymbol.getName() + " | string")
+                .addReference(targetSymbol)
+                .build();
+    }
+
+    // IntEnums are considered "open", meaning it is a backward compatible change to add new
+    // members. Adding the `number` variant allows for previously generated clients to be
+    // able to handle unknown int enum values that may be added in the future.
+    private Symbol createMemberSymbolWithIntEnumTarget(Symbol targetSymbol) {
+        return targetSymbol.toBuilder()
+                .namespace(null, "/")
+                .name(targetSymbol.getName() + " | number")
                 .addReference(targetSymbol)
                 .build();
     }

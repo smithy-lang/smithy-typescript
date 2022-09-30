@@ -37,6 +37,7 @@ import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
 import software.amazon.smithy.codegen.core.directed.DirectedCodegen;
 import software.amazon.smithy.codegen.core.directed.GenerateEnumDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateErrorDirective;
+import software.amazon.smithy.codegen.core.directed.GenerateIntEnumDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
@@ -369,6 +370,18 @@ final class DirectedTypeScriptCodegen
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             EnumGenerator generator = new EnumGenerator(
                     directive.shape().asStringShape().get(),
+                    directive.symbolProvider().toSymbol(directive.shape()),
+                    writer
+            );
+            generator.run();
+        });
+    }
+
+    @Override
+    public void generateIntEnumShape(GenerateIntEnumDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+            IntEnumGenerator generator = new IntEnumGenerator(
+                    directive.shape().asIntEnumShape().get(),
                     directive.symbolProvider().toSymbol(directive.shape()),
                     writer
             );

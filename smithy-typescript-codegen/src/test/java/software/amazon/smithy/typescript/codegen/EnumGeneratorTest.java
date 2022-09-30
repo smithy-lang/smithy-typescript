@@ -2,6 +2,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -33,8 +34,7 @@ public class EnumGeneratorTest {
         new EnumGenerator(shape, symbol, writer).run();
 
         assertThat(writer.toString(), containsString("export enum Baz {"));
-        assertThat(writer.toString(), containsString("FOO = \"FOO\""));
-        assertThat(writer.toString(), containsString("BAR = \"BAR\","));
+        assertThat(writer.toString(), stringContainsInOrder("BAR = \"BAR\",", "FOO = \"FOO\""));
     }
 
     @Test
