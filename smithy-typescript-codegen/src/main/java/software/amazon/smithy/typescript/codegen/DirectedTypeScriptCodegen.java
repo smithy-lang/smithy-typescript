@@ -404,16 +404,6 @@ final class DirectedTypeScriptCodegen
             }
         }
 
-        // Write each custom file.
-        for (TypeScriptIntegration integration : directive.context().integrations()) {
-            LOGGER.finer(() -> "Calling writeAdditionalFiles on " + integration.getClass().getCanonicalName());
-            integration.writeAdditionalFiles(
-                    directive.settings(),
-                    directive.model(),
-                    directive.symbolProvider(),
-                    directive.context().writerDelegator()::useFileWriter);
-        }
-
         // Generate index for client.
         IndexGenerator.writeIndex(
                 directive.settings(),

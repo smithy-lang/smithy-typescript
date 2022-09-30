@@ -19,8 +19,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -32,6 +30,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait;
 import software.amazon.smithy.model.traits.OptionalAuthTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.IoUtils;
@@ -101,17 +100,12 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     }
 
     @Override
-    public void writeAdditionalFiles(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
-    ) {
-        ServiceShape service = settings.getService(model);
+    public void customize(TypeScriptCodegenContext codegenContext) {
+        ServiceShape service = codegenContext.settings().getService(codegenContext.model());
 
         // If the service doesn't use HTTP API keys, we don't need to do anything and the generated
         // code doesn't need any additional files.
-        if (!hasEffectiveHttpApiKeyAuthTrait(model, service)) {
+        if (!hasEffectiveHttpApiKeyAuthTrait(codegenContext.model(), service)) {
             return;
         }
 
@@ -120,7 +114,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                 + "src/main/resources/software/amazon/smithy/aws/typescript/codegen/integration/";
 
         // Write the middleware source.
-        writerFactory.accept(
+        codegenContext.writerDelegator().useFileWriter(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", INTEGRATION_NAME, "index.ts").toString(),
                 writer -> {
                         String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.ts");
@@ -129,7 +123,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                 });
 
         // Write the middleware tests.
-        writerFactory.accept(
+        codegenContext.writerDelegator().useFileWriter(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", INTEGRATION_NAME, "index.spec.ts").toString(),
                 writer -> {
                         writer.addDependency(SymbolDependency.builder()

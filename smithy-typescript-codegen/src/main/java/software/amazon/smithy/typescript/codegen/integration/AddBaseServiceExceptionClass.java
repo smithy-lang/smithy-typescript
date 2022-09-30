@@ -16,8 +16,6 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -25,6 +23,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -37,17 +36,17 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public final class AddBaseServiceExceptionClass implements TypeScriptIntegration {
 
     @Override
-    public void writeAdditionalFiles(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
-    ) {
-        boolean isClientSdk = settings.generateClient();
+    public void customize(TypeScriptCodegenContext codegenContext) {
+        boolean isClientSdk = codegenContext.settings().generateClient();
         if (isClientSdk) {
-            String serviceName = getServiceName(settings, model, symbolProvider);
+            String serviceName = getServiceName(
+                    codegenContext.settings(),
+                    codegenContext.model(),
+                    codegenContext.symbolProvider());
             String serviceExceptionName = getServiceExceptionName(serviceName);
-            writerFactory.accept(
+
+            // Write the ServiceException class for the service.
+            codegenContext.writerDelegator().useFileWriter(
                     Paths.get(CodegenUtils.SOURCE_FOLDER, "models", serviceExceptionName + ".ts").toString(),
                     writer -> {
                             writer.addImport("ServiceException", "__ServiceException",
