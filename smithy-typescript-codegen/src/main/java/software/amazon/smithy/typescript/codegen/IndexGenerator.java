@@ -27,7 +27,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
 
@@ -43,14 +42,11 @@ final class IndexGenerator {
         TypeScriptSettings settings,
         Model model,
         SymbolProvider symbolProvider,
-        FileManifest fileManifest,
-        List<TypeScriptIntegration> integrations,
-        ProtocolGenerator protocolGenerator
+        ProtocolGenerator protocolGenerator,
+        TypeScriptWriter writer
     ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
-
         if (settings.generateClient()) {
-            writeClientExports(settings, model, symbolProvider, writer, fileManifest, integrations);
+            writeClientExports(settings, model, symbolProvider, writer);
         }
 
         if (settings.generateServerSdk() && protocolGenerator != null) {
@@ -60,13 +56,6 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write("export * from \"./models\";");
-
-        // Write each custom export.
-        for (TypeScriptIntegration integration : integrations) {
-            integration.writeAdditionalExports(settings, model, symbolProvider, writer);
-        }
-
-        fileManifest.writeFile(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer.toString());
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
@@ -97,9 +86,7 @@ final class IndexGenerator {
             TypeScriptSettings settings,
             Model model,
             SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
-            FileManifest fileManifest,
-            List<TypeScriptIntegration> integrations
+            TypeScriptWriter writer
     ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);

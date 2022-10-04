@@ -3,14 +3,10 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
-import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
-import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 
 public class IndexGeneratorTest {
 
@@ -23,27 +19,14 @@ public class IndexGeneratorTest {
                 .withMember("packageVersion", Node.from("1.0.0"))
                 .build());
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
-        MockManifest manifest = new MockManifest();
-        List<TypeScriptIntegration> integrations = new ArrayList<>();
-        integrations.add(new TypeScriptIntegration() {
-            @Override
-            public void writeAdditionalExports(
-                    TypeScriptSettings settings,
-                    Model model,
-                    SymbolProvider symbolProvider,
-                    TypeScriptWriter writer
-            ) {
-                writer.write("export * from $S;", "./foo");
-            }
-        });
+        TypeScriptWriter writer = new TypeScriptWriter("");
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, manifest, integrations, null);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer);
 
-        String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/index.ts").get();
+        String contents = writer.toString();
         assertThat(contents, containsString("export * from \"./Example\";"));
         assertThat(contents, containsString("export * from \"./ExampleClient\";"));
         assertThat(contents, containsString("export * from \"./commands\";"));
         assertThat(contents, containsString("export * from \"./models\";"));
-        assertThat(contents, containsString("export * from \"./foo\";"));
     }
 }

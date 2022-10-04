@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -404,24 +406,19 @@ final class DirectedTypeScriptCodegen
             }
         }
 
-        // Write each custom file.
-        for (TypeScriptIntegration integration : directive.context().integrations()) {
-            LOGGER.finer(() -> "Calling writeAdditionalFiles on " + integration.getClass().getCanonicalName());
-            integration.writeAdditionalFiles(
-                    directive.settings(),
-                    directive.model(),
-                    directive.symbolProvider(),
-                    directive.context().writerDelegator()::useFileWriter);
-        }
-
         // Generate index for client.
-        IndexGenerator.writeIndex(
+        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory =
+            directive.context().writerDelegator()::useFileWriter;
+
+        writerFactory.accept(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer -> {
+            IndexGenerator.writeIndex(
                 directive.settings(),
                 directive.model(),
                 directive.symbolProvider(),
-                directive.fileManifest(),
-                directive.context().integrations(),
-                directive.context().protocolGenerator());
+                directive.context().protocolGenerator(),
+                writer
+            );
+        });
 
         if (directive.settings().generateServerSdk()) {
             // Generate index for server
