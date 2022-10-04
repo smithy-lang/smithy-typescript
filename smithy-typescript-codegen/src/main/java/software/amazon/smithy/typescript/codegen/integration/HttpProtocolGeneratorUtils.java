@@ -230,7 +230,8 @@ public final class HttpProtocolGeneratorUtils {
                 () -> {
                     writer.write("httpStatusCode: output.statusCode,");
                     writer.write("requestId: output.headers[\"x-amzn-requestid\"] ??"
-                        + " output.headers[\"x-amzn-request-id\"],");
+                        + " output.headers[\"x-amzn-request-id\"] ??"
+                        + " output.headers[\"x-amz-request-id\"],");
                     writer.write("extendedRequestId: output.headers[\"x-amz-id-2\"],");
                     writer.write("cfId: output.headers[\"x-amz-cf-id\"],");
                 });
