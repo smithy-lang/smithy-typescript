@@ -23,7 +23,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
-import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -32,6 +31,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait;
 import software.amazon.smithy.model.traits.OptionalAuthTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.IoUtils;
@@ -101,10 +101,21 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     }
 
     @Override
-    public void writeAdditionalFiles(
+    public void customize(TypeScriptCodegenContext codegenContext) {
+        TypeScriptSettings settings = codegenContext.settings();
+        Model model = codegenContext.model();
+        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory = codegenContext.writerDelegator()::useFileWriter;
+
+        writeAdditionalFiles(settings, model, writerFactory);
+
+        writerFactory.accept(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer -> {
+            writeAdditionalExports(settings, model, writer);
+        });
+    }
+
+    private void writeAdditionalFiles(
         TypeScriptSettings settings,
         Model model,
-        SymbolProvider symbolProvider,
         BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
     ) {
         ServiceShape service = settings.getService(model);
@@ -144,11 +155,9 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                 });
     }
 
-    @Override
-    public void writeAdditionalExports(
+    private void writeAdditionalExports(
             TypeScriptSettings settings,
             Model model,
-            SymbolProvider symbolProvider,
             TypeScriptWriter writer
     ) {
         boolean isClientSdk = settings.generateClient();
