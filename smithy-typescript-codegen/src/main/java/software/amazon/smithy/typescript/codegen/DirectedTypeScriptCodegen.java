@@ -91,7 +91,7 @@ final class DirectedTypeScriptCodegen
         List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
         directive.integrations().forEach(integration -> {
             LOGGER.info(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
-            integration.getClientPlugins().forEach(runtimePlugin -> {
+            integration.getClientPlugins(directive.settings()).forEach(runtimePlugin -> {
                 LOGGER.info(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
                 runtimePlugins.add(runtimePlugin);
             });

@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SmithyIntegration;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
@@ -41,11 +42,21 @@ public interface TypeScriptIntegration
         extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
 
     /**
+     * Use {@link #getClientPlugins(TypeScriptSettings settings)} instead.
+     */
+    @Deprecated
+    default List<RuntimeClientPlugin> getClientPlugins() {
+        throw new CodegenException("The method `getClientPlugins(TypeScriptSettings settings)`"
+                + " should be used instead of getClientPlugins().");
+    }
+
+    /**
      * Gets a list of plugins to apply to the generated client.
      *
+     * @param settings Settings used to generate.
      * @return Returns the list of RuntimePlugins to apply to the client.
      */
-    default List<RuntimeClientPlugin> getClientPlugins() {
+    default List<RuntimeClientPlugin> getClientPlugins(TypeScriptSettings settings) {
         return Collections.emptyList();
     }
 

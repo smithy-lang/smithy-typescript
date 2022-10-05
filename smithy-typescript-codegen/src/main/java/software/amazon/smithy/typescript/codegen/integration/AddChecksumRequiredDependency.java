@@ -113,7 +113,7 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
     }
 
     @Override
-    public List<RuntimeClientPlugin> getClientPlugins() {
+    public List<RuntimeClientPlugin> getClientPlugins(TypeScriptSettings settings) {
         return ListUtils.of(
             RuntimeClientPlugin.builder()
                         .withConventions(TypeScriptDependency.BODY_CHECKSUM.dependency, "ApplyMd5BodyChecksum",

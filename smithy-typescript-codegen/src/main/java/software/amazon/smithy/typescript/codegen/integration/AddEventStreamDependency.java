@@ -41,7 +41,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public final class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override
-    public List<RuntimeClientPlugin> getClientPlugins() {
+    public List<RuntimeClientPlugin> getClientPlugins(TypeScriptSettings settings) {
         return ListUtils.of(
                 RuntimeClientPlugin.builder()
                         .withConventions(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,

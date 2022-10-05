@@ -60,7 +60,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
      * query parameter, that query parameter will be used.
      */
     @Override
-    public List<RuntimeClientPlugin> getClientPlugins() {
+    public List<RuntimeClientPlugin> getClientPlugins(TypeScriptSettings settings) {
         return ListUtils.of(
             // Add the config if the service uses HTTP API key authorization.
             RuntimeClientPlugin.builder()
