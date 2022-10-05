@@ -15,7 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -98,7 +97,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", false),
 
     // Conditionally added when XML parser needs to be used.
-    XML_PARSER("dependencies", "fast-xml-parser", "4.0.10", false),
+    XML_PARSER("dependencies", "fast-xml-parser", "4.0.11", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Server dependency for SSDKs
