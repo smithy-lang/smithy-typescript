@@ -11,12 +11,15 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
+import software.amazon.smithy.model.shapes.IntEnumShape;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 
 public class SymbolProviderTest {
@@ -189,4 +192,61 @@ public class SymbolProviderTest {
 
         assertThat(memberSymbol.getName(), equalTo("__LazyJsonString | string"));
     }
+
+    @Test
+    public void addsUnknownStringEnumVariant() {
+        EnumTrait trait = EnumTrait.builder()
+                .addEnum(EnumDefinition.builder().value("FOO").name("FOO").build())
+                .addEnum(EnumDefinition.builder().value("BAR").name("BAR").build())
+                .build();
+        StringShape stringShape = StringShape.builder().id("foo.bar#enumString").addTrait(trait).build();
+        MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(stringShape).build();
+        StructureShape struct = StructureShape.builder()
+                .id("foo.bar#test")
+                .addMember(member)
+                .build();
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .addShapes(struct, member, stringShape)
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+
+        SymbolProvider provider = new SymbolVisitor(model, settings);
+        Symbol memberSymbol = provider.toSymbol(member);
+
+        assertThat(memberSymbol.getName(), equalTo("EnumString | string"));
+    }
+
+    @Test
+    public void addsUnknownNumberIntEnumVariant() {
+        IntEnumShape shape = IntEnumShape.builder()
+                .id("com.foo#Foo")
+                .addMember("BAR", 2)
+                .addMember("BAZ", 5)
+                .build();
+        MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(shape).build();
+        StructureShape struct = StructureShape.builder()
+                .id("foo.bar#test")
+                .addMember(member)
+                .build();
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .addShapes(struct, member, shape)
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build());
+
+        SymbolProvider provider = new SymbolVisitor(model, settings);
+        Symbol memberSymbol = provider.toSymbol(member);
+
+        assertThat(memberSymbol.getName(), equalTo("Foo | number"));
+    }
+
 }
