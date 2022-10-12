@@ -100,6 +100,10 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     XML_PARSER("dependencies", "fast-xml-parser", "4.0.11", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
+    // Conditionally added when streaming blob response payload exists.
+    UTIL_STREAM_NODE("dependencies", "@aws-sdk/util-stream-node", false),
+    UTIL_STREAM_BROWSER("dependencies", "@aws-sdk/util-stream-browser", false),
+
     // Server dependency for SSDKs
     SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.6", false);
 

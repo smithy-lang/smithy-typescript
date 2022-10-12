@@ -2024,7 +2024,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
-        String contextType = CodegenUtils.getOperationDeserializerContextType(writer, context.getModel(), operation);
+        String contextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
+                context.getModel(), operation);
 
         // Handle the general response.
         writer.openBlock("export const $L = async(\n"
@@ -2320,14 +2321,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBinding binding
     ) {
         TypeScriptWriter writer = context.getWriter();
+        boolean isClientSdk = context.getSettings().generateClient();
 
         // There can only be one payload binding.
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
 
         // Handle streaming shapes differently.
         if (target.hasTrait(StreamingTrait.class)) {
-            // If payload is streaming, return raw low-level stream directly.
             writer.write("const data: any = output.body;");
+            // If payload is streaming blob, return low-level stream with the stream utility functions mixin.
+            if (isClientSdk && target instanceof BlobShape) {
+                writer.write("context.sdkStreamMixin(data);");
+            }
         } else if (target instanceof BlobShape) {
             // If payload is non-streaming Blob, only need to collect stream to binary data (Uint8Array).
             writer.write("const data: any = await collectBody(output.body, context);");

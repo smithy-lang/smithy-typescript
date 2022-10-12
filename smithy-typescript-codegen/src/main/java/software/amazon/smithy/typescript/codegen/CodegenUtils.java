@@ -28,6 +28,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -75,12 +76,14 @@ public final class CodegenUtils {
 
     /**
      * Get context type for command deserializer function.
+     * @param settings The TypeScript settings
      * @param writer The code writer.
      * @param model The model for the service containing the given command.
      * @param operation The operation shape for given command.
      * @return The TypeScript type for the deserializer context
      */
     public static String getOperationDeserializerContextType(
+            TypeScriptSettings settings,
             TypeScriptWriter writer,
             Model model,
             OperationShape operation
@@ -90,8 +93,14 @@ public final class CodegenUtils {
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
+            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
+                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
             contextInterfaceList.add("__EventStreamSerdeContext");
+        }
+        if (AddSdkStreamMixinDependency.hasStreamingBlobDeser(settings, model, operation)) {
+            writer.addImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext",
+                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            contextInterfaceList.add("__SdkStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
     }
@@ -108,7 +117,7 @@ public final class CodegenUtils {
         return shape.getAllMembers().values().stream()
                 .filter(memberShape -> {
                     // Streaming blobs need to have their types modified
-                    // See `writeStreamingMemberType`
+                    // See `writeClientCommandStreamingInputType`
                     Shape target = model.expectShape(memberShape.getTarget());
                     return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
                 })
@@ -116,12 +125,14 @@ public final class CodegenUtils {
     }
 
     /**
-     * Ease the input streaming member restriction so that users don't need to construct a stream every time.
-     * This type decoration is allowed in Smithy because it makes input type more permissive than output type
-     * for the same member.
+     * Generate the type of the command input of the client sdk given the streaming blob
+     * member of the shape. The generated type eases the streaming member requirement so that users don't need to
+     * construct a stream every time.
+     * This type decoration is allowed in Smithy because it makes, for the same member, the type to be serialized is
+     * more permissive than the type to be deserialized.
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
-    static void writeStreamingMemberType(
+    static void writeClientCommandStreamingInputType(
             TypeScriptWriter writer,
             Symbol containerSymbol,
             String typeName,
@@ -129,14 +140,42 @@ public final class CodegenUtils {
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName, containerSymbol, memberName, () -> {
-            writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
-                    containerSymbol.getName(), memberName));
-            writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix, containerSymbol);
+        writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName,
+                containerSymbol, memberName, () -> {
+                        writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
+                                containerSymbol.getName(), memberName));
+                        writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix,
+                                containerSymbol);
         });
         writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
                 + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
         writer.write("export interface $1L extends $1LType {}", typeName);
+    }
+
+    /**
+     * Generate the type of the command output of the client sdk given the streaming blob
+     * member of the shape. The type marks the streaming blob member to contain the utility methods to transform the
+     * stream to string, buffer or WHATWG stream API.
+     */
+    static void writeClientCommandStreamingOutputType(
+            TypeScriptWriter writer,
+            Symbol containerSymbol,
+            String typeName,
+            MemberShape streamingMember
+    ) {
+        String memberName = streamingMember.getMemberName();
+        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
+        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.addImport("WithSdkStreamMixin", "__WithSdkStreamMixin", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+
+
+        writer.write(
+            "export interface $L extends __WithSdkStreamMixin<$T, $S>, __MetadataBearer {}",
+            typeName,
+            containerSymbol,
+            memberName
+        );
     }
 
     /**

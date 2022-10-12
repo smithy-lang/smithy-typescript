@@ -41,6 +41,6 @@ public class AddDefaultsModeDependency implements TypeScriptIntegration {
         writer.addImport("Provider", "Provider", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.writeDocs("The {@link DefaultsMode} that will be used to determine how certain default configuration "
                 + "options are resolved in the SDK.");
-        writer.write("defaultsMode?: DefaultsMode | Provider<DefaultsMode>;");
+        writer.write("defaultsMode?: DefaultsMode | Provider<DefaultsMode>;\n");
     }
 }

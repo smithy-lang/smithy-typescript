@@ -16,7 +16,8 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
-import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeStreamingMemberType;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingInputType;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingOutputType;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -314,7 +315,8 @@ final class CommandGenerator implements Runnable {
             if (blobStreamingMembers.isEmpty()) {
                 writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             } else {
-                writeStreamingMemberType(writer, symbolProvider.toSymbol(input), typeName, blobStreamingMembers.get(0));
+                writeClientCommandStreamingInputType(writer, symbolProvider.toSymbol(input), typeName,
+                        blobStreamingMembers.get(0));
             }
         } else {
             // If the input is non-existent, then use an empty object.
@@ -327,8 +329,15 @@ final class CommandGenerator implements Runnable {
         // to a defined output shape.
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         if (outputShape.isPresent()) {
-            writer.write("export interface $L extends $T, __MetadataBearer {}",
-                    typeName, symbolProvider.toSymbol(outputShape.get()));
+            StructureShape output = outputShape.get();
+            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, output);
+            if (blobStreamingMembers.isEmpty()) {
+                writer.write("export interface $L extends $T, __MetadataBearer {}",
+                        typeName, symbolProvider.toSymbol(outputShape.get()));
+            } else {
+                writeClientCommandStreamingOutputType(writer, symbolProvider.toSymbol(output), typeName,
+                        blobStreamingMembers.get(0));
+            }
         } else {
             writer.write("export interface $L extends __MetadataBearer {}", typeName);
         }
@@ -371,7 +380,8 @@ final class CommandGenerator implements Runnable {
                 .write("private deserialize(")
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
-                    .write("context: $L", CodegenUtils.getOperationDeserializerContextType(writer, model, operation))
+                    .write("context: $L",
+                            CodegenUtils.getOperationDeserializerContextType(settings, writer, model, operation))
                 .dedent()
                 .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
                 .write("");

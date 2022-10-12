@@ -3,3 +3,4 @@ software.amazon.smithy.typescript.codegen.integration.AddChecksumRequiredDepende
 software.amazon.smithy.typescript.codegen.integration.AddDefaultsModeDependency
 software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin
 software.amazon.smithy.typescript.codegen.integration.AddBaseServiceExceptionClass
+software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency
