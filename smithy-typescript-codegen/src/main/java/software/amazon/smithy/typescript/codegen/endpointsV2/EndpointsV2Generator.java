@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ public final class EndpointsV2Generator implements Runnable {
         TypeScriptWriter writer = new TypeScriptWriter("");
 
         writer.addImport("EndpointParameters", "__EndpointParameters", "@aws-sdk/types");
+        writer.addImport("Provider", null, "@aws-sdk/types");
 
         writer.openBlock(
             "export interface ClientInputEndpointParameters {",
@@ -81,7 +82,9 @@ public final class EndpointsV2Generator implements Runnable {
             }
         );
 
+        writer.write("");
         writer.write("export type ClientResolvedEndpointParameters = ClientInputEndpointParameters;");
+        writer.write("");
 
         writer.openBlock(
             "export const resolveClientEndpointParameters = "
@@ -99,6 +102,7 @@ public final class EndpointsV2Generator implements Runnable {
             }
         );
 
+        writer.write("");
         writer.openBlock(
             "export interface EndpointParameters extends __EndpointParameters {",
             "}",

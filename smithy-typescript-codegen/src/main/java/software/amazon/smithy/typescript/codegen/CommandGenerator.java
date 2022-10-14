@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -235,9 +235,6 @@ final class CommandGenerator implements Runnable {
             // Add serialization and deserialization plugin.
             writer.write("this.middlewareStack.use($T(configuration, this.serialize, this.deserialize));", serde);
 
-            // Add customizations.
-            addCommandSpecificPlugins();
-
             // EndpointsV2
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 writer.addImport(
@@ -253,6 +250,9 @@ final class CommandGenerator implements Runnable {
                     }
                 );
             }
+
+            // Add customizations.
+            addCommandSpecificPlugins();
 
             // Resolve the middleware stack.
             writer.write("\nconst stack = clientStack.concat(this.middlewareStack);\n");
