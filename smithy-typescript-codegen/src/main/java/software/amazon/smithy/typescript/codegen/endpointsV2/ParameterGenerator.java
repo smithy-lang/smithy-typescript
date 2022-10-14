@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -102,14 +102,18 @@ public class ParameterGenerator {
     /**
      * Used to generate interface line for EndpointParameters.ts.
      */
-    public String toCodeString() {
+    public String toCodeString(boolean isClientContextParam) {
         String buffer = "";
         buffer += parameterName;
-        if (!required || hasDefault()) {
+        if (!required || hasDefault() || isClientContextParam) {
             buffer += "?";
         }
         buffer += ": ";
-        buffer += tsParamType + ";";
+        if (isClientContextParam) {
+            buffer += (tsParamType + "|" + "Provider<" + tsParamType + ">") + ";";
+        } else {
+            buffer += tsParamType + ";";
+        }
         return buffer;
     }
 }
