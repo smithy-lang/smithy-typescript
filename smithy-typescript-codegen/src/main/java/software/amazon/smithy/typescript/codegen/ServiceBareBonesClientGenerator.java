@@ -327,6 +327,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.write("let $L = __getRuntimeConfig(configuration);",
                     generateConfigVariable(configVariable));
 
+            if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                configVariable++;
+                writer.write("let $L = $L($L);",
+                    generateConfigVariable(configVariable),
+                    "resolveClientEndpointParameters",
+                    generateConfigVariable(configVariable - 1));
+            }
+
             // Add runtime plugin "resolve" method calls. These are invoked one
             // after the other until all of the runtime plugins have been called.
             // Only plugins that have configuration are called. Each time the
@@ -348,14 +356,6 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                                  generateConfigVariable(configVariable - 1),
                                  additionalParamsString);
                 }
-            }
-
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                configVariable++;
-                writer.write("let $L = $L($L);",
-                    generateConfigVariable(configVariable),
-                    "resolveClientEndpointParameters",
-                    generateConfigVariable(configVariable - 1));
             }
 
             writer.write("super($L);", generateConfigVariable(configVariable));
