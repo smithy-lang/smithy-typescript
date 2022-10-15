@@ -17,6 +17,8 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Map;
+import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.smithy.aws.traits.auth.SigV4Trait;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -83,7 +85,13 @@ public final class EndpointsV2Generator implements Runnable {
         );
 
         writer.write("");
-        writer.write("export type ClientResolvedEndpointParameters = ClientInputEndpointParameters;");
+        writer.openBlock(
+            "export type ClientResolvedEndpointParameters = ClientInputEndpointParameters & {",
+            "};",
+            () -> {
+                writer.write("defaultSigningName: string;");
+            }
+        );
         writer.write("");
 
         writer.openBlock(
@@ -98,6 +106,12 @@ public final class EndpointsV2Generator implements Runnable {
                     ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                         parameters.accept(new RuleSetParametersVisitor(writer, true));
                     });
+                    ServiceTrait serviceTrait = service.getTrait(ServiceTrait.class).get();
+                    writer.write(
+                        "defaultSigningName: \"$L\",",
+                        service.getTrait(SigV4Trait.class).map(SigV4Trait::getName)
+                            .orElse(serviceTrait.getArnNamespace())
+                    );
                 });
             }
         );
