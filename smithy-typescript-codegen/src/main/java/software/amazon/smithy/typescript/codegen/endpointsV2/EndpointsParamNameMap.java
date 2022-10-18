@@ -38,6 +38,21 @@ public final class EndpointsParamNameMap {
     }
 
     public static String getLocalName(String endpointsV2ParamName) {
-        return MAPPING.getOrDefault(endpointsV2ParamName, endpointsV2ParamName);
+        boolean isTitleCase = false;
+        if (endpointsV2ParamName.length() >= 2) {
+            String char1 = endpointsV2ParamName.substring(0, 1);
+            String char2 = endpointsV2ParamName.substring(1, 2);
+            if (char1.toUpperCase().equals(char1) && char2.toLowerCase().equals(char2)) {
+                isTitleCase = true;
+            }
+        }
+
+        String suggestedName = endpointsV2ParamName;
+        if (isTitleCase) {
+            suggestedName = endpointsV2ParamName.substring(0, 1).toLowerCase()
+                + endpointsV2ParamName.substring(1);
+        }
+
+        return MAPPING.getOrDefault(endpointsV2ParamName, suggestedName);
     }
 }

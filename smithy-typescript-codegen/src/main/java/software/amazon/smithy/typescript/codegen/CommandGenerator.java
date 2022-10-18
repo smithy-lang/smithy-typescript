@@ -20,6 +20,7 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClient
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingOutputType;
 
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -191,18 +192,8 @@ final class CommandGenerator implements Runnable {
                     "return {", "};",
                     () -> {
                         RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
-                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
-                            writer.write(
-                                "$L: { type: \"builtInParams\", name: \"$L\" },",
-                                name, EndpointsParamNameMap.getLocalName(name)
-                            );
-                        });
-                        parameterFinder.getClientContextParams().forEach((name, type) -> {
-                            writer.write(
-                                "$L: { type: \"clientContextParams\", name: \"$L\" },",
-                                name, EndpointsParamNameMap.getLocalName(name)
-                            );
-                        });
+                        Set<String> paramNames = new HashSet<>();
+
                         Shape operationInput = model.getShape(operation.getInputShape()).get();
                         parameterFinder.getStaticContextParamValues(operationInput).forEach((name, value) -> {
                             writer.write(
@@ -215,6 +206,24 @@ final class CommandGenerator implements Runnable {
                                 "$L: { type: \"contextParams\", name: \"$L\" },",
                                 name, EndpointsParamNameMap.getLocalName(name)
                             );
+                        });
+                        parameterFinder.getClientContextParams().forEach((name, type) -> {
+                            if (!paramNames.contains(name)) {
+                                writer.write(
+                                    "$L: { type: \"clientContextParams\", name: \"$L\" },",
+                                    name, EndpointsParamNameMap.getLocalName(name)
+                                );
+                            }
+                            paramNames.add(name);
+                        });
+                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
+                            if (!paramNames.contains(name)) {
+                                writer.write(
+                                    "$L: { type: \"builtInParams\", name: \"$L\" },",
+                                    name, EndpointsParamNameMap.getLocalName(name)
+                                );
+                            }
+                            paramNames.add(name);
                         });
                     }
                 );
