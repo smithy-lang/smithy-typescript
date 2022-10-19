@@ -204,7 +204,7 @@ final class CommandGenerator implements Runnable {
                         parameterFinder.getContextParams(operationInput).forEach((name, type) -> {
                             writer.write(
                                 "$L: { type: \"contextParams\", name: \"$L\" },",
-                                name, EndpointsParamNameMap.getLocalName(name)
+                                name, name
                             );
                         });
                         parameterFinder.getClientContextParams().forEach((name, type) -> {
