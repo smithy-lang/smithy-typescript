@@ -45,7 +45,7 @@ public class RuleSetSerializer {
                 "},",
                 () -> {
                     objectNode.getMembers().forEach((k, v) -> {
-                        writer.writeInline(k + ": ");
+                        writer.writeInline("\"" + k + "\": ");
                         traverse(v);
                     });
                 }
