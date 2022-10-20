@@ -307,7 +307,7 @@ final class DirectedTypeScriptCodegen
             return;
         }
 
-        new EndpointsV2Generator(directive.settings(), directive.model(), directive.fileManifest()).run();
+        new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
     }
 
     private void generateServiceInterface(GenerateServiceDirective<TypeScriptCodegenContext,
