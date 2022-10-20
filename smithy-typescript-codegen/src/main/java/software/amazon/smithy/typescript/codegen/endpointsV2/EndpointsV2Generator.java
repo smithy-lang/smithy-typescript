@@ -143,7 +143,7 @@ public final class EndpointsV2Generator implements Runnable {
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RESOLVER_FILE).toString(),
             writer -> {
                 writer.addImport("EndpointV2", null, "@aws-sdk/types");
-                writer.addImport("Logger", null, "@aws-sdk/types");
+                writer.addImport("HandlerExecutionContext", null, "@aws-sdk/types");
 
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
                 writer.addImport("EndpointParams", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS.packageName);
@@ -160,15 +160,18 @@ public final class EndpointsV2Generator implements Runnable {
                     "",
                     () -> {
                         writer.openBlock(
-                            "(endpointParams: EndpointParameters, context: { logger?: Logger } = {}): EndpointV2 => {",
+                            "(endpointParams: EndpointParameters, "
+                                + "context: HandlerExecutionContext = {}): EndpointV2 => {",
                             "};",
                             () -> {
+                                writer.write("context.endpointV2DecisionLog = [];");
                                 writer.openBlock(
                                     "return resolveEndpoint(ruleSet, {",
                                     "});",
                                     () -> {
                                         writer.write("endpointParams: endpointParams as EndpointParams,");
                                         writer.write("logger: context.logger,");
+                                        writer.write("decisionLog: context.endpointV2DecisionLog,");
                                     }
                                 );
                             }
