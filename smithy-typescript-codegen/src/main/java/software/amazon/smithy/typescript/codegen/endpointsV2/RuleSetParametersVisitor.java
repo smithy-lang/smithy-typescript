@@ -64,6 +64,12 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
 
             ParameterGenerator parameterGenerator = new ParameterGenerator(localKey, param);
 
+            if (localKey.equals("endpoint")) {
+                writer.addImport("Endpoint", null, "@aws-sdk/types");
+                writer.addImport("EndpointV2", null, "@aws-sdk/types");
+                writer.addImport("Provider", null, "@aws-sdk/types");
+            }
+
             if (writeDefaults) {
                 if (parameterGenerator.hasDefault()) {
                     writer.write(parameterGenerator.defaultAsCodeString());
