@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -96,9 +97,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private final boolean isErrorCodeInBody;
     private final EventStreamGenerator eventStreamGenerator = new EventStreamGenerator();
     private final LinkedHashMap<String, String> headerBuffer = new LinkedHashMap<>();
-    private final Set<String> contextParamDeduplicationControlSet = SetUtils.of(
-        "Bucket"
-    );
+    private Set<String> contextParamDeduplicationParamControlSet = new HashSet<>();
 
     /**
      * Creates a Http binding protocol generator.
@@ -108,6 +107,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     public HttpBindingProtocolGenerator(boolean isErrorCodeInBody) {
         this.isErrorCodeInBody = isErrorCodeInBody;
+    }
+
+    /**
+     * Indicate that param names in the set should be de-duplicated when appearing in
+     * both contextParams (endpoint ruleset related) and HTTP URI segments / labels.
+     */
+    public void setContextParamDeduplicationParamControlSet(Set<String> contextParamDeduplicationParamControlSet) {
+        this.contextParamDeduplicationParamControlSet = contextParamDeduplicationParamControlSet;
     }
 
     @Override
@@ -751,8 +758,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // do not want to include it in the operation URI to be resolved.
                         // We use this logic plus a temporary control-list, since it is not yet known
                         // how many services and param names will have this issue.
-
-                        return !(isContextParam && contextParamDeduplicationControlSet.contains(content));
+                        return !(isContextParam
+                            && contextParamDeduplicationParamControlSet.contains(content));
                     })
                     .map(Segment::toString)
                     .collect(Collectors.joining("/"))
