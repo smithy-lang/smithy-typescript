@@ -44,7 +44,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", true),
-    TYPES_NODE("devDependencies", "@types/node", "^12.7.5", true),
+    TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", true),
     MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", true),
