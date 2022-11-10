@@ -33,7 +33,17 @@ public class RuleSetSerializer {
      * Write the ruleset as a TS object.
      */
     public void generate() {
-        traverse(ruleSet);
+        ObjectNode objectNode = ruleSet.expectObjectNode();
+        writer.openBlock(
+            "{",
+            "}",
+            () -> {
+                objectNode.getMembers().forEach((k, v) -> {
+                    writer.writeInline("\"" + k + "\": ");
+                    traverse(v);
+                });
+            }
+        );
     }
 
     private void traverse(Node node) {

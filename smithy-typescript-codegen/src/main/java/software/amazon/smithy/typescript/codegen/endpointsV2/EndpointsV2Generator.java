@@ -189,7 +189,7 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addImport("RuleSetObject", null, "@aws-sdk/util-endpoints");
                 writer.openBlock(
                     "export const ruleSet: RuleSetObject = ",
-                    "",
+                    ";",
                     () -> {
                         new RuleSetSerializer(
                             endpointRuleSetTrait.getRuleSet(),
