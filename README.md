@@ -22,7 +22,7 @@ are as follows:
             mavenCentral()
         }
         dependencies {
-            "classpath"("software.amazon.smithy:smithy-cli:[1.19.0,1.20.0[")
+            "classpath"("software.amazon.smithy:smithy-cli:[1.25.0,1.26.0[")
         }
     }
 
@@ -36,8 +36,8 @@ are as follows:
     }
 
     dependencies {
-        implementation("software.amazon.smithy:smithy-model:[1.19.0,1.20.0[")
-        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.11.0")
+        implementation("software.amazon.smithy:smithy-model:[1.25.0,1.26.0[")
+        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.12.0")
     }
    ```
 
@@ -70,26 +70,22 @@ are as follows:
 5. Create a file in the `model` directory named `main.smithy` with the following contents:
 
     ```
+    $version: "2"
+   
     namespace smithy.example
 
     service ExampleService {
-        version: "2022-01-01",
+        version: "2022-01-01"
         operations: [Echo]
     }
 
     operation Echo {
-        input: EchoInput,
-        output: EchoOutput,
-    }
-
-    @input
-    structure EchoInput {
-        message: String,
-    }
-
-    @output
-    structure EchoOutput {
-        message: String
+        input := {
+            message: String
+        } 
+        output := {
+            message: String
+        }
     }
     ```
 
