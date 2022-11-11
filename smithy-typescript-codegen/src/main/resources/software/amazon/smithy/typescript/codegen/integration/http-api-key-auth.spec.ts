@@ -1,14 +1,16 @@
+import { HttpRequest } from "@aws-sdk/protocol-http";
+import { MiddlewareStack } from "@aws-sdk/types";
+
 import {
   getHttpApiKeyAuthPlugin,
   httpApiKeyAuthMiddleware,
   resolveHttpApiKeyAuthConfig,
 } from "./index";
-import { HttpRequest } from "@aws-sdk/protocol-http";
 
 describe("resolveHttpApiKeyAuthConfig", () => {
   it("should return the input unchanged", () => {
     const config = {
-      apiKey: "exampleApiKey",
+      apiKey: () => Promise.resolve("example-api-key"),
     };
     expect(resolveHttpApiKeyAuthConfig(config)).toEqual(config);
   });
@@ -18,7 +20,7 @@ describe("getHttpApiKeyAuthPlugin", () => {
   it("should apply the middleware to the stack", () => {
     const plugin = getHttpApiKeyAuthPlugin(
       {
-        apiKey: "exampleApiKey",
+        apiKey: () => Promise.resolve("example-api-key"),
       },
       {
         in: "query",
@@ -26,14 +28,14 @@ describe("getHttpApiKeyAuthPlugin", () => {
       }
     );
 
-    const mockAdd = jest.fn();
+    const mockApplied = jest.fn();
     const mockOther = jest.fn();
 
     // TODO there's got to be a better way to do this mocking
     plugin.applyToStack({
-      add: mockAdd,
+      addRelativeTo: mockApplied,
       // We don't expect any of these others to be called.
-      addRelativeTo: mockOther,
+      add: mockOther,
       concat: mockOther,
       resolve: mockOther,
       applyToStack: mockOther,
@@ -41,9 +43,9 @@ describe("getHttpApiKeyAuthPlugin", () => {
       clone: mockOther,
       remove: mockOther,
       removeByTag: mockOther,
-    });
+    } as unknown as MiddlewareStack<any, any>);
 
-    expect(mockAdd.mock.calls.length).toEqual(1);
+    expect(mockApplied.mock.calls.length).toEqual(1);
     expect(mockOther.mock.calls.length).toEqual(0);
   });
 });
@@ -59,7 +61,7 @@ describe("httpApiKeyAuthMiddleware", () => {
     it("should set the query parameter if the location is `query`", async () => {
       const middleware = httpApiKeyAuthMiddleware(
         {
-          apiKey: "exampleApiKey",
+          apiKey: () => Promise.resolve("example-api-key"),
         },
         {
           in: "query",
@@ -77,7 +79,7 @@ describe("httpApiKeyAuthMiddleware", () => {
       expect(mockNextHandler.mock.calls.length).toEqual(1);
       expect(
         mockNextHandler.mock.calls[0][0].request.query.key
-      ).toBe("exampleApiKey");
+      ).toBe("example-api-key");
     });
 
     it("should skip if the api key has not been set", async () => {
@@ -122,7 +124,7 @@ describe("httpApiKeyAuthMiddleware", () => {
     it("should set the API key in the lower-cased named header", async () => {
       const middleware = httpApiKeyAuthMiddleware(
         {
-          apiKey: "exampleApiKey",
+          apiKey: () => Promise.resolve("example-api-key"),
         },
         {
           in: "header",
@@ -140,13 +142,13 @@ describe("httpApiKeyAuthMiddleware", () => {
       expect(mockNextHandler.mock.calls.length).toEqual(1);
       expect(
         mockNextHandler.mock.calls[0][0].request.headers.authorization
-      ).toBe("exampleApiKey");
+      ).toBe("example-api-key");
     });
 
     it("should set the API key in the named header with the provided scheme", async () => {
       const middleware = httpApiKeyAuthMiddleware(
         {
-          apiKey: "exampleApiKey",
+          apiKey: () => Promise.resolve("example-api-key"),
         },
         {
           in: "header",
@@ -164,7 +166,7 @@ describe("httpApiKeyAuthMiddleware", () => {
       expect(mockNextHandler.mock.calls.length).toEqual(1);
       expect(
         mockNextHandler.mock.calls[0][0].request.headers.authorization
-      ).toBe("exampleScheme exampleApiKey");
+      ).toBe("exampleScheme example-api-key");
     });
   });
 });
