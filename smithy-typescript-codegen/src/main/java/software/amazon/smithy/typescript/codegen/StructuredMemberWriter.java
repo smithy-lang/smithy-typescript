@@ -220,12 +220,13 @@ final class StructuredMemberWriter {
             String valueParam = "value"; // value of the Object.entries() key-value pair
 
             // Reducer is common to all shapes.
-            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
+            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => (", "), {})",
                 mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
-                    writer.write("...$L,", accParam);
-                    writer.openBlock("[$L]: ", ",", keyParam, () -> {
+                    writer.openBlock("$L[$L] =", "", accParam, keyParam, () -> {
                         writeMemberFilterSensitiveLog(writer, mapMember, valueParam);
+                        writer.writeInline(",");
                     });
+                    writer.write(accParam);
                 }
             );
         }
