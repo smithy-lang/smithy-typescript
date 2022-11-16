@@ -981,15 +981,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Iterate through each entry in the member.
         writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
             () -> {
-                writer.openBlock("(acc: any, suffix: string) => ({", "}), {}",
+                writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
                     () -> {
                         // Use a ! since we already validated the input member is defined above.
                         String headerValue = getInputValue(context, binding.getLocation(),
                                 memberLocation + "![suffix]", binding.getMember(), target);
-                        writer.write("...acc,");
                         // Append the prefix to key.
-                        writer.write("[`$L$${suffix.toLowerCase()}`]: $L,",
+                        writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
                                 binding.getLocationName().toLowerCase(Locale.US), headerValue);
+                        writer.write("return acc;");
                     });
             }
         );
@@ -1348,10 +1348,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String valueString = getInputValue(context, bindingType, "value", mapMember,
                 model.expectShape(mapMember.getTarget()));
         return "Object.entries(" + dataSource + " || {}).reduce("
-            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => ({"
-            +   "...acc,"
-            +   "[key]: " + valueString + ","
-            + "}), {})";
+            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => {"
+            +   "acc[key] = " + valueString + ";"
+            +   "return acc;"
+            + "}, {})";
     }
 
     /**
