@@ -94,7 +94,7 @@ are as follows:
 
 7. The generated client can be found in `build/smithyprojections/foo-client/source/typescript-codegen`.
 
-See [the Smithy documentation](https://awslabs.github.io/smithy/guides/building-models/gradle-plugin.html)
+See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/gradle-plugin.html)
 for more information on build Smithy projects with Gradle.
 
 ## TypeScript code generation

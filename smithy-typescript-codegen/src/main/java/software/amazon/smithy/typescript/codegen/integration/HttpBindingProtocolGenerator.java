@@ -815,7 +815,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 // Handle any additional query params bindings.
                 // If query string parameter is also present in httpQuery, it would be overwritten.
-                // Serializing HTTP messages https://awslabs.github.io/smithy/1.0/spec/core/http-traits.html#serializing-http-messages
+                // Serializing HTTP messages https://smithy.io/2.0/spec/http-bindings.html#serializing-http-messages
                 if (!queryParamsBindings.isEmpty()) {
                     SymbolProvider symbolProvider = context.getSymbolProvider();
                     String memberName = symbolProvider.toMemberName(queryParamsBindings.get(0).getMember());
