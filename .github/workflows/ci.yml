@@ -15,7 +15,7 @@ jobs:
         java: [8, 11]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v2
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     name: TypeScript Lint
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     name: TypeScript Test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ensure TypeScript is formatted
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
