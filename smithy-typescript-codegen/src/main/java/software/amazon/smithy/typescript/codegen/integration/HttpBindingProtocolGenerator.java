@@ -2677,6 +2677,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         context.getWriter().addImport(
                                 "strictParseLong", "__strictParseLong", "@aws-sdk/smithy-client");
                         return "__strictParseLong(" + dataSource + ")";
+                    case INT_ENUM:
                     case INTEGER:
                         context.getWriter().addImport(
                                 "strictParseInt32", "__strictParseInt32", "@aws-sdk/smithy-client");
