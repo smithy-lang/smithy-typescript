@@ -17,6 +17,8 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.aws.traits.auth.SigV4Trait;
 import software.amazon.smithy.model.Model;
@@ -110,12 +112,7 @@ public final class EndpointsV2Generator implements Runnable {
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
                             });
-                            ServiceTrait serviceTrait = service.getTrait(ServiceTrait.class).get();
-                            writer.write(
-                                "defaultSigningName: \"$L\",",
-                                service.getTrait(SigV4Trait.class).map(SigV4Trait::getName)
-                                    .orElse(serviceTrait.getArnNamespace())
-                            );
+                            writer.write("defaultSigningName: \"$L\",", defaultSigningName());
                         });
                     }
                 );
@@ -133,6 +130,21 @@ public final class EndpointsV2Generator implements Runnable {
                 );
             }
         );
+    }
+
+    private String defaultSigningName() {
+      Optional<SigV4Trait> sigv4Trait = service.getTrait(SigV4Trait.class);
+      if (sigv4Trait.isPresent()) {
+        return sigv4Trait.get().getName();
+      }
+      Optional<ServiceTrait> serviceTrait = service.getTrait(ServiceTrait.class);
+      if (serviceTrait.isPresent()) {
+        return serviceTrait.get().getArnNamespace();
+      }
+      throw new NoSuchElementException(String.format(
+                "No %s or %s trait, required for Endpoint default signing name",
+                SigV4Trait.ID,
+                ServiceTrait.ID));
     }
 
     /**
