@@ -856,21 +856,36 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             target
         );
 
+        boolean isRequired = binding.getMember().isRequired();
+        writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
+
         if (Objects.equals("input." + memberName + "!", queryValue)) {
+            String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
             // simple undefined check
             writer.write(
-                "$S: [,$L],",
+                "$S: [," + value + "],",
                 binding.getLocationName(),
                 queryValue
             );
         } else {
-            // undefined check with lazy eval
-            writer.write(
-                "$S: [() => input.$L !== void 0, () => $L],",
-                binding.getLocationName(),
-                memberName,
-                queryValue
-            );
+            if (isRequired) {
+                // __expectNonNull is immediately invoked and not inside a function.
+                writer.write(
+                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L],",
+                    binding.getLocationName(),
+                    memberName,
+                    memberName,
+                    queryValue
+                );
+            } else {
+                // undefined check with lazy eval
+                writer.write(
+                    "$S: [() => input.$L !== void 0, () => $L],",
+                    binding.getLocationName(),
+                    memberName,
+                    queryValue
+                );
+            }
         }
     }
 
