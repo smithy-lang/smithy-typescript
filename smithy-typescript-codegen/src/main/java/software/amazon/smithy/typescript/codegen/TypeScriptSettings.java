@@ -62,6 +62,7 @@ public final class TypeScriptSettings {
     private ShapeId service;
     private ObjectNode pluginSettings = Node.objectNode();
     private ShapeId protocol;
+    private String defaultSigningName = "";
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
@@ -373,6 +374,20 @@ public final class TypeScriptSettings {
      */
     public void setProtocol(ShapeId protocol) {
         this.protocol = Objects.requireNonNull(protocol);
+    }
+
+    /**
+     * @param name - used as the signing service name when no explicit value from endpoints AuthScheme is present.
+     */
+    public void setDefaultSigningName(String name) {
+        defaultSigningName = name;
+    }
+
+    /**
+     * @return signing service name when no explicit value from endpoints AuthScheme is present.
+     */
+    public String getDefaultSigningName() {
+        return defaultSigningName;
     }
 
     /**

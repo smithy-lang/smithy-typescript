@@ -17,10 +17,6 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import software.amazon.smithy.aws.traits.ServiceTrait;
-import software.amazon.smithy.aws.traits.auth.SigV4Trait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -45,6 +41,7 @@ public final class EndpointsV2Generator implements Runnable {
     private final TypeScriptDelegator delegator;
     private final EndpointRuleSetTrait endpointRuleSetTrait;
     private final ServiceShape service;
+    private final TypeScriptSettings settings;
 
     public EndpointsV2Generator(
             TypeScriptDelegator delegator,
@@ -53,6 +50,7 @@ public final class EndpointsV2Generator implements Runnable {
     ) {
         this.delegator = delegator;
         service = settings.getService(model);
+        this.settings = settings;
         endpointRuleSetTrait = service.getTrait(EndpointRuleSetTrait.class)
             .orElseThrow(() -> new RuntimeException("service missing EndpointRuleSetTrait"));
     }
@@ -112,7 +110,10 @@ public final class EndpointsV2Generator implements Runnable {
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
                             });
-                            writer.write("defaultSigningName: \"$L\",", defaultSigningName());
+                            writer.write(
+                                "defaultSigningName: \"$L\",",
+                                settings.getDefaultSigningName()
+                            );
                         });
                     }
                 );
@@ -130,21 +131,6 @@ public final class EndpointsV2Generator implements Runnable {
                 );
             }
         );
-    }
-
-    private String defaultSigningName() {
-      Optional<SigV4Trait> sigv4Trait = service.getTrait(SigV4Trait.class);
-      if (sigv4Trait.isPresent()) {
-        return sigv4Trait.get().getName();
-      }
-      Optional<ServiceTrait> serviceTrait = service.getTrait(ServiceTrait.class);
-      if (serviceTrait.isPresent()) {
-        return serviceTrait.get().getArnNamespace();
-      }
-      throw new NoSuchElementException(String.format(
-                "No %s or %s trait, required for Endpoint default signing name",
-                SigV4Trait.ID,
-                ServiceTrait.ID));
     }
 
     /**
