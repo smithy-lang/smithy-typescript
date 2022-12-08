@@ -18,6 +18,7 @@ import { RE2 } from "re2-wasm";
 import { findDuplicates } from "../unique";
 import {
   EnumValidationFailure,
+  IntegerEnumValidationFailure,
   LengthValidationFailure,
   PatternValidationFailure,
   RangeValidationFailure,
@@ -165,6 +166,31 @@ export class EnumValidator implements SingleConstraintValidator<string, EnumVali
     if (this.allowedValues.indexOf(input) < 0) {
       return {
         constraintType: "enum",
+        constraintValues: this.allowedValues.slice(),
+        path: path,
+        failureValue: input,
+      };
+    }
+
+    return null;
+  }
+}
+
+export class IntegerEnumValidator implements SingleConstraintValidator<number, IntegerEnumValidationFailure> {
+  private readonly allowedValues: number[];
+
+  constructor(allowedValues: readonly number[]) {
+    this.allowedValues = allowedValues.slice();
+  }
+
+  validate(input: number | undefined | null, path: string): IntegerEnumValidationFailure | null {
+    if (input === null || input === undefined) {
+      return null;
+    }
+
+    if (this.allowedValues.indexOf(input) < 0) {
+      return {
+        constraintType: "integerEnum",
         constraintValues: this.allowedValues.slice(),
         path: path,
         failureValue: input,

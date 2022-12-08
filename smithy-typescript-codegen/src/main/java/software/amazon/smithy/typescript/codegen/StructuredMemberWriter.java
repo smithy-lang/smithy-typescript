@@ -26,6 +26,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.shapes.IntEnumShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -473,7 +474,9 @@ final class StructuredMemberWriter {
                                      Shape shape,
                                      Collection<Trait> constraints,
                                      String trailer) {
-        if (constraints.isEmpty()) {
+        boolean shouldWriteIntEnumValidator = shape.isIntEnumShape();
+
+        if (constraints.isEmpty() && !shouldWriteIntEnumValidator) {
             writer.addImport("NoOpValidator", "__NoOpValidator", "@aws-smithy/server-common");
             writer.write("new __NoOpValidator()" + trailer);
             return;
@@ -482,6 +485,15 @@ final class StructuredMemberWriter {
         writer.addImport("CompositeValidator", "__CompositeValidator", "@aws-smithy/server-common");
         writer.openBlock("new __CompositeValidator<$T>([", "])" + trailer, getSymbolForValidatedType(shape),
                 () -> {
+                    if (shouldWriteIntEnumValidator) {
+                        writer.addImport("IntegerEnumValidator", "__IntegerEnumValidator", "@aws-smithy/server-common");
+                        writer.openBlock("new __IntegerEnumValidator([", "]),", () -> {
+                            for (int i : ((IntEnumShape) shape).getEnumValues().values()) {
+                                writer.write("$L,", i);
+                            }
+                        });
+                    }
+
                     for (Trait t : constraints) {
                         writeSingleConstraintValidator(writer, t);
                     }
@@ -575,6 +587,8 @@ final class StructuredMemberWriter {
     private Symbol getSymbolForValidatedType(Shape shape) {
         if (shape instanceof StringShape) {
             return symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
+        } else if (shape instanceof IntEnumShape) {
+            return symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#Integer")));
         }
 
         // Streaming blob inputs can also take string, Uint8Array and Buffer, so we widen the symbol

@@ -16,6 +16,7 @@
 import {
   CompositeValidator,
   EnumValidator,
+  IntegerEnumValidator,
   LengthValidator,
   PatternValidator,
   RangeValidator,
@@ -35,6 +36,9 @@ describe("sensitive validation", () => {
   describe("strips the failure value from the resultant validation failure", () => {
     it("with enums", () => {
       expect(sensitize(new EnumValidator(["apple", "banana", "orange"]), "pear").failureValue).toBeNull();
+    });
+    it("with integer enums", () => {
+      expect(sensitize(new IntegerEnumValidator([1, 2, 3]), 0).failureValue).toBeNull();
     });
     it("with length", () => {
       expect(sensitize(new LengthValidator(2, 4), "pears").failureValue).toBeNull();
@@ -61,6 +65,23 @@ describe("enum validation", () => {
       constraintValues: ["apple", "banana", "orange"],
       path: "fruit",
       failureValue: "kiwi",
+    });
+  });
+});
+
+describe("integer enum validation", () => {
+  const integerEnumValidator = new IntegerEnumValidator([1, 2, 3]);
+
+  it("does not fail when the enum value is found", () => {
+    expect(integerEnumValidator.validate(1, "test")).toBeNull();
+  });
+
+  it("fails when the enum value is not found", () => {
+    expect(integerEnumValidator.validate(0, "test")).toEqual({
+      constraintType: "integerEnum",
+      constraintValues: [1, 2, 3],
+      path: "test",
+      failureValue: 0,
     });
   });
 });
