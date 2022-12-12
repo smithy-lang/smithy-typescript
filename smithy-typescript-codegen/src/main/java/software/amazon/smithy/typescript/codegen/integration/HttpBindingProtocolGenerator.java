@@ -856,18 +856,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
         boolean isRequired = binding.getMember().isRequired();
         String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
+        String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
 
         String queryValue = getInputValue(
             context,
             binding.getLocation(),
-            "input." + memberName + "!",
+            "input." + memberName + memberAssertionComponent,
             binding.getMember(),
             target
         );
 
         writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
 
-        if (Objects.equals("input." + memberName + "!", queryValue)) {
+        if (Objects.equals("input." + memberName + memberAssertionComponent, queryValue)) {
             String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
             // simple undefined check
             writer.write(
