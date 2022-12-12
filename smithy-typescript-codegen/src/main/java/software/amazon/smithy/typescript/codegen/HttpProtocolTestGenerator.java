@@ -643,7 +643,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.write("try {\n"
                        + "  r = await client.send(command);\n"
                        + "} catch (err) {\n"
-                       + "  fail('Expected a valid response to be returned, got:\n\n `${err}`');\n"
+                       + "  fail('Expected a valid response to be returned, got err.');\n"
                        + "  return;\n"
                        + "}");
             writeResponseAssertions(operation, testCase);
