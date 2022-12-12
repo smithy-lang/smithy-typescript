@@ -64,6 +64,7 @@ import software.amazon.smithy.model.traits.HostLabelTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpQueryTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
+import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -848,22 +849,30 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 "@aws-sdk/smithy-client");
 
         Shape target = model.expectShape(binding.getMember().getTarget());
+
+        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
+        if (isIdempotencyToken) {
+            writer.addImport("v4", "generateIdempotencyToken", "uuid");
+        }
+        boolean isRequired = binding.getMember().isRequired();
+        String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
+        String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
+
         String queryValue = getInputValue(
             context,
             binding.getLocation(),
-            "input." + memberName + "!",
+            "input." + memberName + memberAssertionComponent,
             binding.getMember(),
             target
         );
 
-        boolean isRequired = binding.getMember().isRequired();
         writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
 
-        if (Objects.equals("input." + memberName + "!", queryValue)) {
+        if (Objects.equals("input." + memberName + memberAssertionComponent, queryValue)) {
             String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
             // simple undefined check
             writer.write(
-                "$S: [," + value + "],",
+                "$S: [," + value + idempotencyComponent + "],",
                 binding.getLocationName(),
                 queryValue
             );
@@ -875,15 +884,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     binding.getLocationName(),
                     memberName,
                     memberName,
-                    queryValue
+                    queryValue // no idempotency token default for required members
                 );
             } else {
                 // undefined check with lazy eval
                 writer.write(
-                    "$S: [() => input.$L !== void 0, () => $L],",
+                    "$S: [() => input.$L !== void 0, () => ($L)$L],",
                     binding.getLocationName(),
                     memberName,
-                    queryValue
+                    queryValue,
+                    idempotencyComponent
                 );
             }
         }
