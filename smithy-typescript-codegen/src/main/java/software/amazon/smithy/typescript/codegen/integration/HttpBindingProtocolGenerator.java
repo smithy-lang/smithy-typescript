@@ -854,7 +854,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         if (isIdempotencyToken) {
             writer.addImport("v4", "generateIdempotencyToken", "uuid");
         }
-        String idempotencyComponent = isIdempotencyToken ? " ?? generateIdempotencyToken()" : "";
+        boolean isRequired = binding.getMember().isRequired();
+        String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
 
         String queryValue = getInputValue(
             context,
@@ -864,7 +865,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             target
         );
 
-        boolean isRequired = binding.getMember().isRequired();
         writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
 
         if (Objects.equals("input." + memberName + "!", queryValue)) {
@@ -879,17 +879,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (isRequired) {
                 // __expectNonNull is immediately invoked and not inside a function.
                 writer.write(
-                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L$L],",
+                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L],",
                     binding.getLocationName(),
                     memberName,
                     memberName,
-                    queryValue,
-                    idempotencyComponent
+                    queryValue // no idempotency token default for required members
                 );
             } else {
                 // undefined check with lazy eval
                 writer.write(
-                    "$S: [() => input.$L !== void 0, () => $L$L],",
+                    "$S: [() => input.$L !== void 0, () => ($L)$L],",
                     binding.getLocationName(),
                     memberName,
                     queryValue,
