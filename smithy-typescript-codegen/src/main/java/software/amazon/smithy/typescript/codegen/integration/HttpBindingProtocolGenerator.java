@@ -64,6 +64,7 @@ import software.amazon.smithy.model.traits.HostLabelTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpQueryTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
+import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -848,6 +849,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 "@aws-sdk/smithy-client");
 
         Shape target = model.expectShape(binding.getMember().getTarget());
+
+        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
+        if (isIdempotencyToken) {
+            writer.addImport("v4", "generateIdempotencyToken", "uuid");
+        }
+        String idempotencyComponent = isIdempotencyToken ? " ?? generateIdempotencyToken()" : "";
+
         String queryValue = getInputValue(
             context,
             binding.getLocation(),
@@ -863,7 +871,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
             // simple undefined check
             writer.write(
-                "$S: [," + value + "],",
+                "$S: [," + value + idempotencyComponent + "],",
                 binding.getLocationName(),
                 queryValue
             );
@@ -871,19 +879,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (isRequired) {
                 // __expectNonNull is immediately invoked and not inside a function.
                 writer.write(
-                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L],",
+                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L$L],",
                     binding.getLocationName(),
                     memberName,
                     memberName,
-                    queryValue
+                    queryValue,
+                    idempotencyComponent
                 );
             } else {
                 // undefined check with lazy eval
                 writer.write(
-                    "$S: [() => input.$L !== void 0, () => $L],",
+                    "$S: [() => input.$L !== void 0, () => $L$L],",
                     binding.getLocationName(),
                     memberName,
-                    queryValue
+                    queryValue,
+                    idempotencyComponent
                 );
             }
         }
