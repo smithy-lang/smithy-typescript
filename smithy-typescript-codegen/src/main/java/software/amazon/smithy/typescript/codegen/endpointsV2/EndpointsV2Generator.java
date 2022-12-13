@@ -17,8 +17,6 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Map;
-import software.amazon.smithy.aws.traits.ServiceTrait;
-import software.amazon.smithy.aws.traits.auth.SigV4Trait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -43,6 +41,7 @@ public final class EndpointsV2Generator implements Runnable {
     private final TypeScriptDelegator delegator;
     private final EndpointRuleSetTrait endpointRuleSetTrait;
     private final ServiceShape service;
+    private final TypeScriptSettings settings;
 
     public EndpointsV2Generator(
             TypeScriptDelegator delegator,
@@ -51,6 +50,7 @@ public final class EndpointsV2Generator implements Runnable {
     ) {
         this.delegator = delegator;
         service = settings.getService(model);
+        this.settings = settings;
         endpointRuleSetTrait = service.getTrait(EndpointRuleSetTrait.class)
             .orElseThrow(() -> new RuntimeException("service missing EndpointRuleSetTrait"));
     }
@@ -110,11 +110,9 @@ public final class EndpointsV2Generator implements Runnable {
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
                             });
-                            ServiceTrait serviceTrait = service.getTrait(ServiceTrait.class).get();
                             writer.write(
                                 "defaultSigningName: \"$L\",",
-                                service.getTrait(SigV4Trait.class).map(SigV4Trait::getName)
-                                    .orElse(serviceTrait.getArnNamespace())
+                                settings.getDefaultSigningName()
                             );
                         });
                     }
