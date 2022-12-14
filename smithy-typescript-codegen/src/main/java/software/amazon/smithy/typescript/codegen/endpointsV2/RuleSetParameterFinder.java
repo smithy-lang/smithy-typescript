@@ -23,13 +23,13 @@ import software.amazon.smithy.model.node.NodeVisitor;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.rulesengine.traits.ClientContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.rulesengine.traits.StaticContextParamsTrait;
-
 
 public class RuleSetParameterFinder {
     private final ServiceShape service;
@@ -101,31 +101,27 @@ public class RuleSetParameterFinder {
     /**
      * Get map of params to actual values instead of the value type.
      */
-    public Map<String, String> getStaticContextParamValues(Shape operationInput) {
+    public Map<String, String> getStaticContextParamValues(OperationShape operation) {
         Map<String, String> map = new HashMap<>();
 
-        if (operationInput.isStructureShape()) {
-            operationInput.getAllMembers().forEach((String memberName, MemberShape member) -> {
-                Optional<StaticContextParamsTrait> trait = member.getTrait(StaticContextParamsTrait.class);
-                if (trait.isPresent()) {
-                    StaticContextParamsTrait staticContextParamsTrait = trait.get();
-                    staticContextParamsTrait.getParameters().forEach((name, definition) -> {
-                        String value;
-                        if (definition.getValue().isStringNode()) {
-                            value = "`" + definition.getValue().expectStringNode().toString() + "`";
-                        } else if (definition.getValue().isBooleanNode()) {
-                            value = definition.getValue().expectBooleanNode().toString();
-                        } else {
-                            throw new RuntimeException("unexpected type "
-                                + definition.getValue().getType().toString()
-                                + " received as staticContextParam.");
-                        }
-                        map.put(
-                            name,
-                            value
-                        );
-                    });
+        Optional<StaticContextParamsTrait> trait = operation.getTrait(StaticContextParamsTrait.class);
+        if (trait.isPresent()) {
+            StaticContextParamsTrait staticContextParamsTrait = trait.get();
+            staticContextParamsTrait.getParameters().forEach((name, definition) -> {
+                String value;
+                if (definition.getValue().isStringNode()) {
+                    value = "`" + definition.getValue().expectStringNode().toString() + "`";
+                } else if (definition.getValue().isBooleanNode()) {
+                    value = definition.getValue().expectBooleanNode().toString();
+                } else {
+                    throw new RuntimeException("unexpected type "
+                        + definition.getValue().getType().toString()
+                        + " received as staticContextParam.");
                 }
+                map.put(
+                    name,
+                    value
+                );
             });
         }
 
