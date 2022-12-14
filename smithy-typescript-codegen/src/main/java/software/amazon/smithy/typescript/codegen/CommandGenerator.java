@@ -194,19 +194,21 @@ final class CommandGenerator implements Runnable {
                         RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
                         Set<String> paramNames = new HashSet<>();
 
-                        Shape operationInput = model.getShape(operation.getInputShape()).get();
-                        parameterFinder.getStaticContextParamValues(operationInput).forEach((name, value) -> {
+                        parameterFinder.getStaticContextParamValues(operation).forEach((name, value) -> {
                             writer.write(
                                 "$L: { type: \"staticContextParams\", value: $L },",
                                 name, value
                             );
                         });
+
+                        Shape operationInput = model.getShape(operation.getInputShape()).get();
                         parameterFinder.getContextParams(operationInput).forEach((name, type) -> {
                             writer.write(
                                 "$L: { type: \"contextParams\", name: \"$L\" },",
                                 name, name
                             );
                         });
+
                         parameterFinder.getClientContextParams().forEach((name, type) -> {
                             if (!paramNames.contains(name)) {
                                 writer.write(
@@ -216,6 +218,7 @@ final class CommandGenerator implements Runnable {
                             }
                             paramNames.add(name);
                         });
+
                         parameterFinder.getBuiltInParams().forEach((name, type) -> {
                             if (!paramNames.contains(name)) {
                                 writer.write(
