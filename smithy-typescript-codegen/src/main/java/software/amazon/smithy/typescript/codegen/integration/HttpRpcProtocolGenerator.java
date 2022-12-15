@@ -33,6 +33,7 @@ import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveTraitDetection;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -255,6 +256,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.openBlock("const headers: __HeaderBag = {", "};",
             () -> {
                 writer.write("'content-type': $S,", getDocumentContentType());
+                if (SensitiveTraitDetection.operationIncludesSensitiveField(context, operation)) {
+                    writer.write("'cache-control': 'no-store',");
+                }
                 writeDefaultHeaders(context, operation);
             }
         );

@@ -75,6 +75,7 @@ import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveTraitDetection;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SetUtils;
@@ -938,6 +939,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Only set the content type if one can be determined.
         writeContentTypeHeader(context, operation, true);
         writeDefaultInputHeaders(context, operation);
+        if (SensitiveTraitDetection.operationIncludesSensitiveField(context, operation)) {
+            headerBuffer.put("cache-control", "'cache-control': 'no-store',");
+        }
 
         if (inputPresent) {
             for (HttpBinding binding : headers) {
