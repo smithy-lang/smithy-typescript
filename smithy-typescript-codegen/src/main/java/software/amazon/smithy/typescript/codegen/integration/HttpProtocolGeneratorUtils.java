@@ -82,7 +82,7 @@ public final class HttpProtocolGeneratorUtils {
                 // Use the split to not serialize milliseconds.
                 return "(" + dataSource + ".toISOString().split('.')[0]+\"Z\")";
             case EPOCH_SECONDS:
-                return "Math.round(" + dataSource + ".getTime() / 1000)";
+                return "Math.round(" + dataSource + ".getTime() / 1000).toString()";
             case HTTP_DATE:
                 context.getWriter().addImport("dateToUtcString", "__dateToUtcString", "@aws-sdk/smithy-client");
                 return "__dateToUtcString(" + dataSource + ")";
