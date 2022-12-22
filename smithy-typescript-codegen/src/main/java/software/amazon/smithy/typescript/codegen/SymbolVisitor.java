@@ -458,7 +458,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 return visitedModels.get(shape);
             }
             // Add models into buckets no bigger than chunk size.
-            String path = Paths.get(".", SHAPE_NAMESPACE_PREFIX, "models_" + bucketCount).toString();
+            String path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "models_" + bucketCount);
             visitedModels.put(shape, path);
             currentBucketSize++;
             if (currentBucketSize == chunkSize) {
