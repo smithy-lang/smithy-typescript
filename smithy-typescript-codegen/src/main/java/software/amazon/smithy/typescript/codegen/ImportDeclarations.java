@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -33,18 +34,24 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class ImportDeclarations implements ImportContainer {
 
     private final String moduleNameString;
-    private final Path relativize;
+    private final String relativize;
     private final Map<String, Pair<String, Ignore>> defaultImports = new TreeMap<>();
     private final Map<String, Map<String, String>> namedImports = new TreeMap<>();
 
     ImportDeclarations(String relativize) {
+        relativize = relativize.replace(File.separatorChar, '/');
         if (!relativize.startsWith("./")) {
             relativize = "./" + relativize;
         }
         this.moduleNameString = relativize;
 
         // Strip off the filename of what's being relativized since it isn't needed.
-        this.relativize = Paths.get(relativize).getParent();
+        Path relativizePath = Paths.get(relativize).getParent();
+        if (relativizePath == null) {
+            this.relativize = null;
+        } else {
+            this.relativize = relativizePath.toString().replace(File.separatorChar, '/');
+        }
     }
 
     ImportDeclarations addDefaultImport(String name, String module) {
@@ -151,10 +158,11 @@ final class ImportDeclarations implements ImportContainer {
                : entry.getValue() + " as " + entry.getKey();
     }
 
-    private static String getRelativizedModule(Path relativize, String module) {
+    private static String getRelativizedModule(String relativize, String module) {
         if (relativize != null && module.startsWith(".")) {
             // A relative import is resolved against the current file.
-            module = relativize.relativize(Paths.get(module)).toString();
+            Path relativizePath = Paths.get(relativize);
+            module = relativizePath.relativize(Paths.get(module)).toString().replace(File.separatorChar, '/');
             if (!module.startsWith(".")) {
                 module = "./" + module;
             }

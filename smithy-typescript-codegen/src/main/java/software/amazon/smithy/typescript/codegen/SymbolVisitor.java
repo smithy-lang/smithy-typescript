@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
@@ -420,8 +421,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        String prefixedNamespace = Paths.get(".", CodegenUtils.SOURCE_FOLDER,
-            (namespace.startsWith(".") ? namespace.substring(1) : namespace)).toString();
+        String trimmedNamespace = namespace.startsWith("./") ? namespace.substring(2) : namespace;
+        String prefixedNamespace = String.join("/", ".", CodegenUtils.SOURCE_FOLDER, trimmedNamespace);
         return createSymbolBuilder(shape, typeName, prefixedNamespace)
                 .definitionFile(toFilename(prefixedNamespace));
     }
@@ -450,9 +451,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         public String formatModuleName(Shape shape, String name) {
             // All shapes except for the service and operations are stored in models.
             if (shape.getType() == ShapeType.SERVICE) {
-                return Paths.get(".", name).toString();
+                return String.join("/", ".", name);
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return Paths.get(".", CommandGenerator.COMMANDS_FOLDER, name).toString();
+                return String.join("/", ".", CommandGenerator.COMMANDS_FOLDER, name);
             } else if (visitedModels.containsKey(shape)) {
                 return visitedModels.get(shape);
             }
@@ -470,14 +471,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         static void writeModelIndex(Collection<Shape> shapes, SymbolProvider symbolProvider,
                                     FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
-            String modelPrefix = Paths.get(".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX).toString();
+            String modelPrefix = String.join("/", ".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX);
             shapes.stream()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                     .filter(namespace -> namespace.startsWith(modelPrefix))
                     .distinct()
                     .sorted(Comparator.naturalOrder())
-                    .forEach(namespace -> writer.write(
-                            "export * from $S;", namespace.replaceFirst(modelPrefix, ".")));
+                    .map(namespace -> namespace.replaceFirst(Matcher.quoteReplacement(modelPrefix), "."))
+                    .forEach(namespace -> writer.write("export * from $S;", namespace));
             fileManifest.writeFile(
                     Paths.get(CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX, "index.ts").toString(),
                     writer.toString());
