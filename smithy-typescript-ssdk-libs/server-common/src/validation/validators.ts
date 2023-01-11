@@ -13,8 +13,6 @@
  *  permissions and limitations under the License.
  */
 
-import { RE2 } from "re2-wasm";
-
 import { findDuplicates } from "../unique";
 import {
   EnumValidationFailure,
@@ -288,11 +286,11 @@ export class RangeValidator implements SingleConstraintValidator<number, RangeVa
 
 export class PatternValidator implements SingleConstraintValidator<string, PatternValidationFailure> {
   private readonly inputPattern: string;
-  private readonly pattern: RE2;
+  private readonly pattern: RegExp;
 
   constructor(pattern: string) {
     this.inputPattern = pattern;
-    this.pattern = new RE2(pattern, "u");
+    this.pattern = new RegExp(pattern, "u");
   }
 
   validate(input: string | undefined | null, path: string): PatternValidationFailure | null {
@@ -300,7 +298,7 @@ export class PatternValidator implements SingleConstraintValidator<string, Patte
       return null;
     }
 
-    if (!this.pattern.match(input)) {
+    if (!this.pattern.test(input)) {
       return {
         constraintType: "pattern",
         constraintValues: this.inputPattern,
