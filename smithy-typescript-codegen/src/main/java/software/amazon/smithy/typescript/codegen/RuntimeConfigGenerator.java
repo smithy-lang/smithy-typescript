@@ -66,18 +66,6 @@ final class RuntimeConfigGenerator {
                         TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
                 writer.write("streamCollector");
             },
-            "base64Decoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64_NODE);
-                writer.addImport("fromBase64", "fromBase64",
-                        TypeScriptDependency.AWS_SDK_UTIL_BASE64_NODE.packageName);
-                writer.write("fromBase64");
-            },
-            "base64Encoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64_NODE);
-                writer.addImport("toBase64", "toBase64",
-                        TypeScriptDependency.AWS_SDK_UTIL_BASE64_NODE.packageName);
-                writer.write("toBase64");
-            },
             "utf8Decoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8_NODE);
                 writer.addImport("fromUtf8", "fromUtf8",
@@ -116,18 +104,6 @@ final class RuntimeConfigGenerator {
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
                 writer.write("streamCollector");
             },
-            "base64Decoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64_BROWSER);
-                writer.addImport("fromBase64", "fromBase64",
-                        TypeScriptDependency.AWS_SDK_UTIL_BASE64_BROWSER.packageName);
-                writer.write("fromBase64");
-            },
-            "base64Encoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64_BROWSER);
-                writer.addImport("toBase64", "toBase64",
-                        TypeScriptDependency.AWS_SDK_UTIL_BASE64_BROWSER.packageName);
-                writer.write("toBase64");
-            },
             "utf8Decoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8_BROWSER);
                 writer.addImport("fromUtf8", "fromUtf8",
@@ -150,6 +126,18 @@ final class RuntimeConfigGenerator {
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
+            "base64Decoder", writer -> {
+                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+                writer.addImport("fromBase64", "fromBase64",
+                        TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
+                writer.write("fromBase64");
+            },
+            "base64Encoder", writer -> {
+                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+                writer.addImport("toBase64", "toBase64",
+                        TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
+                writer.write("toBase64");
+            },
             "disableHostPrefix", writer -> {
                 writer.write("false");
             },

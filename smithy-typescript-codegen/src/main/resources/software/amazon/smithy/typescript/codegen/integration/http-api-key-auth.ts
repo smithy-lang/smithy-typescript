@@ -1,12 +1,8 @@
 // derived from https://github.com/aws/aws-sdk-js-v3/blob/e35f78c97fa6710ff9c444351893f0f06755e771/packages/middleware-endpoint-discovery/src/endpointDiscoveryMiddleware.ts
 
 import { HttpRequest } from "@aws-sdk/protocol-http";
-import {
-  AbsoluteLocation,
-  BuildHandlerOptions,
-  BuildMiddleware,
-  Pluggable,
-} from "@aws-sdk/types";
+import { BuildMiddleware, Pluggable, Provider, RelativeMiddlewareOptions } from "@aws-sdk/types";
+import { normalizeProvider } from "@aws-sdk/util-middleware";
 
 interface HttpApiKeyAuthMiddlewareConfig {
   /**
@@ -36,10 +32,10 @@ export interface HttpApiKeyAuthInputConfig {
    *
    * This is optional because some operations may not require an API key.
    */
-  apiKey?: string;
+  apiKey?: string | Provider<string>;
 }
 
-interface PreviouslyResolved {}
+export interface ApiKeyPreviouslyResolved {}
 
 export interface HttpApiKeyAuthResolvedConfig {
   /**
@@ -47,7 +43,7 @@ export interface HttpApiKeyAuthResolvedConfig {
    *
    * This is optional because some operations may not require an API key.
    */
-  apiKey?: string;
+  apiKey?: Provider<string>;
 }
 
 // We have to provide a resolve function when we have config, even if it doesn't
@@ -55,9 +51,12 @@ export interface HttpApiKeyAuthResolvedConfig {
 // or resolveFunction are set, then all of inputConfig, resolvedConfig, and
 // resolveFunction must be set."
 export function resolveHttpApiKeyAuthConfig<T>(
-  input: T & PreviouslyResolved & HttpApiKeyAuthInputConfig
+  input: T & ApiKeyPreviouslyResolved & HttpApiKeyAuthInputConfig,
 ): T & HttpApiKeyAuthResolvedConfig {
-  return input;
+  return {
+    ...input,
+    apiKey: input.apiKey ? normalizeProvider(input.apiKey) : undefined,
+  };
 }
 
 /**
@@ -69,23 +68,25 @@ export function resolveHttpApiKeyAuthConfig<T>(
  * prefixed with a scheme. If the trait says to put the API key into a named
  * query parameter, that query parameter will be used.
  *
- * @param resolvedConfig the client configuration. Must include the API key value.
- * @param options the plugin options (location of the parameter, name, and optional scheme)
+ * @param pluginConfig the client configuration. Includes the function that will return the API key value.
+ * @param middlewareConfig the plugin options (location of the parameter, name, and optional scheme)
  * @returns a function that processes the HTTP request and passes it on to the next handler
  */
 export const httpApiKeyAuthMiddleware =
   <Input extends object, Output extends object>(
     pluginConfig: HttpApiKeyAuthResolvedConfig,
-    middlewareConfig: HttpApiKeyAuthMiddlewareConfig
+    middlewareConfig: HttpApiKeyAuthMiddlewareConfig,
   ): BuildMiddleware<Input, Output> =>
   (next) =>
   async (args) => {
     if (!HttpRequest.isInstance(args.request)) return next(args);
 
+    const apiKey = pluginConfig.apiKey && (await pluginConfig.apiKey());
+
     // This middleware will not be injected if the operation has the @optionalAuth trait.
     // We don't know if we're the only auth middleware, so let the service deal with the
     // absence of the API key (or let other middleware do its job).
-    if (!pluginConfig.apiKey) {
+    if (!apiKey) {
       return next(args);
     }
 
@@ -98,36 +99,35 @@ export const httpApiKeyAuthMiddleware =
           ...(middlewareConfig.in === "header" && {
             // Set the header, even if it's already been set.
             [middlewareConfig.name.toLowerCase()]: middlewareConfig.scheme
-              ? `${middlewareConfig.scheme} ${pluginConfig.apiKey}`
-              : pluginConfig.apiKey,
+              ? `${middlewareConfig.scheme} ${apiKey}`
+              : apiKey,
           }),
         },
         query: {
           ...args.request.query,
           // Set the query parameter, even if it's already been set.
-          ...(middlewareConfig.in === "query" && { [middlewareConfig.name]: pluginConfig.apiKey }),
+          ...(middlewareConfig.in === "query" && { [middlewareConfig.name]: apiKey }),
         },
       },
     });
   };
 
-export const httpApiKeyAuthMiddlewareOptions: BuildHandlerOptions &
-  AbsoluteLocation = {
+export const httpApiKeyAuthMiddlewareOptions: RelativeMiddlewareOptions = {
   name: "httpApiKeyAuthMiddleware",
-  step: "build",
-  priority: "low",
-  tags: ["AUTHORIZATION"],
+  tags: ["APIKEY", "AUTH"],
+  relation: "after",
+  toMiddleware: "retryMiddleware",
   override: true,
 };
 
 export const getHttpApiKeyAuthPlugin = (
   pluginConfig: HttpApiKeyAuthResolvedConfig,
-  middlewareConfig: HttpApiKeyAuthMiddlewareConfig
+  middlewareConfig: HttpApiKeyAuthMiddlewareConfig,
 ): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
-    clientStack.add(
+    clientStack.addRelativeTo(
       httpApiKeyAuthMiddleware(pluginConfig, middlewareConfig),
-      httpApiKeyAuthMiddlewareOptions
+      httpApiKeyAuthMiddlewareOptions,
     );
   },
 });

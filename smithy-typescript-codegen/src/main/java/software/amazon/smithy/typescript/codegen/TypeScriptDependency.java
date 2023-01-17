@@ -44,11 +44,12 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", true),
-    TYPES_NODE("devDependencies", "@types/node", "^12.7.5", true),
+    TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", true),
     MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", true),
     MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", true),
+    UTIL_RETRY("dependencies", "@aws-sdk/util-retry", false),
     MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@aws-sdk/middleware-endpoint", false),
     AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
@@ -59,8 +60,9 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     AWS_SDK_URL_PARSER("dependencies", "@aws-sdk/url-parser", true),
 
-    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", true),
-    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", true),
+    @Deprecated AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", false),
+    @Deprecated AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", false),
+    AWS_SDK_UTIL_BASE64("dependencies", "@aws-sdk/util-base64", true),
 
     AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", true),
     AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", true),
@@ -83,6 +85,9 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", false),
+
+    // Conditionally added when setting the auth middleware.
+    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@aws-sdk/util-middleware", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@aws-sdk/eventstream-serde-config-resolver",

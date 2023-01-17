@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -63,6 +64,7 @@ import software.amazon.smithy.model.traits.HostLabelTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpQueryTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
+import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
@@ -96,9 +98,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private final boolean isErrorCodeInBody;
     private final EventStreamGenerator eventStreamGenerator = new EventStreamGenerator();
     private final LinkedHashMap<String, String> headerBuffer = new LinkedHashMap<>();
-    private final Set<String> contextParamDeduplicationControlSet = SetUtils.of(
-        "Bucket"
-    );
+    private Set<String> contextParamDeduplicationParamControlSet = new HashSet<>();
 
     /**
      * Creates a Http binding protocol generator.
@@ -108,6 +108,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      */
     public HttpBindingProtocolGenerator(boolean isErrorCodeInBody) {
         this.isErrorCodeInBody = isErrorCodeInBody;
+    }
+
+    /**
+     * Indicate that param names in the set should be de-duplicated when appearing in
+     * both contextParams (endpoint ruleset related) and HTTP URI segments / labels.
+     */
+    public void setContextParamDeduplicationParamControlSet(Set<String> contextParamDeduplicationParamControlSet) {
+        this.contextParamDeduplicationParamControlSet = contextParamDeduplicationParamControlSet;
     }
 
     @Override
@@ -751,8 +759,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // do not want to include it in the operation URI to be resolved.
                         // We use this logic plus a temporary control-list, since it is not yet known
                         // how many services and param names will have this issue.
-
-                        return !(isContextParam && contextParamDeduplicationControlSet.contains(content));
+                        return !(isContextParam
+                            && contextParamDeduplicationParamControlSet.contains(content));
                     })
                     .map(Segment::toString)
                     .collect(Collectors.joining("/"))
@@ -808,7 +816,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
                 // Handle any additional query params bindings.
                 // If query string parameter is also present in httpQuery, it would be overwritten.
-                // Serializing HTTP messages https://awslabs.github.io/smithy/1.0/spec/core/http-traits.html#serializing-http-messages
+                // Serializing HTTP messages https://smithy.io/2.0/spec/http-bindings.html#serializing-http-messages
                 if (!queryParamsBindings.isEmpty()) {
                     SymbolProvider symbolProvider = context.getSymbolProvider();
                     String memberName = symbolProvider.toMemberName(queryParamsBindings.get(0).getMember());
@@ -841,29 +849,53 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 "@aws-sdk/smithy-client");
 
         Shape target = model.expectShape(binding.getMember().getTarget());
+
+        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
+        if (isIdempotencyToken) {
+            writer.addImport("v4", "generateIdempotencyToken", "uuid");
+        }
+        boolean isRequired = binding.getMember().isRequired();
+        String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
+        String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
+
         String queryValue = getInputValue(
             context,
             binding.getLocation(),
-            "input." + memberName + "!",
+            "input." + memberName + memberAssertionComponent,
             binding.getMember(),
             target
         );
 
-        if (Objects.equals("input." + memberName + "!", queryValue)) {
+        writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
+
+        if (Objects.equals("input." + memberName + memberAssertionComponent, queryValue)) {
+            String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
             // simple undefined check
             writer.write(
-                "$S: [,$L],",
+                "$S: [," + value + idempotencyComponent + "],",
                 binding.getLocationName(),
                 queryValue
             );
         } else {
-            // undefined check with lazy eval
-            writer.write(
-                "$S: [() => input.$L !== void 0, () => $L],",
-                binding.getLocationName(),
-                memberName,
-                queryValue
-            );
+            if (isRequired) {
+                // __expectNonNull is immediately invoked and not inside a function.
+                writer.write(
+                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L],",
+                    binding.getLocationName(),
+                    memberName,
+                    memberName,
+                    queryValue // no idempotency token default for required members
+                );
+            } else {
+                // undefined check with lazy eval
+                writer.write(
+                    "$S: [() => input.$L !== void 0, () => ($L)$L],",
+                    binding.getLocationName(),
+                    memberName,
+                    queryValue,
+                    idempotencyComponent
+                );
+            }
         }
     }
 
@@ -974,15 +1006,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Iterate through each entry in the member.
         writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
             () -> {
-                writer.openBlock("(acc: any, suffix: string) => ({", "}), {}",
+                writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
                     () -> {
                         // Use a ! since we already validated the input member is defined above.
                         String headerValue = getInputValue(context, binding.getLocation(),
                                 memberLocation + "![suffix]", binding.getMember(), target);
-                        writer.write("...acc,");
                         // Append the prefix to key.
-                        writer.write("[`$L$${suffix.toLowerCase()}`]: $L,",
+                        writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
                                 binding.getLocationName().toLowerCase(Locale.US), headerValue);
+                        writer.write("return acc;");
                     });
             }
         );
@@ -1341,10 +1373,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String valueString = getInputValue(context, bindingType, "value", mapMember,
                 model.expectShape(mapMember.getTarget()));
         return "Object.entries(" + dataSource + " || {}).reduce("
-            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => ({"
-            +   "...acc,"
-            +   "[key]: " + valueString + ","
-            + "}), {})";
+            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => {"
+            +   "acc[key] = " + valueString + ";"
+            +   "return acc;"
+            + "}, {})";
     }
 
     /**
@@ -1381,8 +1413,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }
 
-        String baseParam = HttpProtocolGeneratorUtils.getTimestampInputParam(context, dataSource, member, format);
-        return baseParam + ".toString()";
+        return HttpProtocolGeneratorUtils.getTimestampInputParam(context, dataSource, member, format);
     }
 
     /**
@@ -2670,6 +2701,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         context.getWriter().addImport(
                                 "strictParseLong", "__strictParseLong", "@aws-sdk/smithy-client");
                         return "__strictParseLong(" + dataSource + ")";
+                    case INT_ENUM:
                     case INTEGER:
                         context.getWriter().addImport(
                                 "strictParseInt32", "__strictParseInt32", "@aws-sdk/smithy-client");

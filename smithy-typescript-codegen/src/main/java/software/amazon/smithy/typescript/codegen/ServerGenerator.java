@@ -274,8 +274,8 @@ final class ServerGenerator {
         writer.addImport("ServerSerdeContext", "__ServerSerdeContext", "@aws-smithy/server-common");
         writer.addImport("NodeHttpHandler", null, "@aws-sdk/node-http-handler");
         writer.addImport("streamCollector", null, "@aws-sdk/node-http-handler");
-        writer.addImport("fromBase64", null, "@aws-sdk/util-base64-node");
-        writer.addImport("toBase64", null, "@aws-sdk/util-base64-node");
+        writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
+        writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
         writer.addImport("fromUtf8", null, "@aws-sdk/util-utf8-node");
         writer.addImport("toUtf8", null, "@aws-sdk/util-utf8-node");
 

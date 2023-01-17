@@ -26,6 +26,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.shapes.IntEnumShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -220,12 +221,13 @@ final class StructuredMemberWriter {
             String valueParam = "value"; // value of the Object.entries() key-value pair
 
             // Reducer is common to all shapes.
-            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => ({", "}), {})",
+            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => (", "), {})",
                 mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
-                    writer.write("...$L,", accParam);
-                    writer.openBlock("[$L]: ", ",", keyParam, () -> {
+                    writer.openBlock("$L[$L] =", "", accParam, keyParam, () -> {
                         writeMemberFilterSensitiveLog(writer, mapMember, valueParam);
+                        writer.writeInline(",");
                     });
+                    writer.write(accParam);
                 }
             );
         }
@@ -290,7 +292,7 @@ final class StructuredMemberWriter {
      * @param member The member being generated for.
      * @return If the interface member should be treated as required.
      *
-     * @see <a href="https://awslabs.github.io/smithy/spec/core.html#idempotencytoken-trait">Smithy idempotencyToken trait.</a>
+     * @see <a href="https://smithy.io/2.0/spec/behavior-traits.html#idempotencytoken-trait">Smithy idempotencyToken trait.</a>
      */
     private boolean isRequiredMember(MemberShape member) {
         return member.isRequired() && !member.hasTrait(IdempotencyTokenTrait.class);
@@ -472,7 +474,9 @@ final class StructuredMemberWriter {
                                      Shape shape,
                                      Collection<Trait> constraints,
                                      String trailer) {
-        if (constraints.isEmpty()) {
+        boolean shouldWriteIntEnumValidator = shape.isIntEnumShape();
+
+        if (constraints.isEmpty() && !shouldWriteIntEnumValidator) {
             writer.addImport("NoOpValidator", "__NoOpValidator", "@aws-smithy/server-common");
             writer.write("new __NoOpValidator()" + trailer);
             return;
@@ -481,6 +485,15 @@ final class StructuredMemberWriter {
         writer.addImport("CompositeValidator", "__CompositeValidator", "@aws-smithy/server-common");
         writer.openBlock("new __CompositeValidator<$T>([", "])" + trailer, getSymbolForValidatedType(shape),
                 () -> {
+                    if (shouldWriteIntEnumValidator) {
+                        writer.addImport("IntegerEnumValidator", "__IntegerEnumValidator", "@aws-smithy/server-common");
+                        writer.openBlock("new __IntegerEnumValidator([", "]),", () -> {
+                            for (int i : ((IntEnumShape) shape).getEnumValues().values()) {
+                                writer.write("$L,", i);
+                            }
+                        });
+                    }
+
                     for (Trait t : constraints) {
                         writeSingleConstraintValidator(writer, t);
                     }
@@ -574,6 +587,8 @@ final class StructuredMemberWriter {
     private Symbol getSymbolForValidatedType(Shape shape) {
         if (shape instanceof StringShape) {
             return symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#String")));
+        } else if (shape instanceof IntEnumShape) {
+            return symbolProvider.toSymbol(model.expectShape(ShapeId.from("smithy.api#Integer")));
         }
 
         // Streaming blob inputs can also take string, Uint8Array and Buffer, so we widen the symbol

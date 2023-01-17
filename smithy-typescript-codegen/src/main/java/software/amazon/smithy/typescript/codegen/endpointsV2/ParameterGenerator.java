@@ -109,10 +109,15 @@ public class ParameterGenerator {
             buffer += "?";
         }
         buffer += ": ";
-        if (isClientContextParam) {
-            buffer += (tsParamType + "|" + "Provider<" + tsParamType + ">") + ";";
+
+        if (parameterName.equals("endpoint")) {
+            buffer += "string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;";
         } else {
-            buffer += tsParamType + ";";
+            if (isClientContextParam) {
+                buffer += (tsParamType + "|" + "Provider<" + tsParamType + ">") + ";";
+            } else {
+                buffer += tsParamType + ";";
+            }
         }
         return buffer;
     }

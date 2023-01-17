@@ -16,6 +16,7 @@
 import {
   EnumValidationFailure,
   generateValidationMessage,
+  IntegerEnumValidationFailure,
   LengthValidationFailure,
   PatternValidationFailure,
   RangeValidationFailure,
@@ -61,6 +62,17 @@ describe("message formatting", () => {
     };
     expect(generateValidationMessage(failure)).toEqual(
       "Value pear at '/test' failed to satisfy constraint: Member must satisfy enum value set: [apple, banana]"
+    );
+  });
+  it("formats integer enum failures", () => {
+    const failure: IntegerEnumValidationFailure = {
+      constraintType: "integerEnum",
+      constraintValues: [1, 2],
+      failureValue: 3,
+      path: "/test",
+    };
+    expect(generateValidationMessage(failure)).toEqual(
+      "Value 3 at '/test' failed to satisfy constraint: Member must satisfy enum value set: [1, 2]"
     );
   });
   describe("formats length failures", () => {

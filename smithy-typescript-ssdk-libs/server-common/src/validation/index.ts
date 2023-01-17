@@ -29,6 +29,11 @@ export interface EnumValidationFailure extends StandardValidationFailure<string,
   constraintValues: string[];
 }
 
+export interface IntegerEnumValidationFailure extends StandardValidationFailure<number, number> {
+  constraintType: "integerEnum";
+  constraintValues: number[];
+}
+
 export interface LengthValidationFailure extends StandardValidationFailure<number | undefined, number> {
   constraintType: "length";
   constraintValues: [number, number] | [undefined, number] | [number, undefined];
@@ -63,6 +68,7 @@ export interface UniqueItemsValidationFailure {
 
 export type ValidationFailure =
   | EnumValidationFailure
+  | IntegerEnumValidationFailure
   | LengthValidationFailure
   | PatternValidationFailure
   | RangeValidationFailure
@@ -122,6 +128,10 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       suffix = `must satisfy enum value set: [${failure.constraintValues
         .sort((a, b) => a.localeCompare(b))
         .join(", ")}]`;
+      break;
+    }
+    case "integerEnum": {
+      suffix = `must satisfy enum value set: [${failure.constraintValues.sort((a, b) => a - b).join(", ")}]`;
       break;
     }
     case "length": {

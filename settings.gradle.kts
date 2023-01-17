@@ -20,6 +20,7 @@ include(":smithy-typescript-codegen-test")
 pluginManagement {
     repositories {
         mavenLocal()
+        mavenCentral()
         gradlePluginPortal()
     }
 }
