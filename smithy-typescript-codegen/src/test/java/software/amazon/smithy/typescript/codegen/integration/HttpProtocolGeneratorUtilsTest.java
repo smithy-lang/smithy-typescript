@@ -30,7 +30,7 @@ public class HttpProtocolGeneratorUtilsTest {
 
         assertThat("(" + DATA_SOURCE + ".toISOString().split('.')[0]+\"Z\")",
                 equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.DATE_TIME)));
-        assertThat("Math.round(" + DATA_SOURCE + ".getTime() / 1000).toString()",
+        assertThat("Math.round(" + DATA_SOURCE + ".getTime() / 1000)",
                 equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.EPOCH_SECONDS)));
         assertThat("__dateToUtcString(" + DATA_SOURCE + ")",
                 equalTo(HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.HTTP_DATE)));
