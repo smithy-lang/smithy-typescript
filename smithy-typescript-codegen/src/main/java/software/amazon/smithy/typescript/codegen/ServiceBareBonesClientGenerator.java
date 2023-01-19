@@ -235,10 +235,13 @@ final class ServiceBareBonesClientGenerator implements Runnable {
 
             writer.addImport("Hash", "__Hash", "@aws-sdk/types");
             writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
-            writer.writeDocs("A constructor for a class implementing the {@link __Hash} interface \n"
+
+            writer.addImport("Checksum", "__Checksum", "@aws-sdk/types");
+            writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@aws-sdk/types");
+            writer.writeDocs("A constructor for a class implementing the {@link __Checksum} interface \n"
                              + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
                              + "@internal");
-            writer.write("sha256?: __HashConstructor;\n");
+            writer.write("sha256?: __ChecksumConstructor | __HashConstructor;\n");
 
             writer.addImport("UrlParser", "__UrlParser", "@aws-sdk/types");
             writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.\n"
