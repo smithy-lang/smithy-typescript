@@ -1,5 +1,42 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.13.0 (2023-01-31)
+
+### Features
+
+* Upgrade tsconfig.es.json target to ES2020 ([#603](https://github.com/awslabs/smithy-typescript/pull/603))
+* Upgrade to Java 17 ([#621](https://github.com/awslabs/smithy-typescript/pull/621))
+* Upgrade to node >= 14.0.0 ([#623](https://github.com/awslabs/smithy-typescript/pull/623), [#625](https://github.com/awslabs/smithy-typescript/pull/625), [#628](https://github.com/awslabs/smithy-typescript/pull/628))
+* Upgrade to Smithy 1.27.2 ([#682](https://github.com/awslabs/smithy-typescript/pull/682))
+* Add mavenCentral as plugin repository ([#629](https://github.com/awslabs/smithy-typescript/pull/629))
+* Add intEnum generation with validation and tests ([#605](https://github.com/awslabs/smithy-typescript/pull/605), [#654](https://github.com/awslabs/smithy-typescript/pull/654))
+* Use util-base64 instead of platform-based dependencies ([#627](https://github.com/awslabs/smithy-typescript/pull/627), [#631](https://github.com/awslabs/smithy-typescript/pull/631))
+* Use util-base8 instead of platform-based dependencies ([#672](https://github.com/awslabs/smithy-typescript/pull/672), [#677](https://github.com/awslabs/smithy-typescript/pull/677))
+* Add util-retry dependency ([#650](https://github.com/awslabs/smithy-typescript/pull/650))
+* Replace Hash with Checksum ([#668](https://github.com/awslabs/smithy-typescript/pull/668))
+* Allow deferred resolution for api key config ([#588](https://github.com/awslabs/smithy-typescript/pull/588))
+* Stream improvement serde ([#593](https://github.com/awslabs/smithy-typescript/pull/593))
+* Support delegation of determining errors for an operation ([#598](https://github.com/awslabs/smithy-typescript/pull/598))
+* Reduce object copying in iterators ([#638](https://github.com/awslabs/smithy-typescript/pull/638))
+* Refactor writeAdditionalFiles and writeAdditionalExports logic into integration.customize() ([#607](https://github.com/awslabs/smithy-typescript/pull/607))
+* Expose static endpoint param instructions provider ([#590](https://github.com/awslabs/smithy-typescript/pull/590))
+* Add unit tests for endpoints v2 generator ([#674](https://github.com/awslabs/smithy-typescript/pull/674))
+* Use util-utf8 on server and tests ()
+* Bump ssdk lib version to 1.0.0-alpha.7([#675](https://github.com/awslabs/smithy-typescript/pull/675))
+* Clients parse datetime offsets ([#681](https://github.com/awslabs/smithy-typescript/pull/681))
+
+### Bug Fixes
+
+* Call parseErrorBody when parsing error structures ([#597](https://github.com/awslabs/smithy-typescript/pull/597))
+* Fix broken reference to `fail()` after jest-upgrade ([#645](https://github.com/awslabs/smithy-typescript/pull/645))
+* Validate required input query params ([#647](https://github.com/awslabs/smithy-typescript/pull/647), [#646](https://github.com/awslabs/smithy-typescript/pull/646))
+* Include x-amz-request-id in request id deser ([#606](https://github.com/awslabs/smithy-typescript/pull/606))
+* Add idempotencyToken generation if member is queryParam ([#655](https://github.com/awslabs/smithy-typescript/pull/655))
+* Fix Error printout for protocol-response tests ([#657](https://github.com/awslabs/smithy-typescript/pull/657))
+* Fix codegen for windows platforms ([#661](https://github.com/awslabs/smithy-typescript/pull/661))
+* Fix consistency with type aliases ([#670](https://github.com/awslabs/smithy-typescript/pull/670), [#671](https://github.com/awslabs/smithy-typescript/pull/671))
+* Fix misc endpoints 2.0 bugs ([#592](https://github.com/awslabs/smithy-typescript/pull/592), [#600](https://github.com/awslabs/smithy-typescript/pull/600), [#614](https://github.com/awslabs/smithy-typescript/pull/614), [#615](https://github.com/awslabs/smithy-typescript/pull/615), [#616](https://github.com/awslabs/smithy-typescript/pull/616), [#617](https://github.com/awslabs/smithy-typescript/pull/617), [#618](https://github.com/awslabs/smithy-typescript/pull/618), [#619](https://github.com/awslabs/smithy-typescript/pull/619), [#622](https://github.com/awslabs/smithy-typescript/pull/622), [#626](https://github.com/awslabs/smithy-typescript/pull/626), [#634](https://github.com/awslabs/smithy-typescript/pull/634), [#644](https://github.com/awslabs/smithy-typescript/pull/644), [#652](https://github.com/awslabs/smithy-typescript/pull/652), [#658](https://github.com/awslabs/smithy-typescript/pull/658))
+
 ## 0.12.0 (2022-09-19)
 
 ### Features
