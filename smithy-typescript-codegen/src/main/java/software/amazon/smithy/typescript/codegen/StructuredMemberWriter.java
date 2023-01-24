@@ -45,6 +45,7 @@ import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.UniqueItemsTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.CompatibilityMode;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -60,19 +61,19 @@ final class StructuredMemberWriter {
     Collection<MemberShape> members;
     String memberPrefix = "";
     boolean noDocs;
-    boolean backwardCompatible;
+    CompatibilityMode compatibilityMode;
     final Set<String> skipMembers = new HashSet<>();
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
-        this(model, symbolProvider, members, true);
+        this(model, symbolProvider, members, CompatibilityMode.RELAXED);
     }
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members,
-            boolean backwardCompatible) {
+            CompatibilityMode compatibilityMode) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = new LinkedHashSet<>(members);
-        this.backwardCompatible = backwardCompatible;
+        this.compatibilityMode = compatibilityMode;
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
@@ -86,7 +87,8 @@ final class StructuredMemberWriter {
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
-            String typeSuffix = backwardCompatible && isRequiredMember(member) ? " | undefined" : "";
+            String typeSuffix = compatibilityMode == CompatibilityMode.RELAXED
+                         && isRequiredMember(member) ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                          symbolProvider.toSymbol(member), typeSuffix);
 

@@ -329,7 +329,7 @@ final class DirectedTypeScriptCodegen
                     writer,
                     directive.shape(),
                     directive.settings().generateServerSdk(),
-                    directive.settings().isBackwardCompatibleRequiredMember()
+                    directive.settings().getCompatibilityMode()
             );
             generator.run();
         });
@@ -344,7 +344,7 @@ final class DirectedTypeScriptCodegen
                     writer,
                     directive.shape(),
                     directive.settings().generateServerSdk(),
-                    directive.settings().isBackwardCompatibleRequiredMember()
+                    directive.settings().getCompatibilityMode()
             );
             generator.run();
         });

@@ -27,6 +27,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.CompatibilityMode;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -67,13 +68,13 @@ final class StructureGenerator implements Runnable {
     private final TypeScriptWriter writer;
     private final StructureShape shape;
     private final boolean includeValidation;
-    private final boolean backwardCompatibleRequiredMember;
+    private final CompatibilityMode compatibilityMode;
 
     /**
-     * sets 'includeValidation' to 'false' for backwards compatibility.
+     * sets 'includeValidation' to 'false' and backwards compatibility to {@link CompatibilityMode#RELAXED}.
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
-        this(model, symbolProvider, writer, shape, false, true);
+        this(model, symbolProvider, writer, shape, false, CompatibilityMode.RELAXED);
     }
 
     StructureGenerator(Model model,
@@ -81,13 +82,13 @@ final class StructureGenerator implements Runnable {
                        TypeScriptWriter writer,
                        StructureShape shape,
                        boolean includeValidation,
-                       boolean backwardCompatibleRequiredMember) {
+                       CompatibilityMode compatibilityMode) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;
         this.includeValidation = includeValidation;
-        this.backwardCompatibleRequiredMember = backwardCompatibleRequiredMember;
+        this.compatibilityMode = compatibilityMode;
     }
 
     @Override
@@ -161,7 +162,7 @@ final class StructureGenerator implements Runnable {
         }
 
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values(), this.backwardCompatibleRequiredMember);
+                model, symbolProvider, shape.getAllMembers().values(), this.compatibilityMode);
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
@@ -258,7 +259,7 @@ final class StructureGenerator implements Runnable {
             HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
-                shape.getAllMembers().values(), this.backwardCompatibleRequiredMember);
+                shape.getAllMembers().values(), this.compatibilityMode);
         // since any error interface must extend from JavaScript Error interface, message member is already
         // required in the JavaScript Error interface
         structuredMemberWriter.skipMembers.add("message");

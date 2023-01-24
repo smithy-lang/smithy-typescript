@@ -43,7 +43,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public final class TypeScriptSettings {
 
     static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
-    static final String BACKWARD_COMPATIBLE_REQUIRED_MEMBER = "backwardCompatibleRequiredMember";
+    static final String COMPATIBILITY_MODE = "compatibilityMode";
     static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
@@ -66,7 +66,7 @@ public final class TypeScriptSettings {
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
-    private boolean backwardCompatibleRequiredMember = true;
+    private CompatibilityMode compatibilityMode = CompatibilityMode.RELAXED;
     private PackageManager packageManager = PackageManager.YARN;
 
     @Deprecated
@@ -107,8 +107,10 @@ public final class TypeScriptSettings {
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
-        settings.setBackwardCompatibleRequiredMember(
-                config.getBooleanMemberOrDefault(BACKWARD_COMPATIBLE_REQUIRED_MEMBER));
+        settings.setCompatibilityMode(
+            config.getStringMember(COMPATIBILITY_MODE)
+                .map(s -> CompatibilityMode.fromString(s.getValue()))
+                .orElse(CompatibilityMode.RELAXED));
 
         settings.setPluginSettings(config);
         return settings;
@@ -300,16 +302,16 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Returns whether or not required members are backward-compatible.
+     * Returns the backward-compatibility mode.
      *
-     * @return true if required members are backward-compatible. Default: true
+     * @return the configured backward-compatibility mode. Defaults to {@link CompatibilityMode#RELAXED}
      */
-    public boolean isBackwardCompatibleRequiredMember() {
-        return backwardCompatibleRequiredMember;
+    public CompatibilityMode getCompatibilityMode() {
+        return compatibilityMode;
     }
 
-    public void setBackwardCompatibleRequiredMember(boolean backwardCompatibleRequiredMember) {
-        this.backwardCompatibleRequiredMember = backwardCompatibleRequiredMember;
+    public void setCompatibilityMode(CompatibilityMode compatibilityMode) {
+        this.compatibilityMode = compatibilityMode;
     }
 
     /**
@@ -421,6 +423,34 @@ public final class TypeScriptSettings {
          */
         public SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
             return symbolProviderFactory.apply(model, settings);
+        }
+    }
+
+    /**
+     * An enum indicating the backward-compatibility mode.
+     */
+    public enum CompatibilityMode {
+        RELAXED("relaxed"),
+        STRICT("strict");
+
+        private final String mode;
+
+        CompatibilityMode(String mode) {
+            this.mode = mode;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+
+        public static CompatibilityMode fromString(String s) {
+            if ("relaxed".equals(s)) {
+                return RELAXED;
+            }
+            if ("strict".equals(s)) {
+                return STRICT;
+            }
+            throw new CodegenException(String.format("Unsupported backward compatibility mode: %s", s));
         }
     }
 
