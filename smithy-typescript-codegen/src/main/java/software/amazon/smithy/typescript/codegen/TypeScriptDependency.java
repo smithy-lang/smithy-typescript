@@ -67,8 +67,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", true),
     AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", true),
 
-    AWS_SDK_UTIL_UTF8_BROWSER("dependencies", "@aws-sdk/util-utf8-browser", true),
-    AWS_SDK_UTIL_UTF8_NODE("dependencies", "@aws-sdk/util-utf8-node", true),
+    AWS_SDK_UTIL_UTF8("dependencies", "@aws-sdk/util-utf8", true),
 
     AWS_SDK_UTIL_WAITERS("dependencies", "@aws-sdk/util-waiter",  false),
 

@@ -65,18 +65,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("streamCollector", "streamCollector",
                         TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
                 writer.write("streamCollector");
-            },
-            "utf8Decoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8_NODE);
-                writer.addImport("fromUtf8", "fromUtf8",
-                        TypeScriptDependency.AWS_SDK_UTIL_UTF8_NODE.packageName);
-                writer.write("fromUtf8");
-            },
-            "utf8Encoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8_NODE);
-                writer.addImport("toUtf8", "toUtf8",
-                        TypeScriptDependency.AWS_SDK_UTIL_UTF8_NODE.packageName);
-                writer.write("toUtf8");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> browserRuntimeConfigDefaults = MapUtils.of(
@@ -103,18 +91,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("streamCollector", "streamCollector",
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
                 writer.write("streamCollector");
-            },
-            "utf8Decoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8_BROWSER);
-                writer.addImport("fromUtf8", "fromUtf8",
-                        TypeScriptDependency.AWS_SDK_UTIL_UTF8_BROWSER.packageName);
-                writer.write("fromUtf8");
-            },
-            "utf8Encoder", writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8_BROWSER);
-                writer.addImport("toUtf8", "toUtf8",
-                        TypeScriptDependency.AWS_SDK_UTIL_UTF8_BROWSER.packageName);
-                writer.write("toUtf8");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
@@ -146,6 +122,18 @@ final class RuntimeConfigGenerator {
                 writer.addImport("parseUrl", "parseUrl",
                         TypeScriptDependency.AWS_SDK_URL_PARSER.packageName);
                 writer.write("parseUrl");
+            },
+            "utf8Decoder", writer -> {
+                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+                writer.addImport("fromUtf8", "fromUtf8",
+                        TypeScriptDependency.AWS_SDK_UTIL_UTF8.packageName);
+                writer.write("fromUtf8");
+            },
+            "utf8Encoder", writer -> {
+                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+                writer.addImport("toUtf8", "toUtf8",
+                        TypeScriptDependency.AWS_SDK_UTIL_UTF8.packageName);
+                writer.write("toUtf8");
             }
     );
 
