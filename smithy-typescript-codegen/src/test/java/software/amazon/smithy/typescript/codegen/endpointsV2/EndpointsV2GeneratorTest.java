@@ -15,7 +15,11 @@ import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
 public class EndpointsV2GeneratorTest {
     @Test
     public void containsTrailingSemicolon() {
-        testEndpoints("endpoints.smithy",
+        MockManifest manifest = testEndpoints("endpoints.smithy");
+
+        String ruleset = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
+
+        assertThat(ruleset, containsString(
                 "      },\n" +
                 "      {\n" +
                 "        \"documentation\": \"Fallback when region is unset\",\n" +
@@ -26,32 +30,35 @@ public class EndpointsV2GeneratorTest {
                 "      },\n" +
                 "    ],\n" +
                 "  }\n" +
-                ";\n");
+                ";\n"));
     }
 
     @Test
     public void containsExtraContextParameter() {
-        MockManifest manifest = testEndpoints("endpoints.smithy",
+        MockManifest manifest = testEndpoints("endpoints.smithy");
+
+        String ruleset = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
+
+        assertThat(ruleset, containsString(
                 "      },\n" +
                 "      \"Stage\": {\n" +
                 "        \"type\": \"String\",\n" +
                 "        \"required\": true,\n" +
                 "        \"default\": \"production\",\n" +
-                "      },\n");
+                "      },\n"));
 
-        String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts").get();
+        String endpointParameters = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts").get();
 
-        assertThat(contents, containsString(
+        assertThat(endpointParameters, containsString(
                 "  return {\n" +
                 "    ...options,\n" +
                 "    region: options.region ?? \"us-east-1\",\n" +
                 "    stage: options.stage ?? \"production\",\n" +
                 "    defaultSigningName: \"\",\n" +
-                "  }\n"
-        ));
+                "  }\n"));
     }
 
-    private MockManifest testEndpoints(String filename, String expectedType) {
+    private MockManifest testEndpoints(String filename) {
         MockManifest manifest = new MockManifest();
         PluginContext context = PluginContext.builder()
                 .pluginClassLoader(getClass().getClassLoader())
@@ -78,7 +85,6 @@ public class EndpointsV2GeneratorTest {
         String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
 
         assertThat(contents, containsString("export const ruleSet: RuleSetObject"));
-        assertThat(contents, containsString(expectedType));
 
         return manifest;
     }
