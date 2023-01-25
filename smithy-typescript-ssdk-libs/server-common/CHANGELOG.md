@@ -1,5 +1,11 @@
 # server-common Changelog
 
+## 1.0.0-alpha.7 (2023-01-25)
+
+### Features
+
+- Add intEnum validator. ([#654](https://github.com/awslabs/smithy-typescript/pull/654))
+
 ## 1.0.0-alpha.6 (2022-08-22)
 
 ### Features
