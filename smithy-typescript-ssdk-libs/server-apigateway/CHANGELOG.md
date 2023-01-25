@@ -1,5 +1,7 @@
 # server-apigateway Changelog
 
+## 1.0.0-alpha.7 (2023-01-25)
+
 ## 1.0.0-alpha.6 (2022-08-22)
 
 ### Features
