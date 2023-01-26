@@ -540,7 +540,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (isClientTest) {
             writer.write("const utf8Encoder = client.config.utf8Encoder;");
         } else {
-            writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8-node");
+            writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8");
             writer.write("const utf8Encoder = __utf8Encoder;");
         }
 

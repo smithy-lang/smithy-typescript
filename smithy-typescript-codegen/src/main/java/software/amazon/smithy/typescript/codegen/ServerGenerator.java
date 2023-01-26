@@ -276,8 +276,8 @@ final class ServerGenerator {
         writer.addImport("streamCollector", null, "@aws-sdk/node-http-handler");
         writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
         writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
-        writer.addImport("fromUtf8", null, "@aws-sdk/util-utf8-node");
-        writer.addImport("toUtf8", null, "@aws-sdk/util-utf8-node");
+        writer.addImport("fromUtf8", null, "@aws-sdk/util-utf8");
+        writer.addImport("toUtf8", null, "@aws-sdk/util-utf8");
 
         writer.openBlock("const serdeContextBase = {", "};", () -> {
             writer.write("base64Encoder: toBase64,");
