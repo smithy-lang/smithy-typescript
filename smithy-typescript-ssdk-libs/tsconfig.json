@@ -15,7 +15,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2018",
-    "lib": ["es2015", "dom"],
+    "lib": ["es2018", "dom"],
     "baseUrl": ".",
     "strict": true,
     "declaration": true,
