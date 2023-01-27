@@ -37,7 +37,9 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.ListUtils;
 
@@ -46,12 +48,16 @@ public class DocumentMemberDeserVisitorTest {
     private static final String PROTOCOL = "TestProtocol";
     private static final Format FORMAT = Format.EPOCH_SECONDS;
     private static GenerationContext mockContext;
+    private static TypeScriptSettings mockSettings;
 
     static {
         mockContext = new GenerationContext();
+        mockSettings = new TypeScriptSettings();
         mockContext.setProtocolName(PROTOCOL);
         mockContext.setSymbolProvider(new MockProvider());
         mockContext.setWriter(new TypeScriptWriter("foo"));
+        mockSettings.setArtifactType(ArtifactType.SSDK);
+        mockContext.setSettings(mockSettings);
     }
 
     @ParameterizedTest

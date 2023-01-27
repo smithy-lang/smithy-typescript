@@ -103,6 +103,7 @@ public final class HttpProtocolGeneratorUtils {
      * @param format The timestamp format to provide.
      * @param requireNumericEpochSecondsInPayload if true, paylaod epoch seconds are not allowed to be coerced
      *                                            from strings.
+     * @param isClient true if generating a client.
      * @return Returns a value or expression of the output timestamp.
      */
     public static String getTimestampOutputParam(TypeScriptWriter writer,
@@ -110,14 +111,22 @@ public final class HttpProtocolGeneratorUtils {
                                                  Location bindingType,
                                                  Shape shape,
                                                  Format format,
-                                                 boolean requireNumericEpochSecondsInPayload) {
+                                                 boolean requireNumericEpochSecondsInPayload,
+                                                 boolean isClient) {
         // This has always explicitly wrapped the dataSource in "new Date(..)", so it could never generate
         // an expression that evaluates to null. Codegen relies on this.
         writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
         switch (format) {
             case DATE_TIME:
-                writer.addImport("parseRfc3339DateTime", "__parseRfc3339DateTime", "@aws-sdk/smithy-client");
-                return String.format("__expectNonNull(__parseRfc3339DateTime(%s))", dataSource);
+                // Clients should be able to handle offsets and normalize the datetime to an offset of zero.
+                if (isClient) {
+                    writer.addImport("parseRfc3339DateTimeWithOffset", "__parseRfc3339DateTimeWithOffset",
+                        "@aws-sdk/smithy-client");
+                    return String.format("__expectNonNull(__parseRfc3339DateTimeWithOffset(%s))", dataSource);
+                } else {
+                    writer.addImport("parseRfc3339DateTime", "__parseRfc3339DateTime", "@aws-sdk/smithy-client");
+                    return String.format("__expectNonNull(__parseRfc3339DateTime(%s))", dataSource);
+                }
             case HTTP_DATE:
                 writer.addImport("parseRfc7231DateTime", "__parseRfc7231DateTime", "@aws-sdk/smithy-client");
                 return String.format("__expectNonNull(__parseRfc7231DateTime(%s))", dataSource);
