@@ -41,14 +41,16 @@ public class HttpProtocolGeneratorUtilsTest {
         TimestampShape shape = TimestampShape.builder().id("com.smithy.example#Foo").build();
         TypeScriptWriter writer = new TypeScriptWriter("foo");
 
+        assertThat("__expectNonNull(__parseRfc3339DateTimeWithOffset(" + DATA_SOURCE + "))",
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.DATE_TIME, false, true)));
         assertThat("__expectNonNull(__parseRfc3339DateTime(" + DATA_SOURCE + "))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.DATE_TIME, false)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.DATE_TIME, false, false)));
         assertThat("__expectNonNull(__parseEpochTimestamp(__expectNumber(" + DATA_SOURCE + ")))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS, true)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS, true, false)));
         assertThat("__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS, false)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.EPOCH_SECONDS, false, false)));
         assertThat("__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
-                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.HTTP_DATE, false)));
+                equalTo(HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, DATA_SOURCE, Location.DOCUMENT, shape, Format.HTTP_DATE, false, false)));
     }
 
     @Test

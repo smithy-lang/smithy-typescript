@@ -241,7 +241,8 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
                 Location.DOCUMENT,
                 shape,
                 format,
-                requiresNumericEpochSecondsInPayload());
+                requiresNumericEpochSecondsInPayload(),
+                context.getSettings().generateClient());
     }
 
     @Override

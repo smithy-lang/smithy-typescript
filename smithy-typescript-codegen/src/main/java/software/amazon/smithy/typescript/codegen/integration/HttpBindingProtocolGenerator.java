@@ -2484,7 +2484,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Format format = httpIndex.determineTimestampFormat(member, bindingType, getDocumentTimestampFormat());
             return HttpProtocolGeneratorUtils.getTimestampOutputParam(
                     context.getWriter(), dataSource, bindingType, member, format,
-                    requiresNumericEpochSecondsInPayload());
+                    requiresNumericEpochSecondsInPayload(), context.getSettings().generateClient());
         } else if (target instanceof BlobShape) {
             return getBlobOutputParam(bindingType, dataSource);
         } else if (target instanceof CollectionShape) {
