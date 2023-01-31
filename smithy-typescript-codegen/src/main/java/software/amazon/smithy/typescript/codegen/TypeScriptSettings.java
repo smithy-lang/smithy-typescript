@@ -34,6 +34,7 @@ import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -303,9 +304,9 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Returns the backward-compatibility mode.
+     * Returns the compatibility mode in regards to member nullability.
      *
-     * @return the configured backward-compatibility mode.
+     * @return the configured compatibility mode in regards to member nullability.
      *  Defaults to {@link MemberNullabilityCompatibilityMode#RELAXED}
      */
     public MemberNullabilityCompatibilityMode getMemberNullabilityCompatibilityMode() {
@@ -430,10 +431,20 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * An enum indicating the backward-compatibility mode.
+     * An enum indicating the compatibility mode in regards to member nullability.
      */
     public enum MemberNullabilityCompatibilityMode {
+        /**
+         * This is the current behavior and it will be the default. When set,
+         * it allows a member that has the {@link RequiredTrait} applied to be "undefined".
+         * By doing so it can still be considered a backwards compatible change fo
+         * Smithy services even when the required constraint is dropped from a member .
+         */
         RELAXED("relaxed"),
+
+        /**
+         * This will dissallow members marked as {@link RequiredTrait} to be "undefined".
+         */
         STRICT("strict");
 
         private final String mode;
@@ -453,7 +464,7 @@ public final class TypeScriptSettings {
             if ("strict".equals(s)) {
                 return STRICT;
             }
-            throw new CodegenException(String.format("Unsupported backward compatibility mode: %s", s));
+            throw new CodegenException(String.format("Unsupported member nullability compatibility mode: %s", s));
         }
     }
 
