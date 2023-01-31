@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -28,6 +29,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -54,6 +56,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final SymbolReference destroyFunction;
     private final BiPredicate<Model, ServiceShape> servicePredicate;
     private final OperationPredicate operationPredicate;
+    private final Predicate<TypeScriptSettings> settingsPredicate;
 
     private RuntimeClientPlugin(Builder builder) {
         inputConfig = builder.inputConfig;
@@ -65,6 +68,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         destroyFunction = builder.destroyFunction;
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
+        settingsPredicate = builder.settingsPredicate;
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -298,6 +302,17 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         return operationPredicate.test(model, service, operation);
     }
 
+    /**
+     * Returns true if this plugin applies to the given settings.
+     *
+     * @param settings TypeScript settings.
+     *
+     * @return Returns true if the plugin is applied to the given settings.
+     */
+    public boolean matchesSettings(TypeScriptSettings settings) {
+        return settingsPredicate.test(settings);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -369,6 +384,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private SymbolReference destroyFunction;
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
         private OperationPredicate operationPredicate = (model, service, operation) -> false;
+        private Predicate<TypeScriptSettings> settingsPredicate = (settings) -> true;
 
         @Override
         public RuntimeClientPlugin build() {
@@ -698,6 +714,18 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         public Builder servicePredicate(BiPredicate<Model, ServiceShape> servicePredicate) {
             this.servicePredicate = Objects.requireNonNull(servicePredicate);
             operationPredicate = (model, service, operation) -> false;
+            return this;
+        }
+
+        /**
+         * Configures a predicate that applies the plugin if the predicate matches
+         * given settings.
+         *
+         * @param settingsPredicate Settings predicate.
+         * @return Returns the builder.
+         */
+        public Builder settingsPredicate(Predicate<TypeScriptSettings> settingsPredicate) {
+            this.settingsPredicate = Objects.requireNonNull(settingsPredicate);
             return this;
         }
 

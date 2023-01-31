@@ -12,7 +12,8 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.utils.ListUtils;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.ArtifactType;
 
 public class RuntimeClientPluginTest {
     @Test
@@ -66,6 +67,22 @@ public class RuntimeClientPluginTest {
         assertThat(plugin.matchesService(model, service2), equalTo(false));
         assertThat(plugin.matchesOperation(model, service1, operation), equalTo(false));
         assertThat(plugin.matchesOperation(model, service2, operation), equalTo(false));
+    }
+
+    @Test
+    public void allowsConfigurableSettingsPredicate() {
+        RuntimeClientPlugin plugin = RuntimeClientPlugin.builder()
+                .settingsPredicate((s) -> s.generateClient())
+                .build();
+        TypeScriptSettings clientSettings = new TypeScriptSettings();
+        clientSettings.setArtifactType(ArtifactType.CLIENT);
+
+        TypeScriptSettings serverSettings = new TypeScriptSettings();
+        serverSettings.setArtifactType(ArtifactType.SSDK);
+
+
+        assertThat(plugin.matchesSettings(clientSettings), equalTo(true));
+        assertThat(plugin.matchesSettings(serverSettings), equalTo(false));
     }
 
     @Test
