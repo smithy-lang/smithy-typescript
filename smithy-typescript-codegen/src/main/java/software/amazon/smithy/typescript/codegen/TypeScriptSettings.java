@@ -307,7 +307,7 @@ public final class TypeScriptSettings {
      * Returns the compatibility mode in regards to member nullability.
      *
      * @return the configured compatibility mode in regards to member nullability.
-     *  Defaults to {@link MemberNullabilityCompatibilityMode#RELAXED}
+     * Defaults to {@link MemberNullabilityCompatibilityMode#RELAXED}
      */
     public MemberNullabilityCompatibilityMode getMemberNullabilityCompatibilityMode() {
         return memberNullabilityCompatibilityMode;
@@ -315,7 +315,14 @@ public final class TypeScriptSettings {
 
     public void setMemberNullabilityCompatibilityMode(
         MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode) {
-        this.memberNullabilityCompatibilityMode = memberNullabilityCompatibilityMode;
+            if (memberNullabilityCompatibilityMode != MemberNullabilityCompatibilityMode.RELAXED) {
+                LOGGER.warning(String.format("By setting the member nullability compatibility mode to '%s', a"
+                    + " member that has the '@required' trait applied CANNOT be 'undefined'. Differrent than"
+                    + " when it is set to '%s', it will be considered a BACKWARDS INCOMPATIBLE change for"
+                    + " Smithy services even when the required constraint is dropped from a member.",
+                    memberNullabilityCompatibilityMode.mode, MemberNullabilityCompatibilityMode.RELAXED.mode));
+            }
+            this.memberNullabilityCompatibilityMode = memberNullabilityCompatibilityMode;
     }
 
     /**
@@ -404,10 +411,11 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE)),
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, MEMBER_NULLABILITY_COMPATIBILITY_MODE)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, DISABLE_DEFAULT_VALIDATION));
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, MEMBER_NULLABILITY_COMPATIBILITY_MODE,
+                              DISABLE_DEFAULT_VALIDATION));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
