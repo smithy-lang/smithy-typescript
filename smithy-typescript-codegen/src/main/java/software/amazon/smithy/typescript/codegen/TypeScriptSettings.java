@@ -43,7 +43,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public final class TypeScriptSettings {
 
     static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
-    static final String COMPATIBILITY_MODE = "compatibilityMode";
+    static final String MEMBER_NULLABILITY_COMPATIBILITY_MODE = "memberNullabilityCompatibilityMode";
     static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
@@ -66,7 +66,8 @@ public final class TypeScriptSettings {
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
-    private CompatibilityMode compatibilityMode = CompatibilityMode.RELAXED;
+    private MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode =
+        MemberNullabilityCompatibilityMode.RELAXED;
     private PackageManager packageManager = PackageManager.YARN;
 
     @Deprecated
@@ -107,10 +108,10 @@ public final class TypeScriptSettings {
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
-        settings.setCompatibilityMode(
-            config.getStringMember(COMPATIBILITY_MODE)
-                .map(s -> CompatibilityMode.fromString(s.getValue()))
-                .orElse(CompatibilityMode.RELAXED));
+        settings.setMemberNullabilityCompatibilityMode(
+            config.getStringMember(MEMBER_NULLABILITY_COMPATIBILITY_MODE)
+                .map(s -> MemberNullabilityCompatibilityMode.fromString(s.getValue()))
+                .orElse(MemberNullabilityCompatibilityMode.RELAXED));
 
         settings.setPluginSettings(config);
         return settings;
@@ -304,14 +305,16 @@ public final class TypeScriptSettings {
     /**
      * Returns the backward-compatibility mode.
      *
-     * @return the configured backward-compatibility mode. Defaults to {@link CompatibilityMode#RELAXED}
+     * @return the configured backward-compatibility mode.
+     *  Defaults to {@link MemberNullabilityCompatibilityMode#RELAXED}
      */
-    public CompatibilityMode getCompatibilityMode() {
-        return compatibilityMode;
+    public MemberNullabilityCompatibilityMode getMemberNullabilityCompatibilityMode() {
+        return memberNullabilityCompatibilityMode;
     }
 
-    public void setCompatibilityMode(CompatibilityMode compatibilityMode) {
-        this.compatibilityMode = compatibilityMode;
+    public void setMemberNullabilityCompatibilityMode(
+        MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode) {
+        this.memberNullabilityCompatibilityMode = memberNullabilityCompatibilityMode;
     }
 
     /**
@@ -429,13 +432,13 @@ public final class TypeScriptSettings {
     /**
      * An enum indicating the backward-compatibility mode.
      */
-    public enum CompatibilityMode {
+    public enum MemberNullabilityCompatibilityMode {
         RELAXED("relaxed"),
         STRICT("strict");
 
         private final String mode;
 
-        CompatibilityMode(String mode) {
+        MemberNullabilityCompatibilityMode(String mode) {
             this.mode = mode;
         }
 
@@ -443,7 +446,7 @@ public final class TypeScriptSettings {
             return mode;
         }
 
-        public static CompatibilityMode fromString(String s) {
+        public static MemberNullabilityCompatibilityMode fromString(String s) {
             if ("relaxed".equals(s)) {
                 return RELAXED;
             }

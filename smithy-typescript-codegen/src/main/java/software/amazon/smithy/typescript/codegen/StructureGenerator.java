@@ -27,7 +27,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings.CompatibilityMode;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.MemberNullabilityCompatibilityMode;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -68,13 +68,15 @@ final class StructureGenerator implements Runnable {
     private final TypeScriptWriter writer;
     private final StructureShape shape;
     private final boolean includeValidation;
-    private final CompatibilityMode compatibilityMode;
+    private final MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode;
 
     /**
-     * sets 'includeValidation' to 'false' and backwards compatibility to {@link CompatibilityMode#RELAXED}.
+     * sets 'includeValidation' to 'false' and backwards compatibility
+     * to {@link MemberNullabilityCompatibilityMode#RELAXED}.
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
-        this(model, symbolProvider, writer, shape, false, CompatibilityMode.RELAXED);
+        this(model, symbolProvider, writer, shape, false,
+            MemberNullabilityCompatibilityMode.RELAXED);
     }
 
     StructureGenerator(Model model,
@@ -82,13 +84,13 @@ final class StructureGenerator implements Runnable {
                        TypeScriptWriter writer,
                        StructureShape shape,
                        boolean includeValidation,
-                       CompatibilityMode compatibilityMode) {
+                       MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.shape = shape;
         this.includeValidation = includeValidation;
-        this.compatibilityMode = compatibilityMode;
+        this.memberNullabilityCompatibilityMode = memberNullabilityCompatibilityMode;
     }
 
     @Override
@@ -162,7 +164,7 @@ final class StructureGenerator implements Runnable {
         }
 
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values(), this.compatibilityMode);
+                model, symbolProvider, shape.getAllMembers().values(), this.memberNullabilityCompatibilityMode);
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
@@ -259,7 +261,7 @@ final class StructureGenerator implements Runnable {
             HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
-                shape.getAllMembers().values(), this.compatibilityMode);
+                shape.getAllMembers().values(), this.memberNullabilityCompatibilityMode);
         // since any error interface must extend from JavaScript Error interface, message member is already
         // required in the JavaScript Error interface
         structuredMemberWriter.skipMembers.add("message");
