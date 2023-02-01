@@ -300,7 +300,7 @@ export class PatternValidator implements SingleConstraintValidator<string, Patte
       return null;
     }
 
-    if (!this.pattern.match(input)) {
+    if (!this.pattern.test(input)) {
       return {
         constraintType: "pattern",
         constraintValues: this.inputPattern,
