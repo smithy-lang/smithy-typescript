@@ -71,7 +71,7 @@ final class StructureGenerator implements Runnable {
     private final RequiredMemberMode requiredMemberMode;
 
     /**
-     * sets 'includeValidation' to 'false' and backwards compatibility
+     * sets 'includeValidation' to 'false' and requiredMemberMode
      * to {@link RequiredMemberMode#NULLABLE}.
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
