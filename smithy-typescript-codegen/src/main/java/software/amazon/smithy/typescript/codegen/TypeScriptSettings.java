@@ -34,6 +34,7 @@ import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -304,9 +305,9 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Returns the compatibility mode in regards to member nullability.
+     * Returns the compatibility mode in regards to required members..
      *
-     * @return the configured compatibility mode in regards to member nullability.
+     * @return the configured compatibility mode in regards to required members..
      * Defaults to {@link RequiredMemberMode#NULLABLE}
      */
     public RequiredMemberMode getRequiredMemberMode() {
@@ -439,7 +440,7 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * An enum indicating the compatibility mode in regards to member nullability.
+     * An enum indicating the compatibility mode in regards to required members..
      */
     public enum RequiredMemberMode {
         /**
@@ -452,6 +453,14 @@ public final class TypeScriptSettings {
 
         /**
          * This will dissallow members marked as {@link RequiredTrait} to be {@code undefined}.
+         * Use this mode with CAUTION because it comes with certain risks. When a server drops
+         * {@link RequiredTrait} from an output shape (and it is replaced with {@link DefaultTrait}
+         * as defined by the spec), if the server does not always serialize a value,
+         * customer code consuming the client and trying to access this member, may get a
+         * NullPointerException. Smithy spec says: "Authoritative model consumers like servers
+         * SHOULD always serialize default values to remove any ambiguity about the value of
+         * the most up to default value." So one should use this mode on the client, only if
+         * the server is following the approach proposed by the spec.
          */
         STRICT("strict");
 
@@ -472,7 +481,7 @@ public final class TypeScriptSettings {
             if ("strict".equals(s)) {
                 return STRICT;
             }
-            throw new CodegenException(String.format("Unsupported member nullability compatibility mode: %s", s));
+            throw new CodegenException(String.format("Unsupported required member mode: %s", s));
         }
     }
 
