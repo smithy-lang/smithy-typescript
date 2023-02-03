@@ -440,7 +440,7 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * An enum indicating the compatibility mode in regards to required members..
+     * An enum indicating the code generation mode for required members.
      */
     public enum RequiredMemberMode {
         /**
