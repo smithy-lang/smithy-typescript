@@ -305,9 +305,9 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Returns the compatibility mode in regards to required members..
+     * Returns the code generation mode for required members.
      *
-     * @return the configured compatibility mode in regards to required members..
+     * @return the configured mode for required members.
      * Defaults to {@link RequiredMemberMode#NULLABLE}
      */
     public RequiredMemberMode getRequiredMemberMode() {
