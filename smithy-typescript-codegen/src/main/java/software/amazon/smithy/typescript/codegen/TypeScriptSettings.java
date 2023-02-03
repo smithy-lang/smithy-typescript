@@ -44,7 +44,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public final class TypeScriptSettings {
 
     static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
-    static final String MEMBER_NULLABILITY_COMPATIBILITY_MODE = "memberNullabilityCompatibilityMode";
+    static final String REQUIRED_MEMBER_MODE = "requiredMemberMode";
     static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
@@ -67,8 +67,8 @@ public final class TypeScriptSettings {
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
-    private MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode =
-        MemberNullabilityCompatibilityMode.RELAXED;
+    private RequiredMemberMode requiredMemberMode =
+        RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
 
     @Deprecated
@@ -109,10 +109,10 @@ public final class TypeScriptSettings {
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
-        settings.setMemberNullabilityCompatibilityMode(
-            config.getStringMember(MEMBER_NULLABILITY_COMPATIBILITY_MODE)
-                .map(s -> MemberNullabilityCompatibilityMode.fromString(s.getValue()))
-                .orElse(MemberNullabilityCompatibilityMode.RELAXED));
+        settings.setRequiredMemberMode(
+            config.getStringMember(REQUIRED_MEMBER_MODE)
+                .map(s -> RequiredMemberMode.fromString(s.getValue()))
+                .orElse(RequiredMemberMode.NULLABLE));
 
         settings.setPluginSettings(config);
         return settings;
@@ -307,22 +307,22 @@ public final class TypeScriptSettings {
      * Returns the compatibility mode in regards to member nullability.
      *
      * @return the configured compatibility mode in regards to member nullability.
-     * Defaults to {@link MemberNullabilityCompatibilityMode#RELAXED}
+     * Defaults to {@link RequiredMemberMode#NULLABLE}
      */
-    public MemberNullabilityCompatibilityMode getMemberNullabilityCompatibilityMode() {
-        return memberNullabilityCompatibilityMode;
+    public RequiredMemberMode getRequiredMemberMode() {
+        return requiredMemberMode;
     }
 
-    public void setMemberNullabilityCompatibilityMode(
-        MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode) {
-            if (memberNullabilityCompatibilityMode != MemberNullabilityCompatibilityMode.RELAXED) {
+    public void setRequiredMemberMode(
+        RequiredMemberMode requiredMemberMode) {
+            if (requiredMemberMode != RequiredMemberMode.NULLABLE) {
                 LOGGER.warning(String.format("By setting the member nullability compatibility mode to '%s', a"
                     + " member that has the '@required' trait applied CANNOT be 'undefined'. Differrent than"
                     + " when it is set to '%s', it will be considered a BACKWARDS INCOMPATIBLE change for"
                     + " Smithy services even when the required constraint is dropped from a member.",
-                    memberNullabilityCompatibilityMode.mode, MemberNullabilityCompatibilityMode.RELAXED.mode));
+                    requiredMemberMode.mode, RequiredMemberMode.NULLABLE.mode));
             }
-            this.memberNullabilityCompatibilityMode = memberNullabilityCompatibilityMode;
+            this.requiredMemberMode = requiredMemberMode;
     }
 
     /**
@@ -411,10 +411,10 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, MEMBER_NULLABILITY_COMPATIBILITY_MODE)),
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, MEMBER_NULLABILITY_COMPATIBILITY_MODE,
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
                               DISABLE_DEFAULT_VALIDATION));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
@@ -441,23 +441,23 @@ public final class TypeScriptSettings {
     /**
      * An enum indicating the compatibility mode in regards to member nullability.
      */
-    public enum MemberNullabilityCompatibilityMode {
+    public enum RequiredMemberMode {
         /**
          * This is the current behavior and it will be the default. When set,
-         * it allows a member that has the {@link RequiredTrait} applied to be "undefined".
+         * it allows a member that has the {@link RequiredTrait} applied to be {@code undefined}.
          * By doing so it can still be considered a backwards compatible change fo
-         * Smithy services even when the required constraint is dropped from a member .
+         * Smithy services even when the required constraint is dropped from a member.
          */
-        RELAXED("relaxed"),
+        NULLABLE("nullable"),
 
         /**
-         * This will dissallow members marked as {@link RequiredTrait} to be "undefined".
+         * This will dissallow members marked as {@link RequiredTrait} to be {@code undefined}.
          */
         STRICT("strict");
 
         private final String mode;
 
-        MemberNullabilityCompatibilityMode(String mode) {
+        RequiredMemberMode(String mode) {
             this.mode = mode;
         }
 
@@ -465,9 +465,9 @@ public final class TypeScriptSettings {
             return mode;
         }
 
-        public static MemberNullabilityCompatibilityMode fromString(String s) {
-            if ("relaxed".equals(s)) {
-                return RELAXED;
+        public static RequiredMemberMode fromString(String s) {
+            if ("nullable".equals(s)) {
+                return NULLABLE;
             }
             if ("strict".equals(s)) {
                 return STRICT;

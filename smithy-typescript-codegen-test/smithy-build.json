@@ -9,7 +9,7 @@
             "packageJson": {
                 "license": "Apache-2.0"
             },
-            "memberNullabilityCompatibilityMode": "strict"
+            "requiredMemberMode": "strict"
         }
     }
 }

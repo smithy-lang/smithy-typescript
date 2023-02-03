@@ -45,7 +45,7 @@ import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.UniqueItemsTrait;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings.MemberNullabilityCompatibilityMode;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -61,19 +61,19 @@ final class StructuredMemberWriter {
     Collection<MemberShape> members;
     String memberPrefix = "";
     boolean noDocs;
-    MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode;
+    RequiredMemberMode requiredMemberMode;
     final Set<String> skipMembers = new HashSet<>();
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
-        this(model, symbolProvider, members, MemberNullabilityCompatibilityMode.RELAXED);
+        this(model, symbolProvider, members, RequiredMemberMode.NULLABLE);
     }
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members,
-            MemberNullabilityCompatibilityMode memberNullabilityCompatibilityMode) {
+            RequiredMemberMode requiredMemberMode) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = new LinkedHashSet<>(members);
-        this.memberNullabilityCompatibilityMode = memberNullabilityCompatibilityMode;
+        this.requiredMemberMode = requiredMemberMode;
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
@@ -87,7 +87,7 @@ final class StructuredMemberWriter {
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
-            String typeSuffix = memberNullabilityCompatibilityMode == MemberNullabilityCompatibilityMode.RELAXED
+            String typeSuffix = requiredMemberMode == RequiredMemberMode.NULLABLE
                          && isRequiredMember(member) ? " | undefined" : "";
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                          symbolProvider.toSymbol(member), typeSuffix);
