@@ -1,11 +1,10 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "stripInternal": true,
-    "declarationDir": "./dist/types",
-    "rootDir": "./src",
-    "outDir": "./dist/cjs",
+    "removeComments": true,
+    "rootDir": "src",
     "baseUrl": "."
   },
-  "extends": "../tsconfig.json",
   "include": ["src/"]
 }
