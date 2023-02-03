@@ -318,8 +318,8 @@ public final class TypeScriptSettings {
         RequiredMemberMode requiredMemberMode) {
             if (requiredMemberMode != RequiredMemberMode.NULLABLE) {
                 LOGGER.warning(String.format("By setting the member nullability compatibility mode to '%s', a"
-                    + " member that has the '@required' trait applied CANNOT be 'undefined'. Differrent than"
-                    + " when it is set to '%s', it will be considered a BACKWARDS INCOMPATIBLE change for"
+                    + " member that has the '@required' trait applied CANNOT be 'undefined'."
+                    + " It will be considered a BACKWARDS INCOMPATIBLE change for"
                     + " Smithy services even when the required constraint is dropped from a member.",
                     requiredMemberMode.mode, RequiredMemberMode.NULLABLE.mode));
             }
