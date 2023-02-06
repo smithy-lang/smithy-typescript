@@ -34,6 +34,8 @@ import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.DefaultTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -43,6 +45,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public final class TypeScriptSettings {
 
     static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
+    static final String REQUIRED_MEMBER_MODE = "requiredMemberMode";
     static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
@@ -66,6 +69,8 @@ public final class TypeScriptSettings {
     private boolean isPrivate;
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
+    private RequiredMemberMode requiredMemberMode =
+        RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
 
     @Deprecated
@@ -106,6 +111,10 @@ public final class TypeScriptSettings {
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
+        settings.setRequiredMemberMode(
+            config.getStringMember(REQUIRED_MEMBER_MODE)
+                .map(s -> RequiredMemberMode.fromString(s.getValue()))
+                .orElse(RequiredMemberMode.NULLABLE));
 
         settings.setPluginSettings(config);
         return settings;
@@ -297,6 +306,28 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * Returns the code generation mode for required members.
+     *
+     * @return the configured mode for required members.
+     * Defaults to {@link RequiredMemberMode#NULLABLE}
+     */
+    public RequiredMemberMode getRequiredMemberMode() {
+        return requiredMemberMode;
+    }
+
+    public void setRequiredMemberMode(
+        RequiredMemberMode requiredMemberMode) {
+            if (requiredMemberMode != RequiredMemberMode.NULLABLE) {
+                LOGGER.warning(String.format("By setting the required member mode to '%s', a"
+                    + " member that has the '@required' trait applied CANNOT be 'undefined'."
+                    + " It will be considered a BACKWARDS INCOMPATIBLE change for"
+                    + " Smithy services even when the required constraint is dropped from a member.",
+                    requiredMemberMode.mode, RequiredMemberMode.NULLABLE.mode));
+            }
+            this.requiredMemberMode = requiredMemberMode;
+    }
+
+    /**
      * Returns the package manager used by the generated package.
      *
      * @return the configured package manager. Defaults to {@link PackageManager#YARN}
@@ -396,10 +427,11 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE)),
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, DISABLE_DEFAULT_VALIDATION));
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
+                              DISABLE_DEFAULT_VALIDATION));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
@@ -419,6 +451,52 @@ public final class TypeScriptSettings {
          */
         public SymbolProvider createSymbolProvider(Model model, TypeScriptSettings settings) {
             return symbolProviderFactory.apply(model, settings);
+        }
+    }
+
+    /**
+     * An enum indicating the code generation mode for required members.
+     */
+    public enum RequiredMemberMode {
+        /**
+         * This is the current behavior and it will be the default. When set,
+         * it allows a member that has the {@link RequiredTrait} applied to be {@code undefined}.
+         * By doing so it can still be considered a backwards compatible change fo
+         * Smithy services even when the required constraint is dropped from a member.
+         */
+        NULLABLE("nullable"),
+
+        /**
+         * This will dissallow members marked as {@link RequiredTrait} to be {@code undefined}.
+         * Use this mode with CAUTION because it comes with certain risks. When a server drops
+         * {@link RequiredTrait} from an output shape (and it is replaced with {@link DefaultTrait}
+         * as defined by the spec), if the server does not always serialize a value,
+         * customer code consuming the client and trying to access this member, may get a
+         * NullPointerException. Smithy spec says: "Authoritative model consumers like servers
+         * SHOULD always serialize default values to remove any ambiguity about the value of
+         * the most up to default value." So one should use this mode on the client, only if
+         * the server is following the approach proposed by the spec.
+         */
+        STRICT("strict");
+
+        private final String mode;
+
+        RequiredMemberMode(String mode) {
+            this.mode = mode;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+
+        public static RequiredMemberMode fromString(String s) {
+            if ("nullable".equals(s)) {
+                return NULLABLE;
+            }
+            if ("strict".equals(s)) {
+                return STRICT;
+            }
+            throw new CodegenException(String.format("Unsupported required member mode: %s", s));
         }
     }
 

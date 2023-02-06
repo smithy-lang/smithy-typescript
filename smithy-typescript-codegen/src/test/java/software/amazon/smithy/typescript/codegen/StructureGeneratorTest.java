@@ -6,13 +6,13 @@ import static org.hamcrest.Matchers.containsString;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
-import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
 
 public class StructureGeneratorTest {
     @Test
@@ -508,7 +508,19 @@ public class StructureGeneratorTest {
                                 + "})");
     }
 
+    @Test
+    public void properlyGeneratesRequiredMessageMemberNotBackwardCompatible() {
+        testStructureCodegenBase("test-required-member.smithy",
+                                "export interface GetFooOutput {\n"
+                                + "  someRequiredMember: string;\n"
+                                + "}\n", RequiredMemberMode.STRICT);
+    }
+
     private String testStructureCodegen(String file, String expectedType) {
+        return testStructureCodegenBase(file, expectedType, RequiredMemberMode.NULLABLE);
+    }
+
+    private String testStructureCodegenBase(String file, String expectedType, RequiredMemberMode requiredMemberMode) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource(file))
                 .assemble()
@@ -521,6 +533,7 @@ public class StructureGeneratorTest {
                         .withMember("service", Node.from("smithy.example#Example"))
                         .withMember("package", Node.from("example"))
                         .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("requiredMemberMode", Node.from(requiredMemberMode.getMode()))
                         .build())
                 .build();
 

@@ -331,7 +331,8 @@ final class DirectedTypeScriptCodegen
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
-                    directive.settings().generateServerSdk()
+                    directive.settings().generateServerSdk(),
+                    directive.settings().getRequiredMemberMode()
             );
             generator.run();
         });
@@ -345,7 +346,8 @@ final class DirectedTypeScriptCodegen
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
-                    directive.settings().generateServerSdk()
+                    directive.settings().generateServerSdk(),
+                    directive.settings().getRequiredMemberMode()
             );
             generator.run();
         });
