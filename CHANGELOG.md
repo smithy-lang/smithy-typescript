@@ -1,5 +1,13 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.14.0 (2023-02-09)
+
+### Features
+
+* Upgrade TypeScript `lib` to use `es2018` for SSDK libs ([#678](https://github.com/awslabs/smithy-typescript/pull/678))
+* Bump SSDK libs version to 1.0.0-alpha.8 ([#689](https://github.com/awslabs/smithy-typescript/pull/689))
+* Allow non backwards-compatible required members ([#566](https://github.com/awslabs/smithy-typescript/pull/566), [#688](https://github.com/awslabs/smithy-typescript/pull/688))
+
 ## 0.13.0 (2023-01-31)
 
 ### Features
