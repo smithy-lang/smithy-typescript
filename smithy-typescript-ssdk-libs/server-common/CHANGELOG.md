@@ -1,5 +1,12 @@
 # server-common Changelog
 
+## 1.0.0-alpha.8 (2023-02-09)
+
+### Features
+
+- Generate ES module distributions ([#685](https://github.com/awslabs/smithy-typescript/pull/685))
+- Use re2 `test()` instead of `match()` ([#680](https://github.com/awslabs/smithy-typescript/pull/680))
+
 ## 1.0.0-alpha.7 (2023-01-25)
 
 ### Features
