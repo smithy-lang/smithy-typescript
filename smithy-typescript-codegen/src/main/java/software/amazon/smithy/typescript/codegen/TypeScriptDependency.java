@@ -110,7 +110,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     UTIL_STREAM_BROWSER("dependencies", "@aws-sdk/util-stream-browser", false),
 
     // Server dependency for SSDKs
-    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.7", false);
+    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.8", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";
