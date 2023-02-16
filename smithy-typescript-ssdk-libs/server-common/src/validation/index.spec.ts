@@ -155,5 +155,15 @@ describe("message formatting", () => {
         "Value at '/test' failed to satisfy constraint: Member must be between 3 and 7, inclusive"
       );
     });
+    it("with unique items", () => {
+      const failure: UniqueItemsValidationFailure = {
+        constraintType: "uniqueItems",
+        failureValue: [5,9],
+        path:"/test",
+      };
+      expect(generateValidationMessage(failure)).toEqual(
+        "Value with repeated values at '/test' failed to satisfy constraint: Member must have unique values"
+      );
+    })
   });
 });
