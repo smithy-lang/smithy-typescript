@@ -21,6 +21,7 @@ import {
   PatternValidationFailure,
   RangeValidationFailure,
   RequiredValidationFailure,
+  UniqueItemsValidationFailure,
 } from "./index";
 
 describe("message formatting", () => {
@@ -83,7 +84,7 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value at '/test' failed to satisfy constraint: Member must have length greater than or equal to 7"
+        "Value with length 3 at '/test' failed to satisfy constraint: Member must have length greater than or equal to 7"
       );
     });
     it("with only max values", () => {
@@ -94,7 +95,7 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value at '/test' failed to satisfy constraint: Member must have length less than or equal to 2"
+        "Value with length 3 at '/test' failed to satisfy constraint: Member must have length less than or equal to 2"
       );
     });
     it("with min and max values", () => {
@@ -105,7 +106,7 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value at '/test' failed to satisfy constraint: Member must have length between 3 and 7, inclusive"
+        "Value with length 2 at '/test' failed to satisfy constraint: Member must have length between 3 and 7, inclusive"
       );
     });
   });

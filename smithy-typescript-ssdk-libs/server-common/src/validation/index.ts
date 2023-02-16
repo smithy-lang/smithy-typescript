@@ -121,6 +121,9 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       break;
     }
     case "length": {
+      if (failure.failureValue !== null) {
+        prefix = prefix + " with length " + failure.failureValue;
+      }
       const min = failure.constraintValues[0];
       const max = failure.constraintValues[1];
       if (min === undefined) {
