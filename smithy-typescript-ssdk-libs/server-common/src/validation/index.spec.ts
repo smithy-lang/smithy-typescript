@@ -158,12 +158,12 @@ describe("message formatting", () => {
     it("with unique items", () => {
       const failure: UniqueItemsValidationFailure = {
         constraintType: "uniqueItems",
-        failureValue: [5,9],
-        path:"/test",
+        failureValue: [5, 9],
+        path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
         "Value with repeated values at '/test' failed to satisfy constraint: Member must have unique values"
       );
-    })
+    });
   });
 });
