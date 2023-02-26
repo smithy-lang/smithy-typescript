@@ -237,7 +237,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol createBigJsSymbol(Shape shape) {
-        return createSymbolBuilder(shape, "Big", TypeScriptDependency.TYPES_BIG_JS.packageName)
+        return createSymbolBuilder(shape, "Big", TypeScriptDependency.BIG_JS.packageName)
                 .addDependency(TypeScriptDependency.TYPES_BIG_JS)
                 .addDependency(TypeScriptDependency.BIG_JS)
                 .build();
