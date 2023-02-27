@@ -315,12 +315,13 @@ final class CommandGenerator implements Runnable {
     }
 
     private void addInputAndOutputTypes() {
-        writeInputType(inputType.getName(), operationIndex.getInput(operation));
-        writeOutputType(outputType.getName(), operationIndex.getOutput(operation));
+        writeInputType(inputType.getName(), operationIndex.getInput(operation), symbol.getName());
+        writeOutputType(outputType.getName(), operationIndex.getOutput(operation), symbol.getName());
         writer.write("");
     }
 
-    private void writeInputType(String typeName, Optional<StructureShape> inputShape) {
+    private void writeInputType(String typeName, Optional<StructureShape> inputShape, String commandName) {
+        writer.writeDocs("The input for {@link " + commandName + "}.");
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
@@ -336,7 +337,8 @@ final class CommandGenerator implements Runnable {
         }
     }
 
-    private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
+    private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
+        writer.writeDocs("The output of {@link " + commandName + "}.");
         // Output types should always be MetadataBearers, possibly in addition
         // to a defined output shape.
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
