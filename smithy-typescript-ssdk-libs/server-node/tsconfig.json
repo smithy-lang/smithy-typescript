@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "stripInternal": true,
+    "removeComments": true,
+    "rootDir": "src",
+    "baseUrl": ".",
+    "lib": ["es2019.object", "dom"]
+  },
+  "include": ["src/"]
+}
