@@ -162,7 +162,7 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value with repeated values at '/test' failed to satisfy constraint: Member must have unique values"
+        "Value at '/test' failed to satisfy constraint: Member must have unique values"
       );
     });
   });

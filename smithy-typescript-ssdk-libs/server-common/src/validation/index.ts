@@ -152,7 +152,6 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       break;
     }
     case "uniqueItems": {
-      prefix = prefix + " with repeated values";
       suffix = "must have unique values";
     }
   }
