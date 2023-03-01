@@ -47,6 +47,7 @@ import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.model.traits.ExamplesTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameMap;
@@ -200,10 +201,12 @@ final class CommandGenerator implements Runnable {
                 });
     }
 
-    private String getCommandExample(String serviceName, String configName, String commandName, String commandInput,
-            String commandOutput) {
+    private String getCommandExample(
+            String serviceName, String configName, String commandName,
+            String commandInput, String commandOutput
+    ) {
         String packageName = settings.getPackageName();
-        return "@example\n"
+        String exampleDoc = "@example\n"
                 + "Use a bare-bones client and the command you need to make an API call.\n"
                 + "```javascript\n"
                 + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
@@ -226,6 +229,13 @@ final class CommandGenerator implements Runnable {
                 + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
                 + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
                 + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+
+        if (operation.getTrait(ExamplesTrait.class).isPresent()) {
+            List<ExamplesTrait.Example> examples = operation.getTrait(ExamplesTrait.class).get().getExamples();
+            exampleDoc += getOperationExample(examples);
+        }
+
+        return exampleDoc;
     }
 
     private String getThrownExceptions() {
@@ -250,6 +260,21 @@ final class CommandGenerator implements Runnable {
         buffer.append(String.format("@throws {@link %s}%n", CodegenUtils.getServiceExceptionName(name)));
         buffer.append(String.format("<p>Base exception class for all service exceptions from %s service.</p>%n", name));
 
+        return buffer.toString();
+    }
+
+    private String getOperationExample(List<ExamplesTrait.Example> examples) {
+        StringBuilder buffer = new StringBuilder();
+        for (ExamplesTrait.Example example : examples) {
+            buffer
+                .append("\n")
+                .append(String.format("@example %s", example.getTitle()))
+                .append("```javascript")
+                .append(String.format("/* %s */", example.getDocumentation()))
+                .append("some code here")
+                .append("```")
+                .append("\n");
+        }
         return buffer.toString();
     }
 
