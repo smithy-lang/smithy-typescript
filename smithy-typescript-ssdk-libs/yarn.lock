@@ -43,8 +43,14 @@ __metadata:
     "@types/aws-lambda": ^8.10.72
     "@types/jest": ^26.0.4
     "@types/node": ^14.14.37
+    "@typescript-eslint/eslint-plugin": 4.30.0
+    "@typescript-eslint/parser": 4.30.0
     concurrently: ^7.6.0
     downlevel-dts: ^0.7.0
+    eslint: 7.32.0
+    eslint-config-prettier: 8.3.0
+    eslint-plugin-prettier: 3.4.1
+    eslint-plugin-simple-import-sort: 7.0.0
     jest: ^26.1.0
     rimraf: ^3.0.2
     tslib: ^1.8.0
@@ -60,8 +66,14 @@ __metadata:
     "@aws-sdk/types": ^3.267.0
     "@types/jest": ^26.0.22
     "@types/node": ^14.14.37
+    "@typescript-eslint/eslint-plugin": 4.30.0
+    "@typescript-eslint/parser": 4.30.0
     concurrently: ^7.6.0
     downlevel-dts: ^0.7.0
+    eslint: 7.32.0
+    eslint-config-prettier: 8.3.0
+    eslint-plugin-prettier: 3.4.1
+    eslint-plugin-simple-import-sort: 7.0.0
     jest: ^26.6.3
     re2-wasm: ^1.0.2
     rimraf: ^3.0.2
@@ -81,6 +93,10 @@ __metadata:
     "@types/node": ^14.14.37
     concurrently: ^7.6.0
     downlevel-dts: ^0.7.0
+    eslint: 7.32.0
+    eslint-config-prettier: 8.3.0
+    eslint-plugin-prettier: 3.4.1
+    eslint-plugin-simple-import-sort: 7.0.0
     jest: ^26.1.0
     rimraf: ^3.0.2
     tslib: ^1.8.0
@@ -5328,12 +5344,6 @@ __metadata:
   resolution: "smithy-typescript-ssdk@workspace:."
   dependencies:
     "@types/jest": ^26.0.4
-    "@typescript-eslint/eslint-plugin": 4.30.0
-    "@typescript-eslint/parser": 4.30.0
-    eslint: 7.32.0
-    eslint-config-prettier: 8.3.0
-    eslint-plugin-prettier: 3.4.1
-    eslint-plugin-simple-import-sort: 7.0.0
     glob: ^7.1.6
     jest: ^26.1.0
     prettier: 2.2.1
