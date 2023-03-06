@@ -19,11 +19,14 @@ function convertQueryString(qs: URLSearchParams): QueryParameterBag {
 
 export function convertRequest(req: IncomingMessage): HttpRequest {
   const url = new URL(req.url || "", `http://${req.headers.host}`);
+
   return new HttpRequest({
+    hostname: url.hostname,
     method: req.method,
-    headers: convertHeaders(req.headers),
-    query: convertQueryString(url.searchParams),
     path: url.pathname,
+    protocol: url.protocol,
+    query: convertQueryString(url.searchParams),
+    headers: convertHeaders(req.headers),
     body: req,
   });
 }
