@@ -117,13 +117,11 @@ final class PaginationGenerator implements Runnable {
             TypeScriptWriter writer
     ) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
-        String aggregatedClientLocation = service.getNamespace().replace(service.getName(), aggregatedClientName);
-        writer.addImport(aggregatedClientName, aggregatedClientName, aggregatedClientLocation);
         writer.addImport(service.getName(), service.getName(), service.getNamespace());
 
         writer.openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
                 "}", aggregatedClientName, () -> {
-            writer.write("client: $L | $L;", aggregatedClientName, service.getName());
+            writer.write("client: $L;", service.getName());
         });
     }
 
