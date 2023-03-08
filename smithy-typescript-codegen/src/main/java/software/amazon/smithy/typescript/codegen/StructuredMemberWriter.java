@@ -35,8 +35,10 @@ import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.EnumValueTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
+import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.PatternTrait;
@@ -503,6 +505,22 @@ final class StructuredMemberWriter {
                         });
                     }
 
+                    if (shape.isEnumShape()) {
+                        writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
+                        Collection<MemberShape> enumValues = shape.asEnumShape().get().getAllMembers().values();
+                        writer.openBlock("new __EnumValidator([", "]),", () -> {
+                            for (MemberShape member : enumValues) {
+                                writer.write("$S,", member.expectTrait(EnumValueTrait.class).expectStringValue());
+                            }
+                            writer.write("], [");
+                            for (MemberShape member : shape.asEnumShape().get().getAllMembers().values()) {
+                                if (!member.hasTrait((InternalTrait.class)) && !member.hasTag("internal")) {
+                                    writer.write("$S,", member.expectTrait(EnumValueTrait.class).expectStringValue());
+                                }
+                            }
+                        });
+                    }
+
                     for (Trait t : constraints) {
                         writeSingleConstraintValidator(writer, t);
                     }
@@ -517,13 +535,6 @@ final class StructuredMemberWriter {
         if (trait instanceof RequiredTrait) {
             writer.addImport("RequiredValidator", "__RequiredValidator", "@aws-smithy/server-common");
             writer.write("new __RequiredValidator(),");
-        } else if (trait instanceof EnumTrait) {
-            writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
-            writer.openBlock("new __EnumValidator([", "]),", () -> {
-                for (String e : ((EnumTrait) trait).getEnumDefinitionValues()) {
-                    writer.write("$S,", e);
-                }
-            });
         } else if (trait instanceof LengthTrait) {
             LengthTrait lengthTrait = (LengthTrait) trait;
             writer.addImport("LengthValidator", "__LengthValidator", "@aws-smithy/server-common");
