@@ -67,6 +67,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -459,7 +460,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             }
             // Add models into buckets no bigger than chunk size.
             String path;
-            if (shape.getId().toString().equals("smithy.api#Unit")) {
+            if (shape.getId().equals(UnitTypeTrait.UNIT)) {
                 // Unit should only be put in the zero bucket, since it does not
                 // generate anything. It also does not contribute to bucket size.
                 path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "models_0");
