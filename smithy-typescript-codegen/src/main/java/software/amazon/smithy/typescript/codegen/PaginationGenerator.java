@@ -95,9 +95,6 @@ final class PaginationGenerator implements Runnable {
         writer.addImport(outputSymbol.getName(),
                 outputSymbol.getName(),
                 outputSymbol.getNamespace());
-        String aggregatedClientLocation = serviceSymbol.getNamespace()
-                .replace(serviceSymbol.getName(), aggregatedClientName);
-        writer.addImport(aggregatedClientName, aggregatedClientName, aggregatedClientLocation);
         writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
 
         // Import Pagination types
@@ -106,7 +103,6 @@ final class PaginationGenerator implements Runnable {
             Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", "")).toString());
 
         writeCommandRequest();
-        writeMethodRequest();
         writePager();
     }
 
@@ -121,13 +117,11 @@ final class PaginationGenerator implements Runnable {
             TypeScriptWriter writer
     ) {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
-        String aggregatedClientLocation = service.getNamespace().replace(service.getName(), aggregatedClientName);
-        writer.addImport(aggregatedClientName, aggregatedClientName, aggregatedClientLocation);
         writer.addImport(service.getName(), service.getName(), service.getNamespace());
 
         writer.openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
                 "}", aggregatedClientName, () -> {
-            writer.write("client: $L | $L;", aggregatedClientName, service.getName());
+            writer.write("client: $L;", service.getName());
         });
     }
 
@@ -190,10 +184,7 @@ final class PaginationGenerator implements Runnable {
                     writer.write("input[$S] = config.pageSize;", pageSize);
                 }
 
-                writer.openBlock("if (config.client instanceof $L) {", "}", aggregatedClientName, () -> {
-                    writer.write("page = await makePagedRequest(config.client, input, ...additionalArguments);");
-                });
-                writer.openBlock("else if (config.client instanceof $L) {", "}", serviceTypeName, () -> {
+                writer.openBlock("if (config.client instanceof $L) {", "}", serviceTypeName, () -> {
                     writer.write("page = await makePagedClientRequest(config.client, input, ...additionalArguments);");
                 });
                 writer.openBlock("else {", "}", () -> {
@@ -212,21 +203,6 @@ final class PaginationGenerator implements Runnable {
         });
     }
 
-
-    /**
-     * Paginated command that calls client.method({...}) under the hood. This is meant for server side environments and
-     * exposes the entire service.
-     */
-    private void writeMethodRequest() {
-        writer.writeDocs("@private");
-        writer.openBlock(
-                "const makePagedRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
-                "}", aggregatedClientName, inputSymbol.getName(),
-                outputSymbol.getName(), () -> {
-            writer.write("// @ts-ignore");
-            writer.write("return await client.$L(input, ...args);", methodName);
-        });
-    }
 
     /**
      * Paginated command that calls CommandClient().send({...}) under the hood. This is meant for client side (browser)

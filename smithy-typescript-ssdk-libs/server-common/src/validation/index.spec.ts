@@ -21,6 +21,7 @@ import {
   PatternValidationFailure,
   RangeValidationFailure,
   RequiredValidationFailure,
+  UniqueItemsValidationFailure,
 } from "./index";
 
 describe("message formatting", () => {
@@ -32,8 +33,7 @@ describe("message formatting", () => {
       path: "/test",
     };
     expect(generateValidationMessage(failure)).toEqual(
-      "Value zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz... " +
-        "(truncated) at '/test' failed to satisfy constraint: Member must satisfy regular expression pattern: ^[a-c]$"
+      "Value at '/test' failed to satisfy constraint: Member must satisfy regular expression pattern: ^[a-c]$"
     );
   });
   it("omits null values", () => {
@@ -50,7 +50,7 @@ describe("message formatting", () => {
   it("formats required failures", () => {
     const failure = new RequiredValidationFailure("/test");
     expect(generateValidationMessage(failure)).toEqual(
-      "Value null at '/test' failed to satisfy constraint: Member must not be null"
+      "Value at '/test' failed to satisfy constraint: Member must not be null"
     );
   });
   it("formats enum failures", () => {
@@ -61,7 +61,7 @@ describe("message formatting", () => {
       path: "/test",
     };
     expect(generateValidationMessage(failure)).toEqual(
-      "Value pear at '/test' failed to satisfy constraint: Member must satisfy enum value set: [apple, banana]"
+      "Value at '/test' failed to satisfy constraint: Member must satisfy enum value set: [apple, banana]"
     );
   });
   it("formats integer enum failures", () => {
@@ -72,7 +72,7 @@ describe("message formatting", () => {
       path: "/test",
     };
     expect(generateValidationMessage(failure)).toEqual(
-      "Value 3 at '/test' failed to satisfy constraint: Member must satisfy enum value set: [1, 2]"
+      "Value at '/test' failed to satisfy constraint: Member must satisfy enum value set: [1, 2]"
     );
   });
   describe("formats length failures", () => {
@@ -118,7 +118,7 @@ describe("message formatting", () => {
       path: "/test",
     };
     expect(generateValidationMessage(failure)).toEqual(
-      "Value xyz at '/test' failed to satisfy constraint: Member must satisfy regular expression pattern: ^[a-c]$"
+      "Value at '/test' failed to satisfy constraint: Member must satisfy regular expression pattern: ^[a-c]$"
     );
   });
   describe("formats range failures", () => {
@@ -130,7 +130,7 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value 3 at '/test' failed to satisfy constraint: Member must be greater than or equal to 7"
+        "Value at '/test' failed to satisfy constraint: Member must be greater than or equal to 7"
       );
     });
     it("with only max values", () => {
@@ -141,7 +141,7 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value 3 at '/test' failed to satisfy constraint: Member must be less than or equal to 2"
+        "Value at '/test' failed to satisfy constraint: Member must be less than or equal to 2"
       );
     });
     it("with min and max values", () => {
@@ -152,7 +152,17 @@ describe("message formatting", () => {
         path: "/test",
       };
       expect(generateValidationMessage(failure)).toEqual(
-        "Value 2 at '/test' failed to satisfy constraint: Member must be between 3 and 7, inclusive"
+        "Value at '/test' failed to satisfy constraint: Member must be between 3 and 7, inclusive"
+      );
+    });
+    it("with unique items", () => {
+      const failure: UniqueItemsValidationFailure = {
+        constraintType: "uniqueItems",
+        failureValue: [5, 9],
+        path: "/test",
+      };
+      expect(generateValidationMessage(failure)).toEqual(
+        "Value at '/test' failed to satisfy constraint: Member must have unique values"
       );
     });
   });

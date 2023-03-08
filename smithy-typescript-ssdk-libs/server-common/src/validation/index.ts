@@ -103,20 +103,6 @@ export const generateValidationSummary = (failures: readonly ValidationFailure[]
 };
 
 export const generateValidationMessage = (failure: ValidationFailure): string => {
-  let failureValue;
-  if (failure.constraintType === "required") {
-    failureValue = "null ";
-  } else if (failure.failureValue === null) {
-    failureValue = "";
-  } else {
-    const rawFailureValue = failure.failureValue.toString();
-    if (rawFailureValue.length > 64) {
-      failureValue = rawFailureValue.substr(0, 49) + "... (truncated) ";
-    } else {
-      failureValue = rawFailureValue + " ";
-    }
-  }
-
   let prefix = "Value";
   let suffix: string;
   switch (failure.constraintType) {
@@ -136,7 +122,7 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
     }
     case "length": {
       if (failure.failureValue !== null) {
-        prefix = prefix + " with length";
+        prefix = prefix + " with length " + failure.failureValue;
       }
       const min = failure.constraintValues[0];
       const max = failure.constraintValues[1];
@@ -166,9 +152,8 @@ export const generateValidationMessage = (failure: ValidationFailure): string =>
       break;
     }
     case "uniqueItems": {
-      prefix = prefix + " with repeated values";
       suffix = "must have unique values";
     }
   }
-  return `${prefix} ${failureValue}at '${failure.path}' failed to satisfy constraint: Member ${suffix}`;
+  return `${prefix} at '${failure.path}' failed to satisfy constraint: Member ${suffix}`;
 };

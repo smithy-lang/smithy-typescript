@@ -1,7 +1,7 @@
 {
-  "name": "@aws-smithy/server-apigateway",
+  "name": "@aws-smithy/server-node",
   "version": "1.0.0-alpha.8",
-  "description": "Base components for Smithy services behind APIGateway",
+  "description": "Base components for Smithy services running on NodeJS",
   "main": "./dist/cjs/index.js",
   "module": "./dist/es/index.js",
   "types": "./dist/types/index.d.ts",
@@ -21,21 +21,18 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/awslabs/smithy-typescript.git",
-    "directory": "smithy-typescript-ssdk-libs/server-apigateway"
+    "directory": "smithy-typescript-ssdk-libs/server-node"
   },
   "author": "AWS Smithy Team",
   "license": "Apache-2.0",
   "dependencies": {
     "@aws-sdk/protocol-http": "^3.267.0",
     "@aws-sdk/types": "^3.267.0",
-    "@types/aws-lambda": "^8.10.72",
     "tslib": "^1.8.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.4",
     "@types/node": "^14.14.37",
-    "@typescript-eslint/eslint-plugin": "4.30.0",
-    "@typescript-eslint/parser": "4.30.0",
     "concurrently": "^7.6.0",
     "downlevel-dts": "^0.7.0",
     "eslint": "7.32.0",
