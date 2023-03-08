@@ -15,7 +15,7 @@
     "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
     "test": "jest",
     "clean": "rimraf dist",
-    "lint": "yarn run eslint -c ../.eslintrc.js \"src/**/*.ts\"",
+    "lint": "eslint -c ../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\""
   },
   "repository": {
@@ -28,18 +28,24 @@
   "dependencies": {
     "@aws-sdk/protocol-http": "^3.267.0",
     "@aws-sdk/types": "^3.267.0",
-    "tslib": "^1.8.0",
-    "re2-wasm": "^1.0.2"
+    "re2-wasm": "^1.0.2",
+    "tslib": "^1.8.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.37",
+    "@typescript-eslint/eslint-plugin": "4.30.0",
+    "@typescript-eslint/parser": "4.30.0",
     "concurrently": "^7.6.0",
     "downlevel-dts": "^0.7.0",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-prettier": "3.4.1",
+    "eslint-plugin-simple-import-sort": "7.0.0",
     "jest": "^26.6.3",
+    "rimraf": "^3.0.2",
     "ts-jest": "^26.5.2",
-    "typescript": "^4.2.2",
-    "rimraf": "^3.0.2"
+    "typescript": "^4.2.2"
   },
   "files": [
     "dist/cjs/**/*.js",
