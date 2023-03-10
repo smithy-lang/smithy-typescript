@@ -123,13 +123,20 @@ final class CommandGenerator implements Runnable {
         writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
 
         String name = symbol.getName();
+
+        StringBuilder additionalDocs = new StringBuilder()
+            .append("\n")
+            .append(getCommandExample(
+                serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()
+            ))
+            .append("\n")
+            .append(getThrownExceptions());
+
         writer.writeShapeDocs(
             operation,
-            shapeDoc -> shapeDoc + "\n"
-            + getCommandExample(serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName())
-            + "\n"
-            + getThrownExceptions()
+            shapeDoc -> shapeDoc + additionalDocs
         );
+
         writer.openBlock(
             "export class $L extends $$Command<$T, $T, $L> {", "}",
             name, inputType, outputType,
@@ -186,12 +193,13 @@ final class CommandGenerator implements Runnable {
             ErrorTrait errorTrait = errorShape.getTrait(ErrorTrait.class).get();
 
             if (doc.isPresent()) {
-                buffer.append(String.format("@throws {@link %s} (%s fault) %s%n",
+                buffer.append(String.format("@throws {@link %s} (%s fault) %s",
                     error.getName(), errorTrait.getValue(), doc.get().getValue()));
             } else {
-                buffer.append(String.format("@throws {@link %s} (%s fault)%n",
+                buffer.append(String.format("@throws {@link %s} (%s fault)",
                     error.getName(), errorTrait.getValue()));
             }
+            buffer.append("\n");
         }
         return buffer.toString();
     }
