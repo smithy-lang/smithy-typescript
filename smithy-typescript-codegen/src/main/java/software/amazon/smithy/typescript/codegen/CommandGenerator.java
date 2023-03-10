@@ -37,7 +37,10 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.DocumentationTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameMap;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
@@ -120,8 +123,20 @@ final class CommandGenerator implements Runnable {
         writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
 
         String name = symbol.getName();
-        writer.writeShapeDocs(operation, shapeDoc -> shapeDoc + "\n" + getCommandExample(serviceSymbol.getName(),
-                configType, name, inputType.getName(), outputType.getName()));
+
+        StringBuilder additionalDocs = new StringBuilder()
+            .append("\n")
+            .append(getCommandExample(
+                serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()
+            ))
+            .append("\n")
+            .append(getThrownExceptions());
+
+        writer.writeShapeDocs(
+            operation,
+            shapeDoc -> shapeDoc + additionalDocs
+        );
+
         writer.openBlock(
             "export class $L extends $$Command<$T, $T, $L> {", "}",
             name, inputType, outputType,
@@ -167,6 +182,26 @@ final class CommandGenerator implements Runnable {
             + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
             + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
             + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+    }
+
+    private String getThrownExceptions() {
+        List<ShapeId> errors = operation.getErrors();
+        StringBuilder buffer = new StringBuilder();
+        for (ShapeId error : errors) {
+            Shape errorShape = model.getShape(error).get();
+            Optional<DocumentationTrait> doc = errorShape.getTrait(DocumentationTrait.class);
+            ErrorTrait errorTrait = errorShape.getTrait(ErrorTrait.class).get();
+
+            if (doc.isPresent()) {
+                buffer.append(String.format("@throws {@link %s} (%s fault)%n %s",
+                    error.getName(), errorTrait.getValue(), doc.get().getValue()));
+            } else {
+                buffer.append(String.format("@throws {@link %s} (%s fault)",
+                    error.getName(), errorTrait.getValue()));
+            }
+            buffer.append("\n\n");
+        }
+        return buffer.toString();
     }
 
     private void generateCommandConstructor() {
