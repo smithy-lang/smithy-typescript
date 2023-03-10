@@ -193,13 +193,13 @@ final class CommandGenerator implements Runnable {
             ErrorTrait errorTrait = errorShape.getTrait(ErrorTrait.class).get();
 
             if (doc.isPresent()) {
-                buffer.append(String.format("@throws {@link %s} (%s fault) %s",
+                buffer.append(String.format("@throws {@link %s} (%s fault)%n %s",
                     error.getName(), errorTrait.getValue(), doc.get().getValue()));
             } else {
                 buffer.append(String.format("@throws {@link %s} (%s fault)",
                     error.getName(), errorTrait.getValue()));
             }
-            buffer.append("\n");
+            buffer.append("\n\n");
         }
         return buffer.toString();
     }
