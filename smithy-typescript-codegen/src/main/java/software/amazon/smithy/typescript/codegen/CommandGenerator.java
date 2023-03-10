@@ -124,7 +124,7 @@ final class CommandGenerator implements Runnable {
 
         String name = symbol.getName();
         writer.writeShapeDocs(
-            operation, 
+            operation,
             shapeDoc -> shapeDoc + "\n"
             + getCommandExample(serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName())
             + "\n"
@@ -186,10 +186,10 @@ final class CommandGenerator implements Runnable {
             ErrorTrait errorTrait = errorShape.getTrait(ErrorTrait.class).get();
 
             if (doc.isPresent()) {
-                buffer.append(String.format("@throws {@link %s} (%s fault) %s\n", 
+                buffer.append(String.format("@throws {@link %s} (%s fault) %s%n",
                     error.getName(), errorTrait.getValue(), doc.get().getValue()));
             } else {
-                buffer.append(String.format("@throws {@link %s} (%s fault)\n", 
+                buffer.append(String.format("@throws {@link %s} (%s fault)%n",
                     error.getName(), errorTrait.getValue()));
             }
         }
