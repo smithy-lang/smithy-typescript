@@ -1,5 +1,4 @@
 {
-  "extends": ["../../typedoc.client.json"],
   "entryPoints": ["src/index.ts"],
   "out": "docs",
   "readme": "README.md"
