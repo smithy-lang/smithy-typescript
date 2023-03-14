@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.EnumValueTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -535,6 +536,19 @@ final class StructuredMemberWriter {
         if (trait instanceof RequiredTrait) {
             writer.addImport("RequiredValidator", "__RequiredValidator", "@aws-smithy/server-common");
             writer.write("new __RequiredValidator(),");
+        } else if (trait instanceof EnumTrait && !trait.isSynthetic()) {
+            writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
+            writer.openBlock("new __EnumValidator([", "]),", () -> {
+                for (String e : ((EnumTrait) trait).getEnumDefinitionValues()) {
+                    writer.write("$S,", e);
+                }
+                writer.write("], [");
+                for (EnumDefinition enumDefinition : ((EnumTrait) trait).getValues()) {
+                    if (!enumDefinition.hasTag("internal")) {
+                        writer.write("$S, ", enumDefinition.getValue());
+                    }
+                }
+            });
         } else if (trait instanceof LengthTrait) {
             LengthTrait lengthTrait = (LengthTrait) trait;
             writer.addImport("LengthValidator", "__LengthValidator", "@aws-smithy/server-common");
