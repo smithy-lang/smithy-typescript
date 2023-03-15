@@ -1,17 +1,27 @@
 # server-common Changelog
 
+## 1.0.0-alpha.9 (2023-03-16)
+
+### Features
+
+- Updated validation messages to remove user input values and internal enum values. ([#695](https://github.com/awslabs/smithy-typescript/pull/695), [#704](https://github.com/awslabs/smithy-typescript/pull/704), [#713](https://github.com/awslabs/smithy-typescript/pull/713))
+
+### Other
+
+- Upgraded to Yarn 3. ([#705](https://github.com/awslabs/smithy-typescript/pull/705))
+
 ## 1.0.0-alpha.8 (2023-02-09)
 
 ### Features
 
-- Generate ES module distributions ([#685](https://github.com/awslabs/smithy-typescript/pull/685))
-- Use re2 `test()` instead of `match()` ([#680](https://github.com/awslabs/smithy-typescript/pull/680))
+- Generated ES module distributions. ([#685](https://github.com/awslabs/smithy-typescript/pull/685))
+- Used re2 `test()` instead of `match()`. ([#680](https://github.com/awslabs/smithy-typescript/pull/680))
 
 ## 1.0.0-alpha.7 (2023-01-25)
 
 ### Features
 
-- Add intEnum validator. ([#654](https://github.com/awslabs/smithy-typescript/pull/654))
+- Added intEnum validator. ([#654](https://github.com/awslabs/smithy-typescript/pull/654))
 
 ## 1.0.0-alpha.6 (2022-08-22)
 
