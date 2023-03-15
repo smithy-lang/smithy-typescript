@@ -1,10 +1,16 @@
 # server-apigateway Changelog
 
+## 1.0.0-alpha.9 (2023-03-16)
+
+### Other
+
+- Upgraded to Yarn 3. ([#705](https://github.com/awslabs/smithy-typescript/pull/705))
+
 ## 1.0.0-alpha.8 (2023-02-09)
 
 ### Features
 
-- Generate ES module distributions ([#686](https://github.com/awslabs/smithy-typescript/pull/686))
+- Generated ES module distributions. ([#686](https://github.com/awslabs/smithy-typescript/pull/686))
 
 ## 1.0.0-alpha.7 (2023-01-25)
 
