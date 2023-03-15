@@ -35,7 +35,7 @@ describe("sensitive validation", () => {
 
   describe("strips the failure value from the resultant validation failure", () => {
     it("with enums", () => {
-      expect(sensitize(new EnumValidator(["apple", "banana", "orange"]), "pear").failureValue).toBeNull();
+      expect(sensitize(new EnumValidator(["apple", "banana", "orange"], ["apple"]), "pear").failureValue).toBeNull();
     });
     it("with integer enums", () => {
       expect(sensitize(new IntegerEnumValidator([1, 2, 3]), 0).failureValue).toBeNull();
@@ -53,7 +53,7 @@ describe("sensitive validation", () => {
 });
 
 describe("enum validation", () => {
-  const enumValidator = new EnumValidator(["apple", "banana", "orange"]);
+  const enumValidator = new EnumValidator(["apple", "banana", "orange"], ["apple", "banana"]);
 
   it("does not fail when the enum value is found", () => {
     expect(enumValidator.validate("apple", "fruit")).toBeNull();
@@ -62,7 +62,7 @@ describe("enum validation", () => {
   it("fails when the enum value is not found", () => {
     expect(enumValidator.validate("kiwi", "fruit")).toEqual({
       constraintType: "enum",
-      constraintValues: ["apple", "banana", "orange"],
+      constraintValues: ["apple", "banana"],
       path: "fruit",
       failureValue: "kiwi",
     });

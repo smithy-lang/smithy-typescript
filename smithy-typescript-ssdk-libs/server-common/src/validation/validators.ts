@@ -153,9 +153,11 @@ export interface SingleConstraintValidator<T, F> {
 
 export class EnumValidator implements SingleConstraintValidator<string, EnumValidationFailure> {
   private readonly allowedValues: string[];
+  private readonly nonInternalValues: string[];
 
-  constructor(allowedValues: readonly string[]) {
+  constructor(allowedValues: readonly string[], nonInternalValues: readonly string[]) {
     this.allowedValues = allowedValues.slice();
+    this.nonInternalValues = nonInternalValues.slice();
   }
 
   validate(input: string | undefined | null, path: string): EnumValidationFailure | null {
@@ -166,7 +168,7 @@ export class EnumValidator implements SingleConstraintValidator<string, EnumVali
     if (this.allowedValues.indexOf(input) < 0) {
       return {
         constraintType: "enum",
-        constraintValues: this.allowedValues.slice(),
+        constraintValues: this.nonInternalValues.slice(),
         path: path,
         failureValue: input,
       };
