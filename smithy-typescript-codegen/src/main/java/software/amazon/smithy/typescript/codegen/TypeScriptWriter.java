@@ -157,8 +157,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
                     // Escape valid '{' and '}'
-                    docs = docs
-                        .replace("{", "\\{")
+                    docs = docs.replace("{", "\\{")
                         .replace("}", "\\}");
                     docs = preprocessor.apply(docs);
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
@@ -196,8 +195,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
                     // Escape valid '{' and '}'
-                    docs = docs
-                        .replace("{", "\\{")
+                    docs = docs.replace("{", "\\{")
                         .replace("}", "\\}");
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
                         docs = "@deprecated\n\n" + docs;

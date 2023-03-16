@@ -205,8 +205,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandConstructor() {
-        writer
-            .writeDocs("@public")
+        writer.writeDocs("@public")
             .openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
                 // The constructor can be intercepted and changed.
                 writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
@@ -416,28 +415,28 @@ final class CommandGenerator implements Runnable {
 
     private void writeSerde() {
         writer.write("")
-                .writeDocs("@internal")
-                .write("private serialize(")
-                .indent()
-                    .write("input: $T,", inputType)
-                    .write("context: $L", CodegenUtils.getOperationSerializerContextType(writer, model, operation))
-                .dedent()
-                .openBlock(
-                        "): Promise<$T> {", "}",
-                        applicationProtocol.getRequestType(),
-                        () -> writeSerdeDispatcher(true)
-                );
+            .writeDocs("@internal")
+            .write("private serialize(")
+            .indent()
+                .write("input: $T,", inputType)
+                .write("context: $L", CodegenUtils.getOperationSerializerContextType(writer, model, operation))
+            .dedent()
+            .openBlock(
+                    "): Promise<$T> {", "}",
+                    applicationProtocol.getRequestType(),
+                    () -> writeSerdeDispatcher(true)
+            );
 
         writer.write("")
-                .writeDocs("@internal")
-                .write("private deserialize(")
-                .indent()
-                    .write("output: $T,", applicationProtocol.getResponseType())
-                    .write("context: $L",
-                            CodegenUtils.getOperationDeserializerContextType(settings, writer, model, operation))
-                .dedent()
-                .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
-                .write("");
+            .writeDocs("@internal")
+            .write("private deserialize(")
+            .indent()
+                .write("output: $T,", applicationProtocol.getResponseType())
+                .write("context: $L",
+                        CodegenUtils.getOperationDeserializerContextType(settings, writer, model, operation))
+            .dedent()
+            .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
+            .write("");
     }
 
     private void writeSerdeDispatcher(boolean isInput) {

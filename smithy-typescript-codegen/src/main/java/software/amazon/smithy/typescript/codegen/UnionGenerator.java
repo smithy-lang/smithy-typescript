@@ -174,8 +174,7 @@ final class UnionGenerator implements Runnable {
         });
 
         // Write out the namespace that contains each variant and visitor.
-        writer
-            .writeDocs("@public")
+        writer.writeDocs("@public")
             .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
                 writeUnionMemberInterfaces();
                 writeVisitorType();

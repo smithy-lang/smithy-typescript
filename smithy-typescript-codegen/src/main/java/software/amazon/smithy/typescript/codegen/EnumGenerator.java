@@ -81,15 +81,13 @@ final class EnumGenerator implements Runnable {
     // Unnamed enums generate a union of string literals.
     private void generateUnnamedEnum() {
         String variants = TypeScriptUtils.getEnumVariants(enumTrait.getEnumDefinitionValues());
-        writer
-            .writeDocs("@public")
+        writer.writeDocs("@public")
             .write("export type $L = $L", symbol.getName(), variants);
     }
 
     // Named enums generate an actual enum type.
     private void generateNamedEnum() {
-        writer
-            .writeDocs("@public")
+        writer.writeDocs("@public")
             .openBlock("export enum $L {", "}", symbol.getName(), () -> {
                 // Sort the named values to ensure a stable order and sane diffs.
                 // TODO: Should we just sort these in the trait itself?

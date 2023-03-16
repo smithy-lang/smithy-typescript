@@ -229,8 +229,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                     "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
         }
 
-        writer
-            .writeDocs("@public")
+        writer.writeDocs("@public")
             .openBlock("export interface ClientDefaults\n"
                          + "  extends Partial<__SmithyResolvedConfiguration<$T>> {", "}",
                 applicationProtocol.getOptionsType(), () -> {
