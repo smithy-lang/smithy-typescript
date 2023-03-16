@@ -132,6 +132,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                 .sorted(Comparator.comparing(Symbol::getName))
                 .collect(Collectors.toList());
 
+        writer.writeDocs("@public");
         writer.write("export type $L = ", typeName);
         writer.indent();
         // If we have less symbols than operations, at least one doesn't have a type, so add the default.
@@ -154,6 +155,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
 
         generateClientDefaults();
 
+        writer.writeDocs("@public");
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
         writer.write("type $LType = Partial<__SmithyConfiguration<$T>>", configType,
@@ -183,13 +185,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.dedent();
         }
 
-        writer.writeDocs(String.format("The configuration interface of %s class constructor that set the region, "
-                + "credentials and other options.", symbol.getName()));
+        writer.writeDocs(String.format("%s The configuration interface of %s class constructor that set the region, "
+                + "credentials and other options.", "@public\n\n", symbol.getName()));
         writer.write("export interface $1L extends $1LType {}", configType);
 
         // Generate the corresponding "Resolved" configuration type to account for
         // each "Input" configuration type.
         writer.write("");
+        writer.writeDocs("@public");
         writer.write("type $LType = __SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
         writer.write("  & Required<ClientDefaults>");
@@ -212,9 +215,9 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.dedent();
         }
 
-        writer.writeDocs(String.format("The resolved configuration interface of %s class. This is resolved and"
-                + " normalized from the {@link %s | constructor configuration interface}.", symbol.getName(),
-                        configType));
+        writer.writeDocs(String.format("%s The resolved configuration interface of %s class. This is resolved and"
+                + " normalized from the {@link %s | constructor configuration interface}.", "@public\n\n",
+                symbol.getName(), configType));
         writer.write("export interface $1L extends $1LType {}", resolvedConfigType);
 
         writer.popState();
@@ -226,7 +229,9 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                     "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
         }
 
-        writer.openBlock("export interface ClientDefaults\n"
+        writer
+            .writeDocs("@public")
+            .openBlock("export interface ClientDefaults\n"
                          + "  extends Partial<__SmithyResolvedConfiguration<$T>> {", "}",
                 applicationProtocol.getOptionsType(), () -> {
             writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
@@ -238,9 +243,10 @@ final class ServiceBareBonesClientGenerator implements Runnable {
 
             writer.addImport("Checksum", "__Checksum", "@aws-sdk/types");
             writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@aws-sdk/types");
-            writer.writeDocs("A constructor for a class implementing the {@link __Checksum} interface \n"
-                             + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
-                             + "@internal");
+            writer.writeDocs("A constructor for a class implementing the {@link @aws-sdk/types#ChecksumConstructor} "
+                            + "interface \n"
+                            + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
+                            + "@internal");
             writer.write("sha256?: __ChecksumConstructor | __HashConstructor;\n");
 
             writer.addImport("UrlParser", "__UrlParser", "@aws-sdk/types");

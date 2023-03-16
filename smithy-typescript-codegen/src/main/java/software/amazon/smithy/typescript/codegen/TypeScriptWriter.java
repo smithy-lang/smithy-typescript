@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
+import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -155,10 +156,15 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return shape.getTrait(DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
+                    // Escape valid '{' and '}'
+                    docs = docs
+                        .replace("{", "\\{")
+                        .replace("}", "\\}");
                     docs = preprocessor.apply(docs);
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         docs = "@deprecated\n\n" + docs;
                     }
+                    docs = writeReleaseTag(shape, docs);
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -171,7 +177,11 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @return Returns true if docs were written.
      */
     boolean writeShapeDocs(Shape shape) {
-        return writeShapeDocs(shape, (docs) -> docs);
+        boolean didWrite = writeShapeDocs(shape, (docs) -> docs);
+        if (!didWrite) {
+            writeDocs("@public");
+        }
+        return didWrite;
     }
 
     /**
@@ -185,9 +195,14 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return member.getMemberTrait(model, DocumentationTrait.class)
                 .map(DocumentationTrait::getValue)
                 .map(docs -> {
+                    // Escape valid '{' and '}'
+                    docs = docs
+                        .replace("{", "\\{")
+                        .replace("}", "\\}");
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
                         docs = "@deprecated\n\n" + docs;
                     }
+                    writeReleaseTag(member, docs);
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -197,6 +212,15 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class).isPresent()
                // don't consider deprecated prelude shapes (like PrimitiveBoolean)
                && !Prelude.isPreludeShape(member.getTarget());
+    }
+
+    private String writeReleaseTag(Shape shape, String docs) {
+        if (shape.getTrait(InternalTrait.class).isPresent()) {
+            docs = "@internal\n" + docs;
+        } else {
+            docs = "@public\n" + docs;
+        }
+        return docs;
     }
 
     @Override

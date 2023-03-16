@@ -68,7 +68,7 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
                                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
                             writer.addImport("ServiceExceptionOptions", "__ServiceExceptionOptions",
                                     TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-                            writer.writeDocs("Base exception class for all service exceptions from "
+                            writer.writeDocs("@public\n\nBase exception class for all service exceptions from "
                                     + serviceName + " service.");
                             writer.openBlock("export class $L extends __ServiceException {", serviceExceptionName);
                             writer.writeDocs("@internal");

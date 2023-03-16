@@ -174,14 +174,16 @@ final class UnionGenerator implements Runnable {
         });
 
         // Write out the namespace that contains each variant and visitor.
-        writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-            writeUnionMemberInterfaces();
-            writeVisitorType();
-            writeVisitorFunction();
-            if (includeValidation) {
-                writeValidate();
-            }
-        });
+        writer
+            .writeDocs("@public")
+            .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+                writeUnionMemberInterfaces();
+                writeVisitorType();
+                writeVisitorFunction();
+                if (includeValidation) {
+                    writeValidate();
+                }
+            });
         writeFilterSensitiveLog(symbol.getName());
     }
 

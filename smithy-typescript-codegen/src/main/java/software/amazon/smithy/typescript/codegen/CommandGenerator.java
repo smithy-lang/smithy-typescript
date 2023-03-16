@@ -205,13 +205,15 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandConstructor() {
-        writer.openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
-            // The constructor can be intercepted and changed.
-            writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
-                    .pushState(COMMAND_CONSTRUCTOR_SECTION)
-                    .write("super();")
-                    .popState()
-                    .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
+        writer
+            .writeDocs("@public")
+            .openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
+                // The constructor can be intercepted and changed.
+                writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
+                        .pushState(COMMAND_CONSTRUCTOR_SECTION)
+                        .write("super();")
+                        .popState()
+                        .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
         });
     }
 
@@ -356,7 +358,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeInputType(String typeName, Optional<StructureShape> inputShape, String commandName) {
-        writer.writeDocs("The input for {@link " + commandName + "}.");
+        writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
@@ -373,7 +375,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
-        writer.writeDocs("The output of {@link " + commandName + "}.");
+        writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         // Output types should always be MetadataBearers, possibly in addition
         // to a defined output shape.
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
@@ -414,6 +416,7 @@ final class CommandGenerator implements Runnable {
 
     private void writeSerde() {
         writer.write("")
+                .writeDocs("@internal")
                 .write("private serialize(")
                 .indent()
                     .write("input: $T,", inputType)
@@ -426,6 +429,7 @@ final class CommandGenerator implements Runnable {
                 );
 
         writer.write("")
+                .writeDocs("@internal")
                 .write("private deserialize(")
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
