@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -36,12 +37,14 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  *
  * Renders structures as interfaces.
  *
- * <p>A namespace is created with the same name as the structure to
+ * <p>
+ * A namespace is created with the same name as the structure to
  * provide helper functionality for checking if a given value is
  * known to be of the same type as the structure. This will be
  * even more useful if/when inheritance is added to Smithy.
  *
- * <p>Note that the {@code required} trait on structures is used to
+ * <p>
+ * Note that the {@code required} trait on structures is used to
  * determine whether or not a generated TypeScript interface uses
  * required members. This is typically not recommended in other languages
  * since it's documented as backward-compatible for a model to migrate a
@@ -55,7 +58,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * deserializers will need to set previously required properties to
  * undefined too.
  *
- * <p>The generator will explicitly state that a required property can
+ * <p>
+ * The generator will explicitly state that a required property can
  * be set to {@code undefined}. This makes it clear that undefined checks
  * need to be made when using {@code --strictNullChecks}, but has no
  * effect otherwise.
@@ -69,6 +73,7 @@ final class StructureGenerator implements Runnable {
     private final StructureShape shape;
     private final boolean includeValidation;
     private final RequiredMemberMode requiredMemberMode;
+    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
 
     /**
      * sets 'includeValidation' to 'false' and requiredMemberMode
@@ -76,15 +81,15 @@ final class StructureGenerator implements Runnable {
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
         this(model, symbolProvider, writer, shape, false,
-            RequiredMemberMode.NULLABLE);
+                RequiredMemberMode.NULLABLE);
     }
 
     StructureGenerator(Model model,
-                       SymbolProvider symbolProvider,
-                       TypeScriptWriter writer,
-                       StructureShape shape,
-                       boolean includeValidation,
-                       RequiredMemberMode requiredMemberMode) {
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer,
+            StructureShape shape,
+            boolean includeValidation,
+            RequiredMemberMode requiredMemberMode) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
@@ -105,20 +110,24 @@ final class StructureGenerator implements Runnable {
     /**
      * Renders a normal, non-error structure.
      *
-     * <p>For example, given the following Smithy model:
+     * <p>
+     * For example, given the following Smithy model:
      *
-     * <pre>{@code
+     * <pre>
+     * {@code
      * namespace smithy.example
      *
      * structure Person {
-     *     @required
+     *     &#64;required
      *     name: String,
-     *     @range(min: 1)
+     *     &#64;range(min: 1)
      *     age: Integer,
      * }
-     * }</pre>
+     * }
+     * </pre>
      *
-     * <p>The following TypeScript is rendered:
+     * <p>
+     * The following TypeScript is rendered:
      *
      * <pre>{@code
      * export interface Person {
@@ -129,7 +138,8 @@ final class StructureGenerator implements Runnable {
      * export const PersonFilterSensitiveLog = (obj: Person): any => ({...obj});
      * }</pre>
      *
-     * <p>If validation is enabled, it generates the following:
+     * <p>
+     * If validation is enabled, it generates the following:
      *
      * <pre>{@code
      * export interface Person {
@@ -174,15 +184,17 @@ final class StructureGenerator implements Runnable {
     private void renderStructureNamespace(StructuredMemberWriter structuredMemberWriter, boolean includeValidation) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         String objectParam = "obj";
-        writer.writeDocs("@internal");
-        writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => ({", "})",
-            symbol.getName(),
-            objectParam,
-            symbol.getName(),
-            () -> {
-                structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
-            }
-        );
+
+        if (sensitiveDataFinder.findsSensitiveData(shape, model)) {
+            writer.writeDocs("@internal");
+            writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => ({", "})",
+                    symbol.getName(),
+                    objectParam,
+                    symbol.getName(),
+                    () -> {
+                        structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
+                    });
+        }
 
         if (!includeValidation) {
             return;
@@ -212,19 +224,23 @@ final class StructureGenerator implements Runnable {
      * (ServiceException in case of server SDK), and add the appropriate fault
      * property.
      *
-     * <p>Given the following Smithy structure:
+     * <p>
+     * Given the following Smithy structure:
      *
-     * <pre>{@code
+     * <pre>
+     * {@code
      * namespace smithy.example
      *
-     * @error("client")
+     * &#64;error("client")
      * structure NoSuchResource {
-     *     @required
+     *     &#64;required
      *     resourceType: String
      * }
-     * }</pre>
+     * }
+     * </pre>
      *
-     * <p>The following TypeScript is generated:
+     * <p>
+     * The following TypeScript is generated:
      *
      * <pre>{@code
      * import { ExceptionOptionType as __ExceptionOptionType } from "@aws-sdk/smithy-client";
@@ -262,7 +278,8 @@ final class StructureGenerator implements Runnable {
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
                 shape.getAllMembers().values(), this.requiredMemberMode);
-        // since any error interface must extend from JavaScript Error interface, message member is already
+        // since any error interface must extend from JavaScript Error interface,
+        // message member is already
         // required in the JavaScript Error interface
         structuredMemberWriter.skipMembers.add("message");
         structuredMemberWriter.writeMembers(writer, shape);

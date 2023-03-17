@@ -46,6 +46,7 @@ import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameM
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -73,6 +74,7 @@ final class CommandGenerator implements Runnable {
     private final Symbol outputType;
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
+    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
 
     CommandGenerator(
             TypeScriptSettings settings,
@@ -316,20 +318,25 @@ final class CommandGenerator implements Runnable {
                 writer.openBlock("inputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getInput(operation),
                         input -> {
-                            Symbol inputSymbol = symbolProvider.toSymbol(input);
-                            String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
-                            writer.addImport(
-                                filterFunctionName,
-                                filterFunctionName,
-                                inputSymbol.getNamespace()
-                            );
-                            writer.writeInline(filterFunctionName);
+                            if (sensitiveDataFinder.findsSensitiveData(input, model)) {
+                                Symbol inputSymbol = symbolProvider.toSymbol(input);
+                                String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
+                                writer.addImport(
+                                    filterFunctionName,
+                                    filterFunctionName,
+                                    inputSymbol.getNamespace()
+                                );
+                                writer.writeInline(filterFunctionName);
+                            } else {
+                                writer.writeInline("(_: any) => _");
+                            }
                         },
-                        () -> writer.writeInline("(input: any) => input"));
+                        () -> writer.writeInline("(_: any) => _"));
                 });
                 writer.openBlock("outputFilterSensitiveLog: ", ",", () -> {
                     OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
                         output -> {
+                            if (sensitiveDataFinder.findsSensitiveData(output, model)) {
                             Symbol outputSymbol = symbolProvider.toSymbol(output);
                             String filterFunctionName = outputSymbol.getName() + "FilterSensitiveLog";
                             writer.addImport(
@@ -338,8 +345,11 @@ final class CommandGenerator implements Runnable {
                                 outputSymbol.getNamespace()
                             );
                             writer.writeInline(filterFunctionName);
+                            } else {
+                                writer.writeInline("(_: any) => _");
+                            }
                         },
-                        () -> writer.writeInline("(output: any) => output"));
+                        () -> writer.writeInline("(_: any) => _"));
                 });
             });
             writer.write("const { requestHandler } = configuration;");
