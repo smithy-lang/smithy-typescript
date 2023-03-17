@@ -34,9 +34,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-smithy/server-apigateway@workspace:server-apigateway":
+"@aws-smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway":
   version: 0.0.0-use.local
-  resolution: "@aws-smithy/server-apigateway@workspace:server-apigateway"
+  resolution: "@aws-smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway"
   dependencies:
     "@aws-sdk/protocol-http": ^3.267.0
     "@aws-sdk/types": ^3.267.0
@@ -58,9 +58,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@aws-smithy/server-common@workspace:server-common":
+"@aws-smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common":
   version: 0.0.0-use.local
-  resolution: "@aws-smithy/server-common@workspace:server-common"
+  resolution: "@aws-smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common"
   dependencies:
     "@aws-sdk/protocol-http": ^3.267.0
     "@aws-sdk/types": ^3.267.0
@@ -83,9 +83,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@aws-smithy/server-node@workspace:server-node":
+"@aws-smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node":
   version: 0.0.0-use.local
-  resolution: "@aws-smithy/server-node@workspace:server-node"
+  resolution: "@aws-smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node"
   dependencies:
     "@aws-sdk/protocol-http": ^3.267.0
     "@aws-sdk/types": ^3.267.0
