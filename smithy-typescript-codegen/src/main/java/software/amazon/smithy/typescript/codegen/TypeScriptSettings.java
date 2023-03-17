@@ -57,6 +57,7 @@ public final class TypeScriptSettings {
     private static final String PROTOCOL = "protocol";
     private static final String PRIVATE = "private";
     private static final String PACKAGE_MANAGER = "packageManager";
+    private static final String CREATE_DEFAULT_README = "createDefaultReadme";
 
     private String packageName;
     private String packageDescription = "";
@@ -72,6 +73,7 @@ public final class TypeScriptSettings {
     private RequiredMemberMode requiredMemberMode =
         RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
+    private boolean createDefaultReadme = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -103,6 +105,8 @@ public final class TypeScriptSettings {
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
+        settings.setCreateDefaultReadme(
+                config.getBooleanMember(CREATE_DEFAULT_README).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
                 config.getStringMember(PACKAGE_MANAGER)
                     .map(s -> PackageManager.fromString(s.getValue()))
@@ -259,6 +263,14 @@ public final class TypeScriptSettings {
 
     public void setPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
+    }
+
+    public boolean createDefaultReadme() {
+        return createDefaultReadme;
+    }
+
+    public void setCreateDefaultReadme(boolean createDefaultReadme) {
+        this.createDefaultReadme = createDefaultReadme;
     }
 
     /**
@@ -427,11 +439,12 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE)),
+                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
+                              CREATE_DEFAULT_README)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
-                              DISABLE_DEFAULT_VALIDATION));
+                              DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
