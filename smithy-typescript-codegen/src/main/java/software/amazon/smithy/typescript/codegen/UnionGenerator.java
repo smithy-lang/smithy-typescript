@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -134,6 +135,7 @@ final class UnionGenerator implements Runnable {
     private final UnionShape shape;
     private final Map<String, String> variantMap;
     private final boolean includeValidation;
+    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
@@ -243,27 +245,29 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeFilterSensitiveLog(String namespace) {
-        String objectParam = "obj";
-        writer.writeDocs("@internal");
-        writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
-            namespace,
-            objectParam, symbol.getName(),
-            () -> {
-                for (MemberShape member : shape.getAllMembers().values()) {
-                    String memberName = symbolProvider.toMemberName(member);
-                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                            model, symbolProvider, shape.getAllMembers().values());
-                    writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
-                        objectParam, memberName, () -> {
-                            String memberParam = String.format("%s.%s", objectParam, memberName);
-                            structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member, memberParam);
-                        }
-                    );
+        if (sensitiveDataFinder.findsSensitiveData(shape, model)) {
+            String objectParam = "obj";
+            writer.writeDocs("@internal");
+            writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
+                namespace,
+                objectParam, symbol.getName(),
+                () -> {
+                    for (MemberShape member : shape.getAllMembers().values()) {
+                        String memberName = symbolProvider.toMemberName(member);
+                        StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                                model, symbolProvider, shape.getAllMembers().values());
+                        writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
+                            objectParam, memberName, () -> {
+                                String memberParam = String.format("%s.%s", objectParam, memberName);
+                                structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member, memberParam);
+                            }
+                        );
+                    }
+                    writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
+                        objectParam);
                 }
-                writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
-                    objectParam);
-            }
-        );
+            );
+        }
     }
 
     private void writeValidate() {
