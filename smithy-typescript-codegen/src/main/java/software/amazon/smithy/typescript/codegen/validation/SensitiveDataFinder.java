@@ -17,12 +17,12 @@ package software.amazon.smithy.typescript.codegen.validation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 
 public class SensitiveDataFinder {
@@ -44,34 +44,20 @@ public class SensitiveDataFinder {
             return true;
         }
 
-        if (shape instanceof MemberShape) {
-            MemberShape memberShape = (MemberShape) shape;
-            if (memberShape.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                cache.put(shape, true);
-                return true;
-            }
-            Shape memberTarget = model.expectShape(memberShape.getTarget());
-            return findRecursive(memberTarget, model);
-        }
-
         if (shape.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             cache.put(shape, true);
             return true;
-        } else if (shape instanceof SimpleShape) {
-            cache.put(shape, false);
-            return false;
-        } else if (shape.isStructureShape() || shape.isUnionShape()) {
-            boolean found = shape.getAllMembers()
-                    .values()
-                    .stream()
-                    .anyMatch(m -> findRecursive(m, model));
+        }
 
-            cache.put(shape, found);
-            return found;
-        } else if (shape instanceof CollectionShape) {
-            MemberShape collectionMember = ((CollectionShape) shape).getMember();
-            return findRecursive(collectionMember, model);
-        } else if (shape instanceof MapShape) {
+        Selector selector = Selector.parse("[id = '" + shape.getId() + "']" + " ~> [trait|sensitive]");
+        Set<Shape> matches = selector.select(model);
+        boolean found = !matches.isEmpty();
+        if (found) {
+            cache.put(shape, true);
+            return true;
+        }
+
+        if (shape instanceof MapShape) {
             MemberShape keyMember = ((MapShape) shape).getKey();
             MemberShape valMember = ((MapShape) shape).getValue();
             return findRecursive(keyMember, model) || findRecursive(valMember, model);
