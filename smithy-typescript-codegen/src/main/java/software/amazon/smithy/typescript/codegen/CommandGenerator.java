@@ -337,14 +337,14 @@ final class CommandGenerator implements Runnable {
                     OptionalUtils.ifPresentOrElse(operationIndex.getOutput(operation),
                         output -> {
                             if (sensitiveDataFinder.findsSensitiveData(output, model)) {
-                            Symbol outputSymbol = symbolProvider.toSymbol(output);
-                            String filterFunctionName = outputSymbol.getName() + "FilterSensitiveLog";
-                            writer.addImport(
-                                filterFunctionName,
-                                filterFunctionName,
-                                outputSymbol.getNamespace()
-                            );
-                            writer.writeInline(filterFunctionName);
+                                Symbol outputSymbol = symbolProvider.toSymbol(output);
+                                String filterFunctionName = outputSymbol.getName() + "FilterSensitiveLog";
+                                writer.addImport(
+                                    filterFunctionName,
+                                    filterFunctionName,
+                                    outputSymbol.getNamespace()
+                                );
+                                writer.writeInline(filterFunctionName);
                             } else {
                                 writer.writeInline("(_: any) => _");
                             }
