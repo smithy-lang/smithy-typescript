@@ -58,10 +58,10 @@ final class PackageJsonGenerator {
         // These are currently only generated for clients, but they may be needed for ssdk as well.
         if (settings.generateClient()) {
             // Add the Node vs Browser hook.
-            node = node.withMember("browser", Node.objectNode()
+            node = node.withMember("browser", node.getObjectMember("browser").orElse(Node.objectNode())
                     .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.browser"));
             // Add the ReactNative hook.
-            node = node.withMember("react-native", Node.objectNode()
+            node = node.withMember("react-native", node.getObjectMember("react-native").orElse(Node.objectNode())
                     .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.native"));
         }
 
