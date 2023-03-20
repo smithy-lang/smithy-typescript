@@ -24,6 +24,7 @@ import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 
 public class SensitiveDataFinder {
     private Map<Shape, Boolean> cache = new HashMap<>();
@@ -39,18 +40,23 @@ public class SensitiveDataFinder {
             return cache.get(shape);
         }
 
-        if (shape.hasTrait(SensitiveTrait.class)) {
+        if (shape.hasTrait(SensitiveTrait.class)
+                || shape.hasTrait(StreamingTrait.class)) {
             cache.put(shape, true);
             return true;
         }
 
-        if (shape.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+        if (shape.getMemberTrait(model, SensitiveTrait.class).isPresent()
+                || shape.getMemberTrait(model, StreamingTrait.class).isPresent()) {
             cache.put(shape, true);
             return true;
         }
 
-        Selector selector = Selector.parse("[id = '" + shape.getId() + "']" + " ~> [trait|sensitive]");
-        Set<Shape> matches = selector.select(model);
+        Selector sensitiveSelector = Selector.parse("[id = '" + shape.getId() + "']" + " ~> [trait|sensitive]");
+        Selector streamingSelector = Selector.parse("[id = '" + shape.getId() + "']" + " ~> [trait|streaming]");
+        Set<Shape> matches = sensitiveSelector.select(model);
+        matches.addAll(streamingSelector.select(model));
+
         boolean found = !matches.isEmpty();
         if (found) {
             cache.put(shape, true);
