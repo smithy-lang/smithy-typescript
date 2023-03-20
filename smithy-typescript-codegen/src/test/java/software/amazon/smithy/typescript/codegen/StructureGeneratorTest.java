@@ -252,50 +252,9 @@ public class StructureGeneratorTest {
     }
 
     @Test
-    public void callsFilterInUnionWithoutSensitiveData() {
-        testStructureCodegen("test-union-without-sensitive-data.smithy",
-                "export const TestUnionFilterSensitiveLog = (obj: TestUnion): any => {\n"
-                        + "  if (obj.fooString !== undefined) return {fooString:\n"
-                        + "    obj.fooString\n"
-                        + "  };\n"
-                        + "  if (obj.barString !== undefined) return {barString:\n"
-                        + "    obj.barString\n"
-                        + "  };\n"
-                        + "  if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
-                        + "}\n");
-    }
-
-    @Test
-    public void callsFilterInUnionWithStructure() {
-        testStructureCodegen("test-union-with-structure.smithy",
-                "export const TestUnionFilterSensitiveLog = (obj: TestUnion): any => {\n"
-                        + "  if (obj.fooUser !== undefined) return {fooUser:\n"
-                        + "    UserFilterSensitiveLog(obj.fooUser)\n"
-                        + "  };\n"
-                        + "  if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
-                        + "}\n");
-    }
-
-    @Test
-    public void callsFilterInUnionWithList() {
-        testStructureCodegen("test-union-with-list.smithy",
-                "export const TestUnionFilterSensitiveLog = (obj: TestUnion): any => {\n"
-                        + "  if (obj.list !== undefined) return {list:\n"
-                        + "    obj.list\n"
-                        + "  };\n"
-                        + "  if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
-                        + "}\n");
-    }
-
-    @Test
-    public void callsFilterInUnionWithMap() {
-        testStructureCodegen("test-union-with-map.smithy",
-                "export const TestUnionFilterSensitiveLog = (obj: TestUnion): any => {\n"
-                        + "  if (obj.map !== undefined) return {map:\n"
-                        + "    obj.map\n"
-                        + "  };\n"
-                        + "  if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};\n"
-                        + "}\n");
+    public void skipsFilterInUnionWithoutSensitiveData() {
+        testStructureCodegenExcludes("test-union-without-sensitive-data.smithy",
+                "TestUnionFilterSensitiveLog");
     }
 
     @Test
