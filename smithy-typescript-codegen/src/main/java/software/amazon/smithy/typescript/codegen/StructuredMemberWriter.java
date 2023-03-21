@@ -68,7 +68,7 @@ final class StructuredMemberWriter {
     boolean noDocs;
     RequiredMemberMode requiredMemberMode;
     final Set<String> skipMembers = new HashSet<>();
-    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
+    private final SensitiveDataFinder sensitiveDataFinder;
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
         this(model, symbolProvider, members, RequiredMemberMode.NULLABLE);
@@ -76,10 +76,20 @@ final class StructuredMemberWriter {
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members,
             RequiredMemberMode requiredMemberMode) {
+        this(model, symbolProvider, members, requiredMemberMode, new SensitiveDataFinder());
+    }
+
+    StructuredMemberWriter(
+            Model model,
+            SymbolProvider symbolProvider,
+            Collection<MemberShape> members,
+            RequiredMemberMode requiredMemberMode,
+            SensitiveDataFinder sensitiveDataFinder) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = new LinkedHashSet<>(members);
         this.requiredMemberMode = requiredMemberMode;
+        this.sensitiveDataFinder = sensitiveDataFinder;
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {

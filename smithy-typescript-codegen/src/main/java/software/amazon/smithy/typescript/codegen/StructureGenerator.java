@@ -174,7 +174,12 @@ final class StructureGenerator implements Runnable {
         }
 
         StructuredMemberWriter config = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values(), this.requiredMemberMode);
+            model, 
+            symbolProvider, 
+            shape.getAllMembers().values(), 
+            this.requiredMemberMode,
+            sensitiveDataFinder
+        );
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
@@ -277,7 +282,7 @@ final class StructureGenerator implements Runnable {
             HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(model, symbolProvider,
-                shape.getAllMembers().values(), this.requiredMemberMode);
+                shape.getAllMembers().values(), this.requiredMemberMode, sensitiveDataFinder);
         // since any error interface must extend from JavaScript Error interface,
         // message member is already
         // required in the JavaScript Error interface

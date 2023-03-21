@@ -16,9 +16,19 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 
+/**
+ * This validator tells you whether a shape contains sensitive data fields.
+ * This is used to decide whether a sensitive log filter function needs to be generated for
+ * a given shape.
+ */
 public class SensitiveDataFinder {
     private Map<Shape, Boolean> cache = new HashMap<>();
 
+    /**
+     * @param shape - the shape in question.
+     * @param model - model context for the shape, containing its related shapes.
+     * @return whether a sensitive field exists in the shape and its downstream shapes.
+     */
     public boolean findsSensitiveData(Shape shape, Model model) {
         boolean found = findRecursive(shape, model);
         cache.put(shape, found);

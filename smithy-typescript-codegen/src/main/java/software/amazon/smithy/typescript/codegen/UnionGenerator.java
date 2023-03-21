@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -255,7 +256,12 @@ final class UnionGenerator implements Runnable {
                     for (MemberShape member : shape.getAllMembers().values()) {
                         String memberName = symbolProvider.toMemberName(member);
                         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                                model, symbolProvider, shape.getAllMembers().values());
+                            model, 
+                            symbolProvider, 
+                            shape.getAllMembers().values(),
+                            RequiredMemberMode.NULLABLE,
+                            sensitiveDataFinder
+                        );
                         writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
                             objectParam, memberName, () -> {
                                 String memberParam = String.format("%s.%s", objectParam, memberName);
@@ -272,7 +278,12 @@ final class UnionGenerator implements Runnable {
 
     private void writeValidate() {
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
+            model, 
+            symbolProvider, 
+            shape.getAllMembers().values(),
+            RequiredMemberMode.NULLABLE,
+            sensitiveDataFinder
+        );
 
         structuredMemberWriter.writeMemberValidatorCache(writer, "memberValidators");
 
