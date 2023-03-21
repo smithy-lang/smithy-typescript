@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy-io/protocol-http";
 
 import { HttpBindingMux, UriSpec } from ".";
 

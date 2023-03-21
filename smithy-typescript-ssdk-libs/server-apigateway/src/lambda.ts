@@ -13,8 +13,8 @@
  *  permissions and limitations under the License.
  */
 
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { HeaderBag, QueryParameterBag } from "@aws-sdk/types";
+import { HttpRequest, HttpResponse } from "@smithy-io/protocol-http";
+import { HeaderBag, QueryParameterBag } from "@smithy-io/types";
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyEventHeaders,

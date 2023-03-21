@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { HttpRequest } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy-io/types";
 
 import { Mux, ServiceCoordinate } from "..";
 
