@@ -5,7 +5,6 @@
     "module": "commonjs",
     "noEmitHelpers": true,
     "target": "ES2018",
-    "strict": true,
-    "strictNullChecks": true
+    "strict": true
   }
 }

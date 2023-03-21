@@ -2,22 +2,14 @@ const { compilerOptions } = require("@tsconfig/recommended/tsconfig.json");
 
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "node",
-  transform: {
-    "^.+\\.(ts|tsx)$": ["ts-jest", {
-        tsconfig: {
-            ...compilerOptions,
-            noImplicitAny: false,
-            strictNullChecks: false
-        }
-    }]
-  },
+  testMatch: ["**/*.spec.ts", "!**/*.browser.spec.ts", "!**/*.integ.spec.ts"],
   globals: {
     "ts-jest": {
+      tsconfig: {
         ...compilerOptions,
         noImplicitAny: false,
-        strictNullChecks: false
-    }
+        strictNullChecks: false,
+      },
+    },
   },
-  testMatch: ["**/*.spec.ts", "!**/*.integ.spec.ts"],
 };
