@@ -50,6 +50,7 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.UniqueItemsTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -67,6 +68,7 @@ final class StructuredMemberWriter {
     boolean noDocs;
     RequiredMemberMode requiredMemberMode;
     final Set<String> skipMembers = new HashSet<>();
+    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
 
     StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
         this(model, symbolProvider, members, RequiredMemberMode.NULLABLE);
@@ -188,13 +190,17 @@ final class StructuredMemberWriter {
             // Sensitive logs are not filtered from errors.
             writer.write("$L", structureParam);
         } else {
-            // Call filterSensitiveLog on Structure.
-            Symbol symbol = symbolProvider.toSymbol(structureTarget);
-            String filterFunctionName = symbol.getName() + "FilterSensitiveLog";
-            if (!symbol.getNamespace().contains(writer.getModuleName())) {
-                writer.addImport(filterFunctionName, filterFunctionName, symbol.getNamespace());
+            if (sensitiveDataFinder.findsSensitiveData(structureTarget, model)) {
+                // Call filterSensitiveLog on Structure.
+                Symbol symbol = symbolProvider.toSymbol(structureTarget);
+                String filterFunctionName = symbol.getName() + "FilterSensitiveLog";
+                if (!symbol.getNamespace().contains(writer.getModuleName())) {
+                    writer.addImport(filterFunctionName, filterFunctionName, symbol.getNamespace());
+                }
+                writer.write("$L($L)", filterFunctionName, structureParam);
+            } else {
+                writer.write("$L", structureParam);
             }
-            writer.write("$L($L)", filterFunctionName, structureParam);
         }
     }
 
