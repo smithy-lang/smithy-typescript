@@ -22,25 +22,30 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
+import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Renders a TypeScript union.
  *
- * <p>Smithy tagged unions are rendered as a set of TypeScript interfaces
+ * <p>
+ * Smithy tagged unions are rendered as a set of TypeScript interfaces
  * and functionality used to visit each variant. Only a single member
  * can be set at any given time. A member that contains unknown variants
  * is automatically added to each tagged union. If set, it contains the
  * name of the property that was set and its value stored as an
  * {@code any}.
  *
- * <p>A {@code Visitor} interface and a method used to dispatch to the
+ * <p>
+ * A {@code Visitor} interface and a method used to dispatch to the
  * visitor is generated for each tagged union. This allows for working
  * with tagged unions functionally and account for each variant in a
  * typed way.
  *
- * <p>For example, given the following Smithy model:
+ * <p>
+ * For example, given the following Smithy model:
  *
  * <pre>{@code
  * union Attacker {
@@ -50,7 +55,8 @@ import software.amazon.smithy.utils.StringUtils;
  * }
  * }</pre>
  *
- * <p>The following code is generated:
+ * <p>
+ * The following code is generated:
  *
  * <pre>{@code
  * export type Attacker =
@@ -120,7 +126,8 @@ import software.amazon.smithy.utils.StringUtils;
  *
  * }</pre>
  *
- * <p>Important: Tagged unions in TypeScript are intentionally designed
+ * <p>
+ * Important: Tagged unions in TypeScript are intentionally designed
  * so that it is forward-compatible to change a structure with optional
  * and mutually exclusive members to a tagged union.
  */
@@ -134,6 +141,7 @@ final class UnionGenerator implements Runnable {
     private final UnionShape shape;
     private final Map<String, String> variantMap;
     private final boolean includeValidation;
+    private final SensitiveDataFinder sensitiveDataFinder;
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
@@ -143,16 +151,17 @@ final class UnionGenerator implements Runnable {
     }
 
     UnionGenerator(Model model,
-                   SymbolProvider symbolProvider,
-                   TypeScriptWriter writer,
-                   UnionShape shape,
-                   boolean includeValidation) {
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer,
+            UnionShape shape,
+            boolean includeValidation) {
         this.shape = shape;
         this.symbol = symbolProvider.toSymbol(shape);
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.includeValidation = includeValidation;
+        sensitiveDataFinder = new SensitiveDataFinder(model);
 
         variantMap = new TreeMap<>();
         for (MemberShape member : shape.getAllMembers().values()) {
@@ -175,14 +184,14 @@ final class UnionGenerator implements Runnable {
 
         // Write out the namespace that contains each variant and visitor.
         writer.writeDocs("@public")
-            .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-                writeUnionMemberInterfaces();
-                writeVisitorType();
-                writeVisitorFunction();
-                if (includeValidation) {
-                    writeValidate();
-                }
-            });
+                .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+                    writeUnionMemberInterfaces();
+                    writeVisitorType();
+                    writeVisitorFunction();
+                    if (includeValidation) {
+                        writeValidate();
+                    }
+                });
         writeFilterSensitiveLog(symbol.getName());
     }
 
@@ -196,7 +205,7 @@ final class UnionGenerator implements Runnable {
                 for (MemberShape variantMember : shape.getAllMembers().values()) {
                     if (variantMember.getMemberName().equals(member.getMemberName())) {
                         writer.write("$L: $T;", symbolProvider.toMemberName(variantMember),
-                                     symbolProvider.toSymbol(variantMember));
+                                symbolProvider.toSymbol(variantMember));
                     } else {
                         writer.write("$L?: never;", symbolProvider.toMemberName(variantMember));
                     }
@@ -220,7 +229,7 @@ final class UnionGenerator implements Runnable {
         writer.openBlock("export interface Visitor<T> {", "}", () -> {
             for (MemberShape member : shape.getAllMembers().values()) {
                 writer.write("$L: (value: $T) => T;",
-                             symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
+                        symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
             }
             writer.write("_: (name: string, value: any) => T;");
         });
@@ -243,32 +252,41 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeFilterSensitiveLog(String namespace) {
-        String objectParam = "obj";
-        writer.writeDocs("@internal");
-        writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
-            namespace,
-            objectParam, symbol.getName(),
-            () -> {
-                for (MemberShape member : shape.getAllMembers().values()) {
-                    String memberName = symbolProvider.toMemberName(member);
-                    StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                            model, symbolProvider, shape.getAllMembers().values());
-                    writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
-                        objectParam, memberName, () -> {
-                            String memberParam = String.format("%s.%s", objectParam, memberName);
-                            structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member, memberParam);
+        if (sensitiveDataFinder.findsSensitiveDataIn(shape)) {
+            String objectParam = "obj";
+            writer.writeDocs("@internal");
+            writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
+                    namespace,
+                    objectParam, symbol.getName(),
+                    () -> {
+                        for (MemberShape member : shape.getAllMembers().values()) {
+                            String memberName = symbolProvider.toMemberName(member);
+                            StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
+                                    model,
+                                    symbolProvider,
+                                    shape.getAllMembers().values(),
+                                    RequiredMemberMode.NULLABLE,
+                                    sensitiveDataFinder);
+                            writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
+                                    objectParam, memberName, () -> {
+                                        String memberParam = String.format("%s.%s", objectParam, memberName);
+                                        structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member,
+                                                memberParam);
+                                    });
                         }
-                    );
-                }
-                writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
-                    objectParam);
-            }
-        );
+                        writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
+                                objectParam);
+                    });
+        }
     }
 
     private void writeValidate() {
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-                model, symbolProvider, shape.getAllMembers().values());
+                model,
+                symbolProvider,
+                shape.getAllMembers().values(),
+                RequiredMemberMode.NULLABLE,
+                sensitiveDataFinder);
 
         structuredMemberWriter.writeMemberValidatorCache(writer, "memberValidators");
 
@@ -279,7 +297,6 @@ final class UnionGenerator implements Runnable {
                 () -> {
                     structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
                     structuredMemberWriter.writeValidateMethodContents(writer, "obj");
-                }
-        );
+                });
     }
 }
