@@ -125,6 +125,7 @@ final class CommandGenerator implements Runnable {
         String name = symbol.getName();
 
         StringBuilder additionalDocs = new StringBuilder()
+        // add @returns block here?
             .append("\n")
             .append(getCommandExample(
                 serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()
@@ -179,6 +180,8 @@ final class CommandGenerator implements Runnable {
             + "const response = await client.send(command);\n"
             + "```\n"
             + "\n"
+            + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
+            + String.format("@returns {@link %s}%n", commandOutput)
             + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
             + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
             + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);

@@ -140,7 +140,7 @@ public final class CodegenUtils {
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.openBlock("type $LType = Omit<$T, $S> & {", "};", typeName,
+        writer.openBlock("export type $LType = Omit<$T, $S> & {", "};", typeName,
                 containerSymbol, memberName, () -> {
                         writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
                                 containerSymbol.getName(), memberName));
