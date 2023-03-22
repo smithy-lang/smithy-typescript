@@ -18,24 +18,34 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 
 /**
  * This validator tells you whether a shape contains sensitive data fields.
- * This is used to decide whether a sensitive log filter function needs to be generated for
+ * This is used to decide whether a sensitive log filter function needs to be
+ * generated for
  * a given shape.
  */
 public class SensitiveDataFinder {
     private Map<Shape, Boolean> cache = new HashMap<>();
+    private final Model model;
+
+    /**
+     * @param model - model context for the {@link #findsSensitiveDataIn(Shape)}
+     *              queries.
+     */
+    public SensitiveDataFinder(Model model) {
+        this.model = model;
+    }
 
     /**
      * @param shape - the shape in question.
-     * @param model - model context for the shape, containing its related shapes.
-     * @return whether a sensitive field exists in the shape and its downstream shapes.
+     * @return whether a sensitive field exists in the shape and its downstream
+     *         shapes.
      */
-    public boolean findsSensitiveData(Shape shape, Model model) {
-        boolean found = findRecursive(shape, model);
+    public boolean findsSensitiveDataIn(Shape shape) {
+        boolean found = findRecursive(shape);
         cache.put(shape, found);
         return found;
     }
 
-    private boolean findRecursive(Shape shape, Model model) {
+    private boolean findRecursive(Shape shape) {
         if (cache.containsKey(shape)) {
             return cache.get(shape);
         }
@@ -66,7 +76,7 @@ public class SensitiveDataFinder {
         if (shape instanceof MapShape) {
             MemberShape keyMember = ((MapShape) shape).getKey();
             MemberShape valMember = ((MapShape) shape).getValue();
-            return findRecursive(keyMember, model) || findRecursive(valMember, model);
+            return findRecursive(keyMember) || findRecursive(valMember);
         }
 
         cache.put(shape, false);

@@ -73,7 +73,7 @@ final class StructureGenerator implements Runnable {
     private final StructureShape shape;
     private final boolean includeValidation;
     private final RequiredMemberMode requiredMemberMode;
-    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
+    private final SensitiveDataFinder sensitiveDataFinder;
 
     /**
      * sets 'includeValidation' to 'false' and requiredMemberMode
@@ -96,6 +96,7 @@ final class StructureGenerator implements Runnable {
         this.shape = shape;
         this.includeValidation = includeValidation;
         this.requiredMemberMode = requiredMemberMode;
+        sensitiveDataFinder = new SensitiveDataFinder(model);
     }
 
     @Override
@@ -189,7 +190,7 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         String objectParam = "obj";
 
-        if (sensitiveDataFinder.findsSensitiveData(shape, model)) {
+        if (sensitiveDataFinder.findsSensitiveDataIn(shape)) {
             writer.writeDocs("@internal");
             writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => ({", "})",
                     symbol.getName(),

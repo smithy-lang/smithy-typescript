@@ -141,7 +141,7 @@ final class UnionGenerator implements Runnable {
     private final UnionShape shape;
     private final Map<String, String> variantMap;
     private final boolean includeValidation;
-    private final SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder();
+    private final SensitiveDataFinder sensitiveDataFinder;
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
@@ -161,6 +161,7 @@ final class UnionGenerator implements Runnable {
         this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.includeValidation = includeValidation;
+        sensitiveDataFinder = new SensitiveDataFinder(model);
 
         variantMap = new TreeMap<>();
         for (MemberShape member : shape.getAllMembers().values()) {
@@ -183,14 +184,14 @@ final class UnionGenerator implements Runnable {
 
         // Write out the namespace that contains each variant and visitor.
         writer.writeDocs("@public")
-            .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-                writeUnionMemberInterfaces();
-                writeVisitorType();
-                writeVisitorFunction();
-                if (includeValidation) {
-                    writeValidate();
-                }
-            });
+                .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+                    writeUnionMemberInterfaces();
+                    writeVisitorType();
+                    writeVisitorFunction();
+                    if (includeValidation) {
+                        writeValidate();
+                    }
+                });
         writeFilterSensitiveLog(symbol.getName());
     }
 
@@ -251,7 +252,7 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeFilterSensitiveLog(String namespace) {
-        if (sensitiveDataFinder.findsSensitiveData(shape, model)) {
+        if (sensitiveDataFinder.findsSensitiveDataIn(shape)) {
             String objectParam = "obj";
             writer.writeDocs("@internal");
             writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
