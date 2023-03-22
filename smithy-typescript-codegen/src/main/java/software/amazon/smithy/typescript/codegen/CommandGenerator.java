@@ -179,6 +179,8 @@ final class CommandGenerator implements Runnable {
             + "const response = await client.send(command);\n"
             + "```\n"
             + "\n"
+            + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
+            + String.format("@returns {@link %s}%n", commandOutput)
             + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
             + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
             + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
@@ -205,13 +207,14 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandConstructor() {
-        writer.openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
-            // The constructor can be intercepted and changed.
-            writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
-                    .pushState(COMMAND_CONSTRUCTOR_SECTION)
-                    .write("super();")
-                    .popState()
-                    .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
+        writer.writeDocs("@public")
+            .openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
+                // The constructor can be intercepted and changed.
+                writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
+                        .pushState(COMMAND_CONSTRUCTOR_SECTION)
+                        .write("super();")
+                        .popState()
+                        .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
         });
     }
 
@@ -356,7 +359,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeInputType(String typeName, Optional<StructureShape> inputShape, String commandName) {
-        writer.writeDocs("The input for {@link " + commandName + "}.");
+        writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
@@ -373,7 +376,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
-        writer.writeDocs("The output of {@link " + commandName + "}.");
+        writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         // Output types should always be MetadataBearers, possibly in addition
         // to a defined output shape.
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
@@ -414,26 +417,28 @@ final class CommandGenerator implements Runnable {
 
     private void writeSerde() {
         writer.write("")
-                .write("private serialize(")
-                .indent()
-                    .write("input: $T,", inputType)
-                    .write("context: $L", CodegenUtils.getOperationSerializerContextType(writer, model, operation))
-                .dedent()
-                .openBlock(
-                        "): Promise<$T> {", "}",
-                        applicationProtocol.getRequestType(),
-                        () -> writeSerdeDispatcher(true)
-                );
+            .writeDocs("@internal")
+            .write("private serialize(")
+            .indent()
+                .write("input: $T,", inputType)
+                .write("context: $L", CodegenUtils.getOperationSerializerContextType(writer, model, operation))
+            .dedent()
+            .openBlock(
+                    "): Promise<$T> {", "}",
+                    applicationProtocol.getRequestType(),
+                    () -> writeSerdeDispatcher(true)
+            );
 
         writer.write("")
-                .write("private deserialize(")
-                .indent()
-                    .write("output: $T,", applicationProtocol.getResponseType())
-                    .write("context: $L",
-                            CodegenUtils.getOperationDeserializerContextType(settings, writer, model, operation))
-                .dedent()
-                .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
-                .write("");
+            .writeDocs("@internal")
+            .write("private deserialize(")
+            .indent()
+                .write("output: $T,", applicationProtocol.getResponseType())
+                .write("context: $L",
+                        CodegenUtils.getOperationDeserializerContextType(settings, writer, model, operation))
+            .dedent()
+            .openBlock("): Promise<$T> {", "}", outputType, () -> writeSerdeDispatcher(false))
+            .write("");
     }
 
     private void writeSerdeDispatcher(boolean isInput) {

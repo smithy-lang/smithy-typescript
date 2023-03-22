@@ -119,7 +119,8 @@ final class PaginationGenerator implements Runnable {
         writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
         writer.addImport(service.getName(), service.getName(), service.getNamespace());
 
-        writer.openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
+        writer.writeDocs("@public")
+            .openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
                 "}", aggregatedClientName, () -> {
             writer.write("client: $L;", service.getName());
         });
@@ -166,7 +167,8 @@ final class PaginationGenerator implements Runnable {
         String inputTokenName = paginatedInfo.getPaginatedTrait().getInputToken().get();
         String outputTokenName = paginatedInfo.getPaginatedTrait().getOutputToken().get();
 
-        writer.openBlock(
+        writer.writeDocs("@public")
+            .openBlock(
                 "export async function* paginate$L(config: $L, input: $L, ...additionalArguments: any): Paginator<$L>{",
                 "}",  operationName, paginationType, inputTypeName, outputTypeName, () -> {
             String destructuredInputTokenName = destructurePath(inputTokenName);
@@ -209,7 +211,7 @@ final class PaginationGenerator implements Runnable {
      * environments and does not generally expose the entire service.
      */
     private void writeCommandRequest() {
-        writer.writeDocs("@private");
+        writer.writeDocs("@internal");
         writer.openBlock(
                 "const makePagedClientRequest = async (client: $L, input: $L, ...args: any): Promise<$L> => {",
                 "}", serviceSymbol.getName(), inputSymbol.getName(),

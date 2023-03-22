@@ -39,7 +39,8 @@ public class AddDefaultsModeDependency implements TypeScriptIntegration {
         writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_NODE);
         writer.addImport("DefaultsMode", "__DefaultsMode", TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
         writer.addImport("Provider", "__Provider", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        writer.writeDocs("The {@link __DefaultsMode} that will be used to determine how certain default configuration "
+        writer.writeDocs("The {@link @aws-sdk/smithy-client#DefaultsMode} that "
+                + "will be used to determine how certain default configuration "
                 + "options are resolved in the SDK.");
         writer.write("defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;\n");
     }
