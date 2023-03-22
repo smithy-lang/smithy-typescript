@@ -125,7 +125,6 @@ final class CommandGenerator implements Runnable {
         String name = symbol.getName();
 
         StringBuilder additionalDocs = new StringBuilder()
-        // add @returns block here?
             .append("\n")
             .append(getCommandExample(
                 serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()
