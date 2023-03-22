@@ -174,12 +174,11 @@ final class StructureGenerator implements Runnable {
         }
 
         StructuredMemberWriter config = new StructuredMemberWriter(
-            model, 
-            symbolProvider, 
-            shape.getAllMembers().values(), 
-            this.requiredMemberMode,
-            sensitiveDataFinder
-        );
+                model,
+                symbolProvider,
+                shape.getAllMembers().values(),
+                this.requiredMemberMode,
+                sensitiveDataFinder);
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
