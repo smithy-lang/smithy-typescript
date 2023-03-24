@@ -52,11 +52,11 @@ public abstract class StructureExampleGenerator {
                 buffer.toString()
                         .split("\n"))
                 .map(line -> line.replaceAll(
-                        "([\\w\\\",:] )\\s+",
+                        "([\\w\\\",:\\[\\{] )\\s+",
                         "$1"))
                 .collect(Collectors.joining("\n"));
 
-        return s;
+        return s.replaceAll(",$", ";");
     }
 
     private static void structure(StructureShape structureShape,
@@ -64,7 +64,7 @@ public abstract class StructureExampleGenerator {
             int indentation,
             ShapeTracker shapeTracker) {
         if (structureShape.getAllMembers().size() == 0) {
-            append(indentation, buffer, "{}");
+            append(indentation, buffer, "{},");
             checkRequired(indentation, buffer, structureShape);
         } else {
             append(indentation, buffer, "{");
@@ -73,7 +73,7 @@ public abstract class StructureExampleGenerator {
                 append(indentation + 2, buffer, member.getMemberName() + ": ");
                 shape(member, buffer, model, indentation + 2, shapeTracker);
             });
-            append(indentation, buffer, "}\n");
+            append(indentation, buffer, "},\n");
         }
     }
 
@@ -88,7 +88,7 @@ public abstract class StructureExampleGenerator {
             append(indentation + 2, buffer, member.getMemberName() + ": ");
             shape(member, buffer, model, indentation + 2, shapeTracker);
         });
-        append(indentation, buffer, "}\n");
+        append(indentation, buffer, "},\n");
     }
 
     private static void shape(Shape shape,
@@ -104,8 +104,8 @@ public abstract class StructureExampleGenerator {
         }
 
         shapeTracker.mark(shape, indentation);
-        if (shapeTracker.getOccurrenceDepths(shape) > 5) {
-            append(indentation, buffer, "\"<" + shape.getId().getName() + ">\"");
+        if (shapeTracker.getOccurrenceDepths(shape) > 2) {
+            append(indentation, buffer, "\"<" + shape.getId().getName() + ">\",\n");
         } else {
             switch (target.getType()) {
                 case BIG_DECIMAL:
@@ -186,7 +186,7 @@ public abstract class StructureExampleGenerator {
                             .stream()
                             .map(s -> "\"" + s + "\"")
                             .collect(Collectors.joining(" || "));
-                    append(indentation, buffer, enumeration);
+                    append(indentation, buffer, enumeration + ",");
                     break;
                 case INT_ENUM:
                     IntEnumShape intEnumShape = (IntEnumShape) target;
@@ -195,7 +195,7 @@ public abstract class StructureExampleGenerator {
                             .stream()
                             .map(i -> Integer.toString(i))
                             .collect(Collectors.joining(" || "));
-                    append(indentation, buffer, intEnumeration);
+                    append(indentation, buffer, intEnumeration + ",");
                     break;
                 case OPERATION:
                 case RESOURCE:
@@ -205,37 +205,37 @@ public abstract class StructureExampleGenerator {
                     append(indentation, buffer, "\"...\",");
                     break;
             }
-        }
 
-        switch (target.getType()) {
-            case STRUCTURE:
-            case UNION:
-            case LIST:
-            case SET:
-            case MAP:
-                break;
-            case BIG_DECIMAL:
-            case BIG_INTEGER:
-            case BLOB:
-            case BOOLEAN:
-            case BYTE:
-            case DOCUMENT:
-            case DOUBLE:
-            case ENUM:
-            case FLOAT:
-            case INTEGER:
-            case INT_ENUM:
-            case LONG:
-            case MEMBER:
-            case OPERATION:
-            case RESOURCE:
-            case SERVICE:
-            case SHORT:
-            case STRING:
-            case TIMESTAMP:
-            default:
-                checkRequired(indentation, buffer, shape);
-                break;
+            switch (target.getType()) {
+                case STRUCTURE:
+                case UNION:
+                case LIST:
+                case SET:
+                case MAP:
+                    break;
+                case BIG_DECIMAL:
+                case BIG_INTEGER:
+                case BLOB:
+                case BOOLEAN:
+                case BYTE:
+                case DOCUMENT:
+                case DOUBLE:
+                case ENUM:
+                case FLOAT:
+                case INTEGER:
+                case INT_ENUM:
+                case LONG:
+                case MEMBER:
+                case OPERATION:
+                case RESOURCE:
+                case SERVICE:
+                case SHORT:
+                case STRING:
+                case TIMESTAMP:
+                default:
+                    checkRequired(indentation, buffer, shape);
+                    break;
+            }
         }
     }
 
