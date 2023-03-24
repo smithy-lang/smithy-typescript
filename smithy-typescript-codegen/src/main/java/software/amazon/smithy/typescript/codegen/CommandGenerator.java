@@ -42,6 +42,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameMap;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -174,6 +175,9 @@ final class CommandGenerator implements Runnable {
                 + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
                         packageName)
                 + String.format("const client = new %s(config);%n", serviceName)
+                + String.format("const input = %s%n",
+                        StructureExampleGenerator.generateStructuralHintDocumentation(
+                                model.getShape(operation.getInputShape()).get(), model))
                 + String.format("const command = new %s(input);%n", commandName)
                 + "const response = await client.send(command);\n"
                 + "```\n"
