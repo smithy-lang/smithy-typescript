@@ -109,10 +109,10 @@ public abstract class StructureExampleGenerator {
         } else {
             switch (target.getType()) {
                 case BIG_DECIMAL:
-                    append(indentation, buffer, "Number('bigdecimal'),");
+                    append(indentation, buffer, "Number(\"bigdecimal\"),");
                     break;
                 case BIG_INTEGER:
-                    append(indentation, buffer, "Number('bigint'),");
+                    append(indentation, buffer, "Number(\"bigint\"),");
                     break;
                 case BLOB:
                     if (target.hasTrait(StreamingTrait.class)) {
@@ -131,25 +131,25 @@ public abstract class StructureExampleGenerator {
                     append(indentation, buffer, "\"DOCUMENT_VALUE\",");
                     break;
                 case DOUBLE:
-                    append(indentation, buffer, "Number('double'),");
+                    append(indentation, buffer, "Number(\"double\"),");
                     break;
                 case FLOAT:
-                    append(indentation, buffer, "Number('float'),");
+                    append(indentation, buffer, "Number(\"float\"),");
                     break;
                 case INTEGER:
-                    append(indentation, buffer, "Number('int'),");
+                    append(indentation, buffer, "Number(\"int\"),");
                     break;
                 case LONG:
-                    append(indentation, buffer, "Number('long'),");
+                    append(indentation, buffer, "Number(\"long\"),");
                     break;
                 case SHORT:
-                    append(indentation, buffer, "Number('short'),");
+                    append(indentation, buffer, "Number(\"short\"),");
                     break;
                 case STRING:
                     append(indentation, buffer, "\"STRING_VALUE\",");
                     break;
                 case TIMESTAMP:
-                    append(indentation, buffer, "\"TIMESTAMP\",");
+                    append(indentation, buffer, "new Date(\"TIMESTAMP\"),");
                     break;
 
                 case SET:
