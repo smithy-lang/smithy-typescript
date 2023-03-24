@@ -33,8 +33,9 @@ public class EnumGeneratorTest {
         Symbol symbol = new SymbolVisitor(model, settings).toSymbol(shape);
         new EnumGenerator(shape, symbol, writer).run();
 
-        assertThat(writer.toString(), containsString("export enum Baz {"));
-        assertThat(writer.toString(), stringContainsInOrder("BAR = \"BAR\",", "FOO = \"FOO\""));
+        assertThat(writer.toString(), containsString("export const /* enum */ Baz = {"));
+        assertThat(writer.toString(), stringContainsInOrder("BAR: \"BAR\",", "FOO: \"FOO\""));
+        assertThat(writer.toString(), containsString("export type Baz = typeof Baz[keyof typeof Baz]"));
     }
 
     @Test
