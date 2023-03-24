@@ -66,28 +66,35 @@ public class StructureExampleGeneratorTest {
     public void generatesStructuralHintDocumentation_map() {
         assertThat(
                 StructureExampleGenerator.generateStructuralHintDocumentation(map, model),
-                equalTo("{\n  \"<keys>\": \"STRING_VALUE\", \n};"));
+                equalTo("""
+                        {
+                          "<keys>": "STRING_VALUE",
+                        };"""));
     }
 
     @Test
     public void generatesStructuralHintDocumentation_structure() {
         assertThat(
                 StructureExampleGenerator.generateStructuralHintDocumentation(structure, model),
-                equalTo("{\n"
-                        + "  string: \"STRING_VALUE\", \n"
-                        + "  list: [ \n"
-                        + "    \"STRING_VALUE\", \n"
-                        + "  ],\n"
-                        + "  map: { \n"
-                        + "    \"<keys>\": \"STRING_VALUE\", \n"
-                        + "  },\n"
-                        + "};"));
+                equalTo("""
+                        {
+                          string: "STRING_VALUE",
+                          list: [
+                            "STRING_VALUE",
+                          ],
+                          map: {
+                            "<keys>": "STRING_VALUE",
+                          },
+                        };"""));
     }
 
     @Test
     public void generatesStructuralHintDocumentation_list() {
         assertThat(
                 StructureExampleGenerator.generateStructuralHintDocumentation(list, model),
-                equalTo("[\n  \"STRING_VALUE\", \n];"));
+                equalTo("""
+                        [
+                          "STRING_VALUE",
+                        ];"""));
     }
 }

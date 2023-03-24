@@ -53,7 +53,8 @@ public abstract class StructureExampleGenerator {
                         .split("\n"))
                 .map(line -> line.replaceAll(
                         "([\\w\\\",:\\[\\{] )\\s+",
-                        "$1"))
+                        "$1")
+                        .replaceAll("\\s+$", ""))
                 .collect(Collectors.joining("\n"));
 
         return s.replaceAll(",$", ";");
