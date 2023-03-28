@@ -53,7 +53,36 @@ public class StructureExampleGeneratorTest {
     StructureShape structure = StructureShape.builder()
             .id("foo.bar#structure")
             .members(
-                    List.<MemberShape>of(memberForString, memberForList, memberForMap))
+                    List.<MemberShape>of(
+                            memberForString, memberForList, memberForMap,
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$list2")
+                                    .target(list.getId())
+                                    .build(),
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$list3")
+                                    .target(list.getId())
+                                    .build(),
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$list4")
+                                    .target(list.getId())
+                                    .build(),
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$list5")
+                                    .target(list.getId())
+                                    .build(),
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$list6")
+                                    .target(list.getId())
+                                    .build(),
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$list7")
+                                    .target(list.getId())
+                                    .build(),
+                            MemberShape.builder()
+                                    .id("foo.bar#structure$structure")
+                                    .target("foo.bar#structure")
+                                    .build()))
             .build();
 
     private Model model = Model.builder()
@@ -67,7 +96,7 @@ public class StructureExampleGeneratorTest {
         assertThat(
                 StructureExampleGenerator.generateStructuralHintDocumentation(map, model),
                 equalTo("""
-                        {
+                        { // map
                           "<keys>": "STRING_VALUE",
                         };"""));
     }
@@ -77,13 +106,41 @@ public class StructureExampleGeneratorTest {
         assertThat(
                 StructureExampleGenerator.generateStructuralHintDocumentation(structure, model),
                 equalTo("""
-                        {
+                        { // structure
                           string: "STRING_VALUE",
-                          list: [
+                          list: [ // list
                             "STRING_VALUE",
                           ],
-                          map: {
+                          map: { // map
                             "<keys>": "STRING_VALUE",
+                          },
+                          list2: [
+                            "STRING_VALUE",
+                          ],
+                          list3: [
+                            "STRING_VALUE",
+                          ],
+                          list4: [
+                            "STRING_VALUE",
+                          ],
+                          list5: [
+                            "STRING_VALUE",
+                          ],
+                          list6: "<list>",
+                          list7: "<list>",
+                          structure: {
+                            string: "STRING_VALUE",
+                            list: "<list>",
+                            map: {
+                              "<keys>": "STRING_VALUE",
+                            },
+                            list2: "<list>",
+                            list3: "<list>",
+                            list4: "<list>",
+                            list5: "<list>",
+                            list6: "<list>",
+                            list7: "<list>",
+                            structure: "<structure>",
                           },
                         };"""));
     }
@@ -93,7 +150,7 @@ public class StructureExampleGeneratorTest {
         assertThat(
                 StructureExampleGenerator.generateStructuralHintDocumentation(list, model),
                 equalTo("""
-                        [
+                        [ // list
                           "STRING_VALUE",
                         ];"""));
     }

@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.IntEnumShape;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
@@ -68,7 +69,10 @@ public abstract class StructureExampleGenerator {
             append(indentation, buffer, "{},");
             checkRequired(indentation, buffer, structureShape);
         } else {
-            append(indentation, buffer, "{");
+            append(indentation, buffer,
+                    "{" + (shapeTracker.getOccurrenceCount(structureShape) == 1
+                            ? " // " + structureShape.getId().getName()
+                            : ""));
             checkRequired(indentation, buffer, structureShape);
             structureShape.getAllMembers().values().forEach(member -> {
                 append(indentation + 2, buffer, member.getMemberName() + ": ");
@@ -83,7 +87,9 @@ public abstract class StructureExampleGenerator {
             Model model,
             int indentation,
             ShapeTracker shapeTracker) {
-        append(indentation, buffer, "{ // Union: only one key present");
+        append(indentation, buffer, "{" + (shapeTracker.getOccurrenceCount(unionShape) == 1
+                ? " // " + unionShape.getId().getName()
+                : "// ") + " Union: only one key present");
         checkRequired(indentation, buffer, unionShape);
         unionShape.getAllMembers().values().forEach(member -> {
             append(indentation + 2, buffer, member.getMemberName() + ": ");
@@ -104,9 +110,10 @@ public abstract class StructureExampleGenerator {
             target = shape;
         }
 
-        shapeTracker.mark(shape, indentation);
-        if (shapeTracker.getOccurrenceDepths(shape) > 2) {
-            append(indentation, buffer, "\"<" + shape.getId().getName() + ">\",\n");
+        shapeTracker.mark(target, indentation);
+        if (shapeTracker.shouldTruncate(target)) {
+            append(indentation, buffer, "\"<" + target.getId().getName() + ">\",");
+            checkRequired(indentation, buffer, shape);
         } else {
             switch (target.getType()) {
                 case BIG_DECIMAL:
@@ -155,14 +162,18 @@ public abstract class StructureExampleGenerator {
 
                 case SET:
                 case LIST:
-                    append(indentation, buffer, "[");
+                    append(indentation, buffer, "[" + (shapeTracker.getOccurrenceCount(target) == 1
+                            ? " // " + target.getId().getName()
+                            : ""));
                     checkRequired(indentation, buffer, shape);
                     ListShape list = (ListShape) target;
                     shape(list.getMember(), buffer, model, indentation + 2, shapeTracker);
                     append(indentation, buffer, "],\n");
                     break;
                 case MAP:
-                    append(indentation, buffer, "{");
+                    append(indentation, buffer, "{" + (shapeTracker.getOccurrenceCount(target) == 1
+                            ? " // " + target.getId().getName()
+                            : ""));
                     checkRequired(indentation, buffer, shape);
                     append(indentation + 2, buffer, "\"<keys>\": ");
                     MapShape map = (MapShape) target;
@@ -261,23 +272,41 @@ public abstract class StructureExampleGenerator {
      * This handles the case of recursive shapes.
      */
     private static class ShapeTracker {
-        private Map<Shape, Set<Integer>> data = new HashMap<Shape, Set<Integer>>();
+        private Map<Shape, Set<Integer>> depths = new HashMap<Shape, Set<Integer>>();
+        private Map<Shape, Integer> occurrences = new HashMap<Shape, Integer>();
 
         /**
          * Mark that a shape is observed at depth.
          */
         public void mark(Shape shape, int depth) {
-            if (!data.containsKey(shape)) {
-                data.put(shape, new HashSet<>());
+            if (!depths.containsKey(shape)) {
+                depths.put(shape, new HashSet<>());
             }
-            data.get(shape).add(depth);
+            depths.get(shape).add(depth);
+            occurrences.put(shape, occurrences.getOrDefault(shape, 0) + 1);
+        }
+
+        /**
+         * @return whether the shape should be truncated.
+         */
+        public boolean shouldTruncate(Shape shape) {
+            return (shape instanceof MapShape || shape instanceof UnionShape || shape instanceof StructureShape
+                    || shape instanceof ListShape || shape instanceof SetShape)
+                    && (getOccurrenceCount(shape) > 5 || getOccurrenceDepths(shape) > 2);
         }
 
         /**
          * @return the number of distinct depths in which the shape appears.
          */
         public int getOccurrenceDepths(Shape shape) {
-            return data.getOrDefault(shape, Collections.emptySet()).size();
+            return depths.getOrDefault(shape, Collections.emptySet()).size();
+        }
+
+        /**
+         * @return total appearances of the shape.
+         */
+        public int getOccurrenceCount(Shape shape) {
+            return occurrences.getOrDefault(shape, 0);
         }
     }
 }
