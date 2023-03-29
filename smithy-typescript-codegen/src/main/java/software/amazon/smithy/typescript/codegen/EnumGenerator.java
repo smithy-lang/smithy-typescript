@@ -35,10 +35,11 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * <p>We will generate the following:
  *
  * <pre>{@code
- * export enum TypedYesNo {
+ * export const TypedYesNo = {
  *   YES: "YEP",
  *   NO: "NOPE",
- * }
+ * } as const;
+ * type TypedYesNo = typeof TypedYesNo[keyof typeof TypedYesNo];
  * }</pre>
  *
  * <p>Shapes that refer to this string as a member will use the following
@@ -87,8 +88,8 @@ final class EnumGenerator implements Runnable {
 
     // Named enums generate an actual enum type.
     private void generateNamedEnum() {
-        writer.writeDocs("@public")
-            .openBlock("export enum $L {", "}", symbol.getName(), () -> {
+        writer.writeDocs("@public\n@enum")
+            .openBlock("export const $L = {", "} as const", symbol.getName(), () -> {
                 // Sort the named values to ensure a stable order and sane diffs.
                 // TODO: Should we just sort these in the trait itself?
                 enumTrait.getValues()
@@ -96,6 +97,8 @@ final class EnumGenerator implements Runnable {
                         .sorted(Comparator.comparing(e -> e.getName().get()))
                         .forEach(this::writeNamedEnumConstant);
         });
+        writer.writeDocs("@public")
+            .write("export type $L = typeof $L[keyof typeof $L]", symbol.getName(), symbol.getName(), symbol.getName());
     }
 
     private void writeNamedEnumConstant(EnumDefinition body) {
@@ -103,6 +106,6 @@ final class EnumGenerator implements Runnable {
 
         String name = body.getName().get();
         body.getDocumentation().ifPresent(writer::writeDocs);
-        writer.write("$L = $S,", TypeScriptUtils.sanitizePropertyName(name), body.getValue());
+        writer.write("$L: $S,", TypeScriptUtils.sanitizePropertyName(name), body.getValue());
     }
 }
