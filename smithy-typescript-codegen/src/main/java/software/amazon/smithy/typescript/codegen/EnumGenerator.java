@@ -35,7 +35,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * <p>We will generate the following:
  *
  * <pre>{@code
- * export const /* enum *&#47 TypedYesNo = {
+ * export const TypedYesNo = {
  *   YES: "YEP",
  *   NO: "NOPE",
  * } as const;
@@ -88,8 +88,8 @@ final class EnumGenerator implements Runnable {
 
     // Named enums generate an actual enum type.
     private void generateNamedEnum() {
-        writer.writeDocs("@public")
-            .openBlock("export const /* enum */ $L = {", "} as const", symbol.getName(), () -> {
+        writer.writeDocs("@public\n@enum")
+            .openBlock("export const $L = {", "} as const", symbol.getName(), () -> {
                 // Sort the named values to ensure a stable order and sane diffs.
                 // TODO: Should we just sort these in the trait itself?
                 enumTrait.getValues()
