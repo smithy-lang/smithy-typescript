@@ -48,6 +48,13 @@ describe("findDuplicates", () => {
         Uint8Array.of(4, 5, 6),
       ]);
     });
+    it("nulls", () => {
+      expect(findDuplicates([null, 1, null])).toEqual([null]);
+    });
+    it("undefineds", () => {
+      const arr: Array<any> = [undefined, 1, undefined];
+      expect(findDuplicates(arr)).toEqual([undefined]);
+    });
     it("objects", () => {
       expect(findDuplicates([{ a: "b" }, { b: [1, 2, 3] }, { a: "b" }, { a: "b" }])).toEqual([{ a: "b" }]);
       expect(findDuplicates([{ a: "b" }, { b: 1, c: 2 }, { c: 2, b: 1 }])).toEqual([{ b: 1, c: 2 }]);
@@ -101,8 +108,14 @@ describe("findDuplicates", () => {
     it("blobs", () => {
       expect(findDuplicates([Uint8Array.of(1, 2, 3), Uint8Array.of(1, 2)])).toEqual([]);
     });
+    it("nulls", () => {
+      expect(findDuplicates([null, 1])).toEqual([]);
+    });
+    it("undefineds", () => {
+      const arr: Array<any> = [undefined, 1];
+      expect(findDuplicates(arr)).toEqual([]);
+    });
   });
-
   // This is relatively slow and may be flaky if the input size is tuned to let it run reasonably fast
   it.skip("is faster than the naive implementation", () => {
     const input: Input[] = [true, false, 1, 2, 3, 4, 5, 6];
