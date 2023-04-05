@@ -33,6 +33,7 @@ import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -128,6 +129,12 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
 
         TypeScriptWriter writer = context.getWriter();
+
+        if (context.getSettings().generateClient()) {
+            writer.addImport("withBaseException", null, "@aws-sdk/smithy-client");
+            SymbolReference exception = HttpProtocolGeneratorUtils.getClientBaseException(context);
+            writer.write("const throwDefaultError = withBaseException($T);", exception);
+        }
 
         // Write a function to generate HTTP requests since they're so similar.
         SymbolReference requestType = getApplicationProtocol().getRequestType();
@@ -449,7 +456,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     writer.write("...contents,");
                 });
             });
-            writer.write("return Promise.resolve(response);");
+            writer.write("return response;");
         });
         writer.write("");
 
@@ -487,9 +494,15 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 // the error shape here.
                 writer.write("const body = parseBody($L.body, context);", outputReference);
             }
-            writer.write("const deserialized: any = $L($L, context);",
-                    ProtocolGenerator.getDeserFunctionShortName(errorSymbol),
-                    getErrorBodyLocation(context, "body"));
+
+            if (SerdeElision.forModel(context.getModel()).mayElide(error)) {
+                writer.write("const deserialized: any = _json($L);",
+                getErrorBodyLocation(context, "body"));
+            } else {
+                writer.write("const deserialized: any = $L($L, context);",
+                ProtocolGenerator.getDeserFunctionShortName(errorSymbol),
+                getErrorBodyLocation(context, "body"));
+            }
 
             // Then load it into the object with additional error and response properties.
             writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
@@ -598,4 +611,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             OperationShape operation,
             StructureShape outputStructure
     );
+
+    /**
+     * See {@link software.amazon.smithy.typescript.codegen.validation.SerdeElision}.
+     *
+     * @return whether protocol implementation is compatible with serde elision.
+     */
+    protected boolean enableSerdeElision() {
+        return false;
+    }
 }

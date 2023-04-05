@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -305,13 +306,19 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
         String methodLongName =
                 ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
 
-        writer.addImport(symbol, symbol.getName());
-        writer.writeDocs(methodLongName);
-        writer.openBlock("const $L = (\n"
-                       + "  output: any,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): $T => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
-        writer.write("");
+        boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(shape);
+        if (mayElide) {
+            writer.write("// " + methodName + " omitted.");
+            writer.write("");
+        } else {
+            writer.addImport(symbol, symbol.getName());
+            writer.writeDocs(methodLongName);
+            writer.openBlock("const $L = (\n"
+                           + "  output: any,\n"
+                           + "  context: __SerdeContext\n"
+                           + "): $T => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
+            writer.write("");
+        }
     }
 
     @Override

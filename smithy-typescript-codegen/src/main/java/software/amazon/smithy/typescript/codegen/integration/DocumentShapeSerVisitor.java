@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -302,12 +303,18 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
 
         writer.addImport(symbol, symbol.getName());
 
-        writer.writeDocs(methodLongName);
-        writer.openBlock("const $L = (\n"
-                       + "  input: $T,\n"
-                       + "  context: __SerdeContext\n"
-                       + "): any => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
-        writer.write("");
+        boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(shape);
+        if (mayElide) {
+            writer.write("// " + methodName + " omitted.");
+            writer.write("");
+        } else {
+            writer.writeDocs(methodLongName);
+            writer.openBlock("const $L = (\n"
+                        + "  input: $T,\n"
+                        + "  context: __SerdeContext\n"
+                        + "): any => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
+            writer.write("");
+        }
     }
 
     @Override

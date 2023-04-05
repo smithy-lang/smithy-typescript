@@ -364,7 +364,6 @@ public final class HttpProtocolGeneratorUtils {
             }
 
             // Error responses must be at least BaseException interface
-            SymbolReference baseExceptionReference = getClientBaseException(context);
             errorCodeGenerator.accept(context);
 
             Runnable defaultErrorHandler = () -> {
@@ -376,18 +375,15 @@ public final class HttpProtocolGeneratorUtils {
                     writer.write("const parsedBody = await parseBody(output.body, context);");
                 }
 
-                writer.addImport("throwDefaultError", "throwDefaultError", "@aws-sdk/smithy-client");
-
                 // Get the protocol specific error location for retrieving contents.
                 String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                writer.openBlock("throwDefaultError({", "})", () -> {
+                writer.openBlock("return throwDefaultError({", "})", () -> {
                     writer.write("output,");
                     if (errorLocation.equals("parsedBody")) {
                         writer.write("parsedBody,");
                     } else {
                         writer.write("parsedBody: $L,", errorLocation);
                     }
-                    writer.write("exceptionCtor: $T,", baseExceptionReference);
                     writer.write("errorCode");
                 });
             };
@@ -465,7 +461,7 @@ public final class HttpProtocolGeneratorUtils {
     /**
      * Construct a symbol reference of client's base exception class.
      */
-    private static SymbolReference getClientBaseException(GenerationContext context) {
+    public static SymbolReference getClientBaseException(GenerationContext context) {
         ServiceShape service = context.getService();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         String serviceExceptionName = symbolProvider.toSymbol(service).getName()

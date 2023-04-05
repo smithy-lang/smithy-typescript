@@ -75,6 +75,7 @@ import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
+import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SetUtils;
@@ -162,8 +163,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     @Override
     public void generateSharedComponents(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("map", "__map", "@aws-sdk/smithy-client");
-        writer.write("const map = __map");
+        writer.addImport("map", null, "@aws-sdk/smithy-client");
+
+        if (context.getSettings().generateClient()) {
+            writer.addImport("withBaseException", null, "@aws-sdk/smithy-client");
+            SymbolReference exception = HttpProtocolGeneratorUtils.getClientBaseException(context);
+            writer.write("const throwDefaultError = withBaseException($T);", exception);
+        }
 
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
         serializingErrorShapes.forEach(error -> generateErrorSerializer(context, error));
@@ -1348,6 +1354,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case PAYLOAD:
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
+
+                boolean mayElideInput = SerdeElision.forModel(context.getModel())
+                    .setEnabledForModel(enableSerdeElision() && !context.getSettings().generateServerSdk())
+                    .mayElide(target);
+
+                if (mayElideInput) {
+                    return "_json(" + dataSource + ")";
+                }
+
                 return ProtocolGenerator.getSerFunctionShortName(symbol)
                         + "(" + dataSource + ", context)";
             default:
@@ -2088,7 +2103,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
 
             List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
-
             // Track all shapes bound to the document so their deserializers may be generated.
             documentBindings.forEach(binding -> {
                 Shape target = model.expectShape(binding.getMember().getTarget());
@@ -2674,6 +2688,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case PAYLOAD:
                 // Redirect to a deserialization function.
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
+
+                boolean mayElideOutput = SerdeElision.forModel(context.getModel())
+                    .setEnabledForModel(enableSerdeElision() && !context.getSettings().generateServerSdk())
+                    .mayElide(target);
+
+                if (mayElideOutput) {
+                    return "_json(" + dataSource + ")";
+                }
+
                 return ProtocolGenerator.getDeserFunctionShortName(symbol)
                         + "(" + dataSource + ", context)";
             default:
@@ -2858,4 +2881,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @return true if this protocol disallows string epoch timestamps in payloads.
      */
     protected abstract boolean requiresNumericEpochSecondsInPayload();
+
+    /**
+     * Implement a return true if the protocol allows elision of serde functions
+     * as defined in {@link SerdeElision}.
+     *
+     * @return whether protocol implementation is compatible with serde elision.
+     */
+    protected boolean enableSerdeElision() {
+        return false;
+    }
 }
