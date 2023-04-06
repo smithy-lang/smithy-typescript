@@ -263,17 +263,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", responseType, () -> {
 
-                    writeEmptyEndpoint(context);
+            writeEmptyEndpoint(context);
 
-                    writer.openBlock("switch (input.name) {", "}", () -> {
+            writer.openBlock("switch (input.name) {", "}", () -> {
                 for (final Shape shape : new TreeSet<>(context.getModel().getShapesWithTrait(HttpErrorTrait.class))) {
                     StructureShape errorShape = shape.asStructureShape().orElseThrow(IllegalArgumentException::new);
-                            writer.openBlock("case $S: {", "}", errorShape.getId().getName(), () -> {
+                    writer.openBlock("case $S: {", "}", errorShape.getId().getName(), () -> {
                         generateErrorSerializationImplementation(context, errorShape, responseType, bindingIndex);
-                            });
-                        }
                     });
-                });
+                }
+            });
+        });
         writer.write("");
     }
 
@@ -318,8 +318,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     private void generateUriSpec(GenerationContext context,
-            OperationShape operation,
-            HttpTrait httpTrait) {
+                                 OperationShape operation,
+                                 HttpTrait httpTrait) {
         TypeScriptWriter writer = context.getWriter();
 
         String serviceName = context.getService().getId().getName();
@@ -372,8 +372,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.addImport("serializeFrameworkException", null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
-                        ProtocolGenerator.getSanitizedName(getName())).toString());
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(getName())).toString());
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
@@ -384,12 +384,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (context.getSettings().isDisableDefaultValidation()) {
             writer.write("export const get$L = <Context>(service: $T<Context>, "
-                    + "customizer: __ValidationCustomizer<$T>): "
-                    + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
+                            + "customizer: __ValidationCustomizer<$T>): "
+                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     handlerSymbol.getName(), serviceSymbol, operationsSymbol);
         } else {
             writer.write("export const get$L = <Context>(service: $T<Context>): "
-                    + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
+                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     handlerSymbol.getName(), serviceSymbol);
         }
         writer.indent();
@@ -397,21 +397,21 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateServiceMux(context);
         writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __ServiceException> = "
-                + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
-                    writer.openBlock("switch (op) {", "}", () -> {
-                        operations.stream()
-                                .filter(o -> o.getTrait(HttpTrait.class).isPresent())
-                                .forEach(writeOperationCase(writer, symbolProvider));
-                    });
-                });
+                       + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
+            writer.openBlock("switch (op) {", "}", () -> {
+                operations.stream()
+                        .filter(o -> o.getTrait(HttpTrait.class).isPresent())
+                        .forEach(writeOperationCase(writer, symbolProvider));
+            });
+        });
 
         if (!context.getSettings().isDisableDefaultValidation()) {
             writer.addImport("generateValidationSummary", "__generateValidationSummary", "@aws-smithy/server-common");
             writer.addImport("generateValidationMessage", "__generateValidationMessage", "@aws-smithy/server-common");
             writer.openBlock("const customizer: __ValidationCustomizer<$T> = (ctx, failures) => {", "};",
-                    operationsSymbol,
-                    () -> {
-                        writeDefaultValidationCustomizer(writer);
+                operationsSymbol,
+                () -> {
+                    writeDefaultValidationCustomizer(writer);
                 }
             );
         }
@@ -427,8 +427,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.addImport("serializeFrameworkException", null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
-                        ProtocolGenerator.getSanitizedName(getName())).toString());
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(getName())).toString());
         writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
         writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
 
@@ -440,12 +440,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (context.getSettings().isDisableDefaultValidation()) {
             writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>, "
-                    + "customizer: __ValidationCustomizer<$S>): "
-                    + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
+                       + "customizer: __ValidationCustomizer<$S>): "
+                       + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     operationHandlerSymbol.getName(), inputType, outputType, operationSymbol.getName());
         } else {
             writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>): "
-                    + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
+                       + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     operationHandlerSymbol.getName(), inputType, outputType);
         }
         writer.indent();
@@ -456,9 +456,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.addImport("generateValidationSummary", "__generateValidationSummary", "@aws-smithy/server-common");
             writer.addImport("generateValidationMessage", "__generateValidationMessage", "@aws-smithy/server-common");
             writer.openBlock("const customizer: __ValidationCustomizer<$S> = (ctx, failures) => {", "};",
-                    operationSymbol.getName(),
-                    () -> {
-                        writeDefaultValidationCustomizer(writer);
+                operationSymbol.getName(),
+                () -> {
+                    writeDefaultValidationCustomizer(writer);
                 }
             );
         }
@@ -531,28 +531,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  input: $T,\n"
                 + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", methodName, outputType, responseType, () -> {
-                    writeEmptyEndpoint(context);
-                    writeOperationStatusCode(context, operation, bindingIndex, trait);
-                    writeResponseHeaders(context, operation, bindingIndex,
-                            () -> writeDefaultOutputHeaders(context, operation));
+            writeEmptyEndpoint(context);
+            writeOperationStatusCode(context, operation, bindingIndex, trait);
+            writeResponseHeaders(context, operation, bindingIndex,
+                    () -> writeDefaultOutputHeaders(context, operation));
 
-                    List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
-                    if (!bodyBindings.isEmpty()) {
-                        // Track all shapes bound to the body so their serializers may be generated.
-                        bodyBindings.stream()
-                                .map(HttpBinding::getMember)
-                                .map(member -> context.getModel().expectShape(member.getTarget()))
-                                .forEach(serializingDocumentShapes::add);
-                    }
+            List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
+            if (!bodyBindings.isEmpty()) {
+                // Track all shapes bound to the body so their serializers may be generated.
+                bodyBindings.stream()
+                        .map(HttpBinding::getMember)
+                        .map(member -> context.getModel().expectShape(member.getTarget()))
+                        .forEach(serializingDocumentShapes::add);
+            }
 
-                    calculateContentLength(context);
+            calculateContentLength(context);
 
-                    writer.openBlock("return new $T({", "});", responseType, () -> {
-                        writer.write("headers,");
-                        writer.write("body,");
-                        writer.write("statusCode,");
-                    });
-                });
+            writer.openBlock("return new $T({", "});", responseType, () -> {
+                writer.write("headers,");
+                writer.write("body,");
+                writer.write("statusCode,");
+            });
+        });
         writer.write("");
 
         serializingErrorShapes.addAll(OperationIndex.of(context.getModel()).getErrors(operation, context.getService()));
@@ -564,11 +564,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("calculateBodyLength", null, "@aws-sdk/util-body-length-node");
         writer.openBlock("if (body && Object.keys(headers).map((str) => str.toLowerCase())"
                 + ".indexOf('content-length') === -1) {", "}", () -> {
-                    writer.write("const length = calculateBodyLength(body);");
-                    writer.openBlock("if (length !== undefined) {", "}", () -> {
-                        writer.write("headers = { ...headers, 'content-length': String(length) };");
-                    });
-                });
+            writer.write("const length = calculateBodyLength(body);");
+            writer.openBlock("if (length !== undefined) {", "}", () -> {
+                writer.write("headers = { ...headers, 'content-length': String(length) };");
+            });
+        });
 
     }
 
@@ -587,16 +587,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  input: $T,\n"
                 + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
-                    writeEmptyEndpoint(context);
-                    generateErrorSerializationImplementation(context, error, responseType, bindingIndex);
-                });
+            writeEmptyEndpoint(context);
+            generateErrorSerializationImplementation(context, error, responseType, bindingIndex);
+        });
         writer.write("");
     }
 
     private void generateErrorSerializationImplementation(GenerationContext context,
-            StructureShape error,
-            SymbolReference responseType,
-            HttpBindingIndex bindingIndex) {
+                                                          StructureShape error,
+                                                          SymbolReference responseType,
+                                                          HttpBindingIndex bindingIndex) {
         TypeScriptWriter writer = context.getWriter();
         writeErrorStatusCode(context, error);
         writeResponseHeaders(context, error, bindingIndex, () -> writeDefaultErrorHeaders(context, error));
@@ -658,46 +658,46 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  context: $L\n"
                        + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
 
-                // Get the hostname, path, port, and scheme from client's resolved endpoint. Then construct the request from
-                // them. The client's resolved endpoint can be default one or supplied by users.
-                writer.write("const {hostname, protocol = $S, port, path: basePath} = await context.endpoint();", "https");
+            // Get the hostname, path, port, and scheme from client's resolved endpoint. Then construct the request from
+            // them. The client's resolved endpoint can be default one or supplied by users.
+            writer.write("const {hostname, protocol = $S, port, path: basePath} = await context.endpoint();", "https");
 
-                writeRequestHeaders(context, operation, bindingIndex);
-                writeResolvedPath(context, operation, bindingIndex, trait);
-                boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
+            writeRequestHeaders(context, operation, bindingIndex);
+            writeResolvedPath(context, operation, bindingIndex, trait);
+            boolean hasQueryComponents = writeRequestQueryString(context, operation, bindingIndex, trait);
 
-                List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex);
-                if (!bodyBindings.isEmpty()) {
-                    // Track all shapes bound to the body so their serializers may be generated.
-                    bodyBindings.stream()
-                            .map(HttpBinding::getMember)
-                            .map(member -> context.getModel().expectShape(member.getTarget()))
-                            .filter(shape -> !EventStreamGenerator.isEventStreamShape(shape))
-                            .forEach(serializingDocumentShapes::add);
-                }
+            List<HttpBinding> bodyBindings = writeRequestBody(context, operation, bindingIndex);
+            if (!bodyBindings.isEmpty()) {
+                // Track all shapes bound to the body so their serializers may be generated.
+                bodyBindings.stream()
+                        .map(HttpBinding::getMember)
+                        .map(member -> context.getModel().expectShape(member.getTarget()))
+                        .filter(shape -> !EventStreamGenerator.isEventStreamShape(shape))
+                        .forEach(serializingDocumentShapes::add);
+            }
 
-                boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
+            boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
+            if (hasHostPrefix) {
+                HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+            }
+            writer.openBlock("return new $T({", "});", requestType, () -> {
+                writer.write("protocol,");
                 if (hasHostPrefix) {
-                    HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+                    writer.write("hostname: resolvedHostname,");
+                } else {
+                    writer.write("hostname,");
                 }
-                writer.openBlock("return new $T({", "});", requestType, () -> {
-                    writer.write("protocol,");
-                    if (hasHostPrefix) {
-                        writer.write("hostname: resolvedHostname,");
-                    } else {
-                        writer.write("hostname,");
-                    }
-                    writer.write("port,");
-                    writer.write("method: $S,", trait.getMethod());
-                    writer.write("headers,");
-                    writer.write("path: resolvedPath,");
-                    if (hasQueryComponents) {
-                        writer.write("query,");
-                    }
-                    // Always set the body,
-                    writer.write("body,");
-                });
+                writer.write("port,");
+                writer.write("method: $S,", trait.getMethod());
+                writer.write("headers,");
+                writer.write("path: resolvedPath,");
+                if (hasQueryComponents) {
+                    writer.write("query,");
+                }
+                // Always set the body,
+                writer.write("body,");
             });
+        });
 
         writer.write("");
     }
@@ -744,9 +744,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         final boolean useEndpointsV2 = context.getService().hasTrait(EndpointRuleSetTrait.class);
         final Map<String, String> contextParams = useEndpointsV2
-                ? new RuleSetParameterFinder(context.getService())
-                        .getContextParams(context.getModel().getShape(operation.getInputShape()).get())
-                : Collections.emptyMap();
+            ? new RuleSetParameterFinder(context.getService())
+                .getContextParams(context.getModel().getShape(operation.getInputShape()).get())
+            : Collections.emptyMap();
 
         // Always write the bound path, but only the actual segments.
         writer.write("let resolvedPath = `$L` + $S;",
@@ -765,7 +765,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // We use this logic plus a temporary control-list, since it is not yet known
                         // how many services and param names will have this issue.
                         return !(isContextParam
-                                && contextParamDeduplicationParamControlSet.contains(content));
+                            && contextParamDeduplicationParamControlSet.contains(content));
                     })
                     .map(Segment::toString)
                     .collect(Collectors.joining("/"))
@@ -782,12 +782,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
 
                 String labelValueProvider = "() => " + getInputValue(
-                        context,
-                        binding.getLocation(),
-                        "input." + memberName + "!",
-                        binding.getMember(),
-                        target
-                    );
+                    context,
+                    binding.getLocation(),
+                    "input." + memberName + "!",
+                    binding.getMember(),
+                    target
+                );
 
                 // Get the correct label to use.
                 Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
@@ -885,11 +885,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (isRequired) {
                 // __expectNonNull is immediately invoked and not inside a function.
                 writer.write(
-                        "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L],",
-                        binding.getLocationName(),
-                        memberName,
-                        memberName,
-                        queryValue // no idempotency token default for required members
+                    "$S: [__expectNonNull(input.$L, `$L`) != null, () => $L],",
+                    binding.getLocationName(),
+                    memberName,
+                    memberName,
+                    queryValue // no idempotency token default for required members
                 );
             } else {
                 // undefined check with lazy eval
@@ -932,8 +932,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             closing = "};";
         } else {
             opening = normalHeaderCount > 0
-                    ? "const headers: any = map({}, isSerializableHeaderValue, {"
-                    : "const headers: any = map({";
+                ? "const headers: any = map({}, isSerializableHeaderValue, {"
+                : "const headers: any = map({";
             closing = "});";
         }
 
@@ -1010,17 +1010,17 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Shape target = model.expectShape(prefixMap.getValue().getTarget());
         // Iterate through each entry in the member.
         writer.openBlock("...($1L !== undefined) && Object.keys($1L).reduce(", "),", memberLocation,
-                () -> {
-                    writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
-                        () -> {
-                            // Use a ! since we already validated the input member is defined above.
-                            String headerValue = getInputValue(context, binding.getLocation(),
-                                    memberLocation + "![suffix]", binding.getMember(), target);
-                            // Append the prefix to key.
-                            writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
-                                    binding.getLocationName().toLowerCase(Locale.US), headerValue);
-                            writer.write("return acc;");
-                        });
+            () -> {
+                writer.openBlock("(acc: any, suffix: string) => {", "}, {}",
+                    () -> {
+                        // Use a ! since we already validated the input member is defined above.
+                        String headerValue = getInputValue(context, binding.getLocation(),
+                                memberLocation + "![suffix]", binding.getMember(), target);
+                        // Append the prefix to key.
+                        writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
+                                binding.getLocationName().toLowerCase(Locale.US), headerValue);
+                        writer.write("return acc;");
+                    });
             }
         );
     }
@@ -1378,10 +1378,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String valueString = getInputValue(context, bindingType, "value", mapMember,
                 model.expectShape(mapMember.getTarget()));
         return "Object.entries(" + dataSource + " || {}).reduce("
-                + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => {"
-                +   "acc[key] = " + valueString + ";"
-                +   "return acc;"
-                + "}, {})";
+            + "(acc: any, [key, value]: [string, " + symbolProvider.toSymbol(mapMember) + "]) => {"
+            +   "acc[key] = " + valueString + ";"
+            +   "return acc;"
+            + "}, {})";
     }
 
     /**
@@ -1539,8 +1539,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     /**
      * Writes the code needed to serialize a protocol output document.
      *
-     * <p>
-     * Implementations of this method are expected to set a value to the
+     * <p>Implementations of this method are expected to set a value to the
      * {@code body} variable that will be serialized as the request body.
      * This variable will already be defined in scope.
      *
@@ -1722,23 +1721,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  output: $T,\n"
                 + "  context: $L\n"
                 + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
-                    handleContentType(context, operation, bindingIndex);
-                    handleAccept(context, operation, bindingIndex);
-                    // Start deserializing the response.
-                    writer.openBlock("const contents: any = map({", "});", () -> {
-                        readRequestHeaders(context, operation, bindingIndex, "output");
-                    });
-                    readQueryString(context, operation, bindingIndex);
-                    readPath(context, operation, bindingIndex, trait);
-                    readHost(context, operation);
-                    List<HttpBinding> documentBindings = readRequestBody(context, operation, bindingIndex);
-                    // Track all shapes bound to the document so their deserializers may be generated.
-                    documentBindings.forEach(binding -> {
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        deserializingDocumentShapes.add(target);
-                    });
-                    writer.write("return contents;");
-                });
+            handleContentType(context, operation, bindingIndex);
+            handleAccept(context, operation, bindingIndex);
+            // Start deserializing the response.
+            writer.openBlock("const contents: any = map({", "});", () -> {
+                readRequestHeaders(context, operation, bindingIndex, "output");
+            });
+            readQueryString(context, operation, bindingIndex);
+            readPath(context, operation, bindingIndex, trait);
+            readHost(context, operation);
+            List<HttpBinding> documentBindings = readRequestBody(context, operation, bindingIndex);
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = model.expectShape(binding.getMember().getTarget());
+                deserializingDocumentShapes.add(target);
+            });
+            writer.write("return contents;");
+        });
         writer.write("");
     }
 
@@ -1893,17 +1892,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             "@aws-smithy/server-common");
                     writer.write("let queryValue: string;");
                     writer.openBlock("if (Array.isArray(query[$S])) {", "}",
-                            binding.getLocationName(),
-                            () -> {
-                                writer.openBlock("if (query[$S].length === 1) {", "}",
-                                        binding.getLocationName(),
-                                        () -> {
-                                            writer.write("queryValue = query[$S][0];", binding.getLocationName());
-                                        });
-                                writer.openBlock("else {", "}", () -> {
-                                    writer.write("throw new __SerializationException();");
-                                });
+                        binding.getLocationName(),
+                        () -> {
+                            writer.openBlock("if (query[$S].length === 1) {", "}",
+                                binding.getLocationName(),
+                                () -> {
+                                    writer.write("queryValue = query[$S][0];", binding.getLocationName());
+                                }
+                            );
+                            writer.openBlock("else {", "}", () -> {
+                                writer.write("throw new __SerializationException();");
                             });
+                        });
                     writer.openBlock("else {", "}", () -> {
                         writer.write("queryValue = query[$S] as string;", binding.getLocationName());
                     });
@@ -1950,7 +1950,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     writer.write("queryValue = value as string;");
                 });
                 parsedValue = getOutputValue(context, mappedBinding.getLocation(),
-                        "queryValue", target.getValue(), valueShape);
+                                "queryValue", target.getValue(), valueShape);
             }
             writer.write("parsedQuery[key] = $L;", parsedValue);
         });
@@ -2069,34 +2069,34 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Handle the general response.
         writer.writeDocs(methodLongName);
         writer.openBlock("export const $L = async(\n"
-                + "  output: $T,\n"
-                + "  context: $L\n"
-                + "): Promise<$T> => {", "}", methodName, responseType, contextType, outputType, () -> {
-                    // Redirect error deserialization to the dispatcher if we receive an error range
-                    // status code that's not the modeled code (300 or higher). This allows for
-                    // returning other 2XX codes that don't match the defined value.
-                    writer.openBlock("if (output.statusCode !== $L && output.statusCode >= 300) {", "}", trait.getCode(),
-                            () -> writer.write("return $L(output, context);", errorMethodName));
+                       + "  output: $T,\n"
+                       + "  context: $L\n"
+                       + "): Promise<$T> => {", "}", methodName, responseType, contextType, outputType, () -> {
+            // Redirect error deserialization to the dispatcher if we receive an error range
+            // status code that's not the modeled code (300 or higher). This allows for
+            // returning other 2XX codes that don't match the defined value.
+            writer.openBlock("if (output.statusCode !== $L && output.statusCode >= 300) {", "}", trait.getCode(),
+                    () -> writer.write("return $L(output, context);", errorMethodName));
 
-                    // Start deserializing the response.
-                    writer.openBlock("const contents: any = map({", "});", () -> {
-                        writer.write("$$metadata: deserializeMetadata(output),");
+            // Start deserializing the response.
+            writer.openBlock("const contents: any = map({", "});", () -> {
+                writer.write("$$metadata: deserializeMetadata(output),");
 
-                        readResponseHeaders(context, operation, bindingIndex, "output");
-                    });
+                readResponseHeaders(context, operation, bindingIndex, "output");
+            });
 
-                    List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
+            List<HttpBinding> documentBindings = readResponseBody(context, operation, bindingIndex);
 
-                    // Track all shapes bound to the document so their deserializers may be generated.
-                    documentBindings.forEach(binding -> {
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        if (!EventStreamGenerator.isEventStreamShape(target)) {
-                            deserializingDocumentShapes.add(target);
-                        }
-                    });
+            // Track all shapes bound to the document so their deserializers may be generated.
+            documentBindings.forEach(binding -> {
+                Shape target = model.expectShape(binding.getMember().getTarget());
+                if (!EventStreamGenerator.isEventStreamShape(target)) {
+                    deserializingDocumentShapes.add(target);
+                }
+            });
 
-                    writer.write("return contents;");
-                });
+            writer.write("return contents;");
+        });
         writer.write("");
         // Write out the error deserialization dispatcher.
         Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
@@ -2119,29 +2119,29 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.writeDocs(errorDeserMethodLongName);
         writer.openBlock("const $L = async (\n"
-                + "  $L: any,\n"
-                + "  context: __SerdeContext\n"
-                + "): Promise<$T> => {", "};",
+                       + "  $L: any,\n"
+                       + "  context: __SerdeContext\n"
+                       + "): Promise<$T> => {", "};",
                 errorDeserMethodName, outputName, errorSymbol, () -> {
-                    writer.openBlock("const contents: any = map({", "});", () -> {
-                        readResponseHeaders(context, error, bindingIndex, outputName);
-                    });
+            writer.openBlock("const contents: any = map({", "});", () -> {
+                readResponseHeaders(context, error, bindingIndex, outputName);
+            });
 
-                    List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
+            List<HttpBinding> documentBindings = readErrorResponseBody(context, error, bindingIndex);
             // Track all shapes bound to the document so their deserializers may be generated.
-                    documentBindings.forEach(binding -> {
-                        Shape target = model.expectShape(binding.getMember().getTarget());
-                        deserializingDocumentShapes.add(target);
-                    });
-                    writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
-                        writer.write("$$metadata: deserializeMetadata($L),", outputName);
-                        writer.write("...contents");
-                    });
-                    String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
-                    writer.addImport("decorateServiceException", "__decorateServiceException",
-                            TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
-                    writer.write("return __decorateServiceException(exception, $L);", errorLocation);
-                });
+            documentBindings.forEach(binding -> {
+                Shape target = model.expectShape(binding.getMember().getTarget());
+                deserializingDocumentShapes.add(target);
+            });
+            writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
+                writer.write("$$metadata: deserializeMetadata($L),", outputName);
+                writer.write("...contents");
+            });
+            String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
+            writer.addImport("decorateServiceException", "__decorateServiceException",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+            writer.write("return __decorateServiceException(exception, $L);", errorLocation);
+        });
 
         writer.write("");
     }
@@ -2257,9 +2257,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     MapShape prefixMap = model.expectShape(binding.getMember().getTarget()).asMapShape().get();
                     Shape target = model.expectShape(prefixMap.getValue().getTarget());
                     String headerValue = getOutputValue(context, binding.getLocation(),
-                            outputName + ".headers[header]", binding.getMember(), target);
+                        outputName + ".headers[header]", binding.getMember(), target);
                     writer.write("acc[header.substring($L)] = $L;",
-                            headerLocation.length(), headerValue);
+                        headerLocation.length(), headerValue);
                     writer.write("return acc;");
                 });
             });

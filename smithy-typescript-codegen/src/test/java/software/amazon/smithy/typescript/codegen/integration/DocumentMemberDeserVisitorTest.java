@@ -67,11 +67,11 @@ public class DocumentMemberDeserVisitorTest {
         mockContext.setModel(Model.builder().addShapes(shape, fakeStruct).build());
         DocumentMemberDeserVisitor visitor =
                 new DocumentMemberDeserVisitor(mockContext, DATA_SOURCE, FORMAT) {
-            @Override
-            protected MemberShape getMemberShape() {
-                return memberShape;
-            }
-        };
+                    @Override
+                    protected MemberShape getMemberShape() {
+                        return memberShape;
+                    }
+                };
         assertThat(shape.accept(visitor), equalTo(expected));
     }
 
@@ -95,9 +95,9 @@ public class DocumentMemberDeserVisitorTest {
                 {ShortShape.builder().id(id).build(), "__expectShort(" + DATA_SOURCE + ")", source},
                 {StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")", source},
                 {
-                        StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                        "new __LazyJsonString(" + DATA_SOURCE + ")",
-                        source
+                    StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
+                    "new __LazyJsonString(" + DATA_SOURCE + ")",
+                    source
                 },
                 {BlobShape.builder().id(id).build(), "context.base64Decoder(" + DATA_SOURCE + ")", source},
                 {DocumentShape.builder().id(id).build(), delegate, source},
@@ -106,24 +106,24 @@ public class DocumentMemberDeserVisitorTest {
                 {MapShape.builder().id(id).key(key).value(value).build(), delegate, source},
                 {StructureShape.builder().id(id).build(), delegate, source},
                 {
-                        TimestampShape.builder().id(id).build(),
-                        "__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
-                        source
+                    TimestampShape.builder().id(id).build(),
+                    "__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
+                    source
                 },
                 {
-                        TimestampShape.builder().id(id).build(),
-                        "__expectNonNull(__parseRfc3339DateTime(" + DATA_SOURCE + "))",
-                        source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.DATE_TIME)).build()
+                    TimestampShape.builder().id(id).build(),
+                    "__expectNonNull(__parseRfc3339DateTime(" + DATA_SOURCE + "))",
+                    source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.DATE_TIME)).build()
                 },
                 {
-                        TimestampShape.builder().id(id).build(),
-                        "__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
-                        source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.HTTP_DATE)).build()
+                    TimestampShape.builder().id(id).build(),
+                    "__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
+                    source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.HTTP_DATE)).build()
                 },
                 {
-                        UnionShape.builder().id(id).addMember(member).build(),
-                        "de_Foo(__expectUnion(" + DATA_SOURCE + "), context)",
-                        source
+                    UnionShape.builder().id(id).addMember(member).build(),
+                    "de_Foo(__expectUnion(" + DATA_SOURCE + "), context)",
+                    source
                 },
         });
     }
@@ -163,10 +163,10 @@ public class DocumentMemberDeserVisitorTest {
             if (shape instanceof CollectionShape) {
                 MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
                 return collectionMock.toBuilder().putProperty("shape",
-                        ListShape.builder().id(id).member(member).build()).build();
+                    ListShape.builder().id(id).member(member).build()).build();
             }
             return mock.toBuilder().putProperty("shape",
-                    StructureShape.builder().id(id).build()).build();
+                StructureShape.builder().id(id).build()).build();
         }
     }
 }

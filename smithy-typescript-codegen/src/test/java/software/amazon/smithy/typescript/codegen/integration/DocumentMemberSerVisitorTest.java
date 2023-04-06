@@ -80,8 +80,8 @@ public class DocumentMemberSerVisitorTest {
                 {ShortShape.builder().id(id).build(), DATA_SOURCE},
                 {StringShape.builder().id(id).build(), DATA_SOURCE},
                 {
-                        StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                        "__LazyJsonString.fromObject(" + DATA_SOURCE + ")"
+                    StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
+                    "__LazyJsonString.fromObject(" + DATA_SOURCE + ")"
                 },
                 {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
                 {DocumentShape.builder().id(id).build(), delegate},
@@ -128,10 +128,10 @@ public class DocumentMemberSerVisitorTest {
             if (shape instanceof CollectionShape) {
                 MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
                 return collectionMock.toBuilder().putProperty("shape",
-                        ListShape.builder().id(id).member(member).build()).build();
+                    ListShape.builder().id(id).member(member).build()).build();
             }
             return mock.toBuilder().putProperty("shape",
-                    StructureShape.builder().id(id).build()).build();
+                StructureShape.builder().id(id).build()).build();
         }
     }
 }

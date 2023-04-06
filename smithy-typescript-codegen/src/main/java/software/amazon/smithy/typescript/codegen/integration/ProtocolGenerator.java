@@ -114,8 +114,8 @@ public interface ProtocolGenerator {
                     .collect(Collectors.joining(", "));
             throw new CodegenException(String.format(
                     "All of the protocols generated for a service must be runtime compatible, but "
-                            + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
-                            + "set of compatible protocols using the `protocols` option when generating %s.",
+                    + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
+                    + "set of compatible protocols using the `protocols` option when generating %s.",
                     getProtocol().getName(), protocolNames, service.getId()));
         }
 
