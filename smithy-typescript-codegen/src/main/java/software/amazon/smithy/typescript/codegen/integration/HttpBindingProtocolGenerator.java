@@ -658,8 +658,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                        + "  context: $L\n"
                        + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
 
-            // Get the hostname, path, port, and scheme from client's resolved endpoint. Then construct the request from
-            // them. The client's resolved endpoint can be default one or supplied by users.
+            // Get the hostname, path, port, and scheme from client's resolved endpoint.
+            // Then construct the request from them. The client's resolved endpoint can
+            // be default one or supplied by users.
             writer.write("const {hostname, protocol = $S, port, path: basePath} = await context.endpoint();", "https");
 
             writeRequestHeaders(context, operation, bindingIndex);
@@ -2071,7 +2072,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.openBlock("export const $L = async(\n"
                        + "  output: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> => {", "}", methodName, responseType, contextType, outputType, () -> {
+                       + "): Promise<$T> => {", "}",
+                       methodName, responseType, contextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher if we receive an error range
             // status code that's not the modeled code (300 or higher). This allows for
             // returning other 2XX codes that don't match the defined value.
