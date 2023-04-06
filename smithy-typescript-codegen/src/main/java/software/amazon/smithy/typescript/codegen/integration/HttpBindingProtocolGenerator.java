@@ -397,7 +397,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateServiceMux(context);
         writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __ServiceException> = "
-                        + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
+                       + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
             writer.openBlock("switch (op) {", "}", () -> {
                 operations.stream()
                         .filter(o -> o.getTrait(HttpTrait.class).isPresent())
@@ -440,12 +440,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (context.getSettings().isDisableDefaultValidation()) {
             writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>, "
-                            + "customizer: __ValidationCustomizer<$S>): "
-                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
+                       + "customizer: __ValidationCustomizer<$S>): "
+                       + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     operationHandlerSymbol.getName(), inputType, outputType, operationSymbol.getName());
         } else {
             writer.write("export const get$L = <Context>(operation: __Operation<$T, $T, Context>): "
-                            + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
+                       + "__ServiceHandler<Context, __HttpRequest, __HttpResponse> => {",
                     operationHandlerSymbol.getName(), inputType, outputType);
         }
         writer.indent();
@@ -642,19 +642,25 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
+
+        // e.g., se_ES
+        String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
         // e.g., serializeAws_restJson1_1ExecuteStatement
-        String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
+        String methodLongName = ProtocolGenerator.getSerFunctionName(symbol, getName());
+
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
+        writer.writeDocs(methodLongName);
         writer.openBlock("export const $L = async(\n"
                        + "  input: $T,\n"
                        + "  context: $L\n"
                        + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
 
-            // Get the hostname, path, port, and scheme from client's resolved endpoint. Then construct the request from
-            // them. The client's resolved endpoint can be default one or supplied by users.
+            // Get the hostname, path, port, and scheme from client's resolved endpoint.
+            // Then construct the request from them. The client's resolved endpoint can
+            // be default one or supplied by users.
             writer.write("const {hostname, protocol = $S, port, path: basePath} = await context.endpoint();", "https");
 
             writeRequestHeaders(context, operation, bindingIndex);
@@ -777,12 +783,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
 
                 String labelValueProvider = "() => " + getInputValue(
-                        context,
-                        binding.getLocation(),
-                        "input." + memberName + "!",
-                        binding.getMember(),
-                        target
-                    );
+                    context,
+                    binding.getLocation(),
+                    "input." + memberName + "!",
+                    binding.getMember(),
+                    target
+                );
 
                 // Get the correct label to use.
                 Segment uriLabel = uriLabels.stream().filter(s -> s.getContent().equals(memberName)).findFirst().get();
@@ -1342,7 +1348,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case PAYLOAD:
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
-                return ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName())
+                return ProtocolGenerator.getSerFunctionShortName(symbol)
                         + "(" + dataSource + ", context)";
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
@@ -1887,17 +1893,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             "@aws-smithy/server-common");
                     writer.write("let queryValue: string;");
                     writer.openBlock("if (Array.isArray(query[$S])) {", "}",
-                            binding.getLocationName(),
-                            () -> {
-                                writer.openBlock("if (query[$S].length === 1) {", "}",
-                                    binding.getLocationName(),
-                                    () -> {
-                                        writer.write("queryValue = query[$S][0];", binding.getLocationName());
-                                    });
-                                writer.openBlock("else {", "}", () -> {
-                                    writer.write("throw new __SerializationException();");
-                                });
+                        binding.getLocationName(),
+                        () -> {
+                            writer.openBlock("if (query[$S].length === 1) {", "}",
+                                binding.getLocationName(),
+                                () -> {
+                                    writer.write("queryValue = query[$S][0];", binding.getLocationName());
+                                }
+                            );
+                            writer.openBlock("else {", "}", () -> {
+                                writer.write("throw new __SerializationException();");
                             });
+                        });
                     writer.openBlock("else {", "}", () -> {
                         writer.write("queryValue = query[$S] as string;", binding.getLocationName());
                     });
@@ -2052,7 +2059,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Ensure that the response type is imported.
         writer.addUseImports(responseType);
         // e.g., deserializeAws_restJson1_1ExecuteStatement
-        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
+        String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
+        String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
@@ -2060,10 +2068,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 context.getModel(), operation);
 
         // Handle the general response.
+        writer.writeDocs(methodLongName);
         writer.openBlock("export const $L = async(\n"
                        + "  output: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> => {", "}", methodName, responseType, contextType, outputType, () -> {
+                       + "): Promise<$T> => {", "}",
+                       methodName, responseType, contextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher if we receive an error range
             // status code that's not the modeled code (300 or higher). This allows for
             // returning other 2XX codes that don't match the defined value.
@@ -2103,10 +2113,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         HttpBindingIndex bindingIndex = HttpBindingIndex.of(context.getModel());
         Model model = context.getModel();
         Symbol errorSymbol = symbolProvider.toSymbol(error);
-        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
-                context.getProtocolName()) + "Response";
+        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionShortName(errorSymbol) + "Res";
+        String errorDeserMethodLongName = ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName())
+                + "Res";
+
         String outputName = isErrorCodeInBody ? "parsedOutput" : "output";
 
+        writer.writeDocs(errorDeserMethodLongName);
         writer.openBlock("const $L = async (\n"
                        + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
@@ -2661,8 +2674,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case PAYLOAD:
                 // Redirect to a deserialization function.
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
-                return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
-                               + "(" + dataSource + ", context)";
+                return ProtocolGenerator.getDeserFunctionShortName(symbol)
+                        + "(" + dataSource + ", context)";
             default:
                 throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
         }

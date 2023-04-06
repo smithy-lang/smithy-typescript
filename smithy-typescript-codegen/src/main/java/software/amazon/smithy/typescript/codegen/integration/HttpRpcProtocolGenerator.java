@@ -110,15 +110,15 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             },
             serializingDocumentShapes
         );
-         // Error shapes that only referred in the error event of an eventstream
-         Set<StructureShape> errorEventShapes = new TreeSet<>();
-         eventStreamGenerator.generateEventStreamDeserializers(
-             context,
-             service,
-             errorEventShapes,
-             deserializingDocumentShapes,
-             isErrorCodeInBody
-         );
+        // Error shapes that only referred in the error event of an eventstream
+        Set<StructureShape> errorEventShapes = new TreeSet<>();
+        eventStreamGenerator.generateEventStreamDeserializers(
+            context,
+            service,
+            errorEventShapes,
+            deserializingDocumentShapes,
+            isErrorCodeInBody
+        );
         errorEventShapes.removeIf(deserializingErrorShapes::contains);
         errorEventShapes.forEach(error -> generateErrorDeserializer(context, error));
         generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
@@ -144,22 +144,23 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             // Get the hostname, port, and scheme from client's resolved endpoint. Then construct the request from
             // them. The client's resolved endpoint can be default one or supplied by users.
             writer.write("const {hostname, protocol = \"https\", port, path: basePath} = await context.endpoint();");
-            writer.openBlock("const contents: any = {", "};", () -> {
-                writer.write("protocol,");
-                writer.write("hostname,");
-                writer.write("port,");
-                writer.write("method: \"POST\",");
-                writer.write("path: basePath.endsWith(\"/\") ? basePath.slice(0, -1) + path : basePath + path,");
-                writer.write("headers,");
-            });
-            writer.openBlock("if (resolvedHostname !== undefined) {", "}", () -> {
-                writer.write("contents.hostname = resolvedHostname;");
-            });
-            writer.openBlock("if (body !== undefined) {", "}", () -> {
-                writer.write("contents.body = body;");
-            });
-            writer.write("return new $T(contents);", requestType);
-        });
+                writer.openBlock("const contents: any = {", "};", () -> {
+                    writer.write("protocol,");
+                    writer.write("hostname,");
+                    writer.write("port,");
+                    writer.write("method: \"POST\",");
+                    writer.write("path: basePath.endsWith(\"/\") ? basePath.slice(0, -1) + path : basePath + path,");
+                    writer.write("headers,");
+                });
+                writer.openBlock("if (resolvedHostname !== undefined) {", "}", () -> {
+                    writer.write("contents.hostname = resolvedHostname;");
+                });
+                writer.openBlock("if (body !== undefined) {", "}", () -> {
+                    writer.write("contents.body = body;");
+                });
+                writer.write("return new $T(contents);", requestType);
+            }
+        );
         writer.write("");
     }
 
@@ -219,16 +220,19 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
         writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
+        // e.g., se_ES
+        String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
         // e.g., serializeAws_restJson1_1ExecuteStatement
-        String methodName = ProtocolGenerator.getSerFunctionName(symbol, getName());
+        String methodLongName = ProtocolGenerator.getSerFunctionName(symbol, getName());
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
         String serdeContextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
+        writer.writeDocs(methodLongName);
         writer.openBlock("export const $L = async(\n"
-                       + "  input: $T,\n"
-                       + "  context: $L\n"
-                       + "): Promise<$T> => {", "}", methodName, inputType, serdeContextType, requestType, () -> {
+                    + "  input: $T,\n"
+                    + "  context: $L\n"
+                    + "): Promise<$T> => {", "}", methodName, inputType, serdeContextType, requestType, () -> {
             writeRequestHeaders(context, operation);
             boolean hasRequestBody = writeRequestBody(context, operation);
             boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
@@ -266,14 +270,14 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             StructureShape inputShape = context.getModel().expectShape(operation.getInput().get())
                     .asStructureShape().get();
             TypeScriptWriter writer = context.getWriter();
-             // Write the default `body` property.
-             writer.write("let body: any;");
+            // Write the default `body` property.
+            writer.write("let body: any;");
             if (EventStreamGenerator.hasEventStreamInput(context, operation)) {
                 // There must only one eventstream member in request structure.
                 MemberShape member = inputShape.members().stream().collect(Collectors.toList()).get(0);
                 Shape target = context.getModel().expectShape(member.getTarget());
                 Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
-                String serFunctionName = ProtocolGenerator.getSerFunctionName(targetSymbol, context.getProtocolName());
+                String serFunctionName = ProtocolGenerator.getSerFunctionShortName(targetSymbol);
                 String memberName = member.getMemberName();
                 writer.write("body = $L(input.$L, context);", serFunctionName, memberName);
             } else {
@@ -378,7 +382,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Ensure that the response type is imported.
         writer.addUseImports(responseType);
         // e.g., deserializeAws_restJson1_1ExecuteStatement
-        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
+        String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
+        String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = methodName + "Error";
         String serdeContextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
                 context.getModel(), operation);
@@ -386,6 +391,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
 
         // Handle the general response.
+        writer.writeDocs(methodLongName);
         writer.openBlock("export const $L = async(\n"
                        + "  output: $T,\n"
                        + "  context: $L\n"
@@ -420,12 +426,15 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol errorSymbol = symbolProvider.toSymbol(error);
-        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
-                context.getProtocolName()) + "Response";
+        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionShortName(errorSymbol) + "Res";
+        String errorDeserMethodLongName = ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName())
+                + "Res";
 
         // Add the error shape to the list to generate functions for, since we'll use that.
         deserializingDocumentShapes.add(error);
         String outputReference = isErrorCodeInBody ? "parsedOutput" : "output";
+
+        writer.writeDocs(errorDeserMethodLongName);
         writer.openBlock("const $L = async (\n"
                        + "  $L: any,\n"
                        + "  context: __SerdeContext\n"
@@ -441,7 +450,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.write("const body = parseBody($L.body, context);", outputReference);
             }
             writer.write("const deserialized: any = $L($L, context);",
-                    ProtocolGenerator.getDeserFunctionName(errorSymbol, context.getProtocolName()),
+                    ProtocolGenerator.getDeserFunctionShortName(errorSymbol),
                     getErrorBodyLocation(context, "body"));
 
             // Then load it into the object with additional error and response properties.
@@ -470,7 +479,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                         Shape target = context.getModel().expectShape(member.getTarget());
                         Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
                         writer.write("const contents = { $L: $L(output.body, context) };", member.getMemberName(),
-                                ProtocolGenerator.getDeserFunctionName(targetSymbol, context.getProtocolName()));
+                                ProtocolGenerator.getDeserFunctionShortName(targetSymbol));
                     } else {
                         // We only need to load the body and prepare a contents object if there is a response.
                         writer.write("const data: any = await parseBody(output.body, context)");

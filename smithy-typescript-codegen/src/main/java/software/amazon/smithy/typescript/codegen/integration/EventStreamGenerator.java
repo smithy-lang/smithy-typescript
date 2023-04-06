@@ -177,10 +177,14 @@ public class EventStreamGenerator {
 
     private void generateEventStreamSerializer(GenerationContext context, UnionShape eventsUnion) {
         String methodName = getSerFunctionName(context, eventsUnion);
+        String methodLongName = ProtocolGenerator.getSerFunctionName(getSymbol(context, eventsUnion),
+                context.getProtocolName());
         Symbol eventsUnionSymbol = getSymbol(context, eventsUnion);
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         writer.addImport("Message", "__Message", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+
+        writer.writeDocs(methodLongName);
         writer.openBlock("const $L = (\n"
                 + "  input: any,\n"
                 + "  context: $L\n"
@@ -188,20 +192,19 @@ public class EventStreamGenerator {
             writer.openBlock("const eventMarshallingVisitor = (event: any): __Message => $T.visit(event, {", "});",
                     eventsUnionSymbol, () -> {
                         eventsUnion.getAllMembers().forEach((memberName, memberShape) -> {
-                            StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
+                    StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
                             String eventSerMethodName = getEventSerFunctionName(context, target);
                             writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
                         });
                         writer.write("_: value => value as any");
                     });
-            writer.write("return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);");
-        });
+                    writer.write("return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);");
+                });
     }
 
     private String getSerFunctionName(GenerationContext context, Shape shape) {
         Symbol symbol = getSymbol(context, shape);
-        String protocolName = context.getProtocolName();
-        return ProtocolGenerator.getSerFunctionName(symbol, protocolName);
+        return ProtocolGenerator.getSerFunctionShortName(symbol);
     }
 
     public String getEventSerFunctionName(GenerationContext context, Shape shape) {
@@ -347,7 +350,7 @@ public class EventStreamGenerator {
                     writer.write("body = context.utf8Decoder(input.$L);", payloadMemberName);
                 } else if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
                     Symbol symbol = getSymbol(context, payloadShape);
-                    String serFunctionName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
+                    String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
                     documentShapesToSerialize.add(payloadShape);
                     writer.write("body = $L(input.$L, context);", payloadMemberName, serFunctionName);
                     serializeInputEventDocumentPayload.run();
@@ -364,7 +367,7 @@ public class EventStreamGenerator {
                 }
             }
             Symbol symbol = getSymbol(context, event);
-            String serFunctionName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
+            String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
             documentShapesToSerialize.add(event);
             writer.write("body = $L(input, context);", serFunctionName);
             serializeInputEventDocumentPayload.run();
@@ -373,10 +376,14 @@ public class EventStreamGenerator {
 
     private void generateEventStreamDeserializer(GenerationContext context, UnionShape eventsUnion) {
         String methodName = getDeserFunctionName(context, eventsUnion);
+        String methodLongName = ProtocolGenerator.getDeserFunctionName(getSymbol(context, eventsUnion),
+                context.getProtocolName());
         Symbol eventsUnionSymbol = getSymbol(context, eventsUnion);
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         String contextType = getEventStreamSerdeContextType(context, eventsUnion);
+
+        writer.writeDocs(methodLongName);
         writer.openBlock("const $L = (\n"
                 + "  output: any,\n"
                 + "  context: $L\n"
@@ -401,8 +408,7 @@ public class EventStreamGenerator {
 
     private String getDeserFunctionName(GenerationContext context, Shape shape) {
         Symbol symbol = getSymbol(context, shape);
-        String protocolName = context.getProtocolName();
-        return ProtocolGenerator.getDeserFunctionName(symbol, protocolName);
+        return ProtocolGenerator.getDeserFunctionShortName(symbol);
     }
 
     public String getEventDeserFunctionName(GenerationContext context, Shape shape) {
@@ -444,7 +450,7 @@ public class EventStreamGenerator {
         TypeScriptWriter writer = context.getWriter();
         // If this is an error event, we need to generate the error deserializer.
         errorShapesToDeserialize.add(event);
-        String errorDeserMethodName = getDeserFunctionName(context, event) + "Response";
+        String errorDeserMethodName = getDeserFunctionName(context, event) + "Res";
         if (isErrorCodeInBody) {
             // If error code is in body, parseBody() won't be called inside error deser. So we parse body here.
             // It's ok to parse body here because body won't be streaming if 'isErrorCodeInBody' is set.
@@ -489,14 +495,14 @@ public class EventStreamGenerator {
             } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
                 writer.write("const data: any = await parseBody(output.body, context);");
                 Symbol symbol = getSymbol(context, payloadShape);
-                String deserFunctionName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+                String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
                 writer.write("contents.$L = $L(data, context);", payloadMemberName, deserFunctionName);
                 eventShapesToDeserialize.add(payloadShape);
             }
         } else {
             writer.write("const data: any = await parseBody(output.body, context);");
             Symbol symbol = getSymbol(context, event);
-            String deserFunctionName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+            String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
             writer.write("Object.assign(contents, $L(data, context));", deserFunctionName);
             eventShapesToDeserialize.add(event);
         }

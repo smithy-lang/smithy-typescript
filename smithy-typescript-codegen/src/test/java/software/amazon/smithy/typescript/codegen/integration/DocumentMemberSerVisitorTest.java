@@ -57,7 +57,7 @@ public class DocumentMemberSerVisitorTest {
     @MethodSource("validMemberTargetTypes")
     public void providesExpectedDefaults(Shape shape, String expected) {
         DocumentMemberSerVisitor visitor = new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT);
-        assertThat(expected, equalTo(shape.accept(visitor)));
+        assertThat(shape.accept(visitor), equalTo(expected));
     }
 
     public static Collection<Object[]> validMemberTargetTypes() {
@@ -66,8 +66,7 @@ public class DocumentMemberSerVisitorTest {
         MemberShape member = MemberShape.builder().id(id + "$member").target(targetId).build();
         MemberShape key = MemberShape.builder().id(id + "$key").target(targetId).build();
         MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
-        String delegate = "serialize" + ProtocolGenerator.getSanitizedName(PROTOCOL) + "Foo"
-                + "(" + DATA_SOURCE + ", context)";
+        String delegate = "se_Foo(" + DATA_SOURCE + ", context)";
 
         return ListUtils.of(new Object[][]{
                 {BooleanShape.builder().id(id).build(), DATA_SOURCE},
@@ -126,12 +125,12 @@ public class DocumentMemberSerVisitorTest {
 
         @Override
         public Symbol toSymbol(Shape shape) {
-        if (shape instanceof CollectionShape) {
-            MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
-            return collectionMock.toBuilder().putProperty("shape",
+            if (shape instanceof CollectionShape) {
+                MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
+                return collectionMock.toBuilder().putProperty("shape",
                     ListShape.builder().id(id).member(member).build()).build();
-        }
-        return mock.toBuilder().putProperty("shape",
+            }
+            return mock.toBuilder().putProperty("shape",
                 StructureShape.builder().id(id).build()).build();
         }
     }

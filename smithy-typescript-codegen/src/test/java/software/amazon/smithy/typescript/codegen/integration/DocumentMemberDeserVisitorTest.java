@@ -72,7 +72,7 @@ public class DocumentMemberDeserVisitorTest {
                         return memberShape;
                     }
                 };
-        assertThat(expected, equalTo(shape.accept(visitor)));
+        assertThat(shape.accept(visitor), equalTo(expected));
     }
 
     public static Collection<Object[]> validMemberTargetTypes() {
@@ -82,7 +82,7 @@ public class DocumentMemberDeserVisitorTest {
         MemberShape member = MemberShape.builder().id(id + "$member").target(targetId).build();
         MemberShape key = MemberShape.builder().id(id + "$key").target(targetId).build();
         MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
-        String delegate = "deserialize" + ProtocolGenerator.getSanitizedName(PROTOCOL) + "Foo"
+        String delegate = "de_Foo"
                 + "(" + DATA_SOURCE + ", context)";
 
         return ListUtils.of(new Object[][]{
@@ -122,8 +122,7 @@ public class DocumentMemberDeserVisitorTest {
                 },
                 {
                     UnionShape.builder().id(id).addMember(member).build(),
-                    "deserialize" + ProtocolGenerator.getSanitizedName(PROTOCOL) + "Foo"
-                        + "(__expectUnion(" + DATA_SOURCE + "), context)",
+                    "de_Foo(__expectUnion(" + DATA_SOURCE + "), context)",
                     source
                 },
         });
@@ -161,12 +160,12 @@ public class DocumentMemberDeserVisitorTest {
 
         @Override
         public Symbol toSymbol(Shape shape) {
-        if (shape instanceof CollectionShape) {
-            MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
-            return collectionMock.toBuilder().putProperty("shape",
+            if (shape instanceof CollectionShape) {
+                MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
+                return collectionMock.toBuilder().putProperty("shape",
                     ListShape.builder().id(id).member(member).build()).build();
-        }
-        return mock.toBuilder().putProperty("shape",
+            }
+            return mock.toBuilder().putProperty("shape",
                 StructureShape.builder().id(id).build()).build();
         }
     }

@@ -297,9 +297,12 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
 
         Symbol symbol = symbolProvider.toSymbol(shape);
         // Use the shape name for the function name.
-        String methodName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
+        String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
+        String methodLongName = ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName());
 
         writer.addImport(symbol, symbol.getName());
+
+        writer.writeDocs(methodLongName);
         writer.openBlock("const $L = (\n"
                        + "  input: $T,\n"
                        + "  context: __SerdeContext\n"

@@ -344,12 +344,15 @@ public final class HttpProtocolGeneratorUtils {
 
         Symbol symbol = symbolProvider.toSymbol(operation);
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
-        String errorMethodName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName()) + "Error";
+        String errorMethodName = ProtocolGenerator.getDeserFunctionShortName(symbol) + "Error";
+        String errorMethodLongName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
+                + "Error";
 
-        writer.openBlock("const $L = async(\n"
-                       + "  output: $T,\n"
-                       + "  context: __SerdeContext,\n"
-                       + "): Promise<$T> => {", "}", errorMethodName, responseType, outputType, () -> {
+        writer.writeDocs(errorMethodLongName);
+                writer.openBlock("const $L = async(\n"
+                               + "  output: $T,\n"
+                               + "  context: __SerdeContext,\n"
+                               + "): Promise<$T> => {", "}", errorMethodName, responseType, outputType, () -> {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
             if (shouldParseErrorBody) {
@@ -399,8 +402,7 @@ public final class HttpProtocolGeneratorUtils {
                         // Track errors bound to the operation so their deserializers may be generated.
                         errorShapes.add(error);
                         Symbol errorSymbol = symbolProvider.toSymbol(error);
-                        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
-                            context.getProtocolName()) + "Response";
+                        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionShortName(errorSymbol) + "Res";
                         // Dispatch to the error deserialization function.
                         String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
                         writer.write("case $S:", name);

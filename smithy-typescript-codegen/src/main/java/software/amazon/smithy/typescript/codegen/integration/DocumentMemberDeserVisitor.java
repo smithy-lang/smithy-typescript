@@ -283,7 +283,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
     private String getDelegateDeserializer(Shape shape, String customDataSource) {
         // Use the shape for the function name.
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
-        return ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
+        return ProtocolGenerator.getDeserFunctionShortName(symbol)
                 + "(" + customDataSource + ", context)";
     }
 }
