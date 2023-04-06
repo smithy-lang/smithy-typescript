@@ -402,8 +402,7 @@ public final class HttpProtocolGeneratorUtils {
                         // Track errors bound to the operation so their deserializers may be generated.
                         errorShapes.add(error);
                         Symbol errorSymbol = symbolProvider.toSymbol(error);
-                        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionName(errorSymbol,
-                            context.getProtocolName()) + "Response";
+                        String errorDeserMethodName = ProtocolGenerator.getDeserFunctionShortName(errorSymbol) + "Res";
                         // Dispatch to the error deserialization function.
                         String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
                         writer.write("case $S:", name);
