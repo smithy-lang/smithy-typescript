@@ -448,8 +448,8 @@ final class CommandGenerator implements Runnable {
             writer.write("throw new Error(\"No supported protocol was found\");");
         } else {
             String serdeFunctionName = isInput
-                    ? ProtocolGenerator.getSerFunctionName(symbol, protocolGenerator.getName())
-                    : ProtocolGenerator.getDeserFunctionName(symbol, protocolGenerator.getName());
+                    ? ProtocolGenerator.getSerFunctionShortName(symbol)
+                    : ProtocolGenerator.getDeserFunctionShortName(symbol);
             writer.addImport(serdeFunctionName, serdeFunctionName,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
                             ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());

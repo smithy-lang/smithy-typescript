@@ -252,7 +252,7 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     private String getDelegateSerializer(Shape shape) {
         // Use the shape for the function name.
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
-        return ProtocolGenerator.getSerFunctionName(symbol, context.getProtocolName())
+        return ProtocolGenerator.getSerFunctionShortName(symbol)
                 + "(" + dataSource + ", context)";
     }
 }

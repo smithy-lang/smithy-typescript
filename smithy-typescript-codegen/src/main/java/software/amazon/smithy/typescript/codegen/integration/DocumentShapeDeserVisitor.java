@@ -301,9 +301,12 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
 
         Symbol symbol = symbolProvider.toSymbol(shape);
         // Use the shape name for the function name.
-        String methodName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+        String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
+        String methodLongName =
+                ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
 
         writer.addImport(symbol, symbol.getName());
+        writer.writeDocs(methodLongName);
         writer.openBlock("const $L = (\n"
                        + "  output: any,\n"
                        + "  context: __SerdeContext\n"

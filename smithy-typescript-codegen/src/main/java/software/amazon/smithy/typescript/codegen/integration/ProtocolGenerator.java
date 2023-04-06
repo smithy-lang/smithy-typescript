@@ -114,8 +114,8 @@ public interface ProtocolGenerator {
                     .collect(Collectors.joining(", "));
             throw new CodegenException(String.format(
                     "All of the protocols generated for a service must be runtime compatible, but "
-                    + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
-                    + "set of compatible protocols using the `protocols` option when generating %s.",
+                            + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
+                            + "set of compatible protocols using the `protocols` option when generating %s.",
                     getProtocol().getName(), protocolNames, service.getId()));
         }
 
@@ -211,7 +211,21 @@ public interface ProtocolGenerator {
     }
 
     /**
-     * Generates the name of a serializer function for shapes of a service that is not protocol-specific.
+     * @param symbol The symbol the deserializer function is being generated for.
+     * @return Returns the generated function short name.
+     */
+    static String getSerFunctionShortName(Symbol symbol) {
+        // e.g., se_ES for ExecuteStatement
+        String functionName = "se_";
+        // Update the function to have a component based on the symbol.
+        functionName += ProtocolGenerator.getSerdeFunctionSymbolComponent(symbol,
+                symbol.expectProperty("shape", Shape.class));
+        return functionName;
+    }
+
+    /**
+     * Generates the name of a serializer function for shapes of a service that is not
+     * protocol-specific.
      *
      * @param symbol The symbol the serializer function is being generated for.
      * @return Returns the generated function name.
@@ -235,6 +249,19 @@ public interface ProtocolGenerator {
         // Update the function to have a component based on the symbol.
         functionName += getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
 
+        return functionName;
+    }
+
+    /**
+     * @param symbol The symbol the deserializer function is being generated for.
+     * @return Returns the generated function short name.
+     */
+    static String getDeserFunctionShortName(Symbol symbol) {
+        // e.g., de_ES for ExecuteStatement
+        String functionName = "de_";
+        // Update the function to have a component based on the symbol.
+        functionName += ProtocolGenerator.getSerdeFunctionSymbolComponent(symbol,
+                symbol.expectProperty("shape", Shape.class));
         return functionName;
     }
 
