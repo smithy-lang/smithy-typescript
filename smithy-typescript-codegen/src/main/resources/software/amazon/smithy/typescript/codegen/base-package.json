@@ -35,5 +35,5 @@
       "dist-types/*": ["dist-types/ts3.4/*"]
     }
   },
-  "files": ["dist-*"]
+  "files": ["dist-*/**"]
 }
