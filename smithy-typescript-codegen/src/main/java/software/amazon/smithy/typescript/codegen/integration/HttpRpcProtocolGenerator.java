@@ -161,6 +161,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.write("return new $T(contents);", requestType);
             }
         );
+        // Write common request header to be shared by all requests
+        writeSharedRequestHeaders(context);
         writer.write("");
     }
 
@@ -251,17 +253,74 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
     }
 
-    private void writeRequestHeaders(GenerationContext context, OperationShape operation) {
+    /**
+     * Writes HTTP request headers required by the protocol implementation.
+     *
+     * <p>By default, headers are configured to use {@code SHARED_HEADERS}. See {@link #writeSharedRequestHeaders}
+     *
+     * <pre>{@code
+     *   const headers: __HeaderBag = SHARED_HEADERS;
+     * }</pre>
+     *
+     * <p>This method can be overridden to customize headers generation. For example:
+     *
+     * <pre>{@code
+     *   const headers: __HeaderBag = {
+     *     "foo": "This is a custom header",
+     *     ...SHARED_HEADERS
+     *   };
+     * }</pre>
+     *
+     * @param context The generation context.
+     * @param operation The operation being generated.
+     */
+    protected void writeRequestHeaders(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
+        writer.write("const headers: __HeaderBag = SHARED_HEADERS;");
+    }
 
-        // The Content-Type header is always present.
+    /**
+     * Writes headers to be shared for all HTTP requests by the protocol implementation.
+     *
+     * <p>To reduce generated code size, we should put all common headers into single location.
+     * <p>For example, most request headers contain {@code content-type}.
+     *
+     * <pre>{@code
+     * const SHARED_HEADERS: __HeaderBag = {
+     *   "content-type": "application/x-www-form-urlencoded",
+     * };
+     * }</pre>
+     *
+     * <p>{@code SHARED_HEADERS} can then be used as follows:
+     *
+     * <pre>{@code
+     * const headers: __HeaderBag = {
+     *   "foo": "This is a custom header",
+     *   ...SHARED_HEADERS
+     * };
+     * }</pre>
+     *
+     * <p>This method can be overridden for customization. For example:
+     *
+     * <pre>{@code
+     * function sharedHeaders(operationName): __HeaderBag = {
+     *   "custom-header": "xyz-service:${operationName}",
+     * };
+     *
+     * const headers: __HeaderBag = {
+     *   "foo": "This is a custom header",
+     *   ...sharedHeaders(operationName)
+     * };
+     * }</pre>
+     *
+     * @param context The generation context.
+     */
+    protected void writeSharedRequestHeaders(GenerationContext context) {
+        TypeScriptWriter writer = context.getWriter();
         writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
-        writer.openBlock("const headers: __HeaderBag = {", "};",
-            () -> {
-                writer.write("'content-type': $S,", getDocumentContentType());
-                writeDefaultHeaders(context, operation);
-            }
-        );
+        writer.openBlock("const SHARED_HEADERS: __HeaderBag = {", "};", () -> {
+            writer.write("'content-type': $S,", getDocumentContentType());
+        });
     }
 
     private boolean writeRequestBody(GenerationContext context, OperationShape operation) {
@@ -299,27 +358,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      * @return The path to send HTTP requests to.
      */
     protected abstract String getOperationPath(GenerationContext context, OperationShape operation);
-
-    /**
-     * Writes any additional HTTP headers required by the protocol implementation.
-     *
-     * <p>Two parameters will be available in scope:
-     * <ul>
-     *   <li>{@code input: <T>}: the type generated for the operation's input.</li>
-     *   <li>{@code context: SerdeContext}: a TypeScript type containing context and tools for type serde.</li>
-     * </ul>
-     *
-     * <p>For example:
-     *
-     * <pre>{@code
-     *   "foo": "This is a custom header",
-     * }</pre>
-     *
-     * @param context The generation context.
-     * @param operation The operation being generated.
-     */
-    protected void writeDefaultHeaders(GenerationContext context, OperationShape operation) {
-    }
 
     /**
      * Writes the code needed to serialize the input document of a request.
