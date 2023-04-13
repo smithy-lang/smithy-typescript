@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "lib": [],
+    "noUnusedLocals": true,
+    "outDir": "dist-es",
+    "rootDir": "src"
+  },
+  "extends": "../../tsconfig.es.json",
+  "include": ["src/"]
+}
