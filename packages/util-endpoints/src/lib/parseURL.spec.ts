@@ -1,4 +1,4 @@
-import { Endpoint, EndpointURL, EndpointURLScheme } from "@aws-sdk/types";
+import { Endpoint, EndpointURL, EndpointURLScheme } from "@smithy-io/types";
 
 import { parseURL } from "./parseURL";
 

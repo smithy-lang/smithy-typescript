@@ -1,4 +1,4 @@
-import { HttpRequest } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy-io/types";
 import { ClientRequest } from "http";
 import { ClientHttp2Stream } from "http2";
 import { Readable } from "stream";

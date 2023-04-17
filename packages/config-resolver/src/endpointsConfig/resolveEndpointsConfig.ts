@@ -1,5 +1,5 @@
-import { Endpoint, Provider, RegionInfoProvider, UrlParser } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { Endpoint, Provider, RegionInfoProvider, UrlParser } from "@smithy-io/types";
+import { normalizeProvider } from "@smithy-io/util-middleware";
 
 import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 

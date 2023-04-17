@@ -1,7 +1,7 @@
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { isServerError, isThrottlingError, isTransientError } from "@aws-sdk/service-error-classification";
-import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@aws-sdk/types";
-import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@aws-sdk/util-retry";
+import { HttpRequest, HttpResponse } from "@smithy-io/protocol-http";
+import { isServerError, isThrottlingError, isTransientError } from "@smithy-io/service-error-classification";
+import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy-io/types";
+import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy-io/util-retry";
 import { v4 } from "uuid";
 
 import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "./retryMiddleware";

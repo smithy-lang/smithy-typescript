@@ -1,5 +1,5 @@
-import { CredentialsProviderError } from "@aws-sdk/property-provider";
-import { AwsCredentialIdentityProvider } from "@aws-sdk/types";
+import { CredentialsProviderError } from "@smithy-io/property-provider";
+import { AwsCredentialIdentityProvider } from "@smithy-io/types";
 import { RequestOptions } from "http";
 import { parse } from "url";
 

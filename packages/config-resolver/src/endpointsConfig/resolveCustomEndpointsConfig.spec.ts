@@ -1,4 +1,4 @@
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { normalizeProvider } from "@smithy-io/util-middleware";
 
 import { resolveCustomEndpointsConfig } from "./resolveCustomEndpointsConfig";
 

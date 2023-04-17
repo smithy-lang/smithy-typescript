@@ -1,4 +1,4 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy-io/protocol-http";
 
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 

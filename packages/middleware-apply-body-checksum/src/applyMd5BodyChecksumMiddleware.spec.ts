@@ -1,5 +1,5 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { ChecksumConstructor } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy-io/protocol-http";
+import { ChecksumConstructor } from "@smithy-io/types";
 
 import { applyMd5BodyChecksumMiddleware } from "./applyMd5BodyChecksumMiddleware";
 

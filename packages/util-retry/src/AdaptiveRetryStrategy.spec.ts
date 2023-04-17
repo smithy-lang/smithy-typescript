@@ -1,4 +1,4 @@
-import { RetryErrorInfo, RetryErrorType, StandardRetryToken } from "@aws-sdk/types";
+import { RetryErrorInfo, RetryErrorType, StandardRetryToken } from "@smithy-io/types";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { RETRY_MODES } from "./config";

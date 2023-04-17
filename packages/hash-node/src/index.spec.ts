@@ -1,4 +1,4 @@
-import { fromArrayBuffer, fromString } from "@aws-sdk/util-buffer-from";
+import { fromArrayBuffer, fromString } from "@smithy-io/util-buffer-from";
 
 import { Hash } from "./";
 const hashVectors = require("hash-test-vectors");

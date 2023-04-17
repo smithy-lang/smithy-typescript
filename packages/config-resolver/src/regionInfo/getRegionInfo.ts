@@ -1,4 +1,4 @@
-import { RegionInfo } from "@aws-sdk/types";
+import { RegionInfo } from "@smithy-io/types";
 
 import { getHostnameFromVariants } from "./getHostnameFromVariants";
 import { getResolvedHostname } from "./getResolvedHostname";

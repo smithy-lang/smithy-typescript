@@ -1,4 +1,4 @@
-import { SdkError } from "@aws-sdk/types";
+import { SdkError } from "@smithy-io/types";
 
 import {
   CLOCK_SKEW_ERROR_CODES,

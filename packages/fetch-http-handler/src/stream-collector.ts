@@ -1,5 +1,5 @@
-import { StreamCollector } from "@aws-sdk/types";
-import { fromBase64 } from "@aws-sdk/util-base64";
+import { StreamCollector } from "@smithy-io/types";
+import { fromBase64 } from "@smithy-io/util-base64";
 
 //reference: https://snack.expo.io/r1JCSWRGU
 export const streamCollector: StreamCollector = (stream: Blob | ReadableStream): Promise<Uint8Array> => {

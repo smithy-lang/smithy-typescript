@@ -1,6 +1,6 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { buildQueryString } from "@aws-sdk/querystring-builder";
-import { HttpHandlerOptions, Provider } from "@aws-sdk/types";
+import { HttpHandler, HttpRequest, HttpResponse } from "@smithy-io/protocol-http";
+import { buildQueryString } from "@smithy-io/querystring-builder";
+import { HttpHandlerOptions, Provider } from "@smithy-io/types";
 import { Agent as hAgent, request as hRequest } from "http";
 import { Agent as hsAgent, request as hsRequest, RequestOptions } from "https";
 

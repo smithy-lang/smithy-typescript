@@ -1,9 +1,9 @@
 // @jest-environment jsdom
-import { streamCollector } from "@aws-sdk/fetch-http-handler";
-import { SdkStreamMixin } from "@aws-sdk/types";
-import { toBase64 } from "@aws-sdk/util-base64";
-import { toHex } from "@aws-sdk/util-hex-encoding";
-import { toUtf8 } from "@aws-sdk/util-utf8";
+import { streamCollector } from "@smithy-io/fetch-http-handler";
+import { SdkStreamMixin } from "@smithy-io/types";
+import { toBase64 } from "@smithy-io/util-base64";
+import { toHex } from "@smithy-io/util-hex-encoding";
+import { toUtf8 } from "@smithy-io/util-utf8";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
 

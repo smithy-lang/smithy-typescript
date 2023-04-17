@@ -1,4 +1,4 @@
-import { isThrottlingError } from "@aws-sdk/service-error-classification";
+import { isThrottlingError } from "@smithy-io/service-error-classification";
 
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 

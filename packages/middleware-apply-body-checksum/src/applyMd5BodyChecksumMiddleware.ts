@@ -1,5 +1,5 @@
-import { isArrayBuffer } from "@aws-sdk/is-array-buffer";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { isArrayBuffer } from "@smithy-io/is-array-buffer";
+import { HttpRequest } from "@smithy-io/protocol-http";
 import {
   BuildHandler,
   BuildHandlerArguments,
@@ -9,7 +9,7 @@ import {
   HeaderBag,
   MetadataBearer,
   Pluggable,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 import { Md5BodyChecksumResolvedConfig } from "./md5Configuration";
 

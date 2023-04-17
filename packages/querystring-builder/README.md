@@ -1,7 +1,7 @@
-# @aws-sdk/querystring-builder
+# @smithy-io/querystring-builder
 
-[![NPM version](https://img.shields.io/npm/v/@aws-sdk/querystring-builder/latest.svg)](https://www.npmjs.com/package/@aws-sdk/querystring-builder)
-[![NPM downloads](https://img.shields.io/npm/dm/@aws-sdk/querystring-builder.svg)](https://www.npmjs.com/package/@aws-sdk/querystring-builder)
+[![NPM version](https://img.shields.io/npm/v/@smithy-io/querystring-builder/latest.svg)](https://www.npmjs.com/package/@smithy-io/querystring-builder)
+[![NPM downloads](https://img.shields.io/npm/dm/@smithy-io/querystring-builder.svg)](https://www.npmjs.com/package/@smithy-io/querystring-builder)
 
 > An internal package
 

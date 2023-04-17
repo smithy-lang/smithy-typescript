@@ -10,7 +10,7 @@ import {
   Priority,
   RelativeLocation,
   Step,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 import { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewareEntry } from "./types";
 

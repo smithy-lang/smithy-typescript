@@ -1,4 +1,4 @@
-import { HeaderBag, HttpResponse } from "@aws-sdk/types";
+import { HeaderBag, HttpResponse } from "@smithy-io/types";
 import { readFileSync } from "fs";
 import { createServer as createHttpServer, IncomingMessage, Server as HttpServer, ServerResponse } from "http";
 import { createServer as createHttp2Server, Http2Server } from "http2";

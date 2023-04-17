@@ -1,5 +1,5 @@
-import { chain, memoize } from "@aws-sdk/property-provider";
-import { Provider } from "@aws-sdk/types";
+import { chain, memoize } from "@smithy-io/property-provider";
+import { Provider } from "@smithy-io/types";
 
 import { fromEnv, GetterFromEnv } from "./fromEnv";
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";

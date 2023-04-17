@@ -1,7 +1,7 @@
-import { isArrayBuffer } from "@aws-sdk/is-array-buffer";
-import { ChecksumConstructor, HashConstructor, HttpRequest } from "@aws-sdk/types";
-import { toHex } from "@aws-sdk/util-hex-encoding";
-import { toUint8Array } from "@aws-sdk/util-utf8";
+import { isArrayBuffer } from "@smithy-io/is-array-buffer";
+import { ChecksumConstructor, HashConstructor, HttpRequest } from "@smithy-io/types";
+import { toHex } from "@smithy-io/util-hex-encoding";
+import { toUint8Array } from "@smithy-io/util-utf8";
 
 import { SHA256_HEADER, UNSIGNED_PAYLOAD } from "./constants";
 

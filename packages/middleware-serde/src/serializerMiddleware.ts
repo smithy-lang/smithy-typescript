@@ -6,7 +6,7 @@ import {
   SerializeHandlerArguments,
   SerializeHandlerOutput,
   SerializeMiddleware,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 import type { V1OrV2Endpoint } from "./serdePlugin";
 

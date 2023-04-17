@@ -1,5 +1,5 @@
-import { AbortController } from "@aws-sdk/abort-controller";
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
+import { AbortController } from "@smithy-io/abort-controller";
+import { HttpRequest, HttpResponse } from "@smithy-io/protocol-http";
 import { rejects } from "assert";
 import http2, { ClientHttp2Session, ClientHttp2Stream, constants, Http2Server, Http2Stream } from "http2";
 import { Duplex } from "stream";

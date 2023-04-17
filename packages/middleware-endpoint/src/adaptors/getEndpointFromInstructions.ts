@@ -1,4 +1,4 @@
-import { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@aws-sdk/types";
+import { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy-io/types";
 
 import { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";

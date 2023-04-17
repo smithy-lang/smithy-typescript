@@ -1,4 +1,4 @@
-import { EndpointObjectProperty } from "@aws-sdk/types";
+import { EndpointObjectProperty } from "@smithy-io/types";
 
 import { ConditionObject, Expression } from "./shared";
 

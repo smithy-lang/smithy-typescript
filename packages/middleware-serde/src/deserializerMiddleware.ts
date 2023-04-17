@@ -5,7 +5,7 @@ import {
   DeserializeMiddleware,
   HandlerExecutionContext,
   ResponseDeserializer,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 export const deserializerMiddleware =
   <Input extends object, Output extends object, RuntimeUtils = any>(

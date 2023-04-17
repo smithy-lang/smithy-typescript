@@ -8,7 +8,7 @@ import {
   SerializeHandlerArguments,
   SerializeHandlerOutput,
   SerializeMiddleware,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
 import { EndpointResolvedConfig } from "./resolveEndpointConfig";

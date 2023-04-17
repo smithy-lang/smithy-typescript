@@ -1,4 +1,4 @@
-import { SdkError } from "@aws-sdk/types";
+import { SdkError } from "@smithy-io/types";
 
 export const asSdkError = (error: unknown): SdkError => {
   if (error instanceof Error) return error;

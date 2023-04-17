@@ -1,6 +1,6 @@
-import { loadConfig } from "@aws-sdk/node-config-provider";
-import { Endpoint } from "@aws-sdk/types";
-import { parseUrl } from "@aws-sdk/url-parser";
+import { loadConfig } from "@smithy-io/node-config-provider";
+import { Endpoint } from "@smithy-io/types";
+import { parseUrl } from "@smithy-io/url-parser";
 
 import { Endpoint as InstanceMetadataEndpoint } from "../config/Endpoint";
 import { CONFIG_ENDPOINT_NAME, ENDPOINT_CONFIG_OPTIONS, ENV_ENDPOINT_NAME } from "../config/EndpointConfigOptions";

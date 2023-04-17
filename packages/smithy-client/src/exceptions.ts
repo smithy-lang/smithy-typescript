@@ -1,4 +1,4 @@
-import { HttpResponse, MetadataBearer, ResponseMetadata, RetryableTrait, SmithyException } from "@aws-sdk/types";
+import { HttpResponse, MetadataBearer, ResponseMetadata, RetryableTrait, SmithyException } from "@smithy-io/types";
 
 /**
  * The type of the exception class constructor parameter. The returned type contains the properties

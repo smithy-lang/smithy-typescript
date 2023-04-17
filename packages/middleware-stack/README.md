@@ -1,7 +1,7 @@
-# @aws-sdk/middleware-stack
+# @smithy-io/middleware-stack
 
-[![NPM version](https://img.shields.io/npm/v/@aws-sdk/middleware-stack/latest.svg)](https://www.npmjs.com/package/@aws-sdk/middleware-stack)
-[![NPM downloads](https://img.shields.io/npm/dm/@aws-sdk/middleware-stack.svg)](https://www.npmjs.com/package/@aws-sdk/middleware-stack)
+[![NPM version](https://img.shields.io/npm/v/@smithy-io/middleware-stack/latest.svg)](https://www.npmjs.com/package/@smithy-io/middleware-stack)
+[![NPM downloads](https://img.shields.io/npm/dm/@smithy-io/middleware-stack.svg)](https://www.npmjs.com/package/@smithy-io/middleware-stack)
 
 The package contains an implementation of middleware stack interface. Middleware
 stack is a structure storing middleware in specified order and resolve these

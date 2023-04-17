@@ -1,4 +1,4 @@
-import { Hash } from "@aws-sdk/types";
+import { Hash } from "@smithy-io/types";
 import { Readable, Writable } from "stream";
 
 import { HashCalculator } from "./HashCalculator";

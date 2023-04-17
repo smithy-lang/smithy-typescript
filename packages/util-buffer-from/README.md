@@ -1,7 +1,7 @@
-# @aws-sdk/util-buffer-from
+# @smithy-io/util-buffer-from
 
-[![NPM version](https://img.shields.io/npm/v/@aws-sdk/util-buffer-from/latest.svg)](https://www.npmjs.com/package/@aws-sdk/util-buffer-from)
-[![NPM downloads](https://img.shields.io/npm/dm/@aws-sdk/util-buffer-from.svg)](https://www.npmjs.com/package/@aws-sdk/util-buffer-from)
+[![NPM version](https://img.shields.io/npm/v/@smithy-io/util-buffer-from/latest.svg)](https://www.npmjs.com/package/@smithy-io/util-buffer-from)
+[![NPM downloads](https://img.shields.io/npm/dm/@smithy-io/util-buffer-from.svg)](https://www.npmjs.com/package/@smithy-io/util-buffer-from)
 
 > An internal package
 

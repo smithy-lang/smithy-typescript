@@ -1,4 +1,4 @@
-import { HeaderBag } from "@aws-sdk/types";
+import { HeaderBag } from "@smithy-io/types";
 
 export const hasHeader = (soughtHeader: string, headers: HeaderBag): boolean => {
   soughtHeader = soughtHeader.toLowerCase();

@@ -1,4 +1,4 @@
-import { fromStatic as convertToProvider } from "@aws-sdk/property-provider";
+import { fromStatic as convertToProvider } from "@smithy-io/property-provider";
 
 import { fromStatic } from "./fromStatic";
 

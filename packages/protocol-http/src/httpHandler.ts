@@ -1,4 +1,4 @@
-import { HttpHandlerOptions, RequestHandler } from "@aws-sdk/types";
+import { HttpHandlerOptions, RequestHandler } from "@smithy-io/types";
 
 import { HttpRequest } from "./httpRequest";
 import { HttpResponse } from "./httpResponse";

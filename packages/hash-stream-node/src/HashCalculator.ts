@@ -1,5 +1,5 @@
-import { Checksum, Hash } from "@aws-sdk/types";
-import { toUint8Array } from "@aws-sdk/util-utf8";
+import { Checksum, Hash } from "@smithy-io/types";
+import { toUint8Array } from "@smithy-io/util-utf8";
 import { Writable, WritableOptions } from "stream";
 
 /**

@@ -1,5 +1,5 @@
-import { LoadedConfigSelectors } from "@aws-sdk/node-config-provider";
-import { booleanSelector, SelectorType } from "@aws-sdk/util-config-provider";
+import { LoadedConfigSelectors } from "@smithy-io/node-config-provider";
+import { booleanSelector, SelectorType } from "@smithy-io/util-config-provider";
 
 /**
  * @internal

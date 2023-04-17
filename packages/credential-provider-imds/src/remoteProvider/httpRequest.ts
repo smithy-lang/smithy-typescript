@@ -1,4 +1,4 @@
-import { ProviderError } from "@aws-sdk/property-provider";
+import { ProviderError } from "@smithy-io/property-provider";
 import { Buffer } from "buffer";
 import { IncomingMessage, request, RequestOptions } from "http";
 

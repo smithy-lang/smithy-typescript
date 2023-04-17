@@ -1,4 +1,4 @@
-import { Endpoint, EndpointV2 } from "@aws-sdk/types";
+import { Endpoint, EndpointV2 } from "@smithy-io/types";
 
 /**
  * Normalize some key of the client config to an async provider.

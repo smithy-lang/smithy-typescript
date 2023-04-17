@@ -1,4 +1,4 @@
-import { AwsCredentialIdentity } from "@aws-sdk/types";
+import { AwsCredentialIdentity } from "@smithy-io/types";
 
 import { fromImdsCredentials, ImdsCredentials, isImdsCredentials } from "./ImdsCredentials";
 

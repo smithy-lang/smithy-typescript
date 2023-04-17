@@ -1,5 +1,5 @@
-import { constructStack } from "@aws-sdk/middleware-stack";
-import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@aws-sdk/types";
+import { constructStack } from "@smithy-io/middleware-stack";
+import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@smithy-io/types";
 
 /**
  * @internal

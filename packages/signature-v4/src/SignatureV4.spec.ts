@@ -1,6 +1,6 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { AwsCredentialIdentity } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy-io/protocol-http";
+import { AwsCredentialIdentity } from "@smithy-io/types";
 
 import {
   ALGORITHM_IDENTIFIER,

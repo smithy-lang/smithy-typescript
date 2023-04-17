@@ -1,5 +1,5 @@
-import { Checksum, SourceData } from "@aws-sdk/types";
-import { fromUtf8 } from "@aws-sdk/util-utf8";
+import { Checksum, SourceData } from "@smithy-io/types";
+import { fromUtf8 } from "@smithy-io/util-utf8";
 
 import { BLOCK_SIZE, DIGEST_LENGTH, INIT } from "./constants";
 

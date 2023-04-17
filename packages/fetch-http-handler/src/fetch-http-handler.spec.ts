@@ -1,5 +1,5 @@
-import { AbortController } from "@aws-sdk/abort-controller";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { AbortController } from "@smithy-io/abort-controller";
+import { HttpRequest } from "@smithy-io/protocol-http";
 
 import { FetchHttpHandler } from "./fetch-http-handler";
 import { requestTimeout } from "./request-timeout";

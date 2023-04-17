@@ -1,5 +1,5 @@
-import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider } from "@aws-sdk/types";
-import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@aws-sdk/util-retry";
+import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider } from "@smithy-io/types";
+import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@smithy-io/util-retry";
 
 import { StandardRetryStrategy, StandardRetryStrategyOptions } from "./StandardRetryStrategy";
 

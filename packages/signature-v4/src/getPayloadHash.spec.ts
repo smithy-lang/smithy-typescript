@@ -1,5 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy-io/protocol-http";
 
 import { SHA256_HEADER, UNSIGNED_PAYLOAD } from "./constants";
 import { getPayloadHash } from "./getPayloadHash";

@@ -1,4 +1,4 @@
-import { EndpointBearer } from "@aws-sdk/types";
+import { EndpointBearer } from "@smithy-io/types";
 
 import { serializerMiddleware } from "./serializerMiddleware";
 

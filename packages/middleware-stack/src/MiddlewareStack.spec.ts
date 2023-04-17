@@ -5,7 +5,7 @@ import {
   FinalizeHandlerArguments,
   InitializeHandler,
   Pluggable,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 import { constructStack } from "./MiddlewareStack";
 

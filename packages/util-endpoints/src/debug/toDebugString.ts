@@ -1,4 +1,4 @@
-import { EndpointParameters, EndpointV2 } from "@aws-sdk/types";
+import { EndpointParameters, EndpointV2 } from "@smithy-io/types";
 
 import { GetAttrValue } from "../lib";
 import { EndpointObject, FunctionObject, FunctionReturn } from "../types";

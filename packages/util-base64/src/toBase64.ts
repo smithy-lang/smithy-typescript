@@ -1,4 +1,4 @@
-import { fromArrayBuffer } from "@aws-sdk/util-buffer-from";
+import { fromArrayBuffer } from "@smithy-io/util-buffer-from";
 
 /**
  * Converts a Uint8Array of binary data to a base-64 encoded string using

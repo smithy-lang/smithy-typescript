@@ -1,4 +1,4 @@
-import { GetAwsChunkedEncodingStream, GetAwsChunkedEncodingStreamOptions } from "@aws-sdk/types";
+import { GetAwsChunkedEncodingStream, GetAwsChunkedEncodingStreamOptions } from "@smithy-io/types";
 import { Readable } from "stream";
 
 /**

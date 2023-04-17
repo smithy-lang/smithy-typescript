@@ -15,10 +15,10 @@ import {
   RequestSigningArguments,
   SigningArguments,
   StringSigner,
-} from "@aws-sdk/types";
-import { toHex } from "@aws-sdk/util-hex-encoding";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
-import { toUint8Array } from "@aws-sdk/util-utf8";
+} from "@smithy-io/types";
+import { toHex } from "@smithy-io/util-hex-encoding";
+import { normalizeProvider } from "@smithy-io/util-middleware";
+import { toUint8Array } from "@smithy-io/util-utf8";
 
 import {
   ALGORITHM_IDENTIFIER,

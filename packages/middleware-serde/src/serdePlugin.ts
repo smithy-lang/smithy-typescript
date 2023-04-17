@@ -10,7 +10,7 @@ import {
   ResponseDeserializer,
   SerializeHandlerOptions,
   UrlParser,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 import { deserializerMiddleware } from "./deserializerMiddleware";
 import { serializerMiddleware } from "./serializerMiddleware";

@@ -1,5 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { toHex } from "@aws-sdk/util-hex-encoding";
+import { toHex } from "@smithy-io/util-hex-encoding";
 import { createReadStream, mkdtempSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";

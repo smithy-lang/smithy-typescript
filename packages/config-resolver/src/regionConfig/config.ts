@@ -1,4 +1,4 @@
-import { LoadedConfigSelectors, LocalConfigOptions } from "@aws-sdk/node-config-provider";
+import { LoadedConfigSelectors, LocalConfigOptions } from "@smithy-io/node-config-provider";
 
 /**
  * @internal

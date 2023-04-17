@@ -1,4 +1,4 @@
-import { LoadedConfigSelectors } from "@aws-sdk/node-config-provider";
+import { LoadedConfigSelectors } from "@smithy-io/node-config-provider";
 
 import { EndpointMode } from "./EndpointMode";
 

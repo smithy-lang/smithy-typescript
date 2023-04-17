@@ -1,15 +1,16 @@
 {
-  "name": "@aws-sdk/is-array-buffer",
-  "version": "3.310.0",
+  "name": "@smithy-io/is-array-buffer",
+  "version": "1.0.0",
   "description": "Provides a function for detecting if an argument is an ArrayBuffer",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es": "tsc -p tsconfig.es.json",
-    "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "jest"
   },
   "author": {
@@ -36,10 +37,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/aws/aws-sdk-js-v3/tree/main/packages/is-array-buffer",
+  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/is-array-buffer",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aws/aws-sdk-js-v3.git",
+    "url": "https://github.com/awslabs/smithy-typescript.git",
     "directory": "packages/is-array-buffer"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy-io/protocol-http";
 import {
   BodyLengthCalculator,
   BuildHandler,
@@ -8,7 +8,7 @@ import {
   BuildMiddleware,
   MetadataBearer,
   Pluggable,
-} from "@aws-sdk/types";
+} from "@smithy-io/types";
 
 const CONTENT_LENGTH_HEADER = "content-length";
 

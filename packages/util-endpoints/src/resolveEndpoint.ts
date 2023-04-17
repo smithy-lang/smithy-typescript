@@ -1,4 +1,4 @@
-import { EndpointV2 } from "@aws-sdk/types";
+import { EndpointV2 } from "@smithy-io/types";
 
 import { debugId, toDebugString } from "./debug";
 import { EndpointError, EndpointResolverOptions, RuleSetObject } from "./types";

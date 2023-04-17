@@ -1,5 +1,5 @@
-import { MessageHeaders } from "@aws-sdk/types";
-import { fromUtf8, toUtf8 } from "@aws-sdk/util-utf8";
+import { MessageHeaders } from "@smithy-io/types";
+import { fromUtf8, toUtf8 } from "@smithy-io/util-utf8";
 
 import { HeaderMarshaller } from "./HeaderMarshaller";
 import { Int64 } from "./Int64";

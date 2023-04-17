@@ -1,4 +1,4 @@
-import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@aws-sdk/util-retry";
+import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@smithy-io/util-retry";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";

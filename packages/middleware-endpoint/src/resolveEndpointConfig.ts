@@ -1,5 +1,5 @@
-import { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@smithy-io/types";
+import { normalizeProvider } from "@smithy-io/util-middleware";
 
 import { toEndpointV1 } from "./adaptors/toEndpointV1";
 

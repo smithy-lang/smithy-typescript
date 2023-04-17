@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@aws-sdk/types";
+import { ParsedIniData } from "@smithy-io/types";
 
 const profileNameBlockList = ["__proto__", "profile __proto__"];
 

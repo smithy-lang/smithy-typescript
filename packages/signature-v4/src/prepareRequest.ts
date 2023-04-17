@@ -1,4 +1,4 @@
-import { HttpRequest } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy-io/types";
 
 import { cloneRequest } from "./cloneRequest";
 import { GENERATED_HEADERS } from "./constants";

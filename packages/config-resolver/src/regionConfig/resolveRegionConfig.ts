@@ -1,4 +1,4 @@
-import { Provider } from "@aws-sdk/types";
+import { Provider } from "@smithy-io/types";
 
 import { getRealRegion } from "./getRealRegion";
 import { isFipsRegion } from "./isFipsRegion";

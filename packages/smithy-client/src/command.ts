@@ -1,5 +1,5 @@
-import { constructStack } from "@aws-sdk/middleware-stack";
-import { Command as ICommand, Handler, MetadataBearer, MiddlewareStack as IMiddlewareStack } from "@aws-sdk/types";
+import { constructStack } from "@smithy-io/middleware-stack";
+import { Command as ICommand, Handler, MetadataBearer, MiddlewareStack as IMiddlewareStack } from "@smithy-io/types";
 
 /**
  * @internal

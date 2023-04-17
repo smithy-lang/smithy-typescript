@@ -1,5 +1,5 @@
-import { Endpoint, Provider, UrlParser } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { Endpoint, Provider, UrlParser } from "@smithy-io/types";
+import { normalizeProvider } from "@smithy-io/util-middleware";
 
 import { EndpointsInputConfig, EndpointsResolvedConfig } from "./resolveEndpointsConfig";
 

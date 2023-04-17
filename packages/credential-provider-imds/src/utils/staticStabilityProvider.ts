@@ -1,4 +1,4 @@
-import { AwsCredentialIdentity, Logger, Provider } from "@aws-sdk/types";
+import { AwsCredentialIdentity, Logger, Provider } from "@smithy-io/types";
 
 import { InstanceMetadataCredentials } from "../types";
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";

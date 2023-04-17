@@ -1,5 +1,5 @@
-import { loadConfig } from "@aws-sdk/node-config-provider";
-import { parseUrl } from "@aws-sdk/url-parser";
+import { loadConfig } from "@smithy-io/node-config-provider";
+import { parseUrl } from "@smithy-io/url-parser";
 
 import { Endpoint } from "../config/Endpoint";
 import { ENDPOINT_CONFIG_OPTIONS } from "../config/EndpointConfigOptions";

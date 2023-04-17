@@ -1,5 +1,5 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { HeaderBag } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy-io/protocol-http";
+import { HeaderBag } from "@smithy-io/types";
 
 import { ALWAYS_UNSIGNABLE_HEADERS } from "./constants";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";

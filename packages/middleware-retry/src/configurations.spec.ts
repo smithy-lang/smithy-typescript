@@ -1,5 +1,5 @@
-import { normalizeProvider } from "@aws-sdk/util-middleware";
-import { AdaptiveRetryStrategy, DEFAULT_MAX_ATTEMPTS, StandardRetryStrategy } from "@aws-sdk/util-retry";
+import { normalizeProvider } from "@smithy-io/util-middleware";
+import { AdaptiveRetryStrategy, DEFAULT_MAX_ATTEMPTS, StandardRetryStrategy } from "@smithy-io/util-retry";
 
 import {
   CONFIG_MAX_ATTEMPTS,

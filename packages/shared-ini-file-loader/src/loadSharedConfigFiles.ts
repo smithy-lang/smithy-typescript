@@ -1,4 +1,4 @@
-import { SharedConfigFiles } from "@aws-sdk/types";
+import { SharedConfigFiles } from "@smithy-io/types";
 
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getCredentialsFilepath } from "./getCredentialsFilepath";

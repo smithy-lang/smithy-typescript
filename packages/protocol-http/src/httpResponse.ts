@@ -1,4 +1,4 @@
-import { HeaderBag, HttpMessage, HttpResponse as IHttpResponse } from "@aws-sdk/types";
+import { HeaderBag, HttpMessage, HttpResponse as IHttpResponse } from "@smithy-io/types";
 
 type HttpResponseOptions = Partial<HttpMessage> & {
   statusCode: number;

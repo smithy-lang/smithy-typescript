@@ -1,4 +1,4 @@
-import { booleanSelector, SelectorType } from "@aws-sdk/util-config-provider";
+import { booleanSelector, SelectorType } from "@smithy-io/util-config-provider";
 
 import {
   CONFIG_USE_DUALSTACK_ENDPOINT,

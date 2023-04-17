@@ -1,5 +1,5 @@
-import { SdkStreamMixin } from "@aws-sdk/types";
-import { fromArrayBuffer } from "@aws-sdk/util-buffer-from";
+import { SdkStreamMixin } from "@smithy-io/types";
+import { fromArrayBuffer } from "@smithy-io/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
 import util from "util";
 

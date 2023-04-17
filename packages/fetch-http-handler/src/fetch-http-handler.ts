@@ -1,6 +1,6 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { buildQueryString } from "@aws-sdk/querystring-builder";
-import { HeaderBag, HttpHandlerOptions, Provider } from "@aws-sdk/types";
+import { HttpHandler, HttpRequest, HttpResponse } from "@smithy-io/protocol-http";
+import { buildQueryString } from "@smithy-io/querystring-builder";
+import { HeaderBag, HttpHandlerOptions, Provider } from "@smithy-io/types";
 
 import { requestTimeout } from "./request-timeout";
 

@@ -1,6 +1,6 @@
-import { NODE_REGION_CONFIG_OPTIONS } from "@aws-sdk/config-resolver";
-import * as ImdsProvider from "@aws-sdk/credential-provider-imds";
-import * as NodeConfigProvider from "@aws-sdk/node-config-provider";
+import { NODE_REGION_CONFIG_OPTIONS } from "@smithy-io/config-resolver";
+import * as ImdsProvider from "@smithy-io/credential-provider-imds";
+import * as NodeConfigProvider from "@smithy-io/node-config-provider";
 
 import {
   AWS_DEFAULT_REGION_ENV,

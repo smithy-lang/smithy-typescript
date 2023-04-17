@@ -16,4 +16,4 @@ export * from "./parse-utils";
 export * from "./resolve-path";
 export * from "./ser-utils";
 export * from "./split-every";
-export type { DocumentType, SdkError, SmithyException } from "@aws-sdk/types";
+export type { DocumentType, SdkError, SmithyException } from "@smithy-io/types";

@@ -1,5 +1,5 @@
-import { EventStreamCodec } from "@aws-sdk/eventstream-codec";
-import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@aws-sdk/types";
+import { EventStreamCodec } from "@smithy-io/eventstream-codec";
+import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy-io/types";
 
 import { getChunkedStream } from "./getChunkedStream";
 import { getUnmarshalledStream } from "./getUnmarshalledStream";

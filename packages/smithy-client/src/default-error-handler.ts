@@ -1,4 +1,4 @@
-import { HttpResponse, ResponseMetadata } from "@aws-sdk/types";
+import { HttpResponse, ResponseMetadata } from "@smithy-io/types";
 
 import { decorateServiceException } from "./exceptions";
 

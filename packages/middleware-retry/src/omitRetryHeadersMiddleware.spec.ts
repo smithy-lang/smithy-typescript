@@ -1,6 +1,6 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { FinalizeHandlerArguments, MiddlewareStack } from "@aws-sdk/types";
-import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@aws-sdk/util-retry";
+import { HttpRequest } from "@smithy-io/protocol-http";
+import { FinalizeHandlerArguments, MiddlewareStack } from "@smithy-io/types";
+import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy-io/util-retry";
 
 import {
   getOmitRetryHeadersPlugin,

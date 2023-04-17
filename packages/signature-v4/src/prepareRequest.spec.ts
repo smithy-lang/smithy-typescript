@@ -1,4 +1,4 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy-io/protocol-http";
 
 import { AMZ_DATE_HEADER, AUTH_HEADER, DATE_HEADER } from "./constants";
 import { prepareRequest } from "./prepareRequest";

@@ -1,5 +1,5 @@
-import { AbortController } from "@aws-sdk/abort-controller";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { AbortController } from "@smithy-io/abort-controller";
+import { HttpRequest } from "@smithy-io/protocol-http";
 import http, { Server as HttpServer } from "http";
 import https, { Server as HttpsServer } from "https";
 import { AddressInfo } from "net";

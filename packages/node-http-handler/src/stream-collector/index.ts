@@ -1,4 +1,4 @@
-import { StreamCollector } from "@aws-sdk/types";
+import { StreamCollector } from "@smithy-io/types";
 import { Readable } from "stream";
 
 import { Collector } from "./collector";

@@ -1,4 +1,4 @@
-import { Provider, RetryErrorInfo, RetryErrorType, RetryStrategyV2, StandardRetryToken } from "@aws-sdk/types";
+import { Provider, RetryErrorInfo, RetryErrorType, RetryStrategyV2, StandardRetryToken } from "@smithy-io/types";
 
 import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
 import { DEFAULT_RETRY_DELAY_BASE, INITIAL_RETRY_TOKENS } from "./constants";

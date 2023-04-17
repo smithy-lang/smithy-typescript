@@ -1,6 +1,6 @@
 import { Crc32 } from "@aws-crypto/crc32";
-import { Message, MessageHeaders } from "@aws-sdk/types";
-import { Decoder, Encoder } from "@aws-sdk/types";
+import { Message, MessageHeaders } from "@smithy-io/types";
+import { Decoder, Encoder } from "@smithy-io/types";
 
 import { HeaderMarshaller } from "./HeaderMarshaller";
 import { splitMessage } from "./splitMessage";

@@ -1,5 +1,5 @@
-import { chain, fromStatic, memoize } from "@aws-sdk/property-provider";
-import { Profile } from "@aws-sdk/types";
+import { chain, fromStatic, memoize } from "@smithy-io/property-provider";
+import { Profile } from "@smithy-io/types";
 
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";

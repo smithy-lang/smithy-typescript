@@ -1,6 +1,6 @@
-import { CredentialsProviderError } from "@aws-sdk/property-provider";
-import { getProfileName, loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
-import { ParsedIniData, Profile } from "@aws-sdk/types";
+import { CredentialsProviderError } from "@smithy-io/property-provider";
+import { getProfileName, loadSharedConfigFiles } from "@smithy-io/shared-ini-file-loader";
+import { ParsedIniData, Profile } from "@smithy-io/types";
 
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 

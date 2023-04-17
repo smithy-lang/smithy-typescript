@@ -1,4 +1,4 @@
-import { QueryParameterBag } from "@aws-sdk/types";
+import { QueryParameterBag } from "@smithy-io/types";
 
 import { parseQueryString } from "./";
 

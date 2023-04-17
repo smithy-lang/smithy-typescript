@@ -1,6 +1,6 @@
-import { RequestContext } from "@aws-sdk/types";
-import { ConnectConfiguration } from "@aws-sdk/types";
-import { ConnectionManager, ConnectionManagerConfiguration } from "@aws-sdk/types";
+import { RequestContext } from "@smithy-io/types";
+import { ConnectConfiguration } from "@smithy-io/types";
+import { ConnectionManager, ConnectionManagerConfiguration } from "@smithy-io/types";
 import http2, { ClientHttp2Session } from "http2";
 
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";

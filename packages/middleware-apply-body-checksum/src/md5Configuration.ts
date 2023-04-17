@@ -1,4 +1,4 @@
-import { ChecksumConstructor, Encoder, HashConstructor, StreamHasher } from "@aws-sdk/types";
+import { ChecksumConstructor, Encoder, HashConstructor, StreamHasher } from "@smithy-io/types";
 
 export interface Md5BodyChecksumInputConfig {}
 interface PreviouslyResolved {

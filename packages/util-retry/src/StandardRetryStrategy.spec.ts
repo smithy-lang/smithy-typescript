@@ -1,4 +1,4 @@
-import { RetryErrorInfo, RetryErrorType } from "@aws-sdk/types";
+import { RetryErrorInfo, RetryErrorType } from "@smithy-io/types";
 
 import { RETRY_MODES } from "./config";
 import { DEFAULT_RETRY_DELAY_BASE, INITIAL_RETRY_TOKENS } from "./constants";

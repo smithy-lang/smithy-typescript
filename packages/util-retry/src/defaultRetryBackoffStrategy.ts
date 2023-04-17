@@ -1,4 +1,4 @@
-import { StandardRetryBackoffStrategy } from "@aws-sdk/types";
+import { StandardRetryBackoffStrategy } from "@smithy-io/types";
 
 import { DEFAULT_RETRY_DELAY_BASE, MAXIMUM_RETRY_DELAY } from "./constants";
 

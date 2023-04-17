@@ -1,4 +1,4 @@
-import { EndpointV2 } from "@aws-sdk/types";
+import { EndpointV2 } from "@smithy-io/types";
 
 import { EndpointError, EvaluateOptions, RuleSetRules } from "../types";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";

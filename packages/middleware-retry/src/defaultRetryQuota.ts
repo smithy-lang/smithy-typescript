@@ -1,5 +1,5 @@
-import { SdkError } from "@aws-sdk/types";
-import { NO_RETRY_INCREMENT, RETRY_COST, TIMEOUT_RETRY_COST } from "@aws-sdk/util-retry";
+import { SdkError } from "@smithy-io/types";
+import { NO_RETRY_INCREMENT, RETRY_COST, TIMEOUT_RETRY_COST } from "@smithy-io/util-retry";
 
 import { RetryQuota } from "./types";
 

@@ -1,4 +1,4 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy-io/protocol-http";
 import {
   FinalizeHandler,
   FinalizeHandlerArguments,
@@ -6,8 +6,8 @@ import {
   MetadataBearer,
   Pluggable,
   RelativeMiddlewareOptions,
-} from "@aws-sdk/types";
-import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@aws-sdk/util-retry";
+} from "@smithy-io/types";
+import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy-io/util-retry";
 
 export const omitRetryHeadersMiddleware =
   () =>

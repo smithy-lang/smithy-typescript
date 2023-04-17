@@ -1,4 +1,4 @@
-import { EndpointARN } from "@aws-sdk/types";
+import { EndpointARN } from "@smithy-io/types";
 
 import { parseArn } from "./parseArn";
 

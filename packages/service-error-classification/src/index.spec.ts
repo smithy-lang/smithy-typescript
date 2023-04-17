@@ -1,4 +1,4 @@
-import { RetryableTrait, SdkError } from "@aws-sdk/types";
+import { RetryableTrait, SdkError } from "@smithy-io/types";
 
 import {
   CLOCK_SKEW_ERROR_CODES,
