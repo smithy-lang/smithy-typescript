@@ -67,11 +67,18 @@ final class ServiceAggregatedClientGenerator implements Runnable {
     @Override
     public void run() {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
+        final Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        writer.openBlock("const commands = {", "}", () -> {
+            for (OperationShape operation : containedOperations) {
+                Symbol operationSymbol = symbolProvider.toSymbol(operation);
+                writer.write("$L,", operationSymbol.getName());
+            }
+        });
 
-        // Generate the client and extend from the bare-bones client.
-        writer.writeShapeDocs(service);
-        writer.openBlock("export class $L extends $T {", "}", aggregateClientName, serviceSymbol, () -> {
-            Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        writer.write("");
+
+        // Generate an aggregated client interface.
+        writer.openBlock("export interface $L {", "}", aggregateClientName, () -> {
             for (OperationShape operation : containedOperations) {
                 Symbol operationSymbol = symbolProvider.toSymbol(operation);
                 Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
@@ -83,43 +90,41 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 );
 
                 // Generate a multiple overloaded methods for each command.
-                writer.writeShapeDocs(operation);
-                writer.write("public $L(\n"
+                writer.writeDocs(
+                    "@see {@link " + operationSymbol.getName() + "}"
+                );
+                writer.write("$L(\n"
                             + "  args: $T,\n"
                             + "  options?: $T,\n"
                             + "): Promise<$T>;", methodName, input, applicationProtocol.getOptionsType(), output);
-                writer.write("public $L(\n"
+                writer.write("$L(\n"
                              + "  args: $T,\n"
                              + "  cb: (err: any, data?: $T) => void\n"
                              + "): void;", methodName, input, output);
-                writer.write("public $L(\n"
+                writer.write("$L(\n"
                             + "  args: $T,\n"
                             + "  options: $T,\n"
                             + "  cb: (err: any, data?: $T) => void\n"
                             + "): void;", methodName, input, applicationProtocol.getOptionsType(), output);
-                writer.openBlock("public $1L(\n"
-                                 + "  args: $2T,\n"
-                                 + "  optionsOrCb?: $3T | ((err: any, data?: $4T) => void),\n"
-                                 + "  cb?: (err: any, data?: $4T) => void\n"
-                                 + "): Promise<$4T> | void { ", "}",
-                        methodName,
-                        input,
-                        applicationProtocol.getOptionsType(),
-                        output,
-                        () -> {
-                    writer.write("const command = new $T(args);\n"
-                                 + "if (typeof optionsOrCb === \"function\") {\n"
-                                 + "  this.send(command, optionsOrCb)\n"
-                                 + "} else if (typeof cb === \"function\") {\n"
-                                 + "  if (typeof optionsOrCb !== \"object\")\n"
-                                 + "    throw new Error(`Expect http options but get $${typeof optionsOrCb}`)\n"
-                                 + "  this.send(command, optionsOrCb || {}, cb)\n"
-                                 + "} else {\n"
-                                 + "  return this.send(command, optionsOrCb);\n"
-                                 + "}", operationSymbol);
-                });
                 writer.write("");
             }
         });
+
+        writer.write("");
+
+        writer.addImport(aggregateClientName + "ClientConfig", null, "./src/" + aggregateClientName + "Client");
+
+        // Generate the client and extend from the bare-bones client.
+        writer.writeShapeDocs(service);
+        writer.openBlock("export class $L extends $T implements $L {", "}",
+            aggregateClientName, serviceSymbol, aggregateClientName,
+            () -> {
+                writer.openBlock("public constructor(config: $TConfig) {", "}", serviceSymbol, () -> {
+                    writer.write("super(config);");
+                    writer.addImport("createAggregatedClient", null, "@aws-sdk/smithy-client");
+                    writer.write("createAggregatedClient(commands, this);");
+                });
+            }
+        );
     }
 }
