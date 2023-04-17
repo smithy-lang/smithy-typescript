@@ -2,7 +2,7 @@ import { ProviderError } from "./ProviderError";
 
 /**
  * @internal
- * 
+ *
  * An error representing a failure of an individual token provider.
  *
  * This error class has special meaning to the {@link chain} method. If a

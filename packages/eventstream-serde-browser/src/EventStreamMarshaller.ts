@@ -18,7 +18,7 @@ export interface EventStreamMarshallerOptions {
 
 /**
  * @internal
- * 
+ *
  * Utility class used to serialize and deserialize event streams in
  * browsers and ReactNative.
  *

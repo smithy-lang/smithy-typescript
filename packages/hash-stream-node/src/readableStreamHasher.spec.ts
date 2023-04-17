@@ -35,7 +35,7 @@ describe(readableStreamHasher.name, () => {
   }
 
   beforeEach(() => {
-    (HashCalculator as unknown as jest.Mock).mockImplementation(
+    ((HashCalculator as unknown) as jest.Mock).mockImplementation(
       (hash) => new MockHashCalculator(hash, mockHashCalculatorWrite, mockHashCalculatorEnd)
     );
     mockDigest.mockResolvedValue(mockHash);
@@ -108,7 +108,7 @@ describe(readableStreamHasher.name, () => {
       mockHashCalculatorWrite,
       mockHashCalculatorEnd
     );
-    (HashCalculator as unknown as jest.Mock).mockImplementation((hash) => mockHashCalculator);
+    ((HashCalculator as unknown) as jest.Mock).mockImplementation((hash) => mockHashCalculator);
 
     const readableStream = new Readable({
       read: (size) => {},

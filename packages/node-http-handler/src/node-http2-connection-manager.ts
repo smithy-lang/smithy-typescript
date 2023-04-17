@@ -37,9 +37,9 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
         if (err) {
           throw new Error(
             "Fail to set maxConcurrentStreams to " +
-            this.config.maxConcurrency +
-            "when creating new session for " +
-            requestContext.destination.toString()
+              this.config.maxConcurrency +
+              "when creating new session for " +
+              requestContext.destination.toString()
           );
         }
       });

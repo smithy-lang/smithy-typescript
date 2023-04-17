@@ -54,7 +54,7 @@ export interface EndpointsResolvedConfig extends Required<EndpointsInputConfig> 
 
 /**
  * @internal
- * 
+ *
  * @deprecated endpoints rulesets use @aws-sdk/middleware-endpoint resolveEndpointConfig.
  * All generated clients should migrate to Endpoints 2.0 endpointRuleSet traits.
  */

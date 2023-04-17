@@ -23,7 +23,7 @@ export const ENV_CMDS_AUTH_TOKEN = "AWS_CONTAINER_AUTHORIZATION_TOKEN";
 
 /**
  * @internal
- * 
+ *
  * Creates a credential provider that will source credentials from the ECS
  * Container Metadata Service
  */
