@@ -42,6 +42,7 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -351,8 +352,13 @@ public class EventStreamGenerator {
                 } else if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
                     Symbol symbol = getSymbol(context, payloadShape);
                     String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
+                    boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(payloadShape);
                     documentShapesToSerialize.add(payloadShape);
-                    writer.write("body = $L(input.$L, context);", payloadMemberName, serFunctionName);
+                    if (mayElide) {
+                        writer.write("body = $L(input.$L);", "_json", payloadMemberName);
+                    } else {
+                        writer.write("body = $L(input.$L, context);", serFunctionName, payloadMemberName);
+                    }
                     serializeInputEventDocumentPayload.run();
                 } else {
                     throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
@@ -369,7 +375,12 @@ public class EventStreamGenerator {
             Symbol symbol = getSymbol(context, event);
             String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
             documentShapesToSerialize.add(event);
-            writer.write("body = $L(input, context);", serFunctionName);
+            boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(event);
+            if (mayElide) {
+               writer.write("body = $L(input);", "_json");
+            } else {
+                writer.write("body = $L(input, context);", serFunctionName);
+            }
             serializeInputEventDocumentPayload.run();
         }
     }
@@ -496,14 +507,26 @@ public class EventStreamGenerator {
                 writer.write("const data: any = await parseBody(output.body, context);");
                 Symbol symbol = getSymbol(context, payloadShape);
                 String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
-                writer.write("contents.$L = $L(data, context);", payloadMemberName, deserFunctionName);
+                boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(payloadShape);
+                if (mayElide) {
+                    writer.addImport("_json", null, "@aws-sdk/smithy-client");
+                    writer.write("contents.$L = $L(data);", payloadMemberName, "_json");
+                } else {
+                    writer.write("contents.$L = $L(data, context);", payloadMemberName, deserFunctionName);
+                }
                 eventShapesToDeserialize.add(payloadShape);
             }
         } else {
             writer.write("const data: any = await parseBody(output.body, context);");
             Symbol symbol = getSymbol(context, event);
             String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
-            writer.write("Object.assign(contents, $L(data, context));", deserFunctionName);
+            boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(event);
+            if (mayElide) {
+                writer.addImport("_json", null, "@aws-sdk/smithy-client");
+                writer.write("Object.assign(contents, $L(data));", "_json");
+            } else {
+                writer.write("Object.assign(contents, $L(data, context));", deserFunctionName);
+            }
             eventShapesToDeserialize.add(event);
         }
     }

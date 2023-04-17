@@ -45,6 +45,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -65,6 +66,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
+    protected final SerdeElision serdeElision;
     private final GenerationContext context;
     private final String dataSource;
     private final Format defaultTimestampFormat;
@@ -86,6 +88,8 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
         this.context = context;
         this.dataSource = dataSource;
         this.defaultTimestampFormat = defaultTimestampFormat;
+        this.serdeElision = SerdeElision.forModel(context.getModel())
+            .setEnabledForModel(false);
     }
 
     /**
@@ -252,6 +256,11 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     private String getDelegateSerializer(Shape shape) {
         // Use the shape for the function name.
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
+
+        if (serdeElision.mayElide(shape)) {
+            return "_json(" + dataSource + ")";
+        }
+
         return ProtocolGenerator.getSerFunctionShortName(symbol)
                 + "(" + dataSource + ", context)";
     }
