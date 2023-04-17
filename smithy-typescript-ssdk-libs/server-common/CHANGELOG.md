@@ -1,5 +1,11 @@
 # server-common Changelog
 
+## 1.0.0-alpha.10 (2023-04-04)
+
+### Bug Fixes
+
+- Fix `uniqueItems` validation not to throw when undefined values are nested inside a list of objects.
+
 ## 1.0.0-alpha.9 (2023-03-16)
 
 ### Features

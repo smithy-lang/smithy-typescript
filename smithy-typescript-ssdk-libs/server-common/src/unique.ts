@@ -76,6 +76,10 @@ const hash = (input: Input): string => {
  * @return a canonical string representation
  */
 const canonicalize = (input: Input): string => {
+  if (input === undefined) {
+    return "undefined()";
+  }
+
   if (input === null) {
     return "null()";
   }

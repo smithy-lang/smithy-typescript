@@ -260,4 +260,13 @@ describe("uniqueItems", () => {
       path: "aField",
     });
   });
+  describe("supports undefined values inside objects in lists", () => {
+    expect(() => validator.validate([{ a: [{ a: undefined }] }], "aField")).not.toThrowError();
+    expect(validator.validate([{ a: [{ a: null }] }, { a: [{ a: undefined }] }], "aField")).toBeNull();
+    expect(validator.validate([{ a: [{ a: undefined }] }, { a: [{ a: undefined }] }], "aField")).toEqual({
+      constraintType: "uniqueItems",
+      failureValue: [{ a: [{ a: undefined }] }],
+      path: "aField",
+    });
+  });
 });
