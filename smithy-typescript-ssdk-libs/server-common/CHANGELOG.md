@@ -1,6 +1,8 @@
 # server-common Changelog
 
-## 1.0.0-alpha.10 (2023-04-04)
+## 1.0.0-alpha.10 (2023-04-18)
+
+- Updated SDK dependencies.
 
 ### Bug Fixes
 
