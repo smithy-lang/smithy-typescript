@@ -43,6 +43,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
     private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
     private final String aggregateClientName;
+    private final String barebonesClientName;
     private final Symbol serviceSymbol;
     private final ApplicationProtocol applicationProtocol;
 
@@ -62,6 +63,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
         this.aggregateClientName = aggregateClientName;
         this.applicationProtocol = applicationProtocol;
         serviceSymbol = symbolProvider.toSymbol(service);
+        this.barebonesClientName = serviceSymbol.getName();
     }
 
     @Override
@@ -112,19 +114,15 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
         writer.write("");
 
-        writer.addImport(aggregateClientName + "ClientConfig", null, "./src/" + aggregateClientName + "Client");
+        writer.addImport(barebonesClientName + "Config", null, serviceSymbol.getNamespace());
 
         // Generate the client and extend from the bare-bones client.
         writer.writeShapeDocs(service);
-        writer.openBlock("export class $L extends $T implements $L {", "}",
-            aggregateClientName, serviceSymbol, aggregateClientName,
-            () -> {
-                writer.openBlock("public constructor(config: $TConfig) {", "}", serviceSymbol, () -> {
-                    writer.write("super(config);");
-                    writer.addImport("createAggregatedClient", null, "@aws-sdk/smithy-client");
-                    writer.write("createAggregatedClient(commands, this);");
-                });
-            }
+        writer.write("export class $L extends $T implements $L {}",
+            aggregateClientName, serviceSymbol, aggregateClientName
         );
+
+        writer.addImport("createAggregatedClient", null, "@aws-sdk/smithy-client");
+        writer.write("createAggregatedClient(commands, $L);", aggregateClientName);
     }
 }
