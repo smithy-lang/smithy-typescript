@@ -83,8 +83,12 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         this.applicationProtocol = applicationProtocol;
 
         symbol = symbolProvider.toSymbol(service);
-        configType = symbol.getName() + "Config";
+        configType = getConfigTypeName(symbol);
         resolvedConfigType = getResolvedConfigTypeName(symbol);
+    }
+
+    static String getConfigTypeName(Symbol symbol) {
+        return symbol.getName() + "Config";
     }
 
     static String getResolvedConfigTypeName(Symbol symbol) {
