@@ -112,7 +112,11 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
         writer.write("");
 
-        writer.addImport(ServiceBareBonesClientGenerator.getConfigTypeName(serviceSymbol), null, serviceSymbol.getNamespace());
+        writer.addImport(
+            ServiceBareBonesClientGenerator.getConfigTypeName(serviceSymbol),
+            null,
+            serviceSymbol.getNamespace()
+        );
 
         // Generate the client and extend from the bare-bones client.
         writer.writeShapeDocs(service);
