@@ -43,7 +43,6 @@ final class ServiceAggregatedClientGenerator implements Runnable {
     private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
     private final String aggregateClientName;
-    private final String barebonesClientName;
     private final Symbol serviceSymbol;
     private final ApplicationProtocol applicationProtocol;
 
@@ -63,7 +62,6 @@ final class ServiceAggregatedClientGenerator implements Runnable {
         this.aggregateClientName = aggregateClientName;
         this.applicationProtocol = applicationProtocol;
         serviceSymbol = symbolProvider.toSymbol(service);
-        this.barebonesClientName = serviceSymbol.getName();
     }
 
     @Override
@@ -114,7 +112,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
         writer.write("");
 
-        writer.addImport(barebonesClientName + "Config", null, serviceSymbol.getNamespace());
+        writer.addImport(ServiceBareBonesClientGenerator.getConfigTypeName(serviceSymbol), null, serviceSymbol.getNamespace());
 
         // Generate the client and extend from the bare-bones client.
         writer.writeShapeDocs(service);

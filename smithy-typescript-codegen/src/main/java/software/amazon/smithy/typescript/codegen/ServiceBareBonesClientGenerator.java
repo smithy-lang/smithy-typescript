@@ -87,6 +87,10 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         resolvedConfigType = getResolvedConfigTypeName(symbol);
     }
 
+    static String getConfigTypeName(Symbol symbol) {
+        return symbol.getName() + "Config";
+    }
+
     static String getResolvedConfigTypeName(Symbol symbol) {
         return symbol.getName() + "ResolvedConfig";
     }
