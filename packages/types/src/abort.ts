@@ -1,5 +1,8 @@
 /**
  * @public
+ * 
+ * A function to be invoked when the action represented by a signal has
+ * been aborted.
  */
 export interface AbortHandler {
   (this: AbortSignal, ev: any): any;
@@ -29,7 +32,7 @@ export interface AbortSignal {
 /**
  * @public
  *
- * The AWS SDK uses a Controller/Signal model to allow for cooperative
+ * SDKs can use a Controller/Signal model to allow for cooperative
  * cancellation of asynchronous operations. When initiating such an operation,
  * the caller can create an AbortController and then provide linked signal to
  * subtasks. This allows a single source to communicate to multiple consumers

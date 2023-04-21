@@ -1,6 +1,6 @@
 import { CredentialsProviderError } from "@smithy-io/property-provider";
 import { getProfileName, loadSharedConfigFiles, SourceProfileInit } from "@smithy-io/shared-ini-file-loader";
-import { Profile, Provider } from "@smithy-io/types";
+import { IniSection, Provider } from "@smithy-io/types";
 
 export interface SharedConfigInit extends SourceProfileInit {
   /**
@@ -11,7 +11,7 @@ export interface SharedConfigInit extends SourceProfileInit {
   preferredFile?: "config" | "credentials";
 }
 
-export type GetterFromConfig<T> = (profile: Profile) => T | undefined;
+export type GetterFromConfig<T> = (profile: IniSection) => T | undefined;
 
 /**
  * Get config value from the shared config files with inferred profile name.

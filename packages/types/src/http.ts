@@ -1,4 +1,5 @@
 import { AbortSignal } from "./abort";
+
 /**
  * @public
  *
@@ -36,8 +37,8 @@ export interface Headers extends Map<string, string> {
  *
  * ```json
  *    {
- *        'x-amz-date': '2000-01-01T00:00:00Z',
- *        'X-Amz-Date': '2001-01-01T00:00:00Z'
+ *        'x-request-date': '2000-01-01T00:00:00Z',
+ *        'X-Request-Date': '2001-01-01T00:00:00Z'
  *    }
  * ```
  *

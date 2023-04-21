@@ -111,7 +111,7 @@ export interface UrlParser {
  * @public
  *
  * Object containing regionalization information of
- * AWS services.
+ * services.
  */
 export interface RegionInfo {
   hostname: string;
@@ -153,9 +153,9 @@ export interface RegionInfoProvider {
 
 /**
  * @public
- *
- * A tuple that represents an API name and optional version
- * of a library built using the AWS SDK.
+ * 
+ * A tuple that represents an application, operating system, or vendor
+ * and optional version used to identify a user agent.
  */
 export type UserAgentPair = [name: string, version?: string];
 
