@@ -9,7 +9,8 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint --parallel",
-    "format": "turbo run format --parallel"
+    "format": "turbo run format --parallel",
+    "release": "yarn build && yarn changeset publish"
   },
   "repository": {
     "type": "git",
