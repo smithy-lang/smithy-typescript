@@ -15,8 +15,8 @@
     "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
     "test": "jest --passWithNoTests",
     "clean": "rimraf dist",
-    "lint": "eslint -c ../.eslintrc.js \"src/**/*.ts\"",
-    "format": "prettier --config ../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\""
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\""
   },
   "repository": {
     "type": "git",
@@ -32,19 +32,11 @@
     "tslib": "^1.8.0"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.4",
     "@types/node": "^14.14.37",
-    "@typescript-eslint/eslint-plugin": "4.30.0",
-    "@typescript-eslint/parser": "4.30.0",
     "concurrently": "^7.6.0",
     "downlevel-dts": "^0.7.0",
-    "eslint": "7.32.0",
-    "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-prettier": "3.4.1",
-    "eslint-plugin-simple-import-sort": "7.0.0",
-    "jest": "^26.1.0",
     "rimraf": "^3.0.2",
-    "typescript": "~4.2.2"
+    "typescript": "~4.9.5"
   },
   "files": [
     "dist/cjs/**/*.js",
