@@ -8,7 +8,7 @@ apigateway.
 ### Example
 
 ```typescript
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
 import {
   GreetingService as __GreetingService,
   SayHelloInput,

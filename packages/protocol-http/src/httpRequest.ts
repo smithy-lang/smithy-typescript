@@ -1,8 +1,18 @@
-import { Endpoint, HeaderBag, HttpMessage, HttpRequest as IHttpRequest, QueryParameterBag } from "@aws-sdk/types";
+import { Endpoint, QueryParameterBag } from "@smithy/types";
+
+import { HeaderBag, HttpMessage } from "./types";
 
 type HttpRequestOptions = Partial<HttpMessage> & Partial<Endpoint> & { method?: string };
 
-export interface HttpRequest extends IHttpRequest {}
+/**
+ * @public
+ *
+ * Interface an HTTP request class. Contains
+ * addressing information in addition to standard message properties.
+ */
+export interface HttpRequest extends HttpMessage, Endpoint {
+  method: string;
+}
 
 export class HttpRequest implements HttpMessage, Endpoint {
   public method: string;

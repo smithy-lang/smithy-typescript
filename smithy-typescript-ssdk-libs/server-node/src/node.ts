@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { HeaderBag, QueryParameterBag } from "@aws-sdk/types";
+import { HeaderBag, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { QueryParameterBag } from "@smithy/types";
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
 import { URL, URLSearchParams } from "url";
 
