@@ -19,8 +19,8 @@ export * from "./errors";
 export * from "./validation";
 export * from "./unique";
 
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { SerdeContext } from "@aws-sdk/types";
+import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { SerdeContext } from "@smithy/types";
 
 import { ServiceException } from "./errors";
 

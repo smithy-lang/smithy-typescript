@@ -1,10 +1,4 @@
-import { FieldPosition } from "./FieldPosition";
-
-export type FieldOptions = {
-  name: string;
-  kind?: FieldPosition;
-  values?: string[];
-};
+import { FieldOptions, FieldPosition } from "./types";
 
 /**
  * A name-value pair representing a single field

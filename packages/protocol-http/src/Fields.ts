@@ -1,5 +1,5 @@
 import { Field } from "./Field";
-import { FieldPosition } from "./FieldPosition";
+import { FieldPosition } from "./types";
 
 export type FieldsOptions = { fields?: Field[]; encoding?: string };
 

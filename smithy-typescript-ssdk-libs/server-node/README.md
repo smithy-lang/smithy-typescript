@@ -8,7 +8,7 @@ This package provides glue code to enable using a server sdk with NodeJS.
 
 ```typescript
 import { createServer, IncomingMessage, ServerResponse } from "http";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
 import {
   GreetingService as __GreetingService,
   SayHelloInput,

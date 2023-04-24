@@ -41,6 +41,7 @@
     "yarn": "1.22.10"
   },
   "workspaces": [
+    "packages/*",
     "smithy-typescript-ssdk-libs/*"
   ],
   "packageManager": "yarn@3.4.1"
