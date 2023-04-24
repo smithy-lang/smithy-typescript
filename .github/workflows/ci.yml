@@ -70,3 +70,33 @@ jobs:
       # changes) it'll return a non-zero error code.
       - name: Ensure there are no changes from running the formatter
         run: test -z "$(git diff)"
+
+  ensure-typescript-packages-have-changesets:
+    runs-on: ubuntu-latest
+    name: Ensure TypeScript packages have changesets
+    steps:
+      - uses: actions/checkout@v3
+        # Include full git history needed for `yarn changeset status`
+        with:
+          ref: ${{github.event.pull_request.head.sha}}
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - name: Install
+        run: yarn
+      - name: Create empty changeset for ssdk libs
+        run: |
+          echo --- >> .changeset/empty-ssdk-changeset.md
+          echo '"@aws-smithy/server-apigateway": patch' >> .changeset/empty-ssdk-changeset.md
+          echo '"@aws-smithy/server-common": patch' >> .changeset/empty-ssdk-changeset.md
+          echo '"@aws-smithy/server-node": patch' >> .changeset/empty-ssdk-changeset.md
+          echo --- >> .changeset/empty-ssdk-changeset.md
+          echo "" >> .changeset/empty-ssdk-changeset.md
+          echo "empty changeset" >> .changeset/empty-ssdk-changeset.md
+          git config --global user.email "github-aws-smithy-automation@amazon.com"
+          git config --global user.name "Smithy Automation"
+          git add .
+          git commit -m "Create empty changeset"
+      - name: Ensure changesets exist for each changed package
+        run: yarn changeset status --since=origin/main
