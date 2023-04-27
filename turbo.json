@@ -17,6 +17,9 @@
     },
     "clean": {
       "cache": false
+    },
+    "stage-release": {
+        "dependsOn": ["build"]
     }
   }
 }

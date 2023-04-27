@@ -52,3 +52,6 @@ dist-*
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# NPM release staging
+_release
