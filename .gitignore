@@ -54,4 +54,4 @@ dist-*
 !.yarn/versions
 
 # NPM release staging
-_release
+.release

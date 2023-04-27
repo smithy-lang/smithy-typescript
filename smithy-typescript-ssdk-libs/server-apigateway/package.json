@@ -13,7 +13,7 @@
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
     "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
-    "stage-release": "rimraf ./_release && yarn pack && mkdir ./_release && tar zxvf ./package.tgz --directory ./_release && rm ./package.tgz",
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "jest --passWithNoTests",
     "clean": "rimraf dist",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
@@ -59,6 +59,6 @@
   },
   "homepage": "https://github.com/awslabs/smithy-typescript#readme",
   "publishConfig": {
-    "directory": "_release/package"
+    "directory": ".release/package"
   }
 }
