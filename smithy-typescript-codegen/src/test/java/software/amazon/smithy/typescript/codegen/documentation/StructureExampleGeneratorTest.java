@@ -94,7 +94,7 @@ public class StructureExampleGeneratorTest {
     @Test
     public void generatesStructuralHintDocumentation_map() {
         assertThat(
-                StructureExampleGenerator.generateStructuralHintDocumentation(map, model),
+                StructureExampleGenerator.generateStructuralHintDocumentation(map, model, false),
                 equalTo("""
                         { // map
                           "<keys>": "STRING_VALUE",
@@ -104,7 +104,7 @@ public class StructureExampleGeneratorTest {
     @Test
     public void generatesStructuralHintDocumentation_structure() {
         assertThat(
-                StructureExampleGenerator.generateStructuralHintDocumentation(structure, model),
+                StructureExampleGenerator.generateStructuralHintDocumentation(structure, model, false),
                 equalTo("""
                         { // structure
                           string: "STRING_VALUE",
@@ -144,11 +144,55 @@ public class StructureExampleGeneratorTest {
                           },
                         };"""));
     }
+    
+    @Test
+    public void generatesStructuralHintDocumentation_structure_asComment() {
+        assertThat(
+                StructureExampleGenerator.generateStructuralHintDocumentation(structure, model, true),
+                equalTo("""
+                        // { // structure
+                        //   string: "STRING_VALUE",
+                        //   list: [ // list
+                        //     "STRING_VALUE",
+                        //   ],
+                        //   map: { // map
+                        //     "<keys>": "STRING_VALUE",
+                        //   },
+                        //   list2: [
+                        //     "STRING_VALUE",
+                        //   ],
+                        //   list3: [
+                        //     "STRING_VALUE",
+                        //   ],
+                        //   list4: [
+                        //     "STRING_VALUE",
+                        //   ],
+                        //   list5: [
+                        //     "STRING_VALUE",
+                        //   ],
+                        //   list6: "<list>",
+                        //   list7: "<list>",
+                        //   structure: {
+                        //     string: "STRING_VALUE",
+                        //     list: "<list>",
+                        //     map: {
+                        //       "<keys>": "STRING_VALUE",
+                        //     },
+                        //     list2: "<list>",
+                        //     list3: "<list>",
+                        //     list4: "<list>",
+                        //     list5: "<list>",
+                        //     list6: "<list>",
+                        //     list7: "<list>",
+                        //     structure: "<structure>",
+                        //   },
+                        // };"""));
+    }
 
     @Test
     public void generatesStructuralHintDocumentation_list() {
         assertThat(
-                StructureExampleGenerator.generateStructuralHintDocumentation(list, model),
+                StructureExampleGenerator.generateStructuralHintDocumentation(list, model, false),
                 equalTo("""
                         [ // list
                           "STRING_VALUE",
