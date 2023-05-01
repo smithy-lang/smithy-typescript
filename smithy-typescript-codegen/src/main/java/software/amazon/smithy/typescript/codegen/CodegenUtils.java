@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.EventStreamIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -236,5 +238,18 @@ public final class CodegenUtils {
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
         writer.writeInline("Omit<$1T, $2S> & { $2L$3L: $1T[$2S]|string|Uint8Array|Buffer }",
                 containerSymbol, memberName, optionalSuffix);
+    }
+
+    public static String getServiceName(
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider
+    ) {
+        ServiceShape service = settings.getService(model);
+        return symbolProvider.toSymbol(service).getName().replaceAll("(Client)$", "");
+    }
+
+    public static String getServiceExceptionName(String serviceName) {
+        return serviceName + "ServiceException";
     }
 }

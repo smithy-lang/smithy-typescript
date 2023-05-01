@@ -170,9 +170,9 @@ final class CommandGenerator implements Runnable {
         return "@example\n"
                 + "Use a bare-bones client and the command you need to make an API call.\n"
                 + "```javascript\n"
-                + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
+                + String.format("import { %s, %s } from '%s'; // ES Modules import%n", serviceName, commandName,
                         packageName)
-                + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
+                + String.format("// const { %s, %s } = require('%s'); // CommonJS import%n", serviceName, commandName,
                         packageName)
                 + String.format("const client = new %s(config);%n", serviceName)
                 + String.format("const input = %s%n",
@@ -180,7 +180,10 @@ final class CommandGenerator implements Runnable {
                                 model.getShape(operation.getInputShape()).get(), model))
                 + String.format("const command = new %s(input);%n", commandName)
                 + "const response = await client.send(command);\n"
-                + "```\n"
+                + String.format("/**%n%s%n",
+                        StructureExampleGenerator.generateStructuralHintDocumentation(
+                                model.getShape(operation.getOutputShape()).get(), model))
+                + "\n```\n"
                 + "\n"
                 + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
                 + String.format("@returns {@link %s}%n", commandOutput)
@@ -206,6 +209,11 @@ final class CommandGenerator implements Runnable {
             }
             buffer.append("\n\n");
         }
+
+        String name = CodegenUtils.getServiceName(settings, model, symbolProvider);
+        buffer.append(String.format("@throws {@link %s}%n", CodegenUtils.getServiceExceptionName(name)));
+        buffer.append(String.format("<p>Base exception class for all service exceptions from %s service.</p>%n", name));
+
         return buffer.toString();
     }
 

@@ -112,52 +112,52 @@ public abstract class StructureExampleGenerator {
 
         shapeTracker.mark(target, indentation);
         if (shapeTracker.shouldTruncate(target)) {
-            append(indentation, buffer, "\"<" + target.getId().getName() + ">\",");
+            append(indentation, buffer, "'<" + target.getId().getName() + ">',");
             checkRequired(indentation, buffer, shape);
         } else {
             switch (target.getType()) {
                 case BIG_DECIMAL:
-                    append(indentation, buffer, "Number(\"bigdecimal\"),");
+                    append(indentation, buffer, "Number('bigdecimal'),");
                     break;
                 case BIG_INTEGER:
-                    append(indentation, buffer, "Number(\"bigint\"),");
+                    append(indentation, buffer, "Number('bigint'),");
                     break;
                 case BLOB:
                     if (target.hasTrait(StreamingTrait.class)) {
-                        append(indentation, buffer, "\"STREAMING_BLOB_VALUE\",");
+                        append(indentation, buffer, "'STREAMING_BLOB_VALUE',");
                     } else {
-                        append(indentation, buffer, "\"BLOB_VALUE\",");
+                        append(indentation, buffer, "'BLOB_VALUE',");
                     }
                     break;
                 case BOOLEAN:
                     append(indentation, buffer, "true || false,");
                     break;
                 case BYTE:
-                    append(indentation, buffer, "\"BYTE_VALUE\",");
+                    append(indentation, buffer, "'BYTE_VALUE',");
                     break;
                 case DOCUMENT:
-                    append(indentation, buffer, "\"DOCUMENT_VALUE\",");
+                    append(indentation, buffer, "'DOCUMENT_VALUE',");
                     break;
                 case DOUBLE:
-                    append(indentation, buffer, "Number(\"double\"),");
+                    append(indentation, buffer, "Number('double'),");
                     break;
                 case FLOAT:
-                    append(indentation, buffer, "Number(\"float\"),");
+                    append(indentation, buffer, "Number('float'),");
                     break;
                 case INTEGER:
-                    append(indentation, buffer, "Number(\"int\"),");
+                    append(indentation, buffer, "Number('int'),");
                     break;
                 case LONG:
-                    append(indentation, buffer, "Number(\"long\"),");
+                    append(indentation, buffer, "Number('long'),");
                     break;
                 case SHORT:
-                    append(indentation, buffer, "Number(\"short\"),");
+                    append(indentation, buffer, "Number('short'),");
                     break;
                 case STRING:
-                    append(indentation, buffer, "\"STRING_VALUE\",");
+                    append(indentation, buffer, "'STRING_VALUE',");
                     break;
                 case TIMESTAMP:
-                    append(indentation, buffer, "new Date(\"TIMESTAMP\"),");
+                    append(indentation, buffer, "new Date('TIMESTAMP'),");
                     break;
 
                 case SET:
@@ -175,7 +175,7 @@ public abstract class StructureExampleGenerator {
                             ? " // " + target.getId().getName()
                             : ""));
                     checkRequired(indentation, buffer, shape);
-                    append(indentation + 2, buffer, "\"<keys>\": ");
+                    append(indentation + 2, buffer, "'<keys>': ");
                     MapShape map = (MapShape) target;
                     shape(model.getShape(map.getValue().getTarget()).get(), buffer, model, indentation + 2,
                             shapeTracker);
@@ -196,7 +196,7 @@ public abstract class StructureExampleGenerator {
                     String enumeration = enumShape.getEnumValues()
                             .values()
                             .stream()
-                            .map(s -> "\"" + s + "\"")
+                            .map(s -> "'" + s + "'")
                             .collect(Collectors.joining(" || "));
                     append(indentation, buffer, enumeration + ",");
                     break;
@@ -214,7 +214,7 @@ public abstract class StructureExampleGenerator {
                 case SERVICE:
                 case MEMBER:
                 default:
-                    append(indentation, buffer, "\"...\",");
+                    append(indentation, buffer, "'...',");
                     break;
             }
 

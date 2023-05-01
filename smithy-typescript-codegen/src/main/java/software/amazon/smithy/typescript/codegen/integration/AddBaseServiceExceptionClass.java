@@ -22,7 +22,6 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
@@ -59,8 +58,8 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
     ) {
         boolean isClientSdk = settings.generateClient();
         if (isClientSdk) {
-            String serviceName = getServiceName(settings, model, symbolProvider);
-            String serviceExceptionName = getServiceExceptionName(serviceName);
+            String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+            String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
             writerFactory.accept(
                     Paths.get(CodegenUtils.SOURCE_FOLDER, "models", serviceExceptionName + ".ts").toString(),
                     writer -> {
@@ -89,8 +88,8 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
     ) {
         boolean isClientSdk = settings.generateClient();
         if (isClientSdk) {
-            String serviceName = getServiceName(settings, model, symbolProvider);
-            String serviceExceptionName = getServiceExceptionName(serviceName);
+            String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+            String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
             writer.write("export { $1L } from \"./models/$1L\";", serviceExceptionName);
         }
     }
@@ -110,11 +109,11 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         return shape -> {
             Symbol symbol = symbolProvider.toSymbol(shape);
             if (shape.hasTrait(ErrorTrait.class)) {
-                String serviceName = getServiceName(settings, model, symbolProvider);
+                String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
                 String baseExceptionAlias = "__BaseException";
                 SymbolReference reference;
                 if (settings.generateClient()) {
-                    String serviceExceptionName = getServiceExceptionName(serviceName);
+                    String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
                     String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
                     Symbol serviceExceptionSymbol = Symbol.builder()
                             .name(serviceExceptionName)
@@ -138,16 +137,4 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         };
     }
 
-    private String getServiceName(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider
-    ) {
-        ServiceShape service = settings.getService(model);
-        return symbolProvider.toSymbol(service).getName().replaceAll("(Client)$", "");
-    }
-
-    private String getServiceExceptionName(String serviceName) {
-        return serviceName + "ServiceException";
-    }
 }
