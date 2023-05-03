@@ -44,7 +44,7 @@ public abstract class StructureExampleGenerator {
      * };
      * ```
      */
-    public static String generateStructuralHintDocumentation(Shape shape, Model model) {
+    public static String generateStructuralHintDocumentation(Shape shape, Model model, boolean isComment) {
         StringBuilder buffer = new StringBuilder();
         shape(shape, buffer, model, 0, new ShapeTracker());
 
@@ -56,9 +56,9 @@ public abstract class StructureExampleGenerator {
                         "([\\w\\\",:\\[\\{] )\\s+",
                         "$1")
                         .replaceAll("\\s+$", ""))
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining((isComment) ? "\n// " : "\n"));
 
-        return s.replaceAll(",$", ";");
+        return ((isComment) ? "// " : "") + s.replaceAll(",$", ";");
     }
 
     private static void structure(StructureShape structureShape,

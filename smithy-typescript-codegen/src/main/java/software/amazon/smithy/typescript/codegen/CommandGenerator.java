@@ -177,10 +177,13 @@ final class CommandGenerator implements Runnable {
                 + String.format("const client = new %s(config);%n", serviceName)
                 + String.format("const input = %s%n",
                         StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getInputShape()).get(), model))
+                                model.getShape(operation.getInputShape()).get(), model, false))
                 + String.format("const command = new %s(input);%n", commandName)
                 + "const response = await client.send(command);\n"
-                + "```\n"
+                + String.format("%s%n",
+                        StructureExampleGenerator.generateStructuralHintDocumentation(
+                                model.getShape(operation.getOutputShape()).get(), model, true))
+                + "\n```\n"
                 + "\n"
                 + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
                 + String.format("@returns {@link %s}%n", commandOutput)
@@ -206,6 +209,11 @@ final class CommandGenerator implements Runnable {
             }
             buffer.append("\n\n");
         }
+
+        String name = CodegenUtils.getServiceName(settings, model, symbolProvider);
+        buffer.append(String.format("@throws {@link %s}%n", CodegenUtils.getServiceExceptionName(name)));
+        buffer.append(String.format("<p>Base exception class for all service exceptions from %s service.</p>%n", name));
+
         return buffer.toString();
     }
 
