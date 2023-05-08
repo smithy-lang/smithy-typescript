@@ -20,6 +20,12 @@ import software.amazon.smithy.model.traits.SparseTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.MapUtils;
 
+/**
+ * Index of ShapeIds to a boolean indicating whether a shape's serde function
+ * may be omitted. If the shape is of a certain type, and has no downstream
+ * incompatible shapes or traits that require additional handling, its serde
+ * function may be emitted.
+ */
 public class SerdeElisionIndex implements KnowledgeIndex {
     private final Map<ShapeId, Boolean> elisionBinding = new HashMap<>();
     private final Map<String, Class> mutatingTraits = MapUtils.of(
