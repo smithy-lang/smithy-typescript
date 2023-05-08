@@ -45,7 +45,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
-import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
+import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -67,10 +67,11 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
-    protected final SerdeElision serdeElision;
+    protected boolean serdeElisionEnabled;
     private final GenerationContext context;
     private final String dataSource;
     private final Format defaultTimestampFormat;
+    private final SerdeElisionIndex serdeElisionIndex;
 
     /**
      * Constructor.
@@ -89,8 +90,8 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
         this.context = context;
         this.dataSource = dataSource;
         this.defaultTimestampFormat = defaultTimestampFormat;
-        this.serdeElision = SerdeElision.forModel(context.getModel())
-            .setEnabledForModel(false);
+        this.serdeElisionEnabled = false;
+        this.serdeElisionIndex = SerdeElisionIndex.of(context.getModel());
     }
 
     /**
@@ -288,7 +289,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
         // Use the shape for the function name.
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
 
-        if (serdeElision.mayElide(shape)) {
+        if (serdeElisionEnabled && serdeElisionIndex.mayElide(shape)) {
             return "_json(" + customDataSource + ")";
         }
 

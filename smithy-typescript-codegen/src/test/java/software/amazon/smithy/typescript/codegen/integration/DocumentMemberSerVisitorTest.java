@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -51,6 +52,7 @@ public class DocumentMemberSerVisitorTest {
         mockContext.setProtocolName(PROTOCOL);
         mockContext.setSymbolProvider(new MockProvider());
         mockContext.setWriter(new TypeScriptWriter("foo"));
+        mockContext.setModel(Model.builder().build());
     }
 
     @ParameterizedTest

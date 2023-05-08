@@ -42,7 +42,7 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
-import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
+import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -117,13 +117,15 @@ public class EventStreamGenerator {
         eventUnionsToSerialize.forEach(eventsUnion -> {
             generateEventStreamSerializer(context, eventsUnion);
         });
+        SerdeElisionIndex serdeElisionIndex = SerdeElisionIndex.of(model);
         eventShapesToMarshall.forEach(event -> {
             generateEventMarshaller(
                 context,
                 event,
                 documentContentType,
                 serializeInputEventDocumentPayload,
-                documentShapesToSerialize);
+                documentShapesToSerialize,
+                serdeElisionIndex);
         });
     }
 
@@ -143,7 +145,9 @@ public class EventStreamGenerator {
         ServiceShape service,
         Set<StructureShape> errorShapesToDeserialize,
         Set<Shape> eventShapesToDeserialize,
-        boolean isErrorCodeInBody
+        boolean isErrorCodeInBody,
+        boolean serdeElisionEnabled,
+        SerdeElisionIndex serdeElisionIndex
     ) {
         Model model = context.getModel();
 
@@ -171,7 +175,9 @@ public class EventStreamGenerator {
                 event,
                 errorShapesToDeserialize,
                 eventShapesToDeserialize,
-                isErrorCodeInBody
+                isErrorCodeInBody,
+                serdeElisionEnabled,
+                serdeElisionIndex
             );
         });
     }
@@ -234,7 +240,8 @@ public class EventStreamGenerator {
         StructureShape event,
         String documentContentType,
         Runnable serializeInputEventDocumentPayload,
-        Set<Shape> documentShapesToSerialize
+        Set<Shape> documentShapesToSerialize,
+        SerdeElisionIndex serdeElisionIndex
     ) {
         String methodName = getEventSerFunctionName(context, event);
         Symbol symbol = getSymbol(context, event);
@@ -252,7 +259,7 @@ public class EventStreamGenerator {
             });
             writeEventHeaders(context, event);
             writeEventBody(context, event, serializeInputEventDocumentPayload,
-                    documentShapesToSerialize);
+                    documentShapesToSerialize, serdeElisionIndex);
             writer.openBlock("return { headers, body };");
         });
     }
@@ -336,7 +343,8 @@ public class EventStreamGenerator {
         GenerationContext context,
         StructureShape event,
         Runnable serializeInputEventDocumentPayload,
-        Set<Shape> documentShapesToSerialize
+        Set<Shape> documentShapesToSerialize,
+        SerdeElisionIndex serdeElisionIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
         Optional<MemberShape> payloadMemberOptional = getEventPayloadMember(event);
@@ -352,7 +360,7 @@ public class EventStreamGenerator {
                 } else if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
                     Symbol symbol = getSymbol(context, payloadShape);
                     String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
-                    boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(payloadShape);
+                    boolean mayElide = serdeElisionIndex.mayElide(payloadShape);
                     documentShapesToSerialize.add(payloadShape);
                     if (mayElide) {
                         writer.write("body = $L(input.$L);", "_json", payloadMemberName);
@@ -375,7 +383,7 @@ public class EventStreamGenerator {
             Symbol symbol = getSymbol(context, event);
             String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
             documentShapesToSerialize.add(event);
-            boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(event);
+            boolean mayElide = serdeElisionIndex.mayElide(event);
             if (mayElide) {
                writer.write("body = $L(input);", "_json");
             } else {
@@ -431,7 +439,9 @@ public class EventStreamGenerator {
         StructureShape event,
         Set<StructureShape> errorShapesToDeserialize,
         Set<Shape> eventShapesToDeserialize,
-        boolean isErrorCodeInBody
+        boolean isErrorCodeInBody,
+        boolean serdeElisionEnabled,
+        SerdeElisionIndex serdeElisionIndex
     ) {
         String methodName = getEventDeserFunctionName(context, event);
         Symbol symbol = getSymbol(context, event);
@@ -445,7 +455,7 @@ public class EventStreamGenerator {
             } else {
                 writer.write("const contents: $L = {} as any;", symbol.getName());
                 readEventHeaders(context, event);
-                readEventBody(context, event, eventShapesToDeserialize);
+                readEventBody(context, event, eventShapesToDeserialize, serdeElisionEnabled, serdeElisionIndex);
                 writer.write("return contents;");
             }
         });
@@ -492,7 +502,9 @@ public class EventStreamGenerator {
     private void readEventBody(
         GenerationContext context,
         StructureShape event,
-        Set<Shape> eventShapesToDeserialize
+        Set<Shape> eventShapesToDeserialize,
+        boolean serdeElisionEnabled,
+        SerdeElisionIndex serdeElisionIndex
     ) {
         TypeScriptWriter writer = context.getWriter();
         Optional<MemberShape> payloadmemberOptional = getEventPayloadMember(event);
@@ -507,7 +519,7 @@ public class EventStreamGenerator {
                 writer.write("const data: any = await parseBody(output.body, context);");
                 Symbol symbol = getSymbol(context, payloadShape);
                 String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
-                boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(payloadShape);
+                boolean mayElide = serdeElisionEnabled && serdeElisionIndex.mayElide(payloadShape);
                 if (mayElide) {
                     writer.addImport("_json", null, "@aws-sdk/smithy-client");
                     writer.write("contents.$L = $L(data);", payloadMemberName, "_json");
@@ -520,7 +532,7 @@ public class EventStreamGenerator {
             writer.write("const data: any = await parseBody(output.body, context);");
             Symbol symbol = getSymbol(context, event);
             String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
-            boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(event);
+            boolean mayElide = serdeElisionEnabled && serdeElisionIndex.mayElide(event);
             if (mayElide) {
                 writer.addImport("_json", null, "@aws-sdk/smithy-client");
                 writer.write("Object.assign(contents, $L(data));", "_json");
