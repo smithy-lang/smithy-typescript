@@ -6,6 +6,19 @@ documentation, we greatly value feedback and contributions from our community.
 Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
 information to effectively respond to your bug report or contribution.
 
+## Gradle Composite Build
+The `smithy-typescript` repository uses Gradle as a build tool and has Gradle based dependencies such as `smithy`.
+To improve development experience when making changes to the dependencies locally, we can
+use the [Gradle composite build feature](https://docs.gradle.org/current/userguide/composite_builds.html),
+which allows picking up any local changes from dependencies automatically and rebuilding them when `smithy-typescript` is rebuilt.
+
+This also makes IDE integration more pleasant, as Intellij IDEA will open the included projects as modules when the Gradle build is imported.
+
+In order to utilise this feature, create a file `local.properties` in the project directory with the following content:
+
+```
+smithy=/Volumes/workplace/smithy
+```
 
 ## Reporting Bugs/Feature Requests
 
