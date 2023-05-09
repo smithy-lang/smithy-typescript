@@ -55,3 +55,6 @@ dist-*
 
 # NPM release staging
 .release
+
+# Gradle composite build properties
+local.properties
