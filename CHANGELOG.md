@@ -1,5 +1,33 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.15.0 (2023-05-10)
+
+### Features
+
+* Add Gradle composite build ([#761](https://github.com/awslabs/smithy-typescript/pull/761))
+* Improve generated command documentation ([#757](https://github.com/awslabs/smithy-typescript/pull/757))
+* Bump SSDK libs version to 1.0.0-alpha.10 ([#738](https://github.com/awslabs/smithy-typescript/pull/738))
+* Use aggregated client runtime generator ([#736](https://github.com/awslabs/smithy-typescript/pull/736))
+* Add SerdeElision KnowledgeIndex and serde helper function ([#735](https://github.com/awslabs/smithy-typescript/pull/735), [#759](https://github.com/awslabs/smithy-typescript/pull/759))
+* Shorten internal serde function names ([#730](https://github.com/awslabs/smithy-typescript/pull/730))
+* Reduce generated HTTP request header code ([#729](https://github.com/awslabs/smithy-typescript/pull/729))
+* Improve documentation truncation ([#728](https://github.com/awslabs/smithy-typescript/pull/728))
+* Export `enum` as `const` to reduce generated code ([#726](https://github.com/awslabs/smithy-typescript/pull/726))
+* Add structural hint to commmand examples ([#723](https://github.com/awslabs/smithy-typescript/pull/723))
+* Skip generating unused sensitive filter functions ([#722](https://github.com/awslabs/smithy-typescript/pull/722))
+* Add DefaultReadmeGenerator ([#721](https://github.com/awslabs/smithy-typescript/pull/721))
+* Add TSDocs release tags ([#719](https://github.com/awslabs/smithy-typescript/pull/719))
+* Add thrown exceptions to generated command documentation ([#715](https://github.com/awslabs/smithy-typescript/pull/715))
+* Remove internal enum values from validation message ([#713](https://github.com/awslabs/smithy-typescript/pull/713))
+* Omit aggregated client from paginators ([#712](https://github.com/awslabs/smithy-typescript/pull/712))
+* Add NodeJS runtime support to SSDK ([#703](https://github.com/awslabs/smithy-typescript/pull/703))
+* Remove reflected values from validation message ([#695](https://github.com/awslabs/smithy-typescript/pull/695))
+* Add AddClientRuntimeConfig for generic clients ([#693](https://github.com/awslabs/smithy-typescript/pull/693))
+
+### Bug Fixes
+
+* Fix creating empty model files when chunking ([#714](https://github.com/awslabs/smithy-typescript/pull/714))
+
 ## 0.14.0 (2023-02-09)
 
 ### Features
