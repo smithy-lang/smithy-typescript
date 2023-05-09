@@ -77,34 +77,6 @@ list FloatList {
     member: Float
 }
 
-//set BigDecimalSet {
-//    member: BigDecimal
-//}
-//
-//set BigIntegerSet {
-//    member: BigInteger
-//}
-//
-//set BlobSet {
-//    member: Blob
-//}
-//
-//set DocumentSet {
-//    member: Document
-//}
-//
-//set TimestampSet {
-//    member: Timestamp
-//}
-//
-//set DoubleSet {
-//    member: Double
-//}
-//
-//set FloatSet {
-//    member: Float
-//}
-
 structure BigDecimalStructure {
     member: BigDecimal
 }
