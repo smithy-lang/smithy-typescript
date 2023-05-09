@@ -33,7 +33,7 @@ import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
-import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
+import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -113,12 +113,15 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         );
         // Error shapes that only referred in the error event of an eventstream
         Set<StructureShape> errorEventShapes = new TreeSet<>();
+        SerdeElisionIndex serdeElisionIndex = SerdeElisionIndex.of(context.getModel());
         eventStreamGenerator.generateEventStreamDeserializers(
             context,
             service,
             errorEventShapes,
             deserializingDocumentShapes,
-            isErrorCodeInBody
+            isErrorCodeInBody,
+            enableSerdeElision(),
+            serdeElisionIndex
         );
         errorEventShapes.removeIf(deserializingErrorShapes::contains);
         errorEventShapes.forEach(error -> generateErrorDeserializer(context, error));
@@ -495,7 +498,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.write("const body = parseBody($L.body, context);", outputReference);
             }
 
-            if (SerdeElision.forModel(context.getModel()).mayElide(error)) {
+            if (SerdeElisionIndex.of(context.getModel()).mayElide(error) && enableSerdeElision()) {
                 writer.write("const deserialized: any = _json($L);",
                 getErrorBodyLocation(context, "body"));
             } else {
@@ -613,7 +616,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     );
 
     /**
-     * See {@link software.amazon.smithy.typescript.codegen.validation.SerdeElision}.
+     * See {@link SerdeElisionIndex}.
      *
      * @return whether protocol implementation is compatible with serde elision.
      */

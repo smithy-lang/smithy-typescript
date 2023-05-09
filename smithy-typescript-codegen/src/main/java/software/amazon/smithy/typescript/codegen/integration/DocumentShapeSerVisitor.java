@@ -34,7 +34,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
-import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
+import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -66,10 +66,12 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void> {
+    protected boolean serdeElisionEnabled;
     private final GenerationContext context;
 
     public DocumentShapeSerVisitor(GenerationContext context) {
         this.context = context;
+        this.serdeElisionEnabled = false;
     }
 
     /**
@@ -303,7 +305,7 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
 
         writer.addImport(symbol, symbol.getName());
 
-        boolean mayElide = SerdeElision.forModel(context.getModel()).mayElide(shape);
+        boolean mayElide = serdeElisionEnabled && SerdeElisionIndex.of(context.getModel()).mayElide(shape);
         if (mayElide) {
             writer.write("// " + methodName + " omitted.");
             writer.write("");

@@ -75,7 +75,7 @@ import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
-import software.amazon.smithy.typescript.codegen.validation.SerdeElision;
+import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SetUtils;
@@ -183,6 +183,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             },
             serializingDocumentShapes
         );
+        SerdeElisionIndex serdeElisionIndex = SerdeElisionIndex.of(context.getModel());
         // Error shapes that only referred in the error event of an eventstream
         Set<StructureShape> errorEventShapes = new TreeSet<>();
         eventStreamGenerator.generateEventStreamDeserializers(
@@ -190,7 +191,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             service,
             errorEventShapes,
             deserializingDocumentShapes,
-            isErrorCodeInBody
+            isErrorCodeInBody,
+            enableSerdeElision(),
+            serdeElisionIndex
         );
         errorEventShapes.removeIf(deserializingErrorShapes::contains);
         errorEventShapes.forEach(error -> generateErrorDeserializer(context, error));
@@ -1355,9 +1358,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case PAYLOAD:
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
 
-                boolean mayElideInput = SerdeElision.forModel(context.getModel())
-                    .setEnabledForModel(enableSerdeElision() && !context.getSettings().generateServerSdk())
-                    .mayElide(target);
+                boolean mayElideInput = SerdeElisionIndex.of(context.getModel()).mayElide(target)
+                        && (enableSerdeElision() && !context.getSettings().generateServerSdk());
 
                 if (mayElideInput) {
                     return "_json(" + dataSource + ")";
@@ -2689,9 +2691,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 // Redirect to a deserialization function.
                 Symbol symbol = context.getSymbolProvider().toSymbol(target);
 
-                boolean mayElideOutput = SerdeElision.forModel(context.getModel())
-                    .setEnabledForModel(enableSerdeElision() && !context.getSettings().generateServerSdk())
-                    .mayElide(target);
+                boolean mayElideOutput = SerdeElisionIndex.of(context.getModel()).mayElide(target)
+                        && (enableSerdeElision() && !context.getSettings().generateServerSdk());
 
                 if (mayElideOutput) {
                     return "_json(" + dataSource + ")";
@@ -2883,8 +2884,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     protected abstract boolean requiresNumericEpochSecondsInPayload();
 
     /**
-     * Implement a return true if the protocol allows elision of serde functions
-     * as defined in {@link SerdeElision}.
+     * Implement a return true if the protocol allows elision of serde functions.
      *
      * @return whether protocol implementation is compatible with serde elision.
      */

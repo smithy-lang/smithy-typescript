@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -49,6 +50,7 @@ public class DocumentMemberDeserVisitorTest {
     private static final Format FORMAT = Format.EPOCH_SECONDS;
     private static GenerationContext mockContext;
     private static TypeScriptSettings mockSettings;
+    private static StringShape target = StringShape.builder().id(ShapeId.from("com.smithy.example#FooTarget")).build();
 
     static {
         mockContext = new GenerationContext();
@@ -64,7 +66,7 @@ public class DocumentMemberDeserVisitorTest {
     @MethodSource("validMemberTargetTypes")
     public void providesExpectedDefaults(Shape shape, String expected, MemberShape memberShape) {
         Shape fakeStruct = StructureShape.builder().id("com.smithy.example#Enclosing").addMember(memberShape).build();
-        mockContext.setModel(Model.builder().addShapes(shape, fakeStruct).build());
+        mockContext.setModel(Model.builder().addShapes(shape, fakeStruct, target).build());
         DocumentMemberDeserVisitor visitor =
                 new DocumentMemberDeserVisitor(mockContext, DATA_SOURCE, FORMAT) {
                     @Override
@@ -77,7 +79,7 @@ public class DocumentMemberDeserVisitorTest {
 
     public static Collection<Object[]> validMemberTargetTypes() {
         String id = "com.smithy.example#Foo";
-        String targetId = id + "Target";
+        String targetId = String.valueOf(target.getId());
         MemberShape source = MemberShape.builder().id("com.smithy.example#Enclosing$sourceMember").target(id).build();
         MemberShape member = MemberShape.builder().id(id + "$member").target(targetId).build();
         MemberShape key = MemberShape.builder().id(id + "$key").target(targetId).build();
