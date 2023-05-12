@@ -384,8 +384,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
                 ProtocolGenerator.getSanitizedName(getName())).toString());
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
-        writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
-        writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP.packageName);
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
@@ -438,8 +438,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("serializeFrameworkException", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
                 ProtocolGenerator.getSanitizedName(getName())).toString());
-        writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
-        writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP.packageName);
 
         final Symbol operationSymbol = symbolProvider.toSymbol(operation);
         final Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
@@ -650,7 +650,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
+        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES.packageName);
 
         // e.g., se_ES
         String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
@@ -1729,7 +1729,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", "@aws-sdk/types");
+        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES.packageName);
         String methodName = ProtocolGenerator.getGenericDeserFunctionName(symbol) + "Request";
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
