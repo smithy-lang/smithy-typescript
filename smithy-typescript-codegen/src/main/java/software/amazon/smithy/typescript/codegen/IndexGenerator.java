@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -25,6 +26,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -45,6 +47,16 @@ final class IndexGenerator {
         ProtocolGenerator protocolGenerator,
         TypeScriptWriter writer
     ) {
+        ServiceShape service = settings.getService(model);
+        Optional<String> docs = service.getTrait(DocumentationTrait.class)
+                .map(DocumentationTrait::getValue);
+        writer.write("/* eslint-disable */");
+        docs.ifPresent(documentationTrait -> writer.writeDocs(
+                documentationTrait
+                + "\n\n"
+                + "@packageDocumentation"));
+
+
         if (settings.generateClient()) {
             writeClientExports(settings, model, symbolProvider, writer);
         }

@@ -185,8 +185,12 @@ final class CommandGenerator implements Runnable {
                                 model.getShape(operation.getOutputShape()).get(), model, true))
                 + "\n```\n"
                 + "\n"
-                + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
-                + String.format("@returns {@link %s}%n", commandOutput)
+                + String.format("@param %s - {@link %s}%n",
+                    model.getShape(operation.getInputShape()).get().getId().getName(),
+                    model.getShape(operation.getInputShape()).get().getId().getName())
+                + String.format(
+                    "@returns {@link %s}%n",
+                    model.getShape(operation.getOutputShape()).get().getId().getName())
                 + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
                 + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
                 + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
