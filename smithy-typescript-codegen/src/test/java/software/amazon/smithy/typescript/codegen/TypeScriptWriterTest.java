@@ -21,9 +21,11 @@ public class TypeScriptWriterTest {
         TypeScriptWriter writer = new TypeScriptWriter("foo");
         writer.write("import { Foo } from \"baz\";");
         writer.addImport("Baz", "Baz", "hello");
+        writer.addImport("Bar", "__Bar", TypeScriptDependency.AWS_SDK_TYPES);
         String result = writer.toString();
 
-        assertThat(result, equalTo(CODEGEN_INDICATOR + "import { Baz } from \"hello\";\nimport { Foo } from \"baz\";\n"));
+        assertThat(result, equalTo(CODEGEN_INDICATOR + "import { Bar as __Bar } from \"@aws-sdk/types\";\n"
+                + "import { Baz } from \"hello\";\nimport { Foo } from \"baz\";\n"));
     }
 
     @Test
