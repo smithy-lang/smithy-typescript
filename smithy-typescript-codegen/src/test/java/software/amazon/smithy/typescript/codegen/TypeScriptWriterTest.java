@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static software.amazon.smithy.typescript.codegen.TypeScriptWriter.CODEGEN_INDICATOR;
 
+import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
 public class TypeScriptWriterTest {
@@ -22,10 +23,13 @@ public class TypeScriptWriterTest {
         writer.write("import { Foo } from \"baz\";");
         writer.addImport("Baz", "Baz", "hello");
         writer.addImport("Bar", "__Bar", TypeScriptDependency.AWS_SDK_TYPES);
+        writer.addRelativeImport("Qux", "__Qux", Paths.get("./qux"));
         String result = writer.toString();
 
-        assertThat(result, equalTo(CODEGEN_INDICATOR + "import { Bar as __Bar } from \"@aws-sdk/types\";\n"
-                + "import { Baz } from \"hello\";\nimport { Foo } from \"baz\";\n"));
+        assertThat(result, equalTo(CODEGEN_INDICATOR + "import { Qux as __Qux } from \"./qux\";\n"
+                + "import { Bar as __Bar } from \"@aws-sdk/types\";\n"
+                + "import { Baz } from \"hello\";\n"
+                + "import { Foo } from \"baz\";\n"));
     }
 
     @Test
