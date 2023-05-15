@@ -581,7 +581,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
             case "application/octet-stream":
-                writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES.packageName);
+                writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
                 additionalStubs.add("protocol-test-octet-stream-stub.ts");
                 return "compareEquivalentOctetStreamBodies(utf8Encoder, bodyString, r.body)";
             case "text/plain":
@@ -590,7 +590,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
                         + "`, defaulting to direct comparison.");
-                writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES.packageName);
+                writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
                 return "compareEquivalentUnknownTypeBodies(utf8Encoder, bodyString, r.body)";
         }

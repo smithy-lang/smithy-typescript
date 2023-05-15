@@ -262,14 +262,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                             + "@internal");
             writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");
 
-            writer.addImport("StreamCollector", "__StreamCollector", TypeScriptDependency.SMITHY_TYPES.packageName);
+            writer.addImport("StreamCollector", "__StreamCollector", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that converts a stream into an array of bytes.\n"
                             + "@internal");
             writer.write("streamCollector?: __StreamCollector;\n");
 
             // Note: Encoder and Decoder are both used for base64 and UTF.
-            writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES.packageName);
-            writer.addImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES.packageName);
+            writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
+            writer.addImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES);
 
             writer.writeDocs("The function that will be used to convert a base64-encoded string to a byte array.\n"
                             + "@internal");

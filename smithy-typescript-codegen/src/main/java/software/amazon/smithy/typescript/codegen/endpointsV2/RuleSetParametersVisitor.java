@@ -66,9 +66,9 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
             ParameterGenerator parameterGenerator = new ParameterGenerator(localKey, param);
 
             if (localKey.equals("endpoint")) {
-                writer.addImport("Endpoint", null, TypeScriptDependency.SMITHY_TYPES.packageName);
+                writer.addImport("Endpoint", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addImport("EndpointV2", null, "@aws-sdk/types");
-                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES.packageName);
+                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
             }
 
             if (writeDefaults) {

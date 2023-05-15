@@ -650,7 +650,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES.packageName);
+        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
 
         // e.g., se_ES
         String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
@@ -1729,7 +1729,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES.packageName);
+        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
         String methodName = ProtocolGenerator.getGenericDeserFunctionName(symbol) + "Request";
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);

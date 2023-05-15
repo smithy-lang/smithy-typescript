@@ -142,7 +142,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Write a function to generate HTTP requests since they're so similar.
         SymbolReference requestType = getApplicationProtocol().getRequestType();
         writer.addUseImports(requestType);
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES.packageName);
+        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
         writer.openBlock("const buildHttpRpcRequest = async (\n"
                        + "  context: __SerdeContext,\n"
@@ -231,7 +231,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES.packageName);
+        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
         // e.g., se_ES
         String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
         // e.g., serializeAws_restJson1_1ExecuteStatement
