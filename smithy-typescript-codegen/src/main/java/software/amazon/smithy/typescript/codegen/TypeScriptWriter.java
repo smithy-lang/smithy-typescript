@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Path;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -126,6 +127,18 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     public TypeScriptWriter addImport(String name, String as, TypeScriptDependency from) {
         return this.addImport(name, as, from.packageName);
+    }
+
+    /**
+     * Imports a type using an alias from a relative Path.
+     *
+     * @param name Type to import.
+     * @param as Alias to refer to the type as.
+     * @param from Path to import the type from.
+     * @return Returns the writer.
+     */
+    public TypeScriptWriter addRelativeImport(String name, String as, Path from) {
+        return this.addImport(name, as, from.toString());
     }
 
     /**
