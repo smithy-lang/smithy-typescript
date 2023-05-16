@@ -110,7 +110,7 @@ public final class CodegenUtils {
     private static List<String> getDefaultOperationSerdeContextTypes(TypeScriptWriter writer) {
         List<String> contextInterfaceList = new ArrayList<>();
         // Get default SerdeContext.
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         contextInterfaceList.add("__SerdeContext");
         return contextInterfaceList;
     }

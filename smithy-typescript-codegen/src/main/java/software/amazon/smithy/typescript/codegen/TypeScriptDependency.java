@@ -41,6 +41,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/service-client-documentation-generator", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
+    SMITHY_TYPES("dependencies", "@smithy/types", "^1.0.0", true),
     AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", true),
@@ -83,7 +84,7 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     BODY_CHECKSUM("dependencies", "@aws-sdk/middleware-apply-body-checksum", false),
 
     // Conditionally added when using an HTTP application protocol.
-    AWS_SDK_PROTOCOL_HTTP("dependencies", "@aws-sdk/protocol-http", false),
+    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^1.0.1", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", false),
 

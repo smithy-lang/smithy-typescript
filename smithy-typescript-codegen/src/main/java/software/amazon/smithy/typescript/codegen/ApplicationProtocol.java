@@ -65,11 +65,11 @@ public final class ApplicationProtocol {
                         .alias("__HttpHandlerOptions")
                         .build(),
                 SymbolReference.builder()
-                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP, "HttpRequest"))
+                        .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpRequest"))
                         .alias("__HttpRequest")
                         .build(),
                 SymbolReference.builder()
-                        .symbol(createHttpSymbol(TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP, "HttpResponse"))
+                        .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpResponse"))
                         .alias("__HttpResponse")
                         .build()
         );

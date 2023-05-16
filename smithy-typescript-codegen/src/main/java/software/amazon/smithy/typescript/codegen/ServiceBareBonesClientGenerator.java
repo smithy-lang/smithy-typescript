@@ -237,7 +237,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             .openBlock("export interface ClientDefaults\n"
                          + "  extends Partial<__SmithyResolvedConfiguration<$T>> {", "}",
                 applicationProtocol.getOptionsType(), () -> {
-            writer.addImport("HttpHandler", "__HttpHandler", "@aws-sdk/protocol-http");
+            writer.addImport("HttpHandler", "__HttpHandler", TypeScriptDependency.PROTOCOL_HTTP.packageName);
             writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
             writer.write("requestHandler?: __HttpHandler;\n");
 
@@ -262,14 +262,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                             + "@internal");
             writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");
 
-            writer.addImport("StreamCollector", "__StreamCollector", "@aws-sdk/types");
+            writer.addImport("StreamCollector", "__StreamCollector", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that converts a stream into an array of bytes.\n"
                             + "@internal");
             writer.write("streamCollector?: __StreamCollector;\n");
 
             // Note: Encoder and Decoder are both used for base64 and UTF.
-            writer.addImport("Encoder", "__Encoder", "@aws-sdk/types");
-            writer.addImport("Decoder", "__Decoder", "@aws-sdk/types");
+            writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
+            writer.addImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES);
 
             writer.writeDocs("The function that will be used to convert a base64-encoded string to a byte array.\n"
                             + "@internal");

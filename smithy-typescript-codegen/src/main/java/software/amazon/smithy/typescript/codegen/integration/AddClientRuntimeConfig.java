@@ -57,7 +57,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
             SymbolProvider symbolProvider,
             TypeScriptWriter writer
     ) {
-        writer.addImport("Provider", "__Provider", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("Logger", "__Logger", TypeScriptDependency.AWS_SDK_TYPES.packageName);
 
         writer.writeDocs("Value for how many times a request will be made at most in case of retry.")

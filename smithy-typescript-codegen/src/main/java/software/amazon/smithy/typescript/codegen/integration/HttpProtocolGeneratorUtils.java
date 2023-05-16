@@ -256,7 +256,7 @@ public final class HttpProtocolGeneratorUtils {
     static void generateCollectBody(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
 
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.write("// Collect low-level response body stream to Uint8Array.");
         writer.openBlock("const collectBody = (streamBody: any = new Uint8Array(), context: __SerdeContext): "
                 + "Promise<Uint8Array> => {", "};", () -> {
@@ -278,7 +278,7 @@ public final class HttpProtocolGeneratorUtils {
     static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
 
-        writer.addImport("SerdeContext", "__SerdeContext", "@aws-sdk/types");
+        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.write("// Encode Uint8Array data into string with utf-8.");
         writer.write("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => "
                 + "collectBody(streamBody, context).then(body => context.utf8Encoder(body))");
@@ -435,8 +435,7 @@ public final class HttpProtocolGeneratorUtils {
         writer.write("let { hostname: resolvedHostname } = await context.endpoint();");
         // Check if disableHostPrefixInjection has been set to true at runtime
         writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
-            writer.addImport("isValidHostname", "__isValidHostname",
-                    TypeScriptDependency.AWS_SDK_PROTOCOL_HTTP.packageName);
+            writer.addImport("isValidHostname", "__isValidHostname", TypeScriptDependency.PROTOCOL_HTTP);
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
             if (operation.getInput().isPresent()) {
                 List<SmithyPattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();

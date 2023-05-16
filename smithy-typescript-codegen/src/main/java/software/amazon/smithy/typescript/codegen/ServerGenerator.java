@@ -206,8 +206,8 @@ final class ServerGenerator {
         writer.addImport("InternalFailureException", "__InternalFailureException", "@aws-smithy/server-common");
         writer.addImport("SerializationException", "__SerializationException", "@aws-smithy/server-common");
         writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
-        writer.addImport("HttpRequest", "__HttpRequest", "@aws-sdk/protocol-http");
-        writer.addImport("HttpResponse", "__HttpResponse", "@aws-sdk/protocol-http");
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP.packageName);
         writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
     }

@@ -21,6 +21,7 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.NodeVisitor;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 
 /**
@@ -65,9 +66,9 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
             ParameterGenerator parameterGenerator = new ParameterGenerator(localKey, param);
 
             if (localKey.equals("endpoint")) {
-                writer.addImport("Endpoint", null, "@aws-sdk/types");
+                writer.addImport("Endpoint", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addImport("EndpointV2", null, "@aws-sdk/types");
-                writer.addImport("Provider", null, "@aws-sdk/types");
+                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
             }
 
             if (writeDefaults) {

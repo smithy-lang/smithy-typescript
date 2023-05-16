@@ -70,7 +70,7 @@ public final class EndpointsV2Generator implements Runnable {
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
                 writer.addImport("EndpointParameters", "__EndpointParameters", "@aws-sdk/types");
-                writer.addImport("Provider", null, "@aws-sdk/types");
+                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.openBlock(
                     "export interface ClientInputEndpointParameters {",
