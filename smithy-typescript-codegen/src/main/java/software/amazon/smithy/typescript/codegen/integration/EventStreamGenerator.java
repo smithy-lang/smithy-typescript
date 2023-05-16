@@ -220,7 +220,7 @@ public class EventStreamGenerator {
 
     private String getEventStreamSerdeContextType(GenerationContext context, UnionShape eventsUnion) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         String contextType = "__SerdeContext";
         if (eventsUnion.hasTrait(StreamingTrait.class)) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
