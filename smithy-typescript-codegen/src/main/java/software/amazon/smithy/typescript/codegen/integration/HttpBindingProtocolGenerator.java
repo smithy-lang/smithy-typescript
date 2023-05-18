@@ -2623,14 +2623,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         MemberShape targetMember = target.getMember();
         Shape collectionTarget = context.getModel().expectShape(targetMember.getTarget());
-        String collectionTargetValue = getOutputValue(context, bindingType, "_entry.trim()",
+        boolean trimParameterValue = bindingType != Location.QUERY && bindingType != Location.QUERY_PARAMS;
+        String outputValueDataSource = "_entry";
+        if (trimParameterValue) {
+            outputValueDataSource += ".trim()";
+        }
+        String collectionTargetValue = getOutputValue(context, bindingType, outputValueDataSource,
                 targetMember, collectionTarget);
         String outputParam;
         switch (bindingType) {
             case QUERY_PARAMS:
             case QUERY:
-                return String.format("%1$s.map(_entry => %2$s as any)",
-                        dataSource, collectionTargetValue);
+                return String.format("%1$s.map(_entry => %2$s as any)", dataSource, collectionTargetValue);
             case LABEL:
                 dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on slashes.
