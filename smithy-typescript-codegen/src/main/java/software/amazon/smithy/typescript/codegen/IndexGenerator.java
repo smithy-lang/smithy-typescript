@@ -25,6 +25,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -45,6 +46,12 @@ final class IndexGenerator {
         ProtocolGenerator protocolGenerator,
         TypeScriptWriter writer
     ) {
+
+        writer.write("/* eslint-disable */");
+        settings.getService(model).getTrait(DocumentationTrait.class).ifPresent(trait ->
+                writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
+
+
         if (settings.generateClient()) {
             writeClientExports(settings, model, symbolProvider, writer);
         }

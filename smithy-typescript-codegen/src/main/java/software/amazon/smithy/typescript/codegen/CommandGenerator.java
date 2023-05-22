@@ -362,6 +362,9 @@ final class CommandGenerator implements Runnable {
     }
 
     private void addInputAndOutputTypes() {
+        writer.writeDocs("@public");
+        writer.write("export { __MetadataBearer, $$Command };");
+
         writeInputType(inputType.getName(), operationIndex.getInput(operation), symbol.getName());
         writeOutputType(outputType.getName(), operationIndex.getOutput(operation), symbol.getName());
         writer.write("");
