@@ -98,6 +98,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     @Override
     public void run() {
         writer.addImport("Client", "__Client", "@aws-sdk/smithy-client");
+        writer.write("export { __Client }\n");
         writer.addImport("getRuntimeConfig", "__getRuntimeConfig",
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig").toString());
 
@@ -162,7 +163,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         writer.writeDocs("@public");
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
-        writer.write("type $LType = Partial<__SmithyConfiguration<$T>>", configType,
+        writer.write("export type $LType = Partial<__SmithyConfiguration<$T>>", configType,
                 applicationProtocol.getOptionsType());
         writer.write("  & ClientDefaults");
 
@@ -197,7 +198,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         // each "Input" configuration type.
         writer.write("");
         writer.writeDocs("@public");
-        writer.write("type $LType = __SmithyResolvedConfiguration<$T>",
+        writer.write("export type $LType = __SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
         writer.write("  & Required<ClientDefaults>");
 
