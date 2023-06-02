@@ -79,13 +79,15 @@ public class ParameterGenerator {
 
         switch (type.getValue()) {
             case "String":
+            case "string":
                 buffer += "\"" + paramNode.expectStringMember("default").getValue() + "\"";
                 break;
             case "Boolean":
+            case "boolean":
                 buffer += paramNode.expectBooleanMember("default").getValue() ? "true" : "false";
                 break;
             default:
-                // required by linter
+                throw new RuntimeException("Unhandled endpoint param type: " + type.getValue());
         }
 
         buffer += ",";
