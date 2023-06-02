@@ -71,23 +71,15 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
         if (!hasStreamingBlobDeser(settings, model)) {
             return Collections.emptyMap();
         }
-        switch (target) {
-            case NODE:
-                return MapUtils.of("sdkStreamMixin", writer -> {
-                    writer.addDependency(TypeScriptDependency.UTIL_STREAM_NODE);
-                    writer.addImport("sdkStreamMixin", "sdkStreamMixin",
-                            TypeScriptDependency.UTIL_STREAM_NODE.packageName);
-                    writer.write("sdkStreamMixin");
-                });
-            case BROWSER:
-                return MapUtils.of("sdkStreamMixin", writer -> {
-                    writer.addDependency(TypeScriptDependency.UTIL_STREAM_BROWSER);
-                    writer.addImport("sdkStreamMixin", "sdkStreamMixin",
-                            TypeScriptDependency.UTIL_STREAM_BROWSER.packageName);
-                    writer.write("sdkStreamMixin");
-                });
-            default:
-                return Collections.emptyMap();
+
+        if (target == LanguageTarget.SHARED) {
+           return MapUtils.of("sdkStreamMixin", writer -> {
+               writer.addDependency(TypeScriptDependency.UTIL_STREAM);
+               writer.addImport("sdkStreamMixin", "sdkStreamMixin", TypeScriptDependency.UTIL_STREAM);
+               writer.write("sdkStreamMixin");
+           });
+        } else {
+            return Collections.emptyMap();
         }
     }
 
