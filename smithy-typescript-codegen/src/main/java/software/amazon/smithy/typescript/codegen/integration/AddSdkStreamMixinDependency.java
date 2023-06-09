@@ -55,7 +55,7 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
         }
 
         writer.addImport("SdkStreamMixinInjector", "__SdkStreamMixinInjector",
-                TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("The internal function that inject utilities to runtime-specific stream to help users"
                 + " consume the data\n@internal");
         writer.write("sdkStreamMixin?: __SdkStreamMixinInjector;\n");

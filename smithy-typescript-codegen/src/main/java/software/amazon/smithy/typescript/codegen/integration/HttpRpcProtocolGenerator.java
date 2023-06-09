@@ -133,7 +133,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         TypeScriptWriter writer = context.getWriter();
 
         if (context.getSettings().generateClient()) {
-            writer.addImport("withBaseException", null, "@aws-sdk/smithy-client");
+            writer.addImport("withBaseException", null, "@smithy/smithy-client");
             SymbolReference exception = HttpProtocolGeneratorUtils.getClientBaseException(context);
             writer.write("const throwDefaultError = withBaseException($T);", exception);
         }
@@ -142,7 +142,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         SymbolReference requestType = getApplicationProtocol().getRequestType();
         writer.addUseImports(requestType);
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
+        writer.addImport("HeaderBag", "__HeaderBag", "@smithy/types");
         writer.openBlock("const buildHttpRpcRequest = async (\n"
                        + "  context: __SerdeContext,\n"
                        + "  headers: __HeaderBag,\n"
@@ -326,7 +326,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      */
     protected void writeSharedRequestHeaders(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("HeaderBag", "__HeaderBag", "@aws-sdk/types");
+        writer.addImport("HeaderBag", "__HeaderBag", "@smithy/types");
         writer.openBlock("const SHARED_HEADERS: __HeaderBag = {", "};", () -> {
             writer.write("'content-type': $S,", getDocumentContentType());
         });
@@ -512,7 +512,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.write("...deserialized");
             });
             writer.addImport("decorateServiceException", "__decorateServiceException",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                    TypeScriptDependency.AWS_SMITHY_CLIENT);
             writer.write("return __decorateServiceException(exception, body);");
         });
 

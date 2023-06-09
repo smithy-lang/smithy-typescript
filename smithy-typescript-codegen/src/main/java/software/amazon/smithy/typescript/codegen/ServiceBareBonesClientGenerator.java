@@ -97,7 +97,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
 
     @Override
     public void run() {
-        writer.addImport("Client", "__Client", "@aws-sdk/smithy-client");
+        writer.addImport("Client", "__Client", TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.write("export { __Client }\n");
         writer.addImport("getRuntimeConfig", "__getRuntimeConfig",
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig").toString());
@@ -113,7 +113,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         writeInputOutputTypeUnion("ServiceOutputTypes", writer,
                 operationSymbol -> operationSymbol.getProperty("outputType", Symbol.class), writer -> {
             // Use a MetadataBearer if an operation doesn't define output.
-            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES);
             writer.write("| __MetadataBearer");
         });
 
@@ -152,8 +152,8 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConfig() {
-        writer.addImport("SmithyConfiguration", "__SmithyConfiguration", "@aws-sdk/smithy-client");
-        writer.addImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration", "@aws-sdk/smithy-client");
+        writer.addImport("SmithyConfiguration", "__SmithyConfiguration", "@smithy/smithy-client");
+        writer.addImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration", "@smithy/smithy-client");
 
         // Hook for intercepting the client configuration.
         writer.pushState(CLIENT_CONFIG_SECTION);
@@ -238,27 +238,27 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             .openBlock("export interface ClientDefaults\n"
                          + "  extends Partial<__SmithyResolvedConfiguration<$T>> {", "}",
                 applicationProtocol.getOptionsType(), () -> {
-            writer.addImport("HttpHandler", "__HttpHandler", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+            writer.addImport("HttpHandler", "__HttpHandler", TypeScriptDependency.PROTOCOL_HTTP);
             writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
             writer.write("requestHandler?: __HttpHandler;\n");
 
-            writer.addImport("Hash", "__Hash", "@aws-sdk/types");
-            writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
+            writer.addImport("Hash", "__Hash", "@smithy/types");
+            writer.addImport("HashConstructor", "__HashConstructor", "@smithy/types");
 
-            writer.addImport("Checksum", "__Checksum", "@aws-sdk/types");
-            writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@aws-sdk/types");
-            writer.writeDocs("A constructor for a class implementing the {@link @aws-sdk/types#ChecksumConstructor} "
+            writer.addImport("Checksum", "__Checksum", "@smithy/types");
+            writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@smithy/types");
+            writer.writeDocs("A constructor for a class implementing the {@link @smithy/types#ChecksumConstructor} "
                             + "interface \n"
                             + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
                             + "@internal");
             writer.write("sha256?: __ChecksumConstructor | __HashConstructor;\n");
 
-            writer.addImport("UrlParser", "__UrlParser", "@aws-sdk/types");
+            writer.addImport("UrlParser", "__UrlParser", "@smithy/types");
             writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.\n"
                              + "@internal");
             writer.write("urlParser?: __UrlParser;\n");
 
-            writer.addImport("BodyLengthCalculator", "__BodyLengthCalculator", "@aws-sdk/types");
+            writer.addImport("BodyLengthCalculator", "__BodyLengthCalculator", "@smithy/types");
             writer.writeDocs("A function that can calculate the length of a request body.\n"
                             + "@internal");
             writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");

@@ -248,7 +248,7 @@ final class StructureGenerator implements Runnable {
      * The following TypeScript is generated:
      *
      * <pre>{@code
-     * import { ExceptionOptionType as __ExceptionOptionType } from "@aws-sdk/smithy-client";
+     * import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
      * import { FooServiceException as __BaseException } from "./FooServiceException";
      * // In server SDK:
      * // import { ServiceException as __BaseException } from "@aws-smithy/server-common";

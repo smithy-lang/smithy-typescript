@@ -170,7 +170,7 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     }
 
     private String handleFloat() {
-        context.getWriter().addImport("serializeFloat", "__serializeFloat", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("serializeFloat", "__serializeFloat", "@smithy/smithy-client");
         return "__serializeFloat(" + dataSource + ")";
     }
 

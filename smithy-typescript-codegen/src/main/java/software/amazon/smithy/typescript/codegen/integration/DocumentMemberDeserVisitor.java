@@ -144,43 +144,43 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
-        context.getWriter().addImport("expectBoolean", "__expectBoolean", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectBoolean", "__expectBoolean", "@smithy/smithy-client");
         return "__expectBoolean(" + dataSource + ")";
     }
 
     @Override
     public String byteShape(ByteShape shape) {
-        context.getWriter().addImport("expectByte", "__expectByte", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectByte", "__expectByte", "@smithy/smithy-client");
         return "__expectByte(" + dataSource + ")";
     }
 
     @Override
     public String shortShape(ShortShape shape) {
-        context.getWriter().addImport("expectShort", "__expectShort", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectShort", "__expectShort", "@smithy/smithy-client");
         return "__expectShort(" + dataSource + ")";
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-        context.getWriter().addImport("expectInt32", "__expectInt32", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectInt32", "__expectInt32", "@smithy/smithy-client");
         return "__expectInt32(" + dataSource + ")";
     }
 
     @Override
     public String longShape(LongShape shape) {
-        context.getWriter().addImport("expectLong", "__expectLong", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectLong", "__expectLong", "@smithy/smithy-client");
         return "__expectLong(" + dataSource + ")";
     }
 
     @Override
     public String floatShape(FloatShape shape) {
-        context.getWriter().addImport("limitedParseFloat32", "__limitedParseFloat32", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("limitedParseFloat32", "__limitedParseFloat32", "@smithy/smithy-client");
         return "__limitedParseFloat32(" + dataSource + ")";
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        context.getWriter().addImport("limitedParseDouble", "__limitedParseDouble", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("limitedParseDouble", "__limitedParseDouble", "@smithy/smithy-client");
         return "__limitedParseDouble(" + dataSource + ")";
     }
 
@@ -277,7 +277,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public final String unionShape(UnionShape shape) {
-        context.getWriter().addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectUnion", "__expectUnion", "@smithy/smithy-client");
         return getDelegateDeserializer(shape, "__expectUnion(" + dataSource + ")");
     }
 

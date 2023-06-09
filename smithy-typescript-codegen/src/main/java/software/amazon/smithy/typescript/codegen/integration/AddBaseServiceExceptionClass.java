@@ -64,9 +64,9 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
                     Paths.get(CodegenUtils.SOURCE_FOLDER, "models", serviceExceptionName + ".ts").toString(),
                     writer -> {
                             writer.addImport("ServiceException", "__ServiceException",
-                                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                                    TypeScriptDependency.AWS_SMITHY_CLIENT);
                             writer.addImport("ServiceExceptionOptions", "__ServiceExceptionOptions",
-                                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                                    TypeScriptDependency.AWS_SMITHY_CLIENT);
                             // Export ServiceException information to allow
                             //      documentation inheritance to consume their types
                             writer.write("export { __ServiceException, __ServiceExceptionOptions }\n");

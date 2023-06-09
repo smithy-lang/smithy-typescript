@@ -1,5 +1,5 @@
-import { HttpHandlerOptions, HeaderBag } from "@aws-sdk/types";
-import { HttpHandler, HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
+import { HttpHandlerOptions, HeaderBag } from "@smithy/types";
+import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { Readable } from 'stream';
 
 /**

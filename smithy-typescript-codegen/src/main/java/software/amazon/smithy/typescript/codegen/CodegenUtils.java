@@ -71,7 +71,8 @@ public final class CodegenUtils {
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getInputInfo(operation).isPresent()) {
-            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext", "@aws-sdk/types");
+            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
+                TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
@@ -97,12 +98,12 @@ public final class CodegenUtils {
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
             writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
-                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                    TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
         if (AddSdkStreamMixinDependency.hasStreamingBlobDeser(settings, model, operation)) {
             writer.addImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext",
-                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                    TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__SdkStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
@@ -169,9 +170,9 @@ public final class CodegenUtils {
         String commandName
     ) {
         String memberName = streamingMember.getMemberName();
-        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.AWS_SDK_TYPES.packageName);
-        writer.addImport("WithSdkStreamMixin", "__WithSdkStreamMixin", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("WithSdkStreamMixin", "__WithSdkStreamMixin", TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         writer.write(

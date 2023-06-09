@@ -249,7 +249,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         Symbol.Builder builder = createSymbolBuilder(shape, "__DocumentType");
         Symbol importSymbol = Symbol.builder()
                 .name("DocumentType")
-                .namespace(TypeScriptDependency.AWS_SDK_TYPES.packageName, "/")
+                .namespace(TypeScriptDependency.SMITHY_TYPES.packageName, "/")
                 .build();
         SymbolReference reference = SymbolReference.builder()
                 .symbol(importSymbol)
@@ -325,7 +325,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private Symbol.Builder addSmithyUseImport(Symbol.Builder builder, String name, String as) {
         Symbol importSymbol = Symbol.builder()
                 .name(name)
-                .namespace("@aws-sdk/smithy-client", "/")
+                .namespace("@smithy/smithy-client", "/")
                 .build();
         SymbolReference reference = SymbolReference.builder()
                 .symbol(importSymbol)

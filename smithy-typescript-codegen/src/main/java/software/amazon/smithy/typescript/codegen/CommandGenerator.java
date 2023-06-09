@@ -122,11 +122,11 @@ final class CommandGenerator implements Runnable {
         writer.addImport(configType, configType, serviceSymbol.getNamespace());
         writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbol.getNamespace());
         writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbol.getNamespace());
-        writer.addImport("Command", "$Command", "@aws-sdk/smithy-client");
-        writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", "@aws-sdk/types");
-        writer.addImport("Handler", "Handler", "@aws-sdk/types");
-        writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", "@aws-sdk/types");
-        writer.addImport("MiddlewareStack", "MiddlewareStack", "@aws-sdk/types");
+        writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("Handler", "Handler", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("MiddlewareStack", "MiddlewareStack", TypeScriptDependency.SMITHY_TYPES);
 
         String name = symbol.getName();
 
@@ -236,7 +236,7 @@ final class CommandGenerator implements Runnable {
         if (!service.hasTrait(EndpointRuleSetTrait.class)) {
             return;
         }
-        writer.addImport("EndpointParameterInstructions", null, "@aws-sdk/middleware-endpoint");
+        writer.addImport("EndpointParameterInstructions", null, "@smithy/middleware-endpoint");
         writer.openBlock(
                 "public static getEndpointParameterInstructions(): EndpointParameterInstructions {", "}",
                 () -> {
@@ -302,7 +302,7 @@ final class CommandGenerator implements Runnable {
                 writer.addImport(
                         "getEndpointPlugin",
                         "getEndpointPlugin",
-                        "@aws-sdk/middleware-endpoint");
+                        "@smithy/middleware-endpoint");
                 writer.openBlock(
                         "this.middlewareStack.use(getEndpointPlugin(configuration, ",
                         "));",
@@ -407,7 +407,7 @@ final class CommandGenerator implements Runnable {
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
         // Output types should always be MetadataBearers, possibly in addition
         // to a defined output shape.
-        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
+        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
         if (outputShape.isPresent()) {
             StructureShape output = outputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, output);

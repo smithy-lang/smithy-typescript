@@ -229,7 +229,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private void initializeWriterIfNeeded() {
         if (writer == null) {
             context.getWriterDelegator().useFileWriter(createTestCaseFilename(), writer -> this.writer = writer);
-            writer.addDependency(TypeScriptDependency.AWS_SDK_TYPES);
+            writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
             writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
             writer.addDependency(TypeScriptDependency.PROTOCOL_HTTP);
             // Add the template to each generated test.
@@ -494,7 +494,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (!explicitQueryValues.isEmpty()) {
             // Use buildQueryString like the fetch handler will.
             writer.addDependency(TypeScriptDependency.AWS_SDK_QUERYSTRING_BUILDER);
-            writer.addImport("buildQueryString", "buildQueryString", "@aws-sdk/querystring-builder");
+            writer.addImport("buildQueryString", "buildQueryString", "@smithy/querystring-builder");
 
             writer.write("const queryString = buildQueryString(r.query);");
             explicitQueryValues.forEach(explicitQueryValue ->
@@ -541,7 +541,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (isClientTest) {
             writer.write("const utf8Encoder = client.config.utf8Encoder;");
         } else {
-            writer.addImport("toUtf8", "__utf8Encoder", "@aws-sdk/util-utf8");
+            writer.addImport("toUtf8", "__utf8Encoder", "@smithy/util-utf8");
             writer.write("const utf8Encoder = __utf8Encoder;");
         }
 
@@ -834,7 +834,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             writeParamAssertions(writer, payloadBinding, () -> {
                 // TODO: replace this with a collector from the server config once it's available
-                writer.addImport("streamCollector", "__streamCollector", "@aws-sdk/node-http-handler");
+                writer.addImport("streamCollector", "__streamCollector", "@smithy/node-http-handler");
                 writer.write("const comparableBlob = await __streamCollector(r[$S]);",
                         payloadBinding.get().getMemberName());
             });

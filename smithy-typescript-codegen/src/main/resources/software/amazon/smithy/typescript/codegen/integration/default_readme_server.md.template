@@ -21,7 +21,7 @@ Below is an example service handler created for the ${commandName} operation.
 
 ```ts
 import { createServer, IncomingMessage, ServerResponse } from "http";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
 import {
   ${serviceId}Service as __${serviceId}Service,
   ${commandName}Input,

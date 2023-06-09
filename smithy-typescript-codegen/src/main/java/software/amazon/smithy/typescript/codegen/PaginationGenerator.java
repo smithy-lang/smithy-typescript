@@ -98,7 +98,7 @@ final class PaginationGenerator implements Runnable {
         writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
 
         // Import Pagination types
-        writer.addImport("Paginator", "Paginator", "@aws-sdk/types");
+        writer.addImport("Paginator", "Paginator", "@smithy/types");
         writer.addImport(paginationType, paginationType,
             Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", "")).toString());
 
@@ -116,7 +116,7 @@ final class PaginationGenerator implements Runnable {
             Symbol service,
             TypeScriptWriter writer
     ) {
-        writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@aws-sdk/types");
+        writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@smithy/types");
         writer.addImport(service.getName(), service.getName(), service.getNamespace());
 
         writer.writeDocs("@public")
