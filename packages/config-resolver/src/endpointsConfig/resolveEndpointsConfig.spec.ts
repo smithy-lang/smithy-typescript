@@ -1,9 +1,9 @@
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { normalizeProvider } from "@smithy/util-middleware";
 
 import { resolveEndpointsConfig } from "./resolveEndpointsConfig";
 import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 
-jest.mock("@aws-sdk/util-middleware");
+jest.mock("@smithy/util-middleware");
 jest.mock("./utils/getEndpointFromRegion");
 
 describe(resolveEndpointsConfig.name, () => {

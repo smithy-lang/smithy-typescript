@@ -1,4 +1,4 @@
-import { AbortHandler, AbortSignal as IAbortSignal } from "@aws-sdk/types";
+import { AbortHandler, AbortSignal as IAbortSignal } from "@smithy/types";
 
 export { AbortHandler, IAbortSignal };
 

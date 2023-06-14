@@ -1,4 +1,4 @@
-import { AbsoluteLocation, HandlerOptions, MiddlewareType, Priority, RelativeLocation, Step } from "@aws-sdk/types";
+import { AbsoluteLocation, HandlerOptions, MiddlewareType, Priority, RelativeLocation, Step } from "@smithy/types";
 
 export interface MiddlewareEntry<Input extends object, Output extends object> extends HandlerOptions {
   middleware: MiddlewareType<Input, Output>;

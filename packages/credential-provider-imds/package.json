@@ -1,6 +1,6 @@
 {
-  "name": "@aws-sdk/credential-provider-imds",
-  "version": "3.347.0",
+  "name": "@smithy/credential-provider-imds",
+  "version": "1.0.0",
   "description": "AWS credential provider that sources credentials from the EC2 instance metadata service and ECS container metadata service",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -8,10 +8,12 @@
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es": "tsc -p tsconfig.es.json",
-    "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "jest"
   },
   "keywords": [
@@ -24,10 +26,10 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@aws-sdk/node-config-provider": "*",
-    "@aws-sdk/property-provider": "*",
-    "@aws-sdk/types": "*",
-    "@aws-sdk/url-parser": "*",
+    "@smithy/node-config-provider": "workspace:^",
+    "@smithy/property-provider": "workspace:^",
+    "@smithy/types": "workspace:^",
+    "@smithy/url-parser": "workspace:^",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
@@ -35,6 +37,7 @@
     "@types/node": "^14.14.31",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
+    "jest": "28.1.1",
     "nock": "^13.0.2",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
@@ -54,10 +57,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-provider-imds",
+  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/credential-provider-imds",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aws/aws-sdk-js-v3.git",
+    "url": "https://github.com/awslabs/smithy-typescript.git",
     "directory": "packages/credential-provider-imds"
   },
   "typedoc": {

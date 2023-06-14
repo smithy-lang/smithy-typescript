@@ -10,7 +10,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@aws-smithy/*": ["smithy-typescript-ssdk-libs/*/src"],
-      "@smithy-io/*": ["packages/*/src"]
+      "@smithy/*": ["packages/*/src"]
     },
     "preserveConstEnums": true,
     "removeComments": true,

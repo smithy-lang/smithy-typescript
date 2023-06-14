@@ -1,4 +1,4 @@
-import { MAXIMUM_RETRY_DELAY } from "@aws-sdk/util-retry";
+import { MAXIMUM_RETRY_DELAY } from "@smithy/util-retry";
 
 /**
  * Calculate a capped, fully-jittered exponential backoff time.

@@ -1,5 +1,5 @@
-import { QueryParameterBag } from "@aws-sdk/types";
-import { escapeUri } from "@aws-sdk/util-uri-escape";
+import { QueryParameterBag } from "@smithy/types";
+import { escapeUri } from "@smithy/util-uri-escape";
 
 /**
  * @internal

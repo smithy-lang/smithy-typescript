@@ -3,8 +3,8 @@ import {
   isRetryableByTrait,
   isThrottlingError,
   isTransientError,
-} from "@aws-sdk/service-error-classification";
-import { SdkError } from "@aws-sdk/types";
+} from "@smithy/service-error-classification";
+import { SdkError } from "@smithy/types";
 
 export const defaultRetryDecider = (error: SdkError) => {
   if (!error) {

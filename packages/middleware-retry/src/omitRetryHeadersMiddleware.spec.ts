@@ -1,6 +1,6 @@
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { FinalizeHandlerArguments, MiddlewareStack } from "@aws-sdk/types";
-import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@aws-sdk/util-retry";
+import { HttpRequest } from "@smithy/protocol-http";
+import { FinalizeHandlerArguments, MiddlewareStack } from "@smithy/types";
+import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 
 import {
   getOmitRetryHeadersPlugin,
@@ -19,7 +19,7 @@ describe("getOmitRetryHeadersPlugin", () => {
   });
 
   it(`adds omitRetryHeadersMiddleware`, () => {
-    getOmitRetryHeadersPlugin({}).applyToStack(mockClientStack as unknown as MiddlewareStack<any, any>);
+    getOmitRetryHeadersPlugin({}).applyToStack((mockClientStack as unknown) as MiddlewareStack<any, any>);
     expect(mockClientStack.addRelativeTo).toHaveBeenCalledTimes(1);
     expect(mockClientStack.addRelativeTo.mock.calls[0][1]).toEqual(omitRetryHeadersMiddlewareOptions);
   });

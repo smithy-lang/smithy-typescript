@@ -1,4 +1,4 @@
-import { EndpointParameters } from "@aws-sdk/types";
+import { EndpointParameters } from "@smithy/types";
 
 /**
  * @internal

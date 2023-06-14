@@ -1,4 +1,4 @@
-import { SdkError } from "@aws-sdk/types";
+import { SdkError } from "@smithy/types";
 
 /**
  * Determines whether an error is retryable based on the number of retries

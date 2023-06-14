@@ -1,4 +1,4 @@
-import { CredentialsProviderError } from "@aws-sdk/property-provider";
+import { CredentialsProviderError } from "@smithy/property-provider";
 
 import { fromInstanceMetadata } from "./fromInstanceMetadata";
 import { httpRequest } from "./remoteProvider/httpRequest";
@@ -59,7 +59,7 @@ describe("fromInstanceMetadata", () => {
   beforeEach(() => {
     (staticStabilityProvider as jest.Mock).mockImplementation((input) => input);
     (getInstanceMetadataEndpoint as jest.Mock).mockResolvedValue({ hostname });
-    (isImdsCredentials as unknown as jest.Mock).mockReturnValue(true);
+    ((isImdsCredentials as unknown) as jest.Mock).mockReturnValue(true);
     (providerConfigFromInit as jest.Mock).mockReturnValue({
       timeout: mockTimeout,
       maxRetries: mockMaxRetries,
@@ -138,7 +138,7 @@ describe("fromInstanceMetadata", () => {
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
     (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (isImdsCredentials as unknown as jest.Mock).mockReturnValueOnce(false);
+    ((isImdsCredentials as unknown) as jest.Mock).mockReturnValueOnce(false);
 
     await expect(fromInstanceMetadata()()).rejects.toEqual(
       new CredentialsProviderError("Invalid response received from instance metadata service.")

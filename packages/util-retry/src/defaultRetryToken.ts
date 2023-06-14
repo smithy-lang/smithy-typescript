@@ -1,4 +1,4 @@
-import { StandardRetryToken } from "@aws-sdk/types";
+import { StandardRetryToken } from "@smithy/types";
 
 import { MAXIMUM_RETRY_DELAY } from "./constants";
 

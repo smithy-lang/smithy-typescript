@@ -1,4 +1,4 @@
-import { EventStreamMarshaller, EventStreamSerdeProvider } from "@aws-sdk/types";
+import { EventStreamMarshaller, EventStreamSerdeProvider } from "@smithy/types";
 
 /**
  * @internal

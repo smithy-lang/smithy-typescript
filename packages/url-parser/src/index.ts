@@ -1,5 +1,5 @@
-import { parseQueryString } from "@aws-sdk/querystring-parser";
-import { Endpoint, QueryParameterBag, UrlParser } from "@aws-sdk/types";
+import { parseQueryString } from "@smithy/querystring-parser";
+import { Endpoint, QueryParameterBag, UrlParser } from "@smithy/types";
 
 /**
  * @internal

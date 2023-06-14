@@ -1,4 +1,4 @@
-import { WaiterConfiguration as WaiterConfiguration__ } from "@aws-sdk/types";
+import { WaiterConfiguration as WaiterConfiguration__ } from "@smithy/types";
 
 /**
  * @internal

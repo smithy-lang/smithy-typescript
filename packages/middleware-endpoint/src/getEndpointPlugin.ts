@@ -1,5 +1,5 @@
-import { serializerMiddlewareOption } from "@aws-sdk/middleware-serde";
-import { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@aws-sdk/types";
+import { serializerMiddlewareOption } from "@smithy/middleware-serde";
+import { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
 import { endpointMiddleware } from "./endpointMiddleware";
 import { EndpointResolvedConfig } from "./resolveEndpointConfig";

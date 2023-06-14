@@ -1,13 +1,13 @@
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { isServerError, isThrottlingError, isTransientError } from "@aws-sdk/service-error-classification";
-import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@aws-sdk/types";
-import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@aws-sdk/util-retry";
+import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
+import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
+import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
 
 import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "./retryMiddleware";
 
-jest.mock("@aws-sdk/service-error-classification");
-jest.mock("@aws-sdk/protocol-http");
+jest.mock("@smithy/service-error-classification");
+jest.mock("@smithy/protocol-http");
 jest.mock("uuid");
 
 describe(getRetryPlugin.name, () => {
@@ -22,10 +22,10 @@ describe(getRetryPlugin.name, () => {
     (isThrottlingError as jest.Mock).mockReturnValue(false);
     (isTransientError as jest.Mock).mockReturnValue(false);
     (isServerError as jest.Mock).mockReturnValue(false);
-    (HttpRequest as unknown as jest.Mock).mockReturnValue({
+    ((HttpRequest as unknown) as jest.Mock).mockReturnValue({
       isInstance: jest.fn().mockReturnValue(false),
     });
-    (HttpResponse as unknown as jest.Mock).mockReturnValue({
+    ((HttpResponse as unknown) as jest.Mock).mockReturnValue({
       isInstance: jest.fn().mockReturnValue(false),
     });
     (v4 as jest.Mock).mockReturnValue("42");
@@ -41,7 +41,7 @@ describe(getRetryPlugin.name, () => {
         getRetryPlugin({
           maxAttempts: () => Promise.resolve(maxAttempts),
           retryStrategy: jest.fn().mockResolvedValue(mockRetryStrategy),
-        }).applyToStack(mockClientStack as unknown as MiddlewareStack<any, any>);
+        }).applyToStack((mockClientStack as unknown) as MiddlewareStack<any, any>);
         expect(mockClientStack.add).toHaveBeenCalledTimes(1);
         expect(mockClientStack.add.mock.calls[0][1]).toEqual(retryMiddlewareOptions);
       });
@@ -257,7 +257,7 @@ describe(retryMiddleware.name, () => {
       describe("when retry-after is not set", () => {
         it("should not set retryAfter in errorInfo", async () => {
           const { isInstance } = HttpResponse;
-          (isInstance as unknown as jest.Mock).mockReturnValue(true);
+          ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
           Object.defineProperty(mockError, "$response", {
             value: {
               headers: { ["other-header"]: "foo" },
@@ -287,7 +287,7 @@ describe(retryMiddleware.name, () => {
         const now = Date.now();
         const retryAfterDate = new Date(now + 3000);
         const { isInstance } = HttpResponse;
-        (isInstance as unknown as jest.Mock).mockReturnValue(true);
+        ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
         const errorInfo = {
           errorType: "CLIENT_ERROR",
           retryAfterHint: retryAfterDate,
@@ -343,7 +343,7 @@ describe(retryMiddleware.name, () => {
           expect(output.$metadata.attempts).toBe(2);
           expect(output.$metadata.totalRetryDelay).toBeDefined();
         });
-        (isInstance as unknown as jest.Mock).mockReturnValue(false);
+        ((isInstance as unknown) as jest.Mock).mockReturnValue(false);
       });
     });
 
@@ -380,7 +380,7 @@ describe(retryMiddleware.name, () => {
           const retryAfterDate = new Date(Date.now() + 3000);
           const error = getErrorWithValues(retryAfterDate.toISOString());
           const { isInstance } = HttpRequest;
-          (isInstance as unknown as jest.Mock).mockReturnValue(true);
+          ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
           (isThrottlingError as jest.Mock).mockReturnValue(true);
           const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           await retryMiddleware({
@@ -398,7 +398,7 @@ describe(retryMiddleware.name, () => {
           const retryAfterDate = new Date(Date.now() + 3000);
           const error = getErrorWithValues(retryAfterDate.toISOString());
           const { isInstance } = HttpRequest;
-          (isInstance as unknown as jest.Mock).mockReturnValue(true);
+          ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
           (isThrottlingError as jest.Mock).mockReturnValue(true);
           const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           await retryMiddleware({

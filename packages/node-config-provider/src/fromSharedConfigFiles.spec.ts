@@ -1,10 +1,10 @@
-import { CredentialsProviderError } from "@aws-sdk/property-provider";
-import { getProfileName, loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
-import { ParsedIniData, Profile } from "@aws-sdk/types";
+import { CredentialsProviderError } from "@smithy/property-provider";
+import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
+import { ParsedIniData, Profile } from "@smithy/types";
 
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 
-jest.mock("@aws-sdk/shared-ini-file-loader", () => ({
+jest.mock("@smithy/shared-ini-file-loader", () => ({
   getProfileName: jest.fn(),
   loadSharedConfigFiles: jest.fn(),
 }));

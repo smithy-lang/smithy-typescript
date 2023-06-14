@@ -1,5 +1,5 @@
-import { S3 } from "@aws-sdk/client-s3";
-import { S3Control } from "@aws-sdk/client-s3-control";
+import { S3 } from "@smithy/client-s3";
+import { S3Control } from "@smithy/client-s3-control";
 
 import { requireRequestsFrom } from "../../../private/aws-util-test/src";
 

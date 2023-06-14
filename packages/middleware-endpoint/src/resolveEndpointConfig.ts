@@ -1,11 +1,11 @@
-import { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@smithy/types";
+import { normalizeProvider } from "@smithy/util-middleware";
 
 import { toEndpointV1 } from "./adaptors/toEndpointV1";
 
 /**
  * @internal
- * 
+ *
  * Endpoint config interfaces and resolver for Endpoint v2. They live in separate package to allow per-service onboarding.
  * When all services onboard Endpoint v2, the resolver in config-resolver package can be removed.
  * This interface includes all the endpoint parameters with built-in bindings of "AWS::*" and "SDK::*"
@@ -53,9 +53,9 @@ interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> 
 
 /**
  * @internal
- * 
+ *
  * This supercedes the similarly named EndpointsResolvedConfig (no parametric types)
- * from resolveEndpointsConfig.ts in @aws-sdk/config-resolver.
+ * from resolveEndpointsConfig.ts in @smithy/config-resolver.
  */
 export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointParameters> {
   /**

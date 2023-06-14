@@ -1,5 +1,5 @@
-import { Endpoint, EndpointV2 } from "@aws-sdk/types";
-import { parseUrl } from "@aws-sdk/url-parser";
+import { Endpoint, EndpointV2 } from "@smithy/types";
+import { parseUrl } from "@smithy/url-parser";
 
 /**
  * @internal

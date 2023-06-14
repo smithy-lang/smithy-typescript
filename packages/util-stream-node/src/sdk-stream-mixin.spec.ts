@@ -1,11 +1,11 @@
-import { SdkStreamMixin } from "@aws-sdk/types";
-import { fromArrayBuffer } from "@aws-sdk/util-buffer-from";
+import { SdkStreamMixin } from "@smithy/types";
+import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
 import util from "util";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
 
-jest.mock("@aws-sdk/util-buffer-from");
+jest.mock("@smithy/util-buffer-from");
 
 describe(sdkStreamMixin.name, () => {
   const writeDataToStream = (stream: Writable, data: Array<ArrayBufferLike>): Promise<void> =>
@@ -73,9 +73,7 @@ describe(sdkStreamMixin.name, () => {
     });
 
     it("should transform the stream to string with utf-8 encoding by default", async () => {
-      (fromArrayBuffer as jest.Mock).mockImplementation(
-        jest.requireActual("@aws-sdk/util-buffer-from").fromArrayBuffer
-      );
+      (fromArrayBuffer as jest.Mock).mockImplementation(jest.requireActual("@smithy/util-buffer-from").fromArrayBuffer);
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("foo")]);
       const transformed = await sdkStream.transformToString();

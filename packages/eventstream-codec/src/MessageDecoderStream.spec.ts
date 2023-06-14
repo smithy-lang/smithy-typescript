@@ -1,4 +1,4 @@
-import { Message } from "@aws-sdk/types";
+import { Message } from "@smithy/types";
 
 import { MessageDecoderStream } from "./MessageDecoderStream";
 

@@ -1,5 +1,5 @@
-import type { DefaultsMode } from "@aws-sdk/smithy-client";
-import type { Provider } from "@aws-sdk/types";
+import type { DefaultsMode } from "@smithy/smithy-client";
+import type { Provider } from "@smithy/types";
 
 /**
  * @internal

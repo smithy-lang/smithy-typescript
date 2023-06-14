@@ -1,5 +1,5 @@
-import { CredentialsProviderError } from "@aws-sdk/property-provider";
-import { AwsCredentialIdentity, Provider } from "@aws-sdk/types";
+import { CredentialsProviderError } from "@smithy/property-provider";
+import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import { RequestOptions } from "http";
 
 import { httpRequest } from "./remoteProvider/httpRequest";
@@ -15,7 +15,7 @@ const IMDS_TOKEN_PATH = "/latest/api/token";
 
 /**
  * @internal
- * 
+ *
  * Creates a credential provider that will source credentials from the EC2
  * Instance Metadata Service
  */

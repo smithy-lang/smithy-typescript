@@ -1,6 +1,6 @@
-import { memoize } from "@aws-sdk/property-provider";
-import type { DefaultsMode, ResolvedDefaultsMode } from "@aws-sdk/smithy-client";
-import type { Provider } from "@aws-sdk/types";
+import { memoize } from "@smithy/property-provider";
+import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/smithy-client";
+import type { Provider } from "@smithy/types";
 import bowser from "bowser";
 
 import { DEFAULTS_MODE_OPTIONS } from "./constants";

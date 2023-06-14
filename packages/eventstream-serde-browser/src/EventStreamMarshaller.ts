@@ -1,5 +1,5 @@
-import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "@aws-sdk/eventstream-serde-universal";
-import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@aws-sdk/types";
+import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "@smithy/eventstream-serde-universal";
+import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy/types";
 
 import { iterableToReadableStream, readableStreamtoIterable } from "./utils";
 
@@ -18,7 +18,7 @@ export interface EventStreamMarshallerOptions {
 
 /**
  * @internal
- * 
+ *
  * Utility class used to serialize and deserialize event streams in
  * browsers and ReactNative.
  *

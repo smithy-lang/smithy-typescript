@@ -1,4 +1,4 @@
-import { ProviderError } from "@aws-sdk/property-provider";
+import { ProviderError } from "@smithy/property-provider";
 import http, { createServer } from "http";
 import nock from "nock";
 

@@ -1,7 +1,7 @@
-# @aws-sdk/util-retry
+# @smithy/util-retry
 
-[![NPM version](https://img.shields.io/npm/v/@aws-sdk/util-retry/latest.svg)](https://www.npmjs.com/package/@aws-sdk/util-retry)
-[![NPM downloads](https://img.shields.io/npm/dm/@aws-sdk/util-retry.svg)](https://www.npmjs.com/package/@aws-sdk/util-retry)
+[![NPM version](https://img.shields.io/npm/v/@smithy/util-retry/latest.svg)](https://www.npmjs.com/package/@smithy/util-retry)
+[![NPM downloads](https://img.shields.io/npm/dm/@smithy/util-retry.svg)](https://www.npmjs.com/package/@smithy/util-retry)
 
 This package provides shared utilities for retries.
 
@@ -15,7 +15,7 @@ only retryable errors will be retried.
 [AWS Documentation: Retry behavior](https://docs.aws.amazon.com/sdkref/latest/guide/feature-retry-behavior.html).
 
 ```js
-import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client } from "@smithy/client-s3";
 
 const client = new S3Client({}); // default retry strategy included.
 ```
@@ -25,7 +25,7 @@ const client = new S3Client({}); // default retry strategy included.
 If you want to change the number of attempts, you can provide `maxAttempts` configuration during client creation.
 
 ```js
-import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client } from "@smithy/client-s3";
 
 const client = new S3Client({ maxAttempts: 4 });
 ```
@@ -36,11 +36,11 @@ deciding whether an error should be retried, and a retry token counter.
 ### MaxAttempts and BackoffComputation
 
 If you want to change the number of attempts and use a custom delay
-computation, you can use the `ConfiguredRetryStrategy` from `@aws-sdk/util-retry`.
+computation, you can use the `ConfiguredRetryStrategy` from `@smithy/util-retry`.
 
 ```js
-import { S3Client } from "@aws-sdk/client-s3";
-import { ConfiguredRetryStrategy } from "@aws-sdk/util-retry";
+import { S3Client } from "@smithy/client-s3";
+import { ConfiguredRetryStrategy } from "@smithy/util-retry";
 
 const client = new S3Client({
   retryStrategy: new ConfiguredRetryStrategy(
@@ -58,8 +58,8 @@ If you provide both `maxAttempts` and `retryStrategy`, the `retryStrategy` will
 get precedence as it's more specific.
 
 ```js
-import { S3Client } from "@aws-sdk/client-s3";
-import { ConfiguredRetryStrategy } from "@aws-sdk/util-retry";
+import { S3Client } from "@smithy/client-s3";
+import { ConfiguredRetryStrategy } from "@smithy/util-retry";
 
 const client = new S3Client({
   maxAttempts: 2, // ignored.

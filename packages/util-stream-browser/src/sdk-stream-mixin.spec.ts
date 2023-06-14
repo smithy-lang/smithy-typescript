@@ -1,16 +1,16 @@
 // @jest-environment jsdom
-import { streamCollector } from "@aws-sdk/fetch-http-handler";
-import { SdkStreamMixin } from "@aws-sdk/types";
-import { toBase64 } from "@aws-sdk/util-base64";
-import { toHex } from "@aws-sdk/util-hex-encoding";
-import { toUtf8 } from "@aws-sdk/util-utf8";
+import { streamCollector } from "@smithy/fetch-http-handler";
+import { SdkStreamMixin } from "@smithy/types";
+import { toBase64 } from "@smithy/util-base64";
+import { toHex } from "@smithy/util-hex-encoding";
+import { toUtf8 } from "@smithy/util-utf8";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
 
-jest.mock("@aws-sdk/fetch-http-handler");
-jest.mock("@aws-sdk/util-base64");
-jest.mock("@aws-sdk/util-hex-encoding");
-jest.mock("@aws-sdk/util-utf8");
+jest.mock("@smithy/fetch-http-handler");
+jest.mock("@smithy/util-base64");
+jest.mock("@smithy/util-hex-encoding");
+jest.mock("@smithy/util-utf8");
 
 const mockStreamCollectorReturn = Uint8Array.from([117, 112, 113]);
 (streamCollector as jest.Mock).mockReturnValue(mockStreamCollectorReturn);

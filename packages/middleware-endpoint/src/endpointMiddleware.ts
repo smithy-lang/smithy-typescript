@@ -8,7 +8,7 @@ import {
   SerializeHandlerArguments,
   SerializeHandlerOutput,
   SerializeMiddleware,
-} from "@aws-sdk/types";
+} from "@smithy/types";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
 import { EndpointResolvedConfig } from "./resolveEndpointConfig";
@@ -25,32 +25,33 @@ export const endpointMiddleware = <T extends EndpointParameters>({
   instructions: EndpointParameterInstructions;
 }): SerializeMiddleware<any, any> => {
   return <Output extends MetadataBearer>(
-      next: SerializeHandler<any, Output>,
-      context: HandlerExecutionContext
-    ): SerializeHandler<any, Output> =>
-    async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
-      const endpoint: EndpointV2 = await getEndpointFromInstructions(
-        args.input,
-        {
-          getEndpointParameterInstructions() {
-            return instructions;
-          },
+    next: SerializeHandler<any, Output>,
+    context: HandlerExecutionContext
+  ): SerializeHandler<any, Output> => async (
+    args: SerializeHandlerArguments<any>
+  ): Promise<SerializeHandlerOutput<Output>> => {
+    const endpoint: EndpointV2 = await getEndpointFromInstructions(
+      args.input,
+      {
+        getEndpointParameterInstructions() {
+          return instructions;
         },
-        { ...config },
-        context
-      );
+      },
+      { ...config },
+      context
+    );
 
-      context.endpointV2 = endpoint;
-      context.authSchemes = endpoint.properties?.authSchemes;
+    context.endpointV2 = endpoint;
+    context.authSchemes = endpoint.properties?.authSchemes;
 
-      const authScheme: AuthScheme | undefined = context.authSchemes?.[0];
-      if (authScheme) {
-        context["signing_region"] = authScheme.signingRegion;
-        context["signing_service"] = authScheme.signingName;
-      }
+    const authScheme: AuthScheme | undefined = context.authSchemes?.[0];
+    if (authScheme) {
+      context["signing_region"] = authScheme.signingRegion;
+      context["signing_service"] = authScheme.signingName;
+    }
 
-      return next({
-        ...args,
-      });
-    };
+    return next({
+      ...args,
+    });
+  };
 };

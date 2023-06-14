@@ -1,4 +1,4 @@
-import { AbortController } from "@aws-sdk/abort-controller";
+import { AbortController } from "@smithy/abort-controller";
 
 import { runPolling } from "./poller";
 import { sleep } from "./utils/sleep";

@@ -1,15 +1,17 @@
 {
-  "name": "@aws-sdk/util-config-provider",
-  "version": "3.310.0",
+  "name": "@smithy/util-config-provider",
+  "version": "1.0.0",
   "description": "Utilities package for configuration providers",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es": "tsc -p tsconfig.es.json",
-    "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "jest --passWithNoTests"
   },
   "author": {
@@ -29,6 +31,7 @@
     "@types/node": "^14.14.31",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
+    "jest": "28.1.1",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
     "typescript": "~4.9.5"
@@ -46,10 +49,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/aws/aws-sdk-js-v3/tree/main/packages/util-config-provider",
+  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-config-provider",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aws/aws-sdk-js-v3.git",
+    "url": "https://github.com/awslabs/smithy-typescript.git",
     "directory": "packages/util-config-provider"
   },
   "typedoc": {

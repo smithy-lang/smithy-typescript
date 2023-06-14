@@ -1,9 +1,9 @@
-import { NODE_REGION_CONFIG_OPTIONS } from "@aws-sdk/config-resolver";
-import { getInstanceMetadataEndpoint, httpRequest } from "@aws-sdk/credential-provider-imds";
-import { loadConfig } from "@aws-sdk/node-config-provider";
-import { memoize } from "@aws-sdk/property-provider";
-import type { DefaultsMode, ResolvedDefaultsMode } from "@aws-sdk/smithy-client";
-import type { Provider } from "@aws-sdk/types";
+import { NODE_REGION_CONFIG_OPTIONS } from "@smithy/config-resolver";
+import { getInstanceMetadataEndpoint, httpRequest } from "@smithy/credential-provider-imds";
+import { loadConfig } from "@smithy/node-config-provider";
+import { memoize } from "@smithy/property-provider";
+import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/smithy-client";
+import type { Provider } from "@smithy/types";
 
 import {
   AWS_DEFAULT_REGION_ENV,

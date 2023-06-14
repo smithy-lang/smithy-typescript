@@ -1,5 +1,5 @@
-import { fromBase64 } from "@aws-sdk/util-base64";
-import { toHex } from "@aws-sdk/util-hex-encoding";
+import { fromBase64 } from "@smithy/util-base64";
+import { toHex } from "@smithy/util-hex-encoding";
 
 import { Md5 } from "./";
 const hashVectors = require("hash-test-vectors");

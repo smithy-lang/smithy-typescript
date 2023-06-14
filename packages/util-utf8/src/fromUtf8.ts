@@ -1,4 +1,4 @@
-import { fromString } from "@aws-sdk/util-buffer-from";
+import { fromString } from "@smithy/util-buffer-from";
 
 export const fromUtf8 = (input: string): Uint8Array => {
   const buf = fromString(input, "utf8");

@@ -1,4 +1,4 @@
-import { Decoder, Encoder, EventSigner, EventStreamSerdeProvider, Provider } from "@aws-sdk/types";
+import { Decoder, Encoder, EventSigner, EventStreamSerdeProvider, Provider } from "@smithy/types";
 
 import { EventStreamMarshaller } from "./EventStreamMarshaller";
 

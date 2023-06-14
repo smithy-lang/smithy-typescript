@@ -1,4 +1,4 @@
-import { HeaderBag, HttpResponse } from "@aws-sdk/types";
+import { HeaderBag, HttpResponse } from "@smithy/types";
 import { readFileSync } from "fs";
 import { createServer as createHttpServer, IncomingMessage, Server as HttpServer, ServerResponse } from "http";
 import { createServer as createHttp2Server, Http2Server } from "http2";
@@ -22,27 +22,33 @@ const setResponseBody = (response: ServerResponse, body: Readable | string) => {
   }
 };
 
-export const createResponseFunction =
-  (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
-    response.statusCode = httpResp.statusCode;
-    setResponseHeaders(response, httpResp.headers);
-    setResponseBody(response, httpResp.body);
-  };
+export const createResponseFunction = (httpResp: HttpResponse) => (
+  request: IncomingMessage,
+  response: ServerResponse
+) => {
+  response.statusCode = httpResp.statusCode;
+  setResponseHeaders(response, httpResp.headers);
+  setResponseBody(response, httpResp.body);
+};
 
-export const createResponseFunctionWithDelay =
-  (httpResp: HttpResponse, delay: number) => (request: IncomingMessage, response: ServerResponse) => {
-    response.statusCode = httpResp.statusCode;
-    setResponseHeaders(response, httpResp.headers);
-    setTimeout(() => setResponseBody(response, httpResp.body), delay);
-  };
+export const createResponseFunctionWithDelay = (httpResp: HttpResponse, delay: number) => (
+  request: IncomingMessage,
+  response: ServerResponse
+) => {
+  response.statusCode = httpResp.statusCode;
+  setResponseHeaders(response, httpResp.headers);
+  setTimeout(() => setResponseBody(response, httpResp.body), delay);
+};
 
-export const createContinueResponseFunction =
-  (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
-    response.writeContinue();
-    setTimeout(() => {
-      createResponseFunction(httpResp)(request, response);
-    }, 100);
-  };
+export const createContinueResponseFunction = (httpResp: HttpResponse) => (
+  request: IncomingMessage,
+  response: ServerResponse
+) => {
+  response.writeContinue();
+  setTimeout(() => {
+    createResponseFunction(httpResp)(request, response);
+  }, 100);
+};
 
 export const createMockHttpsServer = (): HttpsServer => {
   const server = createHttpsServer({

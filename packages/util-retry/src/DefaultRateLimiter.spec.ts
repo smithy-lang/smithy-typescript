@@ -1,8 +1,8 @@
-import { isThrottlingError } from "@aws-sdk/service-error-classification";
+import { isThrottlingError } from "@smithy/service-error-classification";
 
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 
-jest.mock("@aws-sdk/service-error-classification");
+jest.mock("@smithy/service-error-classification");
 
 describe(DefaultRateLimiter.name, () => {
   beforeEach(() => {

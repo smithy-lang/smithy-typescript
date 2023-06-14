@@ -1,8 +1,8 @@
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { normalizeProvider } from "@smithy/util-middleware";
 
 import { resolveCustomEndpointsConfig } from "./resolveCustomEndpointsConfig";
 
-jest.mock("@aws-sdk/util-middleware");
+jest.mock("@smithy/util-middleware");
 
 describe(resolveCustomEndpointsConfig.name, () => {
   const mockEndpoint = {

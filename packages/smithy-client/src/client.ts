@@ -1,5 +1,5 @@
-import { constructStack } from "@aws-sdk/middleware-stack";
-import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@aws-sdk/types";
+import { constructStack } from "@smithy/middleware-stack";
+import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@smithy/types";
 
 /**
  * @internal
@@ -27,8 +27,7 @@ export class Client<
   ClientInput extends object,
   ClientOutput extends MetadataBearer,
   ResolvedClientConfiguration extends SmithyResolvedConfiguration<HandlerOptions>
-> implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration>
-{
+> implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration> {
   public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>();
   readonly config: ResolvedClientConfiguration;
   constructor(config: ResolvedClientConfiguration) {

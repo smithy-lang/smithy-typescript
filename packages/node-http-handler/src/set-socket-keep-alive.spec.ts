@@ -43,4 +43,3 @@ describe("setSocketKeepAlive", () => {
     expect(setKeepAliveSpy).not.toHaveBeenCalled();
   });
 });
-

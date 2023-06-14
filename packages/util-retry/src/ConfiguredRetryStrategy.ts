@@ -4,7 +4,7 @@ import type {
   RetryErrorInfo,
   RetryStrategyV2,
   StandardRetryToken,
-} from "@aws-sdk/types";
+} from "@smithy/types";
 
 import { DEFAULT_RETRY_DELAY_BASE } from "./constants";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";

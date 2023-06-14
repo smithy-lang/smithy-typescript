@@ -1,26 +1,21 @@
-import { HeaderBag, HttpMessage } from "./types";
+import { HeaderBag, HttpMessage, HttpResponse as IHttpResponse } from "@smithy/types";
 
 type HttpResponseOptions = Partial<HttpMessage> & {
   statusCode: number;
+  reason?: string;
 };
 
-/**
- * @public
- *
- * Represents an HTTP message as received in reply to a request. Contains a
- * numeric status code in addition to standard message properties.
- */
-export interface HttpResponse extends HttpMessage {
-  statusCode: number;
-}
+export interface HttpResponse extends IHttpResponse {}
 
 export class HttpResponse {
   public statusCode: number;
+  public reason?: string;
   public headers: HeaderBag;
   public body?: any;
 
   constructor(options: HttpResponseOptions) {
     this.statusCode = options.statusCode;
+    this.reason = options.reason;
     this.headers = options.headers || {};
     this.body = options.body;
   }

@@ -10,7 +10,7 @@ import {
   Priority,
   RelativeLocation,
   Step,
-} from "@aws-sdk/types";
+} from "@smithy/types";
 
 import { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewareEntry } from "./types";
 
@@ -145,9 +145,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
 
     const mainChain = sort(normalizedAbsoluteEntries)
       .map(expandRelativeMiddlewareList)
-      .reduce((wholeList, expendedMiddlewareList) => {
+      .reduce((wholeList, expandedMiddlewareList) => {
         // TODO: Replace it with Array.flat();
-        wholeList.push(...expendedMiddlewareList);
+        wholeList.push(...expandedMiddlewareList);
         return wholeList;
       }, [] as MiddlewareEntry<Input, Output>[]);
     return mainChain;

@@ -1,7 +1,7 @@
-# @aws-sdk/util-middleware
+# @smithy/util-middleware
 
-[![NPM version](https://img.shields.io/npm/v/@aws-sdk/util-middleware/latest.svg)](https://www.npmjs.com/package/@aws-sdk/util-middleware)
-[![NPM downloads](https://img.shields.io/npm/dm/@aws-sdk/util-middleware.svg)](https://www.npmjs.com/package/@aws-sdk/util-middleware)
+[![NPM version](https://img.shields.io/npm/v/@smithy/util-middleware/latest.svg)](https://www.npmjs.com/package/@smithy/util-middleware)
+[![NPM downloads](https://img.shields.io/npm/dm/@smithy/util-middleware.svg)](https://www.npmjs.com/package/@smithy/util-middleware)
 
 > An internal package
 
