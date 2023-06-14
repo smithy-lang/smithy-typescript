@@ -1,5 +1,5 @@
-import { AbortController } from "@aws-sdk/abort-controller";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { AbortController } from "@smithy/abort-controller";
+import { HttpRequest } from "@smithy/protocol-http";
 import http, { Server as HttpServer } from "http";
 import https, { Server as HttpsServer } from "https";
 import { AddressInfo } from "net";
@@ -106,7 +106,7 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(slowConfigProvider);
 
         const promises = Promise.all(
-          Array.from({ length: 20 }).map(() => nodeHttpHandler.handle({} as unknown as HttpRequest))
+          Array.from({ length: 20 }).map(() => nodeHttpHandler.handle(({} as unknown) as HttpRequest))
         );
 
         expect(providerInvokedCount).toBe(1);

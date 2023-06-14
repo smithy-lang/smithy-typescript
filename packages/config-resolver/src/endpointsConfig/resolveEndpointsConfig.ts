@@ -1,5 +1,5 @@
-import { Endpoint, Provider, RegionInfoProvider, UrlParser } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { Endpoint, Provider, RegionInfoProvider, UrlParser } from "@smithy/types";
+import { normalizeProvider } from "@smithy/util-middleware";
 
 import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 
@@ -54,8 +54,8 @@ export interface EndpointsResolvedConfig extends Required<EndpointsInputConfig> 
 
 /**
  * @internal
- * 
- * @deprecated endpoints rulesets use @aws-sdk/middleware-endpoint resolveEndpointConfig.
+ *
+ * @deprecated endpoints rulesets use @smithy/middleware-endpoint resolveEndpointConfig.
  * All generated clients should migrate to Endpoints 2.0 endpointRuleSet traits.
  */
 export const resolveEndpointsConfig = <T>(

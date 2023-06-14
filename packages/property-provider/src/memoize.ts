@@ -1,4 +1,4 @@
-import { MemoizedProvider, Provider } from "@aws-sdk/types";
+import { MemoizedProvider, Provider } from "@smithy/types";
 
 interface MemoizeOverload {
   /**

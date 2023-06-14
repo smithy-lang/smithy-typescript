@@ -1,4 +1,4 @@
-import { AbortSignal } from "@aws-sdk/types";
+import { AbortSignal } from "@smithy/types";
 
 import { runPolling } from "./poller";
 import { validateWaiterOptions } from "./utils";

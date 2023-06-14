@@ -1,5 +1,5 @@
-import { EventStreamCodec } from "@aws-sdk/eventstream-codec";
-import { Encoder, Message } from "@aws-sdk/types";
+import { EventStreamCodec } from "@smithy/eventstream-codec";
+import { Encoder, Message } from "@smithy/types";
 
 /**
  * @internal

@@ -1,6 +1,6 @@
-import { Checksum, SourceData } from "@aws-sdk/types";
-import { fromArrayBuffer, fromString, StringEncoding } from "@aws-sdk/util-buffer-from";
-import { toUint8Array } from "@aws-sdk/util-utf8";
+import { Checksum, SourceData } from "@smithy/types";
+import { fromArrayBuffer, fromString, StringEncoding } from "@smithy/util-buffer-from";
+import { toUint8Array } from "@smithy/util-utf8";
 import { Buffer } from "buffer";
 import { createHash, createHmac, Hash as NodeHash, Hmac } from "crypto";
 

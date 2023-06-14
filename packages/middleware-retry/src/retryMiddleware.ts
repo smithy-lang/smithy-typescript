@@ -1,5 +1,5 @@
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { isServerError, isThrottlingError, isTransientError } from "@aws-sdk/service-error-classification";
+import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import {
   AbsoluteLocation,
   FinalizeHandler,
@@ -15,70 +15,68 @@ import {
   RetryStrategyV2,
   RetryToken,
   SdkError,
-} from "@aws-sdk/types";
-import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@aws-sdk/util-retry";
+} from "@smithy/types";
+import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
 
 import { RetryResolvedConfig } from "./configurations";
 import { asSdkError } from "./util";
 
-export const retryMiddleware =
-  (options: RetryResolvedConfig) =>
-  <Output extends MetadataBearer = MetadataBearer>(
-    next: FinalizeHandler<any, Output>,
-    context: HandlerExecutionContext
-  ): FinalizeHandler<any, Output> =>
-  async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
-    let retryStrategy = await options.retryStrategy();
-    const maxAttempts = await options.maxAttempts();
+export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends MetadataBearer = MetadataBearer>(
+  next: FinalizeHandler<any, Output>,
+  context: HandlerExecutionContext
+): FinalizeHandler<any, Output> => async (
+  args: FinalizeHandlerArguments<any>
+): Promise<FinalizeHandlerOutput<Output>> => {
+  let retryStrategy = await options.retryStrategy();
+  const maxAttempts = await options.maxAttempts();
 
-    if (isRetryStrategyV2(retryStrategy)) {
-      retryStrategy = retryStrategy as RetryStrategyV2;
-      let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(context["partition_id"]);
-      let lastError: SdkError = new Error();
-      let attempts = 0;
-      let totalRetryDelay = 0;
-      const { request } = args;
-      if (HttpRequest.isInstance(request)) {
-        request.headers[INVOCATION_ID_HEADER] = v4();
-      }
-      while (true) {
-        try {
-          if (HttpRequest.isInstance(request)) {
-            request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
-          }
-          const { response, output } = await next(args);
-          retryStrategy.recordSuccess(retryToken);
-          output.$metadata.attempts = attempts + 1;
-          output.$metadata.totalRetryDelay = totalRetryDelay;
-          return { response, output };
-        } catch (e) {
-          const retryErrorInfo = getRetryErrorInfo(e);
-          lastError = asSdkError(e);
-          try {
-            retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
-          } catch (refreshError) {
-            if (!lastError.$metadata) {
-              lastError.$metadata = {};
-            }
-            lastError.$metadata.attempts = attempts + 1;
-            lastError.$metadata.totalRetryDelay = totalRetryDelay;
-            throw lastError;
-          }
-          attempts = retryToken.getRetryCount();
-          const delay = retryToken.getRetryDelay();
-          totalRetryDelay += delay;
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      }
-    } else {
-      retryStrategy = retryStrategy as RetryStrategy;
-      if (retryStrategy?.mode)
-        context.userAgent = [...(context.userAgent || []), ["cfg/retry-mode", retryStrategy.mode]];
-
-      return retryStrategy.retry(next, args);
+  if (isRetryStrategyV2(retryStrategy)) {
+    retryStrategy = retryStrategy as RetryStrategyV2;
+    let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(context["partition_id"]);
+    let lastError: SdkError = new Error();
+    let attempts = 0;
+    let totalRetryDelay = 0;
+    const { request } = args;
+    if (HttpRequest.isInstance(request)) {
+      request.headers[INVOCATION_ID_HEADER] = v4();
     }
-  };
+    while (true) {
+      try {
+        if (HttpRequest.isInstance(request)) {
+          request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
+        }
+        const { response, output } = await next(args);
+        retryStrategy.recordSuccess(retryToken);
+        output.$metadata.attempts = attempts + 1;
+        output.$metadata.totalRetryDelay = totalRetryDelay;
+        return { response, output };
+      } catch (e) {
+        const retryErrorInfo = getRetryErrorInfo(e);
+        lastError = asSdkError(e);
+        try {
+          retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
+        } catch (refreshError) {
+          if (!lastError.$metadata) {
+            lastError.$metadata = {};
+          }
+          lastError.$metadata.attempts = attempts + 1;
+          lastError.$metadata.totalRetryDelay = totalRetryDelay;
+          throw lastError;
+        }
+        attempts = retryToken.getRetryCount();
+        const delay = retryToken.getRetryDelay();
+        totalRetryDelay += delay;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  } else {
+    retryStrategy = retryStrategy as RetryStrategy;
+    if (retryStrategy?.mode) context.userAgent = [...(context.userAgent || []), ["cfg/retry-mode", retryStrategy.mode]];
+
+    return retryStrategy.retry(next, args);
+  }
+};
 
 const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&

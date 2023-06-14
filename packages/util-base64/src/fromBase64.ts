@@ -1,4 +1,4 @@
-import { fromString } from "@aws-sdk/util-buffer-from";
+import { fromString } from "@smithy/util-buffer-from";
 
 const BASE64_REGEX = /^[A-Za-z0-9+/]*={0,2}$/;
 

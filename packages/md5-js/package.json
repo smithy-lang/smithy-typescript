@@ -1,14 +1,16 @@
 {
-  "name": "@aws-sdk/md5-js",
-  "version": "3.347.0",
+  "name": "@smithy/md5-js",
+  "version": "1.0.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es": "tsc -p tsconfig.es.json",
-    "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "jest"
   },
   "main": "./dist-cjs/index.js",
@@ -20,20 +22,21 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@aws-sdk/util-base64": "*",
-    "@aws-sdk/util-hex-encoding": "*",
+    "@smithy/util-base64": "workspace:^",
+    "@smithy/util-hex-encoding": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "@types/node": "^14.14.31",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "hash-test-vectors": "^1.3.2",
+    "jest": "28.1.1",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
     "typescript": "~4.9.5"
   },
   "dependencies": {
-    "@aws-sdk/types": "*",
-    "@aws-sdk/util-utf8": "*",
+    "@smithy/types": "workspace:^",
+    "@smithy/util-utf8": "workspace:^",
     "tslib": "^2.5.0"
   },
   "typesVersions": {
@@ -46,10 +49,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/aws/aws-sdk-js-v3/tree/main/packages/md5-js",
+  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/md5-js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aws/aws-sdk-js-v3.git",
+    "url": "https://github.com/awslabs/smithy-typescript.git",
     "directory": "packages/md5-js"
   },
   "typedoc": {

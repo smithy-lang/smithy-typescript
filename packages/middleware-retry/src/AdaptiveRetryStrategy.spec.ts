@@ -1,11 +1,11 @@
-import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@aws-sdk/util-retry";
+import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@smithy/util-retry";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import { RetryQuota } from "./types";
 
 jest.mock("./StandardRetryStrategy");
-jest.mock("@aws-sdk/util-retry");
+jest.mock("@smithy/util-retry");
 
 describe(AdaptiveRetryStrategy.name, () => {
   const maxAttemptsProvider = jest.fn();

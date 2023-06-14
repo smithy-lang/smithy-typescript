@@ -1,7 +1,7 @@
-# @aws-sdk/chunked-blob-reader
+# @smithy/chunked-blob-reader
 
-[![NPM version](https://img.shields.io/npm/v/@aws-sdk/chunked-blob-reader/latest.svg)](https://www.npmjs.com/package/@aws-sdk/chunked-blob-reader)
-[![NPM downloads](https://img.shields.io/npm/dm/@aws-sdk/chunked-blob-reader.svg)](https://www.npmjs.com/package/@aws-sdk/chunked-blob-reader)
+[![NPM version](https://img.shields.io/npm/v/@smithy/chunked-blob-reader/latest.svg)](https://www.npmjs.com/package/@smithy/chunked-blob-reader)
+[![NPM downloads](https://img.shields.io/npm/dm/@smithy/chunked-blob-reader.svg)](https://www.npmjs.com/package/@smithy/chunked-blob-reader)
 
 > An internal package
 

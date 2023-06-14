@@ -1,4 +1,4 @@
-import { isArrayBuffer } from "@aws-sdk/is-array-buffer";
+import { isArrayBuffer } from "@smithy/is-array-buffer";
 import { Buffer } from "buffer";
 
 /**

@@ -1,6 +1,6 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@aws-sdk/types";
+import { HttpRequest } from "@smithy/protocol-http";
+import { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
 
 import {
   ALGORITHM_IDENTIFIER,
@@ -830,7 +830,7 @@ describe("SignatureV4", () => {
     const mockDate = new Date();
 
     beforeEach(() => {
-      dateSpy = jest.spyOn(global, "Date").mockImplementation(() => mockDate as unknown as string);
+      dateSpy = jest.spyOn(global, "Date").mockImplementation(() => (mockDate as unknown) as string);
     });
 
     afterEach(() => {

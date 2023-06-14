@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@aws-sdk/types";
+import { ParsedIniData } from "@smithy/types";
 
 /**
  * Merge multiple profile config files such that settings each file are kept together

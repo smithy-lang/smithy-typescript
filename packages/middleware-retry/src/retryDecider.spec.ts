@@ -3,12 +3,12 @@ import {
   isRetryableByTrait,
   isThrottlingError,
   isTransientError,
-} from "@aws-sdk/service-error-classification";
-import { SdkError } from "@aws-sdk/types";
+} from "@smithy/service-error-classification";
+import { SdkError } from "@smithy/types";
 
 import { defaultRetryDecider } from "./retryDecider";
 
-jest.mock("@aws-sdk/service-error-classification");
+jest.mock("@smithy/service-error-classification");
 
 describe("defaultRetryDecider", () => {
   const createMockError = () => Object.assign(new Error(), { $metadata: {} }) as SdkError;

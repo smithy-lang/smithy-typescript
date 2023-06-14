@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@aws-sdk/types";
+import { ParsedIniData } from "@smithy/types";
 
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getSsoSessionData } from "./getSsoSessionData";

@@ -1,13 +1,13 @@
-import { LoadedConfigSelectors } from "@aws-sdk/node-config-provider";
-import { Provider, RetryStrategy, RetryStrategyV2 } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { LoadedConfigSelectors } from "@smithy/node-config-provider";
+import { Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
+import { normalizeProvider } from "@smithy/util-middleware";
 import {
   AdaptiveRetryStrategy,
   DEFAULT_MAX_ATTEMPTS,
   DEFAULT_RETRY_MODE,
   RETRY_MODES,
   StandardRetryStrategy,
-} from "@aws-sdk/util-retry";
+} from "@smithy/util-retry";
 
 export const ENV_MAX_ATTEMPTS = "AWS_MAX_ATTEMPTS";
 export const CONFIG_MAX_ATTEMPTS = "max_attempts";

@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@aws-sdk/types";
+import { ParsedIniData } from "@smithy/types";
 
 import { loadSharedConfigFiles, SharedConfigInit } from "./loadSharedConfigFiles";
 import { mergeConfigFiles } from "./mergeConfigFiles";

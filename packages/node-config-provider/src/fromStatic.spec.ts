@@ -1,8 +1,8 @@
-import { fromStatic as convertToProvider } from "@aws-sdk/property-provider";
+import { fromStatic as convertToProvider } from "@smithy/property-provider";
 
 import { fromStatic } from "./fromStatic";
 
-jest.mock("@aws-sdk/property-provider", () => ({
+jest.mock("@smithy/property-provider", () => ({
   fromStatic: jest.fn(),
 }));
 

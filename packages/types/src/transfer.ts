@@ -31,3 +31,7 @@ export enum RequestHandlerProtocol {
   HTTP_1_0 = "http/1.0",
   TDS_8_0 = "tds/8.0",
 }
+
+export interface RequestContext {
+  destination: URL;
+}

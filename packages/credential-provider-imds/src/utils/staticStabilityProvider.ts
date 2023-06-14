@@ -1,11 +1,11 @@
-import { AwsCredentialIdentity, Logger, Provider } from "@aws-sdk/types";
+import { AwsCredentialIdentity, Logger, Provider } from "@smithy/types";
 
 import { InstanceMetadataCredentials } from "../types";
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
 
 /**
  * @internal
- * 
+ *
  * IMDS credential supports static stability feature. When used, the expiration
  * of recently issued credentials is extended. The server side allows using
  * the recently expired credentials. This mitigates impact when clients using

@@ -1,6 +1,6 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { buildQueryString } from "@aws-sdk/querystring-builder";
-import { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext } from "@aws-sdk/types";
+import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { buildQueryString } from "@smithy/querystring-builder";
+import { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
 import { ClientHttp2Session, constants } from "http2";
 
 import { getTransformedHeaders } from "./get-transformed-headers";

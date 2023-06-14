@@ -4,8 +4,8 @@ import {
   MessageEncoderStream,
   SmithyMessageDecoderStream,
   SmithyMessageEncoderStream,
-} from "@aws-sdk/eventstream-codec";
-import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@aws-sdk/types";
+} from "@smithy/eventstream-codec";
+import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy/types";
 
 import { getChunkedStream } from "./getChunkedStream";
 import { getMessageUnmarshaller } from "./getUnmarshalledStream";

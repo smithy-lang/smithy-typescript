@@ -1,7 +1,7 @@
-import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
-import { isThrottlingError } from "@aws-sdk/service-error-classification";
-import { SdkError } from "@aws-sdk/types";
-import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider, RetryStrategy } from "@aws-sdk/types";
+import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { isThrottlingError } from "@smithy/service-error-classification";
+import { SdkError } from "@smithy/types";
+import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider, RetryStrategy } from "@smithy/types";
 import {
   DEFAULT_MAX_ATTEMPTS,
   DEFAULT_RETRY_DELAY_BASE,
@@ -10,7 +10,7 @@ import {
   REQUEST_HEADER,
   RETRY_MODES,
   THROTTLING_RETRY_DELAY_BASE,
-} from "@aws-sdk/util-retry";
+} from "@smithy/util-retry";
 import { v4 } from "uuid";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
@@ -29,7 +29,7 @@ export interface StandardRetryStrategyOptions {
 }
 
 /**
- * @deprecated use StandardRetryStrategy from @aws-sdk/util-retry
+ * @deprecated use StandardRetryStrategy from @smithy/util-retry
  */
 export class StandardRetryStrategy implements RetryStrategy {
   private retryDecider: RetryDecider;

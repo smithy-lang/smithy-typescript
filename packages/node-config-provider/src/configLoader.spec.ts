@@ -1,5 +1,5 @@
-import { chain, fromStatic, memoize } from "@aws-sdk/property-provider";
-import { Profile } from "@aws-sdk/types";
+import { chain, fromStatic, memoize } from "@smithy/property-provider";
+import { Profile } from "@smithy/types";
 
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";
@@ -7,7 +7,7 @@ import { fromSharedConfigFiles, SharedConfigInit } from "./fromSharedConfigFiles
 
 jest.mock("./fromEnv");
 jest.mock("./fromSharedConfigFiles");
-jest.mock("@aws-sdk/property-provider");
+jest.mock("@smithy/property-provider");
 
 describe("loadConfig", () => {
   const configuration: SharedConfigInit = {

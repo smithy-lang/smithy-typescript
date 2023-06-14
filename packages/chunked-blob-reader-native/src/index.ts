@@ -1,4 +1,4 @@
-import { fromBase64 } from "@aws-sdk/util-base64";
+import { fromBase64 } from "@smithy/util-base64";
 /**
  * @internal
  */

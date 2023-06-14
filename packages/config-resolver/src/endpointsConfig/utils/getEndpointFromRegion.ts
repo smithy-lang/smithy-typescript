@@ -1,4 +1,4 @@
-import { Provider, RegionInfoProvider, UrlParser } from "@aws-sdk/types";
+import { Provider, RegionInfoProvider, UrlParser } from "@smithy/types";
 
 interface GetEndpointFromRegionOptions {
   region: Provider<string>;

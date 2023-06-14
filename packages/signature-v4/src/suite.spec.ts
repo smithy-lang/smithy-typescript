@@ -1,5 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@aws-sdk/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
 
 import { SignatureV4 } from "./SignatureV4";
 import { credentials, region, requests, service, signingDate } from "./suite.fixture";

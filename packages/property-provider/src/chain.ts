@@ -1,10 +1,10 @@
-import { Provider } from "@aws-sdk/types";
+import { Provider } from "@smithy/types";
 
 import { ProviderError } from "./ProviderError";
 
 /**
  * @internal
- * 
+ *
  * Compose a single credential provider function from multiple credential
  * providers. The first provider in the argument list will always be invoked;
  * subsequent providers in the list will be invoked in the order in which the

@@ -1,5 +1,5 @@
-import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "@aws-sdk/eventstream-serde-universal";
-import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@aws-sdk/types";
+import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "@smithy/eventstream-serde-universal";
+import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy/types";
 import { Readable } from "stream";
 
 import { readabletoIterable } from "./utils";

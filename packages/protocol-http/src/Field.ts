@@ -1,4 +1,4 @@
-import { FieldOptions, FieldPosition } from "./types";
+import { FieldOptions, FieldPosition } from "@smithy/types";
 
 /**
  * A name-value pair representing a single field

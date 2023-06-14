@@ -1,4 +1,4 @@
-import { Provider, RetryErrorInfo, RetryStrategyV2, RetryToken, StandardRetryToken } from "@aws-sdk/types";
+import { Provider, RetryErrorInfo, RetryStrategyV2, RetryToken, StandardRetryToken } from "@smithy/types";
 
 import { RETRY_MODES } from "./config";
 import { DefaultRateLimiter } from "./DefaultRateLimiter";

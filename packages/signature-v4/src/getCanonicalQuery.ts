@@ -1,5 +1,5 @@
-import { HttpRequest } from "@aws-sdk/types";
-import { escapeUri } from "@aws-sdk/util-uri-escape";
+import { HttpRequest } from "@smithy/types";
+import { escapeUri } from "@smithy/util-uri-escape";
 
 import { SIGNATURE_HEADER } from "./constants";
 

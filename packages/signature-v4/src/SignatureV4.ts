@@ -1,4 +1,4 @@
-import { HeaderMarshaller } from "@aws-sdk/eventstream-codec";
+import { HeaderMarshaller } from "@smithy/eventstream-codec";
 import {
   AwsCredentialIdentity,
   ChecksumConstructor,
@@ -19,10 +19,10 @@ import {
   SignedMessage,
   SigningArguments,
   StringSigner,
-} from "@aws-sdk/types";
-import { toHex } from "@aws-sdk/util-hex-encoding";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
-import { fromUtf8, toUint8Array, toUtf8 } from "@aws-sdk/util-utf8";
+} from "@smithy/types";
+import { toHex } from "@smithy/util-hex-encoding";
+import { normalizeProvider } from "@smithy/util-middleware";
+import { fromUtf8, toUint8Array, toUtf8 } from "@smithy/util-utf8";
 
 import {
   ALGORITHM_IDENTIFIER,

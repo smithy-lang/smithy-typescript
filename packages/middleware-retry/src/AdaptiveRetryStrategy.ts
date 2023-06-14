@@ -1,5 +1,5 @@
-import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider } from "@aws-sdk/types";
-import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@aws-sdk/util-retry";
+import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider } from "@smithy/types";
+import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@smithy/util-retry";
 
 import { StandardRetryStrategy, StandardRetryStrategyOptions } from "./StandardRetryStrategy";
 
@@ -11,7 +11,7 @@ export interface AdaptiveRetryStrategyOptions extends StandardRetryStrategyOptio
 }
 
 /**
- * @deprecated use AdaptiveRetryStrategy from @aws-sdk/util-retry
+ * @deprecated use AdaptiveRetryStrategy from @smithy/util-retry
  */
 export class AdaptiveRetryStrategy extends StandardRetryStrategy {
   private rateLimiter: RateLimiter;

@@ -6,8 +6,8 @@ import {
   MessageDecoder,
   MessageEncoder,
   MessageHeaders,
-} from "@aws-sdk/types";
-import { Decoder, Encoder } from "@aws-sdk/types";
+} from "@smithy/types";
+import { Decoder, Encoder } from "@smithy/types";
 
 import { HeaderMarshaller } from "./HeaderMarshaller";
 import { splitMessage } from "./splitMessage";

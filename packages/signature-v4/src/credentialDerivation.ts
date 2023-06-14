@@ -1,6 +1,6 @@
-import { AwsCredentialIdentity, ChecksumConstructor, HashConstructor, SourceData } from "@aws-sdk/types";
-import { toHex } from "@aws-sdk/util-hex-encoding";
-import { toUint8Array } from "@aws-sdk/util-utf8";
+import { AwsCredentialIdentity, ChecksumConstructor, HashConstructor, SourceData } from "@smithy/types";
+import { toHex } from "@smithy/util-hex-encoding";
+import { toUint8Array } from "@smithy/util-utf8";
 
 import { KEY_TYPE_IDENTIFIER, MAX_CACHE_SIZE } from "./constants";
 

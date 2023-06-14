@@ -1,4 +1,4 @@
-import { HttpRequest, QueryParameterBag } from "@aws-sdk/types";
+import { HttpRequest, QueryParameterBag } from "@smithy/types";
 
 import { cloneRequest } from "./cloneRequest";
 

@@ -1,6 +1,6 @@
-import { NODE_REGION_CONFIG_OPTIONS } from "@aws-sdk/config-resolver";
-import * as ImdsProvider from "@aws-sdk/credential-provider-imds";
-import * as NodeConfigProvider from "@aws-sdk/node-config-provider";
+import { NODE_REGION_CONFIG_OPTIONS } from "@smithy/config-resolver";
+import * as ImdsProvider from "@smithy/credential-provider-imds";
+import * as NodeConfigProvider from "@smithy/node-config-provider";
 
 import {
   AWS_DEFAULT_REGION_ENV,
@@ -13,8 +13,8 @@ import {
 import { NODE_DEFAULTS_MODE_CONFIG_OPTIONS } from "./defaultsModeConfig";
 import { resolveDefaultsModeConfig } from "./resolveDefaultsModeConfig";
 
-jest.mock("@aws-sdk/node-config-provider");
-jest.mock("@aws-sdk/credential-provider-imds");
+jest.mock("@smithy/node-config-provider");
+jest.mock("@smithy/credential-provider-imds");
 
 describe("resolveDefaultsModeConfig", () => {
   afterEach(() => {

@@ -1,4 +1,4 @@
-import { Message, MessageEncoder } from "@aws-sdk/types";
+import { Message, MessageEncoder } from "@smithy/types";
 
 /**
  * @internal

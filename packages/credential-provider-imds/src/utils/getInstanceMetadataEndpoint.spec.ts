@@ -1,5 +1,5 @@
-import { loadConfig } from "@aws-sdk/node-config-provider";
-import { parseUrl } from "@aws-sdk/url-parser";
+import { loadConfig } from "@smithy/node-config-provider";
+import { parseUrl } from "@smithy/url-parser";
 
 import { Endpoint } from "../config/Endpoint";
 import { ENDPOINT_CONFIG_OPTIONS } from "../config/EndpointConfigOptions";
@@ -7,8 +7,8 @@ import { EndpointMode } from "../config/EndpointMode";
 import { ENDPOINT_MODE_CONFIG_OPTIONS } from "../config/EndpointModeConfigOptions";
 import { getInstanceMetadataEndpoint } from "./getInstanceMetadataEndpoint";
 
-jest.mock("@aws-sdk/node-config-provider");
-jest.mock("@aws-sdk/url-parser");
+jest.mock("@smithy/node-config-provider");
+jest.mock("@smithy/url-parser");
 
 describe(getInstanceMetadataEndpoint.name, () => {
   let mockURL: string;
