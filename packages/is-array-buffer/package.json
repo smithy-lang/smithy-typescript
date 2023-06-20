@@ -1,6 +1,6 @@
 {
   "name": "@smithy/is-array-buffer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Provides a function for detecting if an argument is an ArrayBuffer",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",

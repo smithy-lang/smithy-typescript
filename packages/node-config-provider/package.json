@@ -1,6 +1,6 @@
 {
   "name": "@smithy/node-config-provider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Load config default values from ini config files and environmental variable",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
