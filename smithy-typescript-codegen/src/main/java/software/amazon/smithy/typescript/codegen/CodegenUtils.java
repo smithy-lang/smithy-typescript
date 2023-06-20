@@ -206,13 +206,16 @@ public final class CodegenUtils {
         writer.addImport("BlobTypes", null, TypeScriptDependency.AWS_SDK_TYPES);
 
         writer.writeDocs("@public");
-        writer.openBlock("export type $LType = Omit<$T, $S> & {", "};",
+        writer.write(
+            """
+            export type $LType = Omit<$T, $S> & {
+              $L: BlobTypes;
+            };
+            """,
             typeName,
             containerSymbol,
             memberName,
-            () -> {
-                writer.write("$1L$2L: BlobTypes;", memberName, optionalSuffix);
-            }
+            memberName + optionalSuffix
         );
 
         writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
@@ -233,13 +236,16 @@ public final class CodegenUtils {
         writer.addDependency(TypeScriptDependency.UTIL_STREAM);
 
         writer.writeDocs("@public");
-        writer.openBlock("export type $LType = Omit<$T, $S> & {", "};",
+        writer.write(
+            """
+            export type $LType = Omit<$T, $S> & {
+              $L: Uint8ArrayBlobAdapter;
+            };
+            """,
             typeName,
             containerSymbol,
             memberName,
-            () -> {
-                writer.write("$1L$2L: Uint8ArrayBlobAdapter;", memberName, optionalSuffix);
-            }
+            memberName + optionalSuffix
         );
 
         writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");

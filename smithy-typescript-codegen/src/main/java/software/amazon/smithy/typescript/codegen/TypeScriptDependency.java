@@ -51,7 +51,6 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", true),
     MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", true),
     UTIL_RETRY("dependencies", "@aws-sdk/util-retry", false),
-    UTIL_STREAM("dependencies", "@aws-sdk/util-stream", false),
     MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@aws-sdk/middleware-endpoint", false),
     AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
