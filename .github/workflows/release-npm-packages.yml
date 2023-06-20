@@ -5,7 +5,7 @@ on:
 
 jobs:
   release:
-    name: Release to SSDK lib packages to NPM
+    name: Release TypeScript packages to NPM
     runs-on: ubuntu-latest
     permissions:
       id-token: write
