@@ -33,10 +33,15 @@ jobs:
           npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=SMITHY_PUBLISH_npmToken --query SecretString --output text --profile token)
           echo "::add-mask::$npm_token"
           echo "NPM_TOKEN=$npm_token" >> $GITHUB_ENV
+      - name: Stage Release
+        id: stage
+        if: steps.token.outcome == 'success'
+        run: |
+          yarn stage-release --concurrency=1
       - name: Release
         id: release
         uses: changesets/action@v1
-        if: steps.token.outcome == 'success'
+        if: steps.stage.outcome == 'success'
         with:
           publish: yarn release
         env:

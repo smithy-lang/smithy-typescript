@@ -11,7 +11,7 @@
     "lint": "turbo run lint",
     "format": "turbo run format --parallel",
     "stage-release": "turbo run stage-release",
-    "release": "yarn stage-release && yarn changeset publish"
+    "release": "yarn changeset publish"
   },
   "repository": {
     "type": "git",
