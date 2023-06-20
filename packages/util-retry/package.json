@@ -63,5 +63,8 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
+  },
+  "publishConfig": {
+    "directory": ".release/package"
   }
 }
