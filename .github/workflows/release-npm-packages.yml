@@ -37,7 +37,6 @@ jobs:
           git config --global user.email "github-aws-smithy-automation@amazon.com"
           git config --global user.name "Smithy Automation"
           git remote set-url origin https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/awslabs/smithy-typescript
-          git checkout main
           git add .
           git commit -m 'Verison NPM packages'
           git push
