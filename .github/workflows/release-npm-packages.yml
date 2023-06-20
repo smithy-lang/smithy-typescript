@@ -12,6 +12,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{secrets.PUSH_TOKEN}}
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -36,7 +38,6 @@ jobs:
         run: |
           git config --global user.email "github-aws-smithy-automation@amazon.com"
           git config --global user.name "Smithy Automation"
-          git remote set-url origin https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/awslabs/smithy-typescript
           git add .
           git commit -m 'Verison NPM packages'
           git push
