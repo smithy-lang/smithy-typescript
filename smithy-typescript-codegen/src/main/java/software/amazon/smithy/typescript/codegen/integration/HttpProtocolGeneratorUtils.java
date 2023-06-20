@@ -248,36 +248,14 @@ public final class HttpProtocolGeneratorUtils {
     }
 
     /**
-     * Writes a response body stream collector. This function converts the low-level response body stream to
-     * Uint8Array binary data.
-     *
-     * @param context The generation context.
-     */
-    static void generateCollectBody(GenerationContext context) {
-        TypeScriptWriter writer = context.getWriter();
-
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
-        writer.write("// Collect low-level response body stream to Uint8Array.");
-        writer.openBlock("const collectBody = (streamBody: any = new Uint8Array(), context: __SerdeContext): "
-                + "Promise<Uint8Array> => {", "};", () -> {
-            writer.openBlock("if (streamBody instanceof Uint8Array) {", "}", () -> {
-                writer.write("return Promise.resolve(streamBody);");
-            });
-            writer.write("return context.streamCollector(streamBody) || Promise.resolve(new Uint8Array());");
-        });
-
-        writer.write("");
-    }
-
-    /**
      * Writes a function converting the low-level response body stream to utf-8 encoded string. It depends on
-     * response body stream collector {@link #generateCollectBody(GenerationContext)}.
+     * response body stream collector.
      *
      * @param context The generation context
      */
     static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-
+        writer.addImport("collectBody", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.write("// Encode Uint8Array data into string with utf-8.");
         writer.write("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => "

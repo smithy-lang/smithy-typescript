@@ -15,7 +15,10 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobPayloadMembers;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobStreamingMembers;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandBlobPayloadInputType;
+import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandBlobPayloadOutputType;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingInputType;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingOutputType;
 
@@ -375,38 +378,58 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeInputType(String typeName, Optional<StructureShape> inputShape, String commandName) {
-        writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
         if (inputShape.isPresent()) {
             StructureShape input = inputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
-            if (blobStreamingMembers.isEmpty()) {
-                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
+            List<MemberShape> blobPayloadMembers = getBlobPayloadMembers(model, input);
+
+            if (!blobStreamingMembers.isEmpty()) {
+                writeClientCommandStreamingInputType(
+                    writer, symbolProvider.toSymbol(input), typeName,
+                    blobStreamingMembers.get(0), commandName
+                );
+            } else if (!blobPayloadMembers.isEmpty()) {
+                writeClientCommandBlobPayloadInputType(
+                    writer, symbolProvider.toSymbol(input), typeName,
+                    blobPayloadMembers.get(0), commandName
+                );
             } else {
-                writeClientCommandStreamingInputType(writer, symbolProvider.toSymbol(input), typeName,
-                        blobStreamingMembers.get(0));
+                writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
+                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
             }
         } else {
             // If the input is non-existent, then use an empty object.
+            writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
             writer.write("export interface $L {}", typeName);
         }
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
-        writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         // Output types should always be MetadataBearers, possibly in addition
         // to a defined output shape.
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         if (outputShape.isPresent()) {
             StructureShape output = outputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, output);
-            if (blobStreamingMembers.isEmpty()) {
+            List<MemberShape> blobPayloadMembers = getBlobPayloadMembers(model, output);
+
+            if (!blobStreamingMembers.isEmpty()) {
+                writeClientCommandStreamingOutputType(
+                    writer, symbolProvider.toSymbol(output), typeName,
+                    blobStreamingMembers.get(0), commandName
+                );
+            } else if (!blobPayloadMembers.isEmpty()) {
+                writeClientCommandBlobPayloadOutputType(
+                    writer, symbolProvider.toSymbol(output), typeName,
+                    blobPayloadMembers.get(0), commandName
+                );
+            } else {
+                writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
                 writer.write("export interface $L extends $T, __MetadataBearer {}",
                         typeName, symbolProvider.toSymbol(outputShape.get()));
-            } else {
-                writeClientCommandStreamingOutputType(writer, symbolProvider.toSymbol(output), typeName,
-                        blobStreamingMembers.get(0));
             }
         } else {
+            writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
             writer.write("export interface $L extends __MetadataBearer {}", typeName);
         }
     }

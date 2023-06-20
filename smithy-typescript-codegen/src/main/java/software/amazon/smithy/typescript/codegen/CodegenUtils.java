@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.HttpPayloadTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency;
 import software.amazon.smithy.utils.SmithyUnstableApi;
@@ -135,10 +136,11 @@ public final class CodegenUtils {
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
     static void writeClientCommandStreamingInputType(
-            TypeScriptWriter writer,
-            Symbol containerSymbol,
-            String typeName,
-            MemberShape streamingMember
+        TypeScriptWriter writer,
+        Symbol containerSymbol,
+        String typeName,
+        MemberShape streamingMember,
+        String commandName
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
@@ -149,8 +151,8 @@ public final class CodegenUtils {
                         writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix,
                                 containerSymbol);
         });
-        writer.writeDocs(String.format("This interface extends from `%1$s` interface. There are more parameters than"
-                + " `%2$s` defined in {@link %1$s}", containerSymbol.getName(), memberName));
+
+        writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
         writer.write("export interface $1L extends $1LType {}", typeName);
     }
 
@@ -160,23 +162,96 @@ public final class CodegenUtils {
      * stream to string, buffer or WHATWG stream API.
      */
     static void writeClientCommandStreamingOutputType(
-            TypeScriptWriter writer,
-            Symbol containerSymbol,
-            String typeName,
-            MemberShape streamingMember
+        TypeScriptWriter writer,
+        Symbol containerSymbol,
+        String typeName,
+        MemberShape streamingMember,
+        String commandName
     ) {
         String memberName = streamingMember.getMemberName();
-        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.AWS_SDK_TYPES.packageName);
         writer.addImport("WithSdkStreamMixin", "__WithSdkStreamMixin", TypeScriptDependency.AWS_SDK_TYPES.packageName);
 
-
+        writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         writer.write(
             "export interface $L extends __WithSdkStreamMixin<$T, $S>, __MetadataBearer {}",
             typeName,
             containerSymbol,
             memberName
+        );
+    }
+
+    static List<MemberShape> getBlobPayloadMembers(Model model, StructureShape shape) {
+        return shape.getAllMembers().values().stream()
+            .filter(memberShape -> {
+                Shape target = model.expectShape(memberShape.getTarget());
+                return target.isBlobShape()
+                    && memberShape.hasTrait(HttpPayloadTrait.class)
+                    && !target.hasTrait(StreamingTrait.class);
+            })
+            .collect(Collectors.toList());
+    }
+
+    static void writeClientCommandBlobPayloadInputType(
+        TypeScriptWriter writer,
+        Symbol containerSymbol,
+        String typeName,
+        MemberShape payloadMember,
+        String commandName
+    ) {
+        String memberName = payloadMember.getMemberName();
+        String optionalSuffix = payloadMember.isRequired() ? "" : "?";
+
+        writer.addImport("BlobTypes", null, TypeScriptDependency.AWS_SDK_TYPES);
+
+        writer.writeDocs("@public");
+        writer.write(
+            """
+            export type $LType = Omit<$T, $S> & {
+              $L: BlobTypes;
+            };
+            """,
+            typeName,
+            containerSymbol,
+            memberName,
+            memberName + optionalSuffix
+        );
+
+        writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
+        writer.write("export interface $1L extends $1LType {}", typeName);
+    }
+
+    static void writeClientCommandBlobPayloadOutputType(
+        TypeScriptWriter writer,
+        Symbol containerSymbol,
+        String typeName,
+        MemberShape payloadMember,
+        String commandName
+    ) {
+        String memberName = payloadMember.getMemberName();
+        String optionalSuffix = payloadMember.isRequired() ? "" : "?";
+
+        writer.addImport("Uint8ArrayBlobAdapter", null, TypeScriptDependency.UTIL_STREAM);
+        writer.addDependency(TypeScriptDependency.UTIL_STREAM);
+
+        writer.writeDocs("@public");
+        writer.write(
+            """
+            export type $LType = Omit<$T, $S> & {
+              $L: Uint8ArrayBlobAdapter;
+            };
+            """,
+            typeName,
+            containerSymbol,
+            memberName,
+            memberName + optionalSuffix
+        );
+
+        writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
+        writer.write(
+            "export interface $1L extends $1LType, __MetadataBearer {}",
+            typeName
         );
     }
 

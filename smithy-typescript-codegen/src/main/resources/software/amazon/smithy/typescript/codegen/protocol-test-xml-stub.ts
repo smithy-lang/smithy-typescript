@@ -13,7 +13,7 @@ const compareEquivalentXmlBodies = (
     ignoreDeclaration: true,
     parseTagValue: false,
     trimValues: false,
-    tagValueProcessor: (_, val) => (val.trim() === "" && val.includes("\n") ? "" : undefined),
+    tagValueProcessor: (_: any, val: any) => (val.trim() === "" && val.includes("\n") ? "" : undefined),
   };
 
   const parseXmlBody = (body: string) => {
