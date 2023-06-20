@@ -292,7 +292,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                             + "@internal");
             writer.write("runtime?: string;\n");
 
-            writer.writeDocs("Disable dyanamically changing the endpoint of the client based on the hostPrefix \n"
+            writer.writeDocs("Disable dynamically changing the endpoint of the client based on the hostPrefix \n"
                     + "trait of an operation.");
             writer.write("disableHostPrefix?: boolean;\n");
 
