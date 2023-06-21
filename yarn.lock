@@ -2263,6 +2263,7 @@ __metadata:
   dependencies:
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-stream": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     "@types/node": ^14.14.31
     concurrently: 7.0.0
@@ -2517,7 +2518,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-stream@workspace:packages/util-stream":
+"@smithy/util-stream@workspace:^, @smithy/util-stream@workspace:packages/util-stream":
   version: 0.0.0-use.local
   resolution: "@smithy/util-stream@workspace:packages/util-stream"
   dependencies:
