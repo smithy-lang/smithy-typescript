@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- Migrate util-stream, add collect-body-stream
+- Updated dependencies
+  - @smithy/util-stream@1.0.0
+
 ## 1.0.1
 
 ### Patch Changes
