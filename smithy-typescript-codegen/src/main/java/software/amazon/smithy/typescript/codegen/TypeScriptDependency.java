@@ -104,8 +104,11 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     // Conditionally added when interacting with specific protocol test bodyMediaType values.
     AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", false),
 
-    // Conditionally added when XML parser needs to be used.
+    EXTERNAL_INTERFACES("dependencies", "@smithy/external-interfaces", "^1.0.0", false),
+
+    @Deprecated // previously used in XML parsing.
     XML_PARSER("dependencies", "fast-xml-parser", "4.2.5", false),
+    @Deprecated // previously used in XML parsing.
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.

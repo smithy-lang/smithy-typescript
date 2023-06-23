@@ -1810,6 +1810,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/external-interfaces@workspace:packages/external-interfaces":
+  version: 0.0.0-use.local
+  resolution: "@smithy/external-interfaces@workspace:packages/external-interfaces"
+  dependencies:
+    fast-xml-parser: 4.2.5
+    tslib: ^2.5.0
+  languageName: unknown
+  linkType: soft
+
 "@smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
@@ -5539,6 +5548,17 @@ __metadata:
   version: 2.0.6
   resolution: "fast-levenshtein@npm:2.0.6"
   checksum: 92cfec0a8dfafd9c7a15fba8f2cc29cd0b62b85f056d99ce448bbcd9f708e18ab2764bda4dd5158364f4145a7c72788538994f0d1787b956ef0d1062b0f7c24c
+  languageName: node
+  linkType: hard
+
+"fast-xml-parser@npm:4.2.5":
+  version: 4.2.5
+  resolution: "fast-xml-parser@npm:4.2.5"
+  dependencies:
+    strnum: ^1.0.5
+  bin:
+    fxparser: src/cli/cli.js
+  checksum: d32b22005504eeb207249bf40dc82d0994b5bb9ca9dcc731d335a1f425e47fe085b3cace3cf9d32172dd1a5544193c49e8615ca95b4bf95a4a4920a226b06d80
   languageName: node
   linkType: hard
 
@@ -9880,6 +9900,13 @@ __metadata:
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
   checksum: 492f73e27268f9b1c122733f28ecb0e7e8d8a531a6662efbd08e22cccb3f9475e90a1b82cab06a392f6afae6d2de636f977e231296400d0ec5304ba70f166443
+  languageName: node
+  linkType: hard
+
+"strnum@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "strnum@npm:1.0.5"
+  checksum: 651b2031db5da1bf4a77fdd2f116a8ac8055157c5420f5569f64879133825915ad461513e7202a16d7fec63c54fd822410d0962f8ca12385c4334891b9ae6dd2
   languageName: node
   linkType: hard
 

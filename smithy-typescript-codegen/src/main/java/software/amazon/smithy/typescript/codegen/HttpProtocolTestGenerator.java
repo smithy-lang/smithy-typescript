@@ -574,10 +574,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 additionalStubs.add("protocol-test-json-stub.ts");
                 return "compareEquivalentJsonBodies(bodyString, r.body.toString())";
             case "application/xml":
-                writer.addDependency(TypeScriptDependency.XML_PARSER);
-                writer.addDependency(TypeScriptDependency.HTML_ENTITIES);
-                writer.addImport("XMLParser", null, "fast-xml-parser");
-                writer.addImport("decodeHTML", "decodeHTML", "entities");
+                writer.addDependency(TypeScriptDependency.EXTERNAL_INTERFACES);
+                writer.addImport("XMLParser", null, TypeScriptDependency.EXTERNAL_INTERFACES);
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
             case "application/octet-stream":
