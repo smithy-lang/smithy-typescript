@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- e051b157: Rejoin main promise when error is thrown in writeRequestBody
+
 ## 1.0.1
 
 ### Patch Changes

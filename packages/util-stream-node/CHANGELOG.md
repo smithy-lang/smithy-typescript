@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [e051b157]
+  - @smithy/node-http-handler@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes

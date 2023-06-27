@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- d4dbe242: Fix attempts count on StandardRetryStrategy
+
 ## 1.0.1
 
 ### Patch Changes
