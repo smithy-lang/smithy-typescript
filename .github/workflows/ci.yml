@@ -87,18 +87,5 @@ jobs:
           node-version: 16
       - name: Install
         run: yarn
-      - name: Create empty changeset for ssdk libs
-        run: |
-          echo --- >> .changeset/empty-ssdk-changeset.md
-          echo '"@aws-smithy/server-apigateway": patch' >> .changeset/empty-ssdk-changeset.md
-          echo '"@aws-smithy/server-common": patch' >> .changeset/empty-ssdk-changeset.md
-          echo '"@aws-smithy/server-node": patch' >> .changeset/empty-ssdk-changeset.md
-          echo --- >> .changeset/empty-ssdk-changeset.md
-          echo "" >> .changeset/empty-ssdk-changeset.md
-          echo "empty changeset" >> .changeset/empty-ssdk-changeset.md
-          git config --global user.email "github-aws-smithy-automation@amazon.com"
-          git config --global user.name "Smithy Automation"
-          git add .
-          git commit -m "Create empty changeset"
       - name: Ensure changesets exist for each changed package
         run: yarn changeset status --since=origin/main
