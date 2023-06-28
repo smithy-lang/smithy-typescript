@@ -69,7 +69,7 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
-                writer.addImport("EndpointParameters", "__EndpointParameters", "@aws-sdk/types");
+                writer.addImport("EndpointParameters", "__EndpointParameters", "@smithy/types");
                 writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.openBlock(
@@ -140,12 +140,12 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RESOLVER_FILE).toString(),
             writer -> {
-                writer.addImport("EndpointV2", null, "@aws-sdk/types");
-                writer.addImport("Logger", null, "@aws-sdk/types");
+                writer.addImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
-                writer.addImport("EndpointParams", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS.packageName);
-                writer.addImport("resolveEndpoint", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS.packageName);
+                writer.addImport("EndpointParams", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
+                writer.addImport("resolveEndpoint", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
                 writer.addImport("EndpointParameters", null,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
                         ENDPOINT_PARAMETERS_FILE.replace(".ts", "")).toString());
@@ -184,7 +184,7 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RULESET_FILE).toString(),
             writer -> {
-                writer.addImport("RuleSetObject", null, "@aws-sdk/util-endpoints");
+                writer.addImport("RuleSetObject", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.openBlock(
                     "export const ruleSet: RuleSetObject = ",
                     ";",

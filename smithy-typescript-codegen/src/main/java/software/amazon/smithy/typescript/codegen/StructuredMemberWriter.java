@@ -157,7 +157,7 @@ final class StructuredMemberWriter {
             writer.writeDocs("@internal");
         }
         writer.addImport("ExceptionOptionType", "__ExceptionOptionType",
-                TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.openBlock("constructor(opts: __ExceptionOptionType<$L, __BaseException>) {", symbol.getName());
         writer.openBlock("super({", "});", () -> {
             writer.write("name: $S,", shape.getId().getName());
@@ -178,7 +178,7 @@ final class StructuredMemberWriter {
      * Writes SENSITIVE_STRING to hide the value of sensitive members.
      */
     private void writeSensitiveString(TypeScriptWriter writer) {
-        writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@aws-sdk/smithy-client");
+        writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@smithy/smithy-client");
         writer.write("SENSITIVE_STRING");
     }
 

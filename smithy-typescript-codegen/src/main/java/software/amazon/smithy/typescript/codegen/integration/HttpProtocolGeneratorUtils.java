@@ -84,7 +84,7 @@ public final class HttpProtocolGeneratorUtils {
             case EPOCH_SECONDS:
                 return "Math.round(" + dataSource + ".getTime() / 1000)";
             case HTTP_DATE:
-                context.getWriter().addImport("dateToUtcString", "__dateToUtcString", "@aws-sdk/smithy-client");
+                context.getWriter().addImport("dateToUtcString", "__dateToUtcString", "@smithy/smithy-client");
                 return "__dateToUtcString(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
@@ -115,27 +115,27 @@ public final class HttpProtocolGeneratorUtils {
                                                  boolean isClient) {
         // This has always explicitly wrapped the dataSource in "new Date(..)", so it could never generate
         // an expression that evaluates to null. Codegen relies on this.
-        writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
+        writer.addImport("expectNonNull", "__expectNonNull", "@smithy/smithy-client");
         switch (format) {
             case DATE_TIME:
                 // Clients should be able to handle offsets and normalize the datetime to an offset of zero.
                 if (isClient) {
                     writer.addImport("parseRfc3339DateTimeWithOffset", "__parseRfc3339DateTimeWithOffset",
-                        "@aws-sdk/smithy-client");
+                        "@smithy/smithy-client");
                     return String.format("__expectNonNull(__parseRfc3339DateTimeWithOffset(%s))", dataSource);
                 } else {
-                    writer.addImport("parseRfc3339DateTime", "__parseRfc3339DateTime", "@aws-sdk/smithy-client");
+                    writer.addImport("parseRfc3339DateTime", "__parseRfc3339DateTime", "@smithy/smithy-client");
                     return String.format("__expectNonNull(__parseRfc3339DateTime(%s))", dataSource);
                 }
             case HTTP_DATE:
-                writer.addImport("parseRfc7231DateTime", "__parseRfc7231DateTime", "@aws-sdk/smithy-client");
+                writer.addImport("parseRfc7231DateTime", "__parseRfc7231DateTime", "@smithy/smithy-client");
                 return String.format("__expectNonNull(__parseRfc7231DateTime(%s))", dataSource);
             case EPOCH_SECONDS:
-                writer.addImport("parseEpochTimestamp", "__parseEpochTimestamp", "@aws-sdk/smithy-client");
+                writer.addImport("parseEpochTimestamp", "__parseEpochTimestamp", "@smithy/smithy-client");
                 String modifiedDataSource = dataSource;
                 if (requireNumericEpochSecondsInPayload
                         && (bindingType == Location.DOCUMENT || bindingType == Location.PAYLOAD)) {
-                    writer.addImport("expectNumber", "__expectNumber", "@aws-sdk/smithy-client");
+                    writer.addImport("expectNumber", "__expectNumber", "@smithy/smithy-client");
                     modifiedDataSource = String.format("__expectNumber(%s)", dataSource);
                 }
                 return String.format("__expectNonNull(__parseEpochTimestamp(%s))", modifiedDataSource);
@@ -163,7 +163,7 @@ public final class HttpProtocolGeneratorUtils {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
                 TypeScriptWriter writer = context.getWriter();
-                writer.addImport("LazyJsonString", "__LazyJsonString", "@aws-sdk/smithy-client");
+                writer.addImport("LazyJsonString", "__LazyJsonString", "@smithy/smithy-client");
                 return "__LazyJsonString.fromObject(" + dataSource + ")";
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
@@ -194,7 +194,7 @@ public final class HttpProtocolGeneratorUtils {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
                 TypeScriptWriter writer = context.getWriter();
-                writer.addImport("LazyJsonString", "__LazyJsonString", "@aws-sdk/smithy-client");
+                writer.addImport("LazyJsonString", "__LazyJsonString", "@smithy/smithy-client");
                 return "new __LazyJsonString(" + dataSource + ")";
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
@@ -204,7 +204,7 @@ public final class HttpProtocolGeneratorUtils {
         if (!useExpect) {
             return dataSource;
         }
-        context.getWriter().addImport("expectString", "__expectString", "@aws-sdk/smithy-client");
+        context.getWriter().addImport("expectString", "__expectString", "@smithy/smithy-client");
         return "__expectString(" + dataSource + ")";
     }
 
@@ -234,7 +234,7 @@ public final class HttpProtocolGeneratorUtils {
     static void generateMetadataDeserializer(GenerationContext context, SymbolReference responseType) {
         TypeScriptWriter writer = context.getWriter();
 
-        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@aws-sdk/types");
+        writer.addImport("ResponseMetadata", "__ResponseMetadata", "@smithy/types");
         writer.openBlock("const deserializeMetadata = (output: $T): __ResponseMetadata => ({", "});", responseType,
                 () -> {
                     writer.write("httpStatusCode: output.statusCode,");

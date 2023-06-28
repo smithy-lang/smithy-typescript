@@ -54,17 +54,17 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
         }
 
         writer.addImport("Readable", "Readable", "stream");
-        writer.addImport("StreamHasher", "__StreamHasher", "@aws-sdk/types");
+        writer.addImport("StreamHasher", "__StreamHasher", "@smithy/types");
         writer.writeDocs("A function that, given a hash constructor and a stream, calculates the \n"
                 + "hash of the streamed value.\n"
                 + "@internal");
         writer.write("streamHasher?: __StreamHasher<Readable> | __StreamHasher<Blob>;\n");
 
-        writer.addImport("Hash", "__Hash", "@aws-sdk/types");
-        writer.addImport("HashConstructor", "__HashConstructor", "@aws-sdk/types");
+        writer.addImport("Hash", "__Hash", "@smithy/types");
+        writer.addImport("HashConstructor", "__HashConstructor", "@smithy/types");
 
-        writer.addImport("Checksum", "__Checksum", "@aws-sdk/types");
-        writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@aws-sdk/types");
+        writer.addImport("Checksum", "__Checksum", "@smithy/types");
+        writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@smithy/types");
         writer.writeDocs("A constructor for a class implementing the {@link __checksum} interface \n"
                 + "that computes MD5 hashes.\n"
                 + "@internal");
@@ -88,15 +88,15 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                     "streamHasher", writer -> {
                         writer.addDependency(TypeScriptDependency.STREAM_HASHER_NODE);
                         writer.addImport("fileStreamHasher", "streamHasher",
-                                TypeScriptDependency.STREAM_HASHER_NODE.packageName);
+                                TypeScriptDependency.STREAM_HASHER_NODE);
                         writer.write("streamHasher");
                     },
                     "md5", writer -> {
-                            writer.addDependency(TypeScriptDependency.AWS_SDK_TYPES);
+                            writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
                             writer.addImport("HashConstructor", "__HashConstructor",
-                                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                                    TypeScriptDependency.SMITHY_TYPES);
                             writer.addImport("ChecksumConstructor", "__ChecksumConstructor",
-                                    TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                                    TypeScriptDependency.SMITHY_TYPES);
                             writer.write("Hash.bind(null, \"md5\")");
                     });
             case BROWSER:
@@ -104,12 +104,12 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                     "streamHasher", writer -> {
                         writer.addDependency(TypeScriptDependency.STREAM_HASHER_BROWSER);
                         writer.addImport("blobHasher", "streamHasher",
-                                TypeScriptDependency.STREAM_HASHER_BROWSER.packageName);
+                                TypeScriptDependency.STREAM_HASHER_BROWSER);
                         writer.write("streamHasher");
                     },
                     "md5", writer -> {
                         writer.addDependency(TypeScriptDependency.MD5_BROWSER);
-                        writer.addImport("Md5", "Md5", TypeScriptDependency.MD5_BROWSER.packageName);
+                        writer.addImport("Md5", "Md5", TypeScriptDependency.MD5_BROWSER);
                         writer.write("Md5");
                     });
             default:

@@ -206,8 +206,8 @@ final class ServerGenerator {
         writer.addImport("InternalFailureException", "__InternalFailureException", "@aws-smithy/server-common");
         writer.addImport("SerializationException", "__SerializationException", "@aws-smithy/server-common");
         writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP.packageName);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
         writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
     }
@@ -272,12 +272,12 @@ final class ServerGenerator {
 
     private static void writeSerdeContextBase(TypeScriptWriter writer) {
         writer.addImport("ServerSerdeContext", "__ServerSerdeContext", "@aws-smithy/server-common");
-        writer.addImport("NodeHttpHandler", null, "@aws-sdk/node-http-handler");
-        writer.addImport("streamCollector", null, "@aws-sdk/node-http-handler");
-        writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
-        writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
-        writer.addImport("fromUtf8", null, "@aws-sdk/util-utf8");
-        writer.addImport("toUtf8", null, "@aws-sdk/util-utf8");
+        writer.addImport("NodeHttpHandler", null, "@smithy/node-http-handler");
+        writer.addImport("streamCollector", null, "@smithy/node-http-handler");
+        writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+        writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+        writer.addImport("fromUtf8", null, "@smithy/util-utf8");
+        writer.addImport("toUtf8", null, "@smithy/util-utf8");
 
         writer.openBlock("const serdeContextBase = {", "};", () -> {
             writer.write("base64Encoder: toBase64,");

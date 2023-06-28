@@ -163,10 +163,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     @Override
     public void generateSharedComponents(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("map", null, "@aws-sdk/smithy-client");
+        writer.addImport("map", null, "@smithy/smithy-client");
 
         if (context.getSettings().generateClient()) {
-            writer.addImport("withBaseException", null, "@aws-sdk/smithy-client");
+            writer.addImport("withBaseException", null, "@smithy/smithy-client");
             SymbolReference exception = HttpProtocolGeneratorUtils.getClientBaseException(context);
             writer.write("const throwDefaultError = withBaseException($T);", exception);
         }
@@ -383,8 +383,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
                 ProtocolGenerator.getSanitizedName(getName())).toString());
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP.packageName);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
@@ -437,8 +437,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("serializeFrameworkException", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER,
                 ProtocolGenerator.getSanitizedName(getName())).toString());
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP.packageName);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP.packageName);
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
 
         final Symbol operationSymbol = symbolProvider.toSymbol(operation);
         final Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
@@ -569,7 +569,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private void calculateContentLength(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
         writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
-        writer.addImport("calculateBodyLength", null, "@aws-sdk/util-body-length-node");
+        writer.addImport("calculateBodyLength", null, "@smithy/util-body-length-node");
         writer.openBlock("if (body && Object.keys(headers).map((str) => str.toLowerCase())"
                 + ".indexOf('content-length') === -1) {", "}", () -> {
             writer.write("const length = calculateBodyLength(body);");
@@ -782,7 +782,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Handle any label bindings.
         if (!labelBindings.isEmpty()) {
-            writer.addImport("resolvedPath", "__resolvedPath", "@aws-sdk/smithy-client");
+            writer.addImport("resolvedPath", "__resolvedPath", "@smithy/smithy-client");
 
             Model model = context.getModel();
             List<Segment> uriLabels = trait.getUri().getLabels();
@@ -834,7 +834,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 if (!queryParamsBindings.isEmpty()) {
                     SymbolProvider symbolProvider = context.getSymbolProvider();
                     String memberName = symbolProvider.toMemberName(queryParamsBindings.get(0).getMember());
-                    writer.addImport("convertMap", "convertMap", "@aws-sdk/smithy-client");
+                    writer.addImport("convertMap", "convertMap", "@smithy/smithy-client");
                     writer.write("...convertMap(input.$L),", memberName);
                 }
                 // Handle any additional query bindings.
@@ -860,7 +860,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         String memberName = symbolProvider.toMemberName(binding.getMember());
         writer.addImport("extendedEncodeURIComponent", "__extendedEncodeURIComponent",
-                "@aws-sdk/smithy-client");
+                "@smithy/smithy-client");
 
         Shape target = model.expectShape(binding.getMember().getTarget());
 
@@ -880,7 +880,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             target
         );
 
-        writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
+        writer.addImport("expectNonNull", "__expectNonNull", "@smithy/smithy-client");
 
         if (Objects.equals("input." + memberName + memberAssertionComponent, queryValue)) {
             String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
@@ -2156,7 +2156,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             });
             String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
             writer.addImport("decorateServiceException", "__decorateServiceException",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT.packageName);
+                    TypeScriptDependency.AWS_SMITHY_CLIENT);
             writer.write("return __decorateServiceException(exception, $L);", errorLocation);
         });
 
@@ -2320,8 +2320,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         if (!documentBindings.isEmpty()) {
             // If the response has document bindings, the body can be parsed to a JavaScript object.
-            writer.addImport("expectObject", "__expectObject", "@aws-sdk/smithy-client");
-            writer.addImport("expectNonNull", "__expectNonNull", "@aws-sdk/smithy-client");
+            writer.addImport("expectObject", "__expectObject", "@smithy/smithy-client");
+            writer.addImport("expectNonNull", "__expectNonNull", "@smithy/smithy-client");
             String bodyLocation = "(__expectObject(await parseBody(output.body, context)))";
             // Use the protocol specific error location for retrieving contents.
             if (operationOrError instanceof StructureShape) {
@@ -2398,12 +2398,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("const data: any = await collectBody(output.body, context);");
         } else if (target instanceof StructureShape) {
             // If payload is a Structure, then we need to parse the string into JavaScript object.
-            writer.addImport("expectObject", "__expectObject", "@aws-sdk/smithy-client");
+            writer.addImport("expectObject", "__expectObject", "@smithy/smithy-client");
             writer.write("const data: Record<string, any> | undefined "
                     + "= __expectObject(await parseBody(output.body, context));");
         } else if (target instanceof UnionShape) {
             // If payload is a Union, then we need to parse the string into JavaScript object.
-            writer.addImport("expectUnion", "__expectUnion", "@aws-sdk/smithy-client");
+            writer.addImport("expectUnion", "__expectUnion", "@smithy/smithy-client");
             writer.write("const data: Record<string, any> | undefined "
                     + "= __expectUnion(await parseBody(output.body, context));");
         } else if (target instanceof StringShape || target instanceof DocumentShape) {
@@ -2541,7 +2541,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case QUERY:
             case LABEL:
             case HEADER:
-                context.getWriter().addImport("parseBoolean", "__parseBoolean", "@aws-sdk/smithy-client");
+                context.getWriter().addImport("parseBoolean", "__parseBoolean", "@smithy/smithy-client");
                 return String.format("__parseBoolean(%s)", dataSource);
             default:
                 throw new CodegenException("Unexpected boolean binding location `" + bindingType + "`");
@@ -2657,7 +2657,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
                     if (format == Format.HTTP_DATE) {
                         TypeScriptWriter writer = context.getWriter();
-                        writer.addImport("splitEvery", "__splitEvery", "@aws-sdk/smithy-client");
+                        writer.addImport("splitEvery", "__splitEvery", "@smithy/smithy-client");
                         outputParam = "__splitEvery(" + dataSource + ", ',', 2)";
                     }
                 }
@@ -2732,28 +2732,28 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 switch (target.getType()) {
                     case DOUBLE:
                         context.getWriter().addImport(
-                                "strictParseDouble", "__strictParseDouble", "@aws-sdk/smithy-client");
+                                "strictParseDouble", "__strictParseDouble", "@smithy/smithy-client");
                         return "__strictParseDouble(" + dataSource + ")";
                     case FLOAT:
                         context.getWriter().addImport(
-                                "strictParseFloat", "__strictParseFloat", "@aws-sdk/smithy-client");
+                                "strictParseFloat", "__strictParseFloat", "@smithy/smithy-client");
                         return "__strictParseFloat(" + dataSource + ")";
                     case LONG:
                         context.getWriter().addImport(
-                                "strictParseLong", "__strictParseLong", "@aws-sdk/smithy-client");
+                                "strictParseLong", "__strictParseLong", "@smithy/smithy-client");
                         return "__strictParseLong(" + dataSource + ")";
                     case INT_ENUM:
                     case INTEGER:
                         context.getWriter().addImport(
-                                "strictParseInt32", "__strictParseInt32", "@aws-sdk/smithy-client");
+                                "strictParseInt32", "__strictParseInt32", "@smithy/smithy-client");
                         return "__strictParseInt32(" + dataSource + ")";
                     case SHORT:
                         context.getWriter().addImport(
-                                "strictParseShort", "__strictParseShort", "@aws-sdk/smithy-client");
+                                "strictParseShort", "__strictParseShort", "@smithy/smithy-client");
                         return "__strictParseShort(" + dataSource + ")";
                     case BYTE:
                         context.getWriter().addImport(
-                                "strictParseByte", "__strictParseByte", "@aws-sdk/smithy-client");
+                                "strictParseByte", "__strictParseByte", "@smithy/smithy-client");
                         return "__strictParseByte(" + dataSource + ")";
                     default:
                         throw new CodegenException("Unexpected number shape `" + target.getType() + "`");

@@ -45,25 +45,25 @@ final class RuntimeConfigGenerator {
             "requestHandler", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("NodeHttpHandler", "RequestHandler",
-                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
+                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.write("new RequestHandler(defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
                 writer.addImport("Hash", "Hash",
-                        TypeScriptDependency.AWS_SDK_HASH_NODE.packageName);
+                        TypeScriptDependency.AWS_SDK_HASH_NODE);
                 writer.write("Hash.bind(null, \"sha256\")");
             },
             "bodyLengthChecker", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
                 writer.addImport("calculateBodyLength", "calculateBodyLength",
-                        TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE.packageName);
+                        TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
                 writer.write("calculateBodyLength");
             },
             "streamCollector", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER.packageName);
+                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.write("streamCollector");
             }
     );
@@ -71,33 +71,31 @@ final class RuntimeConfigGenerator {
             "requestHandler", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("FetchHttpHandler", "RequestHandler",
-                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
+                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.write("new RequestHandler(defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
-                writer.addImport("Sha256", "Sha256",
-                        TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER.packageName);
+                writer.addImport("Sha256", "Sha256", TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
                 writer.write("Sha256");
             },
             "bodyLengthChecker", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
                 writer.addImport("calculateBodyLength", "calculateBodyLength",
-                        TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER.packageName);
+                        TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
                 writer.write("calculateBodyLength");
             },
             "streamCollector", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER.packageName);
+                        TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.write("streamCollector");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
-                writer.addImport("Sha256", "Sha256",
-                        TypeScriptDependency.AWS_CRYPTO_SHA256_JS.packageName);
+                writer.addImport("Sha256", "Sha256", TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
                 writer.write("Sha256");
             }
     );
@@ -105,13 +103,13 @@ final class RuntimeConfigGenerator {
             "base64Decoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64);
                 writer.addImport("fromBase64", "fromBase64",
-                        TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
+                        TypeScriptDependency.AWS_SDK_UTIL_BASE64);
                 writer.write("fromBase64");
             },
             "base64Encoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64);
                 writer.addImport("toBase64", "toBase64",
-                        TypeScriptDependency.AWS_SDK_UTIL_BASE64.packageName);
+                        TypeScriptDependency.AWS_SDK_UTIL_BASE64);
                 writer.write("toBase64");
             },
             "disableHostPrefix", writer -> {
@@ -120,19 +118,19 @@ final class RuntimeConfigGenerator {
             "urlParser", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER);
                 writer.addImport("parseUrl", "parseUrl",
-                        TypeScriptDependency.AWS_SDK_URL_PARSER.packageName);
+                        TypeScriptDependency.AWS_SDK_URL_PARSER);
                 writer.write("parseUrl");
             },
             "utf8Decoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.addImport("fromUtf8", "fromUtf8",
-                        TypeScriptDependency.AWS_SDK_UTIL_UTF8.packageName);
+                        TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.write("fromUtf8");
             },
             "utf8Encoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.addImport("toUtf8", "toUtf8",
-                        TypeScriptDependency.AWS_SDK_UTIL_UTF8.packageName);
+                        TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.write("toUtf8");
             }
     );

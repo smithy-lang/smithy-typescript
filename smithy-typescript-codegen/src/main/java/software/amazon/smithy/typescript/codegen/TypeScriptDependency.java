@@ -39,82 +39,82 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public enum TypeScriptDependency implements SymbolDependencyContainer {
 
-    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@aws-sdk/service-client-documentation-generator", true),
+    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", "^1.0.1", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
-    SMITHY_TYPES("dependencies", "@smithy/types", "^1.0.0", true),
-    AWS_SMITHY_CLIENT("dependencies", "@aws-sdk/smithy-client", true),
-    INVALID_DEPENDENCY("dependencies", "@aws-sdk/invalid-dependency", true),
-    CONFIG_RESOLVER("dependencies", "@aws-sdk/config-resolver", true),
+    SMITHY_TYPES("dependencies", "@smithy/types", "^1.1.0", true),
+    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^1.0.3", true),
+    INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "^1.0.1", true),
+    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^1.0.1", true),
     TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
 
-    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@aws-sdk/middleware-content-length", true),
-    MIDDLEWARE_SERDE("dependencies", "@aws-sdk/middleware-serde", true),
-    MIDDLEWARE_RETRY("dependencies", "@aws-sdk/middleware-retry", true),
-    UTIL_RETRY("dependencies", "@aws-sdk/util-retry", false),
-    MIDDLEWARE_STACK("dependencies", "@aws-sdk/middleware-stack", true),
-    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@aws-sdk/middleware-endpoint", false),
+    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^1.0.1", true),
+    MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", "^1.0.1", true),
+    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^1.0.2", true),
+    UTIL_RETRY("dependencies", "@smithy/util-retry", "^1.0.2", false),
+    MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", "^1.0.1", true),
+    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^1.0.1", false),
     AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "3.0.0", true),
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "3.0.0", true),
-    AWS_SDK_HASH_NODE("dependencies", "@aws-sdk/hash-node", true),
+    AWS_SDK_HASH_NODE("dependencies", "@smithy/hash-node", "^1.0.1", true),
 
-    AWS_SDK_URL_PARSER("dependencies", "@aws-sdk/url-parser", true),
+    AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", "^1.0.1", true),
 
-    @Deprecated AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", false),
-    @Deprecated AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", false),
-    AWS_SDK_UTIL_BASE64("dependencies", "@aws-sdk/util-base64", true),
+    @Deprecated AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@smithy/util-base64-browser", "^1.0.1", false),
+    @Deprecated AWS_SDK_UTIL_BASE64_NODE("dependencies", "@smithy/util-base64-node", "^1.0.1", false),
+    AWS_SDK_UTIL_BASE64("dependencies", "@smithy/util-base64", "^1.0.1", true),
 
-    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@aws-sdk/util-body-length-browser", true),
-    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@aws-sdk/util-body-length-node", true),
+    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@smithy/util-body-length-browser", "^1.0.1", true),
+    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@smithy/util-body-length-node", "^1.0.1", true),
 
-    AWS_SDK_UTIL_UTF8("dependencies", "@aws-sdk/util-utf8", true),
+    AWS_SDK_UTIL_UTF8("dependencies", "@smithy/util-utf8", "^1.0.1", true),
 
-    AWS_SDK_UTIL_WAITERS("dependencies", "@aws-sdk/util-waiter",  false),
+    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter",  "^1.0.1", false),
 
-    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@aws-sdk/util-defaults-mode-node", true),
-    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@aws-sdk/util-defaults-mode-browser", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^1.0.1", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "^1.0.1", true),
 
-    NODE_CONFIG_PROVIDER("dependencies", "@aws-sdk/node-config-provider", false),
+    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^1.0.1", false),
 
     // Conditionally added when httpChecksumRequired trait exists
-    MD5_BROWSER("dependencies", "@aws-sdk/md5-js", false),
-    STREAM_HASHER_NODE("dependencies", "@aws-sdk/hash-stream-node", false),
-    STREAM_HASHER_BROWSER("dependencies", "@aws-sdk/hash-blob-browser", false),
-    BODY_CHECKSUM("dependencies", "@aws-sdk/middleware-apply-body-checksum", false),
+    MD5_BROWSER("dependencies", "@smithy/md5-js", "^1.0.1", false),
+    STREAM_HASHER_NODE("dependencies", "@smithy/hash-stream-node", "^1.0.1", false),
+    STREAM_HASHER_BROWSER("dependencies", "@smithy/hash-blob-browser", "^1.0.1", false),
+    BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", "^1.0.1", false),
 
     // Conditionally added when using an HTTP application protocol.
-    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^1.0.1", false),
-    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@aws-sdk/fetch-http-handler", false),
-    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@aws-sdk/node-http-handler", false),
+    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^1.1.0", false),
+    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", "^1.0.1", false),
+    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", "^1.0.2", false),
 
     // Conditionally added when setting the auth middleware.
-    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@aws-sdk/util-middleware", false),
+    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "^1.0.1", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
-    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@aws-sdk/eventstream-serde-config-resolver",
-            false),
-    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@aws-sdk/eventstream-serde-node", false),
-    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@aws-sdk/eventstream-serde-browser", false),
+    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@smithy/eventstream-serde-config-resolver",
+        "^1.0.1", false),
+    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", "^1.0.1", false),
+    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", "^1.0.1", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^6.0.0", false),
     TYPES_BIG_JS("devDependencies", "@types/big.js", "^6.0.0", false),
 
     // Conditionally added when interacting with specific protocol test bodyMediaType values.
-    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@aws-sdk/querystring-builder", false),
+    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@smithy/querystring-builder", "^1.0.1", false),
 
     // Conditionally added when XML parser needs to be used.
     XML_PARSER("dependencies", "fast-xml-parser", "4.2.5", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.
-    @Deprecated UTIL_STREAM_NODE("dependencies", "@aws-sdk/util-stream-node", false),
-    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@aws-sdk/util-stream-browser", false),
-    UTIL_STREAM("dependencies", "@aws-sdk/util-stream", false),
+    @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^1.0.1", false),
+    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^1.0.1", false),
+    UTIL_STREAM("dependencies", "@smithy/util-stream", "^1.0.1", false),
 
     // Server dependency for SSDKs
-    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.10", false);
+    SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.1-alpha.10", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

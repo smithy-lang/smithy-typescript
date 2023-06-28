@@ -64,7 +64,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
 
         writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
         writer.addImport("EventStreamSerdeProvider", "__EventStreamSerdeProvider",
-                TypeScriptDependency.AWS_SDK_TYPES.packageName);
+                TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("The function that provides necessary utilities for generating and parsing event stream");
         writer.write("eventStreamSerdeProvider?: __EventStreamSerdeProvider;\n");
     }
@@ -84,14 +84,14 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
                     writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
-                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE.packageName);
+                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
                     writer.write("eventStreamSerdeProvider");
                 });
             case BROWSER:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
                     writer.addImport("eventStreamSerdeProvider", "eventStreamSerdeProvider",
-                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER.packageName);
+                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
                     writer.write("eventStreamSerdeProvider");
                 });
             default:

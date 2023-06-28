@@ -1,8 +1,8 @@
 // derived from https://github.com/aws/aws-sdk-js-v3/blob/e35f78c97fa6710ff9c444351893f0f06755e771/packages/middleware-endpoint-discovery/src/endpointDiscoveryMiddleware.ts
 
-import { HttpRequest } from "@aws-sdk/protocol-http";
-import { BuildMiddleware, Pluggable, Provider, RelativeMiddlewareOptions } from "@aws-sdk/types";
-import { normalizeProvider } from "@aws-sdk/util-middleware";
+import { HttpRequest } from "@smithy/protocol-http";
+import { BuildMiddleware, Pluggable, Provider, RelativeMiddlewareOptions } from "@smithy/types";
+import { normalizeProvider } from "@smithy/util-middleware";
 
 interface HttpApiKeyAuthMiddlewareConfig {
   /**

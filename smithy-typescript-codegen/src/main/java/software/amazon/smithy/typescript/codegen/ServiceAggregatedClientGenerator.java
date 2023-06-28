@@ -124,7 +124,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
             aggregateClientName, serviceSymbol, aggregateClientName
         );
 
-        writer.addImport("createAggregatedClient", null, "@aws-sdk/smithy-client");
+        writer.addImport("createAggregatedClient", null, "@smithy/smithy-client");
         writer.write("createAggregatedClient(commands, $L);", aggregateClientName);
     }
 }

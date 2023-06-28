@@ -1,8 +1,8 @@
 import { ${clientConfigName} } from "${clientModuleName}";
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";
-import { loadConfigsForDefaultMode } from "@aws-sdk/smithy-client";
-import { resolveDefaultsModeConfig } from "@aws-sdk/util-defaults-mode-node";
-import { emitWarningIfUnsupportedVersion } from "@aws-sdk/smithy-client";
+import { loadConfigsForDefaultMode } from "@smithy/smithy-client";
+import { resolveDefaultsModeConfig } from "@smithy/util-defaults-mode-node";
+import { emitWarningIfUnsupportedVersion } from "@smithy/smithy-client";
 
 /**
  * @internal
