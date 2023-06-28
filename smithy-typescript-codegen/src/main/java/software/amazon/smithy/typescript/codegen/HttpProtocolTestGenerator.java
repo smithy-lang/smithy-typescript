@@ -393,11 +393,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
         });
 
         String getHandlerName = "get" + handlerSymbol.getName();
-        writer.addImport(getHandlerName, null,
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER).toString());
+        writer.addRelativeImport(getHandlerName, null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER));
 
         if (!usesDefaultValidation) {
-            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+            writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
 
             // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
             writer.openBlock(
@@ -494,7 +494,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (!explicitQueryValues.isEmpty()) {
             // Use buildQueryString like the fetch handler will.
             writer.addDependency(TypeScriptDependency.AWS_SDK_QUERYSTRING_BUILDER);
-            writer.addImport("buildQueryString", "buildQueryString", "@smithy/querystring-builder");
+            writer.addImport("buildQueryString", null, TypeScriptDependency.AWS_SDK_QUERYSTRING_BUILDER);
 
             writer.write("const queryString = buildQueryString(r.query);");
             explicitQueryValues.forEach(explicitQueryValue ->
@@ -541,7 +541,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (isClientTest) {
             writer.write("const utf8Encoder = client.config.utf8Encoder;");
         } else {
-            writer.addImport("toUtf8", "__utf8Encoder", "@smithy/util-utf8");
+            writer.addImport("toUtf8", "__utf8Encoder", TypeScriptDependency.AWS_SDK_UTIL_UTF8);
             writer.write("const utf8Encoder = __utf8Encoder;");
         }
 
@@ -576,8 +576,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
             case "application/xml":
                 writer.addDependency(TypeScriptDependency.XML_PARSER);
                 writer.addDependency(TypeScriptDependency.HTML_ENTITIES);
-                writer.addImport("XMLParser", null, "fast-xml-parser");
-                writer.addImport("decodeHTML", "decodeHTML", "entities");
+                writer.addImport("XMLParser", null, TypeScriptDependency.XML_PARSER);
+                writer.addImport("decodeHTML", null, TypeScriptDependency.HTML_ENTITIES);
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
             case "application/octet-stream":
@@ -703,7 +703,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         // There's a lot of setup here, including creating our own mux, serializers list, and ultimately
         // our own service handler. This is largely in service of avoiding having to go through the
         // request deserializer
-        writer.addImport("httpbinding", null, "@aws-smithy/server-common");
+        writer.addImport("httpbinding", null, TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("const testMux = new httpbinding.HttpBindingMux<$S, keyof $T<{}>>([", "]);",
             service.getId().getName(), serviceSymbol, () -> {
                 writer.openBlock("new httpbinding.UriSpec<$S, $S>('POST', [], [], {", "}),",
@@ -726,15 +726,15 @@ public final class HttpProtocolTestGenerator implements Runnable {
         writer.write("const request = new HttpRequest({method: 'POST', hostname: 'example.com'});");
 
         // Create a new serializer factory that always returns our test serializer.
-        writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
-        writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
+        writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("OperationSerializer", "__OperationSerializer", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<{}>, $1T, __ServiceException> = (op) =>"
                         + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
-        writer.addImport("serializeFrameworkException", null,
+        writer.addRelativeImport("serializeFrameworkException", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
-        writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+        writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
         writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException, "
                 + "(ctx: {}, f: __ValidationFailure[]) => { if (f) { throw f; } return undefined;});", handlerSymbol);
         writer.write("let r = await handler.handle(request, {})").write("");
@@ -834,7 +834,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             writeParamAssertions(writer, payloadBinding, () -> {
                 // TODO: replace this with a collector from the server config once it's available
-                writer.addImport("streamCollector", "__streamCollector", "@smithy/node-http-handler");
+                writer.addImport("streamCollector", "__streamCollector",
+                    TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.write("const comparableBlob = await __streamCollector(r[$S]);",
                         payloadBinding.get().getMemberName());
             });

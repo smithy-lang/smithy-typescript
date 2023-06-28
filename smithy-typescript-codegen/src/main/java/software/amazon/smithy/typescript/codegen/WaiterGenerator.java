@@ -38,7 +38,7 @@ import software.amazon.smithy.waiters.Waiter;
 @SmithyInternalApi
 class WaiterGenerator implements Runnable {
     static final String WAITERS_FOLDER = "waiters";
-    static final String WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS.packageName;
+    static final TypeScriptDependency WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS;
 
     private final String waiterName;
     private final Waiter waiter;
@@ -76,12 +76,11 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateWaiter() {
-
-        writer.addImport("createWaiter", "createWaiter", WAITABLE_UTIL_PACKAGE);
-        writer.addImport("WaiterResult", "WaiterResult", WAITABLE_UTIL_PACKAGE);
-        writer.addImport("WaiterState", "WaiterState", WAITABLE_UTIL_PACKAGE);
-        writer.addImport("checkExceptions", "checkExceptions", WAITABLE_UTIL_PACKAGE);
-        writer.addImport("WaiterConfiguration", "WaiterConfiguration", WAITABLE_UTIL_PACKAGE);
+        writer.addImport("createWaiter", null, WAITABLE_UTIL_PACKAGE);
+        writer.addImport("WaiterResult", null, WAITABLE_UTIL_PACKAGE);
+        writer.addImport("WaiterState", null, WAITABLE_UTIL_PACKAGE);
+        writer.addImport("checkExceptions", null, WAITABLE_UTIL_PACKAGE);
+        writer.addImport("WaiterConfiguration", null, WAITABLE_UTIL_PACKAGE);
 
         // generates (deprecated) WaitFor....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"

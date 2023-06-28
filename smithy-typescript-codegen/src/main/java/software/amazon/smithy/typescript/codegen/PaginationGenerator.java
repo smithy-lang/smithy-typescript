@@ -86,21 +86,22 @@ final class PaginationGenerator implements Runnable {
     @Override
     public void run() {
         // Import Service Types
-        writer.addImport(operationSymbol.getName(),
+        writer.addRelativeImport(operationSymbol.getName(),
                 operationSymbol.getName(),
-                operationSymbol.getNamespace());
-        writer.addImport(inputSymbol.getName(),
+                Paths.get(".", operationSymbol.getNamespace()));
+        writer.addRelativeImport(inputSymbol.getName(),
                 inputSymbol.getName(),
-                inputSymbol.getNamespace());
-        writer.addImport(outputSymbol.getName(),
+                Paths.get(".", inputSymbol.getNamespace()));
+        writer.addRelativeImport(outputSymbol.getName(),
                 outputSymbol.getName(),
-                outputSymbol.getNamespace());
-        writer.addImport(serviceSymbol.getName(), serviceSymbol.getName(), serviceSymbol.getNamespace());
+                Paths.get(".", outputSymbol.getNamespace()));
+        writer.addRelativeImport(serviceSymbol.getName(), serviceSymbol.getName(),
+                Paths.get(".", serviceSymbol.getNamespace()));
 
         // Import Pagination types
-        writer.addImport("Paginator", "Paginator", "@smithy/types");
-        writer.addImport(paginationType, paginationType,
-            Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", "")).toString());
+        writer.addImport("Paginator", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addRelativeImport(paginationType, paginationType,
+            Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", "")));
 
         writeCommandRequest();
         writePager();
@@ -116,9 +117,8 @@ final class PaginationGenerator implements Runnable {
             Symbol service,
             TypeScriptWriter writer
     ) {
-        writer.addImport("PaginationConfiguration", "PaginationConfiguration", "@smithy/types");
-        writer.addImport(service.getName(), service.getName(), service.getNamespace());
-
+        writer.addImport("PaginationConfiguration", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addRelativeImport(service.getName(), service.getName(), Paths.get(".", service.getNamespace()));
         writer.writeDocs("@public")
             .openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
                 "}", aggregatedClientName, () -> {

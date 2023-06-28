@@ -75,7 +75,7 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
         if (target == LanguageTarget.SHARED) {
            return MapUtils.of("sdkStreamMixin", writer -> {
                writer.addDependency(TypeScriptDependency.UTIL_STREAM);
-               writer.addImport("sdkStreamMixin", "sdkStreamMixin", TypeScriptDependency.UTIL_STREAM);
+               writer.addImport("sdkStreamMixin", null, TypeScriptDependency.UTIL_STREAM);
                writer.write("sdkStreamMixin");
            });
         } else {

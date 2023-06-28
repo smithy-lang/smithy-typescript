@@ -77,6 +77,8 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^1.0.1", false),
 
+    UUID("dependencies", "uuid", "^8.3.2", false),
+
     // Conditionally added when httpChecksumRequired trait exists
     MD5_BROWSER("dependencies", "@smithy/md5-js", "^1.0.1", false),
     STREAM_HASHER_NODE("dependencies", "@smithy/hash-stream-node", "^1.0.1", false),

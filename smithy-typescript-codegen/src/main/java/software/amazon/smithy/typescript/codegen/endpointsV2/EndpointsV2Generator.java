@@ -69,7 +69,7 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
-                writer.addImport("EndpointParameters", "__EndpointParameters", "@smithy/types");
+                writer.addImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
                 writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.openBlock(
@@ -146,12 +146,12 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
                 writer.addImport("EndpointParams", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
                 writer.addImport("resolveEndpoint", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
-                writer.addImport("EndpointParameters", null,
+                writer.addRelativeImport("EndpointParameters", null,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
-                        ENDPOINT_PARAMETERS_FILE.replace(".ts", "")).toString());
-                writer.addImport("ruleSet", null,
+                        ENDPOINT_PARAMETERS_FILE.replace(".ts", "")));
+                writer.addRelativeImport("ruleSet", null,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
-                        ENDPOINT_RULESET_FILE.replace(".ts", "")).toString());
+                        ENDPOINT_RULESET_FILE.replace(".ts", "")));
 
                 writer.openBlock(
                     "export const defaultEndpointResolver = ",

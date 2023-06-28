@@ -208,7 +208,7 @@ final class StructureGenerator implements Runnable {
         writer.openBlock("export namespace $L {", "}", symbol.getName(), () -> {
             structuredMemberWriter.writeMemberValidatorCache(writer, "memberValidators");
 
-            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+            writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
             writer.writeDocs("@internal");
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, shape);
             writer.writeInline("export const validate = ($L: ", objectParam);

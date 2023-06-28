@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -112,10 +113,10 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
         writer.write("");
 
-        writer.addImport(
+        writer.addRelativeImport(
             ServiceBareBonesClientGenerator.getConfigTypeName(serviceSymbol),
             null,
-            serviceSymbol.getNamespace()
+            Paths.get(".", serviceSymbol.getNamespace())
         );
 
         // Generate the client and extend from the bare-bones client.
@@ -124,7 +125,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
             aggregateClientName, serviceSymbol, aggregateClientName
         );
 
-        writer.addImport("createAggregatedClient", null, "@smithy/smithy-client");
+        writer.addImport("createAggregatedClient", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.write("createAggregatedClient(commands, $L);", aggregateClientName);
     }
 }

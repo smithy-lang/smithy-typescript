@@ -53,18 +53,18 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
             return;
         }
 
-        writer.addImport("Readable", "Readable", "stream");
-        writer.addImport("StreamHasher", "__StreamHasher", "@smithy/types");
+        writer.addImport("Readable", null, "stream");
+        writer.addImport("StreamHasher", "__StreamHasher", TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("A function that, given a hash constructor and a stream, calculates the \n"
                 + "hash of the streamed value.\n"
                 + "@internal");
         writer.write("streamHasher?: __StreamHasher<Readable> | __StreamHasher<Blob>;\n");
 
-        writer.addImport("Hash", "__Hash", "@smithy/types");
-        writer.addImport("HashConstructor", "__HashConstructor", "@smithy/types");
+        writer.addImport("Hash", "__Hash", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
 
-        writer.addImport("Checksum", "__Checksum", "@smithy/types");
-        writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@smithy/types");
+        writer.addImport("Checksum", "__Checksum", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("A constructor for a class implementing the {@link __checksum} interface \n"
                 + "that computes MD5 hashes.\n"
                 + "@internal");
@@ -109,7 +109,7 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                     },
                     "md5", writer -> {
                         writer.addDependency(TypeScriptDependency.MD5_BROWSER);
-                        writer.addImport("Md5", "Md5", TypeScriptDependency.MD5_BROWSER);
+                        writer.addImport("Md5", null, TypeScriptDependency.MD5_BROWSER);
                         writer.write("Md5");
                     });
             default:

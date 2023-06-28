@@ -521,7 +521,7 @@ public class EventStreamGenerator {
                 String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
                 boolean mayElide = serdeElisionEnabled && serdeElisionIndex.mayElide(payloadShape);
                 if (mayElide) {
-                    writer.addImport("_json", null, "@smithy/smithy-client");
+                    writer.addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                     writer.write("contents.$L = $L(data);", payloadMemberName, "_json");
                 } else {
                     writer.write("contents.$L = $L(data, context);", payloadMemberName, deserFunctionName);
@@ -534,7 +534,7 @@ public class EventStreamGenerator {
             String deserFunctionName = ProtocolGenerator.getDeserFunctionShortName(symbol);
             boolean mayElide = serdeElisionEnabled && serdeElisionIndex.mayElide(event);
             if (mayElide) {
-                writer.addImport("_json", null, "@smithy/smithy-client");
+                writer.addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                 writer.write("Object.assign(contents, $L(data));", "_json");
             } else {
                 writer.write("Object.assign(contents, $L(data, context));", deserFunctionName);

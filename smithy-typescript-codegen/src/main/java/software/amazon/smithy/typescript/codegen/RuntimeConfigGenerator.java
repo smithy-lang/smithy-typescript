@@ -50,20 +50,17 @@ final class RuntimeConfigGenerator {
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
-                writer.addImport("Hash", "Hash",
-                        TypeScriptDependency.AWS_SDK_HASH_NODE);
+                writer.addImport("Hash", null, TypeScriptDependency.AWS_SDK_HASH_NODE);
                 writer.write("Hash.bind(null, \"sha256\")");
             },
             "bodyLengthChecker", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
-                writer.addImport("calculateBodyLength", "calculateBodyLength",
-                        TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
+                writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
                 writer.write("calculateBodyLength");
             },
             "streamCollector", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-                writer.addImport("streamCollector", "streamCollector",
-                        TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
+                writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.write("streamCollector");
             }
     );
@@ -76,18 +73,17 @@ final class RuntimeConfigGenerator {
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
-                writer.addImport("Sha256", "Sha256", TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
+                writer.addImport("Sha256", null, TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
                 writer.write("Sha256");
             },
             "bodyLengthChecker", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
-                writer.addImport("calculateBodyLength", "calculateBodyLength",
-                        TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
+                writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
                 writer.write("calculateBodyLength");
             },
             "streamCollector", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
-                writer.addImport("streamCollector", "streamCollector",
+                writer.addImport("streamCollector", null,
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.write("streamCollector");
             }
@@ -95,20 +91,20 @@ final class RuntimeConfigGenerator {
     private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
-                writer.addImport("Sha256", "Sha256", TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
+                writer.addImport("Sha256", null, TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
                 writer.write("Sha256");
             }
     );
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
             "base64Decoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64);
-                writer.addImport("fromBase64", "fromBase64",
+                writer.addImport("fromBase64", null,
                         TypeScriptDependency.AWS_SDK_UTIL_BASE64);
                 writer.write("fromBase64");
             },
             "base64Encoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BASE64);
-                writer.addImport("toBase64", "toBase64",
+                writer.addImport("toBase64", null,
                         TypeScriptDependency.AWS_SDK_UTIL_BASE64);
                 writer.write("toBase64");
             },
@@ -117,19 +113,19 @@ final class RuntimeConfigGenerator {
             },
             "urlParser", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_URL_PARSER);
-                writer.addImport("parseUrl", "parseUrl",
+                writer.addImport("parseUrl", null,
                         TypeScriptDependency.AWS_SDK_URL_PARSER);
                 writer.write("parseUrl");
             },
             "utf8Decoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8);
-                writer.addImport("fromUtf8", "fromUtf8",
+                writer.addImport("fromUtf8", null,
                         TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.write("fromUtf8");
             },
             "utf8Encoder", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_UTF8);
-                writer.addImport("toUtf8", "toUtf8",
+                writer.addImport("toUtf8", null,
                         TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.write("toUtf8");
             }

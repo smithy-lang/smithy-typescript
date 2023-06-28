@@ -44,6 +44,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.SmithyUnstableApi;
@@ -170,7 +171,7 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     }
 
     private String handleFloat() {
-        context.getWriter().addImport("serializeFloat", "__serializeFloat", "@smithy/smithy-client");
+        context.getWriter().addImport("serializeFloat", "__serializeFloat", TypeScriptDependency.AWS_SMITHY_CLIENT);
         return "__serializeFloat(" + dataSource + ")";
     }
 

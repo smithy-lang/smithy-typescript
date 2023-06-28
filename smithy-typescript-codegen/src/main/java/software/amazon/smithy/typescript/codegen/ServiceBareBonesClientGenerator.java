@@ -99,8 +99,8 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     public void run() {
         writer.addImport("Client", "__Client", TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.write("export { __Client }\n");
-        writer.addImport("getRuntimeConfig", "__getRuntimeConfig",
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig").toString());
+        writer.addRelativeImport("getRuntimeConfig", "__getRuntimeConfig",
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig"));
 
         // Normalize the input and output types of the command to account for
         // things like an operation adding input where there once wasn't any
@@ -152,8 +152,9 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConfig() {
-        writer.addImport("SmithyConfiguration", "__SmithyConfiguration", "@smithy/smithy-client");
-        writer.addImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration", "@smithy/smithy-client");
+        writer.addImport("SmithyConfiguration", "__SmithyConfiguration", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration",
+            TypeScriptDependency.AWS_SMITHY_CLIENT);
 
         // Hook for intercepting the client configuration.
         writer.pushState(CLIENT_CONFIG_SECTION);
@@ -242,23 +243,23 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
             writer.write("requestHandler?: __HttpHandler;\n");
 
-            writer.addImport("Hash", "__Hash", "@smithy/types");
-            writer.addImport("HashConstructor", "__HashConstructor", "@smithy/types");
+            writer.addImport("Hash", "__Hash", TypeScriptDependency.SMITHY_TYPES);
+            writer.addImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
 
-            writer.addImport("Checksum", "__Checksum", "@smithy/types");
-            writer.addImport("ChecksumConstructor", "__ChecksumConstructor", "@smithy/types");
+            writer.addImport("Checksum", "__Checksum", TypeScriptDependency.SMITHY_TYPES);
+            writer.addImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A constructor for a class implementing the {@link @smithy/types#ChecksumConstructor} "
                             + "interface \n"
                             + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
                             + "@internal");
             writer.write("sha256?: __ChecksumConstructor | __HashConstructor;\n");
 
-            writer.addImport("UrlParser", "__UrlParser", "@smithy/types");
+            writer.addImport("UrlParser", "__UrlParser", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.\n"
                              + "@internal");
             writer.write("urlParser?: __UrlParser;\n");
 
-            writer.addImport("BodyLengthCalculator", "__BodyLengthCalculator", "@smithy/types");
+            writer.addImport("BodyLengthCalculator", "__BodyLengthCalculator", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that can calculate the length of a request body.\n"
                             + "@internal");
             writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");

@@ -79,7 +79,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
             case SHARED:
                 return MapUtils.of(
                         "logger", writer -> {
-                            writer.addImport("NoOpLogger", null, "@smithy/smithy-client");
+                            writer.addImport("NoOpLogger", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                             writer.write("new NoOpLogger()");
                         }
                 );
@@ -87,14 +87,12 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                 return MapUtils.of(
                         "maxAttempts", writer -> {
                             writer.addDependency(TypeScriptDependency.UTIL_RETRY);
-                            writer.addImport("DEFAULT_MAX_ATTEMPTS", "DEFAULT_MAX_ATTEMPTS",
-                                    TypeScriptDependency.UTIL_RETRY);
+                            writer.addImport("DEFAULT_MAX_ATTEMPTS", null, TypeScriptDependency.UTIL_RETRY);
                             writer.write("DEFAULT_MAX_ATTEMPTS");
                         },
                         "retryMode", writer -> {
                             writer.addDependency(TypeScriptDependency.UTIL_RETRY);
-                            writer.addImport("DEFAULT_RETRY_MODE", "DEFAULT_RETRY_MODE",
-                                    TypeScriptDependency.UTIL_RETRY);
+                            writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
                             writer.write(
                                     "(async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE)");
                         }
@@ -105,7 +103,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                             writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
                             writer.addImport("loadConfig", "loadNodeConfig",
                                     TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                            writer.addImport("NODE_MAX_ATTEMPT_CONFIG_OPTIONS", "NODE_MAX_ATTEMPT_CONFIG_OPTIONS",
+                            writer.addImport("NODE_MAX_ATTEMPT_CONFIG_OPTIONS", null,
                                     TypeScriptDependency.MIDDLEWARE_RETRY);
                             writer.write("loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS)");
                         },
@@ -114,10 +112,9 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                             writer.addImport("loadConfig", "loadNodeConfig",
                                     TypeScriptDependency.NODE_CONFIG_PROVIDER);
                             writer.addDependency(TypeScriptDependency.MIDDLEWARE_RETRY);
-                            writer.addImport("NODE_RETRY_MODE_CONFIG_OPTIONS", "NODE_RETRY_MODE_CONFIG_OPTIONS",
+                            writer.addImport("NODE_RETRY_MODE_CONFIG_OPTIONS", null,
                                     TypeScriptDependency.MIDDLEWARE_RETRY);
-                            writer.addImport("DEFAULT_RETRY_MODE", "DEFAULT_RETRY_MODE",
-                                    TypeScriptDependency.UTIL_RETRY);
+                            writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
                             writer.openBlock("loadNodeConfig({", "})", () -> {
                                 writer.write("...NODE_RETRY_MODE_CONFIG_OPTIONS,");
                                 writer.write("default: async () => "
