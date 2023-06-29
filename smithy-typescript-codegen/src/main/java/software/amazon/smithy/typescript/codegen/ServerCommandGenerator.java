@@ -103,7 +103,7 @@ final class ServerCommandGenerator implements Runnable {
             // If the input is non-existent, then use an empty object.
             writer.write("export interface $L {}", typeName);
             writer.openBlock("export namespace $L {", "}", typeName, () -> {
-                writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+                writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
                 writer.writeDocs("@internal");
                 writer.write("export const validate: () => __ValidationFailure[] = () => [];");
             });
@@ -113,7 +113,7 @@ final class ServerCommandGenerator implements Runnable {
     private void renderNamespace(String typeName, StructureShape input) {
         Symbol symbol = symbolProvider.toSymbol(input);
         writer.openBlock("export namespace $L {", "}", typeName, () -> {
-            writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
+            writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
             writer.writeDocs("@internal");
             // Streaming makes the type of the object being validated weird on occasion.
             // Using `Parameters` here means we don't have to try to derive the weird type twice
@@ -149,7 +149,7 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeOperationType() {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
-        writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
+        writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
         writer.write("export type $L<Context> = __Operation<$T, $T, Context>",
                 operationSymbol.getName(), inputType, outputType);
         writer.write("");
@@ -160,18 +160,18 @@ final class ServerCommandGenerator implements Runnable {
         String serializerName = operationSymbol.expectProperty("serializerType", Symbol.class).getName();
         Symbol serverSymbol = symbolProvider.toSymbol(model.expectShape(settings.getService()));
 
-        writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
+        writer.addImport("OperationSerializer", "__OperationSerializer", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("export class $L implements __OperationSerializer<$T<any>, $S, $T> {", "}",
                 serializerName, serverSymbol, operationSymbol.getName(), errorsType, () -> {
             String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
             String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
 
-            writer.addImport(serializerFunction, null,
+            writer.addRelativeImport(serializerFunction, null,
                 Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
-            writer.addImport(deserializerFunction, null,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+            writer.addRelativeImport(deserializerFunction, null,
                 Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
 
             writer.write("serialize = $L;", serializerFunction);
             writer.write("deserialize = $L;", deserializerFunction);
@@ -202,7 +202,7 @@ final class ServerCommandGenerator implements Runnable {
     }
 
     private void writeErrorHandler() {
-        writer.addImport("ServerSerdeContext", null, "@aws-smithy/server-common");
+        writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("serializeError(error: $T, ctx: ServerSerdeContext): Promise<$T> {", "}",
                 errorsType, applicationProtocol.getResponseType(), () -> {
             if (errors.isEmpty()) {
@@ -222,9 +222,9 @@ final class ServerCommandGenerator implements Runnable {
     private void writeErrorHandlerCase(StructureShape error) {
         Symbol errorSymbol = symbolProvider.toSymbol(error);
         String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
-        writer.addImport(serializerFunction, null,
+        writer.addRelativeImport(serializerFunction, null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
+                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
         writer.openBlock("case $S: {", "}", error.getId().getName(), () -> {
             writer.write("return $L(error, ctx);", serializerFunction);
         });

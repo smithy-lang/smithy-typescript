@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -178,7 +179,7 @@ final class StructuredMemberWriter {
      * Writes SENSITIVE_STRING to hide the value of sensitive members.
      */
     private void writeSensitiveString(TypeScriptWriter writer) {
-        writer.addImport("SENSITIVE_STRING", "SENSITIVE_STRING", "@smithy/smithy-client");
+        writer.addImport("SENSITIVE_STRING", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.write("SENSITIVE_STRING");
     }
 
@@ -203,7 +204,7 @@ final class StructuredMemberWriter {
                 Symbol symbol = symbolProvider.toSymbol(structureTarget);
                 String filterFunctionName = symbol.getName() + "FilterSensitiveLog";
                 if (!symbol.getNamespace().contains(writer.getModuleName())) {
-                    writer.addImport(filterFunctionName, filterFunctionName, symbol.getNamespace());
+                    writer.addRelativeImport(filterFunctionName, null, Paths.get(".", symbol.getNamespace()));
                 }
                 writer.write("$L($L)", filterFunctionName, structureParam);
             } else {
@@ -343,7 +344,7 @@ final class StructuredMemberWriter {
             for (MemberShape member : members) {
                 writer.addImport("MultiConstraintValidator",
                         "__MultiConstraintValidator",
-                        "@aws-smithy/server-common");
+                        TypeScriptDependency.SERVER_COMMON);
                 final Shape targetShape = model.expectShape(member.getTarget());
                 writer.writeInline("$L?: ", getSanitizedMemberName(member));
                 writer.writeInline("__MultiConstraintValidator<");
@@ -420,7 +421,7 @@ final class StructuredMemberWriter {
             Collection<Trait> constraintTraits) {
         writer.addImport("SensitiveConstraintValidator",
                 "__SensitiveConstraintValidator",
-                "@aws-smithy/server-common");
+                TypeScriptDependency.SERVER_COMMON);
         writer.writeInline("new __SensitiveConstraintValidator<");
         writeConstraintValidatorType(writer, targetShape);
         writer.openBlock(">(", ");",
@@ -449,7 +450,7 @@ final class StructuredMemberWriter {
         if (shape.isStructureShape() || shape.isUnionShape()) {
             writer.addImport("CompositeStructureValidator",
                     "__CompositeStructureValidator",
-                    "@aws-smithy/server-common");
+                    TypeScriptDependency.SERVER_COMMON);
             writer.openBlock("new __CompositeStructureValidator<$T>(", ")" + trailer,
                     getValidatorValueType(shape),
                     () -> {
@@ -459,7 +460,7 @@ final class StructuredMemberWriter {
         } else if (shape.isListShape() || shape.isSetShape()) {
             writer.addImport("CompositeCollectionValidator",
                     "__CompositeCollectionValidator",
-                    "@aws-smithy/server-common");
+                    TypeScriptDependency.SERVER_COMMON);
             MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
             Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
             writer.openBlock("new __CompositeCollectionValidator<$T>(", ")" + trailer,
@@ -472,7 +473,7 @@ final class StructuredMemberWriter {
                                 "");
                     });
         } else if (shape.isMapShape()) {
-            writer.addImport("CompositeMapValidator", "__CompositeMapValidator", "@aws-smithy/server-common");
+            writer.addImport("CompositeMapValidator", "__CompositeMapValidator", TypeScriptDependency.SERVER_COMMON);
 
             MapShape mapShape = (MapShape) shape;
             final MemberShape keyShape = mapShape.getKey();
@@ -516,16 +517,17 @@ final class StructuredMemberWriter {
         boolean shouldWriteIntEnumValidator = shape.isIntEnumShape();
 
         if (constraints.isEmpty() && !shouldWriteIntEnumValidator) {
-            writer.addImport("NoOpValidator", "__NoOpValidator", "@aws-smithy/server-common");
+            writer.addImport("NoOpValidator", "__NoOpValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __NoOpValidator()" + trailer);
             return;
         }
 
-        writer.addImport("CompositeValidator", "__CompositeValidator", "@aws-smithy/server-common");
+        writer.addImport("CompositeValidator", "__CompositeValidator", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("new __CompositeValidator<$T>([", "])" + trailer, getSymbolForValidatedType(shape),
                 () -> {
                     if (shouldWriteIntEnumValidator) {
-                        writer.addImport("IntegerEnumValidator", "__IntegerEnumValidator", "@aws-smithy/server-common");
+                        writer.addImport("IntegerEnumValidator", "__IntegerEnumValidator",
+                            TypeScriptDependency.SERVER_COMMON);
                         writer.openBlock("new __IntegerEnumValidator([", "]),", () -> {
                             for (int i : ((IntEnumShape) shape).getEnumValues().values()) {
                                 writer.write("$L,", i);
@@ -534,7 +536,7 @@ final class StructuredMemberWriter {
                     }
 
                     if (shape.isEnumShape()) {
-                        writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
+                        writer.addImport("EnumValidator", "__EnumValidator", TypeScriptDependency.SERVER_COMMON);
                         Collection<MemberShape> enumValues = shape.asEnumShape().get().getAllMembers().values();
                         writer.openBlock("new __EnumValidator([", "]),", () -> {
                             for (MemberShape member : enumValues) {
@@ -560,10 +562,10 @@ final class StructuredMemberWriter {
      */
     private void writeSingleConstraintValidator(TypeScriptWriter writer, Trait trait) {
         if (trait instanceof RequiredTrait) {
-            writer.addImport("RequiredValidator", "__RequiredValidator", "@aws-smithy/server-common");
+            writer.addImport("RequiredValidator", "__RequiredValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __RequiredValidator(),");
         } else if (trait instanceof EnumTrait && !trait.isSynthetic()) {
-            writer.addImport("EnumValidator", "__EnumValidator", "@aws-smithy/server-common");
+            writer.addImport("EnumValidator", "__EnumValidator", TypeScriptDependency.SERVER_COMMON);
             writer.openBlock("new __EnumValidator([", "]),", () -> {
                 for (String e : ((EnumTrait) trait).getEnumDefinitionValues()) {
                     writer.write("$S,", e);
@@ -577,21 +579,21 @@ final class StructuredMemberWriter {
             });
         } else if (trait instanceof LengthTrait) {
             LengthTrait lengthTrait = (LengthTrait) trait;
-            writer.addImport("LengthValidator", "__LengthValidator", "@aws-smithy/server-common");
+            writer.addImport("LengthValidator", "__LengthValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __LengthValidator($L, $L),",
                     lengthTrait.getMin().map(Object::toString).orElse("undefined"),
                     lengthTrait.getMax().map(Object::toString).orElse("undefined"));
         } else if (trait instanceof PatternTrait) {
-            writer.addImport("PatternValidator", "__PatternValidator", "@aws-smithy/server-common");
+            writer.addImport("PatternValidator", "__PatternValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __PatternValidator($S),", ((PatternTrait) trait).getValue());
         } else if (trait instanceof RangeTrait) {
             RangeTrait rangeTrait = (RangeTrait) trait;
-            writer.addImport("RangeValidator", "__RangeValidator", "@aws-smithy/server-common");
+            writer.addImport("RangeValidator", "__RangeValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __RangeValidator($L, $L),",
                     rangeTrait.getMin().map(Object::toString).orElse("undefined"),
                     rangeTrait.getMax().map(Object::toString).orElse("undefined"));
         } else if (trait instanceof UniqueItemsTrait) {
-            writer.addImport("UniqueItemsValidator", "__UniqueItemsValidator", "@aws-smithy/server-common");
+            writer.addImport("UniqueItemsValidator", "__UniqueItemsValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __UniqueItemsValidator(),");
         }
     }

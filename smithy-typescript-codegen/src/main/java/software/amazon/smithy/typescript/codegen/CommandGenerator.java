@@ -119,9 +119,9 @@ final class CommandGenerator implements Runnable {
         String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
 
         // Add required imports.
-        writer.addImport(configType, configType, serviceSymbol.getNamespace());
-        writer.addImport("ServiceInputTypes", "ServiceInputTypes", serviceSymbol.getNamespace());
-        writer.addImport("ServiceOutputTypes", "ServiceOutputTypes", serviceSymbol.getNamespace());
+        writer.addRelativeImport(configType, null, Paths.get(".", serviceSymbol.getNamespace()));
+        writer.addRelativeImport("ServiceInputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
+        writer.addRelativeImport("ServiceOutputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
         writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.addImport("FinalizeHandlerArguments", "FinalizeHandlerArguments", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("Handler", "Handler", TypeScriptDependency.SMITHY_TYPES);
@@ -236,7 +236,7 @@ final class CommandGenerator implements Runnable {
         if (!service.hasTrait(EndpointRuleSetTrait.class)) {
             return;
         }
-        writer.addImport("EndpointParameterInstructions", null, "@smithy/middleware-endpoint");
+        writer.addImport("EndpointParameterInstructions", null, TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
         writer.openBlock(
                 "public static getEndpointParameterInstructions(): EndpointParameterInstructions {", "}",
                 () -> {
@@ -301,8 +301,8 @@ final class CommandGenerator implements Runnable {
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 writer.addImport(
                         "getEndpointPlugin",
-                        "getEndpointPlugin",
-                        "@smithy/middleware-endpoint");
+                        null,
+                        TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
                 writer.openBlock(
                         "this.middlewareStack.use(getEndpointPlugin(configuration, ",
                         "));",
@@ -329,10 +329,10 @@ final class CommandGenerator implements Runnable {
                                 if (sensitiveDataFinder.findsSensitiveDataIn(input)) {
                                     Symbol inputSymbol = symbolProvider.toSymbol(input);
                                     String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
-                                    writer.addImport(
+                                    writer.addRelativeImport(
                                             filterFunctionName,
-                                            filterFunctionName,
-                                            inputSymbol.getNamespace());
+                                            null,
+                                            Paths.get(".", inputSymbol.getNamespace()));
                                     writer.writeInline(filterFunctionName);
                                 } else {
                                     writer.writeInline("(_: any) => _");
@@ -346,10 +346,10 @@ final class CommandGenerator implements Runnable {
                                 if (sensitiveDataFinder.findsSensitiveDataIn(output)) {
                                     Symbol outputSymbol = symbolProvider.toSymbol(output);
                                     String filterFunctionName = outputSymbol.getName() + "FilterSensitiveLog";
-                                    writer.addImport(
+                                    writer.addRelativeImport(
                                             filterFunctionName,
-                                            filterFunctionName,
-                                            outputSymbol.getNamespace());
+                                            null,
+                                            Paths.get(".", outputSymbol.getNamespace()));
                                     writer.writeInline(filterFunctionName);
                                 } else {
                                     writer.writeInline("(_: any) => _");
@@ -488,9 +488,9 @@ final class CommandGenerator implements Runnable {
             String serdeFunctionName = isInput
                     ? ProtocolGenerator.getSerFunctionShortName(symbol)
                     : ProtocolGenerator.getDeserFunctionShortName(symbol);
-            writer.addImport(serdeFunctionName, serdeFunctionName,
+            writer.addRelativeImport(serdeFunctionName, null,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                            ProtocolGenerator.getSanitizedName(protocolGenerator.getName())).toString());
+                            ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
             writer.write("return $L($L, context);", serdeFunctionName, isInput ? "input" : "output");
         }
     }

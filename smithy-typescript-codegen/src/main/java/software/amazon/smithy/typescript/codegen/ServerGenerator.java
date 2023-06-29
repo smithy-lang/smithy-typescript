@@ -49,7 +49,8 @@ final class ServerGenerator {
                                        Set<OperationShape> operations,
                                        TypeScriptWriter writer) {
         addCommonHandlerImports(writer);
-        writer.addImport("UnknownOperationException", "__UnknownOperationException", "@aws-smithy/server-common");
+        writer.addImport("UnknownOperationException", "__UnknownOperationException",
+            TypeScriptDependency.SERVER_COMMON);
 
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
@@ -199,26 +200,26 @@ final class ServerGenerator {
     }
 
     private static void addCommonHandlerImports(TypeScriptWriter writer) {
-        writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
-        writer.addImport("ServiceHandler", "__ServiceHandler", "@aws-smithy/server-common");
-        writer.addImport("Mux", "__Mux", "@aws-smithy/server-common");
-        writer.addImport("OperationSerializer", "__OperationSerializer", "@aws-smithy/server-common");
-        writer.addImport("InternalFailureException", "__InternalFailureException", "@aws-smithy/server-common");
-        writer.addImport("SerializationException", "__SerializationException", "@aws-smithy/server-common");
-        writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", "@aws-smithy/server-common");
+        writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("ServiceHandler", "__ServiceHandler", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("Mux", "__Mux", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("OperationSerializer", "__OperationSerializer", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("InternalFailureException", "__InternalFailureException", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("SerializationException", "__SerializationException", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
         writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
-        writer.addImport("ServiceException", "__ServiceException", "@aws-smithy/server-common");
-        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
+        writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", TypeScriptDependency.SERVER_COMMON);
     }
 
     private static void writeHandleFunction(TypeScriptWriter writer) {
-        writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
-        writer.addImport("OperationInput", "__OperationInput", "@aws-smithy/server-common");
-        writer.addImport("OperationOutput", "__OperationOutput", "@aws-smithy/server-common");
-        writer.addImport("ValidationFailure", "__ValidationFailure", "@aws-smithy/server-common");
-        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", "@aws-smithy/server-common");
-        writer.addImport("isFrameworkException", "__isFrameworkException", "@aws-smithy/server-common");
+        writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("OperationInput", "__OperationInput", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("OperationOutput", "__OperationOutput", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("ValidationCustomizer", "__ValidationCustomizer", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("isFrameworkException", "__isFrameworkException", TypeScriptDependency.SERVER_COMMON);
 
         writer.openBlock("async function handle<S, O extends keyof S & string, Context>(",
                 "): Promise<__HttpResponse> {",
@@ -271,13 +272,13 @@ final class ServerGenerator {
     }
 
     private static void writeSerdeContextBase(TypeScriptWriter writer) {
-        writer.addImport("ServerSerdeContext", "__ServerSerdeContext", "@aws-smithy/server-common");
-        writer.addImport("NodeHttpHandler", null, "@smithy/node-http-handler");
-        writer.addImport("streamCollector", null, "@smithy/node-http-handler");
+        writer.addImport("ServerSerdeContext", "__ServerSerdeContext", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("NodeHttpHandler", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
+        writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
         writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
         writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
-        writer.addImport("fromUtf8", null, "@smithy/util-utf8");
-        writer.addImport("toUtf8", null, "@smithy/util-utf8");
+        writer.addImport("fromUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+        writer.addImport("toUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
 
         writer.openBlock("const serdeContextBase = {", "};", () -> {
             writer.write("base64Encoder: toBase64,");
@@ -294,7 +295,7 @@ final class ServerGenerator {
                                          ServiceShape service,
                                          Set<OperationShape> operations,
                                          TypeScriptWriter writer) {
-        writer.addImport("Operation", "__Operation", "@aws-smithy/server-common");
+        writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
 
         String serviceInterfaceName = symbolProvider.toSymbol(service).getName();
 
