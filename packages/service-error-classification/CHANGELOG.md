@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- c03ce2aa: Remove AbortError from the list of transient error codes
+
 ## 1.0.1
 
 ### Patch Changes

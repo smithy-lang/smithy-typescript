@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.3
+
+### Patch Changes
+
+- 170ac764: fix error in documentation
+- Updated dependencies [c03ce2aa]
+  - @smithy/service-error-classification@1.0.2
+
 ## 1.0.2
 
 ### Patch Changes

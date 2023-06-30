@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- 170ac764: remove unused file
+
 ## 1.0.1
 
 ### Patch Changes

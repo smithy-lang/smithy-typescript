@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [c03ce2aa]
+- Updated dependencies [170ac764]
+  - @smithy/service-error-classification@1.0.2
+  - @smithy/util-retry@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes
