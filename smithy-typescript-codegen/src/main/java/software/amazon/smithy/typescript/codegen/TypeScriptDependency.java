@@ -49,10 +49,10 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^1.0.1", true),
     MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", "^1.0.1", true),
-    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^1.0.2", true),
-    UTIL_RETRY("dependencies", "@smithy/util-retry", "^1.0.2", false),
+    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^1.0.3", true),
+    UTIL_RETRY("dependencies", "@smithy/util-retry", "^1.0.3", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", "^1.0.1", true),
-    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^1.0.1", false),
+    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^1.0.2", false),
     AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "3.0.0", true),
