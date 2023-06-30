@@ -1,5 +1,19 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.16.0 (2023-06-30)
+
+### Features
+
+* Updated code generator to use @smithy scoped npm packages ([#791](https://github.com/awslabs/smithy-typescript/pull/791), [#766](https://github.com/awslabs/smithy-typescript/pull/766))
+* Improved blob payload input and output types ([#777](https://github.com/awslabs/smithy-typescript/pull/777))
+* Added packageDocumentation and improved interface inheritance ([#770](https://github.com/awslabs/smithy-typescript/pull/770))
+* Updated code generator to use runtime-agnostic util-stream package ([#775](https://github.com/awslabs/smithy-typescript/pull/775))
+
+### Bug fixes
+
+* Fixed endpoint parameter name conflict ([#772](https://github.com/awslabs/smithy-typescript/pull/772))
+* Stopped trimming collection query param output values ([#764](https://github.com/awslabs/smithy-typescript/pull/764))
+
 ## 0.15.0 (2023-05-10)
 
 ### Features
