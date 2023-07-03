@@ -544,7 +544,7 @@ final class StructuredMemberWriter {
                             }
                             writer.write("], [");
                             for (MemberShape member : shape.asEnumShape().get().getAllMembers().values()) {
-                                if (!member.hasTrait((InternalTrait.class)) && !member.hasTag("internal")) {
+                                if (!member.hasTrait((InternalTrait.class))) {
                                     writer.write("$S,", member.expectTrait(EnumValueTrait.class).expectStringValue());
                                 }
                             }
