@@ -22,7 +22,7 @@ are as follows:
             mavenCentral()
         }
         dependencies {
-            "classpath"("software.amazon.smithy:smithy-cli:[1.31.1,1.32.0[")
+            "classpath"("software.amazon.smithy:smithy-cli:[1.33.0,1.34.0[")
         }
     }
 
@@ -36,8 +36,8 @@ are as follows:
     }
 
     dependencies {
-        implementation("software.amazon.smithy:smithy-model:[1.31.1,1.32.0[")
-        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.16.0")
+        implementation("software.amazon.smithy:smithy-model:[1.33.0,1.34.0[")
+        implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.17.0")
     }
    ```
 

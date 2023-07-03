@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.17.0 (2023-07-05)
+
+### Features
+
+* Upgraded to Smithy 1.33.0 [#808](https://github.com/awslabs/smithy-typescript/pull/808))
+* Updated enum validator to not remove "internal" tagged members ([#807](https://github.com/awslabs/smithy-typescript/pull/807))
+
+### Bug fixes
+
+* Fixed @aws-smithy/server-common version ([#806](https://github.com/awslabs/smithy-typescript/pull/806))
+
 ## 0.16.0 (2023-06-30)
 
 ### Features
