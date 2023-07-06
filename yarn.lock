@@ -1649,7 +1649,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/chunked-blob-reader-native@workspace:packages/chunked-blob-reader-native":
+"@smithy/chunked-blob-reader-native@workspace:^, @smithy/chunked-blob-reader-native@workspace:packages/chunked-blob-reader-native":
   version: 0.0.0-use.local
   resolution: "@smithy/chunked-blob-reader-native@workspace:packages/chunked-blob-reader-native"
   dependencies:
@@ -1852,6 +1852,7 @@ __metadata:
   dependencies:
     "@aws-crypto/sha256-js": 3.0.0
     "@smithy/chunked-blob-reader": "workspace:^"
+    "@smithy/chunked-blob-reader-native": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
     "@tsconfig/recommended": 1.0.1
