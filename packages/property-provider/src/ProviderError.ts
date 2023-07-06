@@ -1,5 +1,4 @@
 /**
- * @internal
  *
  * An error representing a failure of an individual provider.
  *
