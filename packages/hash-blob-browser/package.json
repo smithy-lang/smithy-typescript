@@ -23,6 +23,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@smithy/chunked-blob-reader": "workspace:^",
+    "@smithy/chunked-blob-reader-native": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.5.0"
   },
