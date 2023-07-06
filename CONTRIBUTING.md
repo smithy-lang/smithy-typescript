@@ -49,6 +49,14 @@ To send us a pull request, please:
 5. Send us a pull request, answering any default questions in the pull request interface.
 6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
+If you are modifying one or more of the NPM packages in the `/packages` directory please follow these additional steps before opening a pull request:
+
+1. After modifying the source, run `yarn changeset add`.
+2. Follow the prompts and select the appropriate change level (`major`, `minor` or `patch`) for each of the NPM packages you have modified.
+3. Add the generated changeset file to your commit: `git add .changeset/<generated file name>.md`.
+4. Commit to your fork using clear commit messages.
+5. Send the pull request.
+
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
