@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.1.1
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- Updated dependencies [6e312329]
+  - @smithy/types@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes

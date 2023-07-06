@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- 6eedc3ae: Added missing chunked-blob-reader-native dependency
+- Updated dependencies [6e312329]
+  - @smithy/chunked-blob-reader-native@1.0.2
+  - @smithy/chunked-blob-reader@1.0.2
+  - @smithy/types@1.1.1
+
 ## 1.0.1
 
 ### Patch Changes

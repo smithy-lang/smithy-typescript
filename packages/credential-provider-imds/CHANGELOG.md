@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- Updated dependencies [6e312329]
+  - @smithy/node-config-provider@1.0.2
+  - @smithy/property-provider@1.0.2
+  - @smithy/url-parser@1.0.2
+  - @smithy/types@1.1.1
+
 ## 1.0.1
 
 ### Patch Changes

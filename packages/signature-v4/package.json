@@ -1,6 +1,6 @@
 {
   "name": "@smithy/signature-v4",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A standalone implementation of the AWS Signature V4 request signing algorithm",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

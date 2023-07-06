@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.0.3
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- Updated dependencies [6e312329]
+  - @smithy/node-http-handler@1.0.3
+  - @smithy/util-buffer-from@1.0.2
+  - @smithy/types@1.1.1
+
 ## 1.0.2
 
 ### Patch Changes

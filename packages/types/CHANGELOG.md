@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.1
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+
 ## 1.1.0
 
 ### Minor Changes

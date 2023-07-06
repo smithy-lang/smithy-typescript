@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- Updated dependencies [6e312329]
+  - @smithy/eventstream-codec@1.0.2
+  - @smithy/util-hex-encoding@1.0.2
+  - @smithy/is-array-buffer@1.0.2
+  - @smithy/util-middleware@1.0.2
+  - @smithy/util-uri-escape@1.0.2
+  - @smithy/util-utf8@1.0.2
+  - @smithy/types@1.1.1
+
 ## 1.0.1
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- Updated dependencies [6e312329]
+  - @smithy/credential-provider-imds@1.0.2
+  - @smithy/node-config-provider@1.0.2
+  - @smithy/property-provider@1.0.2
+  - @smithy/config-resolver@1.0.2
+  - @smithy/types@1.1.1
+
 ## 1.0.1
 
 ### Patch Changes

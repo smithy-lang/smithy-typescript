@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.0.4
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+- Updated dependencies [6e312329]
+  - @smithy/service-error-classification@1.0.3
+  - @smithy/util-middleware@1.0.2
+  - @smithy/protocol-http@1.1.1
+  - @smithy/util-retry@1.0.4
+  - @smithy/types@1.1.1
+
 ## 1.0.3
 
 ### Patch Changes
