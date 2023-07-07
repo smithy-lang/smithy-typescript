@@ -1,7 +1,6 @@
 import { ProviderError } from "./ProviderError";
 
 /**
- * @internal
  *
  * An error representing a failure of an individual credential provider.
  *
