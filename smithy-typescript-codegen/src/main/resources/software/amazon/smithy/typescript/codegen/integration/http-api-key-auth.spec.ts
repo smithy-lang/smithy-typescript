@@ -1,4 +1,4 @@
-import { HttpRequest } from "smithy/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
 import { MiddlewareStack } from "@smithy/types";
 
 import {
