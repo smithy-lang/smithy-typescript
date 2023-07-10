@@ -5,11 +5,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.smithy.build.MockManifest;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -85,6 +87,43 @@ class PackageJsonGeneratorTest {
                       "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
                   }
               """));
+    }
+
+    @Test
+    void expectTestScriptAndTestConfigToBeAdded() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
+
+        MockManifest manifest = new MockManifest();
+
+        ObjectNode settings = Node.objectNodeBuilder()
+                .withMember("service", Node.from("smithy.example#Example"))
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("packageDescription", Node.from("example description"))
+                .build();
+
+        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model, settings,
+                TypeScriptSettings.ArtifactType.CLIENT);
+
+        Map<String, Map<String, SymbolDependency>> deps = new HashMap<>();
+        Map<String, SymbolDependency> devDeps = new HashMap<>();
+
+        devDeps.put("vitest", TypeScriptDependency.VITEST.dependency);
+        deps.put("devDependencies", devDeps);
+
+        PackageJsonGenerator.writePackageJson(typeScriptSettings, manifest, deps);
+
+        assertTrue(manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).isPresent());
+        assertTrue(manifest.getFileString(PackageJsonGenerator.VITEST_CONFIG_FILENAME).isPresent());
+
+        String packageJson = manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).get();
+        String configString = manifest.getFileString(PackageJsonGenerator.VITEST_CONFIG_FILENAME).get();
+
+        assertThat(packageJson, containsString("\"test\": \"vitest run\""));
+        assertThat(configString, containsString("include: ['**/*.spec.ts']"));
     }
 
     private static Stream<Arguments> providePackageDescriptionTestCases() {
