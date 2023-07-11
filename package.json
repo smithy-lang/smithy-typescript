@@ -11,7 +11,8 @@
     "lint": "turbo run lint",
     "format": "turbo run format --parallel",
     "stage-release": "turbo run stage-release",
-    "release": "yarn changeset publish"
+    "release": "yarn changeset publish",
+    "build-test-client": "./gradlew clean build && cd smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/source/typescript-codegen && touch yarn.lock && yarn && yarn build"
   },
   "repository": {
     "type": "git",
