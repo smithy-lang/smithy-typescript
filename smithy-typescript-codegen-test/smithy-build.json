@@ -1,5 +1,29 @@
 {
     "version": "1.0",
+    "projections": {
+        "ssdk-test": {
+            "transforms": [
+                {
+                    "name": "excludeShapesByTag",
+                    "args": {
+                        "tags": ["client-only"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-ssdk-codegen": {
+                    "service": "example.weather#Weather",
+                    "targetNamespace": "Weather",
+                    "package": "weather",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0"
+                    },
+                    "disableDefaultValidation": true
+                }
+            }
+        }
+    },
     "plugins": {
         "typescript-codegen": {
             "service": "example.weather#Weather",
