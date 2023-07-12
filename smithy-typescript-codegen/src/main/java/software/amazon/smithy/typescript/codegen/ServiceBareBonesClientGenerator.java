@@ -113,7 +113,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         writeInputOutputTypeUnion("ServiceOutputTypes", writer,
                 operationSymbol -> operationSymbol.getProperty("outputType", Symbol.class), writer -> {
             // Use a MetadataBearer if an operation doesn't define output.
-            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.AWS_SDK_TYPES);
+            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
             writer.write("| __MetadataBearer");
         });
 
