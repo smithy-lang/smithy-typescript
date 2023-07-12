@@ -1,10 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.17.1 (2023-07-07)
+
+### Bug fixes
+
+* Fixed @smithy/protocol-http import in HttpApiKeyAuth spec ([#817](https://github.com/awslabs/smithy-typescript/pull/817))
+
 ## 0.17.0 (2023-07-06)
 
 ### Features
 
-* Upgraded to Smithy 1.33.0 [#808](https://github.com/awslabs/smithy-typescript/pull/808))
+* Upgraded to Smithy 1.33.0 ([#808](https://github.com/awslabs/smithy-typescript/pull/808))
 * Updated enum validator to not remove "internal" tagged members ([#807](https://github.com/awslabs/smithy-typescript/pull/807))
 
 ### Bug fixes
