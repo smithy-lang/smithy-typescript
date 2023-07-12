@@ -13,6 +13,8 @@
  * permissions and limitations under the License.
  */
 
+import software.amazon.smithy.model.node.Node
+
 description = "Generates TypeScript code from Smithy models"
 extra["displayName"] = "Smithy :: Typescript :: Codegen"
 extra["moduleName"] = "software.amazon.smithy.typescript.codegen"
@@ -37,3 +39,34 @@ dependencies {
     api("software.amazon.smithy:smithy-waiters:$smithyVersion")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
 }
+
+sourceSets {
+    main {
+        resources {
+            setSrcDirs(listOf("src/main/resources", "$buildDir/generated/resources"))
+        }
+    }
+}
+
+tasks.register("set-dependency-versions") {
+    doLast {
+        mkdir("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen")
+        var versionsFile =
+                file("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties")
+        var roots = project.file("../packages").listFiles().toMutableList() + project.file("../smithy-typescript-ssdk-libs").listFiles().toList()
+        roots.forEach { packageDir ->
+            var packageJsonFile = File(packageDir, "package.json")
+            if (packageJsonFile.isFile()) {
+                var packageJson = Node.parse(packageJsonFile.readText()).expectObjectNode()
+                var packageName = packageJson.expectStringMember("name").getValue()
+                var packageVersion = packageJson.expectStringMember("version").getValue()
+                var isPrivate = packageJson.getBooleanMemberOrDefault("private", false)
+                if (!isPrivate) {
+                    versionsFile.appendText("$packageName=$packageVersion\n")
+                }
+            }
+        }
+    }
+}
+
+tasks["processResources"].dependsOn(tasks["set-dependency-versions"])
