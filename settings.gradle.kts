@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 rootProject.name = "smithy-typescript"
 include(":smithy-typescript-codegen")
 include(":smithy-typescript-codegen-test")
+include(":smithy-typescript-ssdk-codegen-test-utils")
 
 file(
     java.nio.file.Paths.get(rootProject.projectDir.absolutePath, "local.properties"))

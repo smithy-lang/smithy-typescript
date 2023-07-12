@@ -68,7 +68,7 @@ subprojects {
      * Java
      * ====================================================
      */
-    if (subproject.name != "smithy-typescript-codegen-test") {
+    if (subproject.name == "smithy-typescript-codegen") {
         apply(plugin = "java-library")
 
         java {

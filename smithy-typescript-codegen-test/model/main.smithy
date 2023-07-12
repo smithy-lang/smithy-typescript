@@ -8,6 +8,7 @@ use smithy.waiters#waitable
 
 /// Provides weather forecasts.
 @fakeProtocol
+@httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01",
@@ -317,6 +318,7 @@ blob CityImageData
 
 @readonly
 @http(method: "GET", uri: "/cities/{cityId}/announcements")
+@tags(["client-only"])
 operation GetCityAnnouncements {
     input: GetCityAnnouncementsInput,
     output: GetCityAnnouncementsOutput,
