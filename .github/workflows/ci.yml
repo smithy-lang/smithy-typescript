@@ -42,15 +42,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
-      - name: Generate client
-        run: ./gradlew clean build
-      - name: Build client
+      - name: Run build-test-client
         run: |
-          cd smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/source/typescript-codegen/
-          touch yarn.lock
           yarn config set enableImmutableInstalls false
           yarn
-          yarn build
+          yarn build-test-client
 
   lint-typescript:
     runs-on: ubuntu-latest
