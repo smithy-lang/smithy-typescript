@@ -1,6 +1,7 @@
 import { ProviderError } from "./ProviderError";
 
 /**
+ * @public
  *
  * An error representing a failure of an individual token provider.
  *
