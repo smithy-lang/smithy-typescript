@@ -31,7 +31,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class PackageJsonGenerator {
 
     public static final String PACKAGE_JSON_FILENAME = "package.json";
-    public static final String VITEST_CONFIG_FILENAME = "vite.config.ts";
+    public static final String VITEST_CONFIG_FILENAME = "vite.config.js";
 
     private PackageJsonGenerator() {}
 
@@ -56,7 +56,7 @@ final class PackageJsonGenerator {
             node = node.withMember(depEntry.getKey(), builder.build());
         }
 
-        // Add test script and vite.config.ts if specs and their devDependency on vitest has been generated.
+        // Add test script and vite.config.js if specs and their devDependency on vitest has been generated.
         ObjectNode devDeps = node.getObjectMember("devDependencies").orElse(Node.objectNode());
         if (devDeps.containsMember(TypeScriptDependency.VITEST.packageName)) {
             ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
