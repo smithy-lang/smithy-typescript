@@ -115,6 +115,9 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^1.0.1", false),
     UTIL_STREAM("dependencies", "@smithy/util-stream", "^1.0.1", false),
 
+    // Conditionally added when specs have been generated.
+    VITEST("devDependencies", "vitest", "^0.33.0", false),
+
     // Server dependency for SSDKs
     SERVER_COMMON("dependencies", "@aws-smithy/server-common", "1.0.0-alpha.10", false);
 
