@@ -37,7 +37,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * An enum of all of the built-in dependencies managed by this package.
  */
 @SmithyUnstableApi
-public enum TypeScriptDependency implements SymbolDependencyContainer {
+public enum TypeScriptDependency implements PackageContainer, SymbolDependencyContainer {
 
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", "^1.0.1", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
@@ -171,6 +171,11 @@ public enum TypeScriptDependency implements SymbolDependencyContainer {
     @Override
     public List<SymbolDependency> getDependencies() {
         return Collections.singletonList(dependency);
+    }
+
+    @Override
+    public String getPackageName() {
+        return this.packageName;
     }
 
     /**
