@@ -143,18 +143,23 @@ public final class CodegenUtils {
         MemberShape streamingMember,
         String commandName
     ) {
+        writer.addImport("StreamingBlobPayloadInputTypes", null, TypeScriptDependency.SMITHY_TYPES);
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.openBlock("export type $LType = Omit<$T, $S> & {", "};", typeName,
-                containerSymbol, memberName, () -> {
-                        writer.writeDocs(String.format("For *`%1$s[\"%2$s\"]`*, see {@link %1$s.%2$s}.",
-                                containerSymbol.getName(), memberName));
-                        writer.write("$1L$2L: $3T[$1S]|string|Uint8Array|Buffer;", memberName, optionalSuffix,
-                                containerSymbol);
-        });
 
         writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
-        writer.write("export interface $1L extends $1LType {}", typeName);
+        writer.write(
+            """
+            export interface $L extends Omit<$T, $S> {
+                $L$L: StreamingBlobPayloadInputTypes;
+            }
+            """,
+            typeName,
+            containerSymbol,
+            memberName,
+            memberName,
+            optionalSuffix
+        );
     }
 
     /**
@@ -170,16 +175,22 @@ public final class CodegenUtils {
         String commandName
     ) {
         String memberName = streamingMember.getMemberName();
+        String optionalSuffix = streamingMember.isRequired() ? "" : "?";
         writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("SdkStream", "__SdkStream", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("WithSdkStreamMixin", "__WithSdkStreamMixin", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("StreamingBlobPayloadOutputTypes", null, TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         writer.write(
-            "export interface $L extends __WithSdkStreamMixin<$T, $S>, __MetadataBearer {}",
+            """
+            export interface $L extends Omit<$T, $S>, __MetadataBearer {
+                $L$L: StreamingBlobPayloadOutputTypes;
+            }
+            """,
             typeName,
             containerSymbol,
-            memberName
+            memberName,
+            memberName,
+            optionalSuffix
         );
     }
 
@@ -204,13 +215,13 @@ public final class CodegenUtils {
         String memberName = payloadMember.getMemberName();
         String optionalSuffix = payloadMember.isRequired() ? "" : "?";
 
-        writer.addImport("BlobTypes", null, TypeScriptDependency.AWS_SDK_TYPES);
+        writer.addImport("BlobPayloadInputTypes", null, TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("@public");
         writer.write(
             """
             export type $LType = Omit<$T, $S> & {
-              $L: BlobTypes;
+              $L: BlobPayloadInputTypes;
             };
             """,
             typeName,

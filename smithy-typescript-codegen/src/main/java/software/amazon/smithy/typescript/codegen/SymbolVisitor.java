@@ -142,8 +142,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol blobShape(BlobShape shape) {
         if (shape.hasTrait(StreamingTrait.class)) {
             // Note: `Readable` needs an import and a dependency.
-            return createSymbolBuilder(shape, "Readable | ReadableStream | Blob", null)
-                    .addReference(Symbol.builder().name("Readable").namespace("stream", "/").build())
+            return createSymbolBuilder(shape, "StreamingBlobTypes", null)
+                    .addReference(
+                        Symbol.builder()
+                            .addDependency(TypeScriptDependency.SMITHY_TYPES)
+                            .name("StreamingBlobTypes")
+                            .namespace("@smithy/types", "/")
+                            .build()
+                    )
                     .build();
         }
 
