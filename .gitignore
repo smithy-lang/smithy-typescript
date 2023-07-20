@@ -58,3 +58,6 @@ dist-*
 
 # Gradle composite build properties
 local.properties
+
+# doc-gen
+api-extractor-packages

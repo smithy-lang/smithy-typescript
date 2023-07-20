@@ -3,7 +3,8 @@
   "baseBranch": "origin/main",
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["dist-types", "dist-cjs", "dist-es"]
     },
     "test": {
       "dependsOn": ["build"],
@@ -18,8 +19,12 @@
     "clean": {
       "cache": false
     },
+    "extract:docs": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "stage-release": {
-        "dependsOn": ["build"]
+      "dependsOn": ["build"]
     }
   }
 }
