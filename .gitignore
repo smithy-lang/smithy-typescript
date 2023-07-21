@@ -36,6 +36,7 @@ smithy-typescript-integ-tests/yarn.lock
 
 # Issue https://github.com/awslabs/smithy-typescript/issues/425
 smithy-typescript-codegen/bin/
+smithy-typescript-ssdk-codegen-test-utils/bin/
 
 **/node_modules/
 **/*.tsbuildinfo

@@ -7,11 +7,19 @@ import { MetadataBearer } from "./response";
  *
  * function definition for different overrides of client's 'send' function.
  */
-interface InvokeFunction<InputTypes extends object, OutputTypes extends MetadataBearer, ResolvedClientConfiguration> {
+export interface InvokeFunction<
+  InputTypes extends object,
+  OutputTypes extends MetadataBearer,
+  ResolvedClientConfiguration
+> {
   <InputType extends InputTypes, OutputType extends OutputTypes>(
     command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
     options?: any
   ): Promise<OutputType>;
+  <InputType extends InputTypes, OutputType extends OutputTypes>(
+    command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
+    cb: (err: any, data?: OutputType) => void
+  ): void;
   <InputType extends InputTypes, OutputType extends OutputTypes>(
     command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
     options: any,
@@ -22,6 +30,18 @@ interface InvokeFunction<InputTypes extends object, OutputTypes extends Metadata
     options?: any,
     cb?: (err: any, data?: OutputType) => void
   ): Promise<OutputType> | void;
+}
+
+/**
+ * @internal
+ *
+ * Signature that appears on aggregated clients' methods.
+ */
+export interface InvokeMethod<InputType extends object, OutputType extends MetadataBearer> {
+  (input: InputType, options?: any): Promise<OutputType>;
+  (input: InputType, cb: (err: any, data?: OutputType) => void): void;
+  (input: InputType, options: any, cb: (err: any, data?: OutputType) => void): void;
+  (input: InputType, options?: any, cb?: (err: any, data?: OutputType) => void): Promise<OutputType> | void;
 }
 
 /**
