@@ -102,7 +102,7 @@ subprojects {
         // Set up tasks that build source and javadoc jars.
         tasks.register<Jar>("sourcesJar") {
             metaInf.with(licenseSpec)
-            from(sourceSets.main.get().allJava)
+            from(sourceSets.main.get().allSource)
             archiveClassifier.set("sources")
         }
 
