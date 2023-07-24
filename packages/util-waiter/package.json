@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-waiter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shared utilities for client waiters for the AWS SDK",
   "dependencies": {
     "@smithy/abort-controller": "workspace:^",

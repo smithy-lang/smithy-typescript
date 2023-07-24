@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [8cd89c75]
+- Updated dependencies [d90a45b5]
+  - @smithy/types@2.0.0
+  - @smithy/middleware-serde@1.0.3
+  - @smithy/url-parser@1.0.3
+  - @smithy/util-middleware@1.0.2
+
 ## 1.0.3
 
 ### Patch Changes

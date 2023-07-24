@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- 4ad43c6a: adding @public annotation to errors
+
+### Patch Changes
+
+- 5f7bcc79: Expose provider Errors to be officially available for error handling.
+- Updated dependencies [8cd89c75]
+- Updated dependencies [d90a45b5]
+  - @smithy/types@2.0.0
+
 ## 1.0.2
 
 ### Patch Changes

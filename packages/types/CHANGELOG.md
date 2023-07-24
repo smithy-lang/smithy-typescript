@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- d90a45b5: improved streaming payload types
+
+### Patch Changes
+
+- 8cd89c75: enable api extractor for documentation generation
+
 ## 1.1.1
 
 ### Patch Changes

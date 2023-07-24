@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.0.3
+
+### Patch Changes
+
+- 99d00e98: Bump webpack to 5.76.0
+- Updated dependencies [8cd89c75]
+- Updated dependencies [d90a45b5]
+  - @smithy/types@2.0.0
+  - @smithy/protocol-http@1.1.2
+  - @smithy/querystring-builder@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes
