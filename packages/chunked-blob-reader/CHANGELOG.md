@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 9d53bc76: update to 2.x major versions
+
 ## 1.1.0
 
 ### Minor Changes

@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 9d53bc76: update to 2.x major versions
+
+### Patch Changes
+
+- Updated dependencies [9d53bc76]
+  - @smithy/protocol-http@2.0.0
+  - @smithy/querystring-builder@2.0.0
+  - @smithy/util-base64@2.0.0
+  - @smithy/types@2.0.1
+
 ## 1.1.0
 
 ### Minor Changes

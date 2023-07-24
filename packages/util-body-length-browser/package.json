@@ -1,7 +1,7 @@
 {
   "name": "@smithy/util-body-length-browser",
   "description": "Determines the length of a request body in browsers",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "tsc -p tsconfig.cjs.json",

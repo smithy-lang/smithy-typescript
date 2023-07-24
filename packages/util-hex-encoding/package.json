@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-hex-encoding",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Converts binary buffers to and from lowercase hexadecimal encoding",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",

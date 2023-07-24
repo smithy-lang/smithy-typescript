@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 9d53bc76: update to 2.x major versions
+
+### Patch Changes
+
+- Updated dependencies [9d53bc76]
+  - @smithy/config-resolver@2.0.0
+  - @smithy/credential-provider-imds@2.0.0
+  - @smithy/node-config-provider@2.0.0
+  - @smithy/property-provider@2.0.0
+  - @smithy/types@2.0.1
+
 ## 1.1.0
 
 ### Minor Changes
