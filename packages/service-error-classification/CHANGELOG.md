@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- e3cbb3cc: set types to the 1.x line
+
 ## 1.0.3
 
 ### Patch Changes

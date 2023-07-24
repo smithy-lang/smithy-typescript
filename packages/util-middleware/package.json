@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-middleware",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Shared utilities for to be used in middleware packages.",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- e3cbb3cc: set types to the 1.x line
+
+### Patch Changes
+
+- Updated dependencies [e3cbb3cc]
+  - @smithy/service-error-classification@1.1.0
+
 ## 1.0.4
 
 ### Patch Changes

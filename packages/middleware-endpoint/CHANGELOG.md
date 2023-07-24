@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- e3cbb3cc: set types to the 1.x line
+
+### Patch Changes
+
+- Updated dependencies [e3cbb3cc]
+  - @smithy/middleware-serde@1.1.0
+  - @smithy/types@1.2.0
+  - @smithy/url-parser@1.1.0
+  - @smithy/util-middleware@1.1.0
+
 ## 1.0.4
 
 ### Patch Changes
