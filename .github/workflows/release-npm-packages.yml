@@ -39,7 +39,7 @@ jobs:
           git config --global user.email "github-aws-smithy-automation@amazon.com"
           git config --global user.name "Smithy Automation"
           git add .
-          git commit -m 'Verison NPM packages'
+          git commit -m 'Version NPM packages'
           git push
       - name: Fetch NPM token
         id: token
