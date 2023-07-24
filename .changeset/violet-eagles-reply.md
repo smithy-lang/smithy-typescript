@@ -1,0 +1,56 @@
+---
+"@smithy/abort-controller": major
+"@smithy/chunked-blob-reader": major
+"@smithy/chunked-blob-reader-native": major
+"@smithy/config-resolver": major
+"@smithy/credential-provider-imds": major
+"@smithy/eventstream-codec": major
+"@smithy/eventstream-serde-browser": major
+"@smithy/eventstream-serde-config-resolver": major
+"@smithy/eventstream-serde-node": major
+"@smithy/eventstream-serde-universal": major
+"@smithy/fetch-http-handler": major
+"@smithy/hash-blob-browser": major
+"@smithy/hash-node": major
+"@smithy/hash-stream-node": major
+"@smithy/invalid-dependency": major
+"@smithy/is-array-buffer": major
+"@smithy/md5-js": major
+"@smithy/middleware-apply-body-checksum": major
+"@smithy/middleware-content-length": major
+"@smithy/middleware-endpoint": major
+"@smithy/middleware-retry": major
+"@smithy/middleware-serde": major
+"@smithy/middleware-stack": major
+"@smithy/node-config-provider": major
+"@smithy/node-http-handler": major
+"@smithy/property-provider": major
+"@smithy/protocol-http": major
+"@smithy/querystring-builder": major
+"@smithy/querystring-parser": major
+"@smithy/service-client-documentation-generator": major
+"@smithy/service-error-classification": major
+"@smithy/shared-ini-file-loader": major
+"@smithy/signature-v4": major
+"@smithy/smithy-client": major
+"@smithy/url-parser": major
+"@smithy/util-base64": major
+"@smithy/util-body-length-browser": major
+"@smithy/util-body-length-node": major
+"@smithy/util-buffer-from": major
+"@smithy/util-config-provider": major
+"@smithy/util-defaults-mode-browser": major
+"@smithy/util-defaults-mode-node": major
+"@smithy/util-hex-encoding": major
+"@smithy/util-middleware": major
+"@smithy/util-retry": major
+"@smithy/util-stream": major
+"@smithy/util-stream-browser": major
+"@smithy/util-stream-node": major
+"@smithy/util-uri-escape": major
+"@smithy/util-utf8": major
+"@smithy/util-waiter": major
+"@smithy/types": patch
+---
+
+update to 2.x major versions
