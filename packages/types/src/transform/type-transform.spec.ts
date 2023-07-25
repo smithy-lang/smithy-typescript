@@ -1,8 +1,8 @@
+import type { Transform as DownlevelTransform } from "../downlevel-ts3.4/transform/type-transform";
 import type { Transform } from "./type-transform";
 
 type Exact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
-// It should transform exact unions recursively.
 type A = {
   a: string;
   b: number | string;
@@ -10,9 +10,23 @@ type A = {
   nested: A;
 };
 
-type T = Transform<A, number | string, "enum">;
+{
+  // It should transform exact unions recursively.
 
-const assert1: Exact<T["a"], string> = true as const;
-const assert2: Exact<T["b"], "enum"> = true as const;
+  type T = Transform<A, number | string, "enum">;
 
-const assert3: Exact<T["nested"]["nested"]["nested"]["b"], "enum"> = true as const;
+  const assert1: Exact<T["a"], string> = true as const;
+  const assert2: Exact<T["b"], "enum"> = true as const;
+
+  const assert3: Exact<T["nested"]["nested"]["nested"]["b"], "enum"> = true as const;
+}
+
+{
+  // the downlevel should function similarly
+  type T = DownlevelTransform<A, number | string, "enum">;
+
+  const assert1: Exact<T["a"], string> = true as const;
+  const assert2: Exact<T["b"], "enum"> = true as const;
+
+  const assert3: Exact<T["nested"]["nested"]["nested"]["b"], "enum"> = true as const;
+}
