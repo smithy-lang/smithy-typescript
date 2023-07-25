@@ -664,6 +664,9 @@ final class StructuredMemberWriter {
         if (shape.isBlobShape() && shape.hasTrait(StreamingTrait.class)) {
             return symbolProvider.toSymbol(shape)
                     .toBuilder()
+                    .addReference(Symbol.builder()
+                        .name("Readable").namespace("stream", "/")
+                        .build())
                     .name("Readable | ReadableStream | Blob | string | Uint8Array | Buffer")
                     .build();
         }
