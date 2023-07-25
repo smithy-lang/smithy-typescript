@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.2
+
+### Patch Changes
+
+- 1b951769: custom ts3.4 downlevel for types/transform/type-transform
+
 ## 2.0.1
 
 ### Patch Changes

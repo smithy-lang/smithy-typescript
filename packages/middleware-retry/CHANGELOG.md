@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [1b951769]
+  - @smithy/types@2.0.2
+  - @smithy/protocol-http@2.0.1
+  - @smithy/service-error-classification@2.0.0
+  - @smithy/util-middleware@2.0.0
+  - @smithy/util-retry@2.0.0
+
 ## 2.0.0
 
 ### Major Changes
