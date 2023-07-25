@@ -28,9 +28,9 @@ jobs:
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
 
-  build-generated-client:
+  build-generated-client-and-ssdk:
     runs-on: ubuntu-latest
-    name: Build generated client
+    name: Build generated client and ssdk packages
     steps:
       - uses: actions/checkout@v3
       - uses: gradle/wrapper-validation-action@v1
@@ -42,31 +42,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
-      - name: Run build-test-client
+      - name: Run build-test-packages
         run: |
           yarn config set enableImmutableInstalls false
           yarn
-          yarn build-test-client
-
-  build-generated-ssdk:
-    runs-on: ubuntu-latest
-    name: Build generated ssdk
-    steps:
-      - uses: actions/checkout@v3
-      - uses: gradle/wrapper-validation-action@v1
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'corretto'
-      - name: Run build-test-ssdk
-        run: |
-          yarn config set enableImmutableInstalls false
-          yarn
-          yarn build-test-ssdk
+          yarn build-test-packages
 
   lint-typescript:
     runs-on: ubuntu-latest
