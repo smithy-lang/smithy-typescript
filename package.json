@@ -8,6 +8,7 @@
     "clean": "turbo run clean --force --parallel",
     "build": "turbo run build",
     "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
     "lint": "turbo run lint",
     "format": "turbo run format --parallel",
     "stage-release": "turbo run stage-release",
@@ -65,7 +66,8 @@
     "packages/*",
     "smithy-typescript-ssdk-libs/*",
     "smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/source/typescript-codegen",
-    "smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/ssdk-test/typescript-ssdk-codegen"
+    "smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/ssdk-test/typescript-ssdk-codegen",
+    "private/*"
   ],
   "packageManager": "yarn@3.4.1"
 }

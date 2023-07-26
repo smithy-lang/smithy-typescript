@@ -74,7 +74,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/aws-lambda": ^8.10.72
     "@types/node": ^14.14.37
-    concurrently: ^7.6.0
+    concurrently: 7.0.0
     downlevel-dts: ^0.7.0
     jest: 28.1.1
     rimraf: ^3.0.2
@@ -90,7 +90,7 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": ^14.14.37
-    concurrently: ^7.6.0
+    concurrently: 7.0.0
     downlevel-dts: ^0.7.0
     jest: 28.1.1
     re2-wasm: ^1.0.2
@@ -107,7 +107,7 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": ^14.14.37
-    concurrently: ^7.6.0
+    concurrently: 7.0.0
     downlevel-dts: ^0.7.0
     jest: 28.1.1
     rimraf: ^3.0.2
@@ -2056,6 +2056,7 @@ __metadata:
     "@smithy/is-array-buffer": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-test": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
@@ -2073,6 +2074,7 @@ __metadata:
   dependencies:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-test": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
@@ -2113,6 +2115,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
+    "@smithy/util-test": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     "@types/uuid": ^8.3.0
     concurrently: 7.0.0
@@ -2131,6 +2134,7 @@ __metadata:
   resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
   dependencies:
     "@smithy/types": "workspace:^"
+    "@smithy/util-test": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
@@ -2604,6 +2608,7 @@ __metadata:
     "@smithy/util-base64": "workspace:^"
     "@smithy/util-buffer-from": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
+    "@smithy/util-test": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     "@types/chai-as-promised": ^7.1.2
     "@types/node": ^14.14.31
@@ -2629,6 +2634,22 @@ __metadata:
     typescript: ~4.9.5
     webpack: 5.76.0
     webpack-cli: 4.10.0
+  languageName: unknown
+  linkType: soft
+
+"@smithy/util-test@workspace:^, @smithy/util-test@workspace:private/util-test":
+  version: 0.0.0-use.local
+  resolution: "@smithy/util-test@workspace:private/util-test"
+  dependencies:
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@tsconfig/recommended": 1.0.1
+    concurrently: 7.0.0
+    downlevel-dts: 0.10.1
+    rimraf: 3.0.2
+    tslib: ^2.5.0
+    typedoc: 0.23.23
+    typescript: ~4.9.5
   languageName: unknown
   linkType: soft
 
@@ -4470,26 +4491,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^7.6.0":
-  version: 7.6.0
-  resolution: "concurrently@npm:7.6.0"
-  dependencies:
-    chalk: ^4.1.0
-    date-fns: ^2.29.1
-    lodash: ^4.17.21
-    rxjs: ^7.0.0
-    shell-quote: ^1.7.3
-    spawn-command: ^0.0.2-1
-    supports-color: ^8.1.0
-    tree-kill: ^1.2.2
-    yargs: ^17.3.1
-  bin:
-    conc: dist/bin/concurrently.js
-    concurrently: dist/bin/concurrently.js
-  checksum: f705c9a7960f1b16559ca64958043faeeef6385c0bf30a03d1375e15ab2d96dba4f8166f1bbbb1c85e8da35ca0ce3c353875d71dff2aa132b2357bb533b3332e
-  languageName: node
-  linkType: hard
-
 "connect@npm:^3.7.0":
   version: 3.7.0
   resolution: "connect@npm:3.7.0"
@@ -4734,7 +4735,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^2.16.1, date-fns@npm:^2.29.1":
+"date-fns@npm:^2.16.1":
   version: 2.29.3
   resolution: "date-fns@npm:2.29.3"
   checksum: e01cf5b62af04e05dfff921bb9c9933310ed0e1ae9a81eb8653452e64dc841acf7f6e01e1a5ae5644d0337e9a7f936175fd2cb6819dc122fdd9c5e86c56be484
@@ -9369,15 +9370,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.0.0":
-  version: 7.8.0
-  resolution: "rxjs@npm:7.8.0"
-  dependencies:
-    tslib: ^2.1.0
-  checksum: 61b4d4fd323c1043d8d6ceb91f24183b28bcf5def4f01ca111511d5c6b66755bc5578587fe714ef5d67cf4c9f2e26f4490d4e1d8cabf9bd5967687835e9866a2
-  languageName: node
-  linkType: hard
-
 "safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.0, safe-buffer@npm:^5.1.1, safe-buffer@npm:^5.1.2, safe-buffer@npm:^5.2.0, safe-buffer@npm:~5.2.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
@@ -9532,13 +9524,6 @@ __metadata:
   version: 3.0.0
   resolution: "shebang-regex@npm:3.0.0"
   checksum: 1a2bcae50de99034fcd92ad4212d8e01eedf52c7ec7830eedcf886622804fe36884278f2be8be0ea5fde3fd1c23911643a4e0f726c8685b61871c8908af01222
-  languageName: node
-  linkType: hard
-
-"shell-quote@npm:^1.7.3":
-  version: 1.8.0
-  resolution: "shell-quote@npm:1.8.0"
-  checksum: 6ef7c5e308b9c77eedded882653a132214fa98b4a1512bb507588cf6cd2fc78bfee73e945d0c3211af028a1eabe09c6a19b96edd8977dc149810797e93809749
   languageName: node
   linkType: hard
 
@@ -10344,17 +10329,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.1.0, tslib@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "tslib@npm:2.5.0"
-  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
-  languageName: node
-  linkType: hard
-
 "tslib@npm:^2.3.1":
   version: 2.5.3
   resolution: "tslib@npm:2.5.3"
   checksum: 88902b309afaf83259131c1e13da1dceb0ad1682a213143a1346a649143924d78cf3760c448b84d796938fd76127183894f8d85cbb3bf9c4fddbfcc140c0003c
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "tslib@npm:2.5.0"
+  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
   languageName: node
   linkType: hard
 

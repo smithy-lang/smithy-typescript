@@ -11,7 +11,8 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test:integration": "jest --config jest.config.integ.js"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -47,6 +48,7 @@
     "directory": "packages/middleware-apply-body-checksum"
   },
   "devDependencies": {
+    "@smithy/util-test": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",

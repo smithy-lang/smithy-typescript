@@ -12,7 +12,8 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "extract:docs": "api-extractor run --local",
-    "test": "jest"
+    "test": "jest",
+    "test:integration": "jest --config jest.config.integ.js"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@smithy/node-config-provider": "workspace:^",
+    "@smithy/util-test": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "@types/uuid": "^8.3.0",
     "concurrently": "7.0.0",

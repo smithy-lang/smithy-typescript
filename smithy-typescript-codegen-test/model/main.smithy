@@ -13,11 +13,12 @@ use smithy.waiters#waitable
 service Weather {
     version: "2006-03-01"
     resources: [City]
-    operations: [GetCurrentTime]
+    operations: [GetCurrentTime, Invoke]
 }
 
 resource City {
     identifiers: {cityId: CityId}
+    create: CreateCity
     read: GetCity
     list: ListCities
     resources: [Forecast, CityImage]
@@ -40,6 +41,7 @@ string CityId
 
 @readonly
 @http(method: "GET", uri: "/cities/{cityId}")
+@httpChecksumRequired
 operation GetCity {
     input: GetCityInput
     output: GetCityOutput
@@ -111,6 +113,28 @@ structure GetCityOutput {
     coordinates: CityCoordinates
 
     city: CitySummary
+}
+
+@idempotent
+@http(method: "PUT", uri: "/city")
+operation CreateCity {
+    input: CreateCityInput
+    output: CreateCityOutput
+}
+
+structure CreateCityInput {
+    @required
+    name: String
+
+    @required
+    coordinates: CityCoordinates
+
+    city: CitySummary
+}
+
+structure CreateCityOutput {
+    @required
+    cityId: CityId
 }
 
 // This structure is nested within GetCityOutput.
@@ -241,6 +265,22 @@ operation GetCurrentTime {
 structure GetCurrentTimeOutput {
     @required
     time: Timestamp
+}
+
+@http(method: "POST", uri: "/invoke", code: 200)
+operation Invoke {
+    input: InvokeInput
+    output: InvokeOutput
+}
+
+structure InvokeInput {
+    @httpPayload
+    payload: Blob
+}
+
+structure InvokeOutput {
+    @httpPayload
+    payload: Blob
 }
 
 @readonly
