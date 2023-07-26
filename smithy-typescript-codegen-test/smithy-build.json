@@ -14,10 +14,11 @@
                 "typescript-ssdk-codegen": {
                     "service": "example.weather#Weather",
                     "targetNamespace": "Weather",
-                    "package": "weather",
+                    "package": "weather-ssdk",
                     "packageVersion": "0.0.1",
                     "packageJson": {
-                        "license": "Apache-2.0"
+                        "license": "Apache-2.0",
+                        "private": true
                     },
                     "disableDefaultValidation": true
                 }
@@ -31,7 +32,8 @@
             "package": "weather",
             "packageVersion": "0.0.1",
             "packageJson": {
-                "license": "Apache-2.0"
+                "license": "Apache-2.0",
+                "private": true
             }
         }
     }
