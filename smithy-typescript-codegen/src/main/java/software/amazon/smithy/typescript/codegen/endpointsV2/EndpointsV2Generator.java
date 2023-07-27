@@ -72,6 +72,7 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
                 writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
+                writer.writeDocs("@public");
                 writer.openBlock(
                     "export interface ClientInputEndpointParameters {",
                     "}",

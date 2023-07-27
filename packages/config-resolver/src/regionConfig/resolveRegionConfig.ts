@@ -4,7 +4,7 @@ import { getRealRegion } from "./getRealRegion";
 import { isFipsRegion } from "./isFipsRegion";
 
 /**
- * @internal
+ * @public
  */
 export interface RegionInputConfig {
   /**

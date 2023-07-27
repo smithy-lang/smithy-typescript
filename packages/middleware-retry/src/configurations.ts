@@ -34,6 +34,9 @@ export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS: LoadedConfigSelectors<number> = {
   default: DEFAULT_MAX_ATTEMPTS,
 };
 
+/**
+ * @public
+ */
 export interface RetryInputConfig {
   /**
    * The maximum number of times requests that encounter retryable failures should be attempted.

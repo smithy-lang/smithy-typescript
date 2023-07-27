@@ -4,7 +4,7 @@ import { normalizeProvider } from "@smithy/util-middleware";
 import { toEndpointV1 } from "./adaptors/toEndpointV1";
 
 /**
- * @internal
+ * @public
  *
  * Endpoint config interfaces and resolver for Endpoint v2. They live in separate package to allow per-service onboarding.
  * When all services onboard Endpoint v2, the resolver in config-resolver package can be removed.
