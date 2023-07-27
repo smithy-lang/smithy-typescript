@@ -1,5 +1,8 @@
 import { ChecksumConstructor, Encoder, HashConstructor, StreamHasher } from "@smithy/types";
 
+/**
+ * @public
+ */
 export interface Md5BodyChecksumInputConfig {}
 interface PreviouslyResolved {
   md5: ChecksumConstructor | HashConstructor;

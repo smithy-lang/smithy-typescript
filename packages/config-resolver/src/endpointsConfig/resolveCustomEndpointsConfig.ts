@@ -4,7 +4,7 @@ import { normalizeProvider } from "@smithy/util-middleware";
 import { EndpointsInputConfig, EndpointsResolvedConfig } from "./resolveEndpointsConfig";
 
 /**
- * @internal
+ * @public
  */
 export interface CustomEndpointsInputConfig extends EndpointsInputConfig {
   /**

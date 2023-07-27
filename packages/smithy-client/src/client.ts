@@ -2,7 +2,7 @@ import { constructStack } from "@smithy/middleware-stack";
 import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@smithy/types";
 
 /**
- * @internal
+ * @public
  */
 export interface SmithyConfiguration<HandlerOptions> {
   requestHandler: RequestHandler<any, any, HandlerOptions>;

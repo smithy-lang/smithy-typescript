@@ -1,7 +1,7 @@
 import { EventStreamMarshaller, EventStreamSerdeProvider } from "@smithy/types";
 
 /**
- * @internal
+ * @public
  */
 export interface EventStreamSerdeInputConfig {}
 

@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
@@ -104,6 +105,11 @@ final class IndexGenerator {
         // Write export statement for aggregated client.
         String aggregatedClientName = symbol.getName().replace("Client", "");
         writer.write("export * from \"./$L\";", aggregatedClientName);
+
+        // export endpoints config interface
+        if (service.hasTrait(EndpointRuleSetTrait.class)) {
+            writer.write("export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
+        }
 
         // Write export statement for commands.
         writer.write("export * from \"./commands\";");

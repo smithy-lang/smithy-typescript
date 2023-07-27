@@ -33,7 +33,7 @@ export interface InvokeFunction<
 }
 
 /**
- * @internal
+ * @public
  *
  * Signature that appears on aggregated clients' methods.
  */

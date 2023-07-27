@@ -10,9 +10,6 @@ export * from "./endpointMiddleware";
  * @internal
  */
 export * from "./getEndpointPlugin";
-/**
- * @internal
- */
 export * from "./resolveEndpointConfig";
 /**
  * @internal

@@ -4,7 +4,7 @@ import { normalizeProvider } from "@smithy/util-middleware";
 import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 
 /**
- * @internal
+ * @public
  */
 export interface EndpointsInputConfig {
   /**
