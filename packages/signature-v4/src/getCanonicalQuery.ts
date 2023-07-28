@@ -21,11 +21,11 @@ export const getCanonicalQuery = ({ query = {} }: HttpRequest): string => {
     } else if (Array.isArray(value)) {
       serialized[key] = value
         .slice(0)
-        .sort()
         .reduce(
           (encoded: Array<string>, value: string) => encoded.concat([`${escapeUri(key)}=${escapeUri(value)}`]),
           []
         )
+        .sort()
         .join("&");
     }
   }
