@@ -101,7 +101,7 @@ describe("getCanonicalQuery", () => {
       getCanonicalQuery(
         new HttpRequest({
           ...httpRequestOptions,
-          query: { "p": ["a", "à"] },
+          query: { p: ["a", "à"] },
         })
       )
     ).toBe("p=%C3%A0&p=a");
