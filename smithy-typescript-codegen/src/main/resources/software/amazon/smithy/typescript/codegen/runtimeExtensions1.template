@@ -1,0 +1,30 @@
+import { ${clientConfigName} } from "./clientConfiguration";
+
+/**
+ * @public
+ */
+export interface RuntimeExtension {
+    configureClient(clientConfiguration: ${clientConfigName}): void;
+}
+
+/**
+ * @public
+ */
+export interface RuntimeExtensionsConfig {
+    extensions: RuntimeExtension[]
+}
+
+const asPartial = <T extends Partial<${clientConfigName}>>(t: T) => t;
+
+/**
+ * @internal
+ */
+export const resolveRuntimeExtensions = (
+    runtimeConfig: any,
+    extensions: RuntimeExtension[]
+) => {
+  const clientConfiguration: ${clientConfigName} = {
+${getPartialClientConfigurations}
+  };
+
+  extensions.forEach(extension => extension.configureClient(clientConfiguration));
