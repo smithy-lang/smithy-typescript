@@ -1,7 +1,11 @@
 name: release-npm-packages
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch: # on button click
+
 
 jobs:
   release:
