@@ -216,6 +216,7 @@ final class UnionGenerator implements Runnable {
         }
 
         // Write out the unknown variant.
+        writer.writeDocs("@public");
         writer.openBlock("export interface $$UnknownMember {", "}", () -> {
             for (MemberShape member : shape.getAllMembers().values()) {
                 writer.write("$L?: never;", symbolProvider.toMemberName(member));

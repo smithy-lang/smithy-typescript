@@ -191,7 +191,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         docs = "@deprecated\n\n" + docs;
                     }
-                    docs = writeReleaseTag(shape, docs);
+                    docs = addReleaseTag(shape, docs);
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -228,7 +228,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
                         docs = "@deprecated\n\n" + docs;
                     }
-                    writeReleaseTag(member, docs);
+                    docs = addReleaseTag(member, docs);
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -240,7 +240,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                && !Prelude.isPreludeShape(member.getTarget());
     }
 
-    private String writeReleaseTag(Shape shape, String docs) {
+    private String addReleaseTag(Shape shape, String docs) {
         if (shape.getTrait(InternalTrait.class).isPresent()) {
             docs = "@internal\n" + docs;
         } else {
