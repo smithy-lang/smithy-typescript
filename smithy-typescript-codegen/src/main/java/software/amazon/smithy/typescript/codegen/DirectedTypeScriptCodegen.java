@@ -92,8 +92,12 @@ final class DirectedTypeScriptCodegen
         directive.integrations().forEach(integration -> {
             LOGGER.info(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
             integration.getClientPlugins().forEach(runtimePlugin -> {
-                LOGGER.info(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
-                runtimePlugins.add(runtimePlugin);
+                if (runtimePlugin.matchesSettings(directive.model(), directive.service(), directive.settings())) {
+                    LOGGER.info(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
+                    runtimePlugins.add(runtimePlugin);
+                } else {
+                    LOGGER.info(() -> "Skipping TypeScript runtime plugin based on settings: " + runtimePlugin);
+                }
             });
         });
 
