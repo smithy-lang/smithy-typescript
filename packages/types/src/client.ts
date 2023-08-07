@@ -2,11 +2,11 @@ import { Command } from "./command";
 import { MiddlewareStack } from "./middleware";
 import { MetadataBearer } from "./response";
 
-export type Exact<Type1, Type2> = [Type1] extends [Type2] ? [Type2] extends [Type1] ? true : false : false;
+export type Exact<Type1, Type2> = [Type1] extends [Type2] ? ([Type2] extends [Type1] ? true : false) : false;
 
 /**
  * @public
- * 
+ *
  * A type which checks if the client configuration is optional.
  * If all entries of the client configuration are optional, it allows client creation without passing any config.
  */
