@@ -333,7 +333,9 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConstructor() {
-        writer.openBlock("constructor(configuration: $L) {", "}", configType, () -> {
+        writer.addImport("CheckOptionalClientConfig", "__CheckOptionalClientConfig",
+            TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.openBlock("constructor(...[configuration]: __CheckOptionalClientConfig<$L>) {", "}", configType, () -> {
             // Hook for adding/changing the client constructor.
             writer.pushState(CLIENT_CONSTRUCTOR_SECTION);
 
