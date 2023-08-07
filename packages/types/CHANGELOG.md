@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 59548ba9: Add type to check optional Client Configuration
+
+### Patch Changes
+
+- 3e1ab589: add release tag public to client init interface components
+
 ## 2.0.2
 
 ### Patch Changes

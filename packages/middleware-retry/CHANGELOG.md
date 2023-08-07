@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.0.2
+
+### Patch Changes
+
+- 3e1ab589: add release tag public to client init interface components
+- Updated dependencies [59548ba9]
+- Updated dependencies [3e1ab589]
+  - @smithy/types@2.1.0
+  - @smithy/protocol-http@2.0.2
+  - @smithy/service-error-classification@2.0.0
+  - @smithy/util-middleware@2.0.0
+  - @smithy/util-retry@2.0.0
+
 ## 2.0.1
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.0.2
+
+### Patch Changes
+
+- bb5beab2: fix: multiple value parameters query string signature
+- Updated dependencies [59548ba9]
+- Updated dependencies [3e1ab589]
+  - @smithy/types@2.1.0
+  - @smithy/eventstream-codec@2.0.2
+  - @smithy/util-middleware@2.0.0
+
 ## 2.0.1
 
 ### Patch Changes
