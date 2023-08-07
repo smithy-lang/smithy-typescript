@@ -340,7 +340,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.pushState(CLIENT_CONSTRUCTOR_SECTION);
 
             int configVariable = 0;
-            writer.write("let $L = __getRuntimeConfig(configuration);",
+            writer.write("let $L = __getRuntimeConfig(configuration || {});",
                     generateConfigVariable(configVariable));
 
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
