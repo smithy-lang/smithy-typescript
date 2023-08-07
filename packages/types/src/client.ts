@@ -1,8 +1,7 @@
 import { Command } from "./command";
 import { MiddlewareStack } from "./middleware";
 import { MetadataBearer } from "./response";
-
-export type Exact<Type1, Type2> = [Type1] extends [Type2] ? ([Type2] extends [Type1] ? true : false) : false;
+import { Exact } from "./util";
 
 /**
  * @public

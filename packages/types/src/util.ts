@@ -5,6 +5,13 @@ import { MetadataBearer } from "./response";
 /**
  * @public
  *
+ * A generic which checks if Type1 is exactly same as Type2.
+ */
+export type Exact<Type1, Type2> = [Type1] extends [Type2] ? ([Type2] extends [Type1] ? true : false) : false;
+
+/**
+ * @public
+ *
  * A function that, given a TypedArray of bytes, can produce a string
  * representation thereof.
  *
