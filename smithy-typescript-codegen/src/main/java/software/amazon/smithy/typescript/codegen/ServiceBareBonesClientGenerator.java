@@ -333,12 +333,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConstructor() {
-        writer.openBlock("constructor(configuration: $L) {", "}", configType, () -> {
+        writer.addImport("CheckOptionalClientConfig", "__CheckOptionalClientConfig",
+            TypeScriptDependency.SMITHY_TYPES);
+        writer.openBlock("constructor(...[configuration]: __CheckOptionalClientConfig<$L>) {", "}", configType, () -> {
             // Hook for adding/changing the client constructor.
             writer.pushState(CLIENT_CONSTRUCTOR_SECTION);
 
             int configVariable = 0;
-            writer.write("let $L = __getRuntimeConfig(configuration);",
+            writer.write("let $L = __getRuntimeConfig(configuration || {});",
                     generateConfigVariable(configVariable));
 
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
