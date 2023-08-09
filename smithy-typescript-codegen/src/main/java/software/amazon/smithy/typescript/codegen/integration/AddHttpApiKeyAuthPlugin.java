@@ -76,6 +76,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                             .name("resolveHttpApiKeyAuthConfig")
                             .build())
                     .servicePredicate((m, s) -> hasEffectiveHttpApiKeyAuthTrait(m, s))
+                    .settingsPredicate((m, s, settings) -> !settings.getExperimentalIdentityAndAuth())
                     .build(),
 
             // Add the middleware to operations that use HTTP API key authorization.
@@ -96,12 +97,17 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                             .keySet()
                             .contains(HttpApiKeyAuthTrait.ID)
                             && !o.hasTrait(OptionalAuthTrait.class))
+                    .settingsPredicate((m, s, settings) -> !settings.getExperimentalIdentityAndAuth())
                     .build()
         );
     }
 
     @Override
     public void customize(TypeScriptCodegenContext codegenContext) {
+        if (codegenContext.settings().getExperimentalIdentityAndAuth()) {
+            return;
+        }
+        // feat(experimentalIdentityAndAuth): control branch for @httpApiKeyAuth
         TypeScriptSettings settings = codegenContext.settings();
         Model model = codegenContext.model();
         BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory = codegenContext.writerDelegator()::useFileWriter;
