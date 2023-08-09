@@ -12,7 +12,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.utils.ListUtils;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 
 public class RuntimeClientPluginTest {
     @Test
@@ -66,6 +66,25 @@ public class RuntimeClientPluginTest {
         assertThat(plugin.matchesService(model, service2), equalTo(false));
         assertThat(plugin.matchesOperation(model, service1, operation), equalTo(false));
         assertThat(plugin.matchesOperation(model, service2, operation), equalTo(false));
+    }
+
+    @Test
+    public void allowsConfigurableSettingsPredicate() {
+        ServiceShape service = ServiceShape.builder().id("a.b#C").version("123").build();
+        Model model = Model.assembler()
+                .addShapes(service)
+                .assemble()
+                .unwrap();
+        RuntimeClientPlugin createDefaultReadmeFlagPlugin = RuntimeClientPlugin.builder()
+                .settingsPredicate((m, s, settings) -> settings.createDefaultReadme())
+                .build();
+
+        TypeScriptSettings createDefaultReadmeTrueSettings = new TypeScriptSettings();
+        createDefaultReadmeTrueSettings.setCreateDefaultReadme(true);
+        assertThat(createDefaultReadmeFlagPlugin.matchesSettings(model, service, createDefaultReadmeTrueSettings), equalTo(true));
+
+        TypeScriptSettings createDefaultReadmeFalseSettings = new TypeScriptSettings();
+        assertThat(createDefaultReadmeFlagPlugin.matchesSettings(model, service, createDefaultReadmeFalseSettings), equalTo(false));
     }
 
     @Test

@@ -28,6 +28,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -54,6 +55,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final SymbolReference destroyFunction;
     private final BiPredicate<Model, ServiceShape> servicePredicate;
     private final OperationPredicate operationPredicate;
+    private final SettingsPredicate settingsPredicate;
 
     private RuntimeClientPlugin(Builder builder) {
         inputConfig = builder.inputConfig;
@@ -65,6 +67,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         destroyFunction = builder.destroyFunction;
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
+        settingsPredicate = builder.settingsPredicate;
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -91,6 +94,19 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @return Returns true if middleware should be applied to the operation.
          */
         boolean test(Model model, ServiceShape service, OperationShape operation);
+    }
+
+    @FunctionalInterface
+    public interface SettingsPredicate {
+        /**
+         * Tests if runtime client plugin should be applied based on settings.
+         *
+         * @param model Model the operation belongs to.
+         * @param service Service the operation belongs to.
+         * @param settings Settings from smithy-build configuration.
+         * @return Returns true if runtime client plugin should be applied.
+         */
+        boolean test(Model model, ServiceShape service, TypeScriptSettings settings);
     }
 
     @FunctionalInterface
@@ -298,6 +314,18 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         return operationPredicate.test(model, service, operation);
     }
 
+    /**
+     * Returns true if this plugin applies given a smithy-build configuration.
+     *
+     * @param model Model the operation belongs to.
+     * @param service Service the operation belongs to.
+     * @param settings Settings from smithy-build configuration to test against.
+     * @return Returns true if the plugin is applied given a smithy-build configuration.
+     */
+    public boolean matchesSettings(Model model, ServiceShape service, TypeScriptSettings settings) {
+        return settingsPredicate.test(model, service, settings);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -369,6 +397,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private SymbolReference destroyFunction;
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
         private OperationPredicate operationPredicate = (model, service, operation) -> false;
+        private SettingsPredicate settingsPredicate = (model, service, settings) -> true;
 
         @Override
         public RuntimeClientPlugin build() {
@@ -674,6 +703,22 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         public Builder appliesOnlyToOperations(Set<String> operationNames) {
             operationPredicate((model, service, operation) -> operationNames.contains(operation.getId().getName()));
             return servicePredicate((model, service) -> false);
+        }
+
+        /**
+         * Configures a predicate that applies the plugin to a service if the
+         * predicate matches a given model and service and settings.
+         *
+         * <p>Setting a custom settings predicate is useful for plugins
+         * that should only be applied based on certain smithy-build
+         * configurations.
+         *
+         * @param settingsPredicate Settings predicate.
+         * @return Returns the builder.
+         */
+        public Builder settingsPredicate(SettingsPredicate settingsPredicate) {
+            this.settingsPredicate = Objects.requireNonNull(settingsPredicate);
+            return this;
         }
 
         /**
