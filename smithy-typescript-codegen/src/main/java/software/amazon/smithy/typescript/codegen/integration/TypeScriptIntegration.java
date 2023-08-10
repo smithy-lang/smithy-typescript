@@ -213,7 +213,7 @@ public interface TypeScriptIntegration
      * Define a list of client configuration interfaces
      *
      * A client configuration interface contains settings that modify a service client.
-     * (User should be able to configure timeouts, retry strategy, etc for the client.)
+     *  The client configuration interface enables configuring timeouts, retry strategy, etc for the client.
      *
      * Multiple interfaces are used to define the client configuration. For example:
      *
