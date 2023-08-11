@@ -425,12 +425,6 @@ final class DirectedTypeScriptCodegen
             }
         }
 
-        new ClientConfigurationGenerator(directive.model(), directive.service(), directive.symbolProvider(),
-                directive.context().writerDelegator(), directive.context().integrations()).generate();
-
-        new RuntimeExtensionsGenerator(directive.model(), directive.service(), directive.symbolProvider(),
-                directive.context().writerDelegator(), directive.context().integrations()).generate();
-
         // Generate index for client.
         BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory =
             directive.context().writerDelegator()::useFileWriter;
