@@ -129,9 +129,9 @@ public class RuleSetParameterFinder {
     }
 
     /**
-     * The contextParam trait allows for binding a structure’s member value to a context
-     * parameter name. This trait MUST target a member shape on an operation’s input structure.
-     * The targeted endpoint parameter MUST be a type that is compatible with member’s
+     * The contextParam trait allows for binding a structure's member value to a context
+     * parameter name. This trait MUST target a member shape on an operation's input structure.
+     * The targeted endpoint parameter MUST be a type that is compatible with member's
      * shape targeted by the trait.
      */
     public Map<String, String> getContextParams(Shape operationInput) {
