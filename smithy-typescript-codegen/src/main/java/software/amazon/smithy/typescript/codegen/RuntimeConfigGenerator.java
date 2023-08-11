@@ -128,9 +128,6 @@ final class RuntimeConfigGenerator {
                 writer.addImport("toUtf8", null,
                         TypeScriptDependency.AWS_SDK_UTIL_UTF8);
                 writer.write("toUtf8");
-            },
-            "extensions", writer -> {
-                writer.write("[]");
             }
     );
 
