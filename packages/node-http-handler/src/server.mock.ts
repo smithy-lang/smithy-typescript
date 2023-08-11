@@ -1,4 +1,4 @@
-import { HeaderBag, HttpResponse } from "@smithy/types";
+import { HeaderBag, HttpResponse, NodeJsRuntimeBlobTypes } from "@smithy/types";
 import { readFileSync } from "fs";
 import { createServer as createHttpServer, IncomingMessage, Server as HttpServer, ServerResponse } from "http";
 import { createServer as createHttp2Server, Http2Server } from "http2";
@@ -14,7 +14,7 @@ const setResponseHeaders = (response: ServerResponse, headers: HeaderBag) => {
   }
 };
 
-const setResponseBody = (response: ServerResponse, body: Readable | string) => {
+const setResponseBody = (response: ServerResponse, body: string | NodeJsRuntimeBlobTypes) => {
   if (body instanceof Readable) {
     body.pipe(response);
   } else {
@@ -66,4 +66,39 @@ export const createMockHttpServer = (): HttpServer => {
 export const createMockHttp2Server = (): Http2Server => {
   const server = createHttp2Server();
   return server;
+};
+
+export const createMirrorResponseFunction = (httpResp: HttpResponse) => (
+  request: IncomingMessage,
+  response: ServerResponse
+) => {
+  const bufs: Buffer[] = [];
+  request.on("data", (chunk) => {
+    bufs.push(chunk);
+  });
+  request.on("end", () => {
+    response.statusCode = httpResp.statusCode;
+    setResponseHeaders(response, httpResp.headers);
+    setResponseBody(response, Buffer.concat(bufs));
+  });
+  request.on("error", (err) => {
+    response.statusCode = 500;
+    setResponseHeaders(response, httpResp.headers);
+    setResponseBody(response, err.message);
+  });
+};
+
+export const getResponseBody = (response: HttpResponse) => {
+  return new Promise<string>((resolve, reject) => {
+    const bufs: Buffer[] = [];
+    response.body.on("data", function (d: Buffer) {
+      bufs.push(d);
+    });
+    response.body.on("end", function () {
+      resolve(Buffer.concat(bufs).toString());
+    });
+    response.body.on("error", (err: Error) => {
+      reject(err);
+    });
+  });
 };
