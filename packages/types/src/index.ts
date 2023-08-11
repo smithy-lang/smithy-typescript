@@ -10,6 +10,7 @@ export * from "./encode";
 export * from "./endpoint";
 export * from "./endpoints";
 export * from "./eventStream";
+export * from "./extensions";
 export * from "./http";
 export * from "./identity";
 export * from "./logger";

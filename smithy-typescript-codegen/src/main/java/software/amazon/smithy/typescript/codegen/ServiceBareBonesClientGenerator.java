@@ -152,6 +152,8 @@ final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConfig() {
+        writer.addRelativeImport("RuntimeExtensionsConfig", null,
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
         writer.addImport("SmithyConfiguration", "__SmithyConfiguration", TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.addImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration",
             TypeScriptDependency.AWS_SMITHY_CLIENT);
@@ -202,6 +204,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         writer.write("export type $LType = __SmithyResolvedConfiguration<$T>",
                      resolvedConfigType, applicationProtocol.getOptionsType());
         writer.write("  & Required<ClientDefaults>");
+        writer.write("  & RuntimeExtensionsConfig");
 
         if (!inputTypes.isEmpty()) {
             writer.indent();
@@ -373,6 +376,14 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                                  additionalParamsString);
                 }
             }
+
+            writer.addRelativeImport("resolveRuntimeExtensions", null,
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
+
+            configVariable++;
+            writer.write("let $L = resolveRuntimeExtensions($L, configuration?.extensions || []);",
+                generateConfigVariable(configVariable),
+                generateConfigVariable(configVariable - 1));
 
             writer.write("super($L);", generateConfigVariable(configVariable));
             writer.write("this.config = $L;", generateConfigVariable(configVariable));
