@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- f6cb949d: add extensions to client runtime config
+
 ## 2.1.0
 
 ### Minor Changes
