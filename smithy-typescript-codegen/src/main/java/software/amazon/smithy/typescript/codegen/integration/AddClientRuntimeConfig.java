@@ -5,15 +5,20 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.extensions.ClientConfigurationInterface;
+import software.amazon.smithy.typescript.codegen.extensions.DefaultClientConfigurationInterface;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -66,6 +71,10 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                 .write("retryMode?: string | __Provider<string>;\n");
         writer.writeDocs("Optional logger for logging debug/info/warn/error.")
                 .write("logger?: __Logger;\n");
+        writer.addRelativeImport("RuntimeExtension", null,
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
+        writer.writeDocs("Optional extensions")
+                .write("extensions: RuntimeExtension[];\n");
     }
 
     @Override
@@ -125,5 +134,10 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
         default:
                 return Collections.emptyMap();
         }
+    }
+
+    @Override
+    public List<ClientConfigurationInterface> getClientConfigurationInterfaces() {
+        return List.of(new DefaultClientConfigurationInterface());
     }
 }
