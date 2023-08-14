@@ -24,7 +24,7 @@ export interface ChecksumConfiguration {
   addChecksumAlgorithm(algo: ChecksumAlgorithm): void;
   checksumAlgorithms(): ChecksumAlgorithm[];
 
-  [other: string | number | symbol]: any;
+  [other: string | number]: any;
 }
 
 type GetChecksumConfigurationType = (
