@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- 381e03c4: Remove symbol as an index from ChecksumConfiguration interface in @smithy/types
+
 ## 2.2.0
 
 ### Minor Changes
