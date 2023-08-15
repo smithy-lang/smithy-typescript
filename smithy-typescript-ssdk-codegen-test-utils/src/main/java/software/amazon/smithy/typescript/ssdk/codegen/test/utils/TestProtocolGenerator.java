@@ -80,7 +80,10 @@ class TestProtocolGenerator extends HttpBindingProtocolGenerator {
             GenerationContext context,
             OperationShape operation,
             List<HttpBinding> documentBindings
-    ) {}
+    ) {
+        TypeScriptWriter writer = context.getWriter();
+        writer.write("body = \"{}\"");
+    }
 
     @Override
     public void deserializeOutputDocumentBody(
