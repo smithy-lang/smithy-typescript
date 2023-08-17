@@ -1,16 +1,6 @@
 /*
- * Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package software.amazon.smithy.typescript.codegen.integration;
@@ -39,11 +29,21 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Add config and middleware to support a service with the @httpApiKeyAuth trait.
+ *
+ * This is the existing control behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
 
     public static final String INTEGRATION_NAME = "HttpApiKeyAuth";
+
+    /**
+     * Integration should only be used if `experimentalIdentityAndAuth` flag is false.
+     */
+    @Override
+    public boolean matchesSettings(TypeScriptSettings settings) {
+        return !settings.getExperimentalIdentityAndAuth();
+    }
 
     /**
      * Plug into code generation for the client.
@@ -75,7 +75,6 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                             .name("resolveHttpApiKeyAuthConfig")
                             .build())
                     .servicePredicate((m, s) -> hasEffectiveHttpApiKeyAuthTrait(m, s))
-                    .settingsPredicate((m, s, settings) -> !settings.getExperimentalIdentityAndAuth())
                     .build(),
 
             // Add the middleware to operations that use HTTP API key authorization.
@@ -93,17 +92,12 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                                     put("scheme", scheme));
                     }})
                     .operationPredicate((m, s, o) -> hasEffectiveHttpApiKeyAuthTrait(m, s, o))
-                    .settingsPredicate((m, s, settings) -> !settings.getExperimentalIdentityAndAuth())
                     .build()
         );
     }
 
     @Override
     public void customize(TypeScriptCodegenContext codegenContext) {
-        if (codegenContext.settings().getExperimentalIdentityAndAuth()) {
-            return;
-        }
-        // feat(experimentalIdentityAndAuth): control branch for @httpApiKeyAuth
         TypeScriptSettings settings = codegenContext.settings();
         Model model = codegenContext.model();
         BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory = codegenContext.writerDelegator()::useFileWriter;
