@@ -74,7 +74,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
         writer.addRelativeImport("RuntimeExtension", null,
                 Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
         writer.writeDocs("Optional extensions")
-                .write("extensions: RuntimeExtension[];\n");
+                .write("extensions?: RuntimeExtension[];\n");
     }
 
     @Override
