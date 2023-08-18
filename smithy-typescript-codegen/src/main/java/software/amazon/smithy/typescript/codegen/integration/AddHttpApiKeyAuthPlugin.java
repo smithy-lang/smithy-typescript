@@ -18,15 +18,14 @@ package software.amazon.smithy.typescript.codegen.integration;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
-import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait;
 import software.amazon.smithy.model.traits.OptionalAuthTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
@@ -93,10 +92,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                             s.expectTrait(HttpApiKeyAuthTrait.class).getScheme().ifPresent(scheme ->
                                     put("scheme", scheme));
                     }})
-                    .operationPredicate((m, s, o) -> ServiceIndex.of(m).getEffectiveAuthSchemes(s, o)
-                            .keySet()
-                            .contains(HttpApiKeyAuthTrait.ID)
-                            && !o.hasTrait(OptionalAuthTrait.class))
+                    .operationPredicate((m, s, o) -> hasEffectiveHttpApiKeyAuthTrait(m, s, o))
                     .settingsPredicate((m, s, settings) -> !settings.getExperimentalIdentityAndAuth())
                     .build()
         );
@@ -170,28 +166,33 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         }
     }
 
-    // The service has the effective trait if it's in the "effective auth schemes" response
-    // AND if not all of the operations have the optional auth trait.
-    private static boolean hasEffectiveHttpApiKeyAuthTrait(Model model, ServiceShape service) {
-        return ServiceIndex.of(model).getEffectiveAuthSchemes(service)
-                .keySet()
-                .contains(HttpApiKeyAuthTrait.ID)
-                && !areAllOptionalAuthOperations(model, service);
-    }
-
-
-    // This is derived from https://github.com/aws/aws-sdk-js-v3/blob/main/codegen/smithy-aws-typescript-codegen/src/main/java/software/amazon/smithy/aws/typescript/codegen/AddAwsAuthPlugin.java.
-    private static boolean areAllOptionalAuthOperations(Model model, ServiceShape service) {
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
-        ServiceIndex index = ServiceIndex.of(model);
-
-        for (OperationShape operation : operations) {
-            if (index.getEffectiveAuthSchemes(service, operation).isEmpty()
-                    || !operation.hasTrait(OptionalAuthTrait.class)) {
-                return false;
+    // If no operations use it, then the service doesn't use it
+    private static boolean hasEffectiveHttpApiKeyAuthTrait(
+        Model model,
+        ServiceShape service
+    ) {
+        ServiceIndex serviceIndex = ServiceIndex.of(model);
+        for (ShapeId id : service.getAllOperations()) {
+            OperationShape operation = model.expectShape(id, OperationShape.class);
+            if (operation.hasTrait(OptionalAuthTrait.ID)) {
+                continue;
+            }
+            if (serviceIndex.getEffectiveAuthSchemes(service, operation).containsKey(HttpApiKeyAuthTrait.ID)) {
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    private static boolean hasEffectiveHttpApiKeyAuthTrait(
+        Model model,
+        ServiceShape service,
+        OperationShape operation
+    ) {
+        if (operation.hasTrait(OptionalAuthTrait.class)) {
+            return false;
+        }
+        return ServiceIndex.of(model)
+            .getEffectiveAuthSchemes(service, operation).containsKey(HttpApiKeyAuthTrait.ID);
     }
 }
