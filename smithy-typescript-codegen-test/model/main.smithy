@@ -2,6 +2,7 @@ $version: "2.0"
 
 namespace example.weather
 
+use aws.auth#sigv4
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 use smithy.waiters#waitable
@@ -9,12 +10,50 @@ use smithy.waiters#waitable
 /// Provides weather forecasts.
 @fakeProtocol
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
+@httpBearerAuth
+@sigv4(name: "weather")
+@auth([sigv4])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01"
     resources: [City]
-    operations: [GetCurrentTime, Invoke]
+    operations: [
+        GetCurrentTime
+        // util-stream.integ.spec.ts
+        Invoke
+        // experimentalIdentityAndAuth
+        OnlyHttpApiKeyAuth
+        OnlyHttpBearerAuth
+        OnlyHttpApiKeyAndBearerAuth
+        OnlyHttpApiKeyAndBearerAuthReversed
+        OnlyHttpApiKeyAuthOptional
+        SameAsService
+    ]
 }
+
+@http(method: "GET", uri: "/OnlyHttpApiKeyAuth")
+@auth([httpApiKeyAuth])
+operation OnlyHttpApiKeyAuth {}
+
+@http(method: "GET", uri: "/OnlyHttpBearerAuth")
+@auth([httpBearerAuth])
+operation OnlyHttpBearerAuth {}
+
+@http(method: "GET", uri: "/OnlyHttpApiKeyAndBearerAuth")
+@auth([httpApiKeyAuth, httpBearerAuth])
+operation OnlyHttpApiKeyAndBearerAuth {}
+
+@http(method: "GET", uri: "/OnlyHttpApiKeyAndBearerAuthReversed")
+@auth([httpBearerAuth, httpApiKeyAuth])
+operation OnlyHttpApiKeyAndBearerAuthReversed {}
+
+@http(method: "GET", uri: "/OnlyHttpApiKeyAuthOptional")
+@auth([httpApiKeyAuth])
+@optionalAuth
+operation OnlyHttpApiKeyAuthOptional {}
+
+@http(method: "GET", uri: "/SameAsService")
+operation SameAsService {}
 
 resource City {
     identifiers: {cityId: CityId}
