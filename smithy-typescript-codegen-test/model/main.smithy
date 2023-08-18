@@ -9,10 +9,12 @@ use smithy.waiters#waitable
 
 /// Provides weather forecasts.
 @fakeProtocol
-@httpApiKeyAuth(name: "X-Api-Key", in: "header")
-@httpBearerAuth
-@sigv4(name: "weather")
-@auth([sigv4])
+// feat(experimentalIdentityAndAuth): uncomment operations as individual
+//   auth scheme support is implemented
+// @httpApiKeyAuth(name: "X-Api-Key", in: "header")
+// @httpBearerAuth
+// @sigv4(name: "weather")
+// @auth([sigv4])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01"
@@ -21,13 +23,15 @@ service Weather {
         GetCurrentTime
         // util-stream.integ.spec.ts
         Invoke
+        // feat(experimentalIdentityAndAuth): uncomment operations as individual
+        //   auth scheme support is implemented
         // experimentalIdentityAndAuth
-        OnlyHttpApiKeyAuth
-        OnlyHttpBearerAuth
-        OnlyHttpApiKeyAndBearerAuth
-        OnlyHttpApiKeyAndBearerAuthReversed
-        OnlyHttpApiKeyAuthOptional
-        SameAsService
+        // OnlyHttpApiKeyAuth
+        // OnlyHttpBearerAuth
+        // OnlyHttpApiKeyAndBearerAuth
+        // OnlyHttpApiKeyAndBearerAuthReversed
+        // OnlyHttpApiKeyAuthOptional
+        // SameAsService
     ]
 }
 
