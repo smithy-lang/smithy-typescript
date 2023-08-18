@@ -50,6 +50,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
@@ -235,6 +236,18 @@ final class DirectedTypeScriptCodegen
         delegator.useShapeWriter(service, writer -> new ServiceBareBonesClientGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
 
+        if (directive.settings().getExperimentalIdentityAndAuth()) {
+            // feat(experimentalIdentityAndAuth): allow configuring custom HttpAuthSchemeProviderGenerator
+            LOGGER.fine("experimentalIdentityAndAuth: Generating auth scheme resolver");
+            new HttpAuthSchemeProviderGenerator(
+                delegator,
+                settings,
+                model,
+                symbolProvider,
+                directive.context().integrations()
+            ).run();
+        }
+
         // Generate the aggregated service client.
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
         String aggregatedClientName = serviceSymbol.getName().replace("Client", "");
@@ -418,7 +431,8 @@ final class DirectedTypeScriptCodegen
                     directive.model(),
                     directive.symbolProvider(),
                     directive.context().writerDelegator(),
-                    directive.context().integrations());
+                    directive.context().integrations(),
+                    directive.context().applicationProtocol());
             for (LanguageTarget target : LanguageTarget.values()) {
                 LOGGER.fine("Generating " + target + " runtime configuration");
                 configGenerator.generate(target);

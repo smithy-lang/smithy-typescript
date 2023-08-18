@@ -67,7 +67,8 @@ public class RuntimeConfigGeneratorTest {
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptDelegator delegator = new TypeScriptDelegator(manifest, symbolProvider);
         RuntimeConfigGenerator generator = new RuntimeConfigGenerator(
-                settings, model, symbolProvider, delegator, integrations);
+                settings, model, symbolProvider, delegator, integrations,
+                ApplicationProtocol.createDefaultHttpApplicationProtocol());
         generator.generate(LanguageTarget.NODE);
         generator.generate(LanguageTarget.BROWSER);
         generator.generate(LanguageTarget.REACT_NATIVE);
