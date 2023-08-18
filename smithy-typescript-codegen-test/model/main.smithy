@@ -11,7 +11,7 @@ use smithy.waiters#waitable
 @fakeProtocol
 // feat(experimentalIdentityAndAuth): uncomment operations as individual
 //   auth scheme support is implemented
-// @httpApiKeyAuth(name: "X-Api-Key", in: "header")
+@httpApiKeyAuth(name: "X-Api-Key", in: "header")
 // @httpBearerAuth
 // @sigv4(name: "weather")
 // @auth([sigv4])
@@ -26,12 +26,12 @@ service Weather {
         // feat(experimentalIdentityAndAuth): uncomment operations as individual
         //   auth scheme support is implemented
         // experimentalIdentityAndAuth
-        // OnlyHttpApiKeyAuth
+        OnlyHttpApiKeyAuth
         // OnlyHttpBearerAuth
         // OnlyHttpApiKeyAndBearerAuth
         // OnlyHttpApiKeyAndBearerAuthReversed
-        // OnlyHttpApiKeyAuthOptional
-        // SameAsService
+        OnlyHttpApiKeyAuthOptional
+        SameAsService
     ]
 }
 
