@@ -5,6 +5,7 @@ software.amazon.smithy.typescript.codegen.integration.AddDefaultsModeDependency
 software.amazon.smithy.typescript.codegen.auth.http.integration.AddNoAuthPlugin
 software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpApiKeyAuthPlugin
 software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpBearerAuthPlugin
+software.amazon.smithy.typescript.codegen.auth.http.integration.AddSigV4AuthPlugin
 software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin
 software.amazon.smithy.typescript.codegen.integration.AddBaseServiceExceptionClass
 software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency

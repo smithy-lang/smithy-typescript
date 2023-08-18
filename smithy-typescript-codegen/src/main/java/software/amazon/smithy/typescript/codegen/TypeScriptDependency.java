@@ -90,7 +90,8 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", "^2.0.5", false),
 
     // Conditionally added when setting the auth middleware.
-    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "^2.0.0", false),
+    UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "^2.0.0", false),
+    @Deprecated AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "^2.0.0", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER(
@@ -113,6 +114,9 @@ public enum TypeScriptDependency implements Dependency {
     @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^2.0.5", false),
     @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.5", false),
     UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.5", false),
+
+    // Conditionally added when @aws.auth#sigv4 is used
+    SIGNATURE_V4("dependencies", "@smithy/signature-v4", "^2.0.4", false),
 
     // feat(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
     // This package should never have a major version, and should only use minor and patch versions in development.
