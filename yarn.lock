@@ -1885,6 +1885,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth":
+  version: 0.0.0-use.local
+  resolution: "@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth"
+  dependencies:
+    "@smithy/types": "workspace:^"
+    "@tsconfig/recommended": 1.0.1
+    concurrently: 7.0.0
+    downlevel-dts: 0.10.1
+    jest: 28.1.1
+    rimraf: 3.0.2
+    tslib: ^2.5.0
+    typedoc: 0.23.23
+    typescript: ~4.9.5
+  languageName: unknown
+  linkType: soft
+
 "@smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
