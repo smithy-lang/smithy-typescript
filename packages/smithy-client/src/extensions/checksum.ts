@@ -1,8 +1,9 @@
-import { ChecksumConstructor } from "../checksum";
-import { HashConstructor } from "../crypto";
+import type { ChecksumConstructor, HashConstructor } from "@smithy/types";
 
 /**
  * @internal
+ *
+ * @deprecated will be imported from types.
  */
 export enum AlgorithmId {
   MD5 = "md5",
@@ -14,6 +15,8 @@ export enum AlgorithmId {
 
 /**
  * @internal
+ *
+ * @deprecated will be imported from types.
  */
 export interface ChecksumAlgorithm {
   algorithmId(): AlgorithmId;
@@ -22,32 +25,18 @@ export interface ChecksumAlgorithm {
 
 /**
  * @internal
+ *
+ * @deprecated will be imported from types.
  */
 export interface ChecksumConfiguration {
   addChecksumAlgorithm(algo: ChecksumAlgorithm): void;
   checksumAlgorithms(): ChecksumAlgorithm[];
-
-  /**
-   * @deprecated unused.
-   */
-  [other: string | number]: any;
 }
 
 /**
- * @deprecated will be removed for implicit type.
- */
-type GetChecksumConfigurationType = (
-  runtimeConfig: Partial<{
-    sha256: ChecksumConstructor | HashConstructor;
-    md5: ChecksumConstructor | HashConstructor;
-  }>
-) => ChecksumConfiguration;
-
-/**
  * @internal
- * @deprecated will be moved to smithy-client.
  */
-export const getChecksumConfiguration: GetChecksumConfigurationType = (
+export const getChecksumConfiguration = (
   runtimeConfig: Partial<{
     sha256: ChecksumConstructor | HashConstructor;
     md5: ChecksumConstructor | HashConstructor;
@@ -81,17 +70,10 @@ export const getChecksumConfiguration: GetChecksumConfigurationType = (
 };
 
 /**
- * @deprecated will be removed for implicit type.
- */
-type ResolveChecksumRuntimeConfigType = (clientConfig: ChecksumConfiguration) => any;
-
-/**
  * @internal
- *
- * @deprecated will be moved to smithy-client.
  */
-export const resolveChecksumRuntimeConfig: ResolveChecksumRuntimeConfigType = (clientConfig: ChecksumConfiguration) => {
-  const runtimeConfig: any = {};
+export const resolveChecksumRuntimeConfig = (clientConfig: ChecksumConfiguration) => {
+  const runtimeConfig: Partial<Record<AlgorithmId, HashConstructor | ChecksumConstructor>> = {};
 
   clientConfig.checksumAlgorithms().forEach((checksumAlgorithm) => {
     runtimeConfig[checksumAlgorithm.algorithmId()] = checksumAlgorithm.checksumConstructor();

@@ -4,6 +4,7 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
+      "inputs": ["src", "package.json"],
       "outputs": ["dist-types", "dist-cjs", "dist-es"]
     },
     "test": {
