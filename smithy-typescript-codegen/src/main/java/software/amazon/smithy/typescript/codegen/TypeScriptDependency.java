@@ -114,7 +114,8 @@ public enum TypeScriptDependency implements Dependency {
     @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.5", false),
     UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.5", false),
 
-    // Conditionally added dependencies for `experimentalIdentityAndAuth`.
+    // feat(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
+    // This package should never have a major version, and should only use minor and patch versions in development.
     EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", "~0.0.1", false),
 
     // Conditionally added when specs have been generated.
