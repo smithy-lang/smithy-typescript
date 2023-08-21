@@ -1890,6 +1890,7 @@ __metadata:
   resolution: "@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth"
   dependencies:
     "@smithy/protocol-http": "workspace:^"
+    "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     concurrently: 7.0.0
@@ -2330,7 +2331,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/signature-v4@workspace:packages/signature-v4":
+"@smithy/signature-v4@workspace:^, @smithy/signature-v4@workspace:packages/signature-v4":
   version: 0.0.0-use.local
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
