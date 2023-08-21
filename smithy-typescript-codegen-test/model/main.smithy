@@ -9,12 +9,10 @@ use smithy.waiters#waitable
 
 /// Provides weather forecasts.
 @fakeProtocol
-// feat(experimentalIdentityAndAuth): uncomment operations as individual
-//   auth scheme support is implemented
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @httpBearerAuth
-// @sigv4(name: "weather")
-// @auth([sigv4])
+@sigv4(name: "weather")
+@auth([sigv4])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01"
@@ -23,8 +21,6 @@ service Weather {
         GetCurrentTime
         // util-stream.integ.spec.ts
         Invoke
-        // feat(experimentalIdentityAndAuth): uncomment operations as individual
-        //   auth scheme support is implemented
         // experimentalIdentityAndAuth
         OnlyHttpApiKeyAuth
         OnlyHttpApiKeyAuthOptional
@@ -32,6 +28,8 @@ service Weather {
         OnlyHttpBearerAuthOptional
         OnlyHttpApiKeyAndBearerAuth
         OnlyHttpApiKeyAndBearerAuthReversed
+        OnlySigv4Auth
+        OnlySigv4AuthOptional
         SameAsService
     ]
 }
@@ -43,6 +41,10 @@ operation OnlyHttpApiKeyAuth {}
 @http(method: "GET", uri: "/OnlyHttpBearerAuth")
 @auth([httpBearerAuth])
 operation OnlyHttpBearerAuth {}
+
+@http(method: "GET", uri: "/OnlySigv4Auth")
+@auth([sigv4])
+operation OnlySigv4Auth {}
 
 @http(method: "GET", uri: "/OnlyHttpApiKeyAndBearerAuth")
 @auth([httpApiKeyAuth, httpBearerAuth])
@@ -61,6 +63,11 @@ operation OnlyHttpApiKeyAuthOptional {}
 @auth([httpBearerAuth])
 @optionalAuth
 operation OnlyHttpBearerAuthOptional {}
+
+@http(method: "GET", uri: "/OnlySigv4AuthOptional")
+@auth([sigv4])
+@optionalAuth
+operation OnlySigv4AuthOptional {}
 
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
