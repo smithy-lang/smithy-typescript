@@ -12,7 +12,7 @@ use smithy.waiters#waitable
 // feat(experimentalIdentityAndAuth): uncomment operations as individual
 //   auth scheme support is implemented
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
-// @httpBearerAuth
+@httpBearerAuth
 // @sigv4(name: "weather")
 // @auth([sigv4])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
@@ -27,10 +27,11 @@ service Weather {
         //   auth scheme support is implemented
         // experimentalIdentityAndAuth
         OnlyHttpApiKeyAuth
-        // OnlyHttpBearerAuth
-        // OnlyHttpApiKeyAndBearerAuth
-        // OnlyHttpApiKeyAndBearerAuthReversed
         OnlyHttpApiKeyAuthOptional
+        OnlyHttpBearerAuth
+        OnlyHttpBearerAuthOptional
+        OnlyHttpApiKeyAndBearerAuth
+        OnlyHttpApiKeyAndBearerAuthReversed
         SameAsService
     ]
 }
@@ -55,6 +56,11 @@ operation OnlyHttpApiKeyAndBearerAuthReversed {}
 @auth([httpApiKeyAuth])
 @optionalAuth
 operation OnlyHttpApiKeyAuthOptional {}
+
+@http(method: "GET", uri: "/OnlyHttpBearerAuthOptional")
+@auth([httpBearerAuth])
+@optionalAuth
+operation OnlyHttpBearerAuthOptional {}
 
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
