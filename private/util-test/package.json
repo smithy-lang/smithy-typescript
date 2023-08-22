@@ -1,5 +1,6 @@
 {
   "name": "@smithy/util-test",
+  "version": "0.0.0",
   "private": true,
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -29,6 +30,5 @@
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
     "typescript": "~4.9.5"
-  },
-  "version": null
+  }
 }
