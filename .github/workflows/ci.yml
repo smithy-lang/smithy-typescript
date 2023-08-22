@@ -81,7 +81,9 @@ jobs:
       # This checks the output of git diff. If it's not empty (i.e there were
       # changes) it'll return a non-zero error code.
       - name: Ensure there are no changes from running the formatter
-        run: test -z "$(git diff)"
+        run: |
+          git diff
+          test -z "$(git diff)"
 
   ensure-typescript-packages-have-changesets:
     runs-on: ubuntu-latest
