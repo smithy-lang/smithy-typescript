@@ -16,26 +16,20 @@
 package software.amazon.smithy.typescript.codegen.extensions;
 
 import software.amazon.smithy.typescript.codegen.Dependency;
+import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * An interface class for defining the service client configuration.
  */
 @SmithyInternalApi
-public interface ClientConfigurationInterface {
-    /**
-     * Define the dependency package where the interface and its related functions are defined in.
-     *
-     * @return Returns a dependency instance
-     */
-    Dependency dependency();
-
+public interface ExtensionConfigurationInterface {
     /**
      * Define the interface name.
      *
-     * @return Returns an interface name
+     * @return Returns the interface name and the corresponding dependency package
      */
-    String name();
+    Pair<String, Dependency> name();
 
     /**
      * Define a function that returns an object instance that implements the interface.
@@ -69,7 +63,7 @@ public interface ClientConfigurationInterface {
      *
      * @return Returns a typescript function name
      */
-    String getClientConfigurationFn();
+    Pair<String, Dependency> getExtensionConfigurationFn();
 
     /**
      * Define a function that returns an object instance that implements the interface.
@@ -92,5 +86,5 @@ public interface ClientConfigurationInterface {
      *
      * @return Returns a typescript function name
      */
-    String resolveRuntimeConfigFn();
+    Pair<String, Dependency> resolveRuntimeConfigFn();
 }

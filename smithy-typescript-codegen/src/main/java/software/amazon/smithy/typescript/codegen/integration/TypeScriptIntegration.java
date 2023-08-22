@@ -29,7 +29,7 @@ import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
-import software.amazon.smithy.typescript.codegen.extensions.ClientConfigurationInterface;
+import software.amazon.smithy.typescript.codegen.extensions.ExtensionConfigurationInterface;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -236,7 +236,7 @@ public interface TypeScriptIntegration
      *
      * @return list of client configuration interface
      */
-    default List<ClientConfigurationInterface> getClientConfigurationInterfaces() {
+    default List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
         return Collections.emptyList();
     }
 }

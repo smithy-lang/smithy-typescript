@@ -24,10 +24,10 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 
-public class ClientConfigurationGenerator {
+public class ExtensionConfigurationGenerator {
 
-    private static final String CLIENT_CONFIGURATION_TEMPLATE = "clientConfiguration.template";
-    private static final String FILENAME = "clientConfiguration.ts";
+    private static final String CLIENT_CONFIGURATION_TEMPLATE = "extensionConfiguration.template";
+    private static final String FILENAME = "extensionConfiguration.ts";
 
     private final Model model;
     private final ServiceShape service;
@@ -35,7 +35,7 @@ public class ClientConfigurationGenerator {
     private final TypeScriptDelegator delegator;
     private final List<TypeScriptIntegration> integrations;
 
-    public ClientConfigurationGenerator(
+    public ExtensionConfigurationGenerator(
         Model model,
         ServiceShape service,
         SymbolProvider symbolProvider,
@@ -53,18 +53,20 @@ public class ClientConfigurationGenerator {
         Map<String, Dependency> interfaces = new HashMap<>();
 
         for (TypeScriptIntegration integration : integrations) {
-            integration.getClientConfigurationInterfaces().forEach(configurationInterface -> {
-                interfaces.put(configurationInterface.name(),
-                        configurationInterface.dependency());
+            integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+                interfaces.put(configurationInterface.name().left,
+                        configurationInterface.name().right);
             });
         }
 
-        String clientName = symbolProvider.toSymbol(service).getName();
+        String clientName = symbolProvider.toSymbol(service).getName()
+                .replace("Client", "")
+                .replace("client", "");
 
         String clientConfigurationContent = TypeScriptUtils
             .loadResourceAsString(CLIENT_CONFIGURATION_TEMPLATE)
-            .replace("${clientConfigName}", clientName + "Configuration")
-            .replace("${clientConfigInterfaces}", String.join(", ", interfaces.keySet()));
+            .replace("${extensionConfigName}", clientName + "ExtensionConfiguration")
+            .replace("${extensionConfigInterfaces}", String.join(", ", interfaces.keySet()));
 
         delegator.useFileWriter(Paths.get(CodegenUtils.SOURCE_FOLDER, FILENAME).toString(), writer -> {
             interfaces.entrySet().forEach(entry -> {

@@ -425,7 +425,7 @@ final class DirectedTypeScriptCodegen
             }
         }
 
-        new ClientConfigurationGenerator(directive.model(), directive.service(), directive.symbolProvider(),
+        new ExtensionConfigurationGenerator(directive.model(), directive.service(), directive.symbolProvider(),
                 directive.context().writerDelegator(), directive.context().integrations()).generate();
 
         new RuntimeExtensionsGenerator(directive.model(), directive.service(), directive.symbolProvider(),
