@@ -24,8 +24,8 @@ import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegrati
 
 public class RuntimeExtensionsGenerator {
 
-    private static final String TEMPLATE_1 = "runtimeExtensions1.template";
-    private static final String TEMPLATE_2 = "runtimeExtensions2.template";
+    private static final String TEMPLATE_1 = "resolveRuntimeExtensions1.template";
+    private static final String TEMPLATE_2 = "resolveRuntimeExtensions2.template";
     private static final String FILENAME = "runtimeExtensions.ts";
 
     private final Model model;
@@ -48,12 +48,14 @@ public class RuntimeExtensionsGenerator {
     }
 
     void generate() {
-        String clientName = symbolProvider.toSymbol(service).getName();
+        String clientName = symbolProvider.toSymbol(service).getName()
+                .replace("Client", "")
+                .replace("client", "");
 
         String template1Contents = TypeScriptUtils.loadResourceAsString(TEMPLATE_1)
-            .replace("${clientConfigName}", clientName + "Configuration")
+            .replace("${extensionConfigName}", clientName + "ExtensionConfiguration")
             .replace("$", "$$") // sanitize template place holders.
-            .replace("$${getPartialClientConfigurations}", "${L@getPartialClientConfigurations}");
+            .replace("$${getPartialExtensionConfigurations}", "${L@getPartialExtensionConfigurations}");
 
         String template2Contents = TypeScriptUtils.loadResourceAsString(TEMPLATE_2)
             .replace("$", "$$") // sanitize template place holders.
@@ -61,20 +63,22 @@ public class RuntimeExtensionsGenerator {
 
         delegator.useFileWriter(Paths.get(CodegenUtils.SOURCE_FOLDER, FILENAME).toString(), writer -> {
             for (TypeScriptIntegration integration : integrations) {
-                integration.getClientConfigurationInterfaces().forEach(configurationInterface -> {
-                    writer.addDependency(configurationInterface.dependency());
-                    writer.addImport(configurationInterface.getClientConfigurationFn(), null,
-                            configurationInterface.dependency());
-                    writer.addImport(configurationInterface.resolveRuntimeConfigFn(), null,
-                            configurationInterface.dependency());
+                integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+                    writer.addDependency(configurationInterface.getExtensionConfigurationFn().right);
+                    writer.addDependency(configurationInterface.resolveRuntimeConfigFn().right);
+
+                    writer.addImport(configurationInterface.getExtensionConfigurationFn().left, null,
+                            configurationInterface.getExtensionConfigurationFn().right);
+                    writer.addImport(configurationInterface.resolveRuntimeConfigFn().left, null,
+                            configurationInterface.resolveRuntimeConfigFn().right);
                 });
             }
 
-            writer.indent().onSection("getPartialClientConfigurations", original -> {
+            writer.indent().onSection("getPartialExtensionConfigurations", original -> {
                 for (TypeScriptIntegration integration : integrations) {
-                    integration.getClientConfigurationInterfaces().forEach(configurationInterface -> {
+                    integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
                         writer.indent(2).write("...asPartial($L(runtimeConfig)),",
-                                configurationInterface.getClientConfigurationFn());
+                                configurationInterface.getExtensionConfigurationFn().left);
                         writer.dedent(2);
                     });
                 }
@@ -83,9 +87,9 @@ public class RuntimeExtensionsGenerator {
 
             writer.indent().onSection("resolvePartialRuntimeConfigs", original -> {
                 for (TypeScriptIntegration integration : integrations) {
-                    integration.getClientConfigurationInterfaces().forEach(configurationInterface -> {
-                        writer.indent(2).write("...$L(clientConfiguration),",
-                                configurationInterface.resolveRuntimeConfigFn());
+                    integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+                        writer.indent(2).write("...$L(extensionConfiguration),",
+                                configurationInterface.resolveRuntimeConfigFn().left);
                         writer.dedent(2);
                     });
                 }

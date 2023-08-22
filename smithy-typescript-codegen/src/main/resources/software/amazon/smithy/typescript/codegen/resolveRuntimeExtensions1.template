@@ -1,10 +1,10 @@
-import { ${clientConfigName}, ${clientConfigType} } from "./clientConfiguration";
+import { ${extensionConfigName} } from "./extensionConfiguration";
 
 /**
  * @public
  */
 export interface RuntimeExtension {
-    configureClient(clientConfiguration: ${clientConfigType}): void;
+    configure(clientConfiguration: ${extensionConfigName}): void;
 }
 
 /**
@@ -14,7 +14,7 @@ export interface RuntimeExtensionsConfig {
     extensions: RuntimeExtension[]
 }
 
-const asPartial = <T extends Partial<${clientConfigName}>>(t: T) => t;
+const asPartial = <T extends Partial<${extensionConfigName}>>(t: T) => t;
 
 /**
  * @internal
@@ -23,8 +23,8 @@ export const resolveRuntimeExtensions = (
     runtimeConfig: any,
     extensions: RuntimeExtension[]
 ) => {
-  const clientConfiguration: ${clientConfigName} = {
-${getPartialClientConfigurations}
+  const extensionConfiguration: ${extensionConfigName} = {
+${getPartialExtensionConfigurations}
   };
 
-  extensions.forEach(extension => extension.configureClient(clientConfiguration));
+  extensions.forEach(extension => extension.configure(extensionConfiguration));
