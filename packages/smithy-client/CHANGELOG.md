@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.0.5
+
+### Patch Changes
+
+- b753dd4c: move extensions code to smithy-client
+- 6c8ffa27: Rename defaultClientConfiguration to defaultExtensionConfiguration
+- Updated dependencies [b753dd4c]
+- Updated dependencies [6c8ffa27]
+- Updated dependencies [1be3c4c9]
+  - @smithy/types@2.2.2
+  - @smithy/util-stream@2.0.5
+  - @smithy/middleware-stack@2.0.0
+
 ## 2.0.4
 
 ### Patch Changes

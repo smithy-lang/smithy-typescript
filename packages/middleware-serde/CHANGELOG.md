@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.5
+
+### Patch Changes
+
+- 1be3c4c9: Add integration tests
+- Updated dependencies [b753dd4c]
+- Updated dependencies [6c8ffa27]
+  - @smithy/types@2.2.2
+
 ## 2.0.4
 
 ### Patch Changes

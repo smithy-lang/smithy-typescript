@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.2.2
+
+### Patch Changes
+
+- b753dd4c: move extensions code to smithy-client
+- 6c8ffa27: Rename defaultClientConfiguration to defaultExtensionConfiguration
+
 ## 2.2.1
 
 ### Patch Changes

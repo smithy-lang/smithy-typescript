@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 4571d59c: calculateBodyLength for Readable stream with range
+
 ## 2.0.0
 
 ### Major Changes
