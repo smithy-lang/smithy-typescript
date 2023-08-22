@@ -6,25 +6,28 @@ export { AlgorithmId, ChecksumAlgorithm, ChecksumConfiguration };
 /**
  * @internal
  */
-export const getChecksumConfiguration = (
-  runtimeConfig: Partial<{
-    sha256: ChecksumConstructor | HashConstructor;
-    md5: ChecksumConstructor | HashConstructor;
-  }>
-) => {
+export type PartialChecksumRuntimeConfigType = Partial<{
+  sha256: ChecksumConstructor | HashConstructor;
+  md5: ChecksumConstructor | HashConstructor;
+  crc32: ChecksumConstructor | HashConstructor;
+  crc32c: ChecksumConstructor | HashConstructor;
+  sha1: ChecksumConstructor | HashConstructor;
+}>;
+
+/**
+ * @internal
+ */
+export const getChecksumConfiguration = (runtimeConfig: PartialChecksumRuntimeConfigType) => {
   const checksumAlgorithms: ChecksumAlgorithm[] = [];
 
-  if (runtimeConfig.sha256 !== undefined) {
+  for (const id in AlgorithmId) {
+    const algorithmId = AlgorithmId[id as keyof typeof AlgorithmId];
+    if (runtimeConfig[algorithmId] === undefined) {
+      continue;
+    }
     checksumAlgorithms.push({
-      algorithmId: () => AlgorithmId.SHA256,
-      checksumConstructor: () => runtimeConfig.sha256!,
-    });
-  }
-
-  if (runtimeConfig.md5 != undefined) {
-    checksumAlgorithms.push({
-      algorithmId: () => AlgorithmId.MD5,
-      checksumConstructor: () => runtimeConfig.md5!,
+      algorithmId: () => algorithmId,
+      checksumConstructor: () => runtimeConfig[algorithmId]!,
     });
   }
 
@@ -42,9 +45,8 @@ export const getChecksumConfiguration = (
 /**
  * @internal
  */
-export const resolveChecksumRuntimeConfig = (clientConfig: ChecksumConfiguration) => {
-  const runtimeConfig: Partial<Record<AlgorithmId, HashConstructor | ChecksumConstructor>> = {};
-
+export const resolveChecksumRuntimeConfig = (clientConfig: ChecksumConfiguration): PartialChecksumRuntimeConfigType => {
+  const runtimeConfig: PartialChecksumRuntimeConfigType = {};
   clientConfig.checksumAlgorithms().forEach((checksumAlgorithm) => {
     runtimeConfig[checksumAlgorithm.algorithmId()] = checksumAlgorithm.checksumConstructor();
   });
