@@ -1,37 +1,7 @@
-import type { ChecksumConstructor, HashConstructor } from "@smithy/types";
+import type { ChecksumAlgorithm, ChecksumConfiguration, ChecksumConstructor, HashConstructor } from "@smithy/types";
+import { AlgorithmId } from "@smithy/types";
 
-/**
- * @internal
- *
- * @deprecated will be imported from types.
- */
-export enum AlgorithmId {
-  MD5 = "md5",
-  CRC32 = "crc32",
-  CRC32C = "crc32c",
-  SHA1 = "sha1",
-  SHA256 = "sha256",
-}
-
-/**
- * @internal
- *
- * @deprecated will be imported from types.
- */
-export interface ChecksumAlgorithm {
-  algorithmId(): AlgorithmId;
-  checksumConstructor(): ChecksumConstructor | HashConstructor;
-}
-
-/**
- * @internal
- *
- * @deprecated will be imported from types.
- */
-export interface ChecksumConfiguration {
-  addChecksumAlgorithm(algo: ChecksumAlgorithm): void;
-  checksumAlgorithms(): ChecksumAlgorithm[];
-}
+export { AlgorithmId, ChecksumAlgorithm, ChecksumConfiguration };
 
 /**
  * @internal

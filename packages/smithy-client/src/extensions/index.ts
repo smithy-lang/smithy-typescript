@@ -1,1 +1,1 @@
-export * from "./defaultClientConfiguration";
+export * from "./defaultExtensionConfiguration";

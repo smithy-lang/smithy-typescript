@@ -1,6 +1,7 @@
 import { ChecksumConfiguration, getChecksumConfiguration, resolveChecksumRuntimeConfig } from "./checksum";
 
 /**
+ * @deprecated will be replaced by DefaultExtensionConfiguration.
  * @internal
  *
  * Default client configuration consisting various configurations for modifying a service client
