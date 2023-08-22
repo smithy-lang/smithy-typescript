@@ -1,11 +1,13 @@
 import type { DefaultExtensionConfiguration } from "@smithy/types";
 
 import { getChecksumConfiguration, resolveChecksumRuntimeConfig } from "./checksum";
+import { getRetryConfiguration, resolveRetryRuntimeConfig } from "./retry";
 
 /**
  * @internal
  */
-export type DefaultExtensionConfigType = Parameters<typeof getChecksumConfiguration>[0];
+export type DefaultExtensionConfigType = Parameters<typeof getChecksumConfiguration>[0] &
+  Parameters<typeof getRetryConfiguration>[0];
 
 /**
  * @internal
@@ -15,6 +17,7 @@ export type DefaultExtensionConfigType = Parameters<typeof getChecksumConfigurat
 export const getDefaultExtensionConfiguration = (runtimeConfig: DefaultExtensionConfigType) => {
   return {
     ...getChecksumConfiguration(runtimeConfig),
+    ...getRetryConfiguration(runtimeConfig),
   };
 };
 
@@ -34,5 +37,6 @@ export const getDefaultClientConfiguration = getDefaultExtensionConfiguration;
 export const resolveDefaultRuntimeConfig = (config: DefaultExtensionConfiguration) => {
   return {
     ...resolveChecksumRuntimeConfig(config),
+    ...resolveRetryRuntimeConfig(config),
   };
 };
