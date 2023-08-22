@@ -8,6 +8,7 @@ export * from "./date-utils";
 export * from "./default-error-handler";
 export * from "./defaults-mode";
 export * from "./emitWarningIfUnsupportedVersion";
+export * from "./extensions";
 export * from "./exceptions";
 export * from "./extended-encode-uri-component";
 export * from "./get-array-if-single-item";
