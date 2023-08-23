@@ -40,79 +40,79 @@ public enum TypeScriptDependency implements Dependency {
 
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", "^2.0.0", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
-    SMITHY_TYPES("dependencies", "@smithy/types", "^2.2.0", true),
-    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.0.3", true),
-    INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "^2.0.3", true),
-    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^2.0.3", true),
+    SMITHY_TYPES("dependencies", "@smithy/types", "^2.2.2", true),
+    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.0.5", true),
+    INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "^2.0.5", true),
+    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^2.0.5", true),
     TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
 
-    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^2.0.3", true),
-    MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", "^2.0.3", true),
-    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^2.0.3", true),
+    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^2.0.5", true),
+    MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", "^2.0.5", true),
+    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^2.0.5", true),
     UTIL_RETRY("dependencies", "@smithy/util-retry", "^2.0.0", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", "^2.0.0", true),
-    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^2.0.3", false),
+    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^2.0.5", false),
     AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "3.0.0", true),
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "3.0.0", true),
-    AWS_SDK_HASH_NODE("dependencies", "@smithy/hash-node", "^2.0.3", true),
+    AWS_SDK_HASH_NODE("dependencies", "@smithy/hash-node", "^2.0.5", true),
 
-    AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", "^2.0.3", true),
+    AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", "^2.0.5", true),
 
     @Deprecated AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@smithy/util-base64-browser", "^1.0.1", false),
     @Deprecated AWS_SDK_UTIL_BASE64_NODE("dependencies", "@smithy/util-base64-node", "^1.0.1", false),
     AWS_SDK_UTIL_BASE64("dependencies", "@smithy/util-base64", "^2.0.0", true),
 
     AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@smithy/util-body-length-browser", "^2.0.0", true),
-    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@smithy/util-body-length-node", "^2.0.0", true),
+    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@smithy/util-body-length-node", "^2.1.0", true),
 
     AWS_SDK_UTIL_UTF8("dependencies", "@smithy/util-utf8", "^2.0.0", true),
 
-    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", "^2.0.3", false),
+    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", "^2.0.5", false),
 
-    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^2.0.3", true),
-    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "^2.0.3", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^2.0.5", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "^2.0.5", true),
 
-    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^2.0.3", false),
+    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^2.0.5", false),
 
     UUID("dependencies", "uuid", "^8.3.2", false),
 
     // Conditionally added when httpChecksumRequired trait exists
-    MD5_BROWSER("dependencies", "@smithy/md5-js", "^2.0.3", false),
-    STREAM_HASHER_NODE("dependencies", "@smithy/hash-stream-node", "^2.0.3", false),
-    STREAM_HASHER_BROWSER("dependencies", "@smithy/hash-blob-browser", "^2.0.3", false),
-    BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", "^2.0.3", false),
+    MD5_BROWSER("dependencies", "@smithy/md5-js", "^2.0.5", false),
+    STREAM_HASHER_NODE("dependencies", "@smithy/hash-stream-node", "^2.0.5", false),
+    STREAM_HASHER_BROWSER("dependencies", "@smithy/hash-blob-browser", "^2.0.5", false),
+    BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", "^2.0.5", false),
 
     // Conditionally added when using an HTTP application protocol.
-    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^2.0.3", false),
-    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", "^2.0.3", false),
-    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", "^2.0.3", false),
+    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^2.0.5", false),
+    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", "^2.0.5", false),
+    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", "^2.0.5", false),
 
     // Conditionally added when setting the auth middleware.
     AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "^2.0.0", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER(
-        "dependencies", "@smithy/eventstream-serde-config-resolver", "^2.0.3", false),
-    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", "^2.0.3", false),
-    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", "^2.0.3", false),
+        "dependencies", "@smithy/eventstream-serde-config-resolver", "^2.0.5", false),
+    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", "^2.0.5", false),
+    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", "^2.0.5", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^6.0.0", false),
     TYPES_BIG_JS("devDependencies", "@types/big.js", "^6.0.0", false),
 
     // Conditionally added when interacting with specific protocol test bodyMediaType values.
-    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@smithy/querystring-builder", "^2.0.3", false),
+    AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@smithy/querystring-builder", "^2.0.5", false),
 
     // Conditionally added when XML parser needs to be used.
     XML_PARSER("dependencies", "fast-xml-parser", "4.2.5", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.
-    @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^2.0.3", false),
-    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.3", false),
-    UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.3", false),
+    @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^2.0.5", false),
+    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.5", false),
+    UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.5", false),
 
     // Conditionally added when specs have been generated.
     VITEST("devDependencies", "vitest", "^0.33.0", false),
