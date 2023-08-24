@@ -13,19 +13,23 @@ import { ProviderError } from "./ProviderError";
  * If no providers were received or no provider resolves successfully, the
  * returned promise will be rejected.
  */
-export function chain<T>(...providers: Array<Provider<T>>): Provider<T> {
-  return () => {
-    let promise: Promise<T> = Promise.reject(new ProviderError("No providers in chain"));
-    for (const provider of providers) {
-      promise = promise.catch((err: any) => {
-        if (err?.tryNextLink) {
-          return provider();
-        }
+export const chain = <T>(...providers: Array<Provider<T>>): Provider<T> => async () => {
+  if (providers.length === 0) {
+    throw new ProviderError("No providers in chain");
+  }
 
-        throw err;
-      });
+  let lastProviderError: Error | undefined;
+  for (const provider of providers) {
+    try {
+      const credentials = await provider();
+      return credentials;
+    } catch (err) {
+      lastProviderError = err;
+      if (err?.tryNextLink) {
+        continue;
+      }
+      throw err;
     }
-
-    return promise;
-  };
-}
+  }
+  throw lastProviderError;
+};
