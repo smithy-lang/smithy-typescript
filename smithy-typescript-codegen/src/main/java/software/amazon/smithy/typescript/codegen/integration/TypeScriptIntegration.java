@@ -42,6 +42,18 @@ public interface TypeScriptIntegration
         extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
 
     /**
+     * Filters the integration based on {@link TypeScriptSettings}.
+     *
+     * By default, it will filter against the set of `excludedIntegrations`.
+     *
+     * @param settings settings to filter against
+     * @return whether the integration matches the settings or not.
+     */
+    default boolean matchesSettings(TypeScriptSettings settings) {
+        return !settings.getExcludedIntegrations().contains(name());
+    }
+
+    /**
      * Gets a list of plugins to apply to the generated client.
      *
      * @return Returns the list of RuntimePlugins to apply to the client.

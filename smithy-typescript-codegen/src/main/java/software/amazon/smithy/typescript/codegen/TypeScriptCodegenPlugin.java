@@ -15,6 +15,9 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
+import java.util.logging.Logger;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
@@ -26,6 +29,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
+
+    private static final Logger LOGGER = Logger.getLogger(TypeScriptCodegenPlugin.class.getName());
 
     @Override
     public String getName() {
@@ -50,6 +55,20 @@ public final class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
         TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings(),
                 TypeScriptSettings.ArtifactType.CLIENT);
         runner.settings(settings);
+
+        // Only add integrations if the integrations match the settings
+        runner.integrationFinder(() ->
+            () -> ServiceLoader.load(TypeScriptIntegration.class, CodegenDirector.class.getClassLoader())
+                .stream()
+                .map(Provider::get)
+                .filter(integration -> {
+                    boolean matchesSettings = integration.matchesSettings(settings);
+                    if (!matchesSettings) {
+                        LOGGER.info(() -> "Skipping TypeScript integration based on settings: " + integration.name());
+                    }
+                    return matchesSettings;
+                })
+                .iterator());
 
         runner.service(settings.getService());
 

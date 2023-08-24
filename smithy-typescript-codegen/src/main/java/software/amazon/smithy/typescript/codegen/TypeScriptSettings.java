@@ -36,6 +36,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -58,6 +59,7 @@ public final class TypeScriptSettings {
     private static final String PRIVATE = "private";
     private static final String PACKAGE_MANAGER = "packageManager";
     private static final String CREATE_DEFAULT_README = "createDefaultReadme";
+    private static final String EXCLUDED_INTEGRATIONS = "excludedIntegrations";
     private static final String EXPERIMENTAL_IDENTITY_AND_AUTH = "experimentalIdentityAndAuth";
 
     private String packageName;
@@ -75,6 +77,7 @@ public final class TypeScriptSettings {
         RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
     private boolean createDefaultReadme = false;
+    private Set<String> excludedIntegrations = Collections.emptySet();
     private boolean experimentalIdentityAndAuth = false;
 
     @Deprecated
@@ -109,6 +112,9 @@ public final class TypeScriptSettings {
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
         settings.setCreateDefaultReadme(
                 config.getBooleanMember(CREATE_DEFAULT_README).map(BooleanNode::getValue).orElse(false));
+        settings.setExcludedIntegrations(config.containsMember(EXCLUDED_INTEGRATIONS)
+            ? Set.copyOf(Node.loadArrayOfString(EXCLUDED_INTEGRATIONS, config.expectArrayMember(EXCLUDED_INTEGRATIONS)))
+            : Collections.<String>emptySet());
         settings.setExperimentalIdentityAndAuth(
                 config.getBooleanMemberOrDefault(EXPERIMENTAL_IDENTITY_AND_AUTH, false));
         settings.setPackageManager(
@@ -357,6 +363,24 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * Returns the names of excluded {@link TypeScriptIntegration}s.
+     *
+     * @return the names of excluded {@link TypeScriptIntegration}s
+     */
+    public Set<String> getExcludedIntegrations() {
+        return excludedIntegrations;
+    }
+
+    /**
+     * Sets the names of excluded {@link TypeScriptIntegration}s.
+     *
+     * @param excludedIntegrations names of {@link TypeScriptIntegration}s to exclude
+     */
+    public void setExcludedIntegrations(Set<String> excludedIntegrations) {
+        this.excludedIntegrations = excludedIntegrations;
+    }
+
+    /**
      * Returns whether to use experimental identity and auth.
      *
      * @return if experimental identity and auth should used. Default: false
@@ -469,7 +493,7 @@ public final class TypeScriptSettings {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
-                              CREATE_DEFAULT_README, EXPERIMENTAL_IDENTITY_AND_AUTH)),
+                              CREATE_DEFAULT_README, EXCLUDED_INTEGRATIONS, EXPERIMENTAL_IDENTITY_AND_AUTH)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
