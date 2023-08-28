@@ -10,6 +10,7 @@
     "test": "turbo run test",
     "test:integration": "yarn build-test-packages && turbo run test:integration",
     "lint": "turbo run lint",
+    "lint-fix": "turbo run lint -- --fix",
     "format": "turbo run format --parallel",
     "stage-release": "turbo run stage-release",
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",

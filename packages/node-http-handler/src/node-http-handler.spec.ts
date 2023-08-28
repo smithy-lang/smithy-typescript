@@ -640,4 +640,68 @@ describe("NodeHttpHandler", () => {
       expect(nodeHttpHandler.destroy()).toBeUndefined();
     });
   });
+
+  describe("configs", () => {
+    const mockResponse = {
+      statusCode: 200,
+      statusText: "OK",
+      headers: {},
+      body: "test",
+    };
+
+    let mockHttpServer: HttpServer;
+    let request: HttpRequest;
+
+    beforeAll(() => {
+      mockHttpServer = createMockHttpServer().listen(54320);
+      request = new HttpRequest({
+        hostname: "localhost",
+        method: "GET",
+        port: (mockHttpServer.address() as AddressInfo).port,
+        protocol: "http:",
+        path: "/",
+        headers: {},
+      });
+    });
+
+    afterEach(() => {
+      mockHttpServer.removeAllListeners("request");
+      mockHttpServer.removeAllListeners("checkContinue");
+    });
+
+    afterAll(() => {
+      mockHttpServer.close();
+    });
+
+    it("put HttpClientConfig", async () => {
+      mockHttpServer.addListener("request", createResponseFunction(mockResponse));
+
+      const nodeHttpHandler = new NodeHttpHandler();
+      const requestTimeout = 200;
+
+      nodeHttpHandler.updateHttpClientConfig("requestTimeout", requestTimeout);
+
+      await nodeHttpHandler.handle(request, {});
+
+      expect(nodeHttpHandler.httpHandlerConfigs().requestTimeout).toEqual(requestTimeout);
+    });
+
+    it("update existing HttpClientConfig", async () => {
+      mockHttpServer.addListener("request", createResponseFunction(mockResponse));
+
+      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 200 });
+      const requestTimeout = 300;
+
+      nodeHttpHandler.updateHttpClientConfig("requestTimeout", requestTimeout);
+
+      await nodeHttpHandler.handle(request, {});
+
+      expect(nodeHttpHandler.httpHandlerConfigs().requestTimeout).toEqual(requestTimeout);
+    });
+
+    it("httpHandlerConfigs returns empty object if handle is not called", async () => {
+      const nodeHttpHandler = new NodeHttpHandler();
+      expect(nodeHttpHandler.httpHandlerConfigs()).toEqual({});
+    });
+  });
 });

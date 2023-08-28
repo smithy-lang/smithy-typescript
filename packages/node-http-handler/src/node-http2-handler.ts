@@ -41,9 +41,9 @@ export interface NodeHttp2HandlerOptions {
   maxConcurrentStreams?: number;
 }
 
-export class NodeHttp2Handler implements HttpHandler {
+export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
   private config?: NodeHttp2HandlerOptions;
-  private readonly configProvider: Promise<NodeHttp2HandlerOptions>;
+  private configProvider: Promise<NodeHttp2HandlerOptions>;
 
   public readonly metadata = { handlerProtocol: "h2" };
 
@@ -200,6 +200,20 @@ export class NodeHttp2Handler implements HttpHandler {
 
       writeRequestBodyPromise = writeRequestBody(req, request, requestTimeout);
     });
+  }
+
+  updateHttpClientConfig(key: keyof NodeHttp2HandlerOptions, value: NodeHttp2HandlerOptions[typeof key]): void {
+    this.config = undefined;
+    this.configProvider = this.configProvider.then((config) => {
+      return {
+        ...config,
+        [key]: value,
+      };
+    });
+  }
+
+  httpHandlerConfigs(): NodeHttp2HandlerOptions {
+    return this.config ?? {};
   }
 
   /**

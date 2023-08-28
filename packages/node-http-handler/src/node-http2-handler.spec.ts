@@ -643,4 +643,55 @@ describe(NodeHttp2Handler.name, () => {
     } as any);
     handler.destroy();
   });
+
+  it("put HttpClientConfig", async () => {
+    const server = createMockHttp2Server();
+    server.on("request", (request, response) => {
+      expect(request.url).toBe("http://foo:bar@localhost/");
+      response.statusCode = 200;
+    });
+    const handler = new NodeHttp2Handler({});
+
+    const requestTimeout = 200;
+
+    handler.updateHttpClientConfig("requestTimeout", requestTimeout);
+
+    await handler.handle({
+      ...getMockReqOptions(),
+      username: "foo",
+      password: "bar",
+      path: "/",
+    } as any);
+    handler.destroy();
+
+    expect(handler.httpHandlerConfigs().requestTimeout).toEqual(requestTimeout);
+  });
+
+  it("update existing HttpClientConfig", async () => {
+    const server = createMockHttp2Server();
+    server.on("request", (request, response) => {
+      expect(request.url).toBe("http://foo:bar@localhost/");
+      response.statusCode = 200;
+    });
+    const handler = new NodeHttp2Handler({ requestTimeout: 200 });
+
+    const requestTimeout = 300;
+
+    handler.updateHttpClientConfig("requestTimeout", requestTimeout);
+
+    await handler.handle({
+      ...getMockReqOptions(),
+      username: "foo",
+      password: "bar",
+      path: "/",
+    } as any);
+    handler.destroy();
+
+    expect(handler.httpHandlerConfigs().requestTimeout).toEqual(requestTimeout);
+  });
+
+  it("httpHandlerConfigs returns empty object if handle is not called", async () => {
+    const nodeHttpHandler = new NodeHttp2Handler();
+    expect(nodeHttpHandler.httpHandlerConfigs()).toEqual({});
+  });
 });
