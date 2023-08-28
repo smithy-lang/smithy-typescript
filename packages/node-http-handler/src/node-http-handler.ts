@@ -50,9 +50,9 @@ interface ResolvedNodeHttpHandlerConfig {
 
 export const DEFAULT_REQUEST_TIMEOUT = 0;
 
-export class NodeHttpHandler implements HttpHandler {
+export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private config?: ResolvedNodeHttpHandlerConfig;
-  private readonly configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
+  private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
@@ -191,5 +191,19 @@ export class NodeHttpHandler implements HttpHandler {
 
       writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch(_reject);
     });
+  }
+
+  updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
+    this.config = undefined;
+    this.configProvider = this.configProvider.then((config) => {
+      return {
+        ...config,
+        [key]: value,
+      };
+    });
+  }
+
+  httpHandlerConfigs(): NodeHttpHandlerOptions {
+    return this.config ?? {};
   }
 }

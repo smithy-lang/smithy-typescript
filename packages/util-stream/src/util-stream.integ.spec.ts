@@ -68,6 +68,10 @@ describe("util-stream", () => {
           }),
         };
       }
+      updateHttpClientConfig(key: string, value: any) {}
+      httpHandlerConfigs(): Record<string, any> {
+        return {};
+      }
     })();
 
     it("should allow string as payload blob and allow conversion of output payload blob to string", async () => {

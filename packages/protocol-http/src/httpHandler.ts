@@ -3,4 +3,19 @@ import { HttpHandlerOptions, RequestHandler } from "@smithy/types";
 import { HttpRequest } from "./httpRequest";
 import { HttpResponse } from "./httpResponse";
 
-export type HttpHandler = RequestHandler<HttpRequest, HttpResponse, HttpHandlerOptions>;
+/**
+ * @internal
+ */
+export type HttpHandler<HttpHandlerConfig> = RequestHandler<HttpRequest, HttpResponse, HttpHandlerOptions> & {
+  /**
+   * @internal
+   * @param key
+   * @param value
+   */
+  updateHttpClientConfig(key: keyof HttpHandlerConfig, value: HttpHandlerConfig[typeof key]): void;
+
+  /**
+   * @internal
+   */
+  httpHandlerConfigs(): HttpHandlerConfig;
+};

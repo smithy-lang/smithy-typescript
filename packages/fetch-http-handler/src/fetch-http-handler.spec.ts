@@ -55,6 +55,54 @@ describe(FetchHttpHandler.name, () => {
     expect(await blobToText(response.response.body)).toBe("FOO");
   });
 
+  it("put HttpClientConfig", async () => {
+    const mockResponse = {
+      headers: {
+        entries: jest.fn().mockReturnValue([
+          ["foo", "bar"],
+          ["bizz", "bazz"],
+        ]),
+      },
+      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+    };
+    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+
+    (global as any).fetch = mockFetch;
+    const fetchHttpHandler = new FetchHttpHandler();
+    fetchHttpHandler.updateHttpClientConfig("requestTimeout", 200);
+
+    await fetchHttpHandler.handle({} as any, {});
+
+    expect(fetchHttpHandler.httpHandlerConfigs().requestTimeout).toBe(200);
+  });
+
+  it("update HttpClientConfig", async () => {
+    const mockResponse = {
+      headers: {
+        entries: jest.fn().mockReturnValue([
+          ["foo", "bar"],
+          ["bizz", "bazz"],
+        ]),
+      },
+      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+    };
+    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+
+    (global as any).fetch = mockFetch;
+    const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 200 });
+    fetchHttpHandler.updateHttpClientConfig("requestTimeout", 300);
+
+    await fetchHttpHandler.handle({} as any, {});
+
+    expect(fetchHttpHandler.httpHandlerConfigs().requestTimeout).toBe(300);
+  });
+
+  it("httpHandlerConfigs returns empty object if handle is not called", async () => {
+    const fetchHttpHandler = new FetchHttpHandler();
+    fetchHttpHandler.updateHttpClientConfig("requestTimeout", 300);
+    expect(fetchHttpHandler.httpHandlerConfigs()).toEqual({});
+  });
+
   it("defaults to response.blob for response.body = null", async () => {
     const mockResponse = {
       body: null,

@@ -19,9 +19,9 @@ export interface FetchHttpHandlerOptions {
 
 type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 
-export class FetchHttpHandler implements HttpHandler {
+export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
   private config?: FetchHttpHandlerConfig;
-  private readonly configProvider: Promise<FetchHttpHandlerConfig>;
+  private configProvider: Promise<FetchHttpHandlerConfig>;
 
   constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | undefined>) {
     if (typeof options === "function") {
@@ -129,5 +129,17 @@ export class FetchHttpHandler implements HttpHandler {
       );
     }
     return Promise.race(raceOfPromises);
+  }
+
+  updateHttpClientConfig(key: keyof FetchHttpHandlerConfig, value: FetchHttpHandlerConfig[typeof key]): void {
+    this.config = undefined;
+    this.configProvider = this.configProvider.then((config) => {
+      config[key] = value;
+      return config;
+    });
+  }
+
+  httpHandlerConfigs(): FetchHttpHandlerConfig {
+    return this.config ?? {};
   }
 }
