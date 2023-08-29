@@ -72,12 +72,13 @@ If you are modifying one or more of the NPM packages in the `/packages` director
 If you are modifying the `smithy-typescript-codegen` package, please create equivalent pull request on aws-sdk-js-v3. This is to ensure that the code generation is kept in sync between the two repositories.
 
 1. Fork and clone [aws/aws-sdk-js-v3][aws-sdk-js-v3].
-2. Run `generate-clients` with `HEAD` commit as follows:
+2. Run `yarn` to install dependencies.
+3. Run `generate-clients` with `HEAD` commit as follows:
     ```sh
     yarn generate-clients --commit HEAD
     ```
-3. If the clients are updated, post a pull request on aws-sdk-js-v3. If the clients are not updated, no further action is needed.
-4. When your PR on smithy-typescript is merged, rebase the PR on aws-sdk-js-v3 and add merged commit as default.
+4. If the clients are updated, post a pull request on aws-sdk-js-v3. If the clients are not updated, no further action is needed.
+5. When your PR on smithy-typescript is merged, rebase the PR on aws-sdk-js-v3 and add merged commit as default.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
