@@ -69,8 +69,15 @@ If you are modifying one or more of the NPM packages in the `/packages` director
 4. Commit to your fork using clear commit messages.
 5. Send the pull request.
 
-If you are modifying the `smithy-typescript-codegen` package, please create equivalent pull request on aws-sdk-js-v3. This is to ensure that the code generation is kept in sync between the two repositories.
+GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
+[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
+## Keeping code generation in sync with aws-sdk-js-v3
+
+Any changes made to the `smithy-typescript-codegen` package need to be compatible with aws-sdk-js-v3. Maintainers and reviewers
+MUST ensure that code generation is kept in sync between the two repositories by creating an equivalent PR in aws-sdk-js-v3.
+
+Procedure to keep code generation in sync while making changes to `smithy-typescript-codegen`:
 1. Fork and clone [aws/aws-sdk-js-v3][aws-sdk-js-v3].
 2. Run `yarn` to install dependencies.
 3. Run `generate-clients` with `HEAD` commit as follows:
@@ -78,11 +85,7 @@ If you are modifying the `smithy-typescript-codegen` package, please create equi
     yarn generate-clients --commit HEAD
     ```
 4. If the clients are updated, post a pull request on aws-sdk-js-v3. If the clients are not updated, no further action is needed.
-5. When your PR on smithy-typescript is merged, rebase the PR on aws-sdk-js-v3 and add merged commit as default.
-
-GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
-[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
-
+5. When PR on smithy-typescript is merged, rebase the PR on aws-sdk-js-v3 and add merged commit as default.
 
 ## Finding contributions to work on
 Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any ['help wanted'](https://github.com/awslabs/smithy-typescript/labels/help%20wanted) issues is a great place to start.
