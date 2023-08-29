@@ -30,6 +30,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.extensions.ExtensionConfigurationInterface;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -40,6 +41,19 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public interface TypeScriptIntegration
         extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
+
+    /**
+     * Filters the integration based on {@link TypeScriptSettings}.
+     *
+     * This is annotated as a Smithy Internal API, and may be removed at any point.
+     *
+     * @param settings settings to filter against
+     * @return whether the integration matches the settings or not.
+     */
+    @SmithyInternalApi
+    default boolean matchesSettings(TypeScriptSettings settings) {
+        return true;
+    }
 
     /**
      * Gets a list of plugins to apply to the generated client.
