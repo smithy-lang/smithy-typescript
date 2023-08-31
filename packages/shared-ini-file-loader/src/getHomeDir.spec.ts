@@ -62,7 +62,7 @@ describe(getHomeDir.name, () => {
   });
 
   describe("makes one homedir call irrespective of getHomeDir calls", () => {
-    it.each([10, 100, 1000, 10000])("calls: %d ", (num: number) => {
+    const testSingleHomeDirCall = (num: number) => {
       jest.isolateModules(() => {
         const { getHomeDir } = require("./getHomeDir");
         process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
@@ -75,6 +75,25 @@ describe(getHomeDir.name, () => {
 
         // There is one homedir call even through getHomeDir is called num times.
         expect(homedir).toHaveBeenCalledTimes(1);
+      });
+    };
+
+    describe("when geteuid is available", () => {
+      it.each([10, 100, 1000, 10000])("calls: %d ", testSingleHomeDirCall);
+    });
+
+    describe("when geteuid is not available", () => {
+      const OLD_GETEUID = process.geteuid;
+
+      beforeEach(() => {
+        // @ts-ignore Type 'undefined' is not assignable to type '() => number'.
+        process.geteuid = undefined;
+      });
+
+      it.each([10, 100, 1000, 10000])("calls: %d ", testSingleHomeDirCall);
+
+      afterEach(() => {
+        process.geteuid = OLD_GETEUID;
       });
     });
   });
