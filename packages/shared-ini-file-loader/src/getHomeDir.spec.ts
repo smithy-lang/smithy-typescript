@@ -59,4 +59,22 @@ describe(getHomeDir.name, () => {
     process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
     expect(getHomeDir()).toEqual(mockHomeDir);
   });
+
+  describe.only("makes one homedir call per user filepath irrespective of getHomeDir calls", () => {
+    it.each([10 /**100, 1000, 10000*/])("parallel calls: %d ", (num: number) => {
+      jest.isolateModules(() => {
+        const { getHomeDir } = require("./getHomeDir");
+        process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
+
+        expect(homedir).not.toHaveBeenCalled();
+        const homeDirArr = Array(num)
+          .fill(num)
+          .map(() => getHomeDir());
+        expect(homeDirArr).toStrictEqual(Array(num).fill(mockHomeDir));
+
+        // There is one homedir call even through getHomeDir is called in parallel num times.
+        expect(homedir).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
 });
