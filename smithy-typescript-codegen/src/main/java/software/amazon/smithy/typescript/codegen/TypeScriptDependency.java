@@ -71,10 +71,10 @@ public enum TypeScriptDependency implements Dependency {
 
     AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", "^2.0.5", false),
 
-    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^2.0.5", true),
-    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "^2.0.5", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^2.0.6", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "^2.0.6", true),
 
-    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^2.0.5", false),
+    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^2.0.6", false),
 
     UUID("dependencies", "uuid", "^8.3.2", false),
 
