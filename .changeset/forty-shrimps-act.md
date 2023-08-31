@@ -3,4 +3,4 @@
 "@smithy/config-resolver": patch
 ---
 
-Move packages with type imports to deps
+Move @smithy/node-config-provider to deps
