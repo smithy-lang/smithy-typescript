@@ -28,7 +28,6 @@ describe(getHomeDir.name, () => {
   afterEach(() => {
     process.env = OLD_ENV;
     jest.clearAllMocks();
-    jest.resetModules();
   });
 
   it("returns value in process.env.HOME first", () => {
@@ -61,7 +60,7 @@ describe(getHomeDir.name, () => {
   });
 
   describe.only("makes one homedir call per user filepath irrespective of getHomeDir calls", () => {
-    it.each([10 /**100, 1000, 10000*/])("parallel calls: %d ", (num: number) => {
+    it.each([10, 100, 1000, 10000])("parallel calls: %d ", (num: number) => {
       jest.isolateModules(() => {
         const { getHomeDir } = require("./getHomeDir");
         process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
