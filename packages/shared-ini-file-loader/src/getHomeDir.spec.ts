@@ -59,7 +59,7 @@ describe(getHomeDir.name, () => {
     expect(getHomeDir()).toEqual(mockHomeDir);
   });
 
-  describe.only("makes one homedir call per user filepath irrespective of getHomeDir calls", () => {
+  describe("makes one homedir call per user filepath irrespective of getHomeDir calls", () => {
     it.each([10, 100, 1000, 10000])("parallel calls: %d ", (num: number) => {
       jest.isolateModules(() => {
         const { getHomeDir } = require("./getHomeDir");
