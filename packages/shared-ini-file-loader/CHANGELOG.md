@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.6
+
+### Patch Changes
+
+- c07cde00: Cache value returned by os.homedir()
+
 ## 2.0.5
 
 ### Patch Changes

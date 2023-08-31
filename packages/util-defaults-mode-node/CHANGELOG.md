@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.7
+
+### Patch Changes
+
+- @smithy/node-config-provider@2.0.7
+- @smithy/config-resolver@2.0.5
+- @smithy/credential-provider-imds@2.0.7
+
 ## 2.0.6
 
 ### Patch Changes
