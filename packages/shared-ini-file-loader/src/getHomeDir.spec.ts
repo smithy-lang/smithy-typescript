@@ -61,7 +61,7 @@ describe(getHomeDir.name, () => {
     expect(getHomeDir()).toEqual(mockHomeDir);
   });
 
-  describe("makes one homedir call per UID irrespective of getHomeDir calls", () => {
+  describe("makes one homedir call irrespective of getHomeDir calls", () => {
     it.each([10, 100, 1000, 10000])("calls: %d ", (num: number) => {
       jest.isolateModules(() => {
         const { getHomeDir } = require("./getHomeDir");
