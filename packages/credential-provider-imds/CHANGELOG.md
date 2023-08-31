@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [a7598a5d]
+  - @smithy/property-provider@2.0.6
+  - @smithy/node-config-provider@2.0.6
+
 ## 2.0.5
 
 ### Patch Changes

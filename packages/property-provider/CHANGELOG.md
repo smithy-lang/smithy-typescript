@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.6
+
+### Patch Changes
+
+- a7598a5d: Fix generating default rejected promise when chaining
+
 ## 2.0.5
 
 ### Patch Changes
