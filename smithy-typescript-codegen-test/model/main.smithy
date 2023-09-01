@@ -7,11 +7,16 @@ use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 use smithy.waiters#waitable
 
+@authDefinition
+@trait
+structure customAuth {}
+
 /// Provides weather forecasts.
 @fakeProtocol
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @httpBearerAuth
 @sigv4(name: "weather")
+@customAuth
 @auth([sigv4])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
@@ -30,6 +35,8 @@ service Weather {
         OnlyHttpApiKeyAndBearerAuthReversed
         OnlySigv4Auth
         OnlySigv4AuthOptional
+        OnlyCustomAuth
+        OnlyCustomAuthOptional
         SameAsService
     ]
 }
@@ -68,6 +75,15 @@ operation OnlyHttpBearerAuthOptional {}
 @auth([sigv4])
 @optionalAuth
 operation OnlySigv4AuthOptional {}
+
+@http(method: "GET", uri: "/OnlyCustomAuth")
+@auth([customAuth])
+operation OnlyCustomAuth {}
+
+@http(method: "GET", uri: "/OnlyCustomAuthOptional")
+@auth([customAuth])
+@optionalAuth
+operation OnlyCustomAuthOptional {}
 
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
