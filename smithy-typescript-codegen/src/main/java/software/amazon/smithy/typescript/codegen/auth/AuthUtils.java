@@ -5,9 +5,14 @@
 
 package software.amazon.smithy.typescript.codegen.auth;
 
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.TreeMap;
+import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
+import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -15,15 +20,26 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class AuthUtils {
-    /**
-     * Writes out `never`, which will make TypeScript compilation fail if used as a value.
-     */
-    public static final Consumer<TypeScriptWriter> DEFAULT_NEVER_WRITER = w -> w.write("never");
-
-    /**
-     * Should be replaced when the synthetic NoAuthTrait is released in Smithy.
-     */
-    public static final ShapeId NO_AUTH_ID = ShapeId.from("smithy.api#noAuth");
-
     private AuthUtils() {}
+
+    public static Map<ShapeId, HttpAuthScheme> getAllEffectiveNoAuthAwareAuthSchemes(
+        ServiceShape serviceShape,
+        ServiceIndex serviceIndex,
+        SupportedHttpAuthSchemesIndex authIndex
+    ) {
+        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes = new TreeMap<>();
+        var serviceEffectiveAuthSchemes =
+            serviceIndex.getEffectiveAuthSchemes(serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
+        for (ShapeId shapeId : serviceEffectiveAuthSchemes.keySet()) {
+            effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
+        }
+        for (var operation : serviceShape.getAllOperations()) {
+            var operationEffectiveAuthSchemes =
+                serviceIndex.getEffectiveAuthSchemes(serviceShape, operation, AuthSchemeMode.NO_AUTH_AWARE);
+            for (ShapeId shapeId : operationEffectiveAuthSchemes.keySet()) {
+                effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
+            }
+        }
+        return effectiveAuthSchemes;
+    }
 }

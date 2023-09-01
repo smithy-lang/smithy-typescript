@@ -6,23 +6,18 @@
 package software.amazon.smithy.typescript.codegen.auth.http;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import software.amazon.smithy.codegen.core.CodegenException;
+import java.util.Map.Entry;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
-import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.traits.OptionalAuthTrait;
 import software.amazon.smithy.model.traits.Trait;
-import software.amazon.smithy.model.validation.ValidationUtils;
-import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -96,26 +91,11 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
     @Override
     public void run() {
-        validateAuthSchemesAreSupported();
         generateHttpAuthSchemeParametersInterface();
         generateDefaultHttpAuthSchemeParametersProviderFunction();
         generateHttpAuthOptionFunctions();
         generateHttpAuthSchemeProviderInterface();
         generateHttpAuthSchemeProviderDefaultFunction();
-    }
-
-    private void validateAuthSchemesAreSupported() {
-        List<ShapeId> unsupportedAuthSchemes = new ArrayList<>();
-        Map<ShapeId, Trait> serviceAuthSchemes = this.serviceIndex.getAuthSchemes(serviceShape);
-        for (ShapeId authScheme : serviceAuthSchemes.keySet()) {
-            if (this.authIndex.getHttpAuthScheme(authScheme) == null) {
-                unsupportedAuthSchemes.add(authScheme);
-            }
-        }
-        if (!unsupportedAuthSchemes.isEmpty()) {
-            throw new CodegenException("Code generation is not supported for the following auth schemes: "
-                + ValidationUtils.tickedList(unsupportedAuthSchemes));
-        }
     }
 
     /*
@@ -185,25 +165,13 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     }
 
     private void generateHttpAuthOptionFunctions() {
-        for (Map.Entry<ShapeId, HttpAuthScheme> entry : this.authIndex.getSupportedHttpAuthSchemes().entrySet()) {
-            if (this.serviceIndex.getAuthSchemes(serviceShape).containsKey(entry.getKey())) {
-                generateHttpAuthOptionFunction(entry.getKey(), entry.getValue());
-            }
-        }
-
-        // Check whether to generate @smithy.api#noAuth auth option function
-        boolean shouldGenerateNoAuthOptionFunction = serviceIndex.getEffectiveAuthSchemes(serviceShape).isEmpty();
-        shouldGenerateNoAuthOptionFunction |= serviceShape.getAllOperations().stream()
-            .map(id -> model.expectShape(id, OperationShape.class))
-            .anyMatch(o -> o.hasTrait(OptionalAuthTrait.ID)
-                || serviceIndex.getEffectiveAuthSchemes(serviceShape, o).isEmpty());
-        if (shouldGenerateNoAuthOptionFunction) {
-            generateHttpAuthOptionFunction(AuthUtils.NO_AUTH_ID, HttpAuthScheme.builder()
-                .schemeId(AuthUtils.NO_AUTH_ID)
-                .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-                .build());
+        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes =
+            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+        for (Entry<ShapeId, HttpAuthScheme> entry : effectiveAuthSchemes.entrySet()) {
+            generateHttpAuthOptionFunction(entry.getKey(), entry.getValue());
         }
     }
+
     /*
     import { HttpAuthOption } from "@smithy/types";
 
@@ -223,16 +191,20 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateHttpAuthOptionFunction(ShapeId shapeId, HttpAuthScheme authScheme) {
         delegator.useFileWriter(HTTP_AUTH_SCHEME_RESOLVER_PATH.toString(), w -> {
-            String normalizedAuthScheme = normalizeAuthScheme(shapeId);
+            String normalizedAuthSchemeName = normalizeAuthSchemeName(shapeId);
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addImport("HttpAuthOption", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.openBlock("""
                 function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
                 HttpAuthOption {""", "};",
-                normalizedAuthScheme, serviceName,
+                normalizedAuthSchemeName, serviceName,
                 () -> {
                 w.openBlock("return {", "};", () -> {
                     w.write("schemeId: $S,", shapeId.toString());
+                    // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties available.
+                    if (authScheme == null) {
+                        return;
+                    }
                     Trait trait = serviceShape.findTrait(shapeId).orElse(null);
                     List<HttpAuthOptionProperty> identityProperties =
                         authScheme.getAuthSchemeOptionParametersByType(Type.IDENTITY);
@@ -257,7 +229,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         });
     }
 
-    private static String normalizeAuthScheme(ShapeId shapeId) {
+    private static String normalizeAuthSchemeName(ShapeId shapeId) {
         return String.join("", Arrays
             .asList(shapeId.toString().split("[.#]"))
             .stream().map(StringUtils::capitalize)
@@ -304,36 +276,29 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
             HttpAuthOption[] {""", "};", serviceName, serviceName, () -> {
                 w.write("const options: HttpAuthOption[] = [];");
                 w.openBlock("switch (authParameters.operation) {", "};", () -> {
-                    var serviceAuthSchemes = serviceIndex.getEffectiveAuthSchemes(serviceShape);
+                    var serviceAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
+                        serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
                     for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
-                        var operationAuthSchemes = serviceIndex.getEffectiveAuthSchemes(serviceShape, operationShapeId);
-                        Shape operationShape = this.model.expectShape(operationShapeId);
-                        if (serviceAuthSchemes.equals(operationAuthSchemes)
-                            && !operationShape.hasTrait(OptionalAuthTrait.ID)) {
+                        var operationAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
+                            serviceShape, operationShapeId, AuthSchemeMode.NO_AUTH_AWARE);
+                        // Skip operation generation if operation auth schemes are equivalent to the default service
+                        // auth schemes.
+                        if (serviceAuthSchemes.equals(operationAuthSchemes)) {
                             continue;
                         }
                         w.openBlock("case $S: {", "};", operationShapeId.getName(), () -> {
                             operationAuthSchemes.keySet().forEach(shapeId -> {
                                 w.write("options.push(create$LHttpAuthOption(authParameters));",
-                                    normalizeAuthScheme(shapeId));
+                                    normalizeAuthSchemeName(shapeId));
                             });
-                            if (operationAuthSchemes.get(AuthUtils.NO_AUTH_ID) != null || operationAuthSchemes.isEmpty()
-                                || operationShape.hasTrait(OptionalAuthTrait.ID)) {
-                                w.write("options.push(create$LHttpAuthOption(authParameters));",
-                                    normalizeAuthScheme(AuthUtils.NO_AUTH_ID));
-                            }
                             w.write("break;");
                         });
                     }
                     w.openBlock("default: {", "};", () -> {
                         serviceAuthSchemes.keySet().forEach(shapeId -> {
                             w.write("options.push(create$LHttpAuthOption(authParameters));",
-                                normalizeAuthScheme(shapeId));
+                                normalizeAuthSchemeName(shapeId));
                         });
-                        if (serviceAuthSchemes.get(AuthUtils.NO_AUTH_ID) != null || serviceAuthSchemes.isEmpty()) {
-                            w.write("options.push(create$LHttpAuthOption(authParameters));",
-                                normalizeAuthScheme(AuthUtils.NO_AUTH_ID));
-                        }
                     });
                 });
                 w.write("return options;");

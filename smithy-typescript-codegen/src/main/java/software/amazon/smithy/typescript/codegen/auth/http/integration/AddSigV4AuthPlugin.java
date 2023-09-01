@@ -6,12 +6,14 @@
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
@@ -25,6 +27,11 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
+    private static final Consumer<TypeScriptWriter> AWS_SIGV4_AUTH_SIGNER = w -> {
+        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addImport("SigV4Signer", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.write("new SigV4Signer()");
+    };
 
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
@@ -39,15 +46,7 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
         return Optional.of(HttpAuthScheme.builder()
                 .schemeId(ShapeId.from("aws.auth#sigv4"))
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-                .putDefaultIdentityProvider(LanguageTarget.SHARED, w -> {
-                    w.write("async () => { throw new Error(\"`credentials` is missing\"); }");
-                })
-                .putDefaultSigner(LanguageTarget.SHARED, w -> {
-                    w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                    w.addImport("SigV4Signer", null,
-                        TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                    w.write("new SigV4Signer()");
-                })
+                .putDefaultSigner(LanguageTarget.SHARED, AWS_SIGV4_AUTH_SIGNER)
                 .addConfigField(new ConfigField("region", w -> {
                     w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                     w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
