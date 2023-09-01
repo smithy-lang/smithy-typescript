@@ -305,13 +305,12 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             // feat(experimentalIdentityAndAuth): write httpAuthSchemes and httpAuthSchemeProvider into ClientDefaults
             if (settings.getExperimentalIdentityAndAuth()) {
                 writer.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                writer.addImport("IdentityProviderConfiguration", null,
-                    TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                writer.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                 writer.writeDocs("""
                     experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
                     default identity providers and signers per auth scheme.
                     @internal""");
-                writer.write("httpAuthSchemes?: IdentityProviderConfiguration;\n");
+                writer.write("httpAuthSchemes?: HttpAuthScheme[];\n");
 
                 String httpAuthSchemeProviderName = service.toShapeId().getName() + "HttpAuthSchemeProvider";
                 writer.addRelativeImport(httpAuthSchemeProviderName, null, Paths.get(".",

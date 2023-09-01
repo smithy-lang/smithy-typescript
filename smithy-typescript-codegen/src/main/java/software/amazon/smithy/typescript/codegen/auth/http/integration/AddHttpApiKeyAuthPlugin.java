@@ -6,6 +6,7 @@
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait;
 import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait.Location;
@@ -14,6 +15,7 @@ import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
@@ -26,6 +28,11 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
+    private static final Consumer<TypeScriptWriter> HTTP_API_KEY_AUTH_SIGNER = w -> {
+        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addImport("HttpApiKeyAuthSigner", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.write("new HttpApiKeyAuthSigner()");
+    };
 
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
@@ -73,14 +80,7 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                         s -> w.write(s),
                         () -> w.write("undefined"));
                 }))
-                .putDefaultIdentityProvider(LanguageTarget.SHARED, w -> {
-                    w.write("async () => { throw new Error(\"`apiKey` is missing\"); }");
-                })
-                .putDefaultSigner(LanguageTarget.SHARED, w -> {
-                    w.addImport("HttpApiKeyAuthSigner", null,
-                        TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                    w.write("new HttpApiKeyAuthSigner()");
-                })
+                .putDefaultSigner(LanguageTarget.SHARED, HTTP_API_KEY_AUTH_SIGNER)
                 .build());
     }
 }
