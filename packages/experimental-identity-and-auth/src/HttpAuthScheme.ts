@@ -1,6 +1,7 @@
 import { Identity, IdentityProvider } from "@smithy/types";
 
 import { HttpSigner } from "./HttpSigner";
+import { IdentityProviderConfig } from "./IdentityProviderConfig";
 
 /**
  * ID for {@link HttpAuthScheme}
@@ -18,9 +19,9 @@ export interface HttpAuthScheme {
    */
   schemeId: HttpAuthSchemeId;
   /**
-   * IdentityProvider corresponding to an HttpAuthScheme.
+   * Gets the IdentityProvider corresponding to an HttpAuthScheme.
    */
-  identityProvider: IdentityProvider<Identity>;
+  identityProvider(config: IdentityProviderConfig): IdentityProvider<Identity> | undefined;
   /**
    * HttpSigner corresponding to an HttpAuthScheme.
    */
