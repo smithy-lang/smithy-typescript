@@ -6,7 +6,11 @@ import { HttpResponse } from "./httpResponse";
 /**
  * @internal
  */
-export type HttpHandler<HttpHandlerConfig> = RequestHandler<HttpRequest, HttpResponse, HttpHandlerOptions> & {
+export type HttpHandler<HttpHandlerConfig extends object = Record<string, unknown>> = RequestHandler<
+  HttpRequest,
+  HttpResponse,
+  HttpHandlerOptions
+> & {
   /**
    * @internal
    * @param key
