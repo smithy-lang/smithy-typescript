@@ -17,7 +17,6 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty;
-import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -47,7 +46,7 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
         return Optional.of(HttpAuthScheme.builder()
                 .schemeId(HttpApiKeyAuthTrait.ID)
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-                .addConfigField(new ConfigField("apiKey", w -> {
+                .addConfigField(new ConfigField("apiKey", ConfigField.Type.MAIN, w -> {
                     w.addImport("ApiKeyIdentity", null,
                         TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                     w.addImport("ApiKeyIdentityProvider", null,
@@ -55,12 +54,12 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                     w.write("ApiKeyIdentity | ApiKeyIdentityProvider");
                 }, w -> w.write("The API key to use when making requests.")))
                 .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "name", Type.SIGNING, t -> w -> {
+                    "name", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
                     HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
                     w.write("$S", httpApiKeyAuthTrait.getName());
                 }))
                 .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "in", Type.SIGNING, t -> w -> {
+                    "in", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
                     w.addImport("HttpApiKeyAuthLocation", null,
                         TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                     HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
@@ -74,7 +73,7 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                     }
                 }))
                 .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "scheme", Type.SIGNING, t -> w -> {
+                    "scheme", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
                     HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
                     httpApiKeyAuthTrait.getScheme().ifPresentOrElse(
                         s -> w.write(s),

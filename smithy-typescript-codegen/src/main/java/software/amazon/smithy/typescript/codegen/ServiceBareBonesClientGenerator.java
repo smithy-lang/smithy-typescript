@@ -32,7 +32,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
-import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
+import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -313,10 +313,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                 writer.write("httpAuthSchemes?: HttpAuthScheme[];\n");
 
                 String httpAuthSchemeProviderName = service.toShapeId().getName() + "HttpAuthSchemeProvider";
-                writer.addRelativeImport(httpAuthSchemeProviderName, null, Paths.get(".",
-                    CodegenUtils.SOURCE_FOLDER,
-                    HttpAuthSchemeProviderGenerator.HTTP_AUTH_FOLDER,
-                    HttpAuthSchemeProviderGenerator.HTTP_AUTH_SCHEME_RESOLVER_MODULE));
+                writer.addImport(httpAuthSchemeProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 writer.writeDocs("""
                     experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
                     resolves which HttpAuthScheme to use.
