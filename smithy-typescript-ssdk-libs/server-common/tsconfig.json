@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "stripInternal": true,
+    "removeComments": true,
+    "rootDir": "src",
+    "baseUrl": "."
+  },
+  "include": ["src/"]
+}

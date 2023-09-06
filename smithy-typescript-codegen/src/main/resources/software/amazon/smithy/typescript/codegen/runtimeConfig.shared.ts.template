@@ -1,0 +1,9 @@
+import { ${clientConfigName} } from "${clientModuleName}";
+
+/**
+ * @internal
+ */
+export const getRuntimeConfig = (config: ${clientConfigName}) => ({
+  apiVersion: "${apiVersion}",
+${customizations}
+});

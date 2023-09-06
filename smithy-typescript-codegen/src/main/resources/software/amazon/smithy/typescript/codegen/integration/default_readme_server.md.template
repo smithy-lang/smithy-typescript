@@ -1,0 +1,57 @@
+<!-- generated file, do not edit directly -->
+
+# ${packageName}
+
+## Description
+
+JavaScript Server SDK for ${serviceId}
+
+${documentation}
+
+## Installing
+To install this package, simply type add or install ${packageName}
+using your favorite package manager:
+- `npm install ${packageName}`
+- `yarn add ${packageName}`
+- `pnpm add ${packageName}`
+
+## Getting Started
+
+Below is an example service handler created for the ${commandName} operation.
+
+```ts
+import { createServer, IncomingMessage, ServerResponse } from "http";
+import { HttpRequest } from "@smithy/protocol-http";
+import {
+  ${serviceId}Service as __${serviceId}Service,
+  ${commandName}Input,
+  ${commandName}Output,
+  get${serviceId}ServiceHandler
+} from "${packageName}";
+import { convertEvent, convertResponse } from "@aws-smithy/server-node";
+
+class ${serviceId}Service implements __${serviceId}Service {
+  ${commandName}(input: ${commandName}Input, request: HttpRequest): ${commandName}Output {
+    // Populate your business logic
+  }
+}
+
+const serviceHandler = get${serviceId}ServiceHandler(new ${serviceId}Service());
+
+const server = createServer(async function (
+  req: IncomingMessage,
+  res: ServerResponse<IncomingMessage> & { req: IncomingMessage }
+) {
+  // Convert NodeJS's http request to an HttpRequest.
+  const httpRequest = convertRequest(req);
+
+  // Call the service handler, which will route the request to the GreetingService
+  // implementation and then serialize the response to an HttpResponse.
+  const httpResponse = await serviceHandler.handle(httpRequest);
+
+  // Write the HttpResponse to NodeJS http's response expected format.
+  return writeResponse(httpResponse, res);
+});
+
+server.listen(3000);
+```

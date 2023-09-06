@@ -1,0 +1,12 @@
+software.amazon.smithy.typescript.codegen.integration.AddClientRuntimeConfig
+software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency
+software.amazon.smithy.typescript.codegen.integration.AddChecksumRequiredDependency
+software.amazon.smithy.typescript.codegen.integration.AddDefaultsModeDependency
+software.amazon.smithy.typescript.codegen.auth.http.integration.AddNoAuthPlugin
+software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpApiKeyAuthPlugin
+software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpBearerAuthPlugin
+software.amazon.smithy.typescript.codegen.auth.http.integration.AddSigV4AuthPlugin
+software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin
+software.amazon.smithy.typescript.codegen.integration.AddBaseServiceExceptionClass
+software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency
+software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator

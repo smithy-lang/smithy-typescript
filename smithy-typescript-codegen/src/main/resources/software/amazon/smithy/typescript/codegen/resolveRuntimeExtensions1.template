@@ -1,0 +1,30 @@
+import { ${extensionConfigName} } from "./extensionConfiguration";
+
+/**
+ * @public
+ */
+export interface RuntimeExtension {
+    configure(extensionConfiguration: ${extensionConfigName}): void;
+}
+
+/**
+ * @public
+ */
+export interface RuntimeExtensionsConfig {
+    extensions: RuntimeExtension[]
+}
+
+const asPartial = <T extends Partial<${extensionConfigName}>>(t: T) => t;
+
+/**
+ * @internal
+ */
+export const resolveRuntimeExtensions = (
+    runtimeConfig: any,
+    extensions: RuntimeExtension[]
+) => {
+  const extensionConfiguration: ${extensionConfigName} = {
+${getPartialExtensionConfigurations}
+  };
+
+  extensions.forEach(extension => extension.configure(extensionConfiguration));

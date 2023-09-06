@@ -1,0 +1,64 @@
+{
+  "name": "@aws-smithy/server-node",
+  "version": "1.0.0-alpha.10",
+  "description": "Base components for Smithy services running on NodeJS",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "pretest": "yarn build",
+    "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
+    "test": "jest --passWithNoTests",
+    "clean": "rimraf dist",
+    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awslabs/smithy-typescript.git",
+    "directory": "smithy-typescript-ssdk-libs/server-node"
+  },
+  "author": "AWS Smithy Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@smithy/protocol-http": "workspace:^",
+    "@smithy/types": "workspace:^",
+    "tslib": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "concurrently": "7.0.0",
+    "downlevel-dts": "^0.7.0",
+    "jest": "28.1.1",
+    "rimraf": "^3.0.2",
+    "typescript": "~4.9.5"
+  },
+  "files": [
+    "dist/cjs/**/*.js",
+    "dist/types/**/*.d.ts",
+    "!**/*.spec.*"
+  ],
+  "engines": {
+    "node": ">= 14.0.0"
+  },
+  "typesVersions": {
+    "<4.0": {
+      "dist/types/*": [
+        "dist/types/ts3.4/*"
+      ]
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/smithy-typescript/issues"
+  },
+  "homepage": "https://github.com/awslabs/smithy-typescript#readme",
+  "publishConfig": {
+    "directory": ".release/package"
+  }
+}

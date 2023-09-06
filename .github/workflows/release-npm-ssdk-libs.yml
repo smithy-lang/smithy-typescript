@@ -1,0 +1,52 @@
+name: release-npm-ssdk-libs
+
+on:
+  workflow_dispatch: # on button click
+
+jobs:
+  release:
+    name: Release to SSDK lib packages to NPM
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: yarn install
+      - name: Configure AWS Credentials
+        id: credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-session-name: SmithyTypeScriptGitHubRelease
+          audience: sts.amazonaws.com
+      - name: Fetch NPM token
+        id: token
+        run: |
+          aws configure --profile token set role_arn ${{ secrets.TOKEN_ROLE }}
+          aws configure --profile token set credential_source Environment
+          npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=SMITHY_PUBLISH_npmToken --query SecretString --output text --profile token)
+          echo "::add-mask::$npm_token"
+          echo "NPM_TOKEN=$npm_token" >> $GITHUB_ENV
+      - name: Stage Release
+        id: stage
+        if: steps.token.outcome == 'success'
+        run: |
+          yarn stage-release --concurrency=1
+      - name: Release
+        id: release
+        uses: changesets/action@v1
+        if: steps.stage.outcome == 'success'
+        with:
+          publish: yarn release
+        env:
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Failure Nofitication
+        if: ${{ failure() }}
+        run: aws cloudwatch put-metric-data --namespace SmithyTypeScriptPublish --metric-name NpmPackagePublishFailure --value 1

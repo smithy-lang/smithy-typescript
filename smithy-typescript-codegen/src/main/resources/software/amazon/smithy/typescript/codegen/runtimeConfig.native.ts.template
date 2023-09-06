@@ -1,0 +1,15 @@
+import { ${clientConfigName} } from "${clientModuleName}";
+import { getRuntimeConfig as getBrowserRuntimeConfig } from "./runtimeConfig.browser";
+
+/**
+ * @internal
+ */
+export const getRuntimeConfig = (config: ${clientConfigName}) => {
+  const browserDefaults = getBrowserRuntimeConfig(config);
+  return {
+    ...browserDefaults,
+    ...config,
+    runtime: "react-native",
+${customizations}
+  };
+};

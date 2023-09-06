@@ -1,0 +1,9 @@
+* @awslabs/aws-sdk-js-team @awslabs/smithy
+
+# These libraries are only intended for use with the SSDK.
+smithy-typescript-ssdk-libs/* @awslabs/smithy-rs-typescript-server
+
+# These are all specific to SSDK functionality.
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerCommandGenerator.java @awslabs/smithy-rs-typescript-server
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerGenerator.java @awslabs/smithy-rs-typescript-server
+smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/ServerSymbolVisitor.java @awslabs/smithy-rs-typescript-server

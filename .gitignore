@@ -1,0 +1,64 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+target/
+**/dependency-reduced-pom.xml
+
+# Gradle
+/.gradle
+build/
+*/out/
+*/*/out/
+wrapper/
+.attach_pid*
+
+# local scripting
+Makefile
+
+# Visual Studio Code
+.vscode/*
+
+# Integ test Yarn stuff
+smithy-typescript-integ-tests/dist
+smithy-typescript-integ-tests/node_modules
+smithy-typescript-integ-tests/yarn.lock
+
+# Issue https://github.com/awslabs/smithy-typescript/issues/425
+smithy-typescript-codegen/bin/
+smithy-typescript-ssdk-codegen-test-utils/bin/
+
+**/node_modules/
+**/*.tsbuildinfo
+**/*.d.ts
+**/yarn-error.log
+coverage
+**/.turbo
+dist-*
+*.tsbuildinfo
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# NPM release staging
+.release
+
+# Gradle composite build properties
+local.properties
+
+# doc-gen
+api-extractor-packages
