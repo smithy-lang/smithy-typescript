@@ -19,6 +19,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.extensions.DefaultExtensionConfigurationInterface;
 import software.amazon.smithy.typescript.codegen.extensions.ExtensionConfigurationInterface;
+import software.amazon.smithy.typescript.codegen.extensions.HttpHandlerExtensionConfigurationInterface;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -138,6 +139,6 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
 
     @Override
     public List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
-        return List.of(new DefaultExtensionConfigurationInterface());
+        return List.of(new DefaultExtensionConfigurationInterface(), new HttpHandlerExtensionConfigurationInterface());
     }
 }
