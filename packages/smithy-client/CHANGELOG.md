@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 88bcec3d: Add retry to runtime extension
+
+### Patch Changes
+
+- Updated dependencies [88bcec3d]
+  - @smithy/types@2.3.0
+  - @smithy/middleware-stack@2.0.0
+  - @smithy/util-stream@2.0.6
+
 ## 2.0.5
 
 ### Patch Changes

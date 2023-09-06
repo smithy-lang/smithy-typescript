@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.0.3
+
+### Patch Changes
+
+- c6251b7a: INTERNAL USE ONLY: Update `HttpAuthScheme` and `IdentityProviderConfig` interfaces
+- Updated dependencies [88bcec3d]
+- Updated dependencies [a03026e3]
+  - @smithy/types@2.3.0
+  - @smithy/protocol-http@3.0.0
+  - @smithy/signature-v4@2.0.6
+
 ## 0.0.2
 
 ### Patch Changes

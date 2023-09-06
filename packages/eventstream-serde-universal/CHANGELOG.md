@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [88bcec3d]
+  - @smithy/types@2.3.0
+  - @smithy/eventstream-codec@2.0.6
+
 ## 2.0.5
 
 ### Patch Changes

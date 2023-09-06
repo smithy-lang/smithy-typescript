@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- a03026e3: Add http client component to runtime extension
+
+### Patch Changes
+
+- Updated dependencies [88bcec3d]
+  - @smithy/types@2.3.0
+
 ## 2.0.5
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [88bcec3d]
+  - @smithy/types@2.3.0
+  - @smithy/node-config-provider@2.0.8
+  - @smithy/property-provider@2.0.7
+  - @smithy/url-parser@2.0.6
+
 ## 2.0.7
 
 ### Patch Changes

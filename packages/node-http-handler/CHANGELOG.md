@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- a03026e3: Add http client component to runtime extension
+
+### Patch Changes
+
+- Updated dependencies [88bcec3d]
+- Updated dependencies [a03026e3]
+  - @smithy/types@2.3.0
+  - @smithy/protocol-http@3.0.0
+  - @smithy/abort-controller@2.0.6
+  - @smithy/querystring-builder@2.0.6
+
 ## 2.0.5
 
 ### Patch Changes

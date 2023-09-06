@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- 88bcec3d: Add retry to runtime extension
+
 ## 2.2.2
 
 ### Patch Changes
