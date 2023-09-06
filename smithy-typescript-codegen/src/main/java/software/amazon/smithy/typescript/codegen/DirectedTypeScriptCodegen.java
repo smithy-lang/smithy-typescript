@@ -437,13 +437,11 @@ final class DirectedTypeScriptCodegen
                 LOGGER.fine("Generating " + target + " runtime configuration");
                 configGenerator.generate(target);
             }
+            new ExtensionConfigurationGenerator(directive.model(), directive.service(), directive.symbolProvider(),
+                    directive.context().writerDelegator(), directive.context().integrations()).generate();
+            new RuntimeExtensionsGenerator(directive.model(), directive.service(), directive.symbolProvider(),
+                    directive.context().writerDelegator(), directive.context().integrations()).generate();
         }
-
-        new ExtensionConfigurationGenerator(directive.model(), directive.service(), directive.symbolProvider(),
-                directive.context().writerDelegator(), directive.context().integrations()).generate();
-
-        new RuntimeExtensionsGenerator(directive.model(), directive.service(), directive.symbolProvider(),
-                directive.context().writerDelegator(), directive.context().integrations()).generate();
 
         // Generate index for client.
         BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory =
