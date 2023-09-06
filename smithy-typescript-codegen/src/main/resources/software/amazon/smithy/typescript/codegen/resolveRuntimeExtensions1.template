@@ -4,7 +4,7 @@ import { ${extensionConfigName} } from "./extensionConfiguration";
  * @public
  */
 export interface RuntimeExtension {
-    configure(clientConfiguration: ${extensionConfigName}): void;
+    configure(extensionConfiguration: ${extensionConfigName}): void;
 }
 
 /**
