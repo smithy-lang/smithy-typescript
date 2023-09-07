@@ -24,6 +24,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "@smithy/node-config-provider": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/service-error-classification": "workspace:^",
     "@smithy/types": "workspace:^",
@@ -33,7 +34,6 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@smithy/node-config-provider": "workspace:^",
     "@smithy/util-test": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "@types/uuid": "^8.3.0",
