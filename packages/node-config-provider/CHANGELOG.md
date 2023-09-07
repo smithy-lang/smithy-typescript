@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [c4e16cfd]
+  - @smithy/shared-ini-file-loader@2.0.8
+
 ## 2.0.8
 
 ### Patch Changes

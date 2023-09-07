@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [d3daa891]
+  - @smithy/config-resolver@2.0.7
+  - @smithy/node-config-provider@2.0.9
+  - @smithy/credential-provider-imds@2.0.9
+
 ## 2.0.8
 
 ### Patch Changes

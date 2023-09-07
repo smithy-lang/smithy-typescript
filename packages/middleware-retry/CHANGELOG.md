@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.8
+
+### Patch Changes
+
+- d3daa891: Move @smithy/node-config-provider to deps
+  - @smithy/node-config-provider@2.0.9
+
 ## 2.0.7
 
 ### Patch Changes
