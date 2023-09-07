@@ -2,4 +2,4 @@
 "@smithy/shared-ini-file-loader": minor
 ---
 
-Fix invalid import on Windows hosts
+Explicitly check for process.geteuid from global scope
