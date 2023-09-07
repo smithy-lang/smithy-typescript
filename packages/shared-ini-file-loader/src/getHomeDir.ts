@@ -1,13 +1,12 @@
 import { homedir } from "os";
 import { sep } from "path";
-import { geteuid } from "process";
 
 const homeDirCache: Record<string, string> = {};
 
 const getHomeDirCacheKey = (): string => {
   // geteuid is only available on POSIX platforms (i.e. not Windows or Android).
-  if (geteuid) {
-    return `${geteuid()}`;
+  if (process && process.geteuid) {
+    return `${process.geteuid()}`;
   }
   return "DEFAULT";
 };
