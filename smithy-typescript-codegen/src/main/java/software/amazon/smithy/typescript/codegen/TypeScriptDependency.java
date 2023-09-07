@@ -43,12 +43,12 @@ public enum TypeScriptDependency implements Dependency {
     SMITHY_TYPES("dependencies", "@smithy/types", "^2.3.0", true),
     AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.1.1", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "^2.0.6", true),
-    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^2.0.6", true),
+    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^2.0.7", true),
     TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^2.0.7", true),
     MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", "^2.0.6", true),
-    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^2.0.7", true),
+    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^2.0.8", true),
     UTIL_RETRY("dependencies", "@smithy/util-retry", "^2.0.0", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", "^2.0.0", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^2.0.6", false),
@@ -71,10 +71,10 @@ public enum TypeScriptDependency implements Dependency {
 
     AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", "^2.0.6", false),
 
-    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^2.0.8", true),
+    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "^2.0.9", true),
     AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "^2.0.7", true),
 
-    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^2.0.8", false),
+    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "^2.0.9", false),
 
     UUID("dependencies", "uuid", "^8.3.2", false),
 
@@ -120,7 +120,7 @@ public enum TypeScriptDependency implements Dependency {
 
     // feat(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
     // This package should never have a major version, and should only use minor and patch versions in development.
-    EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", "~0.0.1", false),
+    EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", "~0.0.4", false),
 
     // Conditionally added when specs have been generated.
     VITEST("devDependencies", "vitest", "^0.33.0", false),
