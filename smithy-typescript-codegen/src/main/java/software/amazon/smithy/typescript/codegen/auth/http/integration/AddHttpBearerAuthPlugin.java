@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import software.amazon.smithy.model.traits.HttpBearerAuthTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.ConfigField;
+import software.amazon.smithy.typescript.codegen.ConfigField.Type;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -43,7 +44,7 @@ public final class AddHttpBearerAuthPlugin implements HttpAuthTypeScriptIntegrat
         return Optional.of(HttpAuthScheme.builder()
                 .schemeId(HttpBearerAuthTrait.ID)
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-                .addConfigField(new ConfigField("token", w -> {
+                .addConfigField(new ConfigField("token", Type.MAIN, w -> {
                     w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                     w.addImport("TokenIdentity", null,
                         TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);

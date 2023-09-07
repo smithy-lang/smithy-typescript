@@ -15,7 +15,6 @@
 
 package software.amazon.smithy.typescript.codegen;
 
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +31,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
-import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
@@ -212,9 +210,7 @@ final class RuntimeConfigGenerator {
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
                 String providerName = "default" + service.toShapeId().getName() + "HttpAuthSchemeProvider";
-                w.addRelativeImport(providerName, null, Paths.get(".", CodegenUtils.SOURCE_FOLDER,
-                    HttpAuthSchemeProviderGenerator.HTTP_AUTH_FOLDER,
-                    HttpAuthSchemeProviderGenerator.HTTP_AUTH_SCHEME_RESOLVER_MODULE));
+                w.addImport(providerName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write(providerName);
             });
         }

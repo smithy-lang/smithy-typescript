@@ -15,7 +15,6 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty;
-import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeParameter;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -47,12 +46,12 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                 .schemeId(ShapeId.from("aws.auth#sigv4"))
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
                 .putDefaultSigner(LanguageTarget.SHARED, AWS_SIGV4_AUTH_SIGNER)
-                .addConfigField(new ConfigField("region", w -> {
+                .addConfigField(new ConfigField("region", ConfigField.Type.AUXILIARY, w -> {
                     w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                     w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
                     w.write("string | __Provider<string>");
                 }, w -> w.write("The AWS region to which this client will send requests.")))
-                .addConfigField(new ConfigField("credentials", w -> {
+                .addConfigField(new ConfigField("credentials", ConfigField.Type.MAIN, w -> {
                     w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                     w.addImport("AwsCredentialIdentity", null, TypeScriptDependency.SMITHY_TYPES);
                     w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
@@ -67,11 +66,11 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                     });
                 }))
                 .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "name", Type.SIGNING, t -> w -> {
+                    "name", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
                     w.write("$S", t.toNode().expectObjectNode().getMember("name"));
                 }))
                 .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "region", Type.SIGNING, t -> w -> {
+                    "region", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
                     w.write("authParameters.region");
                 }))
                 .build());

@@ -41,20 +41,6 @@ import software.amazon.smithy.utils.StringUtils;
  */
 @SmithyInternalApi
 public class HttpAuthSchemeProviderGenerator implements Runnable {
-    /**
-     * Directory segment for {@code auth/}.
-     */
-    public static final String HTTP_AUTH_FOLDER = "auth";
-    /**
-     * File name segment for {@code httpAuthSchemeProvder}.
-     */
-    public static final String HTTP_AUTH_SCHEME_RESOLVER_MODULE = "httpAuthSchemeProvider";
-
-    private static final String HTTP_AUTH_SCHEME_RESOLVER_FILE =
-        HTTP_AUTH_SCHEME_RESOLVER_MODULE + ".ts";
-    private static final String HTTP_AUTH_SCHEME_RESOLVER_PATH =
-        Paths.get(CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, HTTP_AUTH_SCHEME_RESOLVER_FILE).toString();
-
     private final TypeScriptDelegator delegator;
     private final Model model;
 
@@ -104,7 +90,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     }
     */
     private void generateHttpAuthSchemeParametersInterface() {
-        delegator.useFileWriter(HTTP_AUTH_SCHEME_RESOLVER_PATH.toString(), w -> {
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             w.openBlock("""
                 /**
                  * @internal
@@ -138,7 +124,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     };
     */
     private void generateDefaultHttpAuthSchemeParametersProviderFunction() {
-        delegator.useFileWriter(HTTP_AUTH_SCHEME_RESOLVER_PATH.toString(), w -> {
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
                 Paths.get(".", serviceSymbol.getNamespace()));
             w.addImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
@@ -190,7 +176,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     };
     */
     private void generateHttpAuthOptionFunction(ShapeId shapeId, HttpAuthScheme authScheme) {
-        delegator.useFileWriter(HTTP_AUTH_SCHEME_RESOLVER_PATH.toString(), w -> {
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             String normalizedAuthSchemeName = normalizeAuthSchemeName(shapeId);
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addImport("HttpAuthOption", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
@@ -242,7 +228,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     }
     */
     private void generateHttpAuthSchemeProviderInterface() {
-        delegator.useFileWriter(HTTP_AUTH_SCHEME_RESOLVER_PATH.toString(), w -> {
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             w.write("""
             /**
              * @internal
@@ -267,7 +253,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     };
     */
     private void generateHttpAuthSchemeProviderDefaultFunction() {
-        delegator.useFileWriter(HTTP_AUTH_SCHEME_RESOLVER_PATH.toString(), w -> {
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             w.openBlock("""
             /**
              * @internal

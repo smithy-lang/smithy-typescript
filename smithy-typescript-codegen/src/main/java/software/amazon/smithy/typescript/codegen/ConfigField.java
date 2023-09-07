@@ -20,6 +20,22 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public final record ConfigField(
     String name,
+    Type type,
     Consumer<TypeScriptWriter> source,
     Consumer<TypeScriptWriter> docs
-) {}
+) {
+    /**
+     * Defines the type of the config field.
+     */
+    @SmithyUnstableApi
+    public enum Type {
+        /**
+         * Specifies the property is important, e.g. {@code apiKey} for {@code @httpApiKeyAuth}
+         */
+        MAIN,
+        /**
+         * Specifies the property is auxiliary, e.g. {@code region} for {@code @aws.auth#sigv4}
+         */
+        AUXILIARY
+    }
+}
