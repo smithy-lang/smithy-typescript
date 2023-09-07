@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.1
+
+### Patch Changes
+
+- 5db648a6: Add default generic type to HttpHandler
+
 ## 3.0.0
 
 ### Major Changes
