@@ -47,9 +47,11 @@ public class ParameterGenerator {
         if (type.isPresent()) {
             switch (type.get().getValue()) {
                 case "String":
+                case "string":
                     tsParamType = "string";
                     break;
                 case "Boolean":
+                case "boolean":
                     tsParamType = "boolean";
                     break;
                 default:
