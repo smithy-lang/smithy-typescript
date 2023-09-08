@@ -22,6 +22,8 @@ class RequestSerializationTestHandler implements HttpHandler {
     ): Promise<{ response: HttpResponse }> {
         return Promise.reject(new EXPECTED_REQUEST_SERIALIZATION_ERROR(request));
     }
+    updateHttpClientConfig(key: never, value: never): void {}
+    httpHandlerConfigs() { return {}; }
 }
 
 /**
@@ -64,6 +66,8 @@ class ResponseDeserializationTestHandler implements HttpHandler {
             })
         });
     }
+    updateHttpClientConfig(key: never, value: never): void {}
+    httpHandlerConfigs() { return {}; }
 }
 
 interface comparableParts {
