@@ -1,4 +1,4 @@
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpHandler, HttpResponse } from "@smithy/protocol-http";
 import { HttpRequest as IHttpRequest } from "@smithy/types";
 import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { requireRequestsFrom } from "@smithy/util-test";
@@ -59,7 +59,7 @@ describe("util-stream", () => {
       path: "/invoke",
     });
 
-    client.config.requestHandler = new (class {
+    client.config.requestHandler = new (class implements HttpHandler {
       async handle(request: IHttpRequest) {
         return {
           response: new HttpResponse({
