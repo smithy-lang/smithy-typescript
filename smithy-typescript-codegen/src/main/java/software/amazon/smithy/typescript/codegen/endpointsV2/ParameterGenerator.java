@@ -30,11 +30,21 @@ public class ParameterGenerator {
     private final String parameterName;
     private final Node param;
     private boolean required = false;
+    private boolean isInputKey;
     private String tsParamType = "string";
 
-    public ParameterGenerator(String key, Node param) {
+    /**
+     * @param key - the param name.
+     * @param param - the param value.
+     * @param isInputKey - whether the key is a client input key. This is
+     *                     distinct from canonical endpoint param name
+     *                     because it has been transformed to match
+     *                     pre-existing keys in published clients.
+     */
+    public ParameterGenerator(String key, Node param, boolean isInputKey) {
         parameterName = key;
         this.param = param;
+        this.isInputKey = isInputKey;
 
         ObjectNode paramNode = param.asObjectNode()
             .orElseThrow(() -> new RuntimeException("param node is not object node."));
@@ -56,6 +66,10 @@ public class ParameterGenerator {
                     // required by linter
             }
         }
+    }
+
+    public ParameterGenerator(String key, Node param) {
+        this(key, param, false);
     }
 
     public boolean isBuiltIn() {
@@ -112,7 +126,7 @@ public class ParameterGenerator {
         }
         buffer += ": ";
 
-        if (parameterName.equals("endpoint")) {
+        if (parameterName.equals("endpoint") && isInputKey) {
             buffer += "string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;";
         } else {
             if (isClientContextParam) {
