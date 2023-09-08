@@ -41,14 +41,14 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", "^2.0.0", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
     SMITHY_TYPES("dependencies", "@smithy/types", "^2.3.0", true),
-    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.1.1", true),
+    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.1.2", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "^2.0.6", true),
     CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^2.0.7", true),
     TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
 
-    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^2.0.7", true),
+    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", "^2.0.8", true),
     MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", "^2.0.6", true),
-    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^2.0.8", true),
+    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "^2.0.9", true),
     UTIL_RETRY("dependencies", "@smithy/util-retry", "^2.0.0", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", "^2.0.0", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "^2.0.6", false),
@@ -82,12 +82,12 @@ public enum TypeScriptDependency implements Dependency {
     MD5_BROWSER("dependencies", "@smithy/md5-js", "^2.0.6", false),
     STREAM_HASHER_NODE("dependencies", "@smithy/hash-stream-node", "^2.0.6", false),
     STREAM_HASHER_BROWSER("dependencies", "@smithy/hash-blob-browser", "^2.0.6", false),
-    BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", "^2.0.7", false),
+    BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", "^2.0.8", false),
 
     // Conditionally added when using an HTTP application protocol.
-    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^3.0.1", false),
-    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", "^2.1.1", false),
-    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", "^2.1.1", false),
+    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", "^3.0.2", false),
+    AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", "^2.1.2", false),
+    AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", "^2.1.2", false),
 
     // Conditionally added when setting the auth middleware.
     UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "^2.0.0", false),
@@ -111,9 +111,9 @@ public enum TypeScriptDependency implements Dependency {
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.
-    @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^2.0.7", false),
-    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.7", false),
-    UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.7", false),
+    @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^2.0.8", false),
+    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.8", false),
+    UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.8", false),
 
     // Conditionally added when @aws.auth#sigv4 is used
     SIGNATURE_V4("dependencies", "@smithy/signature-v4", "^2.0.6", false),
