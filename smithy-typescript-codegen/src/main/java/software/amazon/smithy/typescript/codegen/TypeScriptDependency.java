@@ -41,7 +41,7 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", "^2.0.0", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
     SMITHY_TYPES("dependencies", "@smithy/types", "^2.3.0", true),
-    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.1.2", true),
+    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "^2.1.3", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "^2.0.6", true),
     CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "^2.0.7", true),
     TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
@@ -113,7 +113,7 @@ public enum TypeScriptDependency implements Dependency {
     // Conditionally added when streaming blob response payload exists.
     @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", "^2.0.8", false),
     @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", "^2.0.8", false),
-    UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.8", false),
+    UTIL_STREAM("dependencies", "@smithy/util-stream", "^2.0.9", false),
 
     // Conditionally added when @aws.auth#sigv4 is used
     SIGNATURE_V4("dependencies", "@smithy/signature-v4", "^2.0.6", false),
