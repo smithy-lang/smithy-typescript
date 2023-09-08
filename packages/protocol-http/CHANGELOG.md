@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.2
+
+### Patch Changes
+
+- 5b3fec37: Fix default HttpHandlerConfig type for HttpHandler
+
 ## 3.0.1
 
 ### Patch Changes

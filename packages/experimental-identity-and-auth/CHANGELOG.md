@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [5b3fec37]
+  - @smithy/protocol-http@3.0.2
+  - @smithy/signature-v4@2.0.6
+
 ## 0.0.4
 
 ### Patch Changes

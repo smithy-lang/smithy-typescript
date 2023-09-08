@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.2
+
+### Patch Changes
+
+- @smithy/util-stream@2.0.8
+
 ## 2.1.1
 
 ### Patch Changes

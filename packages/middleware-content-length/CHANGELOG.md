@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [5b3fec37]
+  - @smithy/protocol-http@3.0.2
+
 ## 2.0.7
 
 ### Patch Changes

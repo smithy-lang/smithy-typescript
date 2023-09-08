@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.8
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@2.1.2
+- @smithy/node-http-handler@2.1.2
+
 ## 2.0.7
 
 ### Patch Changes
