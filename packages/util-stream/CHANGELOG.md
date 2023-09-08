@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.9
+
+### Patch Changes
+
+- d491b770: Add `HttpHandler` implementation for `util-stream.integ.spec.ts`
+
 ## 2.0.8
 
 ### Patch Changes
