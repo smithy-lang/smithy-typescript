@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.3.1
+
+### Patch Changes
+
+- b9265813: fix: broken ChecksumConfiguration interface in TS < 4.4 and conditional generic types in TS<4.1
+- 6d1c2fb1: fix paginator type
+
 ## 2.3.0
 
 ### Minor Changes

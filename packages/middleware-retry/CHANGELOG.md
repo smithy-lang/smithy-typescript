@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.0.10
+
+### Patch Changes
+
+- 2d9473cf: Link to util-retry documentation
+- Updated dependencies [b9265813]
+- Updated dependencies [6d1c2fb1]
+  - @smithy/types@2.3.1
+  - @smithy/node-config-provider@2.0.10
+  - @smithy/protocol-http@3.0.3
+  - @smithy/service-error-classification@2.0.0
+  - @smithy/util-middleware@2.0.0
+  - @smithy/util-retry@2.0.0
+
 ## 2.0.9
 
 ### Patch Changes

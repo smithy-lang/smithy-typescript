@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [b9265813]
+- Updated dependencies [6d1c2fb1]
+  - @smithy/types@2.3.1
+  - @smithy/protocol-http@3.0.3
+  - @smithy/querystring-builder@2.0.7
+
 ## 2.1.2
 
 ### Patch Changes
