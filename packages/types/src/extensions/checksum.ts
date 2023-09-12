@@ -21,16 +21,21 @@ export interface ChecksumAlgorithm {
 }
 
 /**
- * @internal
+ * @deprecated unused.
  */
-export interface ChecksumConfiguration {
-  addChecksumAlgorithm(algo: ChecksumAlgorithm): void;
-  checksumAlgorithms(): ChecksumAlgorithm[];
-
+type ChecksumConfigurationLegacy = {
   /**
    * @deprecated unused.
    */
-  [other: string | number]: any;
+  [other in string | number]: any;
+};
+
+/**
+ * @internal
+ */
+export interface ChecksumConfiguration extends ChecksumConfigurationLegacy {
+  addChecksumAlgorithm(algo: ChecksumAlgorithm): void;
+  checksumAlgorithms(): ChecksumAlgorithm[];
 }
 
 /**
