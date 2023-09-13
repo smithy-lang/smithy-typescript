@@ -482,6 +482,11 @@ export interface MiddlewareStack<Input extends object, Output extends object> ex
 }
 
 /**
+ * @internal
+ */
+export const SMITHY_CONTEXT_KEY = "__smithy_context";
+
+/**
  * @public
  *
  * Data and helper objects that are not expected to change from one execution of
@@ -525,6 +530,12 @@ export interface HandlerExecutionContext {
     overrideInputFilterSensitiveLog(...args: any[]): string | void;
     overrideOutputFilterSensitiveLog(...args: any[]): string | void;
   }>;
+
+  /**
+   * @internal
+   * Context for Smithy properties
+   */
+  [SMITHY_CONTEXT_KEY]?: Record<string, unknown>;
 
   [key: string]: any;
 }
