@@ -305,8 +305,9 @@ export const expectUnion = (value: unknown): Record<string, any> | undefined => 
   }
   const asObject = expectObject(value)!;
 
+  const ignoredKey = "__type";
   const setKeys = Object.entries(asObject)
-    .filter(([, v]) => v != null)
+    .filter(([k, v]) => v != null && k !== ignoredKey)
     .map(([k]) => k);
 
   if (setKeys.length === 0) {

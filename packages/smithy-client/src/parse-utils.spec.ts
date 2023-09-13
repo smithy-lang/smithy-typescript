@@ -394,6 +394,33 @@ describe("expectUnion", () => {
       expect(expectUnion(value)).toEqual(value);
     });
   });
+
+  describe("ignores type", () => {
+    it("ignores the extra field with name __type", () => {
+      expect(() =>
+        expectUnion({
+          __type: "A",
+          A: "A",
+        })
+      ).not.toThrow();
+    });
+
+    it("does not skip other validation when ignoring the extra field with name __type", () => {
+      expect(() =>
+        expectUnion({
+          __type: "A",
+          A: "A",
+          B: "B", // too many keys
+        })
+      ).toThrow();
+
+      expect(() =>
+        expectUnion({
+          __type: "A", // not enough keys
+        })
+      ).toThrow();
+    });
+  });
 });
 
 describe("strictParseDouble", () => {
