@@ -127,6 +127,7 @@ final class CommandGenerator implements Runnable {
         writer.addImport("Handler", "Handler", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("HandlerExecutionContext", "HandlerExecutionContext", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("MiddlewareStack", "MiddlewareStack", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("SMITHY_CONTEXT_KEY", null, TypeScriptDependency.SMITHY_TYPES);
 
         String name = symbol.getName();
 
@@ -356,6 +357,10 @@ final class CommandGenerator implements Runnable {
                                 }
                             },
                             () -> writer.writeInline("(_: any) => _"));
+                });
+                writer.openBlock("[SMITHY_CONTEXT_KEY]: {", "},", () -> {
+                    writer.write("service: $S,", service.toShapeId().getName());
+                    writer.write("operation: $S,", operation.toShapeId().getName());
                 });
             });
             writer.write("const { requestHandler } = configuration;");
