@@ -1,4 +1,5 @@
 export * from "./HttpAuthScheme";
+export * from "./HttpAuthSchemeProvider";
 export * from "./HttpSigner";
 export * from "./IdentityProviderConfig";
 export * from "./SigV4Signer";

@@ -38,3 +38,12 @@ export interface HttpAuthOption {
   identityProperties?: Record<string, unknown>;
   signingProperties?: Record<string, unknown>;
 }
+
+/**
+ * @internal
+ */
+export interface SelectedHttpAuthScheme {
+  httpAuthOption: HttpAuthOption;
+  identity: Identity;
+  signer: HttpSigner;
+}
