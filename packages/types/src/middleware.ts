@@ -500,6 +500,16 @@ export interface HandlerExecutionContext {
   logger?: Logger;
 
   /**
+   * Name of the service the operation is being sent to.
+   */
+  clientName?: string;
+
+  /**
+   * Name of the operation being executed.
+   */
+  commandName?: string;
+
+  /**
    * Additional user agent that inferred by middleware. It can be used to save
    * the internal user agent sections without overriding the `customUserAgent`
    * config in clients.
