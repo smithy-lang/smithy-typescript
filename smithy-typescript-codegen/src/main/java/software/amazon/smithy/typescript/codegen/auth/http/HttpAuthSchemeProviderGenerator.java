@@ -132,6 +132,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 Paths.get(".", serviceSymbol.getNamespace()));
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
+            w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
             w.openBlock("""
                 /**
                  * @internal
@@ -142,7 +144,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 serviceName, serviceSymbol.getName(), serviceName,
                 () -> {
                 w.openBlock("return {", "};", () -> {
-                    w.write("operation: context.commandName,");
+                    w.write("operation: getSmithyContext(context).operation as string,");
                     for (HttpAuthScheme authScheme : authIndex.getSupportedHttpAuthSchemes().values()) {
                         for (HttpAuthSchemeParameter parameter : authScheme.getHttpAuthSchemeParameters()) {
                             w.write("$L: $C,", parameter.name(), parameter.source());
