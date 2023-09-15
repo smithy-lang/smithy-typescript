@@ -1,4 +1,4 @@
-import {
+import type {
   AuthScheme,
   EndpointParameters,
   EndpointV2,
@@ -11,8 +11,8 @@ import {
 } from "@smithy/types";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
-import { EndpointResolvedConfig } from "./resolveEndpointConfig";
-import { EndpointParameterInstructions } from "./types";
+import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
+import type { EndpointParameterInstructions } from "./types";
 
 /**
  * @internal

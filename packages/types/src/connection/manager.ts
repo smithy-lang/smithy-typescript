@@ -1,5 +1,5 @@
-import { RequestContext } from "../transfer";
-import { ConnectConfiguration } from "./config";
+import type { RequestContext } from "../transfer";
+import type { ConnectConfiguration } from "./config";
 
 export interface ConnectionManagerConfiguration {
   /**

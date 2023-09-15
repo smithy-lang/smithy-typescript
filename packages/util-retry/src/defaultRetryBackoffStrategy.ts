@@ -1,4 +1,4 @@
-import { StandardRetryBackoffStrategy } from "@smithy/types";
+import type { StandardRetryBackoffStrategy } from "@smithy/types";
 
 import { DEFAULT_RETRY_DELAY_BASE, MAXIMUM_RETRY_DELAY } from "./constants";
 

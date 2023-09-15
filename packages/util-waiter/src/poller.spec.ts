@@ -2,7 +2,8 @@ import { AbortController } from "@smithy/abort-controller";
 
 import { runPolling } from "./poller";
 import { sleep } from "./utils/sleep";
-import { WaiterOptions, WaiterState } from "./waiter";
+import type { WaiterOptions } from "./waiter";
+import { WaiterState } from "./waiter";
 
 jest.mock("./utils/sleep");
 

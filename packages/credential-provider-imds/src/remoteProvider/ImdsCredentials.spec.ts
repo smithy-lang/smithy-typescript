@@ -1,6 +1,7 @@
-import { AwsCredentialIdentity } from "@smithy/types";
+import type { AwsCredentialIdentity } from "@smithy/types";
 
-import { fromImdsCredentials, ImdsCredentials, isImdsCredentials } from "./ImdsCredentials";
+import type { ImdsCredentials } from "./ImdsCredentials";
+import { fromImdsCredentials, isImdsCredentials } from "./ImdsCredentials";
 
 const creds: ImdsCredentials = Object.freeze({
   AccessKeyId: "foo",

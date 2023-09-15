@@ -1,7 +1,7 @@
-import { HttpHandlerOptions, RequestHandler } from "@smithy/types";
+import type { HttpHandlerOptions, RequestHandler } from "@smithy/types";
 
-import { HttpRequest } from "./httpRequest";
-import { HttpResponse } from "./httpResponse";
+import type { HttpRequest } from "./httpRequest";
+import type { HttpResponse } from "./httpResponse";
 
 /**
  * @internal

@@ -1,4 +1,4 @@
-import { Endpoint } from "@smithy/types";
+import type { Endpoint } from "@smithy/types";
 
 import { createConfigValueProvider } from "./createConfigValueProvider";
 

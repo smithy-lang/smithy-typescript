@@ -1,5 +1,5 @@
-import { Message } from "./eventStream";
-import { HttpRequest } from "./http";
+import type { Message } from "./eventStream";
+import type { HttpRequest } from "./http";
 
 /**
  * @public

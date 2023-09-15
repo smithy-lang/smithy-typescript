@@ -1,6 +1,6 @@
 import { isArrayBuffer } from "@smithy/is-array-buffer";
 import { HttpRequest } from "@smithy/protocol-http";
-import {
+import type {
   BuildHandler,
   BuildHandlerArguments,
   BuildHandlerOptions,
@@ -11,7 +11,7 @@ import {
   Pluggable,
 } from "@smithy/types";
 
-import { Md5BodyChecksumResolvedConfig } from "./md5Configuration";
+import type { Md5BodyChecksumResolvedConfig } from "./md5Configuration";
 
 export const applyMd5BodyChecksumMiddleware = (options: Md5BodyChecksumResolvedConfig): BuildMiddleware<any, any> => <
   Output extends MetadataBearer

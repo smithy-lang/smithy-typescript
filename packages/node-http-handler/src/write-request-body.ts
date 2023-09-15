@@ -1,6 +1,6 @@
-import { HttpRequest } from "@smithy/types";
-import { ClientRequest } from "http";
-import { ClientHttp2Stream } from "http2";
+import type { HttpRequest } from "@smithy/types";
+import type { ClientRequest } from "http";
+import type { ClientHttp2Stream } from "http2";
 import { Readable } from "stream";
 
 const MIN_WAIT_TIME = 1000;

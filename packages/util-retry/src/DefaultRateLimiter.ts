@@ -1,6 +1,6 @@
 import { isThrottlingError } from "@smithy/service-error-classification";
 
-import { RateLimiter } from "./types";
+import type { RateLimiter } from "./types";
 
 /**
  * @public

@@ -1,6 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { getProfileName, loadSharedConfigFiles, SourceProfileInit } from "@smithy/shared-ini-file-loader";
-import { Profile, Provider } from "@smithy/types";
+import type { SourceProfileInit } from "@smithy/shared-ini-file-loader";
+import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
+import type { Profile, Provider } from "@smithy/types";
 
 export interface SharedConfigInit extends SourceProfileInit {
   /**

@@ -1,6 +1,6 @@
-import { EndpointRuleObject } from "./EndpointRuleObject";
-import { ErrorRuleObject } from "./ErrorRuleObject";
-import { ConditionObject } from "./shared";
+import type { EndpointRuleObject } from "./EndpointRuleObject";
+import type { ErrorRuleObject } from "./ErrorRuleObject";
+import type { ConditionObject } from "./shared";
 
 export type RuleSetRules = Array<EndpointRuleObject | ErrorRuleObject | TreeRuleObject>;
 

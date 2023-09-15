@@ -1,4 +1,5 @@
-import { map, ObjectMappingInstructions, SourceMappingInstructions, take } from "./object-mapping";
+import type { ObjectMappingInstructions, SourceMappingInstructions } from "./object-mapping";
+import { map, take } from "./object-mapping";
 
 describe("object mapping", () => {
   const example: ObjectMappingInstructions = {

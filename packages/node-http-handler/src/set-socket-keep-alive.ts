@@ -1,4 +1,4 @@
-import { ClientRequest } from "http";
+import type { ClientRequest } from "http";
 
 export interface SocketKeepAliveOptions {
   keepAlive: boolean;

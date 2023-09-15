@@ -13,7 +13,7 @@ import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
 import { defaultRetryDecider } from "./retryDecider";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
-import { RetryQuota } from "./types";
+import type { RetryQuota } from "./types";
 
 jest.mock("@smithy/service-error-classification");
 jest.mock("./delayDecider");

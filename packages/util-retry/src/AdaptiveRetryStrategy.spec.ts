@@ -1,10 +1,10 @@
-import { RetryErrorInfo, StandardRetryToken } from "@smithy/types";
+import type { RetryErrorInfo, StandardRetryToken } from "@smithy/types";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { RETRY_MODES } from "./config";
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
-import { RateLimiter } from "./types";
+import type { RateLimiter } from "./types";
 
 jest.mock("./StandardRetryStrategy");
 jest.mock("./DefaultRateLimiter");

@@ -1,5 +1,5 @@
-import { Handler, MiddlewareStack } from "./middleware";
-import { MetadataBearer } from "./response";
+import type { Handler, MiddlewareStack } from "./middleware";
+import type { MetadataBearer } from "./response";
 
 /**
  * @public

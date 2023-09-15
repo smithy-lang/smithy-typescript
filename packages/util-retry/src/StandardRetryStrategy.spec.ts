@@ -1,4 +1,4 @@
-import { RetryErrorInfo, RetryErrorType } from "@smithy/types";
+import type { RetryErrorInfo, RetryErrorType } from "@smithy/types";
 
 import { RETRY_MODES } from "./config";
 import { DEFAULT_RETRY_DELAY_BASE, INITIAL_RETRY_TOKENS } from "./constants";

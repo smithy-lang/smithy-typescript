@@ -1,8 +1,9 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
-import { ParsedIniData, Profile } from "@smithy/types";
+import type { ParsedIniData, Profile } from "@smithy/types";
 
-import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
+import type { GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
 
 jest.mock("@smithy/shared-ini-file-loader", () => ({
   getProfileName: jest.fn(),

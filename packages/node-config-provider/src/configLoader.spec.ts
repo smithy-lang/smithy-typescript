@@ -1,9 +1,10 @@
 import { chain, fromStatic, memoize } from "@smithy/property-provider";
-import { Profile } from "@smithy/types";
+import type { Profile } from "@smithy/types";
 
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";
-import { fromSharedConfigFiles, SharedConfigInit } from "./fromSharedConfigFiles";
+import type { SharedConfigInit } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
 
 jest.mock("./fromEnv");
 jest.mock("./fromSharedConfigFiles");

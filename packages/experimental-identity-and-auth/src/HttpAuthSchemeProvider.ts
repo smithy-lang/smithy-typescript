@@ -1,6 +1,6 @@
-import { HandlerExecutionContext } from "@smithy/types";
+import type { HandlerExecutionContext } from "@smithy/types";
 
-import { HttpAuthOption } from "./HttpAuthScheme";
+import type { HttpAuthOption } from "./HttpAuthScheme";
 
 /**
  * @internal

@@ -5,7 +5,8 @@ import {
   fromContainerMetadata,
 } from "./fromContainerMetadata";
 import { httpRequest } from "./remoteProvider/httpRequest";
-import { fromImdsCredentials, ImdsCredentials } from "./remoteProvider/ImdsCredentials";
+import type { ImdsCredentials } from "./remoteProvider/ImdsCredentials";
+import { fromImdsCredentials } from "./remoteProvider/ImdsCredentials";
 
 const mockHttpRequest = <any>httpRequest;
 jest.mock("./remoteProvider/httpRequest");

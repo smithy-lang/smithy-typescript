@@ -1,6 +1,7 @@
 import { AbortController } from "@smithy/abort-controller";
 
-import { WaiterOptions, WaiterState } from "./waiter";
+import type { WaiterOptions } from "./waiter";
+import { WaiterState } from "./waiter";
 
 const mockValidate = jest.fn();
 jest.mock("./utils/validate", () => ({

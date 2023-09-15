@@ -1,5 +1,5 @@
-import { AbortSignal } from "./abort";
-import { URI } from "./uri";
+import type { AbortSignal } from "./abort";
+import type { URI } from "./uri";
 
 /**
  * @public

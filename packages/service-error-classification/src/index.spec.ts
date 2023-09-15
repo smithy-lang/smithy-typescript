@@ -1,4 +1,4 @@
-import { RetryableTrait, SdkError } from "@smithy/types";
+import type { RetryableTrait, SdkError } from "@smithy/types";
 
 import {
   CLOCK_SKEW_ERROR_CODES,

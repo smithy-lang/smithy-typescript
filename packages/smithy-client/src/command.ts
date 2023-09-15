@@ -1,5 +1,5 @@
 import { constructStack } from "@smithy/middleware-stack";
-import { Command as ICommand, Handler, MetadataBearer, MiddlewareStack as IMiddlewareStack } from "@smithy/types";
+import type { Command as ICommand, Handler, MetadataBearer, MiddlewareStack as IMiddlewareStack } from "@smithy/types";
 
 /**
  * @public

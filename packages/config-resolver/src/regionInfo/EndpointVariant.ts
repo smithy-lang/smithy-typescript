@@ -1,4 +1,4 @@
-import { EndpointVariantTag } from "./EndpointVariantTag";
+import type { EndpointVariantTag } from "./EndpointVariantTag";
 
 /**
  * @internal

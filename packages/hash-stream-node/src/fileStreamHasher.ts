@@ -1,6 +1,7 @@
-import { HashConstructor, StreamHasher } from "@smithy/types";
-import { createReadStream, ReadStream } from "fs";
-import { Readable } from "stream";
+import type { HashConstructor, StreamHasher } from "@smithy/types";
+import type { ReadStream } from "fs";
+import { createReadStream } from "fs";
+import type { Readable } from "stream";
 
 import { HashCalculator } from "./HashCalculator";
 

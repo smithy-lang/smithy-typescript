@@ -1,6 +1,6 @@
-import { Endpoint } from "./http";
-import { FinalizeHandler, FinalizeHandlerArguments, FinalizeHandlerOutput } from "./middleware";
-import { MetadataBearer } from "./response";
+import type { Endpoint } from "./http";
+import type { FinalizeHandler, FinalizeHandlerArguments, FinalizeHandlerOutput } from "./middleware";
+import type { MetadataBearer } from "./response";
 
 /**
  * @public

@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@smithy/types";
+import type { ParsedIniData } from "@smithy/types";
 
 const ssoSessionKeyRegex = /^sso-session\s(["'])?([^\1]+)\1$/;
 

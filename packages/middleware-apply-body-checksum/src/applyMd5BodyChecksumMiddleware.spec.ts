@@ -1,5 +1,5 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import { ChecksumConstructor } from "@smithy/types";
+import type { ChecksumConstructor } from "@smithy/types";
 
 import { applyMd5BodyChecksumMiddleware } from "./applyMd5BodyChecksumMiddleware";
 

@@ -15,7 +15,8 @@
 
 import * as util from "util";
 
-import { findDuplicates, Input } from "./unique";
+import type { Input } from "./unique";
+import { findDuplicates } from "./unique";
 
 describe("findDuplicates", () => {
   describe("finds duplicates in", () => {

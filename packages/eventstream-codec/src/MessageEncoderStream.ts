@@ -1,4 +1,4 @@
-import { Message, MessageEncoder } from "@smithy/types";
+import type { Message, MessageEncoder } from "@smithy/types";
 
 /**
  * @internal

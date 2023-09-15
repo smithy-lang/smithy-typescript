@@ -1,4 +1,4 @@
-import { WaiterOptions } from "../waiter";
+import type { WaiterOptions } from "../waiter";
 
 /**
  * @internal

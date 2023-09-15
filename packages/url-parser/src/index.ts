@@ -1,5 +1,5 @@
 import { parseQueryString } from "@smithy/querystring-parser";
-import { Endpoint, QueryParameterBag, UrlParser } from "@smithy/types";
+import type { Endpoint, QueryParameterBag, UrlParser } from "@smithy/types";
 
 /**
  * @internal

@@ -1,4 +1,4 @@
-import { HeaderBag, HttpMessage, HttpRequest as IHttpRequest, QueryParameterBag, URI } from "@smithy/types";
+import type { HeaderBag, HttpMessage, HttpRequest as IHttpRequest, QueryParameterBag, URI } from "@smithy/types";
 
 type HttpRequestOptions = Partial<HttpMessage> & Partial<URI> & { method?: string };
 

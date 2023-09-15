@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  */
 
+import type { SingleConstraintValidator } from "./validators";
 import {
   CompositeValidator,
   EnumValidator,
@@ -21,7 +22,6 @@ import {
   PatternValidator,
   RangeValidator,
   SensitiveConstraintValidator,
-  SingleConstraintValidator,
   UniqueItemsValidator,
 } from "./validators";
 

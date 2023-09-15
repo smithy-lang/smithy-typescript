@@ -1,4 +1,4 @@
-import { EventStreamMarshaller, EventStreamSerdeProvider } from "@smithy/types";
+import type { EventStreamMarshaller, EventStreamSerdeProvider } from "@smithy/types";
 
 /**
  * @public

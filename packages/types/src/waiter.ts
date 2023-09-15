@@ -1,4 +1,4 @@
-import { AbortController } from "./abort";
+import type { AbortController } from "./abort";
 
 /**
  * @public

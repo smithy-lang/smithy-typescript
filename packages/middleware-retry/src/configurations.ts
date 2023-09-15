@@ -1,5 +1,5 @@
-import { LoadedConfigSelectors } from "@smithy/node-config-provider";
-import { Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
+import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
+import type { Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
 import { normalizeProvider } from "@smithy/util-middleware";
 import {
   AdaptiveRetryStrategy,

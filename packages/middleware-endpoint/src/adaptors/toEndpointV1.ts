@@ -1,4 +1,4 @@
-import { Endpoint, EndpointV2 } from "@smithy/types";
+import type { Endpoint, EndpointV2 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
 
 /**

@@ -1,8 +1,9 @@
-import { AbortSignal } from "@smithy/types";
+import type { AbortSignal } from "@smithy/types";
 
 import { runPolling } from "./poller";
 import { validateWaiterOptions } from "./utils";
-import { WaiterOptions, WaiterResult, waiterServiceDefaults, WaiterState } from "./waiter";
+import type { WaiterOptions, WaiterResult } from "./waiter";
+import { waiterServiceDefaults, WaiterState } from "./waiter";
 
 const abortTimeout = async (abortSignal: AbortSignal): Promise<WaiterResult> => {
   return new Promise((resolve) => {

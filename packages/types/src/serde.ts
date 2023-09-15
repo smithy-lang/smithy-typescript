@@ -1,6 +1,6 @@
-import { Endpoint } from "./http";
-import { RequestHandler } from "./transfer";
-import { Decoder, Encoder, Provider } from "./util";
+import type { Endpoint } from "./http";
+import type { RequestHandler } from "./transfer";
+import type { Decoder, Encoder, Provider } from "./util";
 
 /**
  * @public

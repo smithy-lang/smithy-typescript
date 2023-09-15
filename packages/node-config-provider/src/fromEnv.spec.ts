@@ -1,6 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 
-import { fromEnv, GetterFromEnv } from "./fromEnv";
+import type { GetterFromEnv } from "./fromEnv";
+import { fromEnv } from "./fromEnv";
 
 describe("fromEnv", () => {
   describe("with env var getter", () => {

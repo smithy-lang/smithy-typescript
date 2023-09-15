@@ -1,9 +1,9 @@
 import { serializerMiddlewareOption } from "@smithy/middleware-serde";
-import { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
+import type { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
 import { endpointMiddleware } from "./endpointMiddleware";
-import { EndpointResolvedConfig } from "./resolveEndpointConfig";
-import { EndpointParameterInstructions } from "./types";
+import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
+import type { EndpointParameterInstructions } from "./types";
 
 /**
  * @internal

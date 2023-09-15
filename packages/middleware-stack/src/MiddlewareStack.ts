@@ -1,4 +1,4 @@
-import {
+import type {
   AbsoluteLocation,
   DeserializeHandler,
   Handler,
@@ -12,7 +12,7 @@ import {
   Step,
 } from "@smithy/types";
 
-import { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewareEntry } from "./types";
+import type { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewareEntry } from "./types";
 
 export const constructStack = <Input extends object, Output extends object>(): MiddlewareStack<Input, Output> => {
   let absoluteEntries: AbsoluteMiddlewareEntry<Input, Output>[] = [];

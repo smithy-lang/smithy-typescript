@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@smithy/types";
+import type { ParsedIniData } from "@smithy/types";
 
 const profileNameBlockList = ["__proto__", "profile __proto__"];
 

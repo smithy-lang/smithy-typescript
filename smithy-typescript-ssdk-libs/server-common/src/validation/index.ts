@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { ServiceException } from "../errors";
+import type { ServiceException } from "../errors";
 
 export * from "./validators";
 

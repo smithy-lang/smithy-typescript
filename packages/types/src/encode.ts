@@ -1,4 +1,4 @@
-import { Message } from "./eventStream";
+import type { Message } from "./eventStream";
 
 export interface MessageEncoder {
   encode(message: Message): Uint8Array;

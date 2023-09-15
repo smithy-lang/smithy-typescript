@@ -5,7 +5,7 @@ import {
   SmithyMessageDecoderStream,
   SmithyMessageEncoderStream,
 } from "@smithy/eventstream-codec";
-import { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy/types";
+import type { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy/types";
 
 import { getChunkedStream } from "./getChunkedStream";
 import { getMessageUnmarshaller } from "./getUnmarshalledStream";

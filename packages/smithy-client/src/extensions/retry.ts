@@ -1,4 +1,4 @@
-import { Provider, RetryStrategy, RetryStrategyConfiguration, RetryStrategyV2 } from "@smithy/types";
+import type { Provider, RetryStrategy, RetryStrategyConfiguration, RetryStrategyV2 } from "@smithy/types";
 
 export type PartialRetryRuntimeConfigType = Partial<{ retryStrategy: Provider<RetryStrategyV2 | RetryStrategy> }>;
 

@@ -1,4 +1,4 @@
-import { QueryParameterBag } from "@smithy/types";
+import type { QueryParameterBag } from "@smithy/types";
 
 import { parseQueryString } from "./";
 

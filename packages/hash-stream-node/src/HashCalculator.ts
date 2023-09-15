@@ -1,6 +1,7 @@
-import { Checksum, Hash } from "@smithy/types";
+import type { Checksum, Hash } from "@smithy/types";
 import { toUint8Array } from "@smithy/util-utf8";
-import { Writable, WritableOptions } from "stream";
+import type { WritableOptions } from "stream";
+import { Writable } from "stream";
 
 /**
  * @internal

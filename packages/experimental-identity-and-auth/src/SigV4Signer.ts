@@ -1,8 +1,8 @@
-import { HttpRequest } from "@smithy/protocol-http";
+import type { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
-import { AwsCredentialIdentity, HttpRequest as IHttpRequest } from "@smithy/types";
+import type { AwsCredentialIdentity, HttpRequest as IHttpRequest } from "@smithy/types";
 
-import { HttpSigner } from "./HttpSigner";
+import type { HttpSigner } from "./HttpSigner";
 
 /**
  * @internal

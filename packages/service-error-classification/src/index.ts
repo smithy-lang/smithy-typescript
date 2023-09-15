@@ -1,4 +1,4 @@
-import { SdkError } from "@smithy/types";
+import type { SdkError } from "@smithy/types";
 
 import {
   CLOCK_SKEW_ERROR_CODES,

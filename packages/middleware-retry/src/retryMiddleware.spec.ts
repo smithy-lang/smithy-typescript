@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
-import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
+import type { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
 

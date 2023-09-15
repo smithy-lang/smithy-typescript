@@ -1,5 +1,5 @@
 import { HeaderMarshaller } from "@smithy/eventstream-codec";
-import {
+import type {
   AwsCredentialIdentity,
   ChecksumConstructor,
   DateInput,

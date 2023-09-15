@@ -1,4 +1,4 @@
-import { PartitionHash } from "./PartitionHash";
+import type { PartitionHash } from "./PartitionHash";
 
 /**
  * @internal

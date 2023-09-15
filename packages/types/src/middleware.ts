@@ -1,7 +1,7 @@
-import { AuthScheme, HttpAuthDefinition } from "./auth";
-import { EndpointV2 } from "./endpoint";
-import { Logger } from "./logger";
-import { UserAgent } from "./util";
+import type { AuthScheme, HttpAuthDefinition } from "./auth";
+import type { EndpointV2 } from "./endpoint";
+import type { Logger } from "./logger";
+import type { UserAgent } from "./util";
 
 /**
  * @public

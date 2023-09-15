@@ -1,5 +1,5 @@
 import { blobReader } from "@smithy/chunked-blob-reader";
-import { ChecksumConstructor, HashConstructor, StreamHasher } from "@smithy/types";
+import type { ChecksumConstructor, HashConstructor, StreamHasher } from "@smithy/types";
 
 /**
  * @internal

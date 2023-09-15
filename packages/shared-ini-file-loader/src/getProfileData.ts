@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@smithy/types";
+import type { ParsedIniData } from "@smithy/types";
 
 const profileKeyRegex = /^profile\s(["'])?([^\1]+)\1$/;
 

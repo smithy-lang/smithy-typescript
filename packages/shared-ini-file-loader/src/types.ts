@@ -1,4 +1,4 @@
-import {
+import type {
   ParsedIniData as __ParsedIniData,
   Profile as __Profile,
   SharedConfigFiles as __SharedConfigFiles,

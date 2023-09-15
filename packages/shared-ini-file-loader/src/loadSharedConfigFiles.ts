@@ -1,4 +1,4 @@
-import { SharedConfigFiles } from "@smithy/types";
+import type { SharedConfigFiles } from "@smithy/types";
 
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getCredentialsFilepath } from "./getCredentialsFilepath";

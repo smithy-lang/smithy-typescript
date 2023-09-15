@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { ClientRequest } from "http";
+import type { ClientRequest } from "http";
 import { Socket } from "net";
 
 import { setSocketKeepAlive } from "./set-socket-keep-alive";

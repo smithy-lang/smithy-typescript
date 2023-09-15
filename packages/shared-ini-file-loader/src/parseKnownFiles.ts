@@ -1,6 +1,7 @@
-import { ParsedIniData } from "@smithy/types";
+import type { ParsedIniData } from "@smithy/types";
 
-import { loadSharedConfigFiles, SharedConfigInit } from "./loadSharedConfigFiles";
+import type { SharedConfigInit } from "./loadSharedConfigFiles";
+import { loadSharedConfigFiles } from "./loadSharedConfigFiles";
 import { mergeConfigFiles } from "./mergeConfigFiles";
 
 export interface SourceProfileInit extends SharedConfigInit {

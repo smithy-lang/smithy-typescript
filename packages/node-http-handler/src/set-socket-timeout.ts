@@ -1,4 +1,4 @@
-import { ClientRequest } from "http";
+import type { ClientRequest } from "http";
 
 export const setSocketTimeout = (request: ClientRequest, reject: (err: Error) => void, timeoutInMs = 0) => {
   request.setTimeout(timeoutInMs, () => {

@@ -1,4 +1,4 @@
-import { HttpRequest } from "@smithy/types";
+import type { HttpRequest } from "@smithy/types";
 
 import { cloneRequest } from "./cloneRequest";
 import { GENERATED_HEADERS } from "./constants";

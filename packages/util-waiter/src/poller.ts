@@ -1,5 +1,6 @@
 import { sleep } from "./utils/sleep";
-import { WaiterOptions, WaiterResult, WaiterState } from "./waiter";
+import type { WaiterOptions, WaiterResult } from "./waiter";
+import { WaiterState } from "./waiter";
 
 /**
  * @internal

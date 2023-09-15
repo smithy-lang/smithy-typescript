@@ -1,4 +1,4 @@
-import { AwsCredentialIdentity, ChecksumConstructor, HashConstructor, SourceData } from "@smithy/types";
+import type { AwsCredentialIdentity, ChecksumConstructor, HashConstructor, SourceData } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUint8Array } from "@smithy/util-utf8";
 

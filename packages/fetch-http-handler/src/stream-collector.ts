@@ -1,4 +1,4 @@
-import { StreamCollector } from "@smithy/types";
+import type { StreamCollector } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
 //reference: https://snack.expo.io/r1JCSWRGU

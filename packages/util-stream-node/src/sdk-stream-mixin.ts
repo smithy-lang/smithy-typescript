@@ -1,5 +1,5 @@
 import { streamCollector } from "@smithy/node-http-handler";
-import { SdkStream, SdkStreamMixin } from "@smithy/types";
+import type { SdkStream, SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { Readable } from "stream";
 import { TextDecoder } from "util";

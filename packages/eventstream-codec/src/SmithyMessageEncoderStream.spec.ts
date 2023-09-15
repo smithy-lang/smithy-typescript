@@ -1,4 +1,4 @@
-import { Message } from "@smithy/types";
+import type { Message } from "@smithy/types";
 
 import { SmithyMessageEncoderStream } from "./SmithyMessageEncoderStream";
 

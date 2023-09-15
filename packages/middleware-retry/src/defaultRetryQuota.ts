@@ -1,7 +1,7 @@
-import { SdkError } from "@smithy/types";
+import type { SdkError } from "@smithy/types";
 import { NO_RETRY_INCREMENT, RETRY_COST, TIMEOUT_RETRY_COST } from "@smithy/util-retry";
 
-import { RetryQuota } from "./types";
+import type { RetryQuota } from "./types";
 
 export interface DefaultRetryQuotaOptions {
   /**

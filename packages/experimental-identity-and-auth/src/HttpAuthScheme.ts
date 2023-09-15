@@ -1,7 +1,7 @@
-import { Identity, IdentityProvider } from "@smithy/types";
+import type { Identity, IdentityProvider } from "@smithy/types";
 
-import { HttpSigner } from "./HttpSigner";
-import { IdentityProviderConfig } from "./IdentityProviderConfig";
+import type { HttpSigner } from "./HttpSigner";
+import type { IdentityProviderConfig } from "./IdentityProviderConfig";
 
 /**
  * ID for {@link HttpAuthScheme}

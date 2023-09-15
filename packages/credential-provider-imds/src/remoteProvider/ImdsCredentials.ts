@@ -1,4 +1,4 @@
-import { AwsCredentialIdentity } from "@smithy/types";
+import type { AwsCredentialIdentity } from "@smithy/types";
 
 /**
  * @internal

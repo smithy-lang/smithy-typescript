@@ -1,5 +1,5 @@
 import { constructStack } from "@smithy/middleware-stack";
-import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@smithy/types";
+import type { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@smithy/types";
 
 /**
  * @public

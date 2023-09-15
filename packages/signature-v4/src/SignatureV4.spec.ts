@@ -1,6 +1,6 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
-import { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
+import type { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
 
 import {
   ALGORITHM_IDENTIFIER,

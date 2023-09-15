@@ -1,4 +1,4 @@
-import { HeaderBag, HttpMessage, HttpResponse as IHttpResponse } from "@smithy/types";
+import type { HeaderBag, HttpMessage, HttpResponse as IHttpResponse } from "@smithy/types";
 
 type HttpResponseOptions = Partial<HttpMessage> & {
   statusCode: number;

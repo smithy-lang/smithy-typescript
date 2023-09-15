@@ -1,7 +1,9 @@
-import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider } from "@smithy/types";
-import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@smithy/util-retry";
+import type { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider } from "@smithy/types";
+import type { RateLimiter } from "@smithy/util-retry";
+import { DefaultRateLimiter, RETRY_MODES } from "@smithy/util-retry";
 
-import { StandardRetryStrategy, StandardRetryStrategyOptions } from "./StandardRetryStrategy";
+import type { StandardRetryStrategyOptions } from "./StandardRetryStrategy";
+import { StandardRetryStrategy } from "./StandardRetryStrategy";
 
 /**
  * Strategy options to be passed to AdaptiveRetryStrategy

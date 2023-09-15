@@ -1,4 +1,4 @@
-import { Hash } from "@smithy/types";
+import type { Hash } from "@smithy/types";
 import { Readable, Writable } from "stream";
 
 import { HashCalculator } from "./HashCalculator";

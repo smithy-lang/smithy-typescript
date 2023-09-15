@@ -1,19 +1,21 @@
 import { dirname } from "path";
-import {
-  BindOption,
-  ContainerReflection,
+import type {
   Context,
-  Converter,
   DeclarationReflection,
   Logger,
   Options,
   ProjectReflection,
   ReferenceType,
+  Renderer,
+} from "typedoc";
+import {
+  BindOption,
+  ContainerReflection,
+  Converter,
   ReflectionCategory,
   ReflectionFlag,
   ReflectionGroup,
   ReflectionKind,
-  Renderer,
 } from "typedoc";
 
 import { isClientModel } from "./utils";

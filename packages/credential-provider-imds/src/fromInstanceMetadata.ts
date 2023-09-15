@@ -1,12 +1,13 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { AwsCredentialIdentity, Provider } from "@smithy/types";
-import { RequestOptions } from "http";
+import type { AwsCredentialIdentity, Provider } from "@smithy/types";
+import type { RequestOptions } from "http";
 
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
-import { providerConfigFromInit, RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
+import type { RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
+import { providerConfigFromInit } from "./remoteProvider/RemoteProviderInit";
 import { retry } from "./remoteProvider/retry";
-import { InstanceMetadataCredentials } from "./types";
+import type { InstanceMetadataCredentials } from "./types";
 import { getInstanceMetadataEndpoint } from "./utils/getInstanceMetadataEndpoint";
 import { staticStabilityProvider } from "./utils/staticStabilityProvider";
 

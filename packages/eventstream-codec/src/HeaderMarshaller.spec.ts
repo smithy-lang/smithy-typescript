@@ -1,4 +1,4 @@
-import { MessageHeaders } from "@smithy/types";
+import type { MessageHeaders } from "@smithy/types";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 import { HeaderMarshaller } from "./HeaderMarshaller";
