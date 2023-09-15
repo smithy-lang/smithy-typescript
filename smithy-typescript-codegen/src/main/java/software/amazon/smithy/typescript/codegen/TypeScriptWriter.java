@@ -147,7 +147,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @param runnable Runnable that handles actually writing docs with the writer.
      * @return Returns the writer.
      */
-    TypeScriptWriter writeDocs(Runnable runnable) {
+    public TypeScriptWriter writeDocs(Runnable runnable) {
         pushState("docs");
         write("/**");
         setNewlinePrefix(" * ");
