@@ -22,7 +22,6 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@smithy/types": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
@@ -55,5 +54,8 @@
   },
   "publishConfig": {
     "directory": ".release/package"
+  },
+  "dependencies": {
+    "@smithy/types": "workspace:^"
   }
 }

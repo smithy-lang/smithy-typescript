@@ -25,10 +25,10 @@
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
   "dependencies": {
+    "@smithy/types": "workspace:^",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@smithy/types": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",

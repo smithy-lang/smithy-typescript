@@ -23,12 +23,12 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@smithy/property-provider": "workspace:^",
+    "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
     "bowser": "^2.11.0",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@smithy/smithy-client": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "@types/node": "^14.14.31",
     "concurrently": "7.0.0",
