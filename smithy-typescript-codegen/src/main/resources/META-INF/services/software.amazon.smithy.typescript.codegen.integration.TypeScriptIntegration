@@ -2,6 +2,7 @@ software.amazon.smithy.typescript.codegen.integration.AddClientRuntimeConfig
 software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency
 software.amazon.smithy.typescript.codegen.integration.AddChecksumRequiredDependency
 software.amazon.smithy.typescript.codegen.integration.AddDefaultsModeDependency
+software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpSigningMiddleware
 software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthRuntimeExtensionIntegration
 software.amazon.smithy.typescript.codegen.auth.http.integration.AddNoAuthPlugin
 software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpApiKeyAuthPlugin
