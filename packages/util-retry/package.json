@@ -28,10 +28,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@smithy/service-error-classification": "workspace:^",
+    "@smithy/types": "workspace:^",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@smithy/types": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "@types/node": "^14.14.31",
     "concurrently": "7.0.0",
