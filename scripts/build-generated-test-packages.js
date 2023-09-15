@@ -23,6 +23,13 @@ const weatherClientDir = path.join(
     "typescript-codegen"
 );
 
+// TODO(experimentalIdentityAndAuth): build generic client for integration tests
+const weatherExperimentalIdentityAndAuthClientDir = path.join(
+    codegenTestDir,
+    "client-experimental-identity-and-auth",
+    "typescript-codegen"
+);
+
 const weatherSsdkDir = path.join(
     codegenTestDir,
     "ssdk-test",
@@ -52,6 +59,8 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
   try {
     await buildAndCopyToNodeModules("weather", weatherClientDir, nodeModulesDir);
     await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): build generic client for integration tests
+    await buildAndCopyToNodeModules("@smithy/weather-experimental-identity-and-auth", weatherExperimentalIdentityAndAuthClientDir, nodeModulesDir);
  } catch (e) {
     console.log(e);
     process.exit(1);
