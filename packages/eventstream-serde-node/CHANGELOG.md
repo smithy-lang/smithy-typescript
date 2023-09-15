@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/eventstream-serde-universal@2.0.8
+
 ## 2.0.7
 
 ### Patch Changes

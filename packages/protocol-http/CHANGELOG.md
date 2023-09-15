@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+
 ## 3.0.3
 
 ### Patch Changes

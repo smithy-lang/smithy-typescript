@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.1.4
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/abort-controller@2.0.8
+  - @smithy/protocol-http@3.0.4
+  - @smithy/querystring-builder@2.0.8
+
 ## 2.1.3
 
 ### Patch Changes

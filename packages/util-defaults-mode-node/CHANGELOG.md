@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.0.11
+
+### Patch Changes
+
+- e6ea6bd5: move devDeps into deps
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/config-resolver@2.0.9
+  - @smithy/credential-provider-imds@2.0.11
+  - @smithy/node-config-provider@2.0.11
+  - @smithy/property-provider@2.0.9
+  - @smithy/smithy-client@2.1.5
+
 ## 2.0.10
 
 ### Patch Changes

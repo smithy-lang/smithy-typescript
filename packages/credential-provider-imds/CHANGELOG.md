@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/node-config-provider@2.0.11
+  - @smithy/property-provider@2.0.9
+  - @smithy/url-parser@2.0.8
+
 ## 2.0.10
 
 ### Patch Changes

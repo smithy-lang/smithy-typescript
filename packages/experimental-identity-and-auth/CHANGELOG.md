@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.0.7
+
+### Patch Changes
+
+- 36d56a1d: Add additional `HttpAuthScheme` interfaces for auth scheme resolution
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/protocol-http@3.0.4
+  - @smithy/signature-v4@2.0.8
+
 ## 0.0.6
 
 ### Patch Changes

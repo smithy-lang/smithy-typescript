@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.0.11
+
+### Patch Changes
+
+- 99fc0b4c: util-stream api extraction added
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/fetch-http-handler@2.1.4
+  - @smithy/node-http-handler@2.1.4
+
 ## 2.0.10
 
 ### Patch Changes

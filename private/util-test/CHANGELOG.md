@@ -1,5 +1,14 @@
 # @smithy/util-test
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/protocol-http@3.0.4
+
 ## 0.1.3
 
 ### Patch Changes

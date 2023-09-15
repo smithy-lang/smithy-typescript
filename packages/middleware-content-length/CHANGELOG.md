@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/protocol-http@3.0.4
+
 ## 2.0.9
 
 ### Patch Changes

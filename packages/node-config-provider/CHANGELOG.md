@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [fbfeebee]
+- Updated dependencies [c0b17a13]
+  - @smithy/types@2.3.2
+  - @smithy/property-provider@2.0.9
+  - @smithy/shared-ini-file-loader@2.0.10
+
 ## 2.0.10
 
 ### Patch Changes
