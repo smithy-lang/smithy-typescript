@@ -9,6 +9,7 @@ import {
   Pluggable,
   Priority,
   RelativeLocation,
+  RelativeMiddlewareOptions,
   Step,
 } from "@smithy/types";
 
@@ -17,6 +18,7 @@ import { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewar
 export const constructStack = <Input extends object, Output extends object>(): MiddlewareStack<Input, Output> => {
   let absoluteEntries: AbsoluteMiddlewareEntry<Input, Output>[] = [];
   let relativeEntries: RelativeMiddlewareEntry<Input, Output>[] = [];
+  let identifyOnResolve = false;
   const entriesNameSet: Set<string> = new Set();
 
   const sort = <T extends AbsoluteMiddlewareEntry<Input, Output>>(entries: T[]): T[] =>
@@ -67,6 +69,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
       //@ts-ignore
       toStack.addRelativeTo(entry.middleware, { ...entry });
     });
+    toStack.identifyOnResolve(stack.identifyOnResolve());
     return toStack;
   };
 
@@ -236,6 +239,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
     ): MiddlewareStack<InputType, OutputType> => {
       const cloned = cloneTo(constructStack<InputType, OutputType>());
       cloned.use(from);
+      cloned.identifyOnResolve(identifyOnResolve || cloned.identifyOnResolve() || from.identifyOnResolve());
       return cloned;
     },
 
@@ -243,8 +247,21 @@ export const constructStack = <Input extends object, Output extends object>(): M
 
     identify: (): string[] => {
       return getMiddlewareList(true).map((mw: MiddlewareEntry<Input, Output>) => {
-        return mw.name + ": " + (mw.tags || []).join(",");
+        const step =
+          mw.step ??
+          ((mw as unknown) as RelativeMiddlewareOptions).relation +
+            " " +
+            ((mw as unknown) as RelativeMiddlewareOptions).toMiddleware;
+        return mw.name + " - " + step;
       });
+    },
+
+    identifyOnResolve(toggle?: boolean) {
+      if (typeof toggle !== "boolean") {
+        return identifyOnResolve;
+      }
+      identifyOnResolve = !!toggle;
+      return identifyOnResolve;
     },
 
     resolve: <InputType extends Input, OutputType extends Output>(
@@ -255,6 +272,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
         .map((entry) => entry.middleware)
         .reverse()) {
         handler = middleware(handler as Handler<Input, OutputType>, context) as any;
+      }
+      if (identifyOnResolve) {
+        console.log(stack.identify());
       }
       return handler as Handler<InputType, OutputType>;
     },

@@ -466,6 +466,18 @@ export interface MiddlewareStack<Input extends object, Output extends object> ex
   identify(): string[];
 
   /**
+   * @internal
+   *
+   * When an operation is called using this stack,
+   * it will log its list of middleware to the console using
+   * the identify function.
+   *
+   * @param toggle - set whether to log on resolve.
+   *                 If no argument given, returns the current value.
+   */
+  identifyOnResolve(toggle?: boolean): boolean;
+
+  /**
    * Builds a single handler function from zero or more middleware classes and
    * a core handler. The core handler is meant to send command objects to AWS
    * services and return promises that will resolve with the operation result
