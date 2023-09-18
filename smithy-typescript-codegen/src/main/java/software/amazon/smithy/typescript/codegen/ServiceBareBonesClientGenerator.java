@@ -335,7 +335,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                     httpAuthIntegration.getHttpAuthScheme().ifPresent(authScheme -> {
                         for (ConfigField configField : authScheme.getConfigFields()) {
                             writer.writeDocs(() -> writer.write("$C", configField.docs()));
-                            writer.write("$L?: $C;\n", configField.name(), configField.source());
+                            writer.write("$L?: $C;\n", configField.name(), configField.inputType());
                         }
                     });
                 }

@@ -46,33 +46,62 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                 .schemeId(ShapeId.from("aws.auth#sigv4"))
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
                 .putDefaultSigner(LanguageTarget.SHARED, AWS_SIGV4_AUTH_SIGNER)
-                .addConfigField(new ConfigField("region", ConfigField.Type.AUXILIARY, w -> {
-                    w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                    w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
-                    w.write("string | __Provider<string>");
-                }, w -> w.write("The AWS region to which this client will send requests.")))
-                .addConfigField(new ConfigField("credentials", ConfigField.Type.MAIN, w -> {
-                    w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                    w.addImport("AwsCredentialIdentity", null, TypeScriptDependency.SMITHY_TYPES);
-                    w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
-                    w.write("AwsCredentialIdentity | AwsCredentialIdentityProvider");
-                }, w -> w.write("The credentials used to sign requests.")))
-                .addHttpAuthSchemeParameter(new HttpAuthSchemeParameter(
-                    "region", w -> w.write("string"), w -> {
-                    w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-                    w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
-                    w.openBlock("await normalizeProvider(config.region)() || (() => {", "})()", () -> {
-                        w.write("throw new Error(\"expected `region` to be configured for `aws.auth#sigv4`\");");
-                    });
-                }))
-                .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "name", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
-                    w.write("$S", t.toNode().expectObjectNode().getMember("name"));
-                }))
-                .addHttpAuthOptionProperty(new HttpAuthOptionProperty(
-                    "region", HttpAuthOptionProperty.Type.SIGNING, t -> w -> {
-                    w.write("authParameters.region");
-                }))
+                .addConfigField(ConfigField.builder()
+                    .name("credentials")
+                    .type(ConfigField.Type.MAIN)
+                    .docs(w -> w.write("The credentials used to sign requests."))
+                    .inputType(w -> {
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+                        w.addImport("AwsCredentialIdentity", null, TypeScriptDependency.SMITHY_TYPES);
+                        w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
+                        w.write("AwsCredentialIdentity | AwsCredentialIdentityProvider");
+                    })
+                    .resolvedType(w -> {
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+                        w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
+                        w.write("AwsCredentialIdentityProvider");
+                    })
+                    .build())
+                .addConfigField(ConfigField.builder()
+                    .name("region")
+                    .type(ConfigField.Type.AUXILIARY)
+                    .docs(w -> w.write("The AWS region to which this client will send requests."))
+                    .inputType(w -> {
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+                        w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
+                        w.write("string | __Provider<string>");
+                    })
+                    .resolvedType(w -> {
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+                        w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
+                        w.write("__Provider<string>");
+                    })
+                    .build())
+                .addHttpAuthSchemeParameter(HttpAuthSchemeParameter.builder()
+                    .name("region")
+                    .type(w -> w.write("string"))
+                    .source(w -> {
+                        w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
+                        w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+                        w.openBlock("await normalizeProvider(config.region)() || (() => {", "})()", () -> {
+                            w.write("throw new Error(\"expected `region` to be configured for `aws.auth#sigv4`\");");
+                        });
+                    })
+                    .build())
+                .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
+                    .name("name")
+                    .type(HttpAuthOptionProperty.Type.SIGNING)
+                    .source(t -> w -> {
+                        w.write("$S", t.toNode().expectObjectNode().getMember("name"));
+                    })
+                    .build())
+                .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
+                    .name("region")
+                    .type(HttpAuthOptionProperty.Type.SIGNING)
+                    .source(t -> w -> {
+                        w.write("authParameters.region");
+                    })
+                    .build())
                 .build());
     }
 }

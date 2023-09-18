@@ -9,7 +9,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
+import software.amazon.smithy.utils.ToSmithyBuilder;
 
 /**
  * Definition of an HttpAuthOptionProperty.
@@ -24,7 +26,7 @@ public final record HttpAuthOptionProperty(
     String name,
     Type type,
     Function<Trait, Consumer<TypeScriptWriter>> source
-) {
+) implements ToSmithyBuilder<HttpAuthOptionProperty> {
     /**
      * Defines the type of the auth option property.
      */
@@ -37,5 +39,46 @@ public final record HttpAuthOptionProperty(
          * Specifies the property should be included in {@code signingProperties}.
          */
         SIGNING
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Override
+    public SmithyBuilder<HttpAuthOptionProperty> toBuilder() {
+        return builder()
+            .name(name)
+            .type(type)
+            .source(source);
+    }
+
+    public static final class Builder implements SmithyBuilder<HttpAuthOptionProperty> {
+        private String name;
+        private Type type;
+        private Function<Trait, Consumer<TypeScriptWriter>> source;
+
+        @Override
+        public HttpAuthOptionProperty build() {
+            return new HttpAuthOptionProperty(
+                SmithyBuilder.requiredState("name", name),
+                SmithyBuilder.requiredState("type", type),
+                SmithyBuilder.requiredState("source", source));
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder type(Type type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder source(Function<Trait, Consumer<TypeScriptWriter>> source) {
+            this.source = source;
+            return this;
+        }
     }
 }
