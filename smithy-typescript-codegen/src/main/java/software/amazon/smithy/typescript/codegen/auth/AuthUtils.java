@@ -28,21 +28,15 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public final class AuthUtils {
     public static final String HTTP_AUTH_FOLDER = "auth";
 
-    public static final String HTTP_AUTH_SCHEME_PROVIDER_MODULE = "httpAuthSchemeProvider";
+    public static final String HTTP_AUTH_SCHEME_PROVIDER_MODULE =
+        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthSchemeProvider").toString();
 
-    public static final String HTTP_AUTH_SCHEME_PROVIDER_FILE =
-        HTTP_AUTH_SCHEME_PROVIDER_MODULE + ".ts";
-
-    public static final String HTTP_AUTH_SCHEME_PROVIDER_PATH =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, HTTP_AUTH_SCHEME_PROVIDER_FILE).toString();
+    public static final String HTTP_AUTH_SCHEME_PROVIDER_PATH = HTTP_AUTH_SCHEME_PROVIDER_MODULE + ".ts";
 
     public static final Dependency AUTH_HTTP_PROVIDER_DEPENDENCY = new Dependency() {
         @Override
         public String getPackageName() {
-            return Paths.get(
-                ".", CodegenUtils.SOURCE_FOLDER,
-                HTTP_AUTH_FOLDER, HTTP_AUTH_SCHEME_PROVIDER_MODULE
-            ).toString();
+            return HTTP_AUTH_SCHEME_PROVIDER_MODULE;
         }
 
         @Override
@@ -51,21 +45,15 @@ public final class AuthUtils {
         }
     };
 
-    public static final String HTTP_AUTH_SCHEME_EXTENSION_MODULE = "httpAuthExtensionConfiguration";
+    public static final String HTTP_AUTH_SCHEME_EXTENSION_MODULE =
+        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthExtensionConfiguration").toString();
 
-    public static final String HTTP_AUTH_SCHEME_EXTENSION_FILE =
-        HTTP_AUTH_SCHEME_EXTENSION_MODULE + ".ts";
-
-    public static final String HTTP_AUTH_SCHEME_EXTENSION_PATH =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, HTTP_AUTH_SCHEME_EXTENSION_FILE).toString();
+        public static final String HTTP_AUTH_SCHEME_EXTENSION_PATH = HTTP_AUTH_SCHEME_EXTENSION_MODULE + ".ts";
 
     public static final Dependency AUTH_HTTP_EXTENSION_DEPENDENCY = new Dependency() {
         @Override
         public String getPackageName() {
-            return Paths.get(
-                ".", CodegenUtils.SOURCE_FOLDER,
-                HTTP_AUTH_FOLDER, HTTP_AUTH_SCHEME_EXTENSION_MODULE
-            ).toString();
+            return HTTP_AUTH_SCHEME_EXTENSION_MODULE;
         }
 
         @Override
