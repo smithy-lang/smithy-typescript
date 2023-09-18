@@ -257,10 +257,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
     },
 
     identifyOnResolve(toggle?: boolean) {
-      if (typeof toggle !== "boolean") {
-        return identifyOnResolve;
-      }
-      identifyOnResolve = !!toggle;
+      if (typeof toggle === "boolean") identifyOnResolve = toggle;
       return identifyOnResolve;
     },
 
