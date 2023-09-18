@@ -139,8 +139,8 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                             continue;
                         }
                         String capitalizedName = StringUtils.capitalize(configField.name());
-                        w.write("set$L($L: $C): void;", capitalizedName, configField.name(), configField.source());
-                        w.write("$L(): $C | undefined;", configField.name(), configField.source());
+                        w.write("set$L($L: $C): void;", capitalizedName, configField.name(), configField.inputType());
+                        w.write("$L(): $C | undefined;", configField.name(), configField.inputType());
                     }
                 }
             });
@@ -201,7 +201,7 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                         if (!configField.type().equals(ConfigField.Type.MAIN)) {
                             continue;
                         }
-                        w.write("$L: $C;", configField.name(), configField.source());
+                        w.write("$L: $C;", configField.name(), configField.inputType());
                     }
                 }
             });
@@ -330,9 +330,9 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                                 $L(): $C | undefined {
                                   return _$L;
                                 },""",
-                                capitalizedName, configField.name(), configField.source(),
+                                capitalizedName, configField.name(), configField.inputType(),
                                 configField.name(), configField.name(),
-                                configField.name(), configField.source(),
+                                configField.name(), configField.inputType(),
                                 configField.name());
                         }
                     }

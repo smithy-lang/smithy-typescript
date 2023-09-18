@@ -44,14 +44,25 @@ public final class AddHttpBearerAuthPlugin implements HttpAuthTypeScriptIntegrat
         return Optional.of(HttpAuthScheme.builder()
                 .schemeId(HttpBearerAuthTrait.ID)
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-                .addConfigField(new ConfigField("token", Type.MAIN, w -> {
-                    w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                    w.addImport("TokenIdentity", null,
-                        TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                    w.addImport("TokenIdentityProvider", null,
-                        TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                    w.write("TokenIdentity | TokenIdentityProvider");
-                }, w -> w.write("The token used to authenticate requests.")))
+                .addConfigField(ConfigField.builder()
+                    .name("token")
+                    .type(Type.MAIN)
+                    .docs(w -> w.write("The token used to authenticate requests."))
+                    .inputType(w -> {
+                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addImport("TokenIdentity", null,
+                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addImport("TokenIdentityProvider", null,
+                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.write("TokenIdentity | TokenIdentityProvider");
+                    })
+                    .resolvedType(w -> {
+                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addImport("TokenIdentityProvider", null,
+                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.write("TokenIdentityProvider");
+                    })
+                    .build())
                 .putDefaultSigner(LanguageTarget.SHARED, HTTP_BEARER_AUTH_SIGNER)
                 .build());
     }
