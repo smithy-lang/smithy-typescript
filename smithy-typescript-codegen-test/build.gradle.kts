@@ -44,7 +44,9 @@ repositories {
 
 dependencies {
     implementation(project(":smithy-typescript-codegen"))
+    implementation(project(":smithy-typescript-codegen-test:example-weather-customizations"))
     implementation(project(":smithy-typescript-ssdk-codegen-test-utils"))
+    implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
     implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
     implementation("software.amazon.smithy:smithy-aws-traits:$smithyVersion")
