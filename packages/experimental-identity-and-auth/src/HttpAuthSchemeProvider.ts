@@ -23,5 +23,5 @@ export interface HttpAuthSchemeParametersProvider<
   C extends object = object,
   T extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
 > {
-  (config: C, context: HandlerExecutionContext): Promise<T>;
+  (config: C, context: HandlerExecutionContext, input: Record<string, unknown>): Promise<T>;
 }
