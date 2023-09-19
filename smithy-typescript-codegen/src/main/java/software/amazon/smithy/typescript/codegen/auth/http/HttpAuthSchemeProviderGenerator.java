@@ -81,7 +81,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         generateDefaultHttpAuthSchemeParametersProviderFunction();
         generateHttpAuthOptionFunctions();
         generateHttpAuthSchemeProviderInterface();
-        generateHttpAuthSchemeProviderDefaultFunction();
+        generateDefaultHttpAuthSchemeProviderFunction();
     }
 
     /*
@@ -259,7 +259,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         return options;
     };
     */
-    private void generateHttpAuthSchemeProviderDefaultFunction() {
+    private void generateDefaultHttpAuthSchemeProviderFunction() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             w.openBlock("""
             /**
