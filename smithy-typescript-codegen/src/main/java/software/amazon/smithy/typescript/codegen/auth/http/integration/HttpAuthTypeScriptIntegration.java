@@ -44,4 +44,13 @@ public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
     default Optional<Symbol> getDefaultHttpAuthSchemeProvider() {
         return Optional.empty();
     }
+
+    /**
+     * feat(experimentalIdentityAndAuth): Register an {@link Symbol} that points to an
+     * {@code HttpAuthSchemeParametersProvider} implementation.
+     * @return an empty optional.
+     */
+    default Optional<Symbol> getDefaultHttpAuthSchemeParametersProvider() {
+        return Optional.empty();
+    }
 }

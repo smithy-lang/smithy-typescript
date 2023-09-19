@@ -31,6 +31,7 @@ public final class SupportedHttpAuthSchemesIndex {
 
     private final Map<ShapeId, HttpAuthScheme> supportedHttpAuthSchemes = new HashMap<>();
     private Optional<Symbol> defaultHttpAuthSchemeProvider = Optional.empty();
+    private Optional<Symbol> defaultHttpAuthSchemeParametersProvider = Optional.empty();
 
     /**
      * Creates an index from registered {@link HttpAuthScheme}s in {@link TypeScriptIntegration}s.
@@ -58,6 +59,18 @@ public final class SupportedHttpAuthSchemesIndex {
                         + "`");
                 }
                 defaultHttpAuthSchemeProvider = override;
+            }
+            if (httpAuthIntegration.getDefaultHttpAuthSchemeParametersProvider().isPresent()) {
+                Optional<Symbol> override =
+                    httpAuthIntegration.getDefaultHttpAuthSchemeParametersProvider();
+                if (defaultHttpAuthSchemeParametersProvider.isPresent()) {
+                    LOGGER.warning("An existing `HttpAuthSchemeParametersProvider` registration `"
+                        + defaultHttpAuthSchemeParametersProvider.get()
+                        + "` is being overwritten by `"
+                        + override.get()
+                        + "`");
+                }
+                defaultHttpAuthSchemeParametersProvider = override;
             }
         }
     }
@@ -104,5 +117,13 @@ public final class SupportedHttpAuthSchemesIndex {
      */
     public Optional<Symbol> getDefaultHttpAuthSchemeProvider() {
         return defaultHttpAuthSchemeProvider;
+    }
+
+    /**
+     * Gets the default {@code HttpAuthSchemeParametersProvider} symbol.
+     * @return an optional with the symbol or empty.
+     */
+    public Optional<Symbol> getDefaultHttpAuthSchemeParametersProvider() {
+        return defaultHttpAuthSchemeParametersProvider;
     }
 }
