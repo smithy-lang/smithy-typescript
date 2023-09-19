@@ -28,15 +28,10 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
-import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
-import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
-import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -310,41 +305,9 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                     + "trait of an operation.");
             writer.write("disableHostPrefix?: boolean;\n");
 
-            // feat(experimentalIdentityAndAuth): write httpAuthSchemes and httpAuthSchemeProvider into ClientDefaults
-            if (settings.getExperimentalIdentityAndAuth()) {
-                writer.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                writer.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                writer.writeDocs("""
-                    experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
-                    default identity providers and signers per auth scheme.
-                    @internal""");
-                writer.write("httpAuthSchemes?: HttpAuthScheme[];\n");
-
-                String httpAuthSchemeProviderName = service.toShapeId().getName() + "HttpAuthSchemeProvider";
-                writer.addImport(httpAuthSchemeProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
-                writer.writeDocs("""
-                    experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
-                    resolves which HttpAuthScheme to use.
-                    @internal""");
-                writer.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
-            }
-
             // Write custom configuration dependencies.
             for (TypeScriptIntegration integration : integrations) {
                 integration.addConfigInterfaceFields(settings, model, symbolProvider, writer);
-            }
-
-            // feat(experimentalIdentityAndAuth): write any HttpAuthScheme config fields into ClientDefaults
-            // WARNING: may be changed later in lieu of {@link TypeScriptIntegration#addConfigInterfaceFields()},
-            // but will depend after HttpAuthScheme integration implementations.
-            if (settings.getExperimentalIdentityAndAuth()) {
-                Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
-                    service, ServiceIndex.of(model), new SupportedHttpAuthSchemesIndex(integrations));
-                Map<String, ConfigField> configFields = AuthUtils.collectConfigFields(httpAuthSchemes.values());
-                for (ConfigField configField : configFields.values()) {
-                    writer.writeDocs(() -> writer.write("$C", configField.docs()));
-                    writer.write("$L?: $C;\n", configField.name(), configField.inputType());
-                }
             }
         }).write("");
     }
