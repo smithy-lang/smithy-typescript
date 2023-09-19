@@ -6,6 +6,7 @@
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -33,5 +34,23 @@ public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
      * @param supportedHttpAuthSchemesIndex index to mutate.
      */
     default void customizeSupportedHttpAuthSchemes(SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex) {
+    }
+
+    /**
+     * feat(experimentalIdentityAndAuth): Register an {@link Symbol} that points to an {@code HttpAuthSchemeProvider}
+     * implementation.
+     * @return an empty optional.
+     */
+    default Optional<Symbol> getDefaultHttpAuthSchemeProvider() {
+        return Optional.empty();
+    }
+
+    /**
+     * feat(experimentalIdentityAndAuth): Register an {@link Symbol} that points to an
+     * {@code HttpAuthSchemeParametersProvider} implementation.
+     * @return an empty optional.
+     */
+    default Optional<Symbol> getDefaultHttpAuthSchemeParametersProvider() {
+        return Optional.empty();
     }
 }
