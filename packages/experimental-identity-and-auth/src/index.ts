@@ -7,6 +7,7 @@ export * from "./apiKeyIdentity";
 export * from "./createEndpointRuleSetHttpAuthSchemeProvider";
 export * from "./httpApiKeyAuth";
 export * from "./httpBearerAuth";
+export * from "./memoizeIdentityProvider";
 export * from "./middleware-http-signing";
 export * from "./noAuth";
 export * from "./tokenIdentity";
