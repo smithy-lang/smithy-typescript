@@ -81,6 +81,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     @Override
     public void run() {
         generateHttpAuthSchemeParametersInterface();
+        generateHttpAuthSchemeParametersProviderInterface();
         generateDefaultHttpAuthSchemeParametersProviderFunction();
         generateHttpAuthOptionFunctions();
         generateHttpAuthSchemeProviderInterface();
@@ -114,13 +115,32 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     }
 
     /*
-    import { WeatherClientResolvedConfig } from "../WeatherClient";
     import { HttpAuthSchemeParametersProvider } from "@smithy/types";
+    import { WeatherClientResolvedConfig } from "../WeatherClient";
 
     // ...
 
-    export const defaultWeatherHttpAuthSchemeParametersProvider:
-      HttpAuthSchemeParametersProvider<WeatherClientResolvedConfig, WeatherHttpAuthSchemeParameters> =
+    export interface WeatherHttpAuthSchemeParametersProvider extends
+      HttpAuthSchemeParametersProvider<WeatherClientResolvedConfig, WeatherHttpAuthSchemeParameters> {}
+    */
+    private void generateHttpAuthSchemeParametersProviderInterface() {
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
+                Paths.get(".", serviceSymbol.getNamespace()));
+            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.addImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.write("""
+                /**
+                 * @internal
+                 */
+                export interface $LHttpAuthSchemeParametersProvider extends \
+                HttpAuthSchemeParametersProvider<$LResolvedConfig, $LHttpAuthSchemeParameters> {}""",
+                serviceName, serviceSymbol.getName(), serviceName);
+        });
+    }
+
+    /*
+    export const defaultWeatherHttpAuthSchemeParametersProvider: WeatherHttpAuthSchemeParametersProvider =
     async (config, context) => {
       return {
         operation: context.commandName,
@@ -129,10 +149,6 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateDefaultHttpAuthSchemeParametersProviderFunction() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
-                Paths.get(".", serviceSymbol.getNamespace()));
-            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.addImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
             w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
             w.openBlock("""
@@ -140,9 +156,9 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                  * @internal
                  */
                 export const default$LHttpAuthSchemeParametersProvider: \
-                HttpAuthSchemeParametersProvider<$LResolvedConfig, $LHttpAuthSchemeParameters> = \
+                $LHttpAuthSchemeParametersProvider = \
                 async (config, context) => {""", "};",
-                serviceName, serviceSymbol.getName(), serviceName,
+                serviceName, serviceName,
                 () -> {
                 w.openBlock("return {", "};", () -> {
                     w.write("operation: getSmithyContext(context).operation as string,");
