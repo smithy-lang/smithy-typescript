@@ -196,7 +196,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                     if (authScheme == null) {
                         return;
                     }
-                    Trait trait = serviceShape.findTrait(shapeId).orElse(null);
+                    Trait trait = serviceShape.findTrait(authScheme.getTraitId()).orElse(null);
                     List<HttpAuthOptionProperty> identityProperties =
                         authScheme.getAuthSchemeOptionParametersByType(Type.IDENTITY);
                     if (!identityProperties.isEmpty()) {

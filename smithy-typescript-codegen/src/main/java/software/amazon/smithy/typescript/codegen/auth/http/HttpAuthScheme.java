@@ -28,6 +28,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 @SmithyUnstableApi
 public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
     private final ShapeId schemeId;
+    private final ShapeId traitId;
     private final ApplicationProtocol applicationProtocol;
     private final Map<LanguageTarget, Consumer<TypeScriptWriter>> defaultIdentityProviders;
     private final Map<LanguageTarget, Consumer<TypeScriptWriter>> defaultSigners;
@@ -38,6 +39,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
     private HttpAuthScheme(Builder builder) {
         this.schemeId = SmithyBuilder.requiredState(
             "schemeId", builder.schemeId);
+        this.traitId = builder.traitId != null ? builder.traitId : schemeId;
         this.applicationProtocol = SmithyBuilder.requiredState(
             "applicationProtocol", builder.applicationProtocol);
         this.defaultIdentityProviders = SmithyBuilder.requiredState(
@@ -58,6 +60,14 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
      */
     public ShapeId getSchemeId() {
         return schemeId;
+    }
+
+    /**
+     * Gets the trait ID.
+     * @return traitId
+     */
+    public ShapeId getTraitId() {
+        return traitId;
     }
 
     /**
@@ -133,6 +143,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
     public Builder toBuilder() {
         return builder()
             .schemeId(schemeId)
+            .traitId(traitId)
             .applicationProtocol(applicationProtocol)
             .defaultIdentityProviders(defaultIdentityProviders)
             .defaultSigners(defaultSigners)
@@ -146,6 +157,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
      */
     public static final class Builder implements SmithyBuilder<HttpAuthScheme> {
         private ShapeId schemeId;
+        private ShapeId traitId;
         private ApplicationProtocol applicationProtocol;
         private BuilderRef<Map<LanguageTarget, Consumer<TypeScriptWriter>>> defaultIdentityProviders =
             BuilderRef.forOrderedMap();
@@ -172,6 +184,16 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
          */
         public Builder schemeId(ShapeId schemeId) {
             this.schemeId = schemeId;
+            return this;
+        }
+
+        /**
+         * Sets the traitId.
+         * @param traitId trait ID to set
+         * @return the builder
+         */
+        public Builder traitId(ShapeId traitId) {
+            this.traitId = traitId;
             return this;
         }
 
