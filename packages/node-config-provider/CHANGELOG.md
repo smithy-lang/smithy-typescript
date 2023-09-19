@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [ea0635d6]
+  - @smithy/types@2.3.3
+  - @smithy/property-provider@2.0.10
+  - @smithy/shared-ini-file-loader@2.0.11
+
 ## 2.0.11
 
 ### Patch Changes

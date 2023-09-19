@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [ea0635d6]
+  - @smithy/types@2.3.3
+  - @smithy/node-config-provider@2.0.12
+  - @smithy/protocol-http@3.0.5
+  - @smithy/service-error-classification@2.0.2
+  - @smithy/util-middleware@2.0.2
+  - @smithy/util-retry@2.0.2
+
 ## 2.0.11
 
 ### Patch Changes

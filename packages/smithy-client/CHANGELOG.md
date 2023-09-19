@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.1.6
+
+### Patch Changes
+
+- Updated dependencies [ea0635d6]
+  - @smithy/middleware-stack@2.0.2
+  - @smithy/types@2.3.3
+  - @smithy/util-stream@2.0.12
+
 ## 2.1.5
 
 ### Patch Changes

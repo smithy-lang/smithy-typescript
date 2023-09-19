@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.0.8
+
+### Patch Changes
+
+- 85448cbc: Update `HttpAuthSchemeParametersProvider` to take in `input`
+- 51b014c8: Add `httpSigningMiddleware` to sign a request based on a selected auth scheme
+- Updated dependencies [ea0635d6]
+  - @smithy/types@2.3.3
+  - @smithy/middleware-retry@2.0.12
+  - @smithy/protocol-http@3.0.5
+  - @smithy/signature-v4@2.0.9
+
 ## 0.0.7
 
 ### Patch Changes

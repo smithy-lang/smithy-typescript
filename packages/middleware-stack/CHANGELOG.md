@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.2
+
+### Patch Changes
+
+- ea0635d6: add debug method to middlewareStack
+- Updated dependencies [ea0635d6]
+  - @smithy/types@2.3.3
+
 ## 2.0.1
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [ea0635d6]
+  - @smithy/types@2.3.3
+  - @smithy/middleware-serde@2.0.9
+  - @smithy/url-parser@2.0.9
+  - @smithy/util-middleware@2.0.2
+
 ## 2.0.8
 
 ### Patch Changes

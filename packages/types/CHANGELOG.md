@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.3
+
+### Patch Changes
+
+- ea0635d6: add debug method to middlewareStack
+
 ## 2.3.2
 
 ### Patch Changes
