@@ -16,12 +16,16 @@
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.Dependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -33,9 +37,40 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class EndpointsV2Generator implements Runnable {
 
-    static final String ENDPOINT_FOLDER = "endpoint";
-    static final String ENDPOINT_PARAMETERS_FILE = "EndpointParameters.ts";
-    static final String ENDPOINT_RESOLVER_FILE = "endpointResolver.ts";
+    public static final String ENDPOINT_FOLDER = "endpoint";
+    public static final String ENDPOINT_PARAMETERS_MODULE_NAME = "EndpointParameters";
+    public static final String ENDPOINT_RESOLVER_MODULE_NAME = "endpointResolver";
+    public static final String ENDPOINT_PARAMETERS_MODULE =
+        Paths.get(".", CodegenUtils.SOURCE_FOLDER, EndpointsV2Generator.ENDPOINT_FOLDER,
+            EndpointsV2Generator.ENDPOINT_PARAMETERS_MODULE_NAME).toString();
+    public static final Dependency ENDPOINT_PARAMETERS_DEPENDENCY = new Dependency() {
+        @Override
+        public String getPackageName() {
+            return ENDPOINT_PARAMETERS_MODULE;
+        }
+
+        @Override
+        public List<SymbolDependency> getDependencies() {
+            return Collections.emptyList();
+        }
+    };
+    public static final String ENDPOINT_RESOLVER_MODULE =
+        Paths.get(".", CodegenUtils.SOURCE_FOLDER, EndpointsV2Generator.ENDPOINT_FOLDER,
+            EndpointsV2Generator.ENDPOINT_RESOLVER_MODULE_NAME).toString();
+    public static final Dependency ENDPOINT_RESOLVER_DEPENDENCY = new Dependency() {
+        @Override
+        public String getPackageName() {
+            return ENDPOINT_RESOLVER_MODULE;
+        }
+
+        @Override
+        public List<SymbolDependency> getDependencies() {
+            return Collections.emptyList();
+        }
+    };
+
+    static final String ENDPOINT_PARAMETERS_FILE = ENDPOINT_PARAMETERS_MODULE_NAME + ".ts";
+    static final String ENDPOINT_RESOLVER_FILE = ENDPOINT_RESOLVER_MODULE_NAME + ".ts";
     static final String ENDPOINT_RULESET_FILE = "ruleset.ts";
 
     private final TypeScriptDelegator delegator;
