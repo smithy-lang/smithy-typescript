@@ -82,6 +82,15 @@ public final class AuthUtils {
                 effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
             }
         }
+        // TODO(experimentalIdentityAndAuth): remove after @aws.auth#sigv4a is fully supported
+        // BEGIN
+        HttpAuthScheme effectiveSigv4Scheme = effectiveAuthSchemes.get(ShapeId.from("aws.auth#sigv4"));
+        HttpAuthScheme effectiveSigv4aScheme = effectiveAuthSchemes.get(ShapeId.from("aws.auth#sigv4a"));
+        HttpAuthScheme supportedSigv4aScheme = authIndex.getHttpAuthScheme(ShapeId.from("aws.auth#sigv4a"));
+        if (effectiveSigv4Scheme != null && effectiveSigv4aScheme == null && supportedSigv4aScheme != null) {
+            effectiveAuthSchemes.put(supportedSigv4aScheme.getSchemeId(), supportedSigv4aScheme);
+        }
+        // END
         return effectiveAuthSchemes;
     }
 }
