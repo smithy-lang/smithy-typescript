@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -190,6 +191,8 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                 }
             }
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                writer.addImport("ClientInputEndpointParameters", null,
+                    EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
                 writer.write("& ClientInputEndpointParameters");
             }
             writer.dedent();
@@ -221,6 +224,8 @@ final class ServiceBareBonesClientGenerator implements Runnable {
                         }
                     });
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
+                writer.addImport("ClientResolvedEndpointParameters", null,
+                    EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
                 writer.write("& ClientResolvedEndpointParameters");
             }
             writer.dedent();
@@ -384,6 +389,8 @@ final class ServiceBareBonesClientGenerator implements Runnable {
 
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 configVariable++;
+                writer.addImport("resolveClientEndpointParameters", null,
+                    EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
                 writer.write("let $L = $L($L);",
                     generateConfigVariable(configVariable),
                     "resolveClientEndpointParameters",
