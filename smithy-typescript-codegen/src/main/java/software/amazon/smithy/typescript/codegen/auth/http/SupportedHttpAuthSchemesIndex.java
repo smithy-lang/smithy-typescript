@@ -8,6 +8,9 @@ package software.amazon.smithy.typescript.codegen.auth.http;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Logger;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -24,7 +27,10 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class SupportedHttpAuthSchemesIndex {
+    private static final Logger LOGGER = Logger.getLogger(SupportedHttpAuthSchemesIndex.class.getName());
+
     private final Map<ShapeId, HttpAuthScheme> supportedHttpAuthSchemes = new HashMap<>();
+    private Optional<Symbol> defaultHttpAuthSchemeProvider = Optional.empty();
 
     /**
      * Creates an index from registered {@link HttpAuthScheme}s in {@link TypeScriptIntegration}s.
@@ -41,6 +47,18 @@ public final class SupportedHttpAuthSchemesIndex {
                 this.putHttpAuthScheme(authScheme.getSchemeId(), authScheme);
             }
             httpAuthIntegration.customizeSupportedHttpAuthSchemes(this);
+            if (httpAuthIntegration.getDefaultHttpAuthSchemeProvider().isPresent()) {
+                Optional<Symbol> override =
+                    httpAuthIntegration.getDefaultHttpAuthSchemeProvider();
+                if (defaultHttpAuthSchemeProvider.isPresent()) {
+                    LOGGER.warning("An existing `HttpAuthSchemeProvider` registration `"
+                        + defaultHttpAuthSchemeProvider.get()
+                        + "` is being overwritten by `"
+                        + override.get()
+                        + "`");
+                }
+                defaultHttpAuthSchemeProvider = override;
+            }
         }
     }
 
@@ -78,5 +96,13 @@ public final class SupportedHttpAuthSchemesIndex {
      */
     public Map<ShapeId, HttpAuthScheme> getSupportedHttpAuthSchemes() {
         return supportedHttpAuthSchemes;
+    }
+
+    /**
+     * Gets the default {@code HttpAuthSchemeProvider} symbol.
+     * @return an optional with the symbol or empty.
+     */
+    public Optional<Symbol> getDefaultHttpAuthSchemeProvider() {
+        return defaultHttpAuthSchemeProvider;
     }
 }

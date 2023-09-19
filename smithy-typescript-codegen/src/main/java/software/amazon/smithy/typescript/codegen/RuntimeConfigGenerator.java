@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import software.amazon.smithy.build.SmithyBuildException;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
@@ -206,17 +207,20 @@ final class RuntimeConfigGenerator {
         TypeScriptWriter writer,
         LanguageTarget target
     ) {
+        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations);
+
         // feat(experimentalIdentityAndAuth): write the default imported HttpAuthSchemeProvider
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
-                String providerName = "default" + service.toShapeId().getName() + "HttpAuthSchemeProvider";
-                w.addImport(providerName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
-                w.write(providerName);
+                w.write("$T", authIndex.getDefaultHttpAuthSchemeProvider()
+                    .orElse(Symbol.builder()
+                        .name("default" + service.toShapeId().getName() + "HttpAuthSchemeProvider")
+                        .namespace(AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY.getPackageName(), "/")
+                        .build()));
             });
         }
 
         // feat(experimentalIdentityAndAuth): gather HttpAuthSchemes to generate
-        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations);
         ServiceIndex serviceIndex = ServiceIndex.of(model);
         Map<ShapeId, HttpAuthScheme> allEffectiveHttpAuthSchemes =
             AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(service, serviceIndex, authIndex);
