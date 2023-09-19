@@ -59,15 +59,16 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
         ServiceShape serviceShape = codegenContext.settings().getService(codegenContext.model());
         Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes =
             AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+        Map<String, ConfigField> configFields = AuthUtils.collectConfigFields(effectiveAuthSchemes.values());
 
         generateHttpAuthExtensionConfigurationInterface(
-            delegator, effectiveAuthSchemes, serviceName);
+            delegator, configFields, serviceName);
         generateHttpAuthExtensionRuntimeConfigType(
-            delegator, effectiveAuthSchemes, serviceName);
+            delegator, configFields, serviceName);
         generateGetHttpAuthExtensionConfigurationFunction(
-            delegator, effectiveAuthSchemes, serviceName);
+            delegator, configFields, serviceName);
         generateResolveHttpAuthRuntimeConfigFunction(
-            delegator, effectiveAuthSchemes, serviceName);
+            delegator, configFields, serviceName);
     }
 
     /*
@@ -109,7 +110,7 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     */
     private void generateHttpAuthExtensionConfigurationInterface(
         TypeScriptDelegator delegator,
-        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes,
+        Map<String, ConfigField> configFields,
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
@@ -130,14 +131,8 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                     serviceName);
                 w.write("httpAuthSchemeProvider(): $LHttpAuthSchemeProvider;", serviceName);
 
-                for (HttpAuthScheme authScheme : effectiveAuthSchemes.values()) {
-                    if (authScheme == null) {
-                        continue;
-                    }
-                    for (ConfigField configField : authScheme.getConfigFields()) {
-                        if (!configField.type().equals(ConfigField.Type.MAIN)) {
-                            continue;
-                        }
+                for (ConfigField configField : configFields.values()) {
+                    if (configField.type().equals(ConfigField.Type.MAIN)) {
                         String capitalizedName = StringUtils.capitalize(configField.name());
                         w.write("set$L($L: $C): void;", capitalizedName, configField.name(), configField.inputType());
                         w.write("$L(): $C | undefined;", configField.name(), configField.inputType());
@@ -177,7 +172,7 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     */
     private void generateHttpAuthExtensionRuntimeConfigType(
         TypeScriptDelegator delegator,
-        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes,
+        Map<String, ConfigField> configFields,
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
@@ -193,14 +188,8 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 w.write("httpAuthSchemes: HttpAuthScheme[];");
                 w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("httpAuthSchemeProvider: $LHttpAuthSchemeProvider;", serviceName);
-                for (HttpAuthScheme authScheme : effectiveAuthSchemes.values()) {
-                    if (authScheme == null) {
-                        continue;
-                    }
-                    for (ConfigField configField : authScheme.getConfigFields()) {
-                        if (!configField.type().equals(ConfigField.Type.MAIN)) {
-                            continue;
-                        }
+                for (ConfigField configField : configFields.values()) {
+                    if (configField.type().equals(ConfigField.Type.MAIN)) {
                         w.write("$L: $C;", configField.name(), configField.inputType());
                     }
                 }
@@ -269,7 +258,7 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     */
     private void generateGetHttpAuthExtensionConfigurationFunction(
         TypeScriptDelegator delegator,
-        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes,
+        Map<String, ConfigField> configFields,
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
@@ -286,14 +275,8 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 w.write("let _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;");
                 w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider!;");
-                for (HttpAuthScheme authScheme : effectiveAuthSchemes.values()) {
-                    if (authScheme == null) {
-                        continue;
-                    }
-                    for (ConfigField configField : authScheme.getConfigFields()) {
-                        if (!configField.type().equals(ConfigField.Type.MAIN)) {
-                            continue;
-                        }
+                for (ConfigField configField : configFields.values()) {
+                    if (configField.type().equals(ConfigField.Type.MAIN)) {
                         w.write("let _$L = runtimeConfig.$L;", configField.name(), configField.name());
                     }
                 }
@@ -314,14 +297,8 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                         httpAuthSchemeProvider(): $LHttpAuthSchemeProvider {
                           return _httpAuthSchemeProvider;
                         },""", serviceName, serviceName);
-                    for (HttpAuthScheme authScheme : effectiveAuthSchemes.values()) {
-                        if (authScheme == null) {
-                            continue;
-                        }
-                        for (ConfigField configField : authScheme.getConfigFields()) {
-                            if (!configField.type().equals(ConfigField.Type.MAIN)) {
-                                continue;
-                            }
+                    for (ConfigField configField : configFields.values()) {
+                        if (configField.type().equals(ConfigField.Type.MAIN)) {
                             String capitalizedName = StringUtils.capitalize(configField.name());
                             w.write("""
                                 set$L($L: $C): void {
@@ -356,7 +333,7 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     */
     private void generateResolveHttpAuthRuntimeConfigFunction(
         TypeScriptDelegator delegator,
-        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes,
+        Map<String, ConfigField> configFields,
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
@@ -370,14 +347,8 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 w.openBlock("return {", "};", () -> {
                     w.write("httpAuthSchemes: config.httpAuthSchemes(),");
                     w.write("httpAuthSchemeProvider: config.httpAuthSchemeProvider(),");
-                    for (HttpAuthScheme authScheme : effectiveAuthSchemes.values()) {
-                        if (authScheme == null) {
-                            continue;
-                        }
-                        for (ConfigField configField : authScheme.getConfigFields()) {
-                            if (!configField.type().equals(ConfigField.Type.MAIN)) {
-                                continue;
-                            }
+                    for (ConfigField configField : configFields.values()) {
+                        if (configField.type().equals(ConfigField.Type.MAIN)) {
                             w.write("$L: config.$L(),", configField.name(), configField.name());
                         }
                     }

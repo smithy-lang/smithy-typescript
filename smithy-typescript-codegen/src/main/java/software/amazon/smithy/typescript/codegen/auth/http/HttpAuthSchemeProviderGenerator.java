@@ -49,6 +49,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     private final ServiceShape serviceShape;
     private final Symbol serviceSymbol;
     private final String serviceName;
+    private final Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters;
 
     /**
      * Create an HttpAuthSchemeProviderGenerator.
@@ -73,6 +74,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         this.serviceShape = settings.getService(model);
         this.serviceSymbol = symbolProvider.toSymbol(serviceShape);
         this.serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+        this.httpAuthSchemeParameters =
+            AuthUtils.collectHttpAuthSchemeParameters(authIndex.getSupportedHttpAuthSchemes().values());
     }
 
     @Override
@@ -103,10 +106,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 export interface $LHttpAuthSchemeParameters extends HttpAuthSchemeParameters {""", "}",
                 serviceName,
                 () -> {
-                for (HttpAuthScheme authScheme : authIndex.getSupportedHttpAuthSchemes().values()) {
-                    for (HttpAuthSchemeParameter parameter : authScheme.getHttpAuthSchemeParameters()) {
-                        w.write("$L?: $C;", parameter.name(), parameter.type());
-                    }
+                for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
+                    w.write("$L?: $C;", parameter.name(), parameter.type());
                 }
             });
         });
@@ -145,10 +146,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 () -> {
                 w.openBlock("return {", "};", () -> {
                     w.write("operation: getSmithyContext(context).operation as string,");
-                    for (HttpAuthScheme authScheme : authIndex.getSupportedHttpAuthSchemes().values()) {
-                        for (HttpAuthSchemeParameter parameter : authScheme.getHttpAuthSchemeParameters()) {
-                            w.write("$L: $C,", parameter.name(), parameter.source());
-                        }
+                    for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
+                        w.write("$L: $C,", parameter.name(), parameter.source());
                     }
                 });
             });
