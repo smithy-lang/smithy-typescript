@@ -23,6 +23,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "@smithy/middleware-endpoint": "workspace:^",
     "@smithy/middleware-retry": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/signature-v4": "workspace:^",

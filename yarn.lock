@@ -1889,6 +1889,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth"
   dependencies:
+    "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
@@ -2105,7 +2106,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-endpoint@workspace:packages/middleware-endpoint":
+"@smithy/middleware-endpoint@workspace:^, @smithy/middleware-endpoint@workspace:packages/middleware-endpoint":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-endpoint@workspace:packages/middleware-endpoint"
   dependencies:
