@@ -4,6 +4,7 @@ export * from "./HttpSigner";
 export * from "./IdentityProviderConfig";
 export * from "./SigV4Signer";
 export * from "./apiKeyIdentity";
+export * from "./createEndpointRuleSetHttpAuthSchemeProvider";
 export * from "./httpApiKeyAuth";
 export * from "./httpBearerAuth";
 export * from "./middleware-http-signing";
