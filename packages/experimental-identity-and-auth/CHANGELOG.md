@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.0.9
+
+### Patch Changes
+
+- 76e2ef3c: Allow `DefaultIdentityProviderConfig` to accept `undefined` in the constructor
+- 76e2ef3c: Add `httpAuthSchemeMiddleware` to select an auth scheme
+- 76e2ef3c: Add `memoizeIdentityProvider()`
+- c346d597: Add `createEndpointRuleSetHttpAuthSchemeProvider()` to generically create `HttpAuthSchemeProvider`s for `@smithy.rules#endpointRuleSet`
+
 ## 0.0.8
 
 ### Patch Changes
