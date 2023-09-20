@@ -6,18 +6,23 @@
 package software.amazon.smithy.typescript.codegen.auth;
 
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.Dependency;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
+import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeParameter;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -92,5 +97,56 @@ public final class AuthUtils {
         }
         // END
         return effectiveAuthSchemes;
+    }
+
+    public static Map<String, ConfigField> collectConfigFields(Collection<HttpAuthScheme> httpAuthSchemes) {
+        Map<String, ConfigField> configFields = new HashMap<>();
+        for (HttpAuthScheme authScheme : httpAuthSchemes) {
+            if (authScheme == null) {
+                continue;
+            }
+            for (ConfigField configField : authScheme.getConfigFields()) {
+                if (configFields.containsKey(configField.name())) {
+                    ConfigField existingConfigField = configFields.get(configField.name());
+                    if (!configField.equals(existingConfigField)) {
+                        throw new CodegenException("Contradicting `ConfigField` defintions for `"
+                            + configField.name()
+                            + "`; existing: "
+                            + existingConfigField
+                            + ", conflict: "
+                            + configField);
+                    }
+                } else {
+                    configFields.put(configField.name(), configField);
+                }
+            }
+        }
+        return configFields;
+    }
+
+    public static Map<String, HttpAuthSchemeParameter> collectHttpAuthSchemeParameters(
+        Collection<HttpAuthScheme> httpAuthSchemes) {
+        Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters = new HashMap<>();
+        for (HttpAuthScheme authScheme : httpAuthSchemes) {
+            if (authScheme == null) {
+                continue;
+            }
+            for (HttpAuthSchemeParameter param : authScheme.getHttpAuthSchemeParameters()) {
+                if (httpAuthSchemeParameters.containsKey(param.name())) {
+                    HttpAuthSchemeParameter existingParam = httpAuthSchemeParameters.get(param.name());
+                    if (!param.equals(existingParam)) {
+                        throw new CodegenException("Contradicting `HttpAuthSchemeParameter` defintions for `"
+                            + param.name()
+                            + "`; existing: "
+                            + existingParam
+                            + ", conflict: "
+                            + param);
+                    }
+                } else {
+                    httpAuthSchemeParameters.put(param.name(), param);
+                }
+            }
+        }
+        return httpAuthSchemeParameters;
     }
 }

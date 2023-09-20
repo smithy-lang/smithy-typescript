@@ -28,12 +28,15 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
-import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
+import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -329,20 +332,18 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             // Write custom configuration dependencies.
             for (TypeScriptIntegration integration : integrations) {
                 integration.addConfigInterfaceFields(settings, model, symbolProvider, writer);
-                // feat(experimentalIdentityAndAuth): write any HttpAuthScheme config fields into ClientDefaults
-                // WARNING: may be changed later in lieu of {@link TypeScriptIntegration#addConfigInterfaceFields()},
-                // but will depend after HttpAuthScheme integration implementations.
-                if (settings.getExperimentalIdentityAndAuth()) {
-                    if (!(integration instanceof HttpAuthTypeScriptIntegration)) {
-                        continue;
-                    }
-                    HttpAuthTypeScriptIntegration httpAuthIntegration = (HttpAuthTypeScriptIntegration) integration;
-                    httpAuthIntegration.getHttpAuthScheme().ifPresent(authScheme -> {
-                        for (ConfigField configField : authScheme.getConfigFields()) {
-                            writer.writeDocs(() -> writer.write("$C", configField.docs()));
-                            writer.write("$L?: $C;\n", configField.name(), configField.inputType());
-                        }
-                    });
+            }
+
+            // feat(experimentalIdentityAndAuth): write any HttpAuthScheme config fields into ClientDefaults
+            // WARNING: may be changed later in lieu of {@link TypeScriptIntegration#addConfigInterfaceFields()},
+            // but will depend after HttpAuthScheme integration implementations.
+            if (settings.getExperimentalIdentityAndAuth()) {
+                Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
+                    service, ServiceIndex.of(model), new SupportedHttpAuthSchemesIndex(integrations));
+                Map<String, ConfigField> configFields = AuthUtils.collectConfigFields(httpAuthSchemes.values());
+                for (ConfigField configField : configFields.values()) {
+                    writer.writeDocs(() -> writer.write("$C", configField.docs()));
+                    writer.write("$L?: $C;\n", configField.name(), configField.inputType());
                 }
             }
         }).write("");
