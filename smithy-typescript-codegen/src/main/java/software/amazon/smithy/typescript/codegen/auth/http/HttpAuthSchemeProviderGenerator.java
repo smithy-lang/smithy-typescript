@@ -141,7 +141,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
     /*
     export const defaultWeatherHttpAuthSchemeParametersProvider: WeatherHttpAuthSchemeParametersProvider =
-    async (config, context) => {
+    async (config, context, input) => {
       return {
         operation: context.commandName,
       };
@@ -157,7 +157,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                  */
                 export const default$LHttpAuthSchemeParametersProvider: \
                 $LHttpAuthSchemeParametersProvider = \
-                async (config, context) => {""", "};",
+                async (config, context, input) => {""", "};",
                 serviceName, serviceName,
                 () -> {
                 w.openBlock("return {", "};", () -> {
