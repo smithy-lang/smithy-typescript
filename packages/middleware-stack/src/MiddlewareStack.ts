@@ -69,7 +69,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
       //@ts-ignore
       toStack.addRelativeTo(entry.middleware, { ...entry });
     });
-    toStack.identifyOnResolve(stack.identifyOnResolve());
+    toStack.identifyOnResolve?.(stack.identifyOnResolve());
     return toStack;
   };
 
@@ -239,7 +239,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
     ): MiddlewareStack<InputType, OutputType> => {
       const cloned = cloneTo(constructStack<InputType, OutputType>());
       cloned.use(from);
-      cloned.identifyOnResolve(identifyOnResolve || cloned.identifyOnResolve() || from.identifyOnResolve());
+      cloned.identifyOnResolve(
+        identifyOnResolve || cloned.identifyOnResolve() || (from.identifyOnResolve?.() ?? false)
+      );
       return cloned;
     },
 

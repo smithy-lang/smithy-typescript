@@ -370,6 +370,22 @@ describe("MiddlewareStack", () => {
     });
   });
 
+  it("checks identifyOnResolve calls to external instances due to version mismatching", () => {
+    const newStack = constructStack<input, output>();
+    const oldStack = constructStack<input, output>();
+
+    delete (oldStack as any).identifyOnResolve;
+    oldStack.clone = () => oldStack;
+    oldStack.concat = <S>(stack: S) => oldStack as S;
+    oldStack.applyToStack = () => void 0;
+
+    expect(oldStack.identifyOnResolve).toBeUndefined();
+    expect(() => {
+      newStack.concat(oldStack);
+      newStack.clone();
+    }).not.toThrow();
+  });
+
   describe("use", () => {
     it("should apply customizations from pluggables", async () => {
       const stack = constructStack<input, output>();
