@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.1.7
+
+### Patch Changes
+
+- Updated dependencies [20fc148d]
+  - @smithy/middleware-stack@2.0.3
+
 ## 2.1.6
 
 ### Patch Changes

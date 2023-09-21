@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.3
+
+### Patch Changes
+
+- 20fc148d: check calls to external instances of middlewareStack
+
 ## 2.0.2
 
 ### Patch Changes
