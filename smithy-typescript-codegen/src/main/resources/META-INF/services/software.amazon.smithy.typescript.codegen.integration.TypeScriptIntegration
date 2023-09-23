@@ -13,3 +13,4 @@ software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin
 software.amazon.smithy.typescript.codegen.integration.AddBaseServiceExceptionClass
 software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency
 software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator
+software.amazon.smithy.typescript.codegen.integration.AddEndpointRuleSetIntegration

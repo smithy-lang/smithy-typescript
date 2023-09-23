@@ -50,6 +50,7 @@ import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameM
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -361,6 +362,10 @@ final class CommandGenerator implements Runnable {
                 writer.openBlock("[SMITHY_CONTEXT_KEY]: {", "},", () -> {
                     writer.write("service: $S,", service.toShapeId().getName());
                     writer.write("operation: $S,", operation.toShapeId().getName());
+                    writer.injectSection(SmithyContextCodeSection.builder()
+                        .service(service)
+                        .operation(operation)
+                        .build());
                 });
             });
             writer.write("const { requestHandler } = configuration;");
