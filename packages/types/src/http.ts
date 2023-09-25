@@ -38,7 +38,7 @@ export interface HttpResponse extends HttpMessage {
  * @public
  *
  * Represents an HTTP message with headers and an optional static or streaming
- * body. bode: ArrayBuffer | ArrayBufferView | string | Uint8Array | Readable | ReadableStream;
+ * body. body: ArrayBuffer | ArrayBufferView | string | Uint8Array | Readable | ReadableStream;
  */
 export interface HttpMessage {
   headers: HeaderBag;
