@@ -1,7 +1,13 @@
-import { EndpointParameters, EndpointV2, Logger } from "@smithy/types";
+import { EndpointParameterInstructions, resolveParams } from "@smithy/middleware-endpoint";
+import { EndpointParameters, EndpointV2, HandlerExecutionContext, Logger } from "@smithy/types";
+import { getSmithyContext } from "@smithy/util-middleware";
 
 import { HttpAuthOption } from "./HttpAuthScheme";
-import { HttpAuthSchemeParameters, HttpAuthSchemeProvider } from "./HttpAuthSchemeProvider";
+import {
+  HttpAuthSchemeParameters,
+  HttpAuthSchemeParametersProvider,
+  HttpAuthSchemeProvider,
+} from "./HttpAuthSchemeProvider";
 
 /**
  * @internal
@@ -77,4 +83,59 @@ export const createEndpointRuleSetHttpAuthSchemeProvider: CreateEndpointRuleSetH
   };
 
   return endpointRuleSetHttpAuthSchemeProvider;
+};
+
+/**
+ * @internal
+ */
+export interface EndpointRuleSetSmithyContext {
+  endpointRuleSet?: {
+    getEndpointParameterInstructions?: () => EndpointParameterInstructions;
+  };
+}
+
+/**
+ * @internal
+ */
+export interface CreateEndpointRuleSetHttpAuthSchemeParametersProvider<
+  HttpAuthSchemeParametersProviderT extends HttpAuthSchemeParametersProvider = HttpAuthSchemeParametersProvider
+> {
+  (defaultHttpAuthSchemeResolver: HttpAuthSchemeParametersProviderT): EndpointRuleSetHttpAuthSchemeParametersProvider;
+}
+
+/**
+ * @internal
+ */
+export interface EndpointRuleSetHttpAuthSchemeParametersProvider<
+  C extends object = object,
+  EndpointParametersT extends EndpointParameters = EndpointParameters,
+  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
+> extends HttpAuthSchemeParametersProvider<C, HttpAuthSchemeParametersT & EndpointParametersT> {}
+
+/**
+ * @internal
+ */
+export const createEndpointRuleSetHttpAuthSchemeParametersProvider: CreateEndpointRuleSetHttpAuthSchemeParametersProvider = <
+  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
+>(
+  defaultHttpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<object, HttpAuthSchemeParametersT>
+) => async (config, context: HandlerExecutionContext, input: Record<string, unknown>) => {
+  if (!input) {
+    throw new Error(`Could not find \`input\` for \`defaultEndpointRuleSetHttpAuthSchemeParametersProvider\``);
+  }
+  const defaultParameters = await defaultHttpAuthSchemeParametersProvider(config, context, input);
+  const instructionsFn = (getSmithyContext(context) as EndpointRuleSetSmithyContext)?.endpointRuleSet
+    ?.getEndpointParameterInstructions;
+  if (!instructionsFn) {
+    throw new Error(`getEndpointParameterInstructions() is not defined on \`${context.commandName!}\``);
+  }
+  const endpointParameters = await resolveParams(
+    input,
+    { getEndpointParameterInstructions: instructionsFn! },
+    { ...config }
+  );
+  return {
+    ...defaultParameters,
+    ...endpointParameters,
+  };
 };
