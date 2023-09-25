@@ -284,6 +284,14 @@ export interface HandlerOptions {
   name?: string;
 
   /**
+   * @internal
+   * Aliases allows for middleware to be found by multiple names besides {@link HandlerOptions.name}.
+   * This allows for references to replaced middleware to continue working, e.g. replacing
+   * multiple auth-specific middleware with a single generic auth middleware.
+   */
+  aliases?: Array<string>;
+
+  /**
    * A flag to override the existing middleware with the same name. Without
    * setting it, adding middleware with duplicated name will throw an exception.
    * @internal
