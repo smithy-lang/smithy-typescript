@@ -1,11 +1,10 @@
 import { AbortController } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/protocol-http";
 
-import { FetchHttpHandler } from "./fetch-http-handler";
+import { FetchHttpHandler, keepAliveSupport } from "./fetch-http-handler";
 import { requestTimeout } from "./request-timeout";
 
 const mockRequest = jest.fn();
-let mockResponse: any;
 let timeoutSpy: jest.SpyInstance<any>;
 
 (global as any).Request = mockRequest;
@@ -15,16 +14,6 @@ describe(FetchHttpHandler.name, () => {
   beforeEach(() => {
     (global as any).AbortController = void 0;
     jest.clearAllMocks();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockResponse = {
-      headers: {
-        entries: jest.fn().mockReturnValue([
-          ["foo", "bar"],
-          ["bizz", "bazz"],
-        ]),
-      },
-      arrayBuffer: jest.fn(),
-    };
   });
 
   afterEach(() => {
@@ -368,6 +357,71 @@ describe(FetchHttpHandler.name, () => {
     it("should be callable and return nothing", () => {
       const httpHandler = new FetchHttpHandler();
       expect(httpHandler.destroy()).toBeUndefined();
+    });
+  });
+
+  describe("keepalive", () => {
+    it("will pass keepalive as true by default to request if supported", async () => {
+      const mockResponse = {
+        headers: {
+          entries: jest.fn().mockReturnValue([
+            ["foo", "bar"],
+            ["bizz", "bazz"],
+          ]),
+        },
+        blob: jest.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler();
+
+      keepAliveSupport.supported = true;
+      await fetchHttpHandler.handle({} as any, {});
+
+      expect(mockRequest.mock.calls[0][1].keepalive).toBe(true);
+    });
+
+    it("will pass keepalive to request if supported", async () => {
+      const mockResponse = {
+        headers: {
+          entries: jest.fn().mockReturnValue([
+            ["foo", "bar"],
+            ["bizz", "bazz"],
+          ]),
+        },
+        blob: jest.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
+
+      keepAliveSupport.supported = true;
+      await fetchHttpHandler.handle({} as any, {});
+
+      expect(mockRequest.mock.calls[0][1].keepalive).toBe(false);
+    });
+
+    it("will not have keepalive property in request if not supported", async () => {
+      const mockResponse = {
+        headers: {
+          entries: jest.fn().mockReturnValue([
+            ["foo", "bar"],
+            ["bizz", "bazz"],
+          ]),
+        },
+        blob: jest.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
+      mockRequest.mockImplementation(() => null);
+
+      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
+
+      keepAliveSupport.supported = false;
+      await fetchHttpHandler.handle({} as any, {});
+      expect(mockRequest.mock.calls[0][1]).not.toHaveProperty("keepalive");
     });
   });
 

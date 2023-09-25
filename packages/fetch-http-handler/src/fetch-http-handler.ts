@@ -15,10 +15,28 @@ export interface FetchHttpHandlerOptions {
    * terminated.
    */
   requestTimeout?: number;
+
+  /**
+   * Whether to allow the request to outlive the page. Default value is true
+   */
+  keepAlive?: boolean;
 }
 
 type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 
+/**
+ * @internal
+ * Detection of keepalive support. Can be overridden for testing.
+ */
+export const keepAliveSupport = {
+  supported: Boolean(typeof Request !== "undefined" && "keepalive" in new Request("")),
+};
+
+/**
+ * @public
+ *
+ * HttpHandler implementation using browsers' `fetch` global function.
+ */
 export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
   private config?: FetchHttpHandlerConfig;
   private configProvider: Promise<FetchHttpHandlerConfig>;
@@ -41,6 +59,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       this.config = await this.configProvider;
     }
     const requestTimeoutInMs = this.config!.requestTimeout;
+    const keepAlive = this.config!.keepAlive ?? true;
 
     // if the request was already aborted, prevent doing extra work
     if (abortSignal?.aborted) {
@@ -79,6 +98,11 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     // some browsers support abort signal
     if (typeof AbortController !== "undefined") {
       (requestOptions as any)["signal"] = abortSignal;
+    }
+
+    // some browsers support keepalive
+    if (keepAliveSupport.supported) {
+      (requestOptions as any)["keepalive"] = keepAlive;
     }
 
     const fetchRequest = new Request(url, requestOptions);
@@ -134,7 +158,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
   updateHttpClientConfig(key: keyof FetchHttpHandlerConfig, value: FetchHttpHandlerConfig[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
-      config[key] = value;
+      (config as Record<typeof key, typeof value>)[key] = value;
       return config;
     });
   }
