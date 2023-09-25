@@ -1,5 +1,7 @@
 import type { Readable } from "stream";
 
+import type { BlobOptionalType, ReadableStreamOptionalType } from "../externals-check/browser-externals-check";
+
 /**
  * @public
  *
@@ -31,4 +33,4 @@ export type NodeJsRuntimeStreamingBlobTypes = Readable;
  *
  * Browser streaming blob types.
  */
-export type BrowserRuntimeStreamingBlobTypes = ReadableStream | Blob;
+export type BrowserRuntimeStreamingBlobTypes = ReadableStreamOptionalType | BlobOptionalType;

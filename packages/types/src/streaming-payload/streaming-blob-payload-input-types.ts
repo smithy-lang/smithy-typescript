@@ -1,5 +1,7 @@
 import type { Readable } from "stream";
 
+import type { BlobOptionalType, ReadableStreamOptionalType } from "../externals-check/browser-externals-check";
+
 /**
  * @public
  *
@@ -61,4 +63,8 @@ export type NodeJsRuntimeStreamingBlobPayloadInputTypes = string | Uint8Array | 
  * Streaming payload input types in the browser environment.
  * These are derived from the types compatible with fetch's Request.body.
  */
-export type BrowserRuntimeStreamingBlobPayloadInputTypes = string | Uint8Array | ReadableStream | Blob;
+export type BrowserRuntimeStreamingBlobPayloadInputTypes =
+  | string
+  | Uint8Array
+  | ReadableStreamOptionalType
+  | BlobOptionalType;

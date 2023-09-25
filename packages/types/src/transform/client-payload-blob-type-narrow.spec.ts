@@ -6,8 +6,7 @@ import type { MetadataBearer } from "../response";
 import type { SdkStream } from "../serde";
 import type { StreamingBlobPayloadOutputTypes } from "../streaming-payload/streaming-blob-payload-output-types";
 import type { BrowserClient, NodeJsClient } from "./client-payload-blob-type-narrow";
-
-type Exact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+import type { Exact } from "./exact";
 
 // it should narrow operational methods and the generic send method
 
