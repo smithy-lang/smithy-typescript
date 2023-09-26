@@ -68,7 +68,10 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
 
         writer.writeDocs("Value for how many times a request will be made at most in case of retry.")
                 .write("maxAttempts?: number | __Provider<number>;\n");
-        writer.writeDocs("Specifies which retry algorithm to use.")
+        writer.writeDocs("""
+                         Specifies which retry algorithm to use.
+                         @see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-smithy-util-retry/Enum/RETRY_MODES/
+                         """)
                 .write("retryMode?: string | __Provider<string>;\n");
         writer.writeDocs("Optional logger for logging debug/info/warn/error.")
                 .write("logger?: __Logger;\n");
