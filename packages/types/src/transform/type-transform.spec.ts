@@ -1,7 +1,6 @@
 import type { Transform as DownlevelTransform } from "../downlevel-ts3.4/transform/type-transform";
+import type { Exact } from "./exact";
 import type { Transform } from "./type-transform";
-
-type Exact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 type A = {
   a: string;

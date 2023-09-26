@@ -1,6 +1,7 @@
 import type { IncomingMessage } from "http";
 import type { Readable } from "stream";
 
+import type { BlobOptionalType, ReadableStreamOptionalType } from "../externals-check/browser-externals-check";
 import type { SdkStream } from "../serde";
 
 /**
@@ -53,4 +54,4 @@ export type NodeJsRuntimeStreamingBlobPayloadOutputTypes = SdkStream<IncomingMes
  * The SdkStreamMixin adds methods on this type to help transform (collect) it to
  * other formats.
  */
-export type BrowserRuntimeStreamingBlobPayloadOutputTypes = SdkStream<ReadableStream | Blob>;
+export type BrowserRuntimeStreamingBlobPayloadOutputTypes = SdkStream<ReadableStreamOptionalType | BlobOptionalType>;
