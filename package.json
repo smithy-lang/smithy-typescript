@@ -15,7 +15,8 @@
     "stage-release": "turbo run stage-release",
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",
     "release": "yarn changeset publish",
-    "build-test-packages": "./gradlew clean build && node ./scripts/build-generated-test-packages"
+    "build-test-packages": "./gradlew clean build && node ./scripts/build-generated-test-packages",
+    "g:jest": "cd $INIT_CWD && jest"
   },
   "repository": {
     "type": "git",

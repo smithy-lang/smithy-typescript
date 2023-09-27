@@ -10,7 +10,7 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "jest"
+    "test": "yarn g:jest"
   },
   "main": "./dist-es/index.js",
   "module": "./dist-es/index.js",

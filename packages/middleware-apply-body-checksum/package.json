@@ -11,8 +11,8 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "jest --coverage",
-    "test:integration": "jest --config jest.config.integ.js"
+    "test": "yarn g:jest --coverage",
+    "test:integration": "yarn g:jest --config yarn g:jest.config.integ.js"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

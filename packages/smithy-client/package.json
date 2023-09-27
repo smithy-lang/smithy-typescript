@@ -12,7 +12,7 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "extract:docs": "api-extractor run --local",
-    "test": "jest --passWithNoTests"
+    "test": "yarn g:jest --passWithNoTests"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
