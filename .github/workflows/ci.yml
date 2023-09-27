@@ -57,6 +57,13 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
+      - uses: trappar/turborepo-remote-cache-gh-action@main
+        with:
+          storage-provider: s3
+          storage-path: ${{ secrets.REMOTE_CACHE_BUCKET }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Install dependencies
         run: yarn
       - name: Build packages
