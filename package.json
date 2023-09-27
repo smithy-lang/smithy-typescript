@@ -63,10 +63,16 @@
     "webpack-cli": "4.10.0",
     "yarn": "1.22.10"
   },
-  "workspaces": [
-    "packages/*",
-    "smithy-typescript-ssdk-libs/*",
-    "private/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "smithy-typescript-ssdk-libs/*",
+      "private/*"
+    ],
+    "nohoist": [
+      "**/@types/mocha*",
+      "**/@types/mocha*/**"
+    ]
+  },
   "packageManager": "yarn@3.4.1"
 }
