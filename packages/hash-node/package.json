@@ -11,7 +11,7 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "jest"
+    "test": "yarn g:jest"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -27,7 +27,6 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "hash-test-vectors": "^1.3.2",
-    "jest": "28.1.1",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
     "typescript": "~4.9.5"
