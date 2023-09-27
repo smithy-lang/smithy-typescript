@@ -47,6 +47,11 @@ describe("MiddlewareStack", () => {
         priority: "low",
         step: "deserialize",
       });
+      stack.add(getConcatMiddleware("H") as DeserializeMiddleware<input, output>, {
+        aliases: ["h"],
+        priority: "low",
+        step: "deserialize",
+      });
       const inner = jest.fn();
 
       const composed = stack.resolve(inner, {} as any);
@@ -54,7 +59,7 @@ describe("MiddlewareStack", () => {
 
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({
-        input: ["A", "B", "C", "D", "E", "F", "G"],
+        input: ["A", "B", "C", "D", "E", "F", "G", "H"],
       });
     });
 
@@ -63,6 +68,22 @@ describe("MiddlewareStack", () => {
       const aMW = getConcatMiddleware("A");
       stack.add(aMW, { name: "A" });
       expect(() => stack.add(aMW, { name: "A" })).toThrow("Duplicate middleware name 'A'");
+    });
+
+    it("should throw if duplicated name via aliases of existing entry is found", () => {
+      const stack = constructStack<input, output>();
+      const aMW = getConcatMiddleware("A");
+      stack.add(aMW, { aliases: ["ALIAS"] });
+      expect(() => stack.add(aMW, { name: "ALIAS" })).toThrow("Duplicate middleware name 'ALIAS'");
+    });
+
+    it("should throw if duplicated name via aliases of added entry is found", () => {
+      const stack = constructStack<input, output>();
+      const aMW = getConcatMiddleware("ALIAS");
+      stack.add(aMW, { name: "ALIAS" });
+      expect(() => stack.add(aMW, { aliases: ["ALIAS"] })).toThrow(
+        "Duplicate middleware name 'anonymous (a.k.a. ALIAS)'"
+      );
     });
 
     describe("config: override", () => {
@@ -79,13 +100,59 @@ describe("MiddlewareStack", () => {
         });
       });
 
+      it("should override the middleware with matching alias of existing entry if override config is set", async () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { aliases: ["ALIAS"] });
+        stack.add(getConcatMiddleware("override"), { name: "ALIAS", override: true });
+        const inner = jest.fn();
+        const composed = stack.resolve(inner, {} as any);
+        await composed({ input: [] });
+        expect(inner.mock.calls.length).toBe(1);
+        expect(inner).toBeCalledWith({
+          input: ["override"],
+        });
+      });
+
+      it("should override the middleware with matching alias of added entry if override config is set", async () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { name: "ALIAS" });
+        stack.add(getConcatMiddleware("override"), { aliases: ["ALIAS"], override: true });
+        const inner = jest.fn();
+        const composed = stack.resolve(inner, {} as any);
+        await composed({ input: [] });
+        expect(inner.mock.calls.length).toBe(1);
+        expect(inner).toBeCalledWith({
+          input: ["override"],
+        });
+      });
+
       it("should throw if overriding middleware with same name different position", () => {
         const stack = constructStack<input, output>();
         stack.add(getConcatMiddleware("A"), { name: "A" });
         expect(() =>
           stack.add(getConcatMiddleware("override"), { name: "A", step: "serialize", override: true })
         ).toThrow(
-          '"A" middleware with normal priority in initialize step cannot be overridden by same-name middleware with normal priority in serialize step.'
+          '"A" middleware with normal priority in initialize step cannot be overridden by "A" middleware with normal priority in serialize step.'
+        );
+      });
+
+      it("should throw if overriding middleware with matching alias of existing entry different position", () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { aliases: ["ALIAS"] });
+        expect(() =>
+          stack.add(getConcatMiddleware("override"), { name: "ALIAS", step: "serialize", override: true })
+        ).toThrow(
+          '"anonymous (a.k.a. ALIAS)" middleware with normal priority in initialize step cannot be overridden by "ALIAS" middleware with normal priority in serialize step.'
+        );
+      });
+
+      it("should throw if overriding middleware with matching alias of added entry different position", () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { name: "ALIAS" });
+        expect(() =>
+          stack.add(getConcatMiddleware("override"), { aliases: ["ALIAS"], step: "serialize", override: true })
+        ).toThrow(
+          '"ALIAS" middleware with normal priority in initialize step cannot be overridden by "anonymous (a.k.a. ALIAS)" middleware with normal priority in serialize step.'
         );
       });
     });
@@ -95,7 +162,7 @@ describe("MiddlewareStack", () => {
     it("should allow adding middleware relatively based relation and order of adding", async () => {
       const stack = constructStack<input, output>();
       stack.addRelativeTo(getConcatMiddleware("H"), {
-        name: "H",
+        aliases: ["AliasH"],
         relation: "after",
         toMiddleware: "G",
       });
@@ -131,11 +198,21 @@ describe("MiddlewareStack", () => {
         relation: "before",
         toMiddleware: "G",
       });
+      stack.addRelativeTo(getConcatMiddleware("I"), {
+        aliases: ["AliasI"],
+        relation: "after",
+        toMiddleware: "AliasH",
+      });
+      stack.addRelativeTo(getConcatMiddleware("J"), {
+        name: "J",
+        relation: "after",
+        toMiddleware: "AliasI",
+      });
       const inner = jest.fn();
       const composed = stack.resolve(inner, {} as any);
       await composed({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
-      expect(inner).toBeCalledWith({ input: ["A", "B", "C", "D", "E", "F", "G", "H"] });
+      expect(inner).toBeCalledWith({ input: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"] });
     });
 
     it("should add relative middleware within the scope of adjacent absolute middleware", async () => {
@@ -149,14 +226,24 @@ describe("MiddlewareStack", () => {
       stack.addRelativeTo(getConcatMiddleware("C"), {
         name: "C",
         relation: "before",
-        toMiddleware: "D",
+        toMiddleware: "AliasD",
       });
-      stack.add(getConcatMiddleware("D"), { name: "D" });
+      stack.add(getConcatMiddleware("D"), { aliases: ["AliasD"] });
+      stack.addRelativeTo(getConcatMiddleware("F"), {
+        aliases: ["AliasF"],
+        relation: "after",
+        toMiddleware: "AliasD",
+      });
+      stack.addRelativeTo(getConcatMiddleware("E"), {
+        relation: "before",
+        toMiddleware: "AliasF",
+      });
+      stack.add(getConcatMiddleware("G"), { name: "G" });
       const inner = jest.fn();
       const composed = stack.resolve(inner, {} as any);
       await composed({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
-      expect(inner).toBeCalledWith({ input: ["A", "B", "C", "D"] });
+      expect(inner).toBeCalledWith({ input: ["A", "B", "C", "D", "E", "F", "G"] });
     });
 
     it("should not add self-referenced relative middleware", async () => {
@@ -173,6 +260,11 @@ describe("MiddlewareStack", () => {
       });
       stack.addRelativeTo(getConcatMiddleware("C"), {
         name: "C",
+        relation: "before",
+        toMiddleware: "AliasD",
+      });
+      stack.addRelativeTo(getConcatMiddleware("D"), {
+        aliases: ["AliasD"],
         relation: "after",
         toMiddleware: "A",
       });
@@ -219,6 +311,52 @@ describe("MiddlewareStack", () => {
         });
       });
 
+      it("should override the middleware with matching alias of existing entry if override config is set", async () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { name: "A" });
+        stack.addRelativeTo(getConcatMiddleware("B"), {
+          aliases: ["ALIAS"],
+          relation: "after",
+          toMiddleware: "A",
+        });
+        stack.addRelativeTo(getConcatMiddleware("override"), {
+          name: "ALIAS",
+          relation: "after",
+          toMiddleware: "A",
+          override: true,
+        });
+        const inner = jest.fn();
+        const composed = stack.resolve(inner, {} as any);
+        await composed({ input: [] });
+        expect(inner.mock.calls.length).toBe(1);
+        expect(inner).toBeCalledWith({
+          input: ["A", "override"],
+        });
+      });
+
+      it("should override the middleware with matching alias of added entry if override config is set", async () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { name: "A" });
+        stack.addRelativeTo(getConcatMiddleware("ALIAS"), {
+          name: "ALIAS",
+          relation: "after",
+          toMiddleware: "A",
+        });
+        stack.addRelativeTo(getConcatMiddleware("override"), {
+          aliases: ["ALIAS"],
+          relation: "after",
+          toMiddleware: "A",
+          override: true,
+        });
+        const inner = jest.fn();
+        const composed = stack.resolve(inner, {} as any);
+        await composed({ input: [] });
+        expect(inner.mock.calls.length).toBe(1);
+        expect(inner).toBeCalledWith({
+          input: ["A", "override"],
+        });
+      });
+
       it("should throw if overriding middleware with same name different position", () => {
         const stack = constructStack<input, output>();
         stack.add(getConcatMiddleware("A"), { name: "A" });
@@ -230,8 +368,46 @@ describe("MiddlewareStack", () => {
             toMiddleware: "A",
             override: true,
           })
+        ).toThrow('"B" middleware after "A" middleware cannot be overridden by "B" middleware before "A" middleware.');
+      });
+
+      it("should throw if overriding middleware with matching alias of existing entry different position", () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { name: "A" });
+        stack.addRelativeTo(getConcatMiddleware("B"), {
+          aliases: ["ALIAS"],
+          relation: "after",
+          toMiddleware: "A",
+        });
+        expect(() =>
+          stack.addRelativeTo(getConcatMiddleware("override"), {
+            name: "ALIAS",
+            relation: "before",
+            toMiddleware: "A",
+            override: true,
+          })
         ).toThrow(
-          '"B" middleware after "A" middleware cannot be overridden by same-name middleware before "A" middleware.'
+          '"anonymous (a.k.a. ALIAS)" middleware after "A" middleware cannot be overridden by "ALIAS" middleware before "A" middleware.'
+        );
+      });
+
+      it("should throw if overriding middleware with matching alias of added entry different position", () => {
+        const stack = constructStack<input, output>();
+        stack.add(getConcatMiddleware("A"), { name: "A" });
+        stack.addRelativeTo(getConcatMiddleware("ALIAS"), {
+          name: "ALIAS",
+          relation: "after",
+          toMiddleware: "A",
+        });
+        expect(() =>
+          stack.addRelativeTo(getConcatMiddleware("override"), {
+            aliases: ["ALIAS"],
+            relation: "before",
+            toMiddleware: "A",
+            override: true,
+          })
+        ).toThrow(
+          '"ALIAS" middleware after "A" middleware cannot be overridden by "anonymous (a.k.a. ALIAS)" middleware before "A" middleware.'
         );
       });
     });
@@ -246,19 +422,25 @@ describe("MiddlewareStack", () => {
         name: "A",
         priority: "high",
       });
+      stack.add(getConcatMiddleware("C"), {
+        aliases: ["AliasC"],
+      });
       const secondStack = stack.clone();
       const inner = jest.fn();
       await secondStack.resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
-      expect(inner).toBeCalledWith({ input: ["A", "B"] });
+      expect(inner).toBeCalledWith({ input: ["A", "B", "C"] });
       // validate adding middleware to cloned stack won't affect the original stack.
       inner.mockClear();
-      secondStack.add(getConcatMiddleware("C"));
+      secondStack.add(getConcatMiddleware("D"));
+      secondStack.add(getConcatMiddleware("E"), {
+        aliases: ["AliasE"],
+      });
       await secondStack.resolve(inner, {} as any)({ input: [] });
-      expect(inner).toBeCalledWith({ input: ["A", "B", "C"] });
+      expect(inner).toBeCalledWith({ input: ["A", "B", "C", "D", "E"] });
       inner.mockClear();
       await stack.resolve(inner, {} as any)({ input: [] });
-      expect(inner).toBeCalledWith({ input: ["A", "B"] });
+      expect(inner).toBeCalledWith({ input: ["A", "B", "C"] });
     });
   });
 
@@ -267,7 +449,7 @@ describe("MiddlewareStack", () => {
       const stack = constructStack<input, output>();
       stack.add(getConcatMiddleware("A"));
       stack.add(getConcatMiddleware("B"), {
-        name: "B",
+        aliases: ["AliasB"],
         priority: "low",
       });
 
@@ -278,7 +460,7 @@ describe("MiddlewareStack", () => {
       });
       secondStack.addRelativeTo(getConcatMiddleware("C"), {
         relation: "after",
-        toMiddleware: "B",
+        toMiddleware: "AliasB",
       });
 
       const inner = jest.fn();
@@ -328,12 +510,34 @@ describe("MiddlewareStack", () => {
       expect(inner).toBeCalledWith({ input: ["don't remove me"] });
     });
 
+    it("should remove middleware by alias of existing entry", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("don't remove me"), { name: "notRemove" });
+      stack.addRelativeTo(getConcatMiddleware("remove me!"), {
+        relation: "after",
+        toMiddleware: "notRemove",
+        aliases: ["toRemove"],
+      });
+
+      await stack.resolve(({ input }: FinalizeHandlerArguments<Array<string>>) => {
+        expect(input.sort()).toEqual(["don't remove me", "remove me!"]);
+        return Promise.resolve({ response: {} });
+      }, {} as any)({ input: [] });
+
+      stack.remove("toRemove");
+
+      const inner = jest.fn();
+      await stack.resolve(inner, {} as any)({ input: [] });
+      expect(inner.mock.calls.length).toBe(1);
+      expect(inner).toBeCalledWith({ input: ["don't remove me"] });
+    });
+
     it("should remove middleware by reference", async () => {
       const stack = constructStack<input, output>();
       const mw = getConcatMiddleware("remove all references of me");
       stack.add(mw, { name: "toRemove1" });
       stack.add(getConcatMiddleware("don't remove me!"));
-      stack.add(mw, { name: "toRemove2" });
+      stack.add(mw, { aliases: ["toRemove2"] });
       stack.remove(mw);
 
       const inner = jest.fn();
@@ -351,6 +555,7 @@ describe("MiddlewareStack", () => {
         tags: ["foo", "bar"],
       });
       stack.addRelativeTo(getConcatMiddleware("remove me!"), {
+        aliases: ["remove me!"],
         relation: "after",
         toMiddleware: "not removed",
         tags: ["foo", "bar", "baz"],
