@@ -9,10 +9,24 @@ import {
   SerializeHandlerOutput,
   SerializeMiddleware,
 } from "@smithy/types";
+import { getSmithyContext } from "@smithy/util-middleware";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
 import { EndpointResolvedConfig } from "./resolveEndpointConfig";
 import { EndpointParameterInstructions } from "./types";
+
+/**
+ * @internal
+ */
+interface EndpointMiddlewareSmithyContext extends Record<string, unknown> {
+  // TODO(experimentalIdentityAndAuth): should be replaced with `SelectedHttpAuthScheme` interface
+  //                                    after it is moved to @smithy/types.
+  selectedHttpAuthScheme?: {
+    httpAuthOption?: {
+      signingProperties?: Record<string, unknown>;
+    };
+  };
+}
 
 /**
  * @internal
@@ -48,6 +62,23 @@ export const endpointMiddleware = <T extends EndpointParameters>({
     if (authScheme) {
       context["signing_region"] = authScheme.signingRegion;
       context["signing_service"] = authScheme.signingName;
+      const smithyContext: EndpointMiddlewareSmithyContext = getSmithyContext(context);
+      const httpAuthOption = smithyContext?.selectedHttpAuthScheme?.httpAuthOption;
+      if (httpAuthOption) {
+        // TODO(experimentalIdentityAndAuth): Should be constrained somehow, but currently the only properties
+        //                                    found were `signing_region` and `signing_service`.
+        httpAuthOption.signingProperties = Object.assign(
+          httpAuthOption.signingProperties || {},
+          {
+            signing_region: authScheme.signingRegion,
+            signingRegion: authScheme.signingRegion,
+            signing_service: authScheme.signingName,
+            signingName: authScheme.signingName,
+            signingRegionSet: authScheme.signingRegionSet,
+          },
+          authScheme.properties
+        );
+      }
     }
 
     return next({
