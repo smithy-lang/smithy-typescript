@@ -10,6 +10,7 @@ export const httpSigningMiddlewareOptions: FinalizeRequestHandlerOptions & Relat
   step: "finalizeRequest",
   tags: ["HTTP_SIGNING"],
   name: "httpSigningMiddleware",
+  aliases: ["apiKeyMiddleware", "tokenMiddleware", "awsAuthMiddleware"],
   override: true,
   relation: "after",
   toMiddleware: retryMiddlewareOptions.name!,
