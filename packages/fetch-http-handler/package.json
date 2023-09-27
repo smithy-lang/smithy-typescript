@@ -34,6 +34,7 @@
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@smithy/abort-controller": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
+    "@web/dev-server-esbuild": "^0.4.1",
     "@web/test-runner": "^0.17.1",
     "@web/test-runner-playwright": "^0.10.1",
     "concurrently": "7.0.0",
