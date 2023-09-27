@@ -3,15 +3,15 @@
   "version": "0.0.9",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:es": "tsc -p tsconfig.es.json",
-    "build:types": "tsc -p tsconfig.types.json",
+    "build:cjs": "yarn g:tsc -p tsconfig.cjs.json",
+    "build:es": "yarn g:tsc -p tsconfig.es.json",
+    "build:types": "yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "tsc -p tsconfig.test.json"
+    "test": "yarn g:tsc -p tsconfig.test.json"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
