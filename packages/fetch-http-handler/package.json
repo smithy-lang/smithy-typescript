@@ -31,11 +31,15 @@
     "tslib": "^2.5.0"
   },
   "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
     "@smithy/abort-controller": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
+    "@web/test-runner": "^0.17.1",
+    "@web/test-runner-playwright": "^0.10.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "jest": "28.1.1",
+    "playwright": "^1.38.1",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
     "typescript": "~4.9.5"
