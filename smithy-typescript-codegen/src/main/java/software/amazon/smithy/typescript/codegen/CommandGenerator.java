@@ -42,8 +42,10 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameMap;
@@ -139,9 +141,23 @@ final class CommandGenerator implements Runnable {
                 .append("\n")
                 .append(getThrownExceptions());
 
-        writer.writeShapeDocs(
+        boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
+
+        if (operationHasDocumentation) {
+            writer.writeShapeDocs(
                 operation,
-                shapeDoc -> shapeDoc + additionalDocs);
+                shapeDoc -> shapeDoc + additionalDocs
+            );
+        } else {
+            boolean isPublic = !operation.hasTrait(InternalTrait.class);
+            boolean isDeprecated = operation.hasTrait(DeprecatedTrait.class);
+
+            writer.writeDocs(
+                (isPublic ? "@public\n" : "@internal\n")
+                + (isDeprecated ? "@deprecated\n" : "")
+                + additionalDocs
+            );
+        }
 
         writer.openBlock(
                 "export class $L extends $$Command<$T, $T, $L> {", "}",
