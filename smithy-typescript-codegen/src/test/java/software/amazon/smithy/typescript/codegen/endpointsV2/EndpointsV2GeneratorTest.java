@@ -52,10 +52,14 @@ public class EndpointsV2GeneratorTest {
         assertThat(endpointParameters, containsString(
                 "  return {\n" +
                 "    ...options,\n" +
-                "    region: options.region ?? \"us-east-1\",\n" +
                 "    stage: options.stage ?? \"production\",\n" +
                 "    defaultSigningName: \"\",\n" +
                 "  }\n"));
+        assertThat(endpointParameters, containsString(
+                "export interface ClientInputEndpointParameters {\n" +
+                "  region?: string|Provider<string>;\n" +
+                "  stage?: string|Provider<string>;\n" +
+                "  endpoint?:"));
     }
 
     private MockManifest testEndpoints(String filename) {
