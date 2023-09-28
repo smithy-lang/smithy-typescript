@@ -61,6 +61,7 @@ jobs:
         with:
           storage-provider: s3
           storage-path: smithy-typescript-remote-cache
+          team-id: ci
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
