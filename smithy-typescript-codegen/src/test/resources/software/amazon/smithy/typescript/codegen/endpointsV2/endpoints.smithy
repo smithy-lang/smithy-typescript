@@ -6,10 +6,7 @@ namespace smithy.example
   "version": "1.3"
   "parameters": {
     "Region": {
-      "builtIn": "AWS::Region",
       "type": "String",
-      "required": true,
-      "default": "us-east-1",
       "documentation": "The region to dispatch this request, eg. `us-east-1`."
     },
     "Stage": {
@@ -108,6 +105,7 @@ namespace smithy.example
 })
 @smithy.rules#clientContextParams(
   Stage: {type: "string", documentation: "The endpoint stage used to construct the hostname."}
+  Region: {type: "string", documentation: "The region to dispatch this request, eg. `us-east-1`."}
 )
 service Example {
     version: "2023-01-01"
