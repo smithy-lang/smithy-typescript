@@ -57,14 +57,6 @@ namespace smithy.example
     {
       "documentation": "Template the region into the URI when region is set",
       "conditions": [
-        {
-          "fn": "isSet",
-          "argv": [
-            {
-              "ref": "Region"
-            }
-          ]
-        }
       ],
       "type": "tree",
       "rules": [
