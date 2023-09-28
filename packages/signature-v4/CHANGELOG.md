@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [2f70f105]
+- Updated dependencies [9a562d37]
+  - @smithy/types@2.3.4
+  - @smithy/eventstream-codec@2.0.10
+  - @smithy/util-middleware@2.0.3
+
 ## 2.0.9
 
 ### Patch Changes

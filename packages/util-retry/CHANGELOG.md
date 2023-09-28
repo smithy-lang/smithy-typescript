@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [2f70f105]
+- Updated dependencies [9a562d37]
+  - @smithy/types@2.3.4
+  - @smithy/service-error-classification@2.0.3
+
 ## 2.0.2
 
 ### Patch Changes

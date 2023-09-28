@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.4
+
+### Patch Changes
+
+- 2f70f105: Support `aliases` for `MiddlewareStack`
+- Updated dependencies [2f70f105]
+- Updated dependencies [9a562d37]
+  - @smithy/types@2.3.4
+
 ## 2.0.3
 
 ### Patch Changes

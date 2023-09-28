@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.3.4
+
+### Patch Changes
+
+- 2f70f105: Support `aliases` for `MiddlewareStack`
+- 9a562d37: check for existence of browser Blob/ReadableStream types in payload union
+
 ## 2.3.3
 
 ### Patch Changes

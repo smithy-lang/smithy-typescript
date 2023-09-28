@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.0.10
+
+### Patch Changes
+
+- 2503655d: Add `createEndpointRuleSetHttpAuthSchemeParametersProvider()` to generically create `HttpAuthSchemeParametersProvider`s for `@smithy.rules#endpointRuleSet`
+- Updated dependencies [2f70f105]
+- Updated dependencies [9a562d37]
+  - @smithy/types@2.3.4
+  - @smithy/middleware-endpoint@2.0.10
+  - @smithy/middleware-retry@2.0.13
+  - @smithy/protocol-http@3.0.6
+  - @smithy/signature-v4@2.0.10
+
 ## 0.0.9
 
 ### Patch Changes
