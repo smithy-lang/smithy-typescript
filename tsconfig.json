@@ -20,7 +20,8 @@
     "experimentalDecorators": true,
     "jsx": "react",
     "jsxFactory": "JSX.createElement",
-    "jsxFragmentFactory": "JSX.Fragment"
+    "jsxFragmentFactory": "JSX.Fragment",
+    "typeRoots": ["overrides", "node_modules/@types"]
   },
   "include": ["packages/", "smithy-typescript-ssdk-libs/"],
   "exclude": ["node_modules/", "**/*.spec.ts"]
