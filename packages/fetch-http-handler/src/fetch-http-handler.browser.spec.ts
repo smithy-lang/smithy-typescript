@@ -7,49 +7,43 @@ describe(FetchHttpHandler.name, () => {
     new HttpRequest({ method, hostname: "example.com", body });
 
   describe("fetch", () => {
-    it("sends basic fetch request", (done) => {
+    it("sends basic fetch request", async () => {
       const fetchHttpHandler = new FetchHttpHandler();
       const winReqSpy = spyOn(window, "Request");
 
       const mockHttpRequest = getMockHttpRequest({});
-      fetchHttpHandler.handle(mockHttpRequest);
+      await fetchHttpHandler.handle(mockHttpRequest);
 
       const expectedUrl = `${mockHttpRequest.protocol}//${mockHttpRequest.hostname}${mockHttpRequest.path}`;
       const requestArgs = winReqSpy.calls.argsFor(0);
       expect(requestArgs[0]).toEqual(expectedUrl);
       expect(requestArgs[1].method).toEqual(mockHttpRequest.method);
       expect(requestArgs[1].keepalive).toEqual(true);
-
-      done();
     });
 
     for (const method of ["GET", "HEAD"]) {
-      it(`sets body to undefined when method: '${method}'`, (done) => {
+      it(`sets body to undefined when method: '${method}'`, async () => {
         const fetchHttpHandler = new FetchHttpHandler();
         const winReqSpy = spyOn(window, "Request");
 
         const mockHttpRequest = getMockHttpRequest({ method, body: "test" });
-        fetchHttpHandler.handle(mockHttpRequest);
+        await fetchHttpHandler.handle(mockHttpRequest);
 
         const requestArgs = winReqSpy.calls.argsFor(0);
         expect(requestArgs[1].method).toEqual(mockHttpRequest.method);
         expect(requestArgs[1].body).toEqual(undefined);
-
-        done();
       });
     }
 
-    it(`sets keepalive to false if explcitly requested`, (done) => {
+    it(`sets keepalive to false if explcitly requested`, async () => {
       const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
       const winReqSpy = spyOn(window, "Request");
 
       const mockHttpRequest = getMockHttpRequest({});
-      fetchHttpHandler.handle(mockHttpRequest);
+      await fetchHttpHandler.handle(mockHttpRequest);
 
       const requestArgs = winReqSpy.calls.argsFor(0);
       expect(requestArgs[1].keepalive).toEqual(false);
-
-      done();
     });
   });
 });
