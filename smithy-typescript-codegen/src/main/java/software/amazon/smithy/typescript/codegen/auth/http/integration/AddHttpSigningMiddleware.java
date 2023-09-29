@@ -9,26 +9,15 @@ import static software.amazon.smithy.typescript.codegen.integration.RuntimeClien
 
 import java.util.List;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Add middleware for {@code httpSigningMiddleware}.
- *
- * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public class AddHttpSigningMiddleware implements TypeScriptIntegration {
-    /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
-     */
-    @Override
-    public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
-    }
-
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return List.of(RuntimeClientPlugin.builder()

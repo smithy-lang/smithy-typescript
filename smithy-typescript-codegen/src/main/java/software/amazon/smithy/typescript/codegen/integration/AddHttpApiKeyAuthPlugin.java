@@ -29,21 +29,12 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Add config and middleware to support a service with the @httpApiKeyAuth trait.
- *
- * This is the existing control behavior for `experimentalIdentityAndAuth`.
  */
+@Deprecated
 @SmithyInternalApi
 public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
 
     public static final String INTEGRATION_NAME = "HttpApiKeyAuth";
-
-    /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is false.
-     */
-    @Override
-    public boolean matchesSettings(TypeScriptSettings settings) {
-        return !settings.getExperimentalIdentityAndAuth();
-    }
 
     /**
      * Plug into code generation for the client.
