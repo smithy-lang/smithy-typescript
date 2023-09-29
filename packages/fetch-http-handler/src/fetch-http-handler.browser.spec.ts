@@ -18,6 +18,7 @@ describe(FetchHttpHandler.name, () => {
       const requestArgs = winReqSpy.calls.argsFor(0);
       expect(requestArgs[0]).toEqual(expectedUrl);
       expect(requestArgs[1].method).toEqual(mockHttpRequest.method);
+      expect(requestArgs[1].keepalive).toEqual(true);
 
       done();
     });
@@ -37,5 +38,18 @@ describe(FetchHttpHandler.name, () => {
         done();
       });
     }
+
+    it(`sets keepalive to false if explcitly requested`, (done) => {
+      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
+      const winReqSpy = spyOn(window, "Request");
+
+      const mockHttpRequest = getMockHttpRequest({});
+      fetchHttpHandler.handle(mockHttpRequest);
+
+      const requestArgs = winReqSpy.calls.argsFor(0);
+      expect(requestArgs[1].keepalive).toEqual(false);
+
+      done();
+    });
   });
 });
