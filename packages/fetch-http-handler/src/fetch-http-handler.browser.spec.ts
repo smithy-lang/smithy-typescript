@@ -9,10 +9,12 @@ describe(FetchHttpHandler.name, () => {
     body?: any;
     query?: QueryParameterBag;
     fragment?: string;
+    username?: string;
+    password?: string;
   }
 
-  const getMockHttpRequest = ({ method, body, query, fragment }: MockHttpRequestOptions): HttpRequest =>
-    new HttpRequest({ method, hostname: "example.com", body, query, fragment });
+  const getMockHttpRequest = (options: MockHttpRequestOptions): HttpRequest =>
+    new HttpRequest({ hostname: "example.com", ...options });
 
   describe("fetch", () => {
     it("sends basic fetch request", async () => {
@@ -43,7 +45,7 @@ describe(FetchHttpHandler.name, () => {
       });
     }
 
-    it(`sets keepalive to false if explcitly requested`, async () => {
+    it(`sets keepalive to false if explicitly requested`, async () => {
       const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
       const winReqSpy = spyOn(window, "Request");
 
@@ -66,6 +68,21 @@ describe(FetchHttpHandler.name, () => {
       const expectedUrl = `${mockHttpRequest.protocol}//${mockHttpRequest.hostname}/?${Object.entries(query)
         .map(([key, val]) => `${key}=${val}`)
         .join("&")}#${fragment}`;
+      const requestArgs = winReqSpy.calls.argsFor(0);
+      expect(requestArgs[0]).toEqual(expectedUrl);
+    });
+
+    it(`sets auth if username/password are provided`, async () => {
+      const fetchHttpHandler = new FetchHttpHandler();
+      const winReqSpy = spyOn(window, "Request");
+
+      const username = "foo";
+      const password = "bar";
+      const mockHttpRequest = getMockHttpRequest({ username, password });
+      await fetchHttpHandler.handle(mockHttpRequest);
+
+      const mockAuth = `${mockHttpRequest.username}:${mockHttpRequest.password}`;
+      const expectedUrl = `${mockHttpRequest.protocol}//${mockAuth}@${mockHttpRequest.hostname}/`;
       const requestArgs = winReqSpy.calls.argsFor(0);
       expect(requestArgs[0]).toEqual(expectedUrl);
     });
