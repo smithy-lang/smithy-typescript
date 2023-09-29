@@ -1,3 +1,5 @@
+import { describe, expect, it } from "@jest/globals";
+
 import { FetchHttpHandler } from "./fetch-http-handler";
 
 describe(FetchHttpHandler.name, () => {
