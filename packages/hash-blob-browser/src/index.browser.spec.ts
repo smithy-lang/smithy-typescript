@@ -1,4 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
+import { describe, expect, it } from "@jest/globals";
 import { toHex } from "@smithy/util-hex-encoding";
 
 import { blobHasher } from "./index";
