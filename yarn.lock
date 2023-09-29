@@ -2483,6 +2483,7 @@ __metadata:
     "@smithy/util-test": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^14.14.31
+    "@web/test-runner": ^0.17.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
