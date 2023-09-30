@@ -89,11 +89,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     // Request constructor doesn't allow GET/HEAD request with body
     // ref: https://github.com/whatwg/fetch/issues/551
     const body = method === "GET" || method === "HEAD" ? undefined : request.body;
-    const requestOptions: RequestInit = {
-      body,
-      headers: new Headers(request.headers),
-      method: method,
-    };
+    const requestOptions: RequestInit = { body, headers: new Headers(request.headers), method: method };
 
     // some browsers support abort signal
     if (typeof AbortController !== "undefined") {
