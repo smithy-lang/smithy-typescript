@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- b411ffd1: use valid dummy URL
+
 ## 2.2.0
 
 ### Minor Changes

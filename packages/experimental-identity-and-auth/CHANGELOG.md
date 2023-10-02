@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.11
+
+### Patch Changes
+
+- 890feeb1: Add aliases for `httpSigningMiddleware`
+
 ## 0.0.10
 
 ### Patch Changes
