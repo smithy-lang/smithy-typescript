@@ -34,14 +34,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptIntegration {
-    /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
-     */
-    @Override
-    public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
-    }
-
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return List.of(
@@ -78,7 +70,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
         writer.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
         writer.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
         writer.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
+            Configuration of HttpAuthSchemes for a client which provides \
             default identity providers and signers per auth scheme.
             @internal""");
         writer.write("httpAuthSchemes?: HttpAuthScheme[];\n");
@@ -87,7 +79,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             + "HttpAuthSchemeProvider";
         writer.addImport(httpAuthSchemeProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
         writer.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
+            Configuration of an HttpAuthSchemeProvider for a client which \
             resolves which HttpAuthScheme to use.
             @internal""");
         writer.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
@@ -172,7 +164,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                     w.write("readonly $L?: $C;", configField.name(), configField.resolvedType());
                 }
                 w.writeDocs("""
-                    experimentalIdentityAndAuth: provides parameters for HttpAuthSchemeProvider.
+                    provides parameters for HttpAuthSchemeProvider.
                     @internal""");
                 w.write("readonly httpAuthSchemeParametersProvider: $LHttpAuthSchemeParametersProvider;",
                     service);
@@ -180,7 +172,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                 w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                 w.addImport("IdentityProviderConfig", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                 w.writeDocs("""
-                    experimentalIdentityAndAuth: abstraction around identity configuration fields
+                    abstraction around identity configuration fields
                     @internal""");
                 w.write("readonly identityProviderConfig: IdentityProviderConfig;");
             });

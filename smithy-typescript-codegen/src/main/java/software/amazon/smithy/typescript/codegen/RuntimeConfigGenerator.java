@@ -182,10 +182,10 @@ final class RuntimeConfigGenerator {
                 for (TypeScriptIntegration integration : integrations) {
                     configs.putAll(integration.getRuntimeConfigWriters(settings, model, symbolProvider, target));
                 }
-                // feat(experimentalIdentityAndAuth): add config writers for httpAuthScheme and httpAuthSchemes
+                // TODO(experimentalIdentityAndAuth): add config writers for httpAuthScheme and httpAuthSchemes
                 // Needs a separate integration point since not all the information is accessible in
                 // {@link TypeScriptIntegration#getRuntimeConfigWriters()}
-                if (applicationProtocol.isHttpProtocol() && settings.getExperimentalIdentityAndAuth()) {
+                if (applicationProtocol.isHttpProtocol()) {
                     generateHttpAuthSchemeConfig(configs, writer, target);
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
@@ -209,7 +209,6 @@ final class RuntimeConfigGenerator {
     ) {
         SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations);
 
-        // feat(experimentalIdentityAndAuth): write the default imported HttpAuthSchemeProvider
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
                 w.write("$T", authIndex.getDefaultHttpAuthSchemeProvider()
@@ -220,7 +219,6 @@ final class RuntimeConfigGenerator {
             });
         }
 
-        // feat(experimentalIdentityAndAuth): gather HttpAuthSchemes to generate
         ServiceIndex serviceIndex = ServiceIndex.of(model);
         Map<ShapeId, HttpAuthScheme> allEffectiveHttpAuthSchemes =
             AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(service, serviceIndex, authIndex);
@@ -246,7 +244,6 @@ final class RuntimeConfigGenerator {
             return;
         }
 
-        // feat(experimentalIdentityAndAuth): write the default httpAuthSchemes
         configs.put("httpAuthSchemes", w -> {
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addImport("IdentityProviderConfig", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);

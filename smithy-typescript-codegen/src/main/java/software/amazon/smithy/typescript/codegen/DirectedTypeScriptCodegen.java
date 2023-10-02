@@ -236,9 +236,7 @@ final class DirectedTypeScriptCodegen
         delegator.useShapeWriter(service, writer -> new ServiceBareBonesClientGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
 
-        if (directive.settings().getExperimentalIdentityAndAuth()) {
-            // feat(experimentalIdentityAndAuth): allow configuring custom HttpAuthSchemeProviderGenerator
-            LOGGER.fine("experimentalIdentityAndAuth: Generating auth scheme resolver");
+        if (applicationProtocol.isHttpProtocol()) {
             new HttpAuthSchemeProviderGenerator(
                 delegator,
                 settings,

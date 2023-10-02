@@ -12,7 +12,6 @@ import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
@@ -21,8 +20,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Support for generic @aws.auth#sigv4.
- *
- * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
@@ -31,14 +28,6 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
         w.addImport("SigV4Signer", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
         w.write("new SigV4Signer()");
     };
-
-    /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
-     */
-    @Override
-    public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
-    }
 
     @Override
     public Optional<HttpAuthScheme> getHttpAuthScheme() {

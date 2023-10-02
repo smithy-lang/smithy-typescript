@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.is;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -28,12 +29,15 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
 
+@Deprecated
 public class AddHttpApiKeyAuthPluginTest {
+    @Disabled("software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin is considered deprecated")
     @Test
     public void httpApiKeyAuthClientOnService() {
         testInjects("http-api-key-auth-trait.smithy", ", { scheme: 'ApiKey', in: 'header', name: 'Authorization'}");
     }
 
+    @Disabled("software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin is considered deprecated")
     @Test
     public void httpApiKeyAuthClientOnOperation() {
         testInjects("http-api-key-auth-trait-on-operation.smithy",
@@ -42,6 +46,7 @@ public class AddHttpApiKeyAuthPluginTest {
 
     // This should be identical to the httpApiKeyAuthClient test except for the parameters provided
     // to the middleware.
+    @Disabled("software.amazon.smithy.typescript.codegen.integration.AddHttpApiKeyAuthPlugin is considered deprecated")
     @Test
     public void httpApiKeyAuthClientNoScheme() {
         testInjects("http-api-key-auth-trait-no-scheme.smithy", ", { in: 'header', name: 'Authorization'}");

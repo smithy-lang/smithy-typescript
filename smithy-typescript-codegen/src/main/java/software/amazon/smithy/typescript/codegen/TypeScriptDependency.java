@@ -119,7 +119,7 @@ public enum TypeScriptDependency implements Dependency {
     // Conditionally added when @aws.auth#sigv4 is used
     SIGNATURE_V4("dependencies", "@smithy/signature-v4", false),
 
-    // feat(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
+    // TODO(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
     // This package should never have a major version, and should only use minor and patch versions in development.
     EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
 

@@ -15,7 +15,6 @@ import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
-import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
@@ -26,20 +25,9 @@ import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Adds {@link HttpAuthExtensionConfigurationInterface} to a client.
- *
- * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegration {
-
-    /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
-     */
-    @Override
-    public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
-    }
-
     @Override
     public List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
         return List.of(new HttpAuthExtensionConfigurationInterface());

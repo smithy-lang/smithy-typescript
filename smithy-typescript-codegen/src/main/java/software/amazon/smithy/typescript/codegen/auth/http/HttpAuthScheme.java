@@ -20,7 +20,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
 /**
- * feat(experimentalIdentityAndAuth): Defines an HttpAuthScheme used in code generation.
+ * Defines an HttpAuthScheme used in code generation.
  *
  * HttpAuthScheme defines everything needed to generate an HttpAuthSchemeProvider,
  * HttpAuthOptions, and registered HttpAuthSchemes in the IdentityProviderConfiguration.
