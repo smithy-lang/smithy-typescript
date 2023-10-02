@@ -29,7 +29,7 @@ type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
  * Detection of keepalive support. Can be overridden for testing.
  */
 export const keepAliveSupport = {
-  supported: Boolean(typeof Request !== "undefined" && "keepalive" in new Request("")),
+  supported: Boolean(typeof Request !== "undefined" && "keepalive" in new Request("https://[::1]")),
 };
 
 /**
