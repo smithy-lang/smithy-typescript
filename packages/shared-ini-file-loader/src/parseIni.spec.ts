@@ -91,20 +91,18 @@ describe(parseIni.name, () => {
     });
 
     it("returns data from main section, and not subsection", () => {
-      const mockMainSettings = { key: "value1" };
-      const mockProfileDataWithSubSettings = { ...mockMainSettings, "sub-settings-name": { key: "subValue1" } };
+      const mockProfileDataWithSubSettings = { key: "value1", "sub-settings-name": { key: "subValue1" } };
       const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithSubSettings);
       expect(parseIni(mockInput)).toStrictEqual({
-        [mockProfileName]: mockMainSettings,
+        [mockProfileName]: mockProfileDataWithSubSettings,
       });
 
       const mockProfileName2 = "mock_profile_name_2";
-      const mockMainSettings2 = { key: "value2" };
-      const mockProfileDataWithSubSettings2 = { ...mockMainSettings2, "sub-settings-name": { key: "subValue2" } };
+      const mockProfileDataWithSubSettings2 = { key: "value2", "sub-settings-name": { key: "subValue2" } };
       const mockInput2 = getMockProfileContent(mockProfileName2, mockProfileDataWithSubSettings2);
       expect(parseIni(`${mockInput}${mockInput2}`)).toStrictEqual({
-        [mockProfileName]: mockMainSettings,
-        [mockProfileName2]: mockMainSettings2,
+        [mockProfileName]: mockProfileDataWithSubSettings,
+        [mockProfileName2]: mockProfileDataWithSubSettings2,
       });
     });
   });
