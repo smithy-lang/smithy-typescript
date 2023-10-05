@@ -16,6 +16,7 @@ export const CONFIG_ENDPOINT_MODE_NAME = "ec2_metadata_service_endpoint_mode";
  */
 export const ENDPOINT_MODE_CONFIG_OPTIONS: LoadedConfigSelectors<string | undefined> = {
   environmentVariableSelector: (env) => env[ENV_ENDPOINT_MODE_NAME],
-  configFileSelector: (profile) => profile[CONFIG_ENDPOINT_MODE_NAME],
+  configFileSelector: (profile) =>
+    typeof profile[CONFIG_ENDPOINT_MODE_NAME] === "string" ? profile[CONFIG_ENDPOINT_MODE_NAME] : undefined,
   default: EndpointMode.IPv4,
 };

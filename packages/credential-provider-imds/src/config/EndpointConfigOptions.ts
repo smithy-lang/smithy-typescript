@@ -14,6 +14,7 @@ export const CONFIG_ENDPOINT_NAME = "ec2_metadata_service_endpoint";
  */
 export const ENDPOINT_CONFIG_OPTIONS: LoadedConfigSelectors<string | undefined> = {
   environmentVariableSelector: (env) => env[ENV_ENDPOINT_NAME],
-  configFileSelector: (profile) => profile[CONFIG_ENDPOINT_NAME],
+  configFileSelector: (profile) =>
+    typeof profile[CONFIG_ENDPOINT_NAME] === "string" ? profile[CONFIG_ENDPOINT_NAME] : undefined,
   default: undefined,
 };
