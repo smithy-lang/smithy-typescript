@@ -77,7 +77,6 @@ describe(parseIni.name, () => {
       const mockMainSettings = { key: "value1" };
       const mockProfileDataWithSubSettings = { ...mockMainSettings, "sub-settings-name": { key: "value2" } };
       const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithSubSettings);
-      console.log({ mockInput });
       expect(parseIni(mockInput)).toStrictEqual({
         [mockProfileName]: mockMainSettings,
       });
