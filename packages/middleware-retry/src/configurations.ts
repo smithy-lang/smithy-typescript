@@ -24,7 +24,7 @@ export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS: LoadedConfigSelectors<number> = {
   },
   configFileSelector: (profile) => {
     const value = profile[CONFIG_MAX_ATTEMPTS];
-    if (!value) return undefined;
+    if (typeof value !== "string") return undefined;
     const maxAttempt = parseInt(value);
     if (Number.isNaN(maxAttempt)) {
       throw new Error(`Shared config file entry ${CONFIG_MAX_ATTEMPTS} mast be a number, got "${value}"`);
@@ -91,6 +91,7 @@ export const CONFIG_RETRY_MODE = "retry_mode";
 
 export const NODE_RETRY_MODE_CONFIG_OPTIONS: LoadedConfigSelectors<string> = {
   environmentVariableSelector: (env) => env[ENV_RETRY_MODE],
-  configFileSelector: (profile) => profile[CONFIG_RETRY_MODE],
+  configFileSelector: (profile) =>
+    typeof profile[CONFIG_RETRY_MODE] === "string" ? profile[CONFIG_RETRY_MODE] : undefined,
   default: DEFAULT_RETRY_MODE,
 };
