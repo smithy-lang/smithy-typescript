@@ -19,14 +19,16 @@ export const parseIni = (iniData: string): ParsedIniData => {
       }
     } else if (currentSection) {
       const [name, value] = line.split("=").map((item) => item.trim());
-      if (value === "") {
-        currentSubSection = name;
-      }
-      if (currentSubSection === undefined) {
-        // ToDo: populate subsection in future PR, when IniSection is updated to support subsections.
-        if (name !== "" && value !== "") {
-          map[currentSection] = map[currentSection] || {};
-          map[currentSection][name] = value;
+      if (name !== "") {
+        if (value === "") {
+          currentSubSection = name;
+        }
+        if (currentSubSection === undefined) {
+          // ToDo: populate subsection in future PR, when IniSection is updated to support subsections.
+          if (value !== "") {
+            map[currentSection] = map[currentSection] || {};
+            map[currentSection][name] = value;
+          }
         }
       }
     }
