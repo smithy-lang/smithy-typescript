@@ -14,9 +14,9 @@ describe(parseIni.name, () => {
 
     const getMockProfileDataEntries = (profileData: Record<string, string | Record<string, string>>) =>
       Object.entries(profileData).map(([key, value]) => {
-        let result = `${key} =`;
+        let result = `${key}=`;
         if (typeof value === "string") {
-          result += ` ${value}`;
+          result += `${value}`;
         } else {
           result += `\n    ${getMockProfileDataEntries(value).join("\n    ")}`;
         }
@@ -25,6 +25,15 @@ describe(parseIni.name, () => {
 
     const getMockProfileContent = (profileName: string, profileData: Record<string, string | Record<string, string>>) =>
       `[${profileName}]\n${getMockProfileDataEntries(profileData).join("\n")}\n`;
+
+    it("trims data from key/value", () => {
+      const mockInput = `[${mockProfileName}]\n  ${Object.entries(mockProfileData)
+        .map(([key, value]) => ` ${key} = ${value} `)
+        .join("\n")}`;
+      expect(parseIni(mockInput)).toStrictEqual({
+        [mockProfileName]: mockProfileData,
+      });
+    });
 
     it("returns data for one profile", () => {
       const mockInput = getMockProfileContent(mockProfileName, mockProfileData);
