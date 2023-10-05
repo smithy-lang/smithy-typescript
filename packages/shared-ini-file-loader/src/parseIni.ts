@@ -27,19 +27,13 @@ export const parseIni = (iniData: string): ParsedIniData => {
         if (value === "") {
           currentSubSectionName = name;
         } else {
-          if (map[currentSectionName] === undefined) {
-            map[currentSectionName] = {};
-          }
-          const currentSection = map[currentSectionName];
+          const currentSection = map[currentSectionName] || {};
           if (currentSubSectionName === undefined) {
             currentSection[name] = value;
           } else {
-            if (currentSection[currentSubSectionName] === undefined) {
-              currentSection[currentSubSectionName] = {};
-            }
-            const currentSubSection = currentSection[currentSubSectionName];
+            const currentSubSection = currentSection[currentSubSectionName] || {};
             if (typeof currentSubSection !== "string") {
-              currentSubSection[name] = value;
+              (currentSubSection as Record<string, string>)[name] = value;
             }
           }
         }
