@@ -35,7 +35,9 @@ export const parseIni = (iniData: string): ParsedIniData => {
             if (typeof currentSubSection !== "string") {
               (currentSubSection as Record<string, string>)[name] = value;
             }
+            currentSection[currentSubSectionName] = currentSubSection;
           }
+          map[currentSectionName] = currentSection;
         }
       }
     }
