@@ -18,22 +18,13 @@ export const parseIni = (iniData: string): ParsedIniData => {
         throw new Error(`Found invalid profile name "${currentSection}"`);
       }
     } else if (currentSection) {
-      const [key, value] = line.split("=").map((item) => item.trim());
+      const [name, value] = line.split("=").map((item) => item.trim());
       if (value === "") {
-        currentSubSection = key;
+        currentSubSection = name;
       }
       if (currentSubSection === undefined) {
         // ToDo: populate subsection in future PR, when IniSection is updated to support subsections.
-        const indexOfEqualsSign = line.indexOf("=");
-        const start = 0;
-        const end: number = line.length - 1;
-        const isAssignment: boolean =
-          indexOfEqualsSign !== -1 && indexOfEqualsSign !== start && indexOfEqualsSign !== end;
-        if (isAssignment) {
-          const [name, value]: [string, string] = [
-            line.substring(0, indexOfEqualsSign).trim(),
-            line.substring(indexOfEqualsSign + 1).trim(),
-          ];
+        if (name !== "" && value !== "") {
           map[currentSection] = map[currentSection] || {};
           map[currentSection][name] = value;
         }
