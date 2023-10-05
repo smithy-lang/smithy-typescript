@@ -35,6 +35,14 @@ describe(parseIni.name, () => {
       });
     });
 
+    it("returns value with equals sign", () => {
+      const mockProfileDataWithEqualsSign = { key: "value=value" };
+      const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithEqualsSign);
+      expect(parseIni(mockInput)).toStrictEqual({
+        [mockProfileName]: mockProfileDataWithEqualsSign,
+      });
+    });
+
     it("returns data for one profile", () => {
       const mockInput = getMockProfileContent(mockProfileName, mockProfileData);
       expect(parseIni(mockInput)).toStrictEqual({
