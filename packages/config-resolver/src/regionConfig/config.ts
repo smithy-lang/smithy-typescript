@@ -14,7 +14,8 @@ export const REGION_INI_NAME = "region";
  */
 export const NODE_REGION_CONFIG_OPTIONS: LoadedConfigSelectors<string> = {
   environmentVariableSelector: (env) => env[REGION_ENV_NAME],
-  configFileSelector: (profile) => profile[REGION_INI_NAME],
+  configFileSelector: (profile) =>
+    typeof profile[REGION_INI_NAME] === "string" ? profile[REGION_INI_NAME] : undefined,
   default: () => {
     throw new Error("Region is missing");
   },
