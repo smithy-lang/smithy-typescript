@@ -12,24 +12,33 @@ describe(parseIni.name, () => {
     const mockProfileName = "mock_profile_name";
     const mockProfileData = { key: "value" };
 
-    const getMockProfileData = (profileName: string, profileData: Record<string, string>) =>
-      `[${profileName}]\n${Object.entries(profileData)
-        .map(([key, value]) => `${key} = ${value}`)
-        .join("\n")}\n`;
+    const getMockProfileDataEntries = (profileData: Record<string, string | Record<string, string>>) =>
+      Object.entries(profileData).map(([key, value]) => {
+        let result = `${key} =`;
+        if (typeof value === "string") {
+          result += ` ${value}`;
+        } else {
+          result += `\n    ${getMockProfileDataEntries(value).join("\n    ")}`;
+        }
+        return result;
+      });
+
+    const getMockProfileContent = (profileName: string, profileData: Record<string, string | Record<string, string>>) =>
+      `[${profileName}]\n${getMockProfileDataEntries(profileData).join("\n")}\n`;
 
     it("returns data for one profile", () => {
-      const mockInput = getMockProfileData(mockProfileName, mockProfileData);
+      const mockInput = getMockProfileContent(mockProfileName, mockProfileData);
       expect(parseIni(mockInput)).toStrictEqual({
         [mockProfileName]: mockProfileData,
       });
     });
 
     it("returns data for two profiles", () => {
-      const mockProfile1 = getMockProfileData(mockProfileName, mockProfileData);
+      const mockProfile1 = getMockProfileContent(mockProfileName, mockProfileData);
 
       const mockProfileName2 = "mock_profile_name_2";
       const mockProfileData2 = { key2: "value2" };
-      const mockProfile2 = getMockProfileData(mockProfileName2, mockProfileData2);
+      const mockProfile2 = getMockProfileContent(mockProfileName2, mockProfileData2);
 
       expect(parseIni(`${mockProfile1}${mockProfile2}`)).toStrictEqual({
         [mockProfileName]: mockProfileData,
@@ -39,7 +48,7 @@ describe(parseIni.name, () => {
 
     it("skip section if data is not present", () => {
       const mockProfileNameWithoutData = "mock_profile_name_without_data";
-      const mockInput = getMockProfileData(mockProfileName, mockProfileData);
+      const mockInput = getMockProfileContent(mockProfileName, mockProfileData);
       expect(parseIni(`${mockInput}[${mockProfileNameWithoutData}]`)).toStrictEqual({
         [mockProfileName]: mockProfileData,
       });
@@ -50,7 +59,7 @@ describe(parseIni.name, () => {
 
     it("returns data profile name containing multiple words", () => {
       const mockProfileNameMultiWords = "foo bar baz";
-      const mockInput = getMockProfileData(mockProfileNameMultiWords, mockProfileData);
+      const mockInput = getMockProfileContent(mockProfileNameMultiWords, mockProfileData);
       expect(parseIni(mockInput)).toStrictEqual({
         [mockProfileNameMultiWords]: mockProfileData,
       });
@@ -58,9 +67,19 @@ describe(parseIni.name, () => {
 
     it("returns data for profile containing multiple entries", () => {
       const mockProfileDataMultipleEntries = { key1: "value1", key2: "value2", key3: "value3" };
-      const mockInput = getMockProfileData(mockProfileName, mockProfileDataMultipleEntries);
+      const mockInput = getMockProfileContent(mockProfileName, mockProfileDataMultipleEntries);
       expect(parseIni(mockInput)).toStrictEqual({
         [mockProfileName]: mockProfileDataMultipleEntries,
+      });
+    });
+
+    it.only("returns data from main settings, and not subsettings", () => {
+      const mockMainSettings = { key: "value1" };
+      const mockProfileDataWithSubSettings = { ...mockMainSettings, "sub-settings-name": { key: "value2" } };
+      const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithSubSettings);
+      console.log({ mockInput });
+      expect(parseIni(mockInput)).toStrictEqual({
+        [mockProfileName]: mockMainSettings,
       });
     });
   });
