@@ -1,7 +1,7 @@
 /**
  * @public
  */
-export type IniSection = Record<string, string | undefined>;
+export type IniSection = Record<string, string | Record<string, string> | undefined>;
 
 /**
  * @public
