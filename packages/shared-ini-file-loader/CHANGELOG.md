@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.13
+
+### Patch Changes
+
+- 60e88afe: Read values from main settings when parsing INI files
+
 ## 2.0.12
 
 ### Patch Changes
