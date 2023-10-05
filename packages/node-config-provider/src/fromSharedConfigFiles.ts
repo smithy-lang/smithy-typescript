@@ -11,7 +11,7 @@ export interface SharedConfigInit extends SourceProfileInit {
   preferredFile?: "config" | "credentials";
 }
 
-export type GetterFromConfig<T> = (profile: Profile, configFile: ParsedIniData) => T | undefined;
+export type GetterFromConfig<T> = (profile: Profile, configFile?: ParsedIniData) => T | undefined;
 
 /**
  * Get config value from the shared config files with inferred profile name.
