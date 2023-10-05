@@ -1,6 +1,6 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 import { getProfileName, loadSharedConfigFiles, SourceProfileInit } from "@smithy/shared-ini-file-loader";
-import { Profile, Provider } from "@smithy/types";
+import { ParsedIniData, Profile, Provider } from "@smithy/types";
 
 export interface SharedConfigInit extends SourceProfileInit {
   /**
@@ -11,7 +11,7 @@ export interface SharedConfigInit extends SourceProfileInit {
   preferredFile?: "config" | "credentials";
 }
 
-export type GetterFromConfig<T> = (profile: Profile) => T | undefined;
+export type GetterFromConfig<T> = (profile: Profile, configFile: ParsedIniData) => T | undefined;
 
 /**
  * Get config value from the shared config files with inferred profile name.
@@ -31,7 +31,8 @@ export const fromSharedConfigFiles = <T = string>(
       : { ...profileFromConfig, ...profileFromCredentials };
 
   try {
-    const configValue = configSelector(mergedProfile);
+    const cfgFile = preferredFile === "config" ? configFile : credentialsFile;
+    const configValue = configSelector(mergedProfile, cfgFile);
     if (configValue === undefined) {
       throw new Error();
     }
