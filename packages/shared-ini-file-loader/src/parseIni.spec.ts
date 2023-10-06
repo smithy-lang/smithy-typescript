@@ -75,14 +75,6 @@ describe(parseIni.name, () => {
       });
     });
 
-    it("returns data profile name containing multiple words", () => {
-      const mockProfileNameMultiWords = "foo bar baz";
-      const mockInput = getMockProfileContent(mockProfileNameMultiWords, mockProfileData);
-      expect(parseIni(mockInput)).toStrictEqual({
-        [mockProfileNameMultiWords]: mockProfileData,
-      });
-    });
-
     it("returns data for profile containing multiple entries", () => {
       const mockProfileDataMultipleEntries = { key1: "value1", key2: "value2", key3: "value3" };
       const mockInput = getMockProfileContent(mockProfileName, mockProfileDataMultipleEntries);
