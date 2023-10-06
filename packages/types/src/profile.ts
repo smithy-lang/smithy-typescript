@@ -1,6 +1,15 @@
 /**
  * @public
  */
+export enum IniSectionType {
+  PROFILE = "profile",
+  SSO_SESSION = "sso-session",
+  SERVICES = "services",
+}
+
+/**
+ * @public
+ */
 export type IniSection = Record<string, string | undefined>;
 
 /**

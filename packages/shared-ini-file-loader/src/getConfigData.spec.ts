@@ -1,23 +1,26 @@
-import { getProfileData } from "./getProfileData";
+import { IniSectionType } from "@smithy/types";
 
-describe(getProfileData.name, () => {
+import { getConfigData } from "./getConfigData";
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
+
+describe(getConfigData.name, () => {
   it("returns empty for no data", () => {
-    expect(getProfileData({})).toStrictEqual({});
+    expect(getConfigData({})).toStrictEqual({});
   });
 
   it("returns default profile if present", () => {
     const mockInput = { default: { key: "value" } };
-    expect(getProfileData(mockInput)).toStrictEqual(mockInput);
+    expect(getConfigData(mockInput)).toStrictEqual(mockInput);
   });
 
   it("skips profiles without prefix profile", () => {
     const mockInput = { test: { key: "value" } };
-    expect(getProfileData(mockInput)).toStrictEqual({});
+    expect(getConfigData(mockInput)).toStrictEqual({});
   });
 
-  it("skips profiles with different prefix", () => {
-    const mockInput = { "not-profile test": { key: "value" } };
-    expect(getProfileData(mockInput)).toStrictEqual({});
+  it.each([IniSectionType.SSO_SESSION, IniSectionType.SERVICES])("includes sections with '%s' prefix", (prefix) => {
+    const mockInput = { [[prefix, "test"].join(CONFIG_PREFIX_SEPARATOR)]: { key: "value" } };
+    expect(getConfigData(mockInput)).toStrictEqual(mockInput);
   });
 
   describe("normalizes profile names", () => {
@@ -30,38 +33,41 @@ describe(getProfileData.name, () => {
       profileNames.reduce((acc, profileName) => ({ ...acc, [profileName]: getMockProfileData(profileName) }), {});
 
     const getMockInput = (mockOutput: Record<string, Record<string, string>>) =>
-      Object.entries(mockOutput).reduce((acc, [key, value]) => ({ ...acc, [`profile ${key}`]: value }), {});
+      Object.entries(mockOutput).reduce(
+        (acc, [key, value]) => ({ ...acc, [[IniSectionType.PROFILE, key].join(CONFIG_PREFIX_SEPARATOR)]: value }),
+        {}
+      );
 
     it("single profile", () => {
       const mockOutput = getMockOutput(["one"]);
       const mockInput = getMockInput(mockOutput);
-      expect(getProfileData(mockInput)).toStrictEqual(mockOutput);
+      expect(getConfigData(mockInput)).toStrictEqual(mockOutput);
     });
 
     it("two profiles", () => {
       const mockOutput = getMockOutput(["one", "two"]);
       const mockInput = getMockInput(mockOutput);
-      expect(getProfileData(mockInput)).toStrictEqual(mockOutput);
+      expect(getConfigData(mockInput)).toStrictEqual(mockOutput);
     });
 
     it("three profiles", () => {
       const mockOutput = getMockOutput(["one", "two", "three"]);
       const mockInput = getMockInput(mockOutput);
-      expect(getProfileData(mockInput)).toStrictEqual(mockOutput);
+      expect(getConfigData(mockInput)).toStrictEqual(mockOutput);
     });
 
     it("with default", () => {
       const defaultInput = { default: { key: "value" } };
       const mockOutput = getMockOutput(["one"]);
       const mockInput = getMockInput(mockOutput);
-      expect(getProfileData({ ...defaultInput, ...mockInput })).toStrictEqual({ ...defaultInput, ...mockOutput });
+      expect(getConfigData({ ...defaultInput, ...mockInput })).toStrictEqual({ ...defaultInput, ...mockOutput });
     });
 
     it("with profileName without prefix", () => {
       const profileWithPrefix = { test: { key: "value" } };
       const mockOutput = getMockOutput(["one"]);
       const mockInput = getMockInput(mockOutput);
-      expect(getProfileData({ ...profileWithPrefix, ...mockInput })).toStrictEqual(mockOutput);
+      expect(getConfigData({ ...profileWithPrefix, ...mockInput })).toStrictEqual(mockOutput);
     });
   });
 });

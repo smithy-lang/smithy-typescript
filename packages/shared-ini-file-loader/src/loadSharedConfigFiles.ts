@@ -1,8 +1,8 @@
 import { SharedConfigFiles } from "@smithy/types";
 
+import { getConfigData } from "./getConfigData";
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getCredentialsFilepath } from "./getCredentialsFilepath";
-import { getProfileData } from "./getProfileData";
 import { parseIni } from "./parseIni";
 import { slurpFile } from "./slurpFile";
 
@@ -40,7 +40,7 @@ export const loadSharedConfigFiles = async (init: SharedConfigInit = {}): Promis
       ignoreCache: init.ignoreCache,
     })
       .then(parseIni)
-      .then(getProfileData)
+      .then(getConfigData)
       .catch(swallowError),
     slurpFile(filepath, {
       ignoreCache: init.ignoreCache,

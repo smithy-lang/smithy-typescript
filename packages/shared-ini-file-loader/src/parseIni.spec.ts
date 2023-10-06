@@ -1,3 +1,5 @@
+import { IniSectionType } from "@smithy/types";
+
 import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 import { parseIni } from "./parseIni";
 
@@ -44,12 +46,17 @@ describe(parseIni.name, () => {
       });
     });
 
-    it("returns data for one profile", () => {
-      const mockInput = getMockProfileContent(mockProfileName, mockProfileData);
-      expect(parseIni(mockInput)).toStrictEqual({
-        [mockProfileName]: mockProfileData,
-      });
-    });
+    it.each(Object.values(IniSectionType))(
+      "returns data for section '%s' with separator",
+      (sectionType: IniSectionType) => {
+        const mockSectionName = "mock_section_name";
+        const mockSectionFullName = [sectionType, mockSectionName].join(" ");
+        const mockInput = getMockProfileContent(mockSectionFullName, mockProfileData);
+        expect(parseIni(mockInput)).toStrictEqual({
+          [[sectionType, mockSectionName].join(CONFIG_PREFIX_SEPARATOR)]: mockProfileData,
+        });
+      }
+    );
 
     it("returns data for two profiles", () => {
       const mockProfile1 = getMockProfileContent(mockProfileName, mockProfileData);
@@ -72,14 +79,6 @@ describe(parseIni.name, () => {
       });
       expect(parseIni(`[${mockProfileNameWithoutData}]\n${mockInput}`)).toStrictEqual({
         [mockProfileName]: mockProfileData,
-      });
-    });
-
-    it("returns data profile name containing multiple words", () => {
-      const mockProfileNameMultiWords = "foo bar baz";
-      const mockInput = getMockProfileContent(mockProfileNameMultiWords, mockProfileData);
-      expect(parseIni(mockInput)).toStrictEqual({
-        [mockProfileNameMultiWords]: mockProfileData,
       });
     });
 
