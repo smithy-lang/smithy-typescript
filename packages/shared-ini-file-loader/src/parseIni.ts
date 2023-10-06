@@ -23,10 +23,9 @@ export const parseIni = (iniData: string): ParsedIniData => {
       const matches = prefixKeyRegex.exec(sectionName);
       if (matches) {
         const [, prefix, , name] = matches;
+        // Add prefix, if the section name starts with `profile`, `sso-session` or `services`.
         if (Object.values(IniSectionType).includes(prefix as IniSectionType)) {
-          // Add prefix, only if the section name does not start with `profile`.
-          // Else, use the section name as is.
-          currentSection = prefix === IniSectionType.PROFILE ? name : [prefix, name].join(CONFIG_PREFIX_SEPARATOR);
+          currentSection = [prefix, name].join(CONFIG_PREFIX_SEPARATOR);
         }
       } else {
         // If the section name does not match the regex, use the section name as is.
