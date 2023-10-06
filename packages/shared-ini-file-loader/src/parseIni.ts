@@ -1,4 +1,4 @@
-import { ParsedIniData } from "@smithy/types";
+import { IniSectionType, ParsedIniData } from "@smithy/types";
 
 import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
@@ -24,7 +24,7 @@ export const parseIni = (iniData: string): ParsedIniData => {
       if (matches) {
         const [, prefix, , name] = matches;
         // Add prefix, if the section name starts with `profile`, `sso-session` or `services`.
-        if (["profile", "sso-session", "services"].includes(prefix)) {
+        if (Object.values(IniSectionType).includes(prefix as IniSectionType)) {
           currentSection = [prefix, name].join(CONFIG_PREFIX_SEPARATOR);
         }
       } else {
