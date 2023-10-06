@@ -2,7 +2,7 @@ import { IniSectionType, ParsedIniData } from "@smithy/types";
 
 import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
-const prefixKeyRegex = /^([\w]+)\s(["'])?([\w-]+)\2$/;
+const prefixKeyRegex = /^([\w-]+)\s(["'])?([\w-]+)\2$/;
 const profileNameBlockList = ["__proto__", "profile __proto__"];
 
 export const parseIni = (iniData: string): ParsedIniData => {
