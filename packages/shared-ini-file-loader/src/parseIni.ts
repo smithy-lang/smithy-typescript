@@ -1,5 +1,7 @@
 import { ParsedIniData } from "@smithy/types";
 
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
+
 const profileNameBlockList = ["__proto__", "profile __proto__"];
 
 export const parseIni = (iniData: string): ParsedIniData => {
@@ -28,7 +30,7 @@ export const parseIni = (iniData: string): ParsedIniData => {
           currentSubSection = name;
         } else {
           map[currentSection] = map[currentSection] || {};
-          const key = currentSubSection ? `${currentSubSection}.${name}` : name;
+          const key = currentSubSection ? [currentSubSection, name].join(CONFIG_PREFIX_SEPARATOR) : name;
           map[currentSection][key] = value;
         }
       }
