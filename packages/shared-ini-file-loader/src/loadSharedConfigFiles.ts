@@ -30,6 +30,8 @@ export interface SharedConfigInit {
 
 const swallowError = () => ({});
 
+export const CONFIG_PREFIX_SEPARATOR = ".";
+
 export const loadSharedConfigFiles = async (init: SharedConfigInit = {}): Promise<SharedConfigFiles> => {
   const { filepath = getCredentialsFilepath(), configFilepath = getConfigFilepath() } = init;
 

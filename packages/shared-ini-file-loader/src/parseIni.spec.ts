@@ -1,3 +1,4 @@
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 import { parseIni } from "./parseIni";
 
 describe(parseIni.name, () => {
@@ -99,7 +100,7 @@ describe(parseIni.name, () => {
       expect(parseIni(mockInput)).toStrictEqual({
         [mockProfileName]: {
           key: "value",
-          "subSection.subKey": "subValue",
+          [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subValue",
         },
       });
 
@@ -112,11 +113,11 @@ describe(parseIni.name, () => {
       expect(parseIni(`${mockInput}${mockInput2}`)).toStrictEqual({
         [mockProfileName]: {
           key: "value",
-          "subSection.subKey": "subValue",
+          [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subValue",
         },
         [mockProfileName2]: {
           key: "value2",
-          "subSection.subKey": "subValue2",
+          [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subValue2",
         },
       });
     });
