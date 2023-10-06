@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [d6b4c090]
+  - @smithy/types@2.3.5
+
 ## 3.0.6
 
 ### Patch Changes

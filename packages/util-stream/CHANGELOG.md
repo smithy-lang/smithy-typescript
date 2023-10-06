@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.15
+
+### Patch Changes
+
+- Updated dependencies [d6b4c090]
+  - @smithy/types@2.3.5
+  - @smithy/fetch-http-handler@2.2.2
+  - @smithy/node-http-handler@2.1.7
+
 ## 2.0.14
 
 ### Patch Changes

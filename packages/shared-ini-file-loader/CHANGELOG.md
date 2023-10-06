@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- d6b4c090: Populate sso-session and services sections when loading config files
+
+### Patch Changes
+
+- 719777c7: Export CONFIG_PREFIX_SEPARATOR from loadSharedConfigFiles
+- Updated dependencies [d6b4c090]
+  - @smithy/types@2.3.5
+
 ## 2.1.0
 
 ### Minor Changes

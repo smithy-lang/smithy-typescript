@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.5
+
+### Patch Changes
+
+- d6b4c090: Add enum IniSectionType
+
 ## 2.3.4
 
 ### Patch Changes
