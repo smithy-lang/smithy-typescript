@@ -1,4 +1,7 @@
+import { IniSectionType } from "@smithy/types";
+
 import { getSsoSessionData } from "./getSsoSessionData";
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
 describe(getSsoSessionData.name, () => {
   it("returns empty for no data", () => {
@@ -25,7 +28,10 @@ describe(getSsoSessionData.name, () => {
       ssoSessionNames.reduce((acc, profileName) => ({ ...acc, [profileName]: getMockSsoSessionData(profileName) }), {});
 
     const getMockInput = (mockOutput: { [key: string]: { [key: string]: string } }) =>
-      Object.entries(mockOutput).reduce((acc, [key, value]) => ({ ...acc, [`sso-session ${key}`]: value }), {});
+      Object.entries(mockOutput).reduce(
+        (acc, [key, value]) => ({ ...acc, [[IniSectionType.SSO_SESSION, key].join(CONFIG_PREFIX_SEPARATOR)]: value }),
+        {}
+      );
 
     it("single sso-session section", () => {
       const mockOutput = getMockOutput(["one"]);

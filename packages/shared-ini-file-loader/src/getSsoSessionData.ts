@@ -1,6 +1,6 @@
-import { ParsedIniData } from "@smithy/types";
+import { IniSectionType, ParsedIniData } from "@smithy/types";
 
-const ssoSessionKeyRegex = /^sso-session\s(["'])?([^\1]+)\1$/;
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
 /**
  * Returns the sso-session data from parsed ini data by reading
@@ -9,6 +9,6 @@ const ssoSessionKeyRegex = /^sso-session\s(["'])?([^\1]+)\1$/;
 export const getSsoSessionData = (data: ParsedIniData): ParsedIniData =>
   Object.entries(data)
     // filter out non sso-session keys
-    .filter(([key]) => ssoSessionKeyRegex.test(key))
+    .filter(([key]) => key.startsWith(IniSectionType.SSO_SESSION))
     // replace sso-session key with sso-session name
-    .reduce((acc, [key, value]) => ({ ...acc, [ssoSessionKeyRegex.exec(key)![2]]: value }), {});
+    .reduce((acc, [key, value]) => ({ ...acc, [key.split(CONFIG_PREFIX_SEPARATOR)[1]]: value }), {});
