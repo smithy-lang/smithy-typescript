@@ -1,6 +1,6 @@
-import { ParsedIniData } from "@smithy/types";
+import { IniSectionType, ParsedIniData } from "@smithy/types";
 
-const profileKeyRegex = /^profile\s(["'])?([^\1]+)\1$/;
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
 /**
  * Returns the profile data from parsed ini data.
@@ -10,9 +10,9 @@ const profileKeyRegex = /^profile\s(["'])?([^\1]+)\1$/;
 export const getProfileData = (data: ParsedIniData): ParsedIniData =>
   Object.entries(data)
     // filter out non-profile keys
-    .filter(([key]) => profileKeyRegex.test(key))
+    .filter(([key]) => key.startsWith(IniSectionType.PROFILE))
     // replace profile key with profile name
-    .reduce((acc, [key, value]) => ({ ...acc, [profileKeyRegex.exec(key)![2]]: value }), {
+    .reduce((acc, [key, value]) => ({ ...acc, [key.split(CONFIG_PREFIX_SEPARATOR)[1]]: value }), {
       // Populate default profile, if present.
       ...(data.default && { default: data.default }),
     });

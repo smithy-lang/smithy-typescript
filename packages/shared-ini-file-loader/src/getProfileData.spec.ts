@@ -1,4 +1,7 @@
+import { IniSectionType } from "@smithy/types";
+
 import { getProfileData } from "./getProfileData";
+import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
 describe(getProfileData.name, () => {
   it("returns empty for no data", () => {
@@ -30,7 +33,10 @@ describe(getProfileData.name, () => {
       profileNames.reduce((acc, profileName) => ({ ...acc, [profileName]: getMockProfileData(profileName) }), {});
 
     const getMockInput = (mockOutput: Record<string, Record<string, string>>) =>
-      Object.entries(mockOutput).reduce((acc, [key, value]) => ({ ...acc, [`profile ${key}`]: value }), {});
+      Object.entries(mockOutput).reduce(
+        (acc, [key, value]) => ({ ...acc, [[IniSectionType.PROFILE, key].join(CONFIG_PREFIX_SEPARATOR)]: value }),
+        {}
+      );
 
     it("single profile", () => {
       const mockOutput = getMockOutput(["one"]);
