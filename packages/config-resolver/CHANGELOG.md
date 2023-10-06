@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [7b568c39]
+  - @smithy/node-config-provider@2.1.0
+
 ## 2.0.12
 
 ### Patch Changes

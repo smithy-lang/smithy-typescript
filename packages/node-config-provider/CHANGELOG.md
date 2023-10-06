@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 7b568c39: Pass configuration file as second parameter to configSelector
+
+### Patch Changes
+
+- Updated dependencies [aa86b3fe]
+  - @smithy/shared-ini-file-loader@2.1.0
+
 ## 2.0.14
 
 ### Patch Changes

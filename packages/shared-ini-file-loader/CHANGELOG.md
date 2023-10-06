@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- aa86b3fe: Populate subsection using dot separator in section key when parsing INI files
+
 ## 2.0.13
 
 ### Patch Changes
