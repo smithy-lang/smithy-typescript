@@ -28,5 +28,5 @@ export const getConfigData = (data: ParsedIniData): ParsedIniData =>
       {
         // Populate default profile, if present.
         ...(data.default && { default: data.default }),
-      }
+      } as ParsedIniData
     );
