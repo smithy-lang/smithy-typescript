@@ -26,10 +26,10 @@ export const parseIni = (iniData: string): ParsedIniData => {
         ];
         if (value === "") {
           currentSubSection = name;
-        } else if (currentSubSection === undefined) {
-          // ToDo: populate subsection in future PR, when IniSection is updated to support subsections.
+        } else {
           map[currentSection] = map[currentSection] || {};
-          map[currentSection][name] = value;
+          const key = currentSubSection ? `${currentSubSection}.${name}` : name;
+          map[currentSection][key] = value;
         }
       }
     }
