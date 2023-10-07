@@ -26,7 +26,7 @@ class TestProtocolGenerator extends HttpBindingProtocolGenerator {
 
     @Override
     public ShapeId getProtocol() {
-        return ShapeId.from("example.weather#fakeProtocol");
+        return ShapeId.from("common#fakeProtocol");
     }
 
     @Override

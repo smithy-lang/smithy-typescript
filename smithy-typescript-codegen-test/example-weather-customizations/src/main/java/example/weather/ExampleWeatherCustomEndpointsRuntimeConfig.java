@@ -15,6 +15,8 @@ import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ToShapeId;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.Dependency;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
@@ -29,7 +31,7 @@ import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
-public final class GenericTestAddCustomEndpointsRuntimeConfig implements TypeScriptIntegration {
+public final class ExampleWeatherCustomEndpointsRuntimeConfig implements TypeScriptIntegration {
     public static final String GENERIC_TEST_DIR = Paths.get(".", CodegenUtils.SOURCE_FOLDER, "generic").toString();
     public static final String INDEX_MODULE = GENERIC_TEST_DIR + "/index";
     public static final String INDEX_FILE = INDEX_MODULE + ".ts";
@@ -37,7 +39,8 @@ public final class GenericTestAddCustomEndpointsRuntimeConfig implements TypeScr
     public static final String getClientFile(ShapeId service) {
         return Paths.get(".", CodegenUtils.SOURCE_FOLDER, service.getName() + "Client.ts").toString();
     }
-
+    public static final ShapeId EXAMPLE_WEATHER_SERVICE_ID = ShapeId.from("example.weather#Weather");
+    
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return List.of(
@@ -54,10 +57,12 @@ public final class GenericTestAddCustomEndpointsRuntimeConfig implements TypeScr
                         .namespace(INDEX_MODULE, "/")
                         .name("resolveGenericCustomEndpointsConfig")
                         .build())
+                .servicePredicate((m, s) -> isExampleWeatherService(s))
                 .build(),
             RuntimeClientPlugin.builder()
                 .withConventions(
                     TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", Convention.HAS_CONFIG)
+                .servicePredicate((m, s) -> isExampleWeatherService(s))
                 .build());
     }
 
@@ -67,12 +72,18 @@ public final class GenericTestAddCustomEndpointsRuntimeConfig implements TypeScr
             return;
         }
 
+        if (!isExampleWeatherService(codegenContext.settings().getService())) {
+            return;
+        }
+
         codegenContext.writerDelegator().useFileWriter(INDEX_FILE, w -> {
             w.write("export * from \"./customEndpoints\";");
         });
 
         codegenContext.writerDelegator().useFileWriter(getClientFile(codegenContext.settings().getService()), w -> {
-            w.addImport("EndpointParameters", null, EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
+            if (codegenContext.settings().getService(codegenContext.model()).hasTrait(EndpointRuleSetTrait.ID)) {
+                w.addImport("EndpointParameters", null, EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
+            }
         });
 
         codegenContext.writerDelegator().useFileWriter(ADD_CUSTOM_ENDPOINTS_FILE, w -> {
@@ -101,5 +112,9 @@ public final class GenericTestAddCustomEndpointsRuntimeConfig implements TypeScr
                 }
                 """);
         });
+    }
+
+    private static boolean isExampleWeatherService(ToShapeId toShapeId) {
+        return toShapeId.toShapeId().equals(EXAMPLE_WEATHER_SERVICE_ID);
     }
 }

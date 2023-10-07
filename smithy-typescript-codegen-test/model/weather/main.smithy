@@ -6,17 +6,15 @@ use aws.auth#sigv4
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 use smithy.waiters#waitable
-
-@authDefinition
-@trait
-structure customAuth {}
+use common#fakeProtocol
+use common#fakeAuth
 
 /// Provides weather forecasts.
 @fakeProtocol
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @httpBearerAuth
 @sigv4(name: "weather")
-@customAuth
+@fakeAuth
 @auth([sigv4])
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
@@ -35,8 +33,8 @@ service Weather {
         OnlyHttpApiKeyAndBearerAuthReversed
         OnlySigv4Auth
         OnlySigv4AuthOptional
-        OnlyCustomAuth
-        OnlyCustomAuthOptional
+        OnlyFakeAuth
+        OnlyFakeAuthOptional
         SameAsService
     ]
 }
@@ -76,14 +74,14 @@ operation OnlyHttpBearerAuthOptional {}
 @optionalAuth
 operation OnlySigv4AuthOptional {}
 
-@http(method: "GET", uri: "/OnlyCustomAuth")
-@auth([customAuth])
-operation OnlyCustomAuth {}
+@http(method: "GET", uri: "/OnlyFakeAuth")
+@auth([fakeAuth])
+operation OnlyFakeAuth {}
 
-@http(method: "GET", uri: "/OnlyCustomAuthOptional")
-@auth([customAuth])
+@http(method: "GET", uri: "/OnlyFakeAuthOptional")
+@auth([fakeAuth])
 @optionalAuth
-operation OnlyCustomAuthOptional {}
+operation OnlyFakeAuthOptional {}
 
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
@@ -126,7 +124,7 @@ apply GetCity @httpRequestTests(
         {
             id: "WriteGetCityAssertions"
             documentation: "Does something"
-            protocol: "example.weather#fakeProtocol"
+            protocol: "common#fakeProtocol"
             method: "GET"
             uri: "/cities/123"
             body: ""
@@ -140,7 +138,7 @@ apply GetCity @httpResponseTests(
         {
             id: "WriteGetCityResponseAssertions"
             documentation: "Does something"
-            protocol: "example.weather#fakeProtocol"
+            protocol: "common#fakeProtocol"
             code: 200
             body: """
             {
@@ -234,7 +232,7 @@ apply NoSuchResource @httpResponseTests(
         {
             id: "WriteNoSuchResourceAssertions"
             documentation: "Does something"
-            protocol: "example.weather#fakeProtocol"
+            protocol: "common#fakeProtocol"
             code: 404
             body: """
             {
@@ -279,7 +277,7 @@ apply ListCities @httpRequestTests(
         {
             id: "WriteListCitiesAssertions"
             documentation: "Does something"
-            protocol: "example.weather#fakeProtocol"
+            protocol: "common#fakeProtocol"
             method: "GET"
             uri: "/cities"
             body: ""
@@ -461,11 +459,6 @@ structure Message {
     message: String
     author: String
 }
-
-// Define a fake protocol trait for use.
-@trait
-@protocolDefinition
-structure fakeProtocol {}
 
 apply Weather @smithy.rules#endpointRuleSet({
   "version": "1.3",
