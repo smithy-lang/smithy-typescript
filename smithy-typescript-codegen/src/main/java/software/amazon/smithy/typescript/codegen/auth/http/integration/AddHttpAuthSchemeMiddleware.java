@@ -220,17 +220,18 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
              */
             export const resolveHttpAuthSchemeConfig = (config: HttpAuthSchemeInputConfig): \
             HttpAuthSchemeResolvedConfig => {""", "};", () -> {
-                w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-                w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
                 w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("memoizeIdentityProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("isIdentityExpired", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("doesIdentityRequireRefresh", null,
-                    TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                 w.addImport("DefaultIdentityProviderConfig", null,
                     TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                 for (ConfigField configField : configFields.values()) {
                     if (configField.type().equals(ConfigField.Type.MAIN)) {
+                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addImport("memoizeIdentityProvider", null,
+                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addImport("isIdentityExpired", null,
+                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addImport("doesIdentityRequireRefresh", null,
+                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                         w.write("""
                             const $L = memoizeIdentityProvider(config.$L, isIdentityExpired, \
                             doesIdentityRequireRefresh);""",
@@ -238,6 +239,8 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                             configField.name());
                     }
                     if (configField.type().equals(ConfigField.Type.AUXILIARY)) {
+                        w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
+                        w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
                         w.write("const $L = config.$L ? normalizeProvider(config.$L) : undefined;",
                             configField.name(),
                             configField.name(),
