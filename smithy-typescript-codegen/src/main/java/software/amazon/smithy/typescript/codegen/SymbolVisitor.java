@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -486,13 +487,22 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                                     FileManifest fileManifest) {
             TypeScriptWriter writer = new TypeScriptWriter("");
             String modelPrefix = String.join("/", ".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX);
-            shapes.stream()
+            List<String> collectedModelNamespaces = shapes.stream()
                     .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                     .filter(namespace -> namespace.startsWith(modelPrefix))
                     .distinct()
                     .sorted(Comparator.naturalOrder())
                     .map(namespace -> namespace.replaceFirst(Matcher.quoteReplacement(modelPrefix), "."))
-                    .forEach(namespace -> writer.write("export * from $S;", namespace));
+                    .toList();
+
+            // Omit model index if no models_* files are present
+            if (collectedModelNamespaces.isEmpty()) {
+                return;
+            }
+
+            for (String namespace : collectedModelNamespaces) {
+                writer.write("export * from $S;", namespace);
+            }
             fileManifest.writeFile(
                     Paths.get(CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX, "index.ts").toString(),
                     writer.toString());
