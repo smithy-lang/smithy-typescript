@@ -1,6 +1,7 @@
 import { endpointMiddlewareOptions } from "@smithy/middleware-endpoint";
-import { MetadataBearer, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
+import { HandlerExecutionContext, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
+import { HttpAuthSchemeParameters } from "../HttpAuthSchemeProvider";
 import { httpAuthSchemeMiddleware, PreviouslyResolved } from "./httpAuthSchemeMiddleware";
 
 /**
@@ -19,11 +20,13 @@ export const httpAuthSchemeMiddlewareOptions: SerializeHandlerOptions & Relative
  * @internal
  */
 export const getHttpAuthSchemePlugin = <
-  Input extends Record<string, unknown> = Record<string, unknown>,
-  Output extends MetadataBearer = MetadataBearer
+  TConfig extends object,
+  TContext extends HandlerExecutionContext,
+  TParameters extends HttpAuthSchemeParameters,
+  TInput extends object
 >(
-  config: PreviouslyResolved
-): Pluggable<Input, Output> => ({
+  config: TConfig & PreviouslyResolved<TConfig, TContext, TParameters, TInput>
+): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
     clientStack.addRelativeTo(httpAuthSchemeMiddleware(config), httpAuthSchemeMiddlewareOptions);
   },
