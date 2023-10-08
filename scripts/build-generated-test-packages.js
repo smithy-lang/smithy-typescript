@@ -32,6 +32,7 @@ const weatherSsdkDir = path.join(
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
+    console.log(`Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\``);
     // Yarn detects that the generated TypeScript package is nested beneath the
     // top-level package.json. Adding an empty lock file allows it to be treated
     // as its own package.
