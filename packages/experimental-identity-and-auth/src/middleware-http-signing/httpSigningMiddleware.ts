@@ -9,7 +9,7 @@ import {
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
-import { SelectedHttpAuthScheme } from "../HttpAuthScheme";
+import { SelectedHttpAuthScheme } from "../types/auth/HttpAuthScheme";
 
 /**
  * @internal

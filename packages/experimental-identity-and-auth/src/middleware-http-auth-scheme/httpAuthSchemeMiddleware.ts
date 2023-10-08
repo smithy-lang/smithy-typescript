@@ -9,13 +9,13 @@ import {
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
-import { HttpAuthScheme, HttpAuthSchemeId, SelectedHttpAuthScheme } from "../HttpAuthScheme";
+import { HttpAuthScheme, HttpAuthSchemeId, SelectedHttpAuthScheme } from "../types/auth/HttpAuthScheme";
 import {
   HttpAuthSchemeParameters,
   HttpAuthSchemeParametersProvider,
   HttpAuthSchemeProvider,
-} from "../HttpAuthSchemeProvider";
-import { IdentityProviderConfig } from "../IdentityProviderConfig";
+} from "../types/auth/HttpAuthSchemeProvider";
+import { IdentityProviderConfig } from "../types/identity/IdentityProviderConfig";
 
 /**
  * @internal

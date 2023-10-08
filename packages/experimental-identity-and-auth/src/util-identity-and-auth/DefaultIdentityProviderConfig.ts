@@ -1,19 +1,7 @@
 import { Identity, IdentityProvider } from "@smithy/types";
 
-import { HttpAuthSchemeId } from "./HttpAuthScheme";
-
-/**
- * Interface to get an IdentityProvider for a specified HttpAuthScheme
- * @internal
- */
-export interface IdentityProviderConfig {
-  /**
-   * Get the IdentityProvider for a specified HttpAuthScheme.
-   * @param schemeId schemeId of the HttpAuthScheme
-   * @returns IdentityProvider or undefined if HttpAuthScheme is not found
-   */
-  getIdentityProvider(schemeId: HttpAuthSchemeId): IdentityProvider<Identity> | undefined;
-}
+import { HttpAuthSchemeId } from "../types/auth/HttpAuthScheme";
+import { IdentityProviderConfig } from "../types/identity/IdentityProviderConfig";
 
 /**
  * Default implementation of IdentityProviderConfig

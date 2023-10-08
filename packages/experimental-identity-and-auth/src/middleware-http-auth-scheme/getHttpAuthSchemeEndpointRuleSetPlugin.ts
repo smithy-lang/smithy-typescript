@@ -1,7 +1,7 @@
 import { endpointMiddlewareOptions } from "@smithy/middleware-endpoint";
 import { HandlerExecutionContext, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
-import { HttpAuthSchemeParameters } from "../HttpAuthSchemeProvider";
+import { HttpAuthSchemeParameters } from "../types/auth/HttpAuthSchemeProvider";
 import { httpAuthSchemeMiddleware, PreviouslyResolved } from "./httpAuthSchemeMiddleware";
 
 /**

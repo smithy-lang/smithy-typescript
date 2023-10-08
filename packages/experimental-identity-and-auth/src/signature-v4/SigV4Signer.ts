@@ -2,7 +2,7 @@ import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { AwsCredentialIdentity, HttpRequest as IHttpRequest } from "@smithy/types";
 
-import { HttpSigner } from "./HttpSigner";
+import { HttpSigner } from "../types/auth/HttpSigner";
 
 /**
  * @internal

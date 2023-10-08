@@ -1,7 +1,7 @@
 import { serializerMiddlewareOption } from "@smithy/middleware-serde";
 import { HandlerExecutionContext, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
-import { HttpAuthSchemeParameters } from "../HttpAuthSchemeProvider";
+import { HttpAuthSchemeParameters } from "../types/auth/HttpAuthSchemeProvider";
 import { httpAuthSchemeMiddleware, PreviouslyResolved } from "./httpAuthSchemeMiddleware";
 
 /**

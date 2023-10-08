@@ -1,6 +1,6 @@
 import { HttpRequest, Identity } from "@smithy/types";
 
-import { HttpSigner } from "./HttpSigner";
+import { HttpSigner } from "../types/auth/HttpSigner";
 
 /**
  * Signer for the synthetic @smithy.api#noAuth auth scheme.
