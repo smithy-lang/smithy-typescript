@@ -42,7 +42,7 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     // it can be used in integration tests by other packages within the monorepo.
     await spawnProcess("yarn", ["pack"], { cwd: codegenDir });
     await spawnProcess("rm", ["-rf", packageName], { cwd: nodeModulesDir });
-    await spawnProcess("mkdir", [packageName], { cwd: nodeModulesDir });
+    await spawnProcess("mkdir", ["-p", packageName], { cwd: nodeModulesDir });
     const targetPackageDir = path.join(nodeModulesDir, packageName);
     await spawnProcess("tar", ["-xf", "package.tgz", "-C", targetPackageDir, "--strip-components", "1"], { cwd: codegenDir });
 };
