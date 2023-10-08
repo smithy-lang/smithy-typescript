@@ -29,6 +29,13 @@ const weatherSsdkDir = path.join(
     "typescript-ssdk-codegen"
 )
 
+// TODO(experimentalIdentityAndAuth): add `@aws.auth#sigv4` client for integration tests
+const sigv4ClientDir = path.join(
+    codegenTestDir,
+    "identity-and-auth-sigv4",
+    "typescript-codegen"
+);
+
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
@@ -52,6 +59,8 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
   try {
     await buildAndCopyToNodeModules("weather", weatherClientDir, nodeModulesDir);
     await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): add `@aws.auth#sigv4` client for integration tests
+    await buildAndCopyToNodeModules("@smithy/identity-and-auth-sigv4-service", sigv4ClientDir, nodeModulesDir);
  } catch (e) {
     console.log(e);
     process.exit(1);

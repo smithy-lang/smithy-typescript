@@ -74,6 +74,29 @@
                     }
                 }
             }
+        },
+        "identity-and-auth-sigv4": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["identity.auth.sigv4#Sigv4Service"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-codegen": {
+                    "service": "identity.auth.sigv4#Sigv4Service",
+                    "targetNamespace": "Sigv4Service",
+                    "package": "@smithy/identity-and-auth-sigv4-service",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "experimentalIdentityAndAuth": true
+                }
+            }
         }
     },
     "plugins": {
