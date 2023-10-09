@@ -38,9 +38,11 @@ export const getEndpointFromInstructions = async <
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
   context?: HandlerExecutionContext
 ): Promise<EndpointV2> => {
-  const endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId || "");
-  if (endpointFromConfig) {
-    clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig));
+  if (!clientConfig.endpoint) {
+    const endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId || "");
+    if (endpointFromConfig) {
+      clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig));
+    }
   }
 
   const endpointParams = await resolveParams(commandInput, instructionsSupplier, clientConfig);
