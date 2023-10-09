@@ -1,4 +1,5 @@
 import { LoadedConfigSelectors } from "@smithy/node-config-provider";
+import { CONFIG_PREFIX_SEPARATOR } from "@smithy/shared-ini-file-loader";
 
 const ENV_ENDPOINT_URL = "AWS_ENDPOINT_URL";
 const CONFIG_ENDPOINT_URL = "endpoint_url";
@@ -17,12 +18,15 @@ export const getEndpointUrlConfig = (serviceId: string): LoadedConfigSelectors<s
     return undefined;
   },
 
-  configFileSelector: (profile) => {
+  configFileSelector: (profile, config) => {
     // The value provided by a service-specific parameter from a services definition section
-    // referenced in a profile in the shared configuration file.
-
-    // ToDo: profile is selected one. It does not have access to other 'services' section.
-    // We should call loadSharedConfigFiles directly.
+    if (config && profile.services) {
+      const servicesSection = config[["services", profile.services].join(CONFIG_PREFIX_SEPARATOR)];
+      if (servicesSection) {
+        const endpointUrl = servicesSection[[serviceId, CONFIG_ENDPOINT_URL].join(CONFIG_PREFIX_SEPARATOR)];
+        if (endpointUrl) return endpointUrl;
+      }
+    }
 
     // The value provided by the global parameter from a profile in the shared configuration file.
     const endpointUrl = profile[CONFIG_ENDPOINT_URL];

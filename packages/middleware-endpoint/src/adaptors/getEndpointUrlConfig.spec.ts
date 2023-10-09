@@ -1,3 +1,5 @@
+import { CONFIG_PREFIX_SEPARATOR } from "@smithy/shared-ini-file-loader";
+
 import { getEndpointUrlConfig } from "./getEndpointUrlConfig";
 
 const ENV_ENDPOINT_URL = "AWS_ENDPOINT_URL";
@@ -43,8 +45,25 @@ describe(getEndpointUrlConfig.name, () => {
   });
 
   describe("configFileSelector", () => {
+    const serviceMockEndpoint = `${mockEndpoint}/${serviceId}`;
+
     it("returns service specific endpoint from config file, if available", () => {
-      // ToDo
+      const servicesSectionPrefix = "services";
+      const servicesSectionName = "config-services";
+
+      const profile = {
+        [servicesSectionPrefix]: servicesSectionName,
+        [CONFIG_ENDPOINT_URL]: mockEndpoint,
+      };
+
+      const config = {
+        [serviceId]: profile,
+        [[servicesSectionPrefix, servicesSectionName].join(CONFIG_PREFIX_SEPARATOR)]: {
+          [[serviceId, CONFIG_ENDPOINT_URL].join(CONFIG_PREFIX_SEPARATOR)]: serviceMockEndpoint,
+        },
+      };
+
+      expect(endpointUrlConfig.configFileSelector(profile, config)).toEqual(serviceMockEndpoint);
     });
 
     it("returns endpoint from config file, if available", () => {
