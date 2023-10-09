@@ -37,7 +37,7 @@ describe(getEndpointUrlConfig.name, () => {
       expect(endpointUrlConfig.environmentVariableSelector(process.env)).toEqual(serviceMockEndpoint);
     });
 
-    it("returns endpoint from environment variable, if available", () => {
+    it(`returns endpoint from environment variable ${ENV_ENDPOINT_URL}`, () => {
       expect(endpointUrlConfig.environmentVariableSelector(process.env)).toEqual(mockEndpoint);
     });
 
@@ -48,11 +48,14 @@ describe(getEndpointUrlConfig.name, () => {
   });
 
   describe("configFileSelector", () => {
-    const serviceMockEndpoint = `${mockEndpoint}/${serviceId}`;
-
-    it("returns service specific endpoint from config file, if available", () => {
+    it.each([
+      ["foo", "foo"],
+      ["foobar", "foobar"],
+      ["foo bar", "foo_bar"],
+    ])("returns endpoint for '%s' from config file '%s'", (serviceId, serviceConfigId) => {
       const servicesSectionPrefix = "services";
       const servicesSectionName = "config-services";
+      const serviceMockEndpoint = `${mockEndpoint}/${serviceConfigId}`;
 
       const profile = {
         [servicesSectionPrefix]: servicesSectionName,
@@ -62,14 +65,15 @@ describe(getEndpointUrlConfig.name, () => {
       const config = {
         [serviceId]: profile,
         [[servicesSectionPrefix, servicesSectionName].join(CONFIG_PREFIX_SEPARATOR)]: {
-          [[serviceId, CONFIG_ENDPOINT_URL].join(CONFIG_PREFIX_SEPARATOR)]: serviceMockEndpoint,
+          [[serviceConfigId, CONFIG_ENDPOINT_URL].join(CONFIG_PREFIX_SEPARATOR)]: serviceMockEndpoint,
         },
       };
 
+      const endpointUrlConfig = getEndpointUrlConfig(serviceId);
       expect(endpointUrlConfig.configFileSelector(profile, config)).toEqual(serviceMockEndpoint);
     });
 
-    it("returns endpoint from config file, if available", () => {
+    it(`returns endpoint from config ${CONFIG_ENDPOINT_URL}`, () => {
       const profile = { [CONFIG_ENDPOINT_URL]: mockEndpoint };
       expect(endpointUrlConfig.configFileSelector(profile)).toEqual(mockEndpoint);
     });
