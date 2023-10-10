@@ -37,7 +37,7 @@ export class HttpApiKeyAuthSigner implements HttpSigner {
       clonedRequest.query[signingProperties.name] = identity.apiKey;
     } else if (signingProperties.in === HttpApiKeyAuthLocation.HEADER) {
       clonedRequest.headers[signingProperties.name] = signingProperties.scheme
-        ? `$${signingProperties.scheme} $${identity.apiKey}`
+        ? `${signingProperties.scheme} ${identity.apiKey}`
         : identity.apiKey;
     } else {
       throw new Error(
