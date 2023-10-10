@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.0.16
+
+### Patch Changes
+
+- a0957ef1: Fix test script to use `jest`.
+- 58824d85: Remove generic parameter defaults.
+- 6c53a93b: Add different `httpAuthSchemeMiddleware` plugins depending on `@endpointRuleSet`
+- c8c9de77: Await `signer.sign()` in `httpSigningMiddleware`
+- d4df615a: Remove extra `# Change Log from `HttpApiKeyAuthSigner`
+- f38771a3: Scaffold integration tests.
+
 ## 0.0.15
 
 ### Patch Changes
