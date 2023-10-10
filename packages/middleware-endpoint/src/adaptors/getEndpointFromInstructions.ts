@@ -4,6 +4,8 @@ import { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";
 import { EndpointParameterInstructions } from "../types";
 import { createConfigValueProvider } from "./createConfigValueProvider";
+import { getEndpointFromConfig } from "./getEndpointFromConfig";
+import { toEndpointV1 } from "./toEndpointV1";
 
 /**
  * @internal
@@ -36,6 +38,13 @@ export const getEndpointFromInstructions = async <
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
   context?: HandlerExecutionContext
 ): Promise<EndpointV2> => {
+  if (!clientConfig.endpoint) {
+    const endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId || "");
+    if (endpointFromConfig) {
+      clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig));
+    }
+  }
+
   const endpointParams = await resolveParams(commandInput, instructionsSupplier, clientConfig);
 
   if (typeof clientConfig.endpointProvider !== "function") {

@@ -2071,6 +2071,7 @@ __metadata:
   resolution: "@smithy/middleware-endpoint@workspace:packages/middleware-endpoint"
   dependencies:
     "@smithy/middleware-serde": "workspace:^"
+    "@smithy/node-config-provider": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
