@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- f64c4c2d: Read service specific endpoints from env/config
+
 ## 2.0.11
 
 ### Patch Changes

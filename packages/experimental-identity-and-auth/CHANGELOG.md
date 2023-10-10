@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [f64c4c2d]
+  - @smithy/middleware-endpoint@2.1.0
+
 ## 0.0.14
 
 ### Patch Changes

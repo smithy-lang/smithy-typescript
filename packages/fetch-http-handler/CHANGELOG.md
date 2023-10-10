@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.3
+
+### Patch Changes
+
+- 34b7f7b6: set keepalive default to false in fetch handler
+
 ## 2.2.2
 
 ### Patch Changes
