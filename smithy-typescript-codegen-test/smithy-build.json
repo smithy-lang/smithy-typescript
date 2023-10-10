@@ -8,6 +8,12 @@
                     "args": {
                         "tags": ["client-only"]
                     }
+                },
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["example.weather#Weather"]
+                    }
                 }
             ],
             "plugins": {
@@ -25,6 +31,14 @@
             }
         },
         "client-experimental-identity-and-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["example.weather#Weather"]
+                    }
+                }
+            ],
             "plugins": {
                 "typescript-codegen": {
                     "service": "example.weather#Weather",
@@ -40,6 +54,14 @@
             }
         },
         "control-experimental-identity-and-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["example.weather#Weather"]
+                    }
+                }
+            ],
             "plugins": {
                 "typescript-codegen": {
                     "service": "example.weather#Weather",
