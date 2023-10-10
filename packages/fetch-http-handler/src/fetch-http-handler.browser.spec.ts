@@ -28,7 +28,7 @@ describe(FetchHttpHandler.name, () => {
       const requestArgs = winReqSpy.calls.argsFor(0);
       expect(requestArgs[0]).toEqual(expectedUrl);
       expect(requestArgs[1].method).toEqual(mockHttpRequest.method);
-      expect(requestArgs[1].keepalive).toEqual(true);
+      expect(requestArgs[1].keepalive).toEqual(false);
     });
 
     for (const method of ["GET", "HEAD"]) {
@@ -45,15 +45,15 @@ describe(FetchHttpHandler.name, () => {
       });
     }
 
-    it(`sets keepalive to false if explicitly requested`, async () => {
-      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
+    it(`sets keepalive to true if explicitly requested`, async () => {
+      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: true });
       const winReqSpy = spyOn(window, "Request");
 
       const mockHttpRequest = getMockHttpRequest({});
       await fetchHttpHandler.handle(mockHttpRequest);
 
       const requestArgs = winReqSpy.calls.argsFor(0);
-      expect(requestArgs[1].keepalive).toEqual(false);
+      expect(requestArgs[1].keepalive).toEqual(true);
     });
 
     it(`builds querystring if provided`, async () => {
