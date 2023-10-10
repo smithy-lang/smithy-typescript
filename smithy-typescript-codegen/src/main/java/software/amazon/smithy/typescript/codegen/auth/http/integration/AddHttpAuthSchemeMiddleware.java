@@ -5,8 +5,6 @@
 
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
-import static software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention.HAS_MIDDLEWARE;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +15,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
@@ -27,6 +26,7 @@ import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -46,10 +46,18 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     public List<RuntimeClientPlugin> getClientPlugins() {
         return List.of(
             RuntimeClientPlugin.builder()
+                .servicePredicate((m, s) -> s.hasTrait(EndpointRuleSetTrait.ID))
+                .withConventions(
+                    TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
+                    "HttpAuthSchemeEndpointRuleSet",
+                    Convention.HAS_MIDDLEWARE)
+                .build(),
+            RuntimeClientPlugin.builder()
+                .servicePredicate((m, s) -> !s.hasTrait(EndpointRuleSetTrait.ID))
                 .withConventions(
                     TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
                     "HttpAuthScheme",
-                    HAS_MIDDLEWARE)
+                    Convention.HAS_MIDDLEWARE)
                 .build(),
             RuntimeClientPlugin.builder()
                 .inputConfig(Symbol.builder()

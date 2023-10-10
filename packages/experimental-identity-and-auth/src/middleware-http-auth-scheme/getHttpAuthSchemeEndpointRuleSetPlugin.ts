@@ -1,4 +1,4 @@
-import { serializerMiddlewareOption } from "@smithy/middleware-serde";
+import { endpointMiddlewareOptions } from "@smithy/middleware-endpoint";
 import { HandlerExecutionContext, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
 import { HttpAuthSchemeParameters } from "../HttpAuthSchemeProvider";
@@ -7,19 +7,19 @@ import { httpAuthSchemeMiddleware, PreviouslyResolved } from "./httpAuthSchemeMi
 /**
  * @internal
  */
-export const httpAuthSchemeMiddlewareOptions: SerializeHandlerOptions & RelativeMiddlewareOptions = {
+export const httpAuthSchemeEndpointRuleSetMiddlewareOptions: SerializeHandlerOptions & RelativeMiddlewareOptions = {
   step: "serialize",
   tags: ["HTTP_AUTH_SCHEME"],
   name: "httpAuthSchemeMiddleware",
   override: true,
   relation: "before",
-  toMiddleware: serializerMiddlewareOption.name!,
+  toMiddleware: endpointMiddlewareOptions.name!,
 };
 
 /**
  * @internal
  */
-export const getHttpAuthSchemePlugin = <
+export const getHttpAuthSchemeEndpointRuleSetPlugin = <
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
@@ -28,6 +28,6 @@ export const getHttpAuthSchemePlugin = <
   config: TConfig & PreviouslyResolved<TConfig, TContext, TParameters, TInput>
 ): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
-    clientStack.addRelativeTo(httpAuthSchemeMiddleware(config), httpAuthSchemeMiddlewareOptions);
+    clientStack.addRelativeTo(httpAuthSchemeMiddleware(config), httpAuthSchemeEndpointRuleSetMiddlewareOptions);
   },
 });
