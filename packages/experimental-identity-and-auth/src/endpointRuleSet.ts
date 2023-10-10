@@ -13,40 +13,27 @@ import {
  * @internal
  */
 export interface EndpointRuleSetHttpAuthSchemeProvider<
-  EndpointParametersT extends EndpointParameters = EndpointParameters,
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
+  EndpointParametersT extends EndpointParameters,
+  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters
 > extends HttpAuthSchemeProvider<EndpointParametersT & HttpAuthSchemeParametersT> {}
 
 /**
  * @internal
  */
-export interface DefaultEndpointResolver<EndpointParametersT extends EndpointParameters = EndpointParameters> {
+export interface DefaultEndpointResolver<EndpointParametersT extends EndpointParameters> {
   (params: EndpointParametersT, context?: { logger?: Logger }): EndpointV2;
 }
 
 /**
  * @internal
  */
-export interface CreateEndpointRuleSetHttpAuthSchemeProvider<
-  EndpointParametersT extends EndpointParameters = EndpointParameters,
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
-> {
-  (
-    defaultEndpointResolver: DefaultEndpointResolver<EndpointParametersT>,
-    defaultHttpAuthSchemeResolver: HttpAuthSchemeProvider<HttpAuthSchemeParametersT>
-  ): EndpointRuleSetHttpAuthSchemeProvider;
-}
-
-/**
- * @internal
- */
-export const createEndpointRuleSetHttpAuthSchemeProvider: CreateEndpointRuleSetHttpAuthSchemeProvider = <
-  EndpointParametersT extends EndpointParameters = EndpointParameters,
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
+export const createEndpointRuleSetHttpAuthSchemeProvider = <
+  EndpointParametersT extends EndpointParameters,
+  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters
 >(
   defaultEndpointResolver: DefaultEndpointResolver<EndpointParametersT>,
   defaultHttpAuthSchemeResolver: HttpAuthSchemeProvider<HttpAuthSchemeParametersT>
-) => {
+): EndpointRuleSetHttpAuthSchemeProvider<EndpointParametersT, HttpAuthSchemeParametersT> => {
   const endpointRuleSetHttpAuthSchemeProvider: EndpointRuleSetHttpAuthSchemeProvider<
     EndpointParametersT,
     HttpAuthSchemeParametersT
@@ -97,29 +84,36 @@ export interface EndpointRuleSetSmithyContext {
 /**
  * @internal
  */
-export interface CreateEndpointRuleSetHttpAuthSchemeParametersProvider<
-  HttpAuthSchemeParametersProviderT extends HttpAuthSchemeParametersProvider = HttpAuthSchemeParametersProvider
-> {
-  (defaultHttpAuthSchemeResolver: HttpAuthSchemeParametersProviderT): EndpointRuleSetHttpAuthSchemeParametersProvider;
-}
-
-/**
- * @internal
- */
 export interface EndpointRuleSetHttpAuthSchemeParametersProvider<
-  C extends object = object,
-  EndpointParametersT extends EndpointParameters = EndpointParameters,
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
-> extends HttpAuthSchemeParametersProvider<C, HttpAuthSchemeParametersT & EndpointParametersT> {}
+  TConfig extends object,
+  TContext extends HandlerExecutionContext,
+  TParameters extends HttpAuthSchemeParameters & EndpointParameters,
+  TInput extends object
+> extends HttpAuthSchemeParametersProvider<TConfig, TContext, TParameters, TInput> {}
 
 /**
  * @internal
  */
-export const createEndpointRuleSetHttpAuthSchemeParametersProvider: CreateEndpointRuleSetHttpAuthSchemeParametersProvider = <
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
+export const createEndpointRuleSetHttpAuthSchemeParametersProvider = <
+  TConfig extends object,
+  TContext extends HandlerExecutionContext,
+  THttpAuthSchemeParameters extends HttpAuthSchemeParameters,
+  TEndpointParameters extends EndpointParameters,
+  TParameters extends THttpAuthSchemeParameters & TEndpointParameters,
+  TInput extends object
 >(
-  defaultHttpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<object, HttpAuthSchemeParametersT>
-) => async (config, context: HandlerExecutionContext, input: Record<string, unknown>) => {
+  defaultHttpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<
+    TConfig,
+    TContext,
+    THttpAuthSchemeParameters,
+    TInput
+  >
+): EndpointRuleSetHttpAuthSchemeParametersProvider<
+  TConfig,
+  TContext,
+  THttpAuthSchemeParameters & TEndpointParameters,
+  TInput
+> => async (config: TConfig, context: TContext, input: TInput): Promise<TParameters> => {
   if (!input) {
     throw new Error(`Could not find \`input\` for \`defaultEndpointRuleSetHttpAuthSchemeParametersProvider\``);
   }
@@ -130,12 +124,9 @@ export const createEndpointRuleSetHttpAuthSchemeParametersProvider: CreateEndpoi
     throw new Error(`getEndpointParameterInstructions() is not defined on \`${context.commandName!}\``);
   }
   const endpointParameters = await resolveParams(
-    input,
+    input as Record<string, unknown>,
     { getEndpointParameterInstructions: instructionsFn! },
-    { ...config }
+    config as Record<string, unknown>
   );
-  return {
-    ...defaultParameters,
-    ...endpointParameters,
-  };
+  return Object.assign(defaultParameters, endpointParameters) as TParameters;
 };

@@ -10,16 +10,25 @@ import {
 import { getSmithyContext } from "@smithy/util-middleware";
 
 import { HttpAuthScheme, HttpAuthSchemeId, SelectedHttpAuthScheme } from "../HttpAuthScheme";
-import { HttpAuthSchemeParametersProvider, HttpAuthSchemeProvider } from "../HttpAuthSchemeProvider";
+import {
+  HttpAuthSchemeParameters,
+  HttpAuthSchemeParametersProvider,
+  HttpAuthSchemeProvider,
+} from "../HttpAuthSchemeProvider";
 import { IdentityProviderConfig } from "../IdentityProviderConfig";
 
 /**
  * @internal
  */
-export interface PreviouslyResolved {
+export interface PreviouslyResolved<
+  TConfig extends object,
+  TContext extends HandlerExecutionContext,
+  TParameters extends HttpAuthSchemeParameters,
+  TInput extends object
+> {
   httpAuthSchemes: HttpAuthScheme[];
-  httpAuthSchemeProvider: HttpAuthSchemeProvider;
-  httpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider;
+  httpAuthSchemeProvider: HttpAuthSchemeProvider<TParameters>;
+  httpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<TConfig, TContext, TParameters, TInput>;
   identityProviderConfig: IdentityProviderConfig;
 }
 
@@ -53,18 +62,21 @@ function convertHttpAuthSchemesToMap(httpAuthSchemes: HttpAuthScheme[]): Map<Htt
  * @internal
  */
 export const httpAuthSchemeMiddleware = <
-  Input extends Record<string, unknown> = Record<string, unknown>,
-  Output extends MetadataBearer = MetadataBearer
+  TInput extends object,
+  Output extends object,
+  TConfig extends object,
+  TContext extends HttpAuthSchemeMiddlewareHandlerExecutionContext,
+  TParameters extends HttpAuthSchemeParameters
 >(
-  config: PreviouslyResolved
-): SerializeMiddleware<Input, Output> => (
-  next: SerializeHandler<Input, Output>,
+  config: TConfig & PreviouslyResolved<TConfig, TContext, TParameters, TInput>
+): SerializeMiddleware<TInput, Output> => (
+  next: SerializeHandler<TInput, Output>,
   context: HttpAuthSchemeMiddlewareHandlerExecutionContext
-): SerializeHandler<Input, Output> => async (
-  args: SerializeHandlerArguments<Input>
+): SerializeHandler<TInput, Output> => async (
+  args: SerializeHandlerArguments<TInput>
 ): Promise<SerializeHandlerOutput<Output>> => {
   const options = config.httpAuthSchemeProvider(
-    await config.httpAuthSchemeParametersProvider(config, context, args.input)
+    await config.httpAuthSchemeParametersProvider(config, context as TContext, args.input)
   );
   const authSchemes = convertHttpAuthSchemesToMap(config.httpAuthSchemes);
   const smithyContext: HttpAuthSchemeMiddlewareSmithyContext = getSmithyContext(context);

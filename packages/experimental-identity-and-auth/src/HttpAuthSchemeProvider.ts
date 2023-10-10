@@ -12,7 +12,7 @@ export interface HttpAuthSchemeParameters {
 /**
  * @internal
  */
-export interface HttpAuthSchemeProvider<TParameters extends HttpAuthSchemeParameters = HttpAuthSchemeParameters> {
+export interface HttpAuthSchemeProvider<TParameters extends HttpAuthSchemeParameters> {
   (authParameters: TParameters): HttpAuthOption[];
 }
 
@@ -20,8 +20,10 @@ export interface HttpAuthSchemeProvider<TParameters extends HttpAuthSchemeParame
  * @internal
  */
 export interface HttpAuthSchemeParametersProvider<
-  C extends object = object,
-  T extends HttpAuthSchemeParameters = HttpAuthSchemeParameters
+  TConfig extends object,
+  TContext extends HandlerExecutionContext,
+  TParameters extends HttpAuthSchemeParameters,
+  TInput extends object
 > {
-  (config: C, context: HandlerExecutionContext, input: Record<string, unknown>): Promise<T>;
+  (config: TConfig, context: TContext, input: TInput): Promise<TParameters>;
 }
