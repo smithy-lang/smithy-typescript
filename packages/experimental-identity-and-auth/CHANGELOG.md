@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.17
+
+### Patch Changes
+
+- e5ee17ad: Move `@smithy/util-test` to `devDependencies`.
+
 ## 0.0.16
 
 ### Patch Changes
