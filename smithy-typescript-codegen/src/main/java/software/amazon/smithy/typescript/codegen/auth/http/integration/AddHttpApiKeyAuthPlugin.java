@@ -97,7 +97,7 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                     .source(t -> w -> {
                         HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
                         httpApiKeyAuthTrait.getScheme().ifPresentOrElse(
-                            s -> w.write(s),
+                            s -> w.write("$S", s),
                             () -> w.write("undefined"));
                     })
                     .build())
