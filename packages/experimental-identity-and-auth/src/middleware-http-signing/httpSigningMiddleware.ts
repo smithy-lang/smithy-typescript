@@ -52,6 +52,6 @@ export const httpSigningMiddleware = <Input extends object, Output extends objec
   } = scheme;
   return next({
     ...args,
-    request: signer.sign(args.request, identity, signingProperties || {}),
+    request: await signer.sign(args.request, identity, signingProperties || {}),
   });
 };
