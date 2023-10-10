@@ -30,7 +30,6 @@
     "@smithy/protocol-http": "workspace:^",
     "@smithy/signature-v4": "workspace:^",
     "@smithy/types": "workspace:^",
-    "@smithy/util-test": "workspace:^",
     "tslib": "^2.5.0"
   },
   "engines": {
@@ -53,6 +52,7 @@
     "directory": "packages/experimental-identity-and-auth"
   },
   "devDependencies": {
+    "@smithy/util-test": "workspace:^",
     "@tsconfig/recommended": "1.0.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
