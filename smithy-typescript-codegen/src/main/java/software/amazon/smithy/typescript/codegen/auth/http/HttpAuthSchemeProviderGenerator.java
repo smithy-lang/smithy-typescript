@@ -74,8 +74,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         this.serviceShape = settings.getService(model);
         this.serviceSymbol = symbolProvider.toSymbol(serviceShape);
         this.serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        this.httpAuthSchemeParameters =
-            AuthUtils.collectHttpAuthSchemeParameters(authIndex.getSupportedHttpAuthSchemes().values());
+        this.httpAuthSchemeParameters = AuthUtils.collectHttpAuthSchemeParameters(
+            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex).values());
     }
 
     @Override
