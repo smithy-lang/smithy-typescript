@@ -361,7 +361,7 @@ describe(FetchHttpHandler.name, () => {
   });
 
   describe("keepalive", () => {
-    it("will pass keepalive as true by default to request if supported", async () => {
+    it("will pass keepalive as false by default to request if supported", async () => {
       const mockResponse = {
         headers: {
           entries: jest.fn().mockReturnValue([
@@ -379,7 +379,7 @@ describe(FetchHttpHandler.name, () => {
       keepAliveSupport.supported = true;
       await fetchHttpHandler.handle({} as any, {});
 
-      expect(mockRequest.mock.calls[0][1].keepalive).toBe(true);
+      expect(mockRequest.mock.calls[0][1].keepalive).toBe(false);
     });
 
     it("will pass keepalive to request if supported", async () => {
@@ -395,12 +395,12 @@ describe(FetchHttpHandler.name, () => {
       const mockFetch = jest.fn().mockResolvedValue(mockResponse);
       (global as any).fetch = mockFetch;
 
-      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: false });
+      const fetchHttpHandler = new FetchHttpHandler({ keepAlive: true });
 
       keepAliveSupport.supported = true;
       await fetchHttpHandler.handle({} as any, {});
 
-      expect(mockRequest.mock.calls[0][1].keepalive).toBe(false);
+      expect(mockRequest.mock.calls[0][1].keepalive).toBe(true);
     });
 
     it("will not have keepalive property in request if not supported", async () => {

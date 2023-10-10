@@ -17,7 +17,13 @@ export interface FetchHttpHandlerOptions {
   requestTimeout?: number;
 
   /**
-   * Whether to allow the request to outlive the page. Default value is true
+   * Whether to allow the request to outlive the page. Default value is false.
+   *
+   * There may be limitations to the payload size, number of concurrent requests,
+   * request duration etc. when using keepalive in browsers.
+   *
+   * These may change over time, so look for up to date information about
+   * these limitations before enabling keepalive.
    */
   keepAlive?: boolean;
 }
@@ -59,7 +65,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       this.config = await this.configProvider;
     }
     const requestTimeoutInMs = this.config!.requestTimeout;
-    const keepAlive = this.config!.keepAlive ?? true;
+    const keepAlive = this.config!.keepAlive === true;
 
     // if the request was already aborted, prevent doing extra work
     if (abortSignal?.aborted) {
