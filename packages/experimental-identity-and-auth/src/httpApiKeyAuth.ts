@@ -32,6 +32,9 @@ export class HttpApiKeyAuthSigner implements HttpSigner {
     if (!signingProperties.in) {
       throw new Error("request could not be signed with `apiKey` since the `in` signer property is missing");
     }
+    if (!identity.apiKey) {
+      throw new Error("request could not be signed with `apiKey` since the `apiKey` is not defined");
+    }
     const clonedRequest = httpRequest.clone();
     if (signingProperties.in === HttpApiKeyAuthLocation.QUERY) {
       clonedRequest.query[signingProperties.name] = identity.apiKey;
