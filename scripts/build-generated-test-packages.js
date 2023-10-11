@@ -36,6 +36,13 @@ const weatherSsdkDir = path.join(
     "typescript-ssdk-codegen"
 )
 
+// TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
+const httpApiKeyAuthClientDir = path.join(
+    codegenTestDir,
+    "identity-and-auth-http-api-key-auth",
+    "typescript-codegen"
+);
+
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
@@ -61,6 +68,8 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
     // TODO(experimentalIdentityAndAuth): build generic client for integration tests
     await buildAndCopyToNodeModules("@smithy/weather-experimental-identity-and-auth", weatherExperimentalIdentityAndAuthClientDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
+    await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
  } catch (e) {
     console.log(e);
     process.exit(1);
