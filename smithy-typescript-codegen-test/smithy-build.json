@@ -74,6 +74,29 @@
                     }
                 }
             }
+        },
+        "identity-and-auth-http-api-key-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["identity.auth.httpApiKeyAuth#HttpApiKeyAuthService"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-codegen": {
+                    "service": "identity.auth.httpApiKeyAuth#HttpApiKeyAuthService",
+                    "targetNamespace": "HttpApiKeyAuthService",
+                    "package": "@smithy/identity-and-auth-http-api-key-auth-service",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "experimentalIdentityAndAuth": true
+                }
+            }
         }
     },
     "plugins": {
