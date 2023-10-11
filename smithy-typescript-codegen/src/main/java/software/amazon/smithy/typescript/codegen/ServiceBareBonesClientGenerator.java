@@ -142,7 +142,7 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         writer.write("export type $L = ", typeName);
         writer.indent();
         // If we have less symbols than operations, at least one doesn't have a type, so add the default.
-        if (containedOperations.size() != symbols.size()) {
+        if (containedOperations.size() != symbols.size() || containedOperations.isEmpty()) {
             defaultTypeGenerator.accept(writer);
         }
         for (int i = 0; i < symbols.size(); i++) {
