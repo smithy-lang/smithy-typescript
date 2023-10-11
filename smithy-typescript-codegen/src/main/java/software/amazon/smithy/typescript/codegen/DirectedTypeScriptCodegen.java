@@ -300,18 +300,24 @@ final class DirectedTypeScriptCodegen
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
 
+        // Write operation index files
+        if (settings.generateClient()) {
+            CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
+        }
+        if (settings.generateServerSdk()) {
+            ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
+        }
+
         // Generate each operation for the service.
         for (OperationShape operation : directive.operations()) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
-                CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
                 delegator.useShapeWriter(operation, commandWriter -> new CommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         runtimePlugins, protocolGenerator, applicationProtocol).run());
             }
 
             if (settings.generateServerSdk()) {
-                ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
                 delegator.useShapeWriter(operation, commandWriter -> new ServerCommandGenerator(
                         settings, model, operation, symbolProvider, commandWriter,
                         protocolGenerator, applicationProtocol).run());

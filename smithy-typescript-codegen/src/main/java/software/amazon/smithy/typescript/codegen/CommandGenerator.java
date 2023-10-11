@@ -531,8 +531,12 @@ final class CommandGenerator implements Runnable {
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        for (OperationShape operation : containedOperations) {
-            writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
+        if (containedOperations.isEmpty()) {
+            writer.write("export {};");
+        } else {
+            for (OperationShape operation : containedOperations) {
+                writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
+            }
         }
 
         fileManifest.writeFile(
