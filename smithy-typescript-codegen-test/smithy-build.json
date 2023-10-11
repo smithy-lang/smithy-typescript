@@ -97,6 +97,29 @@
                     "experimentalIdentityAndAuth": true
                 }
             }
+        },
+        "identity-and-auth-http-bearer-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["identity.auth.httpBearerAuth#HttpBearerAuthService"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-codegen": {
+                    "service": "identity.auth.httpBearerAuth#HttpBearerAuthService",
+                    "targetNamespace": "HttpBearerAuthService",
+                    "package": "@smithy/identity-and-auth-http-bearer-auth-service",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "experimentalIdentityAndAuth": true
+                }
+            }
         }
     },
     "plugins": {
