@@ -50,6 +50,27 @@ const httpBearerAuthClientDir = path.join(
     "typescript-codegen"
 );
 
+// TODO(experimentalIdentityAndAuth): add default multi-auth client for integration tests
+const defaultMultiAuthClientDir = path.join(
+    codegenTestDir,
+    "identity-and-auth-service-default-multi-auth",
+    "typescript-codegen"
+);
+
+// TODO(experimentalIdentityAndAuth): add empty auth client for integration tests
+const emptyAuthClientDir = path.join(
+    codegenTestDir,
+    "identity-and-auth-service-empty-auth",
+    "typescript-codegen"
+);
+
+// TODO(experimentalIdentityAndAuth): add specified multi-auth client for integration tests
+const specifiedMultiAuthClientDir = path.join(
+    codegenTestDir,
+    "identity-and-auth-service-specified-multi-auth",
+    "typescript-codegen"
+);
+
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
@@ -79,6 +100,12 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
     // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
     await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): add default multi-auth client for integration tests
+    await buildAndCopyToNodeModules("@smithy/identity-and-auth-service-default-multi-auth-service", defaultMultiAuthClientDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): add empty auth client for integration tests
+    await buildAndCopyToNodeModules("@smithy/identity-and-auth-service-empty-auth-service", emptyAuthClientDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): add specified multi-auth client for integration tests
+    await buildAndCopyToNodeModules("@smithy/identity-and-auth-service-specified-multi-auth-service", specifiedMultiAuthClientDir, nodeModulesDir);
  } catch (e) {
     console.log(e);
     process.exit(1);

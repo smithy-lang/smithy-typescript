@@ -120,6 +120,75 @@
                     "experimentalIdentityAndAuth": true
                 }
             }
+        },
+        "identity-and-auth-service-default-multi-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["identity.auth.defaultAuth#DefaultAuthService"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-codegen": {
+                    "service": "identity.auth.defaultAuth#DefaultAuthService",
+                    "targetNamespace": "DefaultAuthService",
+                    "package": "@smithy/identity-and-auth-service-default-multi-auth-service",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "experimentalIdentityAndAuth": true
+                }
+            }
+        },
+        "identity-and-auth-service-empty-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["identity.auth.emptyAuth#EmptyAuthService"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-codegen": {
+                    "service": "identity.auth.emptyAuth#EmptyAuthService",
+                    "targetNamespace": "EmptyAuthService",
+                    "package": "@smithy/identity-and-auth-service-empty-auth-service",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "experimentalIdentityAndAuth": true
+                }
+            }
+        },
+        "identity-and-auth-service-specified-multi-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["identity.auth.specifiedAuth#SpecifiedAuthService"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-codegen": {
+                    "service": "identity.auth.specifiedAuth#SpecifiedAuthService",
+                    "targetNamespace": "SpecifiedAuthService",
+                    "package": "@smithy/identity-and-auth-service-specified-multi-auth-service",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "experimentalIdentityAndAuth": true
+                }
+            }
         }
     },
     "plugins": {
