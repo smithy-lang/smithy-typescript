@@ -43,6 +43,13 @@ const httpApiKeyAuthClientDir = path.join(
     "typescript-codegen"
 );
 
+// TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
+const httpBearerAuthClientDir = path.join(
+    codegenTestDir,
+    "identity-and-auth-http-bearer-auth",
+    "typescript-codegen"
+);
+
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
@@ -70,6 +77,8 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     await buildAndCopyToNodeModules("@smithy/weather-experimental-identity-and-auth", weatherExperimentalIdentityAndAuthClientDir, nodeModulesDir);
     // TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
     await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
+    // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
+    await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
  } catch (e) {
     console.log(e);
     process.exit(1);
