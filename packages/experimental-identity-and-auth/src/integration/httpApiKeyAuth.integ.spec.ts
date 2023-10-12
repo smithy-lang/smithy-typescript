@@ -1,10 +1,12 @@
+import { describe, it } from "@jest/globals";
 import {
   HttpApiKeyAuthServiceClient,
   OnlyHttpApiKeyAuthCommand,
   OnlyHttpApiKeyAuthOptionalCommand,
   SameAsServiceCommand,
 } from "@smithy/identity-and-auth-http-api-key-auth-service";
-import { requireRequestsFrom } from "@smithy/util-test";
+
+import { expectClientCommand } from "../util-test";
 
 describe("@httpApiKeyAuth integration tests", () => {
   // TODO(experimentalIdentityAndAuth): should match `HttpApiKeyAuthService` `@httpApiKeyAuth` trait
@@ -12,204 +14,206 @@ describe("@httpApiKeyAuth integration tests", () => {
   const MOCK_API_KEY_SCHEME = "ApiKey";
   const MOCK_API_KEY = "APIKEY_123";
 
-  // Arbitrary mock endpoint (`requireRequestsFrom()` intercepts network requests)
-  const MOCK_ENDPOINT = "https://foo.bar";
-
   describe("Operation requires `@httpApiKeyAuth`", () => {
     it("Request is thrown when `apiKey` is not configured", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthCommand,
+        clientRejects: "HttpAuthScheme `smithy.api#httpApiKeyAuth` did not have an IdentityProvider configured.",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new OnlyHttpApiKeyAuthCommand({}))).rejects.toThrow(
-        "HttpAuthScheme `smithy.api#httpApiKeyAuth` did not have an IdentityProvider configured."
-      );
     });
 
     it("Request is thrown when `apiKey` is configured incorrectly", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: {} as any,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthCommand,
+        clientConfig: {
+          apiKey: {},
+        },
+        clientRejects: "request could not be signed with `apiKey` since the `apiKey` is not defined",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new OnlyHttpApiKeyAuthCommand({}))).rejects.toThrow(
-        "request could not be signed with `apiKey` since the `apiKey` is not defined"
-      );
     });
 
     it("Request is thrown given configured `apiKey` identity provider throws", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: async () => {
-          throw new Error("IdentityProvider throws this error");
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthCommand,
+        clientConfig: {
+          apiKey: async () => {
+            throw new Error("IdentityProvider throws this error");
+          },
         },
+        clientRejects: "IdentityProvider throws this error",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new OnlyHttpApiKeyAuthCommand({}))).rejects.toThrow(
-        "IdentityProvider throws this error"
-      );
     });
 
     it("Request is signed given configured `apiKey` identity provider", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: async () => ({
-          apiKey: MOCK_API_KEY,
-        }),
-      });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthCommand,
+        clientConfig: {
+          apiKey: async () => ({
+            apiKey: MOCK_API_KEY,
+          }),
+        },
+        requestMatchers: {
+          headers: {
+            [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+          },
         },
       });
-      await client.send(new OnlyHttpApiKeyAuthCommand({}));
     });
 
     it("Request is signed given configured `apiKey` identity", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: {
-          apiKey: MOCK_API_KEY,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthCommand,
+        clientConfig: {
+          apiKey: {
+            apiKey: MOCK_API_KEY,
+          },
+        },
+        requestMatchers: {
+          headers: {
+            [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+          },
         },
       });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
-        },
-      });
-      await client.send(new OnlyHttpApiKeyAuthCommand({}));
     });
   });
 
   describe("Operation has `@httpApiKeyAuth` and `@optionalAuth`", () => {
     it("Request is NOT thrown and NOT signed when `apiKey` is not configured", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthOptionalCommand,
       });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: (value) => expect(value).toBeUndefined(),
-        },
-      });
-      await client.send(new OnlyHttpApiKeyAuthOptionalCommand({}));
     });
 
     it("Request is thrown when `apiKey` is configured incorrectly", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: {} as any,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthOptionalCommand,
+        clientConfig: {
+          apiKey: {},
+        },
+        clientRejects: "request could not be signed with `apiKey` since the `apiKey` is not defined",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new OnlyHttpApiKeyAuthOptionalCommand({}))).rejects.toThrow(
-        "request could not be signed with `apiKey` since the `apiKey` is not defined"
-      );
     });
 
     it("Request is thrown given configured `apiKey` identity provider throws", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: async () => {
-          throw new Error("IdentityProvider throws this error");
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthOptionalCommand,
+        clientConfig: {
+          apiKey: async () => {
+            throw new Error("IdentityProvider throws this error");
+          },
         },
+        clientRejects: "IdentityProvider throws this error",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new OnlyHttpApiKeyAuthOptionalCommand({}))).rejects.toThrow(
-        "IdentityProvider throws this error"
-      );
     });
 
     it("Request is signed given configured `apiKey` identity provider", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: async () => ({
-          apiKey: MOCK_API_KEY,
-        }),
-      });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthOptionalCommand,
+        clientConfig: {
+          apiKey: async () => ({
+            apiKey: MOCK_API_KEY,
+          }),
+        },
+        requestMatchers: {
+          headers: {
+            [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+          },
         },
       });
-      await client.send(new OnlyHttpApiKeyAuthOptionalCommand({}));
     });
 
     it("Request is signed given configured `apiKey` identity", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: {
-          apiKey: MOCK_API_KEY,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthOptionalCommand,
+        clientConfig: {
+          apiKey: {
+            apiKey: MOCK_API_KEY,
+          },
+        },
+        requestMatchers: {
+          headers: {
+            [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+          },
         },
       });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
-        },
-      });
-      await client.send(new OnlyHttpApiKeyAuthOptionalCommand({}));
     });
   });
 
   describe("Service has `@httpApiKeyAuth`", () => {
     it("Request is thrown when `apiKey` is not configured", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: SameAsServiceCommand,
+        clientRejects: "HttpAuthScheme `smithy.api#httpApiKeyAuth` did not have an IdentityProvider configured.",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new SameAsServiceCommand({}))).rejects.toThrow(
-        "HttpAuthScheme `smithy.api#httpApiKeyAuth` did not have an IdentityProvider configured."
-      );
     });
 
     it("Request is thrown when `apiKey` is configured incorrectly", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: {} as any,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: SameAsServiceCommand,
+        clientConfig: {
+          apiKey: {},
+        },
+        clientRejects: "request could not be signed with `apiKey` since the `apiKey` is not defined",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new SameAsServiceCommand({}))).rejects.toThrow(
-        "request could not be signed with `apiKey` since the `apiKey` is not defined"
-      );
     });
 
     it("Request is thrown given configured `apiKey` identity provider throws", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: async () => {
-          throw new Error("IdentityProvider throws this error");
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: OnlyHttpApiKeyAuthCommand,
+        clientConfig: {
+          apiKey: async () => {
+            throw new Error("IdentityProvider throws this error");
+          },
         },
+        clientRejects: "IdentityProvider throws this error",
       });
-      requireRequestsFrom(client).toMatch({});
-      await expect(client.send(new SameAsServiceCommand({}))).rejects.toThrow("IdentityProvider throws this error");
     });
 
     it("Request is signed given configured `apiKey` identity provider", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: async () => ({
-          apiKey: MOCK_API_KEY,
-        }),
-      });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: SameAsServiceCommand,
+        clientConfig: {
+          apiKey: async () => ({
+            apiKey: MOCK_API_KEY,
+          }),
+        },
+        requestMatchers: {
+          headers: {
+            [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+          },
         },
       });
-      await client.send(new SameAsServiceCommand({}));
     });
 
     it("Request is signed given configured `apiKey` identity", async () => {
-      const client = new HttpApiKeyAuthServiceClient({
-        endpoint: MOCK_ENDPOINT,
-        apiKey: {
-          apiKey: MOCK_API_KEY,
+      await expectClientCommand({
+        clientConstructor: HttpApiKeyAuthServiceClient,
+        commandConstructor: SameAsServiceCommand,
+        clientConfig: {
+          apiKey: {
+            apiKey: MOCK_API_KEY,
+          },
+        },
+        requestMatchers: {
+          headers: {
+            [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
+          },
         },
       });
-      requireRequestsFrom(client).toMatch({
-        headers: {
-          [MOCK_API_KEY_NAME]: `${MOCK_API_KEY_SCHEME} ${MOCK_API_KEY}`,
-        },
-      });
-      await client.send(new SameAsServiceCommand({}));
     });
   });
 });
