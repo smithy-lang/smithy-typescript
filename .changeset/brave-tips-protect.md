@@ -2,4 +2,4 @@
 "@smithy/shared-ini-file-loader": patch
 ---
 
-Use additional whitespaces prior to ini entries to add as part of subsection
+Treat absence of prefix whitespace as section keys when reading ini files
