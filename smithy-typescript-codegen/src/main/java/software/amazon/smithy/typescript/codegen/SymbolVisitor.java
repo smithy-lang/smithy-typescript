@@ -377,7 +377,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private Symbol createMemberSymbolWithEnumTarget(Symbol targetSymbol) {
         return targetSymbol.toBuilder()
                 .namespace(null, "/")
-                .name(targetSymbol.getName() + " | string")
+                .name(targetSymbol.getName())
                 .addReference(targetSymbol)
                 .build();
     }
