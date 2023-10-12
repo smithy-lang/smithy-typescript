@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.0.18
+
+### Patch Changes
+
+- 49f75b47: Add `@httpBearerAuth` integration tests.
+- 56bdadd4: Add strict check for `token` in `HttpBearerAuthSigner`.
+- 940aad53: Add `@httpApiKeyAuth` integration tests.
+- 3d5da269: Add strict check for `apiKey` in `HttpApiKeyAuthSigner`.
+- Updated dependencies [afaa68af]
+  - @smithy/middleware-endpoint@2.1.1
+
 ## 0.0.17
 
 ### Patch Changes
