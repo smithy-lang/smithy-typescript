@@ -7,6 +7,7 @@ package software.amazon.smithy.typescript.codegen.auth.http;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
@@ -35,6 +36,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
     private final List<ConfigField> configFields;
     private final List<HttpAuthSchemeParameter> httpAuthSchemeParameters;
     private final List<HttpAuthOptionProperty> httpAuthOptionProperties;
+    private final Consumer<TypeScriptWriter> httpAuthOptionConfigPropertiesExtractor;
 
     private HttpAuthScheme(Builder builder) {
         this.schemeId = SmithyBuilder.requiredState(
@@ -52,6 +54,8 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
             "httpAuthSchemeParameters", builder.httpAuthSchemeParameters.copy());
         this.httpAuthOptionProperties = SmithyBuilder.requiredState(
             "httpAuthOptionProperties", builder.httpAuthOptionProperties.copy());
+        this.httpAuthOptionConfigPropertiesExtractor =
+            builder.httpAuthOptionConfigPropertiesExtractor;
     }
 
     /**
@@ -128,6 +132,14 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
     }
 
     /**
+     * Gets the writer for the config properties extractor.
+     * @return optional of config properties extractor
+     */
+    public Optional<Consumer<TypeScriptWriter>> getHttpAuthOptionConfigPropertiesExtractor() {
+        return Optional.ofNullable(httpAuthOptionConfigPropertiesExtractor);
+    }
+
+    /**
      * Creates a {@link Builder}.
      * @return a builder
      */
@@ -149,7 +161,8 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
             .defaultSigners(defaultSigners)
             .configFields(configFields)
             .httpAuthSchemeParameters(httpAuthSchemeParameters)
-            .httpAuthOptionProperties(httpAuthOptionProperties);
+            .httpAuthOptionProperties(httpAuthOptionProperties)
+            .httpAuthOptionConfigPropertiesExtractor(httpAuthOptionConfigPropertiesExtractor);
     }
 
     /**
@@ -169,6 +182,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
             BuilderRef.forList();
         private BuilderRef<List<HttpAuthOptionProperty>> httpAuthOptionProperties =
             BuilderRef.forList();
+        private Consumer<TypeScriptWriter> httpAuthOptionConfigPropertiesExtractor;
 
         private Builder() {}
 
@@ -341,6 +355,17 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
          */
         public Builder addHttpAuthOptionProperty(HttpAuthOptionProperty httpAuthOptionProperty) {
             this.httpAuthOptionProperties.get().add(httpAuthOptionProperty);
+            return this;
+        }
+
+        /**
+         * Sets the httpAuthOptionConfigPropertiesExtractor.
+         * @param httpAuthOptionConfigPropertiesExtractor writer for properties extractor
+         * @return the builder
+         */
+        public Builder httpAuthOptionConfigPropertiesExtractor(
+            Consumer<TypeScriptWriter> httpAuthOptionConfigPropertiesExtractor) {
+            this.httpAuthOptionConfigPropertiesExtractor = httpAuthOptionConfigPropertiesExtractor;
             return this;
         }
     }

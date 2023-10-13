@@ -246,6 +246,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                             }
                         });
                     }
+                    authScheme.getHttpAuthOptionConfigPropertiesExtractor()
+                        .ifPresent(extractor -> w.write("configPropertiesExtractor: $C", extractor));
                 });
             });
         });
