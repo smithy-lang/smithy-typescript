@@ -18,6 +18,7 @@ import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.Dependency;
@@ -148,5 +149,24 @@ public final class AuthUtils {
             }
         }
         return httpAuthSchemeParameters;
+    }
+
+    public static boolean areHttpAuthSchemesEqual(
+        Map<ShapeId, Trait> httpAuthSchemes1,
+        Map<ShapeId, Trait> httpAuthSchemes2
+    ) {
+        if (httpAuthSchemes1.size() != httpAuthSchemes2.size()) {
+            return false;
+        }
+        var iter1 = httpAuthSchemes1.entrySet().iterator();
+        var iter2 = httpAuthSchemes2.entrySet().iterator();
+        while (iter1.hasNext() && iter2.hasNext()) {
+            var entry1 = iter1.next();
+            var entry2 = iter2.next();
+            if (!entry1.equals(entry2)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

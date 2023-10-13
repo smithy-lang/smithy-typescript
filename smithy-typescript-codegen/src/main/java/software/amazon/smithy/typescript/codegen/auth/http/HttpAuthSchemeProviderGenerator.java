@@ -308,7 +308,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                             serviceShape, operationShapeId, AuthSchemeMode.NO_AUTH_AWARE);
                         // Skip operation generation if operation auth schemes are equivalent to the default service
                         // auth schemes.
-                        if (serviceAuthSchemes.equals(operationAuthSchemes)) {
+                        if (AuthUtils.areHttpAuthSchemesEqual(serviceAuthSchemes, operationAuthSchemes)) {
                             continue;
                         }
                         w.openBlock("case $S: {", "};", operationShapeId.getName(), () -> {
