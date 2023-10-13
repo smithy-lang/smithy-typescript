@@ -123,7 +123,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
      * @param type type of auth option property
      * @return httpAuthOptionProperties filtered by type
      */
-    public List<HttpAuthOptionProperty> getAuthSchemeOptionParametersByType(Type type) {
+    public List<HttpAuthOptionProperty> getHttpAuthSchemeOptionParametersByType(Type type) {
         return httpAuthOptionProperties.stream().filter(p -> p.type().equals(type)).toList();
     }
 
