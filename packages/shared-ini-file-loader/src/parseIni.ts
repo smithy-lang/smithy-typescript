@@ -2,7 +2,9 @@ import { IniSectionType, ParsedIniData } from "@smithy/types";
 
 import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 
-const prefixKeyRegex = /^([\w-]+)\s(["'])?([\w-]+)\2$/;
+// Character `@` is not allowed in profile name, but some customers are using it.
+// Refs: https://github.com/awslabs/smithy-typescript/issues/1026
+const prefixKeyRegex = /^([\w-]+)\s(["'])?([\w-@]+)\2$/;
 const profileNameBlockList = ["__proto__", "profile __proto__"];
 
 export const parseIni = (iniData: string): ParsedIniData => {
