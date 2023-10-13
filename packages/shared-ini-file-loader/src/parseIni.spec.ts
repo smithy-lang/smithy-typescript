@@ -90,34 +90,63 @@ describe(parseIni.name, () => {
       });
     });
 
-    it("returns data from main section, and not subsection", () => {
-      const mockProfileDataWithSubSettings = {
-        key: "value",
-        subSection: { subKey: "subValue" },
-      };
-      const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithSubSettings);
-      expect(parseIni(mockInput)).toStrictEqual({
-        [mockProfileName]: {
-          key: "value",
-          [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subValue",
-        },
+    describe("returns data from main section, and not subsection", () => {
+      it("if subsection comes after section", () => {
+        const mockProfileDataWithSubSettings = {
+          key: "keyValue",
+          subSection: {
+            key: "keyValueInSubSection",
+            subKey: "subKeyValue",
+          },
+        };
+        const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithSubSettings);
+        expect(parseIni(mockInput)).toStrictEqual({
+          [mockProfileName]: {
+            key: "keyValue",
+            [["subSection", "key"].join(CONFIG_PREFIX_SEPARATOR)]: "keyValueInSubSection",
+            [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subKeyValue",
+          },
+        });
+
+        const mockProfileName2 = "mock_profile_name_2";
+        const mockProfileDataWithSubSettings2 = {
+          key: "keyValue2",
+          subSection: {
+            key: "keyValue2InSubSection",
+            subKey: "subKeyValue2",
+          },
+        };
+        const mockInput2 = getMockProfileContent(mockProfileName2, mockProfileDataWithSubSettings2);
+        expect(parseIni(`${mockInput}${mockInput2}`)).toStrictEqual({
+          [mockProfileName]: {
+            key: "keyValue",
+            [["subSection", "key"].join(CONFIG_PREFIX_SEPARATOR)]: "keyValueInSubSection",
+            [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subKeyValue",
+          },
+          [mockProfileName2]: {
+            key: "keyValue2",
+            [["subSection", "key"].join(CONFIG_PREFIX_SEPARATOR)]: "keyValue2InSubSection",
+            [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subKeyValue2",
+          },
+        });
       });
 
-      const mockProfileName2 = "mock_profile_name_2";
-      const mockProfileDataWithSubSettings2 = {
-        key: "value2",
-        subSection: { subKey: "subValue2" },
-      };
-      const mockInput2 = getMockProfileContent(mockProfileName2, mockProfileDataWithSubSettings2);
-      expect(parseIni(`${mockInput}${mockInput2}`)).toStrictEqual({
-        [mockProfileName]: {
-          key: "value",
-          [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subValue",
-        },
-        [mockProfileName2]: {
-          key: "value2",
-          [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subValue2",
-        },
+      it("if subsection comes before section", () => {
+        const mockProfileDataWithSubSettings = {
+          subSection: {
+            key: "keyValueInSubSection",
+            subKey: "subKeyValue",
+          },
+          key: "keyValue",
+        };
+        const mockInput = getMockProfileContent(mockProfileName, mockProfileDataWithSubSettings);
+        expect(parseIni(mockInput)).toStrictEqual({
+          [mockProfileName]: {
+            [["subSection", "key"].join(CONFIG_PREFIX_SEPARATOR)]: "keyValueInSubSection",
+            [["subSection", "subKey"].join(CONFIG_PREFIX_SEPARATOR)]: "subKeyValue",
+            key: "keyValue",
+          },
+        });
       });
     });
   });

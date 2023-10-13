@@ -11,15 +11,15 @@ export const parseIni = (iniData: string): ParsedIniData => {
   let currentSection: string | undefined;
   let currentSubSection: string | undefined;
 
-  for (let line of iniData.split(/\r?\n/)) {
-    line = line.split(/(^|\s)[;#]/)[0].trim(); // remove comments and trim
-    const isSection: boolean = line[0] === "[" && line[line.length - 1] === "]";
+  for (const iniLine of iniData.split(/\r?\n/)) {
+    const trimmedLine = iniLine.split(/(^|\s)[;#]/)[0].trim(); // remove comments and trim
+    const isSection: boolean = trimmedLine[0] === "[" && trimmedLine[trimmedLine.length - 1] === "]";
     if (isSection) {
       // New section found. Reset currentSection and currentSubSection.
       currentSection = undefined;
       currentSubSection = undefined;
 
-      const sectionName = line.substring(1, line.length - 1);
+      const sectionName = trimmedLine.substring(1, trimmedLine.length - 1);
       const matches = prefixKeyRegex.exec(sectionName);
       if (matches) {
         const [, prefix, , name] = matches;
@@ -36,15 +36,19 @@ export const parseIni = (iniData: string): ParsedIniData => {
         throw new Error(`Found invalid profile name "${sectionName}"`);
       }
     } else if (currentSection) {
-      const indexOfEqualsSign = line.indexOf("=");
+      const indexOfEqualsSign = trimmedLine.indexOf("=");
       if (![0, -1].includes(indexOfEqualsSign)) {
         const [name, value]: [string, string] = [
-          line.substring(0, indexOfEqualsSign).trim(),
-          line.substring(indexOfEqualsSign + 1).trim(),
+          trimmedLine.substring(0, indexOfEqualsSign).trim(),
+          trimmedLine.substring(indexOfEqualsSign + 1).trim(),
         ];
         if (value === "") {
           currentSubSection = name;
         } else {
+          if (currentSubSection && iniLine.trimStart() === iniLine) {
+            // Reset currentSubSection if there is no whitespace
+            currentSubSection = undefined;
+          }
           map[currentSection] = map[currentSection] || {};
           const key = currentSubSection ? [currentSubSection, name].join(CONFIG_PREFIX_SEPARATOR) : name;
           map[currentSection][key] = value;
