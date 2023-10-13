@@ -49,7 +49,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * import { TypedYesNo } from "./TypedYesNo";
  *
  * interface MyStructure {
- *   "yesNo": TypedYesNo | string;
+ *   "yesNo": TypedYesNo;
  * }
  * }</pre>
  */

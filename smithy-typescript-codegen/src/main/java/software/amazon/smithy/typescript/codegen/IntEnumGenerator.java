@@ -51,7 +51,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * import { FaceCard } from "./FaceCard";
  *
  * interface MyStructure {
- *   "facecard": FaceCard | number;
+ *   "facecard": FaceCard;
  * }
  * }</pre>
  */

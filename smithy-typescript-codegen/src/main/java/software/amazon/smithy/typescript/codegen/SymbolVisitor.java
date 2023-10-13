@@ -353,11 +353,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
         Symbol targetSymbol = toSymbol(targetShape);
 
-        if (targetShape.isIntEnumShape()) {
-            return createMemberSymbolWithIntEnumTarget(targetSymbol);
-        }
-
-        if (targetSymbol.getProperties().containsKey(EnumTrait.class.getName())) {
+        if (targetSymbol.getProperties().containsKey(EnumTrait.class.getName()) || targetShape.isIntEnumShape()) {
             return createMemberSymbolWithEnumTarget(targetSymbol);
         }
 
@@ -371,24 +367,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         return targetSymbol;
     }
 
-    // Enums are considered "open", meaning it is a backward compatible change to add new
-    // members. Adding the `string` variant allows for previously generated clients to be
-    // able to handle unknown enum values that may be added in the future.
+    // Enums were considered "open" with the union `| string` or `| number`, meaning it was a backwards
+    // compatible change to add new members. This behavior was later removed to improve the helpfulness
+    // of closed enumerated union types.
+    // For overrides, users should use available type system overrides such as "as any" or
+    // pragma comments.
     private Symbol createMemberSymbolWithEnumTarget(Symbol targetSymbol) {
         return targetSymbol.toBuilder()
                 .namespace(null, "/")
-                .name(targetSymbol.getName() + " | string")
-                .addReference(targetSymbol)
-                .build();
-    }
-
-    // IntEnums are considered "open", meaning it is a backward compatible change to add new
-    // members. Adding the `number` variant allows for previously generated clients to be
-    // able to handle unknown int enum values that may be added in the future.
-    private Symbol createMemberSymbolWithIntEnumTarget(Symbol targetSymbol) {
-        return targetSymbol.toBuilder()
-                .namespace(null, "/")
-                .name(targetSymbol.getName() + " | number")
+                .name(targetSymbol.getName())
                 .addReference(targetSymbol)
                 .build();
     }

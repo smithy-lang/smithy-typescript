@@ -194,7 +194,7 @@ public class SymbolProviderTest {
     }
 
     @Test
-    public void addsUnknownStringEnumVariant() {
+    public void omitsUnknownStringEnumVariant() {
         EnumTrait trait = EnumTrait.builder()
                 .addEnum(EnumDefinition.builder().value("FOO").name("FOO").build())
                 .addEnum(EnumDefinition.builder().value("BAR").name("BAR").build())
@@ -218,11 +218,11 @@ public class SymbolProviderTest {
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
 
-        assertThat(memberSymbol.getName(), equalTo("EnumString | string"));
+        assertThat(memberSymbol.getName(), equalTo("EnumString"));
     }
 
     @Test
-    public void addsUnknownNumberIntEnumVariant() {
+    public void omitsUnknownNumberIntEnumVariant() {
         IntEnumShape shape = IntEnumShape.builder()
                 .id("com.foo#Foo")
                 .addMember("BAR", 2)
@@ -246,7 +246,7 @@ public class SymbolProviderTest {
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
 
-        assertThat(memberSymbol.getName(), equalTo("Foo | number"));
+        assertThat(memberSymbol.getName(), equalTo("Foo"));
     }
 
 }

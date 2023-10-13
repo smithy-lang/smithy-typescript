@@ -66,7 +66,7 @@ final class TypeScriptUtils {
     /**
      * Creates a list of sorted, pipe separated enum variants as a union.
      *
-     * <p>For example, `"foo" | "baz" | string`. Note: special characters
+     * <p>For example, `"foo" | "baz"`. Note: special characters
      * and quotes are escaped as needed.
      *
      * @param values Values to create into a union.
