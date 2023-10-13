@@ -229,7 +229,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                     }
                     Trait trait = serviceShape.findTrait(authScheme.getTraitId()).orElse(null);
                     List<HttpAuthOptionProperty> identityProperties =
-                        authScheme.getAuthSchemeOptionParametersByType(Type.IDENTITY);
+                        authScheme.getHttpAuthSchemeOptionParametersByType(Type.IDENTITY);
                     if (!identityProperties.isEmpty()) {
                         w.openBlock("identityProperties: {", "},", () -> {
                             for (HttpAuthOptionProperty parameter : identityProperties) {
@@ -238,7 +238,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                         });
                     }
                     List<HttpAuthOptionProperty> signingProperties =
-                        authScheme.getAuthSchemeOptionParametersByType(Type.SIGNING);
+                        authScheme.getHttpAuthSchemeOptionParametersByType(Type.SIGNING);
                     if (!signingProperties.isEmpty()) {
                         w.openBlock("signingProperties: {", "},", () -> {
                             for (HttpAuthOptionProperty parameter : signingProperties) {
