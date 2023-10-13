@@ -611,9 +611,10 @@ final class StructuredMemberWriter {
             Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
             writer.writeInline("Iterable<$T>", getSymbolForValidatedType(collectionMemberTargetShape));
         } else if (shape.isMapShape()) {
+            MapShape mapShape = shape.asMapShape().get();
             writer.writeInline("Record<$T, $T>",
-                getSymbolForValidatedType(((MapShape) shape).getKey()),
-                getSymbolForValidatedType(((MapShape) shape).getValue())
+                getSymbolForValidatedType(mapShape.getKey()),
+                getSymbolForValidatedType(mapShape.getValue())
             );
         } else if (shape instanceof SimpleShape) {
             writer.writeInline("$T", getSymbolForValidatedType(shape));

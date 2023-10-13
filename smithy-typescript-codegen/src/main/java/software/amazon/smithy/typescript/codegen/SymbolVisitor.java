@@ -196,6 +196,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         Symbol key = toSymbol(shape.getKey());
         Symbol value = toSymbol(shape.getValue());
         return createSymbolBuilder(shape, format("Record<%s, %s>", key.getName(), value.getName()), null)
+                .addReference(key)
                 .addReference(value)
                 .build();
     }
