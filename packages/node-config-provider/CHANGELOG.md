@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.1.2
+
+### Patch Changes
+
+- Updated dependencies [5bd46820]
+- Updated dependencies [6ae95278]
+  - @smithy/shared-ini-file-loader@2.2.1
+
 ## 2.1.1
 
 ### Patch Changes

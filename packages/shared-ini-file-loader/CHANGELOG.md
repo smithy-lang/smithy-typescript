@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- 5bd46820: Treat absence of prefix whitespace as section keys when reading ini files
+- 6ae95278: Parse profile name with invalid '@' character
+
 ## 2.2.0
 
 ### Minor Changes
