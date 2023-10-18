@@ -58,9 +58,10 @@ describe(parseIni.name, () => {
       }
     );
 
-    // Character `@` is not allowed in profile name, but some customers are using it.
-    // Refs: https://github.com/awslabs/smithy-typescript/issues/1026
-    it.each(["-", "_", "@"])("returns data for character '%s' in profile name", (specialChar: string) => {
+    // Some characters are not allowed in profile name, but we parse them as customers use them.
+    // `@` https://github.com/awslabs/smithy-typescript/issues/1026
+    // `+` https://github.com/aws/aws-sdk-js-v3/issues/5373
+    it.each(["-", "_", "@", "+"])("returns data for character '%s' in profile name", (specialChar: string) => {
       const mockProfileName = ["profile", "stage"].join(specialChar);
       const mockSectionFullName = ["profile", mockProfileName].join(" ");
       const mockInput = getMockProfileContent(mockSectionFullName, mockProfileData);
