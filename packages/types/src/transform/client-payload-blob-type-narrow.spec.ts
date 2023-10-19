@@ -4,9 +4,14 @@ import type { Client } from "../client";
 import type { HttpHandlerOptions } from "../http";
 import type { MetadataBearer } from "../response";
 import type { SdkStream } from "../serde";
+import type {
+  NodeJsRuntimeStreamingBlobPayloadInputTypes,
+  StreamingBlobPayloadInputTypes,
+} from "../streaming-payload/streaming-blob-payload-input-types";
 import type { StreamingBlobPayloadOutputTypes } from "../streaming-payload/streaming-blob-payload-output-types";
 import type { BrowserClient, NodeJsClient } from "./client-payload-blob-type-narrow";
 import type { Exact } from "./exact";
+import type { Transform } from "./type-transform";
 
 // it should narrow operational methods and the generic send method
 
@@ -14,6 +19,7 @@ type MyInput = Partial<{
   a: boolean;
   b: boolean | number;
   c: boolean | number | string;
+  body?: StreamingBlobPayloadInputTypes;
 }>;
 
 type MyOutput = {
@@ -35,6 +41,19 @@ interface MyClient extends Client<MyInput, MyOutput, MyConfig> {
   putObject(args: MyInput, options?: HttpHandlerOptions): Promise<MyOutput>;
   putObject(args: MyInput, cb: (err: any, data?: MyOutput) => void): void;
   putObject(args: MyInput, options: HttpHandlerOptions, cb: (err: any, data?: MyOutput) => void): void;
+}
+
+{
+  interface NodeJsMyClient extends NodeJsClient<MyClient> {}
+  const mockClient = (null as unknown) as NodeJsMyClient;
+  type Input = Parameters<typeof mockClient.getObject>[0];
+
+  const assert1: Exact<
+    Input,
+    Transform<MyInput, StreamingBlobPayloadInputTypes | undefined, NodeJsRuntimeStreamingBlobPayloadInputTypes>
+  > = true as const;
+
+  const assert2: Exact<Input, MyInput> = false as const;
 }
 
 {
