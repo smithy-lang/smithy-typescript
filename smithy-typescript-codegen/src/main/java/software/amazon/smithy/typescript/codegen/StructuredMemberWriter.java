@@ -612,10 +612,19 @@ final class StructuredMemberWriter {
             writer.writeInline("Iterable<$T>", getSymbolForValidatedType(collectionMemberTargetShape));
         } else if (shape.isMapShape()) {
             MapShape mapShape = shape.asMapShape().get();
-            writer.writeInline("Record<$T, $T>",
-                getSymbolForValidatedType(mapShape.getKey()),
-                getSymbolForValidatedType(mapShape.getValue())
-            );
+            String keyType = getSymbolForValidatedType(mapShape.getKey()).toString();
+
+            if (keyType.equals("string")) {
+                writer.writeInline("Record<$T, $T>",
+                    getSymbolForValidatedType(mapShape.getKey()),
+                    getSymbolForValidatedType(mapShape.getValue())
+                );
+            } else {
+                writer.writeInline("Partial<Record<$T, $T>>",
+                    getSymbolForValidatedType(mapShape.getKey()),
+                    getSymbolForValidatedType(mapShape.getValue())
+                );
+            }
         } else if (shape instanceof SimpleShape) {
             writer.writeInline("$T", getSymbolForValidatedType(shape));
         } else {
