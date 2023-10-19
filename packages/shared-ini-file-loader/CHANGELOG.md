@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.2.2
+
+### Patch Changes
+
+- 901cb6c9: Parse profile name with invalid '+' character
+- Updated dependencies [5e9fd6ce]
+- Updated dependencies [05f5d42c]
+  - @smithy/types@2.4.0
+
 ## 2.2.1
 
 ### Patch Changes

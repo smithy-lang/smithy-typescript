@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.4.0
+
+### Minor Changes
+
+- 5e9fd6ce: transform inputs for env specific type helpers
+
+### Patch Changes
+
+- 05f5d42c: Allow lowercase type names for endpoint parameter
+
 ## 2.3.5
 
 ### Patch Changes

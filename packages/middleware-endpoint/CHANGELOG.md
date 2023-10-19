@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [5e9fd6ce]
+- Updated dependencies [901cb6c9]
+- Updated dependencies [05f5d42c]
+  - @smithy/types@2.4.0
+  - @smithy/shared-ini-file-loader@2.2.2
+  - @smithy/middleware-serde@2.0.12
+  - @smithy/node-config-provider@2.1.3
+  - @smithy/url-parser@2.0.12
+  - @smithy/util-middleware@2.0.5
+
 ## 2.1.2
 
 ### Patch Changes
