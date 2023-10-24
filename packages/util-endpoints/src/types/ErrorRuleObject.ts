@@ -1,8 +1,3 @@
-import { ConditionObject, Expression } from "./shared";
+import { ErrorRuleObject as __ErrorRuleObject } from "@smithy/types";
 
-export type ErrorRuleObject = {
-  type: "error";
-  conditions?: ConditionObject[];
-  error: Expression;
-  documentation?: string;
-};
+export type ErrorRuleObject = __ErrorRuleObject;

@@ -1,18 +1,14 @@
-import { EndpointObjectProperty } from "@smithy/types";
+import {
+  EndpointObject as __EndpointObject,
+  EndpointObjectHeaders as __EndpointObjectHeaders,
+  EndpointObjectProperties as __EndpointObjectProperties,
+  EndpointObjectProperty,
+  EndpointRuleObject as __EndpointRuleObject,
+} from "@smithy/types";
 
-import { ConditionObject, Expression } from "./shared";
+export type EndpointObjectProperties = __EndpointObjectProperties;
 
-export type EndpointObjectProperties = Record<string, EndpointObjectProperty>;
-export type EndpointObjectHeaders = Record<string, Expression[]>;
-export type EndpointObject = {
-  url: Expression;
-  properties?: EndpointObjectProperties;
-  headers?: EndpointObjectHeaders;
-};
+export type EndpointObjectHeaders = __EndpointObjectHeaders;
+export type EndpointObject = __EndpointObject;
 
-export type EndpointRuleObject = {
-  type: "endpoint";
-  conditions?: ConditionObject[];
-  endpoint: EndpointObject;
-  documentation?: string;
-};
+export type EndpointRuleObject = __EndpointRuleObject;
