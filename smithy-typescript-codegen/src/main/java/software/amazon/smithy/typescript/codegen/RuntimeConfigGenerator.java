@@ -169,11 +169,17 @@ final class RuntimeConfigGenerator {
                     .replaceFirst(CodegenUtils.SOURCE_FOLDER + "/", ""))
                 .replace("${clientConfigName}", symbolProvider.toSymbol(service).getName() + "Config")
                 .replace("${apiVersion}", service.getVersion())
-                .replace("$", "$$") // sanitize template place holders.
-                .replace("$${customizations}", "${L@customizations}");
+                .replace("${", "$${") // sanitize template place holders.
+                .replace("$${customizations}", "${L@customizations}")
+                .replace("$${prepareCustomizations}", "${L@prepareCustomizations}");
 
         delegator.useFileWriter(target.getTargetFilename(), writer -> {
             // Inject customizations into the ~template.
+            writer.onSection("prepareCustomizations", original -> {
+                for (TypeScriptIntegration integration : integrations) {
+                    integration.prepareCustomizations(writer, target, settings, model);
+                }
+            });
             writer.indent().onSection("customizations", original -> {
                 // Start with defaults, use a TreeMap for keeping entries sorted.
                 Map<String, Consumer<TypeScriptWriter>> configs =
@@ -198,7 +204,7 @@ final class RuntimeConfigGenerator {
                 });
             });
             writer.dedent();
-            writer.write(contents, "");
+            writer.write(contents, "", "");
         });
     }
 

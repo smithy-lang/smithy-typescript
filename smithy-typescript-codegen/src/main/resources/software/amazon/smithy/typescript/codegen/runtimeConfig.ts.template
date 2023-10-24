@@ -12,7 +12,7 @@ export const getRuntimeConfig = (config: ${clientConfigName}) => {
   const defaultsMode = resolveDefaultsModeConfig(config);
   const defaultConfigProvider = () => defaultsMode().then(loadConfigsForDefaultMode);
   const clientSharedValues = getSharedRuntimeConfig(config);
-  return {
+  ${prepareCustomizations}return {
     ...clientSharedValues,
     ...config,
     runtime: "node",
