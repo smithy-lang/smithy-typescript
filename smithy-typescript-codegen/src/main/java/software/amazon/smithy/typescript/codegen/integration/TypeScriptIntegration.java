@@ -253,4 +253,17 @@ public interface TypeScriptIntegration
     default List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
         return Collections.emptyList();
     }
+
+    /**
+     * Allows the customization to write arbitrary preparatory code prior to the returned config object.
+     */
+    @SmithyInternalApi
+    default void prepareCustomizations(
+        TypeScriptWriter writer,
+        LanguageTarget target,
+        TypeScriptSettings settings,
+        Model model
+    ) {
+        return;
+    }
 }
