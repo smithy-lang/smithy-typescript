@@ -52,7 +52,8 @@ public enum TypeScriptDependency implements Dependency {
     UTIL_RETRY("dependencies", "@smithy/util-retry", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", false),
-    AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
+    @Deprecated AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
+    UTIL_ENDPOINTS("dependencies", "@smithy/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "3.0.0", true),
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "3.0.0", true),

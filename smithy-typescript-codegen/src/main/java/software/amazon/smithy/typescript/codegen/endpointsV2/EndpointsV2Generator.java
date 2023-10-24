@@ -179,9 +179,9 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
 
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
-                writer.addImport("EndpointParams", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
-                writer.addImport("resolveEndpoint", null, TypeScriptDependency.AWS_SDK_UTIL_ENDPOINTS);
+                writer.addDependency(TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.addImport("EndpointParams", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.addImport("resolveEndpoint", null, TypeScriptDependency.UTIL_ENDPOINTS);
                 writer.addRelativeImport("EndpointParameters", null,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
                         ENDPOINT_PARAMETERS_FILE.replace(".ts", "")));
