@@ -60,7 +60,7 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     await spawnProcess("touch", ["yarn.lock"], { cwd: codegenDir });
     await spawnProcess("yarn", { cwd: codegenDir });
     await spawnProcess("yarn", ["build"], { cwd: codegenDir });
-    // After building the package, its packed and copied to node_modules so that
+    // After building the package, it's packed and copied to node_modules so that
     // it can be used in integration tests by other packages within the monorepo.
     await spawnProcess("yarn", ["pack"], { cwd: codegenDir });
     await spawnProcess("rm", ["-rf", packageName], { cwd: nodeModulesDir });
