@@ -257,6 +257,7 @@ public interface TypeScriptIntegration
     /**
      * Allows the customization to write arbitrary preparatory code prior to the returned config object.
      */
+    @SmithyInternalApi
     default void prepareCustomizations(
         TypeScriptWriter writer,
         LanguageTarget target,
