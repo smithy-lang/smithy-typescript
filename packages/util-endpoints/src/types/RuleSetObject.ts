@@ -1,22 +1,11 @@
-import { RuleSetRules } from "./TreeRuleObject";
+import {
+  DeprecatedObject as __DeprecatedObject,
+  ParameterObject as __ParameterObject,
+  RuleSetObject as __RuleSetObject,
+} from "@smithy/types";
 
-export type DeprecatedObject = {
-  message?: string;
-  since?: string;
-};
+export type DeprecatedObject = __DeprecatedObject;
 
-export type ParameterObject = {
-  type: "String" | "Boolean";
-  default?: string | boolean;
-  required?: boolean;
-  documentation?: string;
-  builtIn?: string;
-  deprecated?: DeprecatedObject;
-};
+export type ParameterObject = __ParameterObject;
 
-export type RuleSetObject = {
-  version: string;
-  serviceId?: string;
-  parameters: Record<string, ParameterObject>;
-  rules: RuleSetRules;
-};
+export type RuleSetObject = __RuleSetObject;

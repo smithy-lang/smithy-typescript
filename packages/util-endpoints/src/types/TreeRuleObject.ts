@@ -1,12 +1,5 @@
-import { EndpointRuleObject } from "./EndpointRuleObject";
-import { ErrorRuleObject } from "./ErrorRuleObject";
-import { ConditionObject } from "./shared";
+import { RuleSetRules as __RuleSetRules, TreeRuleObject as __TreeRuleObject } from "@smithy/types";
 
-export type RuleSetRules = Array<EndpointRuleObject | ErrorRuleObject | TreeRuleObject>;
+export type RuleSetRules = __RuleSetRules;
 
-export type TreeRuleObject = {
-  type: "tree";
-  conditions?: ConditionObject[];
-  rules: RuleSetRules;
-  documentation?: string;
-};
+export type TreeRuleObject = __TreeRuleObject;
