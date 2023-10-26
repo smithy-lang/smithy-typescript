@@ -135,17 +135,6 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
                         writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.ts");
                         writer.write("$L", source);
                 });
-
-        // Write the middleware tests.
-        writerFactory.accept(
-                Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", INTEGRATION_NAME, "index.spec.ts").toString(),
-                writer -> {
-                        writer.addDependency(TypeScriptDependency.VITEST);
-
-                        String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.spec.ts");
-                        writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.spec.ts");
-                        writer.write("$L", source);
-                });
     }
 
     private void writeAdditionalExports(
