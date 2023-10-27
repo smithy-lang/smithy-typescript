@@ -17,7 +17,7 @@
                 }
             ],
             "plugins": {
-                "typescript-ssdk-codegen": {
+                "typescript-server-codegen": {
                     "service": "example.weather#Weather",
                     "targetNamespace": "Weather",
                     "package": "weather-ssdk",
@@ -40,7 +40,7 @@
                 }
             ],
             "plugins": {
-                "typescript-codegen": {
+                "typescript-client-codegen": {
                     "service": "example.weather#Weather",
                     "targetNamespace": "Weather",
                     "package": "@smithy/weather-experimental-identity-and-auth",
@@ -63,7 +63,7 @@
                 }
             ],
             "plugins": {
-                "typescript-codegen": {
+                "typescript-client-codegen": {
                     "service": "example.weather#Weather",
                     "targetNamespace": "Weather",
                     "package": "weather",
@@ -85,7 +85,7 @@
                 }
             ],
             "plugins": {
-                "typescript-codegen": {
+                "typescript-client-codegen": {
                     "service": "identity.auth.httpApiKeyAuth#HttpApiKeyAuthService",
                     "targetNamespace": "HttpApiKeyAuthService",
                     "package": "@smithy/identity-and-auth-http-api-key-auth-service",
@@ -108,7 +108,7 @@
                 }
             ],
             "plugins": {
-                "typescript-codegen": {
+                "typescript-client-codegen": {
                     "service": "identity.auth.httpBearerAuth#HttpBearerAuthService",
                     "targetNamespace": "HttpBearerAuthService",
                     "package": "@smithy/identity-and-auth-http-bearer-auth-service",
@@ -123,7 +123,7 @@
         }
     },
     "plugins": {
-        "typescript-codegen": {
+        "typescript-client-codegen": {
             "service": "example.weather#Weather",
             "targetNamespace": "Weather",
             "package": "weather",
