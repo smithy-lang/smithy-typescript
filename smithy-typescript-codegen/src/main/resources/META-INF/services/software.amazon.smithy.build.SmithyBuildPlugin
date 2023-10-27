@@ -1,2 +1,4 @@
-software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin
+software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin
 software.amazon.smithy.typescript.codegen.TypeScriptServerCodegenPlugin
+software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin
+software.amazon.smithy.typescript.codegen.TypeScriptSSDKCodegenPlugin

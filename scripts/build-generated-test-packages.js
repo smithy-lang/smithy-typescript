@@ -20,34 +20,34 @@ const codegenTestDir = path.join(
 const weatherClientDir = path.join(
     codegenTestDir,
     "source",
-    "typescript-codegen"
+    "typescript-client-codegen"
 );
 
 // TODO(experimentalIdentityAndAuth): build generic client for integration tests
 const weatherExperimentalIdentityAndAuthClientDir = path.join(
     codegenTestDir,
     "client-experimental-identity-and-auth",
-    "typescript-codegen"
+    "typescript-client-codegen"
 );
 
 const weatherSsdkDir = path.join(
     codegenTestDir,
     "ssdk-test",
-    "typescript-ssdk-codegen"
+    "typescript-server-codegen"
 )
 
 // TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
 const httpApiKeyAuthClientDir = path.join(
     codegenTestDir,
     "identity-and-auth-http-api-key-auth",
-    "typescript-codegen"
+    "typescript-client-codegen"
 );
 
 // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
 const httpBearerAuthClientDir = path.join(
     codegenTestDir,
     "identity-and-auth-http-bearer-auth",
-    "typescript-codegen"
+    "typescript-client-codegen"
 );
 
 const nodeModulesDir = path.join(root, "node_modules");
