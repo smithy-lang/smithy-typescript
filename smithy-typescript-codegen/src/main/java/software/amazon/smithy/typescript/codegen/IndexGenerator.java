@@ -98,18 +98,23 @@ final class IndexGenerator {
     ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
+        // Normalizes client name, e.g. WeatherClient => Weather
+        String normalizedClientName = symbol.getName().replace("Client", "");
 
         // Write export statement for bare-bones client.
         writer.write("export * from \"./$L\";", symbol.getName());
 
         // Write export statement for aggregated client.
-        String aggregatedClientName = symbol.getName().replace("Client", "");
-        writer.write("export * from \"./$L\";", aggregatedClientName);
+        writer.write("export * from \"./$L\";", normalizedClientName);
 
         // export endpoints config interface
         if (service.hasTrait(EndpointRuleSetTrait.class)) {
             writer.write("export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
         }
+
+        // Export Runtime Extension and Client ExtensionConfiguration interfaces
+        writer.write("export { RuntimeExtension } from \"./runtimeExtensions\";");
+        writer.write("export { $LExtensionConfiguration } from \"./extensionConfiguration\";", normalizedClientName);
 
         // Write export statement for commands.
         writer.write("export * from \"./commands\";");
