@@ -1,4 +1,4 @@
-import { AwsCredentialIdentity, Logger, Provider } from "@smithy/types";
+import { Logger, Provider } from "@smithy/types";
 
 import { InstanceMetadataCredentials } from "../types";
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
