@@ -41,6 +41,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class ServerCommandGenerator implements Runnable {
 
     static final String COMMANDS_FOLDER = "operations";
+    private static final String NO_PROTOCOL_FOUND_SERDE_FUNCTION =
+        "(async (...args: any[]) => { throw new Error(\"No supported protocol was found\"); })";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -163,18 +165,23 @@ final class ServerCommandGenerator implements Runnable {
         writer.addImport("OperationSerializer", "__OperationSerializer", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("export class $L implements __OperationSerializer<$T<any>, $S, $T> {", "}",
                 serializerName, serverSymbol, operationSymbol.getName(), errorsType, () -> {
-            String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
-            String deserializerFunction = ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
-
-            writer.addRelativeImport(serializerFunction, null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
-            writer.addRelativeImport(deserializerFunction, null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
-
-            writer.write("serialize = $L;", serializerFunction);
-            writer.write("deserialize = $L;", deserializerFunction);
+            if (protocolGenerator == null) {
+                writer.write("serialize = $L as any;", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
+                writer.write("deserialize = $L as any;", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
+            } else {
+                String serializerFunction =
+                    ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
+                writer.addRelativeImport(serializerFunction, null,
+                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                writer.write("serialize = $L;", serializerFunction);
+                String deserializerFunction =
+                    ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
+                writer.addRelativeImport(deserializerFunction, null,
+                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                writer.write("deserialize = $L;", deserializerFunction);
+            }
             writer.write("");
             writeErrorChecker();
             writeErrorHandler();
@@ -221,12 +228,16 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeErrorHandlerCase(StructureShape error) {
         Symbol errorSymbol = symbolProvider.toSymbol(error);
-        String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
-        writer.addRelativeImport(serializerFunction, null,
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
         writer.openBlock("case $S: {", "}", error.getId().getName(), () -> {
-            writer.write("return $L(error, ctx);", serializerFunction);
+            if (protocolGenerator == null) {
+                writer.write("return $L(error, ctx);", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
+            } else {
+                String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
+                writer.addRelativeImport(serializerFunction, null,
+                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                writer.write("return $L(error, ctx);", serializerFunction);
+            }
         });
     }
 
