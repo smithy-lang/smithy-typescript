@@ -19,7 +19,6 @@
             "plugins": {
                 "typescript-server-codegen": {
                     "service": "example.weather#Weather",
-                    "targetNamespace": "Weather",
                     "package": "weather-ssdk",
                     "packageVersion": "0.0.1",
                     "packageJson": {
@@ -42,7 +41,6 @@
             "plugins": {
                 "typescript-client-codegen": {
                     "service": "example.weather#Weather",
-                    "targetNamespace": "Weather",
                     "package": "@smithy/weather-experimental-identity-and-auth",
                     "packageVersion": "0.0.1",
                     "packageJson": {
@@ -65,7 +63,6 @@
             "plugins": {
                 "typescript-client-codegen": {
                     "service": "example.weather#Weather",
-                    "targetNamespace": "Weather",
                     "package": "weather",
                     "packageVersion": "0.0.1",
                     "packageJson": {
@@ -87,7 +84,6 @@
             "plugins": {
                 "typescript-client-codegen": {
                     "service": "identity.auth.httpApiKeyAuth#HttpApiKeyAuthService",
-                    "targetNamespace": "HttpApiKeyAuthService",
                     "package": "@smithy/identity-and-auth-http-api-key-auth-service",
                     "packageVersion": "0.0.1",
                     "packageJson": {
@@ -110,7 +106,6 @@
             "plugins": {
                 "typescript-client-codegen": {
                     "service": "identity.auth.httpBearerAuth#HttpBearerAuthService",
-                    "targetNamespace": "HttpBearerAuthService",
                     "package": "@smithy/identity-and-auth-http-bearer-auth-service",
                     "packageVersion": "0.0.1",
                     "packageJson": {
@@ -125,7 +120,6 @@
     "plugins": {
         "typescript-client-codegen": {
             "service": "example.weather#Weather",
-            "targetNamespace": "Weather",
             "package": "weather",
             "packageVersion": "0.0.1",
             "packageJson": {
