@@ -1,5 +1,50 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.19.0 (2023-11-02)
+
+### Features
+* Updated codegen plugins to match idiomatic plugin names([#1057](https://github.com/awslabs/smithy-typescript/pull/1057))
+* Added flag for blocking imds v1 fallback behavior ([#1059](https://github.com/awslabs/smithy-typescript/pull/1059))
+* Upgraded@babel/traverse from 7.21.2 to 7.23.2 ([#1041](https://github.com/awslabs/smithy-typescript/pull/1041))
+* Upgraded browserify-sign from 4.2.1 to 4.2.2 ([#1058](https://github.com/awslabs/smithy-typescript/pull/1058))
+* Updated to use migrated `util-endpoints` ([#1044](https://github.com/awslabs/smithy-typescript/pull/1044))
+* Re-exported existing endpoint types ([#1055](https://github.com/awslabs/smithy-typescript/pull/1055))
+* Added util-endpoints package ([#1043](https://github.com/awslabs/smithy-typescript/pull/1043))
+* Allow TypeScriptIntegration to write prior to the config object literal ([#1054](https://github.com/awslabs/smithy-typescript/pull/1054))
+* Updated to transform inputs for platform specific type helpers ([#1046](https://github.com/awslabs/smithy-typescript/pull/1046))
+* Made `unionShape` deserializer overridable ([#1040](https://github.com/awslabs/smithy-typescript/pull/1040), [#1045](https://github.com/awslabs/smithy-typescript/pull/1045))
+* Update to generate enum Record keys when target is enum ([#1037](https://github.com/awslabs/smithy-typescript/pull/1037))
+* Removed "| string" and "| number" from enum targeted members ([#1028](https://github.com/awslabs/smithy-typescript/pull/1003))
+* Added `-p` for `mkdir` in `build-generated-test-packages` ([#1010](https://github.com/awslabs/smithy-typescript/pull/1003))
+* Added logging for `buildAndCopyToNodeModules()` ([#1003](https://github.com/awslabs/smithy-typescript/pull/1003)) 
+* Reorganized models in `smithy-typescript-codegen-test` ([#995](https://github.com/awslabs/smithy-typescript/pull/995))
+* Updated to export empty model index if no `model_*` files exist ([#996](https://github.com/awslabs/smithy-typescript/pull/996))
+* Read service specific endpoints for environment or config ([#1014](https://github.com/awslabs/smithy-typescript/pull/1014))
+* Updated to populate `sso-session` and services sections when loading config files ([#993](https://github.com/awslabs/smithy-typescript/pull/993))
+* Added export `CONFIG_PREFIX_SEPARATOR` from `loadSharedConfigFiles` ([#992](https://github.com/awslabs/smithy-typescript/pull/992))
+* Updated to pass configuration file as second parameter to `configSelector` ([#990](https://github.com/awslabs/smithy-typescript/pull/990))
+* Updated to populate subsection using dot separator in section key when parsing INI files ([#989](https://github.com/awslabs/smithy-typescript/pull/989))
+* Added support for reading values from main section when parsing INI files ([#986](https://github.com/awslabs/smithy-typescript/pull/986))
+
+### Bug Fixes
+* Exported `RuntimeExtension` and Client `ExtensionConfiguration` interfaces ([#1057](https://github.com/awslabs/smithy-typescript/pull/1057))
+* Removed `TARGET_NAMESPACE` from `TypeScriptSettings` ([#1057](https://github.com/awslabs/smithy-typescript/pull/1057))
+* Updated Server Codegen to generate without a protocol ([#1057](https://github.com/awslabs/smithy-typescript/pull/1057))
+* Updated to use partial record for enum keyed types ([#1049](https://github.com/awslabs/smithy-typescript/pull/1049))
+* Allowed lowercase type names for endpoint parameters ([#1050](https://github.com/awslabs/smithy-typescript/pull/1050))
+* Added parsing for profile name with invalid '+' character ([#1047](https://github.com/awslabs/smithy-typescript/pull/1047))
+* Added missing map shape reference ([#1038](https://github.com/awslabs/smithy-typescript/pull/1038))
+* Adds parsing for profile name with invalid '@' character ([#1036](https://github.com/awslabs/smithy-typescript/pull/1036))
+* Treat absence of prefix whitespace as section keys when reading ini files ([#1029](https://github.com/awslabs/smithy-typescript/pull/1029))
+* Added missing dependency of `@smithy/shared-ini-file-loader` ([#1027](https://github.com/awslabs/smithy-typescript/pull/1027))
+* Fixed operation index file codegen ([#1025](https://github.com/awslabs/smithy-typescript/pull/1025))
+* Removed extra `$` from `HttpApiKeyAuthSigner` ([#1006](https://github.com/awslabs/smithy-typescript/pull/1006))
+* Added await to `signer.sign()` in `httpSigningMiddleware` ([#1005](https://github.com/awslabs/smithy-typescript/pull/1005))
+* Fixed `@httpApiKeyAuth` scheme property ([#1001](https://github.com/awslabs/smithy-typescript/pull/1001))
+* Fixed `HttpAuthSchemeParameters` codegen ([#998](https://github.com/awslabs/smithy-typescript/pull/998))
+* Fixed `resolveHttpAuthSchemeConfig` imports ([#997](https://github.com/awslabs/smithy-typescript/pull/997))
+* Updated default `keepalive=false` for fetch ([#1016](https://github.com/awslabs/smithy-typescript/pull/1016))
+
 ## 0.18.0 (2023-10-04)
 
 ### Features
