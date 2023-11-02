@@ -116,9 +116,6 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
       let token: string;
       try {
         token = (await getMetadataToken({ ...endpoint, timeout })).toString();
-        throw {
-          statusCode: 404,
-        };
       } catch (error) {
         if (error?.statusCode === 400) {
           throw Object.assign(error, {
