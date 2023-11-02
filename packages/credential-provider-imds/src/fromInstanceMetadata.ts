@@ -16,6 +16,7 @@ const IMDS_PATH = "/latest/meta-data/iam/security-credentials/";
 const IMDS_TOKEN_PATH = "/latest/api/token";
 const AWS_EC2_METADATA_V1_DISABLED = "AWS_EC2_METADATA_V1_DISABLED";
 const PROFILE_AWS_EC2_METADATA_V1_DISABLED = "ec2_metadata_v1_disabled";
+const X_AWS_EC2_METADATA_TOKEN = "x-aws-ec2-metadata-token";
 
 /**
  * @internal
@@ -33,7 +34,7 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
   const { timeout, maxRetries } = providerConfigFromInit(init);
 
   const getCredentials = async (maxRetries: number, options: RequestOptions) => {
-    const isImdsV1Fallback = disableFetchToken || options.headers?.["x-aws-ec2-metadata-token"] == null;
+    const isImdsV1Fallback = disableFetchToken || options.headers?.[X_AWS_EC2_METADATA_TOKEN] == null;
 
     if (isImdsV1Fallback) {
       let fallbackBlockedFromProfile = false;
@@ -67,8 +68,9 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
         const causes: string[] = [];
         if (init.ec2MetadataV1Disabled)
           causes.push("credential provider initialization (runtime option ec2MetadataV1Disabled)");
-        if (fallbackBlockedFromProfile) causes.push("config file profile (ec2_metadata_v1_disabled)");
-        if (fallbackBlockedFromProcessEnv) causes.push("process environment variable (AWS_EC2_METADATA_V1_DISABLED)");
+        if (fallbackBlockedFromProfile) causes.push(`config file profile (${PROFILE_AWS_EC2_METADATA_V1_DISABLED})`);
+        if (fallbackBlockedFromProcessEnv)
+          causes.push(`process environment variable (${AWS_EC2_METADATA_V1_DISABLED})`);
 
         throw new InstanceMetadataV1FallbackError(
           `AWS EC2 Metadata v1 fallback has been blocked by AWS SDK configuration in the following: [${causes.join(
@@ -130,7 +132,7 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
       return getCredentials(maxRetries, {
         ...endpoint,
         headers: {
-          "x-aws-ec2-metadata-token": token,
+          [X_AWS_EC2_METADATA_TOKEN]: token,
         },
         timeout,
       });
