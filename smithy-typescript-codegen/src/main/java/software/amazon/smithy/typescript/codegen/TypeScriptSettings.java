@@ -46,7 +46,6 @@ public final class TypeScriptSettings {
 
     static final String DISABLE_DEFAULT_VALIDATION = "disableDefaultValidation";
     static final String REQUIRED_MEMBER_MODE = "requiredMemberMode";
-    static final String TARGET_NAMESPACE = "targetNamespace";
     private static final Logger LOGGER = Logger.getLogger(TypeScriptSettings.class.getName());
 
     private static final String PACKAGE = "package";
@@ -468,11 +467,11 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
+                              SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
                               CREATE_DEFAULT_README, EXPERIMENTAL_IDENTITY_AND_AUTH)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, TARGET_NAMESPACE, PRIVATE, REQUIRED_MEMBER_MODE,
+                              SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
                               DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
