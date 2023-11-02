@@ -25,6 +25,7 @@ wrapper/
 
 # local scripting
 Makefile
+workspace
 
 # Visual Studio Code
 .vscode/*

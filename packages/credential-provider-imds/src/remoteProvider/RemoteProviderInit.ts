@@ -13,7 +13,7 @@ export const DEFAULT_TIMEOUT = 1000;
 export const DEFAULT_MAX_RETRIES = 0;
 
 /**
- * @internal
+ * @public
  */
 export interface RemoteProviderConfig {
   /**
@@ -28,10 +28,18 @@ export interface RemoteProviderConfig {
 }
 
 /**
- * @internal
+ * @public
  */
 export interface RemoteProviderInit extends Partial<RemoteProviderConfig> {
   logger?: Logger;
+  /**
+   * Only used in the IMDS credential provider.
+   */
+  ec2MetadataV1Disabled?: boolean;
+  /**
+   * AWS_PROFILE.
+   */
+  profile?: string;
 }
 
 /**

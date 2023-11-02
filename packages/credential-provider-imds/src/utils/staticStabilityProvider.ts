@@ -1,5 +1,6 @@
-import { AwsCredentialIdentity, Logger, Provider } from "@smithy/types";
+import { Logger, Provider } from "@smithy/types";
 
+import { InstanceMetadataV1FallbackError } from "../error/InstanceMetadataV1FallbackError";
 import { InstanceMetadataCredentials } from "../types";
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
 
@@ -32,7 +33,7 @@ export const staticStabilityProvider = (
         credentials = getExtendedInstanceMetadataCredentials(credentials, logger);
       }
     } catch (e) {
-      if (pastCredentials) {
+      if (pastCredentials && !(e instanceof InstanceMetadataV1FallbackError)) {
         logger.warn("Credential renew failed: ", e);
         credentials = getExtendedInstanceMetadataCredentials(pastCredentials, logger);
       } else {

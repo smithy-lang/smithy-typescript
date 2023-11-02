@@ -1,5 +1,6 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 
+import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
 import { fromInstanceMetadata } from "./fromInstanceMetadata";
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
@@ -284,5 +285,19 @@ describe("fromInstanceMetadata", () => {
     const fromInstanceMetadataFunc = fromInstanceMetadata();
     await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
     await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
+  });
+
+  it("allows blocking imdsv1 fallback", async () => {
+    const tokenError = Object.assign(new Error("Error"), { statusCode: 406 });
+
+    (httpRequest as jest.Mock).mockRejectedValueOnce(tokenError);
+
+    (retry as jest.Mock).mockImplementation((fn: any) => fn());
+    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+
+    const fromInstanceMetadataFunc = fromInstanceMetadata({
+      ec2MetadataV1Disabled: true,
+    });
+    await expect(() => fromInstanceMetadataFunc()).rejects.toBeInstanceOf(InstanceMetadataV1FallbackError);
   });
 });

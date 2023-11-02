@@ -1,7 +1,9 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
+import { parseKnownFiles } from "@smithy/shared-ini-file-loader";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import { RequestOptions } from "http";
 
+import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
 import { providerConfigFromInit, RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
@@ -12,6 +14,8 @@ import { staticStabilityProvider } from "./utils/staticStabilityProvider";
 
 const IMDS_PATH = "/latest/meta-data/iam/security-credentials/";
 const IMDS_TOKEN_PATH = "/latest/api/token";
+const AWS_EC2_METADATA_V1_DISABLED = "AWS_EC2_METADATA_V1_DISABLED";
+const AWS_PROFILE = "AWS_PROFILE";
 
 /**
  * @internal
@@ -25,10 +29,35 @@ export const fromInstanceMetadata = (init: RemoteProviderInit = {}): Provider<In
 const getInstanceImdsProvider = (init: RemoteProviderInit) => {
   // when set to true, metadata service will not fetch token
   let disableFetchToken = false;
+  const { logger, profile = process.env[AWS_PROFILE] ?? "default" } = init;
   const { timeout, maxRetries } = providerConfigFromInit(init);
 
   const getCredentials = async (maxRetries: number, options: RequestOptions) => {
-    const profile = (
+    const isImdsV1Fallback = disableFetchToken || options.headers?.["x-aws-ec2-metadata-token"] == null;
+
+    if (isImdsV1Fallback) {
+      const configFiles = await parseKnownFiles({});
+      const fallbackBlockedFromProfile =
+        configFiles[profile]?.ec2_metadata_v1_disabled &&
+        String(configFiles[profile]?.ec2_metadata_v1_disabled).toLowerCase() !== "false";
+      const fallbackBlockedFromProcessEnv =
+        process.env[AWS_EC2_METADATA_V1_DISABLED] && process.env[AWS_EC2_METADATA_V1_DISABLED] !== "false";
+
+      if (init.ec2MetadataV1Disabled || fallbackBlockedFromProfile || fallbackBlockedFromProcessEnv) {
+        const causes: string[] = [];
+        if (init.ec2MetadataV1Disabled) causes.push("credential provider initialization (runtime)");
+        if (fallbackBlockedFromProfile) causes.push("config file profile");
+        if (fallbackBlockedFromProcessEnv) causes.push("process environment variable");
+
+        throw new InstanceMetadataV1FallbackError(
+          `AWS EC2 Metadata v1 fallback has been blocked by AWS SDK configuration in the following: [${causes.join(
+            ", "
+          )}].`
+        );
+      }
+    }
+
+    const imdsProfile = (
       await retry<string>(async () => {
         let profile: string;
         try {
@@ -46,7 +75,7 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
     return retry(async () => {
       let creds: AwsCredentialIdentity;
       try {
-        creds = await getCredentialsFromProfile(profile, options);
+        creds = await getCredentialsFromProfile(imdsProfile, options);
       } catch (err) {
         if (err.statusCode === 401) {
           disableFetchToken = false;
@@ -60,6 +89,7 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
   return async () => {
     const endpoint = await getInstanceMetadataEndpoint();
     if (disableFetchToken) {
+      logger?.debug("AWS SDK Instance Metadata", "using v1 fallback (no token fetch)");
       return getCredentials(maxRetries, { ...endpoint, timeout });
     } else {
       let token: string;
@@ -73,6 +103,7 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
         } else if (error.message === "TimeoutError" || [403, 404, 405].includes(error.statusCode)) {
           disableFetchToken = true;
         }
+        logger?.debug("AWS SDK Instance Metadata", "using v1 fallback (initial)");
         return getCredentials(maxRetries, { ...endpoint, timeout });
       }
       return getCredentials(maxRetries, {
