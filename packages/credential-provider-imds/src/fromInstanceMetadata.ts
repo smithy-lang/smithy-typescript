@@ -1,5 +1,5 @@
+import { loadConfig } from "@smithy/node-config-provider";
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { parseKnownFiles } from "@smithy/shared-ini-file-loader";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import { RequestOptions } from "http";
 
@@ -15,7 +15,7 @@ import { staticStabilityProvider } from "./utils/staticStabilityProvider";
 const IMDS_PATH = "/latest/meta-data/iam/security-credentials/";
 const IMDS_TOKEN_PATH = "/latest/api/token";
 const AWS_EC2_METADATA_V1_DISABLED = "AWS_EC2_METADATA_V1_DISABLED";
-const AWS_PROFILE = "AWS_PROFILE";
+const PROFILE_AWS_EC2_METADATA_V1_DISABLED = "ec2_metadata_v1_disabled";
 
 /**
  * @internal
@@ -29,25 +29,46 @@ export const fromInstanceMetadata = (init: RemoteProviderInit = {}): Provider<In
 const getInstanceImdsProvider = (init: RemoteProviderInit) => {
   // when set to true, metadata service will not fetch token
   let disableFetchToken = false;
-  const { logger, profile = process.env[AWS_PROFILE] ?? "default" } = init;
+  const { logger, profile } = init;
   const { timeout, maxRetries } = providerConfigFromInit(init);
 
   const getCredentials = async (maxRetries: number, options: RequestOptions) => {
     const isImdsV1Fallback = disableFetchToken || options.headers?.["x-aws-ec2-metadata-token"] == null;
 
     if (isImdsV1Fallback) {
-      const configFiles = await parseKnownFiles({});
-      const fallbackBlockedFromProfile =
-        configFiles[profile]?.ec2_metadata_v1_disabled &&
-        String(configFiles[profile]?.ec2_metadata_v1_disabled).toLowerCase() !== "false";
-      const fallbackBlockedFromProcessEnv =
-        process.env[AWS_EC2_METADATA_V1_DISABLED] && process.env[AWS_EC2_METADATA_V1_DISABLED] !== "false";
+      let fallbackBlockedFromProfile = false;
+      let fallbackBlockedFromProcessEnv = false;
 
-      if (init.ec2MetadataV1Disabled || fallbackBlockedFromProfile || fallbackBlockedFromProcessEnv) {
+      const configValue = await loadConfig(
+        {
+          environmentVariableSelector: (env) => {
+            const envValue = env[AWS_EC2_METADATA_V1_DISABLED];
+            fallbackBlockedFromProcessEnv = !!envValue && envValue !== "false";
+            if (envValue === undefined) {
+              throw new CredentialsProviderError(
+                `${AWS_EC2_METADATA_V1_DISABLED} not set in env, checking config file next.`
+              );
+            }
+            return fallbackBlockedFromProcessEnv;
+          },
+          configFileSelector: (profile) => {
+            const profileValue = profile[PROFILE_AWS_EC2_METADATA_V1_DISABLED];
+            fallbackBlockedFromProfile = !!profileValue && profileValue !== "false";
+            return fallbackBlockedFromProfile;
+          },
+          default: false,
+        },
+        {
+          profile,
+        }
+      )();
+
+      if (init.ec2MetadataV1Disabled || configValue) {
         const causes: string[] = [];
-        if (init.ec2MetadataV1Disabled) causes.push("credential provider initialization (runtime)");
-        if (fallbackBlockedFromProfile) causes.push("config file profile");
-        if (fallbackBlockedFromProcessEnv) causes.push("process environment variable");
+        if (init.ec2MetadataV1Disabled)
+          causes.push("credential provider initialization (runtime option ec2MetadataV1Disabled)");
+        if (fallbackBlockedFromProfile) causes.push("config file profile (ec2_metadata_v1_disabled)");
+        if (fallbackBlockedFromProcessEnv) causes.push("process environment variable (AWS_EC2_METADATA_V1_DISABLED)");
 
         throw new InstanceMetadataV1FallbackError(
           `AWS EC2 Metadata v1 fallback has been blocked by AWS SDK configuration in the following: [${causes.join(
@@ -95,6 +116,9 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
       let token: string;
       try {
         token = (await getMetadataToken({ ...endpoint, timeout })).toString();
+        throw {
+          statusCode: 404,
+        };
       } catch (error) {
         if (error?.statusCode === 400) {
           throw Object.assign(error, {
