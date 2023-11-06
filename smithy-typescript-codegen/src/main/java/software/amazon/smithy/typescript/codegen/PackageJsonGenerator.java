@@ -60,7 +60,7 @@ final class PackageJsonGenerator {
         ObjectNode devDeps = node.getObjectMember("devDependencies").orElse(Node.objectNode());
         if (devDeps.containsMember(TypeScriptDependency.VITEST.packageName)) {
             ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
-            scripts = scripts.withMember("test", "vitest run");
+            scripts = scripts.withMember("test", "vitest run --passWithNoTests");
             node = node.withMember("scripts", scripts);
 
             manifest.writeFile(VITEST_CONFIG_FILENAME, IoUtils.toUtf8String(
