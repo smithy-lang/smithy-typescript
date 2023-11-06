@@ -84,7 +84,7 @@ export const httpAuthSchemeMiddleware = <
   for (const option of options) {
     const scheme = authSchemes.get(option.schemeId);
     if (!scheme) {
-      failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` was not enable for this service.`);
+      failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` was not enabled for this service.`);
       continue;
     }
     const identityProvider = scheme.identityProvider(config.identityProviderConfig);
