@@ -1,11 +1,15 @@
 const fs = require("fs");
 
 /**
+ * This enforcement is not here to prevent adoption of newer
+ * package standards such as "exports". It is to ensure consistency in the
+ * monorepo until the time comes for those changes.
+ * ----
  *
- * Will enforce several things on a package json object:
+ * The script will enforce several things on a package json object:
  *
  * - main and module must be defined.
- *   Note: in the future this may change. Browser is perhaps more standard than module.
+ *   In the future this may change. Browser is perhaps more standard than module.
  *
  * - if react-native entry exists, browser and react native entries must have
  *   an identical set of keys for replacement directives
