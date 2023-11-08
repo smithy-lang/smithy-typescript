@@ -50,7 +50,8 @@
     "dist-*/**"
   ],
   "react-native": {
-    "./dist-es/resolveDefaultsModeConfig": "./dist-es/resolveDefaultsModeConfig.native"
+    "./dist-es/resolveDefaultsModeConfig": "./dist-es/resolveDefaultsModeConfig.native",
+    "./dist-cjs/resolveDefaultsModeConfig": "./dist-cjs/resolveDefaultsModeConfig.native"
   },
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-defaults-mode-node",
   "repository": {
@@ -63,5 +64,9 @@
   },
   "publishConfig": {
     "directory": ".release/package"
+  },
+  "browser": {
+    "./dist-es/resolveDefaultsModeConfig": "./dist-es/resolveDefaultsModeConfig.native",
+    "./dist-cjs/resolveDefaultsModeConfig": "./dist-cjs/resolveDefaultsModeConfig.native"
   }
 }
