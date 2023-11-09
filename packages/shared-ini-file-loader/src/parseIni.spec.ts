@@ -63,14 +63,17 @@ describe(parseIni.name, () => {
     // `+` https://github.com/aws/aws-sdk-js-v3/issues/5373
     // `.` https://github.com/aws/aws-sdk-js-v3/issues/5449
     // `/` https://github.com/awslabs/smithy-typescript/issues/1053
-    it.each(["-", "_", "@", "+", ".", "/"])("returns data for character '%s' in profile name", (specialChar: string) => {
-      const mockProfileName = ["profile", "stage"].join(specialChar);
-      const mockSectionFullName = ["profile", mockProfileName].join(" ");
-      const mockInput = getMockProfileContent(mockSectionFullName, mockProfileData);
-      expect(parseIni(mockInput)).toStrictEqual({
-        [["profile", mockProfileName].join(CONFIG_PREFIX_SEPARATOR)]: mockProfileData,
-      });
-    });
+    it.each(["-", "_", "@", "+", ".", "/"])(
+      "returns data for character '%s' in profile name",
+      (specialChar: string) => {
+        const mockProfileName = ["profile", "stage"].join(specialChar);
+        const mockSectionFullName = ["profile", mockProfileName].join(" ");
+        const mockInput = getMockProfileContent(mockSectionFullName, mockProfileData);
+        expect(parseIni(mockInput)).toStrictEqual({
+          [["profile", mockProfileName].join(CONFIG_PREFIX_SEPARATOR)]: mockProfileData,
+        });
+      }
+    );
 
     it("returns data for two profiles", () => {
       const mockProfile1 = getMockProfileContent(mockProfileName, mockProfileData);
