@@ -63,7 +63,9 @@ describe(parseIni.name, () => {
     // `+` https://github.com/aws/aws-sdk-js-v3/issues/5373
     // `.` https://github.com/aws/aws-sdk-js-v3/issues/5449
     // `/` https://github.com/awslabs/smithy-typescript/issues/1053
-    it.each(["-", "_", "@", "+", ".", "/"])(
+    // `%` https://github.com/aws/aws-sdk-java-v2/pull/1538
+    // `:` https://github.com/aws/aws-sdk-java-v2/pull/1898
+    it.each(["-", "_", "@", "+", ".", "/", "%", ":"])(
       "returns data for character '%s' in profile name",
       (specialChar: string) => {
         const mockProfileName = ["profile", "stage"].join(specialChar);
