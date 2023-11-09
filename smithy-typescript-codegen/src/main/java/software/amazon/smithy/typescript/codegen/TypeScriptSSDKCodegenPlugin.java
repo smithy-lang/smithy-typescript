@@ -12,6 +12,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 @Deprecated
+@SuppressWarnings("AbbreviationAsWordInName")
 public class TypeScriptSSDKCodegenPlugin extends TypeScriptServerCodegenPlugin {
     @Override
     public String getName() {
