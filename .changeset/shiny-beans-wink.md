@@ -2,4 +2,4 @@
 "@smithy/shared-ini-file-loader": patch
 ---
 
-Parse profile name with invalid '.' and '/' characters
+Allow dot, solidus, percent and colon characters in profile names
