@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.0.21
+
+### Patch Changes
+
+- e92dbafc: Fix typo in `HttpAuthScheme` not enabled message in `httpAuthSchemeMiddleware`.
+  - @smithy/middleware-endpoint@2.1.4
+  - @smithy/middleware-retry@2.0.19
+
 ## 0.0.20
 
 ### Patch Changes

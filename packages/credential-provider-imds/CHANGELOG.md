@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 4693031d: Add IMDSv1 toggle.
+
+### Patch Changes
+
+- @smithy/node-config-provider@2.1.4
+
 ## 2.0.18
 
 ### Patch Changes

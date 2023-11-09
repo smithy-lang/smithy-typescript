@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.3
+
+### Patch Changes
+
+- c27879f2: Allow dot, solidus, percent and colon characters in profile names
+
 ## 2.2.2
 
 ### Patch Changes
