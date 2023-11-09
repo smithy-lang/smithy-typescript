@@ -71,8 +71,6 @@
     "dist-*/**"
   ],
   "browser": {
-    "./dist-cjs/getAwsChunkedEncodingStream": "./dist-cjs/getAwsChunkedEncodingStream.browser",
-    "./dist-cjs/sdk-stream-mixin": "./dist-cjs/sdk-stream-mixin.browser",
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser"
   },

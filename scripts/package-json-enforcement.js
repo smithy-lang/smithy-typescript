@@ -1,3 +1,4 @@
+const { error } = require("console");
 const fs = require("fs");
 
 /**
@@ -49,29 +50,13 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
   if (typeof pkgJson.browser !== typeof pkgJson["react-native"]) {
     errors.push(`browser and react-native fields are different in ${pkgJson.name}`);
-    if (overwrite) {
-      if (typeof pkgJson.browser === "object") {
-        pkgJson["react-native"] = pkgJson.browser;
-      } else if (typeof pkgJson["react-native"] === "object") {
-        pkgJson.browser = pkgJson["react-native"];
-      }
-    }
   }
 
   if (typeof pkgJson.browser === "object" && typeof pkgJson["react-native"] === "object") {
-    const browserCanonical = [
-      ...new Set([
-        ...Object.entries(pkgJson.browser).map(([k, v]) => [
-          k.replace("dist-cjs", "dist-es"),
-          typeof v === "string" ? v.replace("dist-cjs", "dist-es") : v,
-        ]),
-        ...Object.entries(pkgJson.browser).map(([k, v]) => [
-          k.replace("dist-es", "dist-cjs"),
-          typeof v === "string" ? v.replace("dist-es", "dist-cjs") : v,
-        ]),
-      ]),
-    ].reduce((acc, [k, v]) => {
-      acc[k] = v;
+    const browserCanonical = Object.entries(pkgJson.browser).reduce((acc, [k, v]) => {
+      if (!k.includes("dist-cjs/") || typeof v === "boolean") {
+        acc[k] = v;
+      }
       return acc;
     }, {});
 
@@ -94,7 +79,12 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
         ]),
       ]),
     ].reduce((acc, [k, v]) => {
-      acc[k] = v;
+      const automatic = typeof v === "string" ? v.match(/\.native(\.js)?$/) && k === v.replace(".native", "") : false;
+      if (!automatic) {
+        acc[k] = v;
+      } else {
+        errors.push(`${k} -> ${v} is unnecessary in ${pkgJson.name} (automatic in React-Native bundler)`);
+      }
       return acc;
     }, {});
 

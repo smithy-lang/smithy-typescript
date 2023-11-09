@@ -52,7 +52,6 @@
     "dist-*/**"
   ],
   "browser": {
-    "./dist-cjs/adaptors/getEndpointFromConfig": "./dist-cjs/adaptors/getEndpointFromConfig.browser",
     "./dist-es/adaptors/getEndpointFromConfig": "./dist-es/adaptors/getEndpointFromConfig.browser"
   },
   "react-native": {
