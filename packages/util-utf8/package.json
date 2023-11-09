@@ -47,10 +47,10 @@
     "dist-*/**"
   ],
   "browser": {
-    "./dist-es/fromUtf8": "./dist-es/fromUtf8.browser",
-    "./dist-es/toUtf8": "./dist-es/toUtf8.browser",
     "./dist-cjs/fromUtf8": "./dist-cjs/fromUtf8.browser",
-    "./dist-cjs/toUtf8": "./dist-cjs/toUtf8.browser"
+    "./dist-cjs/toUtf8": "./dist-cjs/toUtf8.browser",
+    "./dist-es/fromUtf8": "./dist-es/fromUtf8.browser",
+    "./dist-es/toUtf8": "./dist-es/toUtf8.browser"
   },
   "react-native": {
     "./dist-es/fromUtf8": "./dist-es/fromUtf8.browser",

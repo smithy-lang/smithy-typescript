@@ -48,10 +48,10 @@
     "dist-*/**"
   ],
   "browser": {
-    "./dist-es/fromBase64": "./dist-es/fromBase64.browser",
-    "./dist-es/toBase64": "./dist-es/toBase64.browser",
     "./dist-cjs/fromBase64": "./dist-cjs/fromBase64.browser",
-    "./dist-cjs/toBase64": "./dist-cjs/toBase64.browser"
+    "./dist-cjs/toBase64": "./dist-cjs/toBase64.browser",
+    "./dist-es/fromBase64": "./dist-es/fromBase64.browser",
+    "./dist-es/toBase64": "./dist-es/toBase64.browser"
   },
   "react-native": {
     "./dist-es/fromBase64": "./dist-es/fromBase64.browser",

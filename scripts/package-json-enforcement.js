@@ -77,6 +77,9 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
     if (Object.keys(browserCanonical).length !== Object.keys(pkgJson.browser).length) {
       errors.push(`${pkgJson.name} browser field is incomplete.`);
+      if (overwrite) {
+        pkgJson.browser = browserCanonical;
+      }
     }
 
     const reactNativeCanonical = [
@@ -97,15 +100,13 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
     if (Object.keys(reactNativeCanonical).length !== Object.keys(pkgJson["react-native"]).length) {
       errors.push(`${pkgJson.name} react-native field is incomplete.`);
-    }
-
-    if (overwrite) {
-      pkgJson.browser = browserCanonical;
-      pkgJson["react-native"] = reactNativeCanonical;
+      if (overwrite) {
+        pkgJson["react-native"] = reactNativeCanonical;
+      }
     }
   }
 
-  if (overwrite) {
+  if (overwrite && errors.length) {
     fs.writeFileSync(pkgJsonFilePath, JSON.stringify(pkgJson, null, 2) + "\n");
   }
 
