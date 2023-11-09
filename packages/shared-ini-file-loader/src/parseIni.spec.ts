@@ -61,14 +61,21 @@ describe(parseIni.name, () => {
     // Some characters are not allowed in profile name, but we parse them as customers use them.
     // `@` https://github.com/awslabs/smithy-typescript/issues/1026
     // `+` https://github.com/aws/aws-sdk-js-v3/issues/5373
-    it.each(["-", "_", "@", "+"])("returns data for character '%s' in profile name", (specialChar: string) => {
-      const mockProfileName = ["profile", "stage"].join(specialChar);
-      const mockSectionFullName = ["profile", mockProfileName].join(" ");
-      const mockInput = getMockProfileContent(mockSectionFullName, mockProfileData);
-      expect(parseIni(mockInput)).toStrictEqual({
-        [["profile", mockProfileName].join(CONFIG_PREFIX_SEPARATOR)]: mockProfileData,
-      });
-    });
+    // `.` https://github.com/aws/aws-sdk-js-v3/issues/5449
+    // `/` https://github.com/awslabs/smithy-typescript/issues/1053
+    // `%` https://github.com/aws/aws-sdk-java-v2/pull/1538
+    // `:` https://github.com/aws/aws-sdk-java-v2/pull/1898
+    it.each(["-", "_", "@", "+", ".", "/", "%", ":"])(
+      "returns data for character '%s' in profile name",
+      (specialChar: string) => {
+        const mockProfileName = ["profile", "stage"].join(specialChar);
+        const mockSectionFullName = ["profile", mockProfileName].join(" ");
+        const mockInput = getMockProfileContent(mockSectionFullName, mockProfileData);
+        expect(parseIni(mockInput)).toStrictEqual({
+          [["profile", mockProfileName].join(CONFIG_PREFIX_SEPARATOR)]: mockProfileData,
+        });
+      }
+    );
 
     it("returns data for two profiles", () => {
       const mockProfile1 = getMockProfileContent(mockProfileName, mockProfileData);
