@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.13
+
+### Patch Changes
+
+- 5598a033: update bundler replacement directives in package.json
+  - @smithy/chunked-blob-reader-native@2.0.1
+
 ## 2.0.12
 
 ### Patch Changes

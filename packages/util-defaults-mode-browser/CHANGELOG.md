@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.17
+
+### Patch Changes
+
+- 5598a033: update bundler replacement directives in package.json
+  - @smithy/smithy-client@2.1.13
+
 ## 2.0.16
 
 ### Patch Changes

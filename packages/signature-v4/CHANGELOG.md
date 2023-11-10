@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [5598a033]
+  - @smithy/util-utf8@2.0.1
+  - @smithy/eventstream-codec@2.0.12
+
 ## 2.0.12
 
 ### Patch Changes

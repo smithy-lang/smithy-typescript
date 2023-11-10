@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.1.13
+
+### Patch Changes
+
+- Updated dependencies [5598a033]
+  - @smithy/util-stream@2.0.18
+
 ## 2.1.12
 
 ### Patch Changes

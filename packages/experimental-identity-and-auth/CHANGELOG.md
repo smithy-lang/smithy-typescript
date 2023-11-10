@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.0.22
+
+### Patch Changes
+
+- Updated dependencies [5598a033]
+  - @smithy/middleware-endpoint@2.1.5
+  - @smithy/signature-v4@2.0.13
+
 ## 0.0.21
 
 ### Patch Changes

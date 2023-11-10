@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.5
+
+### Patch Changes
+
+- 5598a033: update bundler replacement directives in package.json
+
 ## 2.1.4
 
 ### Patch Changes
