@@ -9,10 +9,13 @@ const path = require("node:path");
 const root = path.join(__dirname, "..");
 const packages = path.join(root, "packages");
 const walk = require("./utils/walk");
+const pkgJsonEnforcement = require("./package-json-enforcement");
 
 (async () => {
+  const errors = [];
   for (const folder of fs.readdirSync(packages)) {
     const pkgJsonPath = path.join(packages, folder, "package.json");
+    errors.push(...pkgJsonEnforcement(pkgJsonPath, true));
     const srcPath = path.join(packages, folder, "src");
     const pkgJson = require(pkgJsonPath);
 
@@ -40,5 +43,8 @@ const walk = require("./utils/walk");
         }
       }
     }
+  }
+  if (errors.length) {
+    throw new Error(errors.join("\n"));
   }
 })();

@@ -55,6 +55,9 @@
   "react-native": {
     "@smithy/chunked-blob-reader": "@smithy/chunked-blob-reader-native"
   },
+  "browser": {
+    "@smithy/chunked-blob-reader": "@smithy/chunked-blob-reader"
+  },
   "typesVersions": {
     "<4.0": {
       "dist-types/*": [

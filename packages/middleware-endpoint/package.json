@@ -55,7 +55,8 @@
     "./dist-es/adaptors/getEndpointFromConfig": "./dist-es/adaptors/getEndpointFromConfig.browser"
   },
   "react-native": {
-    "./dist-es/adaptors/getEndpointFromConfig": "./dist-es/adaptors/getEndpointFromConfig.browser"
+    "./dist-es/adaptors/getEndpointFromConfig": "./dist-es/adaptors/getEndpointFromConfig.browser",
+    "./dist-cjs/adaptors/getEndpointFromConfig": "./dist-cjs/adaptors/getEndpointFromConfig.browser"
   },
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/middleware-endpoint",
   "repository": {
