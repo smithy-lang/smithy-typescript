@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.14
+
+### Patch Changes
+
+- Updated dependencies [f2a04b7e]
+  - @smithy/util-utf8@2.0.2
+
 ## 2.0.13
 
 ### Patch Changes

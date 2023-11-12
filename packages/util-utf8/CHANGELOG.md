@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.2
+
+### Patch Changes
+
+- f2a04b7e: Use Node.js implementations in react-native
+
 ## 2.0.1
 
 ### Patch Changes
