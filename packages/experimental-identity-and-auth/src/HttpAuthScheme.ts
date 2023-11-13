@@ -1,4 +1,4 @@
-import { Identity, IdentityProvider } from "@smithy/types";
+import { HandlerExecutionContext, Identity, IdentityProvider } from "@smithy/types";
 
 import { HttpSigner } from "./HttpSigner";
 import { IdentityProviderConfig } from "./IdentityProviderConfig";
@@ -37,6 +37,13 @@ export interface HttpAuthOption {
   schemeId: HttpAuthSchemeId;
   identityProperties?: Record<string, unknown>;
   signingProperties?: Record<string, unknown>;
+  propertiesExtractor?: <TConfig extends object, TContext extends HandlerExecutionContext>(
+    config: TConfig,
+    context: TContext
+  ) => {
+    identityProperties?: Record<string, unknown>;
+    signingProperties?: Record<string, unknown>;
+  };
 }
 
 /**

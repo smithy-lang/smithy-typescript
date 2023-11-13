@@ -1,6 +1,5 @@
 import {
   HandlerExecutionContext,
-  MetadataBearer,
   SerializeHandler,
   SerializeHandlerArguments,
   SerializeHandlerOutput,
@@ -20,16 +19,22 @@ import { IdentityProviderConfig } from "../IdentityProviderConfig";
 /**
  * @internal
  */
-export interface PreviouslyResolved<
+export interface PreviouslyResolved<TParameters extends HttpAuthSchemeParameters> {
+  httpAuthSchemes: HttpAuthScheme[];
+  httpAuthSchemeProvider: HttpAuthSchemeProvider<TParameters>;
+}
+
+/**
+ * @internal
+ */
+interface HttpAuthSchemeMiddlewareOptions<
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
   TInput extends object
 > {
-  httpAuthSchemes: HttpAuthScheme[];
-  httpAuthSchemeProvider: HttpAuthSchemeProvider<TParameters>;
   httpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<TConfig, TContext, TParameters, TInput>;
-  identityProviderConfig: IdentityProviderConfig;
+  identityProviderConfigProvider: (config: TConfig) => Promise<IdentityProviderConfig>;
 }
 
 /**
@@ -68,7 +73,8 @@ export const httpAuthSchemeMiddleware = <
   TContext extends HttpAuthSchemeMiddlewareHandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters
 >(
-  config: TConfig & PreviouslyResolved<TConfig, TContext, TParameters, TInput>
+  config: TConfig & PreviouslyResolved<TParameters>,
+  mwOptions: HttpAuthSchemeMiddlewareOptions<TConfig, TContext, TParameters, TInput>
 ): SerializeMiddleware<TInput, Output> => (
   next: SerializeHandler<TInput, Output>,
   context: HttpAuthSchemeMiddlewareHandlerExecutionContext
@@ -76,7 +82,7 @@ export const httpAuthSchemeMiddleware = <
   args: SerializeHandlerArguments<TInput>
 ): Promise<SerializeHandlerOutput<Output>> => {
   const options = config.httpAuthSchemeProvider(
-    await config.httpAuthSchemeParametersProvider(config, context as TContext, args.input)
+    await mwOptions.httpAuthSchemeParametersProvider(config, context as TContext, args.input)
   );
   const authSchemes = convertHttpAuthSchemesToMap(config.httpAuthSchemes);
   const smithyContext: HttpAuthSchemeMiddlewareSmithyContext = getSmithyContext(context);
@@ -87,15 +93,17 @@ export const httpAuthSchemeMiddleware = <
       failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` was not enabled for this service.`);
       continue;
     }
-    const identityProvider = scheme.identityProvider(config.identityProviderConfig);
+    const identityProvider = scheme.identityProvider(await mwOptions.identityProviderConfigProvider(config));
     if (!identityProvider) {
       failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` did not have an IdentityProvider configured.`);
       continue;
     }
-    const identity = await identityProvider(option.identityProperties || {});
+    const { identityProperties = {}, signingProperties = {} } = option.propertiesExtractor?.(config, context) || {};
+    option.identityProperties = Object.assign(option.identityProperties || {}, identityProperties);
+    option.signingProperties = Object.assign(option.signingProperties || {}, signingProperties);
     smithyContext.selectedHttpAuthScheme = {
       httpAuthOption: option,
-      identity,
+      identity: await identityProvider(option.identityProperties),
       signer: scheme.signer,
     };
     break;
