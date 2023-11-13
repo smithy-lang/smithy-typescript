@@ -102,6 +102,12 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                         w.write("authParameters.region");
                     })
                     .build())
+                .httpAuthOptionConfigPropertiesExtractor(w -> w.write("""
+                    (config: Record<string, unknown>) => ({
+                      signingProperties: {
+                        sha256: config.sha256,
+                      },
+                    }),"""))
                 .build());
     }
 }

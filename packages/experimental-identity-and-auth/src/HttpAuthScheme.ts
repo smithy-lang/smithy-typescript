@@ -37,6 +37,12 @@ export interface HttpAuthOption {
   schemeId: HttpAuthSchemeId;
   identityProperties?: Record<string, unknown>;
   signingProperties?: Record<string, unknown>;
+  configPropertiesExtractor?: (
+    config: Record<string, unknown>
+  ) => {
+    identityProperties?: Record<string, unknown>;
+    signingProperties?: Record<string, unknown>;
+  };
 }
 
 /**

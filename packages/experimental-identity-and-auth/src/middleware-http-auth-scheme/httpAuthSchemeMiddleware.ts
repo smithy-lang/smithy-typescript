@@ -1,6 +1,5 @@
 import {
   HandlerExecutionContext,
-  MetadataBearer,
   SerializeHandler,
   SerializeHandlerArguments,
   SerializeHandlerOutput,
@@ -92,10 +91,13 @@ export const httpAuthSchemeMiddleware = <
       failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` did not have an IdentityProvider configured.`);
       continue;
     }
-    const identity = await identityProvider(option.identityProperties || {});
+    const { identityProperties = {}, signingProperties = {} } =
+      option.configPropertiesExtractor?.(config as Record<string, unknown>) || {};
+    option.identityProperties = Object.assign(option.identityProperties || {}, identityProperties);
+    option.signingProperties = Object.assign(option.signingProperties || {}, signingProperties);
     smithyContext.selectedHttpAuthScheme = {
       httpAuthOption: option,
-      identity,
+      identity: await identityProvider(option.identityProperties),
       signer: scheme.signer,
     };
     break;
