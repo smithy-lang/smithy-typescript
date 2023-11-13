@@ -20,7 +20,7 @@ import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
-public final class SmithyContextCodeSection implements CodeSection {
+public final class CommandPropertiesCodeSection implements CodeSection {
     private final TypeScriptSettings settings;
     private final Model model;
     private final ServiceShape service;
@@ -30,7 +30,7 @@ public final class SmithyContextCodeSection implements CodeSection {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
 
-    private SmithyContextCodeSection(Builder builder) {
+    private CommandPropertiesCodeSection(Builder builder) {
         settings = SmithyBuilder.requiredState("settings", builder.settings);
         model = SmithyBuilder.requiredState("model", builder.model);
         service = SmithyBuilder.requiredState("service", builder.service);
@@ -77,7 +77,7 @@ public final class SmithyContextCodeSection implements CodeSection {
         return applicationProtocol;
     }
 
-    public static class Builder implements SmithyBuilder<SmithyContextCodeSection> {
+    public static class Builder implements SmithyBuilder<CommandPropertiesCodeSection> {
         private TypeScriptSettings settings;
         private Model model;
         private ServiceShape service;
@@ -88,8 +88,8 @@ public final class SmithyContextCodeSection implements CodeSection {
         private ApplicationProtocol applicationProtocol;
 
         @Override
-        public SmithyContextCodeSection build() {
-            return new SmithyContextCodeSection(this);
+        public CommandPropertiesCodeSection build() {
+            return new CommandPropertiesCodeSection(this);
         }
 
         public Builder settings(TypeScriptSettings settings) {

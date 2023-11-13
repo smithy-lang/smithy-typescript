@@ -54,7 +54,7 @@ public final class AuthUtils {
     public static final String HTTP_AUTH_SCHEME_EXTENSION_MODULE =
         Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthExtensionConfiguration").toString();
 
-        public static final String HTTP_AUTH_SCHEME_EXTENSION_PATH = HTTP_AUTH_SCHEME_EXTENSION_MODULE + ".ts";
+    public static final String HTTP_AUTH_SCHEME_EXTENSION_PATH = HTTP_AUTH_SCHEME_EXTENSION_MODULE + ".ts";
 
     public static final Dependency AUTH_HTTP_EXTENSION_DEPENDENCY = new Dependency() {
         @Override

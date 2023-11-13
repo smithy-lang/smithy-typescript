@@ -223,7 +223,12 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
       let _token = runtimeConfig.token;
       return {
         setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void {
-          _httpAuthSchemes.push(httpAuthScheme);
+          const index = _httpAuthSchemes.findIndex(scheme => scheme.schemeId === httpAuthScheme.schemeId);
+          if (index === -1) {
+            _httpAuthSchemes.push(httpAuthScheme);
+          } else {
+            _httpAuthSchemes.splice(index, 1, httpAuthScheme);
+          }
         },
         httpAuthSchemes(): HttpAuthScheme[] {
           return _httpAuthSchemes;
@@ -285,7 +290,13 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 () -> {
                     w.write("""
                         setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void {
-                          _httpAuthSchemes.push(httpAuthScheme);
+                          const index = _httpAuthSchemes.findIndex(scheme => \
+                        scheme.schemeId === httpAuthScheme.schemeId);
+                          if (index === -1) {
+                            _httpAuthSchemes.push(httpAuthScheme);
+                          } else {
+                            _httpAuthSchemes.splice(index, 1, httpAuthScheme);
+                          }
                         },
                         httpAuthSchemes(): HttpAuthScheme[] {
                           return _httpAuthSchemes;

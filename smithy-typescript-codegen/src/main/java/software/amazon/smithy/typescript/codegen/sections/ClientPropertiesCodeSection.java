@@ -6,38 +6,31 @@
 package software.amazon.smithy.typescript.codegen.sections;
 
 import java.util.List;
-import java.util.Optional;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
-import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
-public final class SmithyContextCodeSection implements CodeSection {
+public final class ClientPropertiesCodeSection implements CodeSection {
     private final TypeScriptSettings settings;
     private final Model model;
     private final ServiceShape service;
-    private final OperationShape operation;
     private final SymbolProvider symbolProvider;
-    private final List<RuntimeClientPlugin> runtimeClientPlugins;
-    private final ProtocolGenerator protocolGenerator;
+    private final List<TypeScriptIntegration> integrations;
     private final ApplicationProtocol applicationProtocol;
 
-    private SmithyContextCodeSection(Builder builder) {
+    private ClientPropertiesCodeSection(Builder builder) {
         settings = SmithyBuilder.requiredState("settings", builder.settings);
         model = SmithyBuilder.requiredState("model", builder.model);
         service = SmithyBuilder.requiredState("service", builder.service);
-        operation = SmithyBuilder.requiredState("operation", builder.operation);
         symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
-        runtimeClientPlugins = SmithyBuilder.requiredState("runtimeClientPlugins", builder.runtimeClientPlugins);
-        protocolGenerator = builder.protocolGenerator;
+        integrations = SmithyBuilder.requiredState("integrations", builder.integrations);
         applicationProtocol = SmithyBuilder.requiredState("applicationProtocol", builder.applicationProtocol);
     }
 
@@ -57,39 +50,29 @@ public final class SmithyContextCodeSection implements CodeSection {
         return service;
     }
 
-    public OperationShape getOperation() {
-        return operation;
-    }
-
     public SymbolProvider getSymbolProvider() {
         return symbolProvider;
     }
 
-    public List<RuntimeClientPlugin> getRuntimeClientPlugins() {
-        return runtimeClientPlugins;
-    }
-
-    public Optional<ProtocolGenerator> getProtocolGenerator() {
-        return Optional.ofNullable(protocolGenerator);
+    public List<TypeScriptIntegration> getIntegrations() {
+        return integrations;
     }
 
     public ApplicationProtocol getApplicationProtocol() {
         return applicationProtocol;
     }
 
-    public static class Builder implements SmithyBuilder<SmithyContextCodeSection> {
+    public static class Builder implements SmithyBuilder<ClientPropertiesCodeSection> {
         private TypeScriptSettings settings;
         private Model model;
         private ServiceShape service;
-        private OperationShape operation;
         private SymbolProvider symbolProvider;
-        private List<RuntimeClientPlugin> runtimeClientPlugins;
-        private ProtocolGenerator protocolGenerator;
+        private List<TypeScriptIntegration> integrations;
         private ApplicationProtocol applicationProtocol;
 
         @Override
-        public SmithyContextCodeSection build() {
-            return new SmithyContextCodeSection(this);
+        public ClientPropertiesCodeSection build() {
+            return new ClientPropertiesCodeSection(this);
         }
 
         public Builder settings(TypeScriptSettings settings) {
@@ -107,23 +90,13 @@ public final class SmithyContextCodeSection implements CodeSection {
             return this;
         }
 
-        public Builder operation(OperationShape operation) {
-            this.operation = operation;
-            return this;
-        }
-
         public Builder symbolProvider(SymbolProvider symbolProvider) {
             this.symbolProvider = symbolProvider;
             return this;
         }
 
-        public Builder runtimeClientPlugins(List<RuntimeClientPlugin> runtimeClientPlugins) {
-            this.runtimeClientPlugins = runtimeClientPlugins;
-            return this;
-        }
-
-        public Builder protocolGenerator(ProtocolGenerator protocolGenerator) {
-            this.protocolGenerator = protocolGenerator;
+        public Builder integrations(List<TypeScriptIntegration> integrations) {
+            this.integrations = integrations;
             return this;
         }
 

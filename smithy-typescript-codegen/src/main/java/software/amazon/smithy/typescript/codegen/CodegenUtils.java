@@ -284,9 +284,9 @@ public final class CodegenUtils {
                 if (value instanceof Symbol) {
                     String symbolName = ((Symbol) value).getName();
                     if (key.equals(symbolName)) {
-                        functionParametersList.add(key);
+                        functionParametersList.add(String.format("$%s:T", symbolName));
                     } else {
-                        functionParametersList.add(String.format("%s: %s", key, symbolName));
+                        functionParametersList.add(String.format("%s: $%s:T", key, key));
                     }
                 } else if (value instanceof String) {
                     functionParametersList.add(String.format("%s: '%s'", key, value));

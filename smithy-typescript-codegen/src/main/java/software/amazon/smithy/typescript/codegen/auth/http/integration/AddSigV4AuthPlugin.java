@@ -91,8 +91,8 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                 .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
                     .name("name")
                     .type(HttpAuthOptionProperty.Type.SIGNING)
-                    .source(t -> w -> {
-                        w.write("$S", t.toNode().expectObjectNode().getMember("name"));
+                    .source(s -> w -> {
+                        w.write("$S", s.trait().toNode().expectObjectNode().getMember("name"));
                     })
                     .build())
                 .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()

@@ -23,6 +23,7 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClient
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingOutputType;
 
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,10 @@ import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsParamNameM
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.CommandContextCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.OptionalUtils;
@@ -64,9 +69,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class CommandGenerator implements Runnable {
 
     static final String COMMANDS_FOLDER = "commands";
-    static final String COMMAND_PROPERTIES_SECTION = "command_properties";
-    static final String COMMAND_BODY_EXTRA_SECTION = "command_body_extra";
-    static final String COMMAND_CONSTRUCTOR_SECTION = "command_constructor";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -165,9 +167,16 @@ final class CommandGenerator implements Runnable {
                 configType, () -> {
 
                     // Section for adding custom command properties.
-                    writer.write("// Start section: $L", COMMAND_PROPERTIES_SECTION);
-                    writer.pushState(COMMAND_PROPERTIES_SECTION).popState();
-                    writer.write("// End section: $L", COMMAND_PROPERTIES_SECTION);
+                    writer.injectSection(CommandPropertiesCodeSection.builder()
+                        .settings(settings)
+                        .model(model)
+                        .service(service)
+                        .operation(operation)
+                        .symbolProvider(symbolProvider)
+                        .runtimeClientPlugins(runtimePlugins)
+                        .protocolGenerator(protocolGenerator)
+                        .applicationProtocol(applicationProtocol)
+                        .build());
                     writer.write("");
                     generateEndpointParameterInstructionProvider();
                     writer.write("");
@@ -178,10 +187,16 @@ final class CommandGenerator implements Runnable {
                     writeSerde();
 
                     // Hook for adding more methods to the command.
-                    writer.write("// Start section: $L", COMMAND_BODY_EXTRA_SECTION)
-                            .pushState(COMMAND_BODY_EXTRA_SECTION)
-                            .popState()
-                            .write("// End section: $L", COMMAND_BODY_EXTRA_SECTION);
+                    writer.injectSection(CommandBodyExtraCodeSection.builder()
+                        .settings(settings)
+                        .model(model)
+                        .service(service)
+                        .operation(operation)
+                        .symbolProvider(symbolProvider)
+                        .runtimeClientPlugins(runtimePlugins)
+                        .protocolGenerator(protocolGenerator)
+                        .applicationProtocol(applicationProtocol)
+                        .build());
                 });
     }
 
@@ -241,12 +256,18 @@ final class CommandGenerator implements Runnable {
     private void generateCommandConstructor() {
         writer.writeDocs("@public")
                 .openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
-                    // The constructor can be intercepted and changed.
-                    writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
-                            .pushState(COMMAND_CONSTRUCTOR_SECTION)
-                            .write("super();")
-                            .popState()
-                            .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
+                    writer.pushState(CommandConstructorCodeSection.builder()
+                        .settings(settings)
+                        .model(model)
+                        .service(service)
+                        .operation(operation)
+                        .symbolProvider(symbolProvider)
+                        .runtimeClientPlugins(runtimePlugins)
+                        .protocolGenerator(protocolGenerator)
+                        .applicationProtocol(applicationProtocol)
+                        .build());
+                    writer.write("super();");
+                    writer.popState();
                 });
     }
 
@@ -337,6 +358,16 @@ final class CommandGenerator implements Runnable {
             writer.write("const { logger } = configuration;");
             writer.write("const clientName = $S;", symbolProvider.toSymbol(service).getName());
             writer.write("const commandName = $S;", symbolProvider.toSymbol(operation).getName());
+            writer.pushState(CommandContextCodeSection.builder()
+                .settings(settings)
+                .model(model)
+                .service(service)
+                .operation(operation)
+                .symbolProvider(symbolProvider)
+                .runtimeClientPlugins(runtimePlugins)
+                .protocolGenerator(protocolGenerator)
+                .applicationProtocol(applicationProtocol)
+                .build());
             writer.openBlock("const handlerExecutionContext: HandlerExecutionContext = {", "}", () -> {
                 writer.write("logger,");
                 writer.write("clientName,");
@@ -377,14 +408,21 @@ final class CommandGenerator implements Runnable {
                 });
                 writer.openBlock("[SMITHY_CONTEXT_KEY]: {", "},", () -> {
                     writer.pushState(SmithyContextCodeSection.builder()
+                        .settings(settings)
+                        .model(model)
                         .service(service)
                         .operation(operation)
+                        .symbolProvider(symbolProvider)
+                        .runtimeClientPlugins(runtimePlugins)
+                        .protocolGenerator(protocolGenerator)
+                        .applicationProtocol(applicationProtocol)
                         .build());
                     writer.write("service: $S,", service.toShapeId().getName());
                     writer.write("operation: $S,", operation.toShapeId().getName());
                     writer.popState();
                 });
             });
+            writer.popState();
             writer.write("const { requestHandler } = configuration;");
             writer.openBlock("return stack.resolve(", ");", () -> {
                 writer.write("(request: FinalizeHandlerArguments<any>) => ");
@@ -467,16 +505,27 @@ final class CommandGenerator implements Runnable {
         // applied automatically when the Command's middleware stack is copied from
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
-            plugin.getPluginFunction().ifPresent(symbol -> {
+            plugin.getPluginFunction().ifPresent(pluginSymbol -> {
+                // Construct additional parameters string
                 Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
                         model, service, operation);
                 List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-
                 String additionalParamsString = additionalParameters.isEmpty()
                         ? ""
-                        : ", { " + String.join(", ", additionalParameters) + "}";
-                writer.write("this.middlewareStack.use($T(configuration$L));",
-                        symbol, additionalParamsString);
+                        : ", { " + String.join(", ", additionalParameters) + " }";
+
+                // Construct writer context
+                Map<String, Object> symbolMap = new HashMap<>();
+                symbolMap.put("pluginFn", pluginSymbol);
+                for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
+                    if (entry.getValue() instanceof Symbol) {
+                        symbolMap.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                writer.pushState();
+                writer.putContext(symbolMap);
+                writer.write("this.middlewareStack.use($pluginFn:T(configuration" + additionalParamsString + "));");
+                writer.popState();
             });
         }
     }

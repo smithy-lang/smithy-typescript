@@ -218,11 +218,10 @@ final class RuntimeConfigGenerator {
         // feat(experimentalIdentityAndAuth): write the default imported HttpAuthSchemeProvider
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
-                w.write("$T", authIndex.getDefaultHttpAuthSchemeProvider()
-                    .orElse(Symbol.builder()
+                w.write("$T", Symbol.builder()
                         .name("default" + service.toShapeId().getName() + "HttpAuthSchemeProvider")
                         .namespace(AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY.getPackageName(), "/")
-                        .build()));
+                        .build());
             });
         }
 

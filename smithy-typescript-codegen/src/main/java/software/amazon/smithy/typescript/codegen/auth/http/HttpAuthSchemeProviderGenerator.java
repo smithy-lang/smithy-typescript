@@ -22,8 +22,14 @@ import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.DefaultHttpAuthSchemeParametersProviderFunctionCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.DefaultHttpAuthSchemeProviderFunctionCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthOptionFunctionsCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeParametersProviderInterfaceCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeProviderInterfaceCodeSection;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -42,13 +48,17 @@ import software.amazon.smithy.utils.StringUtils;
 @SmithyInternalApi
 public class HttpAuthSchemeProviderGenerator implements Runnable {
     private final TypeScriptDelegator delegator;
+    private final TypeScriptSettings settings;
     private final Model model;
+    private final SymbolProvider symbolProvider;
+    private final List<TypeScriptIntegration> integrations;
 
     private final SupportedHttpAuthSchemesIndex authIndex;
     private final ServiceIndex serviceIndex;
     private final ServiceShape serviceShape;
     private final Symbol serviceSymbol;
     private final String serviceName;
+    private final Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
     private final Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters;
 
     /**
@@ -67,15 +77,20 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         List<TypeScriptIntegration> integrations
     ) {
         this.delegator = delegator;
+        this.settings = settings;
         this.model = model;
+        this.symbolProvider = symbolProvider;
+        this.integrations = integrations;
 
         this.authIndex = new SupportedHttpAuthSchemesIndex(integrations);
         this.serviceIndex = ServiceIndex.of(model);
         this.serviceShape = settings.getService(model);
         this.serviceSymbol = symbolProvider.toSymbol(serviceShape);
         this.serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        this.httpAuthSchemeParameters = AuthUtils.collectHttpAuthSchemeParameters(
-            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex).values());
+        this.effectiveHttpAuthSchemes =
+            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+        this.httpAuthSchemeParameters =
+            AuthUtils.collectHttpAuthSchemeParameters(effectiveHttpAuthSchemes.values());
     }
 
     @Override
@@ -98,6 +113,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateHttpAuthSchemeParametersInterface() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.pushState(HttpAuthSchemeProviderInterfaceCodeSection.builder()
+                .service(serviceShape)
+                .settings(settings)
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .build());
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addImport("HttpAuthSchemeParameters", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.openBlock("""
@@ -111,6 +132,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                     w.write("$L?: $C;", parameter.name(), parameter.type());
                 }
             });
+            w.popState();
         });
     }
 
@@ -129,6 +151,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateHttpAuthSchemeParametersProviderInterface() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.pushState(HttpAuthSchemeParametersProviderInterfaceCodeSection.builder()
+                .service(serviceShape)
+                .settings(settings)
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .build());
             w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
                 Paths.get(".", serviceSymbol.getNamespace()));
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
@@ -146,6 +174,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 $LHttpAuthSchemeParameters, \
                 object> {}""",
                 serviceName, serviceSymbol.getName(), serviceName);
+            w.popState();
         });
     }
 
@@ -160,6 +189,13 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateDefaultHttpAuthSchemeParametersProviderFunction() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.pushState(DefaultHttpAuthSchemeParametersProviderFunctionCodeSection.builder()
+                .service(serviceShape)
+                .settings(settings)
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .httpAuthSchemeParameters(httpAuthSchemeParameters)
+                .build());
             w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
                 Paths.get(".", serviceSymbol.getNamespace()));
             w.addDependency(TypeScriptDependency.SMITHY_TYPES);
@@ -183,15 +219,24 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                     }
                 });
             });
+            w.popState();
         });
     }
 
     private void generateHttpAuthOptionFunctions() {
-        Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes =
-            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
-        for (Entry<ShapeId, HttpAuthScheme> entry : effectiveAuthSchemes.entrySet()) {
-            generateHttpAuthOptionFunction(entry.getKey(), entry.getValue());
-        }
+        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.pushState(HttpAuthOptionFunctionsCodeSection.builder()
+                .service(serviceShape)
+                .settings(settings)
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .effectiveHttpAuthSchemes(effectiveHttpAuthSchemes)
+                .build());
+            for (Entry<ShapeId, HttpAuthScheme> entry : effectiveHttpAuthSchemes.entrySet()) {
+                generateHttpAuthOptionFunction(w, entry.getKey(), entry.getValue());
+            }
+            w.popState();
+        });
     }
 
     /*
@@ -211,42 +256,57 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         };
     };
     */
-    private void generateHttpAuthOptionFunction(ShapeId shapeId, HttpAuthScheme authScheme) {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            String normalizedAuthSchemeName = normalizeAuthSchemeName(shapeId);
-            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.addImport("HttpAuthOption", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.openBlock("""
-                function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
-                HttpAuthOption {""", "};",
-                normalizedAuthSchemeName, serviceName,
-                () -> {
-                w.openBlock("return {", "};", () -> {
-                    w.write("schemeId: $S,", shapeId.toString());
-                    // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties available.
-                    if (authScheme == null) {
-                        return;
-                    }
-                    Trait trait = serviceShape.findTrait(authScheme.getTraitId()).orElse(null);
-                    List<HttpAuthOptionProperty> identityProperties =
-                        authScheme.getHttpAuthSchemeOptionParametersByType(Type.IDENTITY);
-                    if (!identityProperties.isEmpty()) {
-                        w.openBlock("identityProperties: {", "},", () -> {
-                            for (HttpAuthOptionProperty parameter : identityProperties) {
-                                w.write("$L: $C,", parameter.name(), parameter.source().apply(trait));
-                            }
-                        });
-                    }
-                    List<HttpAuthOptionProperty> signingProperties =
-                        authScheme.getHttpAuthSchemeOptionParametersByType(Type.SIGNING);
-                    if (!signingProperties.isEmpty()) {
-                        w.openBlock("signingProperties: {", "},", () -> {
-                            for (HttpAuthOptionProperty parameter : signingProperties) {
-                                w.write("$L: $C,", parameter.name(), parameter.source().apply(trait));
-                            }
-                        });
-                    }
-                });
+    private void generateHttpAuthOptionFunction(
+        TypeScriptWriter w,
+        ShapeId shapeId,
+        HttpAuthScheme authScheme
+    ) {
+        String normalizedAuthSchemeName = normalizeAuthSchemeName(shapeId);
+        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addImport("HttpAuthOption", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.openBlock("""
+            function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
+            HttpAuthOption {""", "};\n",
+            normalizedAuthSchemeName, serviceName,
+            () -> {
+            w.openBlock("return {", "};", () -> {
+                w.write("schemeId: $S,", shapeId.toString());
+                // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties available.
+                if (authScheme == null) {
+                    return;
+                }
+                Trait trait = serviceShape.findTrait(authScheme.getTraitId()).orElse(null);
+                List<HttpAuthOptionProperty> identityProperties =
+                    authScheme.getHttpAuthSchemeOptionParametersByType(Type.IDENTITY);
+                if (!identityProperties.isEmpty()) {
+                    w.openBlock("identityProperties: {", "},", () -> {
+                        for (HttpAuthOptionProperty parameter : identityProperties) {
+                            w.write("$L: $C,",
+                                parameter.name(),
+                                parameter.source().apply(HttpAuthOptionProperty.Source.builder()
+                                    .httpAuthScheme(authScheme)
+                                    .trait(trait)
+                                    .build()));
+                        }
+                    });
+                }
+                List<HttpAuthOptionProperty> signingProperties =
+                    authScheme.getHttpAuthSchemeOptionParametersByType(Type.SIGNING);
+                if (!signingProperties.isEmpty()) {
+                    w.openBlock("signingProperties: {", "},", () -> {
+                        for (HttpAuthOptionProperty parameter : signingProperties) {
+                            w.write("$L: $C,",
+                                parameter.name(),
+                                parameter.source().apply(HttpAuthOptionProperty.Source.builder()
+                                    .httpAuthScheme(authScheme)
+                                    .trait(trait)
+                                    .build()));
+                        }
+                    });
+                }
+                authScheme.getPropertiesExtractor()
+                    .ifPresent(extractor -> w.write("propertiesExtractor: $C",
+                        extractor.apply(serviceSymbol.getName() + "ResolvedConfig")));
             });
         });
     }
@@ -267,6 +327,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateHttpAuthSchemeProviderInterface() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.pushState(HttpAuthSchemeProviderInterfaceCodeSection.builder()
+                .service(serviceShape)
+                .settings(settings)
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .build());
             w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.addImport("HttpAuthSchemeProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
             w.write("""
@@ -275,6 +341,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
              */
             export interface $LHttpAuthSchemeProvider extends HttpAuthSchemeProvider<$LHttpAuthSchemeParameters> {}
             """, serviceName, serviceName);
+            w.popState();
         });
     }
 
@@ -292,6 +359,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateDefaultHttpAuthSchemeProviderFunction() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
+            w.pushState(DefaultHttpAuthSchemeProviderFunctionCodeSection.builder()
+                .service(serviceShape)
+                .settings(settings)
+                .model(model)
+                .symbolProvider(symbolProvider)
+                .build());
             w.openBlock("""
             /**
              * @internal
@@ -328,6 +401,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 });
                 w.write("return options;");
             });
+            w.popState();
         });
     }
 }

@@ -31,20 +31,20 @@ import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
 public class AddHttpApiKeyAuthPluginTest {
     @Test
     public void httpApiKeyAuthClientOnService() {
-        testInjects("http-api-key-auth-trait.smithy", ", { scheme: 'ApiKey', in: 'header', name: 'Authorization'}");
+        testInjects("http-api-key-auth-trait.smithy", ", { scheme: 'ApiKey', in: 'header', name: 'Authorization' }");
     }
 
     @Test
     public void httpApiKeyAuthClientOnOperation() {
         testInjects("http-api-key-auth-trait-on-operation.smithy",
-                ", { scheme: 'ApiKey', in: 'header', name: 'Authorization'}");
+                ", { scheme: 'ApiKey', in: 'header', name: 'Authorization' }");
     }
 
     // This should be identical to the httpApiKeyAuthClient test except for the parameters provided
     // to the middleware.
     @Test
     public void httpApiKeyAuthClientNoScheme() {
-        testInjects("http-api-key-auth-trait-no-scheme.smithy", ", { in: 'header', name: 'Authorization'}");
+        testInjects("http-api-key-auth-trait-no-scheme.smithy", ", { in: 'header', name: 'Authorization' }");
     }
 
     private void testInjects(String filename, String extra) {
