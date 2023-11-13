@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -27,6 +25,9 @@ import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention;
+import software.amazon.smithy.typescript.codegen.sections.ClientPropertiesCodeSection;
+import software.amazon.smithy.utils.CodeInterceptor;
+import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -51,6 +52,14 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                     TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
                     "HttpAuthSchemeEndpointRuleSet",
                     Convention.HAS_MIDDLEWARE)
+                .additionalPluginFunctionParamsSupplier((model, service, operation) -> Map.of(
+                    "httpAuthSchemeParametersProvider", Symbol.builder()
+                        .name("this.getDefaultHttpAuthSchemeParametersProvider()")
+                        .build(),
+                    "identityProviderConfigProvider", Symbol.builder()
+                        .name("this.getIdentityProviderConfigProvider()")
+                        .build()
+                ))
                 .build(),
             RuntimeClientPlugin.builder()
                 .servicePredicate((m, s) -> !s.hasTrait(EndpointRuleSetTrait.ID))
@@ -58,6 +67,14 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                     TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
                     "HttpAuthScheme",
                     Convention.HAS_MIDDLEWARE)
+                .additionalPluginFunctionParamsSupplier((model, service, operation) -> Map.of(
+                    "httpAuthSchemeParametersProvider", Symbol.builder()
+                        .name("this.getDefaultHttpAuthSchemeParametersProvider()")
+                        .build(),
+                    "identityProviderConfigProvider", Symbol.builder()
+                        .name("this.getIdentityProviderConfigProvider()")
+                        .build()
+                ))
                 .build(),
             RuntimeClientPlugin.builder()
                 .inputConfig(Symbol.builder()
@@ -77,38 +94,91 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     }
 
     @Override
-    public void addConfigInterfaceFields(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        TypeScriptWriter writer
+    public List<? extends CodeInterceptor<? extends CodeSection, TypeScriptWriter>> interceptors(
+        TypeScriptCodegenContext codegenContext
     ) {
-        writer.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-        writer.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-        writer.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
-            default identity providers and signers per auth scheme.
-            @internal""");
-        writer.write("httpAuthSchemes?: HttpAuthScheme[];\n");
+        return List.of(CodeInterceptor.appender(ClientPropertiesCodeSection.class, (w, s) -> {
+            if (!s.getSettings().generateClient()
+                || !s.getSettings().getExperimentalIdentityAndAuth()
+                || !s.getApplicationProtocol().isHttpProtocol()) {
+                return;
+            }
 
-        String httpAuthSchemeProviderName = CodegenUtils.getServiceName(settings, model, symbolProvider)
-            + "HttpAuthSchemeProvider";
-        writer.addImport(httpAuthSchemeProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
-        writer.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
-            resolves which HttpAuthScheme to use.
-            @internal""");
-        writer.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
+            /*
+            private getDefaultHttpAuthSchemeParametersProvider() {
+              return defaultWeatherHttpAuthSchemeParametersProvider;
+            }
+            */
+            w.openBlock("private getDefaultHttpAuthSchemeParametersProvider() {", "}\n", () -> {
+                String httpAuthSchemeParametersProviderName = "default"
+                    + CodegenUtils.getServiceName(s.getSettings(), s.getModel(), s.getSymbolProvider())
+                    + "HttpAuthSchemeParametersProvider";
+                w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
+                w.write("return " + httpAuthSchemeParametersProviderName + ";");
+            });
+
+            /*
+            private getIdentityProviderConfigProvider() {
+              return async (config: WeatherClientResolvedConfig) => new DefaultIdentityProviderConfig({
+                "aws.auth#sigv4": config.credentials,
+                "smithy.api#httpApiKeyAuth": config.apiKey,
+                "smithy.api#httpBearerAuth": config.token,
+              });
+            }
+            */
+            w.openBlock("private getIdentityProviderConfigProvider() {", "}\n", () -> {
+                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.openBlock("""
+                    return async (config: $LResolvedConfig) => \
+                    new DefaultIdentityProviderConfig({""", "});",
+                    s.getSymbolProvider().toSymbol(s.getService()).getName(),
+                    () -> {
+                    SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(s.getIntegrations());
+                    ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
+                    Map<ShapeId, HttpAuthScheme> httpAuthSchemes
+                        = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(s.getService(), serviceIndex, authIndex);
+                    // TODO(experimentalIdentityAndAuth): figure out a better deduping strategy
+                    Map<String, ConfigField> visitedConfigFields = new HashMap<>();
+                    for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
+                        if (scheme == null) {
+                            continue;
+                        }
+                        for (ConfigField configField : scheme.getConfigFields()) {
+                            if (visitedConfigFields.containsKey(configField.name())) {
+                                ConfigField visitedConfigField = visitedConfigFields.get(configField.name());
+                                if (!configField.equals(visitedConfigField)) {
+                                    throw new CodegenException("Contradicting `ConfigField` defintions for `"
+                                        + configField.name()
+                                        + "`; existing: "
+                                        + visitedConfigField
+                                        + ", conflict: "
+                                        + configField);
+                                }
+                            } else {
+                                visitedConfigFields.put(configField.name(), configField);
+                                if (configField.type().equals(ConfigField.Type.MAIN)) {
+                                    w.write("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }));
     }
 
     @Override
     public void customize(TypeScriptCodegenContext codegenContext) {
-        if (!codegenContext.settings().generateClient()) {
+        if (!codegenContext.settings().generateClient()
+            || !codegenContext.settings().getExperimentalIdentityAndAuth()
+            || !codegenContext.applicationProtocol().isHttpProtocol()) {
             return;
         }
+
         codegenContext.writerDelegator().useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(codegenContext.integrations());
-            String service = CodegenUtils.getServiceName(
+            String serviceName = CodegenUtils.getServiceName(
                 codegenContext.settings(), codegenContext.model(), codegenContext.symbolProvider());
             ServiceShape serviceShape = codegenContext.settings().getService(codegenContext.model());
             ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
@@ -117,14 +187,18 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             Map<String, ConfigField> configFields =
                 AuthUtils.collectConfigFields(httpAuthSchemes.values());
 
-            generateHttpAuthSchemeInputConfigInterface(w, configFields);
-            generateHttpAuthSchemeResolvedConfigInterface(w, configFields, service);
-            generateResolveHttpAuthSchemeConfigFunction(w, configFields, httpAuthSchemes, authIndex, service);
+            generateHttpAuthSchemeInputConfigInterface(w, configFields, serviceName);
+            generateHttpAuthSchemeResolvedConfigInterface(w, configFields, serviceName);
+            generateResolveHttpAuthSchemeConfigFunction(w, configFields, httpAuthSchemes, authIndex);
         });
     }
 
     /*
     export interface HttpAuthSchemeInputConfig {
+      httpAuthSchemes?: HttpAuthScheme[];
+
+      httpAuthSchemeProvider?: WeatherHttpAuthSchemeProvider;
+
       apiKey?: ApiKeyIdentity | ApiKeyIdentityProvider;
 
       token?: TokenIdentity | TokenIdentityProvider;
@@ -136,13 +210,29 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     */
     private void generateHttpAuthSchemeInputConfigInterface(
         TypeScriptWriter w,
-        Map<String, ConfigField> configFields
+        Map<String, ConfigField> configFields,
+        String serviceName
     ) {
         w.openBlock("""
             /**
              * @internal
              */
             export interface HttpAuthSchemeInputConfig {""", "}\n", () -> {
+                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.writeDocs("""
+                    experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
+                    default identity providers and signers per auth scheme.
+                    @internal""");
+                w.write("httpAuthSchemes?: HttpAuthScheme[];\n");
+
+                String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
+                w.writeDocs("""
+                    experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
+                    resolves which HttpAuthScheme to use.
+                    @internal""");
+                w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
+
                 for (ConfigField configField : configFields.values()) {
                     w.writeDocs(() -> w.write("$C", configField.docs()));
                     w.write("$L?: $C;", configField.name(), configField.inputType());
@@ -152,6 +242,10 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
 
     /*
     export interface HttpAuthSchemeResolvedConfig {
+      readonly httpAuthSchemes: HttpAuthScheme[];
+
+      readonly httpAuthSchemeProvider: WeatherHttpAuthSchemeProvider;
+
       readonly apiKey?: ApiKeyIdentityProvider;
 
       readonly token?: TokenIdentityProvider;
@@ -159,38 +253,37 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
       readonly region?: __Provider<string>;
 
       readonly credentials?: AwsCredentialIdentityProvider;
-
-      readonly httpAuthSchemeParametersProvider: WeatherHttpAuthSchemeParametersProvider;
-
-      readonly identityProviderConfig: IdentityProviderConfig;
     }
     */
     private void generateHttpAuthSchemeResolvedConfigInterface(
         TypeScriptWriter w,
         Map<String, ConfigField> configFields,
-        String service
+        String serviceName
     ) {
         w.openBlock("""
             /**
              * @internal
              */
             export interface HttpAuthSchemeResolvedConfig {""", "}\n", () -> {
+                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.writeDocs("""
+                    experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
+                    default identity providers and signers per auth scheme.
+                    @internal""");
+                w.write("readonly httpAuthSchemes: HttpAuthScheme[];\n");
+
+                String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
+                w.writeDocs("""
+                    experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
+                    resolves which HttpAuthScheme to use.
+                    @internal""");
+                w.write("readonly httpAuthSchemeProvider: $L;\n", httpAuthSchemeProviderName);
+
                 for (ConfigField configField : configFields.values()) {
                     w.writeDocs(() -> w.write("$C", configField.docs()));
                     w.write("readonly $L?: $C;", configField.name(), configField.resolvedType());
                 }
-                w.writeDocs("""
-                    experimentalIdentityAndAuth: provides parameters for HttpAuthSchemeProvider.
-                    @internal""");
-                w.write("readonly httpAuthSchemeParametersProvider: $LHttpAuthSchemeParametersProvider;",
-                    service);
-
-                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("IdentityProviderConfig", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.writeDocs("""
-                    experimentalIdentityAndAuth: abstraction around identity configuration fields
-                    @internal""");
-                w.write("readonly identityProviderConfig: IdentityProviderConfig;");
             });
     }
 
@@ -206,21 +299,14 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
         region,
         apiKey,
         token,
-        httpAuthSchemeParametersProvider: defaultWeatherHttpAuthSchemeParametersProvider,
-        identityProviderConfig: new DefaultIdentityProviderConfig({
-          "aws.auth#sigv4": credentials,
-          "smithy.api#httpApiKeyAuth": apiKey,
-          "smithy.api#httpBearerAuth": token,
-        }),
-      };
+      } as HttpAuthSchemeResolvedConfig;
     };
     */
     private void generateResolveHttpAuthSchemeConfigFunction(
         TypeScriptWriter w,
         Map<String, ConfigField> configFields,
         Map<ShapeId, HttpAuthScheme> httpAuthSchemes,
-        SupportedHttpAuthSchemesIndex authIndex,
-        String service
+        SupportedHttpAuthSchemesIndex authIndex
     ) {
         w.openBlock("""
             /**
@@ -228,9 +314,8 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
              */
             export const resolveHttpAuthSchemeConfig = (config: HttpAuthSchemeInputConfig): \
             HttpAuthSchemeResolvedConfig => {""", "};", () -> {
+                // TODO(experimentalIdentityAndAuth): figure out a better way to configure resolving identities
                 w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("DefaultIdentityProviderConfig", null,
-                    TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                 for (ConfigField configField : configFields.values()) {
                     if (configField.type().equals(ConfigField.Type.MAIN)) {
                         w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
@@ -255,43 +340,11 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                             configField.name());
                     }
                 }
-                w.openBlock("return {", "};", () -> {
+                w.openBlock("return {", "} as HttpAuthSchemeResolvedConfig;", () -> {
                     w.write("...config,");
                     for (ConfigField configField : configFields.values()) {
                         w.write("$L,", configField.name());
                     }
-                    w.write("httpAuthSchemeParametersProvider: $T,",
-                        authIndex.getDefaultHttpAuthSchemeParametersProvider()
-                        .orElse(Symbol.builder()
-                            .name("default" + service + "HttpAuthSchemeParametersProvider")
-                            .build()));
-
-                    w.openBlock("identityProviderConfig: new DefaultIdentityProviderConfig({", "}),", () -> {
-                        Map<String, ConfigField> visitedConfigFields = new HashMap<>();
-                        for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
-                            if (scheme == null) {
-                                continue;
-                            }
-                            for (ConfigField configField : scheme.getConfigFields()) {
-                                if (visitedConfigFields.containsKey(configField.name())) {
-                                    ConfigField visitedConfigField = visitedConfigFields.get(configField.name());
-                                    if (!configField.equals(visitedConfigField)) {
-                                        throw new CodegenException("Contradicting `ConfigField` defintions for `"
-                                            + configField.name()
-                                            + "`; existing: "
-                                            + visitedConfigField
-                                            + ", conflict: "
-                                            + configField);
-                                    }
-                                } else {
-                                    visitedConfigFields.put(configField.name(), configField);
-                                    if (configField.type().equals(ConfigField.Type.MAIN)) {
-                                        w.write("$S: $L,", scheme.getSchemeId().toString(), configField.name());
-                                    }
-                                }
-                            }
-                        }
-                    });
                 });
             });
     }

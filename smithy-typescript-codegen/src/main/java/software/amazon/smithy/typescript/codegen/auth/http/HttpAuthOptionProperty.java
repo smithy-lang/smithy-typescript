@@ -25,7 +25,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 public final record HttpAuthOptionProperty(
     String name,
     Type type,
-    Function<Trait, Consumer<TypeScriptWriter>> source
+    Function<Source, Consumer<TypeScriptWriter>> source
 ) implements ToSmithyBuilder<HttpAuthOptionProperty> {
     /**
      * Defines the type of the auth option property.
@@ -41,12 +41,50 @@ public final record HttpAuthOptionProperty(
         SIGNING
     }
 
+    public static final record Source(
+        HttpAuthScheme httpAuthScheme,
+        Trait trait
+    ) implements ToSmithyBuilder<Source> {
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        @Override
+        public Builder toBuilder() {
+            return builder()
+                .httpAuthScheme(httpAuthScheme)
+                .trait(trait);
+        }
+
+        public static final class Builder implements SmithyBuilder<Source> {
+            HttpAuthScheme httpAuthScheme;
+            Trait trait;
+
+            @Override
+            public Source build() {
+                return new Source(
+                    SmithyBuilder.requiredState("httpAuthScheme", httpAuthScheme),
+                    SmithyBuilder.requiredState("trait", trait));
+            }
+
+            public Builder httpAuthScheme(HttpAuthScheme httpAuthScheme) {
+                this.httpAuthScheme = httpAuthScheme;
+                return this;
+            }
+
+            public Builder trait(Trait trait) {
+                this.trait = trait;
+                return this;
+            }
+        }
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
     @Override
-    public SmithyBuilder<HttpAuthOptionProperty> toBuilder() {
+    public Builder toBuilder() {
         return builder()
             .name(name)
             .type(type)
@@ -56,7 +94,7 @@ public final record HttpAuthOptionProperty(
     public static final class Builder implements SmithyBuilder<HttpAuthOptionProperty> {
         private String name;
         private Type type;
-        private Function<Trait, Consumer<TypeScriptWriter>> source;
+        private Function<Source, Consumer<TypeScriptWriter>> source;
 
         @Override
         public HttpAuthOptionProperty build() {
@@ -76,7 +114,7 @@ public final record HttpAuthOptionProperty(
             return this;
         }
 
-        public Builder source(Function<Trait, Consumer<TypeScriptWriter>> source) {
+        public Builder source(Function<Source, Consumer<TypeScriptWriter>> source) {
             this.source = source;
             return this;
         }

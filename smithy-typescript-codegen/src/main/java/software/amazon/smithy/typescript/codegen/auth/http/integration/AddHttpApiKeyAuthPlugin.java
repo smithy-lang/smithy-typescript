@@ -68,36 +68,36 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                 .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
                     .name("name")
                     .type(HttpAuthOptionProperty.Type.SIGNING)
-                    .source(t -> w -> {
-                        HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
-                        w.write("$S", httpApiKeyAuthTrait.getName());
+                    .source(s -> w -> {
+                        HttpApiKeyAuthTrait t = (HttpApiKeyAuthTrait) s.trait();
+                        w.write("$S", t.getName());
                     })
                     .build())
                 .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
                     .name("in")
                     .type(HttpAuthOptionProperty.Type.SIGNING)
-                    .source(t -> w -> {
+                    .source(s -> w -> {
                         w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
                         w.addImport("HttpApiKeyAuthLocation", null,
                             TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                        HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
-                        if (httpApiKeyAuthTrait.getIn().equals(Location.HEADER)) {
+                        HttpApiKeyAuthTrait t = (HttpApiKeyAuthTrait) s.trait();
+                        if (t.getIn().equals(Location.HEADER)) {
                             w.write("HttpApiKeyAuthLocation.HEADER");
-                        } else if (httpApiKeyAuthTrait.getIn().equals(Location.QUERY)) {
+                        } else if (t.getIn().equals(Location.QUERY)) {
                             w.write("HttpApiKeyAuthLocation.QUERY");
                         } else {
                             throw new CodegenException("Encountered invalid `in` property on `@httpApiKeyAuth`: "
-                            + httpApiKeyAuthTrait.getIn());
+                            + t.getIn());
                         }
                     })
                     .build())
                 .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
                     .name("scheme")
                     .type(HttpAuthOptionProperty.Type.SIGNING)
-                    .source(t -> w -> {
-                        HttpApiKeyAuthTrait httpApiKeyAuthTrait = (HttpApiKeyAuthTrait) t;
-                        httpApiKeyAuthTrait.getScheme().ifPresentOrElse(
-                            s -> w.write("$S", s),
+                    .source(s -> w -> {
+                        HttpApiKeyAuthTrait t = (HttpApiKeyAuthTrait) s.trait();
+                        t.getScheme().ifPresentOrElse(
+                            scheme -> w.write("$S", scheme),
                             () -> w.write("undefined"));
                     })
                     .build())
