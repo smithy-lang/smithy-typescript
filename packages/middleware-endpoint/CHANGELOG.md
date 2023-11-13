@@ -1,5 +1,22 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 8044a814: feat(experimentalIdentityAndAuth): move `experimentalIdentityAndAuth` types and interfaces to `@smithy/types` and `@smithy/core`
+
+### Patch Changes
+
+- 9e0a5a74: Add `@endpointRuleSet` signing properties to `selectedHttpAuthScheme`
+- Updated dependencies [8044a814]
+  - @smithy/types@2.5.0
+  - @smithy/middleware-serde@2.0.13
+  - @smithy/node-config-provider@2.1.5
+  - @smithy/shared-ini-file-loader@2.2.4
+  - @smithy/url-parser@2.0.13
+  - @smithy/util-middleware@2.0.6
+
 ## 2.1.5
 
 ### Patch Changes

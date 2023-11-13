@@ -1,5 +1,19 @@
 # Change Log
 
+## 0.0.24
+
+### Patch Changes
+
+- 8044a814: feat(experimentalIdentityAndAuth): move `experimentalIdentityAndAuth` types and interfaces to `@smithy/types` and `@smithy/core`
+- Updated dependencies [8044a814]
+- Updated dependencies [9e0a5a74]
+  - @smithy/middleware-endpoint@2.2.0
+  - @smithy/types@2.5.0
+  - @smithy/middleware-retry@2.0.20
+  - @smithy/middleware-serde@2.0.13
+  - @smithy/protocol-http@3.0.9
+  - @smithy/signature-v4@2.0.15
+
 ## 0.0.23
 
 ### Patch Changes

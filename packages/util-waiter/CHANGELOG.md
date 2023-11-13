@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [8044a814]
+  - @smithy/types@2.5.0
+  - @smithy/abort-controller@2.0.13
+
 ## 2.0.12
 
 ### Patch Changes
