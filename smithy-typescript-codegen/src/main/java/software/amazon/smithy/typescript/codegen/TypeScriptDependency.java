@@ -38,6 +38,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public enum TypeScriptDependency implements Dependency {
 
+    SMITHY_CORE("dependencies", "@smithy/core", false),
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", true),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
     SMITHY_TYPES("dependencies", "@smithy/types", true),
@@ -122,7 +123,8 @@ public enum TypeScriptDependency implements Dependency {
 
     // feat(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
     // This package should never have a major version, and should only use minor and patch versions in development.
-    EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
+    // Exports are located between @smithy/types and @smithy/core
+    @Deprecated EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
 
     // Conditionally added when specs have been generated.
     VITEST("devDependencies", "vitest", "^0.33.0", false),

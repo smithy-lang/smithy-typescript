@@ -33,7 +33,7 @@ public class AddHttpSigningMiddleware implements TypeScriptIntegration {
     public List<RuntimeClientPlugin> getClientPlugins() {
         return List.of(RuntimeClientPlugin.builder()
             .withConventions(
-                TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
+                TypeScriptDependency.SMITHY_CORE.dependency,
                 "HttpSigning",
                 HAS_MIDDLEWARE)
             .build());

@@ -28,8 +28,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
     private static final Consumer<TypeScriptWriter> HTTP_API_KEY_AUTH_SIGNER = w -> {
-        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-        w.addImport("HttpApiKeyAuthSigner", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addDependency(TypeScriptDependency.SMITHY_CORE);
+        w.addImport("HttpApiKeyAuthSigner", null, TypeScriptDependency.SMITHY_CORE);
         w.write("new HttpApiKeyAuthSigner()");
     };
 
@@ -51,17 +51,17 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                     .type(ConfigField.Type.MAIN)
                     .docs(w -> w.write("The API key to use when making requests."))
                     .inputType(w -> {
-                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("ApiKeyIdentity", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("ApiKeyIdentityProvider", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         w.write("ApiKeyIdentity | ApiKeyIdentityProvider");
                     })
                     .resolvedType(w -> {
-                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("ApiKeyIdentityProvider", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         w.write("ApiKeyIdentityProvider");
                     })
                     .build())
@@ -77,9 +77,9 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                     .name("in")
                     .type(HttpAuthOptionProperty.Type.SIGNING)
                     .source(s -> w -> {
-                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("HttpApiKeyAuthLocation", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         HttpApiKeyAuthTrait t = (HttpApiKeyAuthTrait) s.trait();
                         if (t.getIn().equals(Location.HEADER)) {
                             w.write("HttpApiKeyAuthLocation.HEADER");

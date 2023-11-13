@@ -26,8 +26,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class AddHttpBearerAuthPlugin implements HttpAuthTypeScriptIntegration {
     private static final Consumer<TypeScriptWriter> HTTP_BEARER_AUTH_SIGNER = w -> {
-        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-        w.addImport("HttpBearerAuthSigner", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addDependency(TypeScriptDependency.SMITHY_CORE);
+        w.addImport("HttpBearerAuthSigner", null, TypeScriptDependency.SMITHY_CORE);
         w.write("new HttpBearerAuthSigner()");
     };
 
@@ -49,17 +49,17 @@ public final class AddHttpBearerAuthPlugin implements HttpAuthTypeScriptIntegrat
                     .type(Type.MAIN)
                     .docs(w -> w.write("The token used to authenticate requests."))
                     .inputType(w -> {
-                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("TokenIdentity", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("TokenIdentityProvider", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         w.write("TokenIdentity | TokenIdentityProvider");
                     })
                     .resolvedType(w -> {
-                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
                         w.addImport("TokenIdentityProvider", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_TYPES);
                         w.write("TokenIdentityProvider");
                     })
                     .build())

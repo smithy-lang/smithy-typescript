@@ -24,8 +24,8 @@ public final class AddNoAuthPlugin implements HttpAuthTypeScriptIntegration {
     private static final Consumer<TypeScriptWriter> NO_AUTH_IDENTITY_PROVIDER_WRITER =
         w -> w.write("async () => ({})");
     private static final Consumer<TypeScriptWriter> NO_AUTH_SIGNER_WRITER = w -> {
-        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-        w.addImport("NoAuthSigner", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addDependency(TypeScriptDependency.SMITHY_CORE);
+        w.addImport("NoAuthSigner", null, TypeScriptDependency.SMITHY_CORE);
         w.write("new NoAuthSigner()");
     };
 
