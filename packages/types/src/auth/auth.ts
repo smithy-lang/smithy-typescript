@@ -30,6 +30,7 @@ export interface AuthScheme {
 
 /**
  * @internal
+ * @deprecated
  */
 export interface HttpAuthDefinition {
   /**
@@ -47,8 +48,10 @@ export interface HttpAuthDefinition {
    */
   scheme?: string;
 }
+
 /**
  * @internal
+ * @deprecated
  */
 export enum HttpAuthLocation {
   HEADER = "header",

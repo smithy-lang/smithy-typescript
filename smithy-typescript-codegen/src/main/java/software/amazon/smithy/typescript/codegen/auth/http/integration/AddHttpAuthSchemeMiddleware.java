@@ -49,7 +49,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             RuntimeClientPlugin.builder()
                 .servicePredicate((m, s) -> s.hasTrait(EndpointRuleSetTrait.ID))
                 .withConventions(
-                    TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
+                    TypeScriptDependency.SMITHY_CORE.dependency,
                     "HttpAuthSchemeEndpointRuleSet",
                     Convention.HAS_MIDDLEWARE)
                 .additionalPluginFunctionParamsSupplier((model, service, operation) -> Map.of(
@@ -64,7 +64,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             RuntimeClientPlugin.builder()
                 .servicePredicate((m, s) -> !s.hasTrait(EndpointRuleSetTrait.ID))
                 .withConventions(
-                    TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH.dependency,
+                    TypeScriptDependency.SMITHY_CORE.dependency,
                     "HttpAuthScheme",
                     Convention.HAS_MIDDLEWARE)
                 .additionalPluginFunctionParamsSupplier((model, service, operation) -> Map.of(
@@ -127,8 +127,8 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             }
             */
             w.openBlock("private getIdentityProviderConfigProvider() {", "}\n", () -> {
-                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addDependency(TypeScriptDependency.SMITHY_CORE);
+                w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.SMITHY_CORE);
                 w.openBlock("""
                     return async (config: $LResolvedConfig) => \
                     new DefaultIdentityProviderConfig({""", "});",
@@ -218,8 +218,8 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
              * @internal
              */
             export interface HttpAuthSchemeInputConfig {""", "}\n", () -> {
-                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+                w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.writeDocs("""
                     experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
                     default identity providers and signers per auth scheme.
@@ -265,8 +265,8 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
              * @internal
              */
             export interface HttpAuthSchemeResolvedConfig {""", "}\n", () -> {
-                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-                w.addImport("HttpAuthScheme", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+                w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.writeDocs("""
                     experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
                     default identity providers and signers per auth scheme.
@@ -315,16 +315,16 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             export const resolveHttpAuthSchemeConfig = (config: HttpAuthSchemeInputConfig): \
             HttpAuthSchemeResolvedConfig => {""", "};", () -> {
                 // TODO(experimentalIdentityAndAuth): figure out a better way to configure resolving identities
-                w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                w.addDependency(TypeScriptDependency.SMITHY_CORE);
                 for (ConfigField configField : configFields.values()) {
                     if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                        w.addDependency(TypeScriptDependency.SMITHY_CORE);
                         w.addImport("memoizeIdentityProvider", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_CORE);
                         w.addImport("isIdentityExpired", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_CORE);
                         w.addImport("doesIdentityRequireRefresh", null,
-                            TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+                            TypeScriptDependency.SMITHY_CORE);
                         w.write("""
                             const $L = memoizeIdentityProvider(config.$L, isIdentityExpired, \
                             doesIdentityRequireRefresh);""",

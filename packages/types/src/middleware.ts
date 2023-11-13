@@ -1,4 +1,4 @@
-import { AuthScheme, HttpAuthDefinition } from "./auth";
+import { AuthScheme, HttpAuthDefinition } from "./auth/auth";
 import { EndpointV2 } from "./endpoint";
 import { Logger } from "./logger";
 import { UserAgent } from "./util";

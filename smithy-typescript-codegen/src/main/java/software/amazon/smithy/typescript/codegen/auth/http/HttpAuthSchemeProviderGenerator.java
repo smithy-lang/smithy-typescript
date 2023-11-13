@@ -119,8 +119,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .model(model)
                 .symbolProvider(symbolProvider)
                 .build());
-            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.addImport("HttpAuthSchemeParameters", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+            w.addImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
             w.openBlock("""
                 /**
                  * @internal
@@ -159,8 +159,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .build());
             w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
                 Paths.get(".", serviceSymbol.getNamespace()));
-            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.addImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+            w.addImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.SMITHY_TYPES);
             w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.addImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
             w.write("""
@@ -262,8 +262,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         HttpAuthScheme authScheme
     ) {
         String normalizedAuthSchemeName = normalizeAuthSchemeName(shapeId);
-        w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-        w.addImport("HttpAuthOption", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+        w.addImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
         w.openBlock("""
             function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
             HttpAuthOption {""", "};\n",
@@ -333,8 +333,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .model(model)
                 .symbolProvider(symbolProvider)
                 .build());
-            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.addImport("HttpAuthSchemeProvider", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+            w.addImport("HttpAuthSchemeProvider", null, TypeScriptDependency.SMITHY_TYPES);
             w.write("""
             /**
              * @internal

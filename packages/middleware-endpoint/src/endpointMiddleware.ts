@@ -4,6 +4,7 @@ import {
   EndpointV2,
   HandlerExecutionContext,
   MetadataBearer,
+  SelectedHttpAuthScheme,
   SerializeHandler,
   SerializeHandlerArguments,
   SerializeHandlerOutput,
@@ -19,13 +20,7 @@ import { EndpointParameterInstructions } from "./types";
  * @internal
  */
 interface EndpointMiddlewareSmithyContext extends Record<string, unknown> {
-  // TODO(experimentalIdentityAndAuth): should be replaced with `SelectedHttpAuthScheme` interface
-  //                                    after it is moved to @smithy/types.
-  selectedHttpAuthScheme?: {
-    httpAuthOption?: {
-      signingProperties?: Record<string, unknown>;
-    };
-  };
+  selectedHttpAuthScheme?: SelectedHttpAuthScheme;
 }
 
 /**

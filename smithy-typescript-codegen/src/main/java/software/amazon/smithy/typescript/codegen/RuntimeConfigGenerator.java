@@ -253,8 +253,8 @@ final class RuntimeConfigGenerator {
 
         // feat(experimentalIdentityAndAuth): write the default httpAuthSchemes
         configs.put("httpAuthSchemes", w -> {
-            w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
-            w.addImport("IdentityProviderConfig", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
+            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+            w.addImport("IdentityProviderConfig", null, TypeScriptDependency.SMITHY_TYPES);
             w.openBlock("[", "]", () -> {
                 Iterator<HttpAuthSchemeTarget> iter = targetAuthSchemes.iterator();
                 while (iter.hasNext()) {
