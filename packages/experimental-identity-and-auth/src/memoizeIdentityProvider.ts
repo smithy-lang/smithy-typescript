@@ -2,6 +2,12 @@ import { Identity, IdentityProvider } from "@smithy/types";
 
 /**
  * @internal
+ */
+export const createIsIdentityExpiredFunction = (expirationMs: number) => (identity: Identity) =>
+  doesIdentityRequireRefresh(identity) && identity.expiration!.getTime() - Date.now() < expirationMs;
+
+/**
+ * @internal
  * This may need to be configurable in the future, but for now it is defaulted to 5min.
  */
 export const EXPIRATION_MS = 300_000;
@@ -9,8 +15,7 @@ export const EXPIRATION_MS = 300_000;
 /**
  * @internal
  */
-export const isIdentityExpired = (identity: Identity) =>
-  doesIdentityRequireRefresh(identity) && identity.expiration!.getTime() - Date.now() < EXPIRATION_MS;
+export const isIdentityExpired = createIsIdentityExpiredFunction(EXPIRATION_MS);
 
 /**
  * @internal
