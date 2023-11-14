@@ -263,8 +263,8 @@ final class RuntimeConfigGenerator {
                         w.write("""
                             {
                               schemeId: $S,
-                              identityProvider: (config: IdentityProviderConfig) =>
-                                config.getIdentityProvider($S),
+                              identityProvider: (ipc: IdentityProviderConfig) =>
+                                ipc.getIdentityProvider($S),
                               signer: $C,
                             }""",
                             entry.httpAuthScheme.getSchemeId(),
@@ -274,8 +274,8 @@ final class RuntimeConfigGenerator {
                         w.write("""
                             {
                               schemeId: $S,
-                              identityProvider: (config: IdentityProviderConfig) =>
-                                config.getIdentityProvider($S) || ($C),
+                              identityProvider: (ipc: IdentityProviderConfig) =>
+                                ipc.getIdentityProvider($S) || ($C),
                               signer: $C,
                             }""",
                             entry.httpAuthScheme.getSchemeId(),
