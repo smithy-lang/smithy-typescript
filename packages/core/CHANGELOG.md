@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.1
+
+### Patch Changes
+
+- 4fca874e: Fix test script.
+
 ## 1.0.0
 
 ### Major Changes
