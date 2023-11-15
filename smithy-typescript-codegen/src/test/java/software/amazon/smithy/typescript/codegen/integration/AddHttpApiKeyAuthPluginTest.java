@@ -26,18 +26,19 @@ import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
-import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
+import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
 
 public class AddHttpApiKeyAuthPluginTest {
     @Test
     public void httpApiKeyAuthClientOnService() {
-        testInjects("http-api-key-auth-trait.smithy", ", { scheme: 'ApiKey', in: 'header', name: 'Authorization' }");
+        testInjects("http-api-key-auth-trait.smithy",
+                ", { in: 'header', name: 'Authorization', scheme: 'ApiKey' }");
     }
 
     @Test
     public void httpApiKeyAuthClientOnOperation() {
         testInjects("http-api-key-auth-trait-on-operation.smithy",
-                ", { scheme: 'ApiKey', in: 'header', name: 'Authorization' }");
+                ", { in: 'header', name: 'Authorization', scheme: 'ApiKey' }");
     }
 
     // This should be identical to the httpApiKeyAuthClient test except for the parameters provided
@@ -95,7 +96,7 @@ public class AddHttpApiKeyAuthPluginTest {
                         .build())
                 .build();
 
-        new TypeScriptCodegenPlugin().execute(context);
+        new TypeScriptClientCodegenPlugin().execute(context);
 
         return manifest;
     }

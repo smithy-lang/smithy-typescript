@@ -271,14 +271,17 @@ public final class CodegenUtils {
      * Returns the list of function parameter key-value pairs to be written for
      * provided parameters map.
      *
-     * @param paramsMap Map of paramters to generate a parameters string for.
+     * @param paramsMap Map of parameters to generate a parameters string for.
      * @return The list of parameters to be written.
      */
     static List<String> getFunctionParametersList(Map<String, Object> paramsMap) {
         List<String> functionParametersList = new ArrayList<String>();
+        List<Map.Entry<String, Object>> sortedParamsMap = paramsMap.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .toList();
 
-        if (!paramsMap.isEmpty()) {
-            for (Map.Entry<String, Object> param : paramsMap.entrySet()) {
+        if (!sortedParamsMap.isEmpty()) {
+            for (Map.Entry<String, Object> param : sortedParamsMap) {
                 String key = param.getKey();
                 Object value = param.getValue();
                 if (value instanceof Symbol) {
