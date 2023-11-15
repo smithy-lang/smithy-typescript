@@ -48,7 +48,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * Generates a bare-bones client and configuration for service using plugins.
  */
 @SmithyInternalApi
-final class ServiceBareBonesClientGenerator implements Runnable {
+public final class ServiceBareBonesClientGenerator implements Runnable {
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -88,11 +88,11 @@ final class ServiceBareBonesClientGenerator implements Runnable {
         resolvedConfigType = getResolvedConfigTypeName(symbol);
     }
 
-    static String getConfigTypeName(Symbol symbol) {
+    public static String getConfigTypeName(Symbol symbol) {
         return symbol.getName() + "Config";
     }
 
-    static String getResolvedConfigTypeName(Symbol symbol) {
+    public static String getResolvedConfigTypeName(Symbol symbol) {
         return symbol.getName() + "ResolvedConfig";
     }
 

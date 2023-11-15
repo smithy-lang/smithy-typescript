@@ -12,12 +12,12 @@ import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
-import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
+import software.amazon.smithy.typescript.codegen.auth.http.ConfigField;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.extensions.ExtensionConfigurationInterface;
@@ -55,8 +55,10 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
             return;
         }
         TypeScriptDelegator delegator = codegenContext.writerDelegator();
-        SupportedHttpAuthSchemesIndex authIndex =
-            new SupportedHttpAuthSchemesIndex(codegenContext.integrations());
+        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
+            codegenContext.integrations(),
+            codegenContext.model(),
+            codegenContext.settings());
         ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
         String serviceName = CodegenUtils.getServiceName(
             codegenContext.settings(), codegenContext.model(), codegenContext.symbolProvider());
@@ -134,12 +136,18 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                     serviceName);
                 w.write("httpAuthSchemeProvider(): $LHttpAuthSchemeProvider;", serviceName);
 
-                for (ConfigField configField : configFields.values()) {
-                    if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        String capitalizedName = StringUtils.capitalize(configField.name());
-                        w.write("set$L($L: $C): void;", capitalizedName, configField.name(), configField.inputType());
-                        w.write("$L(): $C | undefined;", configField.name(), configField.inputType());
-                    }
+                List<ConfigField> mainConfigFields = configFields.values().stream()
+                    .filter(c -> c.type().equals(ConfigField.Type.MAIN))
+                    .toList();
+                for (ConfigField configField : mainConfigFields) {
+                    String capitalizedName = StringUtils.capitalize(configField.name());
+                    w.write("set$L($L: $T): void;",
+                        capitalizedName,
+                        configField.name(),
+                        configField.inputType());
+                    w.write("$L(): $T | undefined;",
+                        configField.name(),
+                        configField.inputType());
                 }
             });
         });
@@ -190,10 +198,13 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 w.write("httpAuthSchemes: HttpAuthScheme[];");
                 w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("httpAuthSchemeProvider: $LHttpAuthSchemeProvider;", serviceName);
-                for (ConfigField configField : configFields.values()) {
-                    if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        w.write("$L: $C;", configField.name(), configField.inputType());
-                    }
+                List<ConfigField> mainConfigFields = configFields.values().stream()
+                    .filter(c -> c.type().equals(ConfigField.Type.MAIN))
+                    .toList();
+                for (ConfigField configField : mainConfigFields) {
+                    w.write("$L: $T;",
+                        configField.name(),
+                        configField.inputType());
                 }
             });
         });
@@ -281,10 +292,11 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 w.write("let _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;");
                 w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider!;");
-                for (ConfigField configField : configFields.values()) {
-                    if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        w.write("let _$L = runtimeConfig.$L;", configField.name(), configField.name());
-                    }
+                List<ConfigField> mainConfigFields = configFields.values().stream()
+                    .filter(c -> c.type().equals(ConfigField.Type.MAIN))
+                    .toList();
+                for (ConfigField configField : mainConfigFields) {
+                    w.write("let _$L = runtimeConfig.$L;", configField.name(), configField.name());
                 }
 
                 w.openBlock("return {", "}",
@@ -309,21 +321,19 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                         httpAuthSchemeProvider(): $LHttpAuthSchemeProvider {
                           return _httpAuthSchemeProvider;
                         },""", serviceName, serviceName);
-                    for (ConfigField configField : configFields.values()) {
-                        if (configField.type().equals(ConfigField.Type.MAIN)) {
-                            String capitalizedName = StringUtils.capitalize(configField.name());
-                            w.write("""
-                                set$L($L: $C): void {
-                                  _$L = $L;
-                                },
-                                $L(): $C | undefined {
-                                  return _$L;
-                                },""",
-                                capitalizedName, configField.name(), configField.inputType(),
-                                configField.name(), configField.name(),
-                                configField.name(), configField.inputType(),
-                                configField.name());
-                        }
+                    for (ConfigField configField : mainConfigFields) {
+                        String capitalizedName = StringUtils.capitalize(configField.name());
+                        w.write("""
+                            set$L($L: $T): void {
+                                _$L = $L;
+                            },
+                            $L(): $T | undefined {
+                                return _$L;
+                            },""",
+                            capitalizedName, configField.name(), configField.inputType(),
+                            configField.name(), configField.name(),
+                            configField.name(), configField.inputType(),
+                            configField.name());
                     }
                 });
             });
