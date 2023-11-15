@@ -312,8 +312,8 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             /**
              * @internal
              */
-            export const resolveHttpAuthSchemeConfig = (config: HttpAuthSchemeInputConfig): \
-            HttpAuthSchemeResolvedConfig => {""", "};", () -> {
+            export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig): \
+            T & HttpAuthSchemeResolvedConfig => {""", "};", () -> {
                 // TODO(experimentalIdentityAndAuth): figure out a better way to configure resolving identities
                 w.addDependency(TypeScriptDependency.SMITHY_CORE);
                 for (ConfigField configField : configFields.values()) {
@@ -340,7 +340,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                             configField.name());
                     }
                 }
-                w.openBlock("return {", "} as HttpAuthSchemeResolvedConfig;", () -> {
+                w.openBlock("return {", "} as T & HttpAuthSchemeResolvedConfig;", () -> {
                     w.write("...config,");
                     for (ConfigField configField : configFields.values()) {
                         w.write("$L,", configField.name());
