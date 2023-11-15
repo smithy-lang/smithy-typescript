@@ -5,32 +5,38 @@
 
 package software.amazon.smithy.typescript.codegen.auth.http.sections;
 
+import java.util.List;
 import java.util.Map;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
-import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
+import software.amazon.smithy.typescript.codegen.auth.http.ConfigField;
+import software.amazon.smithy.typescript.codegen.auth.http.ResolveConfigFunction;
+import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
-public final class HttpAuthOptionFunctionsCodeSection implements CodeSection {
+public final class HttpAuthSchemeInputConfigInterfaceCodeSection implements CodeSection {
     private final ServiceShape service;
     private final TypeScriptSettings settings;
     private final Model model;
     private final SymbolProvider symbolProvider;
-    private final Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
+    private final List<TypeScriptIntegration> integrations;
+    private final Map<String, ConfigField> configFields;
+    private final Map<Symbol, ResolveConfigFunction> resolveConfigFunctions;
 
-    private HttpAuthOptionFunctionsCodeSection(Builder builder) {
+    private HttpAuthSchemeInputConfigInterfaceCodeSection(Builder builder) {
         service = SmithyBuilder.requiredState("service", builder.service);
         settings = SmithyBuilder.requiredState("settings", builder.settings);
         model = SmithyBuilder.requiredState("model", builder.model);
         symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
-        effectiveHttpAuthSchemes =
-            SmithyBuilder.requiredState("effectiveHttpAuthSchemes", builder.effectiveHttpAuthSchemes);
+        integrations = SmithyBuilder.requiredState("integrations", builder.integrations);
+        configFields = SmithyBuilder.requiredState("configFields", builder.configFields);
+        resolveConfigFunctions = SmithyBuilder.requiredState("resolveConfigFunctions", builder.resolveConfigFunctions);
     }
 
     public ServiceShape getService() {
@@ -49,24 +55,34 @@ public final class HttpAuthOptionFunctionsCodeSection implements CodeSection {
         return symbolProvider;
     }
 
-    public Map<ShapeId, HttpAuthScheme> getEffectiveHttpAuthSchemes() {
-        return effectiveHttpAuthSchemes;
+    public List<TypeScriptIntegration> getIntegrations() {
+        return integrations;
+    }
+
+    public Map<String, ConfigField> getConfigFields() {
+        return configFields;
+    }
+
+    public Map<Symbol, ResolveConfigFunction> getResolveConfigFunctions() {
+        return resolveConfigFunctions;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder implements SmithyBuilder<HttpAuthOptionFunctionsCodeSection> {
+    public static class Builder implements SmithyBuilder<HttpAuthSchemeInputConfigInterfaceCodeSection> {
         private ServiceShape service;
         private TypeScriptSettings settings;
         private Model model;
         private SymbolProvider symbolProvider;
-        private Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
+        private List<TypeScriptIntegration> integrations;
+        private Map<String, ConfigField>  configFields;
+        private Map<Symbol, ResolveConfigFunction>  resolveConfigFunctions;
 
         @Override
-        public HttpAuthOptionFunctionsCodeSection build() {
-            return new HttpAuthOptionFunctionsCodeSection(this);
+        public HttpAuthSchemeInputConfigInterfaceCodeSection build() {
+            return new HttpAuthSchemeInputConfigInterfaceCodeSection(this);
         }
 
         public Builder service(ServiceShape service) {
@@ -89,8 +105,18 @@ public final class HttpAuthOptionFunctionsCodeSection implements CodeSection {
             return this;
         }
 
-        public Builder effectiveHttpAuthSchemes(Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes) {
-            this.effectiveHttpAuthSchemes = effectiveHttpAuthSchemes;
+        public Builder integrations(List<TypeScriptIntegration> integrations) {
+            this.integrations = integrations;
+            return this;
+        }
+
+        public Builder configFields(Map<String, ConfigField> configFields) {
+            this.configFields = configFields;
+            return this;
+        }
+
+        public Builder resolveConfigFunctions(Map<Symbol, ResolveConfigFunction> resolveConfigFunctions) {
+            this.resolveConfigFunctions = resolveConfigFunctions;
             return this;
         }
     }

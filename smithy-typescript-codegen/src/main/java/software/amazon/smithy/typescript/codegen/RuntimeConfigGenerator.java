@@ -213,13 +213,15 @@ final class RuntimeConfigGenerator {
         TypeScriptWriter writer,
         LanguageTarget target
     ) {
-        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations);
+        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
 
         // feat(experimentalIdentityAndAuth): write the default imported HttpAuthSchemeProvider
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
                 w.write("$T", Symbol.builder()
-                        .name("default" + service.toShapeId().getName() + "HttpAuthSchemeProvider")
+                        .name("default"
+                            + CodegenUtils.getServiceName(settings, model, symbolProvider)
+                            + "HttpAuthSchemeProvider")
                         .namespace(AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY.getPackageName(), "/")
                         .build());
             });

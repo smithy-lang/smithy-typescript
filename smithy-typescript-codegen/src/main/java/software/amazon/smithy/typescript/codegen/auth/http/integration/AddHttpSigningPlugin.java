@@ -20,7 +20,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
-public class AddHttpSigningMiddleware implements TypeScriptIntegration {
+public class AddHttpSigningPlugin implements TypeScriptIntegration {
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
      */

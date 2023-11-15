@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
@@ -20,10 +21,11 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
-import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.Dependency;
+import software.amazon.smithy.typescript.codegen.auth.http.ConfigField;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeParameter;
+import software.amazon.smithy.typescript.codegen.auth.http.ResolveConfigFunction;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -110,7 +112,7 @@ public final class AuthUtils {
                 if (configFields.containsKey(configField.name())) {
                     ConfigField existingConfigField = configFields.get(configField.name());
                     if (!configField.equals(existingConfigField)) {
-                        throw new CodegenException("Contradicting `ConfigField` defintions for `"
+                        throw new CodegenException("Contradicting `ConfigField` definitions for `"
                             + configField.name()
                             + "`; existing: "
                             + existingConfigField
@@ -125,6 +127,34 @@ public final class AuthUtils {
         return configFields;
     }
 
+    public static Map<Symbol, ResolveConfigFunction> collectResolveConfigFunctions(
+        Collection<HttpAuthScheme> httpAuthSchemes
+    ) {
+        Map<Symbol, ResolveConfigFunction> resolveConfigFunctions = new HashMap<>();
+        for (HttpAuthScheme authScheme : httpAuthSchemes) {
+            if (authScheme == null) {
+                continue;
+            }
+            for (ResolveConfigFunction fn : authScheme.getResolveConfigFunctions()) {
+                if (resolveConfigFunctions.containsKey(fn.resolveConfigFunction())) {
+                    ResolveConfigFunction existingFn =
+                        resolveConfigFunctions.get(fn.resolveConfigFunction());
+                    if (!fn.equals(existingFn)) {
+                        throw new CodegenException("Contradicting `ResolveConfigFunction` definitions for `"
+                            + fn.resolveConfigFunction()
+                            + "`; existing: "
+                            + existingFn
+                            + ", conflict: "
+                            + fn);
+                    }
+                } else {
+                    resolveConfigFunctions.put(fn.resolveConfigFunction(), fn);
+                }
+            }
+        }
+        return resolveConfigFunctions;
+    }
+
     public static Map<String, HttpAuthSchemeParameter> collectHttpAuthSchemeParameters(
         Collection<HttpAuthScheme> httpAuthSchemes) {
         Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters = new HashMap<>();
@@ -136,7 +166,7 @@ public final class AuthUtils {
                 if (httpAuthSchemeParameters.containsKey(param.name())) {
                     HttpAuthSchemeParameter existingParam = httpAuthSchemeParameters.get(param.name());
                     if (!param.equals(existingParam)) {
-                        throw new CodegenException("Contradicting `HttpAuthSchemeParameter` defintions for `"
+                        throw new CodegenException("Contradicting `HttpAuthSchemeParameter` definitions for `"
                             + param.name()
                             + "`; existing: "
                             + existingParam

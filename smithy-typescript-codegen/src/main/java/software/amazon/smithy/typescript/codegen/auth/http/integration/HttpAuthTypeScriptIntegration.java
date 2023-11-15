@@ -6,6 +6,8 @@
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -31,7 +33,14 @@ public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
      * feat(experimentalIdentityAndAuth): Mutate an {@link SupportedHttpAuthSchemesIndex} to mutate registered
      * {@link HttpAuthScheme}s, e.g. default {@code IdentityProvider}s and {@code HttpSigner}s.
      * @param supportedHttpAuthSchemesIndex index to mutate.
+     * @param model model
+     * @param settings settings
      */
-    default void customizeSupportedHttpAuthSchemes(SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex) {
+    default void customizeSupportedHttpAuthSchemes(
+        SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex,
+        Model model,
+        TypeScriptSettings settings
+    ) {
+        // pass
     }
 }

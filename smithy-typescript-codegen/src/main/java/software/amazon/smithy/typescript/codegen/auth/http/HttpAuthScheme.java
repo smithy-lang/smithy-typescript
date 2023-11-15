@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
-import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
@@ -35,9 +35,10 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
     private final Map<LanguageTarget, Consumer<TypeScriptWriter>> defaultIdentityProviders;
     private final Map<LanguageTarget, Consumer<TypeScriptWriter>> defaultSigners;
     private final List<ConfigField> configFields;
+    private final List<ResolveConfigFunction> resolveConfigFunctions;
     private final List<HttpAuthSchemeParameter> httpAuthSchemeParameters;
     private final List<HttpAuthOptionProperty> httpAuthOptionProperties;
-    private final Function<String, Consumer<TypeScriptWriter>> propertiesExtractor;
+    private final Function<Symbol, Consumer<TypeScriptWriter>> propertiesExtractor;
 
     private HttpAuthScheme(Builder builder) {
         this.schemeId = SmithyBuilder.requiredState(
@@ -51,6 +52,8 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
             "defaultSigners", builder.defaultSigners.copy());
         this.configFields = SmithyBuilder.requiredState(
             "configFields", builder.configFields.copy());
+        this.resolveConfigFunctions = SmithyBuilder.requiredState(
+            "resolveConfigFunctions", builder.resolveConfigFunctions.copy());
         this.httpAuthSchemeParameters = SmithyBuilder.requiredState(
             "httpAuthSchemeParameters", builder.httpAuthSchemeParameters.copy());
         this.httpAuthOptionProperties = SmithyBuilder.requiredState(
@@ -107,6 +110,10 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
         return configFields;
     }
 
+    public List<ResolveConfigFunction> getResolveConfigFunctions() {
+        return resolveConfigFunctions;
+    }
+
     /**
      * Gets the list of auth scheme parameters for an auth scheme.
      * @return httpAuthSchemeParameters
@@ -136,7 +143,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
      * Gets the writer for the config properties extractor.
      * @return optional of config properties extractor
      */
-    public Optional<Function<String, Consumer<TypeScriptWriter>>> getPropertiesExtractor() {
+    public Optional<Function<Symbol, Consumer<TypeScriptWriter>>> getPropertiesExtractor() {
         return Optional.ofNullable(propertiesExtractor);
     }
 
@@ -162,6 +169,7 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
             .defaultIdentityProviders(defaultIdentityProviders)
             .defaultSigners(defaultSigners)
             .configFields(configFields)
+            .resolveConfigFunctions(resolveConfigFunctions)
             .httpAuthSchemeParameters(httpAuthSchemeParameters)
             .httpAuthOptionProperties(httpAuthOptionProperties)
             .propertiesExtractor(propertiesExtractor);
@@ -180,11 +188,13 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
             BuilderRef.forOrderedMap();
         private BuilderRef<List<ConfigField>> configFields =
             BuilderRef.forList();
+        private BuilderRef<List<ResolveConfigFunction>> resolveConfigFunctions =
+            BuilderRef.forList();
         private BuilderRef<List<HttpAuthSchemeParameter>> httpAuthSchemeParameters =
             BuilderRef.forList();
         private BuilderRef<List<HttpAuthOptionProperty>> httpAuthOptionProperties =
             BuilderRef.forList();
-        private Function<String, Consumer<TypeScriptWriter>> propertiesExtractor;
+        private Function<Symbol, Consumer<TypeScriptWriter>> propertiesExtractor;
 
         private Builder() {}
 
@@ -317,6 +327,32 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
         }
 
         /**
+         * Removes a config field by name.
+         * @param configField name of the config field to remove
+         * @return the builder
+         */
+        public Builder removeConfigField(String configField) {
+            this.configFields.get().removeIf(c -> c.name().equals(configField));
+            return this;
+        }
+
+        public Builder resolveConfigFunctions(List<ResolveConfigFunction> resolveConfigFunctions) {
+            this.resolveConfigFunctions.clear();
+            this.resolveConfigFunctions.get().addAll(resolveConfigFunctions);
+            return this;
+        }
+
+        public Builder addResolveConfigFunction(ResolveConfigFunction resolveConfigFunction) {
+            this.resolveConfigFunctions.get().add(resolveConfigFunction);
+            return this;
+        }
+
+        public Builder removeResolveConfigFunction(Symbol resolveConfigFunction) {
+            this.resolveConfigFunctions.get().removeIf(c -> c.resolveConfigFunction().equals(resolveConfigFunction));
+            return this;
+        }
+
+        /**
          * Sets the httpAuthSchemeParameters.
          * @param httpAuthSchemeParameters auth scheme parameters to set
          * @return the builder
@@ -329,12 +365,22 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
         }
 
         /**
-         * Adds a auth scheme parameter.
+         * Adds an auth scheme parameter.
          * @param httpAuthSchemeParameter parameter to add
          * @return the builder
          */
         public Builder addHttpAuthSchemeParameter(HttpAuthSchemeParameter httpAuthSchemeParameter) {
             this.httpAuthSchemeParameters.get().add(httpAuthSchemeParameter);
+            return this;
+        }
+
+        /**
+         * Removes an auth scheme parameter by name.
+         * @param httpAuthSchemeParameter name of the auth scheme parameter to remove
+         * @return the builder
+         */
+        public Builder removeHttpAuthSchemeParameter(String httpAuthSchemeParameter) {
+            this.httpAuthSchemeParameters.get().removeIf(p -> p.name().equals(httpAuthSchemeParameter));
             return this;
         }
 
@@ -361,12 +407,22 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
         }
 
         /**
+         * Removes an auth option property.
+         * @param httpAuthOptionProperty name of the auth option property to remove
+         * @return the builder
+         */
+        public Builder removeHttpAuthOptionProperty(String httpAuthOptionProperty) {
+            this.httpAuthOptionProperties.get().removeIf(p -> p.name().equals(httpAuthOptionProperty));
+            return this;
+        }
+
+        /**
          * Sets the propertiesExtractor.
          * @param propertiesExtractor writer for properties extractor
          * @return the builder
          */
         public Builder propertiesExtractor(
-            Function<String, Consumer<TypeScriptWriter>> propertiesExtractor) {
+            Function<Symbol, Consumer<TypeScriptWriter>> propertiesExtractor) {
             this.propertiesExtractor = propertiesExtractor;
             return this;
         }
