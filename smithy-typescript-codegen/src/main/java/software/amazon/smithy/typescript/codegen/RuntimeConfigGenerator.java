@@ -219,7 +219,9 @@ final class RuntimeConfigGenerator {
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
                 w.write("$T", Symbol.builder()
-                        .name("default" + service.toShapeId().getName() + "HttpAuthSchemeProvider")
+                        .name("default"
+                            + CodegenUtils.getServiceName(settings, model, symbolProvider)
+                            + "HttpAuthSchemeProvider")
                         .namespace(AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY.getPackageName(), "/")
                         .build());
             });
