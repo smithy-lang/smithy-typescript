@@ -250,7 +250,10 @@ public interface TypeScriptIntegration
      *
      * @return list of client configuration interface
      */
-    default List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
+    default List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces(
+        Model model,
+        TypeScriptSettings settings
+    ) {
         return Collections.emptyList();
     }
 

@@ -29,18 +29,22 @@ public class RuntimeExtensionsGenerator {
     private static final String FILENAME = "runtimeExtensions.ts";
 
     private final Model model;
+    private final TypeScriptSettings settings;
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final TypeScriptDelegator delegator;
     private final List<TypeScriptIntegration> integrations;
 
     public RuntimeExtensionsGenerator(
-        Model model, ServiceShape service,
+        Model model,
+        TypeScriptSettings settings,
+        ServiceShape service,
         SymbolProvider symbolProvider,
         TypeScriptDelegator delegator,
         List<TypeScriptIntegration> integrations
     ) {
         this.model = model;
+        this.settings = settings;
         this.service = service;
         this.symbolProvider = symbolProvider;
         this.delegator = delegator;
@@ -63,7 +67,7 @@ public class RuntimeExtensionsGenerator {
 
         delegator.useFileWriter(Paths.get(CodegenUtils.SOURCE_FOLDER, FILENAME).toString(), writer -> {
             for (TypeScriptIntegration integration : integrations) {
-                integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+                integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
                     writer.addDependency(configurationInterface.getExtensionConfigurationFn().right);
                     writer.addDependency(configurationInterface.resolveRuntimeConfigFn().right);
 
@@ -76,7 +80,7 @@ public class RuntimeExtensionsGenerator {
 
             writer.indent().onSection("getPartialExtensionConfigurations", original -> {
                 for (TypeScriptIntegration integration : integrations) {
-                    integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+                    integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
                         writer.indent(2).write("...asPartial($L(runtimeConfig)),",
                                 configurationInterface.getExtensionConfigurationFn().left);
                         writer.dedent(2);
@@ -87,7 +91,7 @@ public class RuntimeExtensionsGenerator {
 
             writer.indent().onSection("resolvePartialRuntimeConfigs", original -> {
                 for (TypeScriptIntegration integration : integrations) {
-                    integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+                    integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
                         writer.indent(2).write("...$L(extensionConfiguration),",
                                 configurationInterface.resolveRuntimeConfigFn().left);
                         writer.dedent(2);
