@@ -141,7 +141,10 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
     }
 
     @Override
-    public List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
+    public List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces(
+        Model model,
+        TypeScriptSettings settings
+    ) {
         return List.of(new DefaultExtensionConfigurationInterface(), new HttpHandlerExtensionConfigurationInterface());
     }
 }
