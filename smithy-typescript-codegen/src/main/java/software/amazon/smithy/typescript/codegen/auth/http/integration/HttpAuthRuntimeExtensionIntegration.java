@@ -133,8 +133,13 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 for (ConfigField configField : configFields.values()) {
                     if (configField.type().equals(ConfigField.Type.MAIN)) {
                         String capitalizedName = StringUtils.capitalize(configField.name());
-                        w.write("set$L($L: $C): void;", capitalizedName, configField.name(), configField.inputType());
-                        w.write("$L(): $C | undefined;", configField.name(), configField.inputType());
+                        w.write("set$L($L: $C): void;",
+                            capitalizedName,
+                            configField.name(),
+                            configField.inputType().get());
+                        w.write("$L(): $C | undefined;",
+                            configField.name(),
+                            configField.inputType().get());
                     }
                 }
             });
@@ -188,7 +193,9 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 w.write("httpAuthSchemeProvider: $LHttpAuthSchemeProvider;", serviceName);
                 for (ConfigField configField : configFields.values()) {
                     if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        w.write("$L: $C;", configField.name(), configField.inputType());
+                        w.write("$L: $C;",
+                            configField.name(),
+                            configField.inputType().get());
                     }
                 }
             });
@@ -315,9 +322,9 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                                 $L(): $C | undefined {
                                   return _$L;
                                 },""",
-                                capitalizedName, configField.name(), configField.inputType(),
+                                capitalizedName, configField.name(), configField.inputType().get(),
                                 configField.name(), configField.name(),
-                                configField.name(), configField.inputType(),
+                                configField.name(), configField.inputType().get(),
                                 configField.name());
                         }
                     }

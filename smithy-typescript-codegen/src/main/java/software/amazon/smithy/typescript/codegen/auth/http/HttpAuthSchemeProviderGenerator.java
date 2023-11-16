@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -27,6 +28,7 @@ import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty.Type;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.DefaultHttpAuthSchemeParametersProviderFunctionCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.DefaultHttpAuthSchemeProviderFunctionCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthOptionFunctionCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthOptionFunctionsCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeParametersProviderInterfaceCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeProviderInterfaceCodeSection;
@@ -233,7 +235,15 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .effectiveHttpAuthSchemes(effectiveHttpAuthSchemes)
                 .build());
             for (Entry<ShapeId, HttpAuthScheme> entry : effectiveHttpAuthSchemes.entrySet()) {
-                generateHttpAuthOptionFunction(w, entry.getKey(), entry.getValue());
+                generateHttpAuthOptionFunction(w, HttpAuthOptionFunctionCodeSection.builder()
+                    .service(serviceShape)
+                    .settings(settings)
+                    .model(model)
+                    .symbolProvider(symbolProvider)
+                    .effectiveHttpAuthSchemes(effectiveHttpAuthSchemes)
+                    .schemeId(entry.getKey())
+                    .httpAuthScheme(entry.getValue())
+                    .build());
             }
             w.popState();
         });
@@ -258,10 +268,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateHttpAuthOptionFunction(
         TypeScriptWriter w,
-        ShapeId shapeId,
-        HttpAuthScheme authScheme
+        HttpAuthOptionFunctionCodeSection s
     ) {
-        String normalizedAuthSchemeName = normalizeAuthSchemeName(shapeId);
+        w.pushState(s);
+        ShapeId schemeId = s.getSchemeId();
+        String normalizedAuthSchemeName = normalizeAuthSchemeName(schemeId);
+        Optional<HttpAuthScheme> authSchemeOptional = s.getHttpAuthScheme();
         w.addDependency(TypeScriptDependency.SMITHY_TYPES);
         w.addImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
         w.openBlock("""
@@ -270,11 +282,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
             normalizedAuthSchemeName, serviceName,
             () -> {
             w.openBlock("return {", "};", () -> {
-                w.write("schemeId: $S,", shapeId.toString());
+                w.write("schemeId: $S,", schemeId.toString());
                 // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties available.
-                if (authScheme == null) {
+                if (authSchemeOptional.isEmpty()) {
                     return;
                 }
+                HttpAuthScheme authScheme = authSchemeOptional.get();
                 Trait trait = serviceShape.findTrait(authScheme.getTraitId()).orElse(null);
                 List<HttpAuthOptionProperty> identityProperties =
                     authScheme.getHttpAuthSchemeOptionParametersByType(Type.IDENTITY);
@@ -309,6 +322,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                         extractor.apply(serviceSymbol.getName() + "ResolvedConfig")));
             });
         });
+        w.popState();
     }
 
     private static String normalizeAuthSchemeName(ShapeId shapeId) {

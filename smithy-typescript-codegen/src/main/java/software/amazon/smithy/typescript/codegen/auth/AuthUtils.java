@@ -110,7 +110,7 @@ public final class AuthUtils {
                 if (configFields.containsKey(configField.name())) {
                     ConfigField existingConfigField = configFields.get(configField.name());
                     if (!configField.equals(existingConfigField)) {
-                        throw new CodegenException("Contradicting `ConfigField` defintions for `"
+                        throw new CodegenException("Contradicting `ConfigField` definitions for `"
                             + configField.name()
                             + "`; existing: "
                             + existingConfigField
@@ -136,7 +136,7 @@ public final class AuthUtils {
                 if (httpAuthSchemeParameters.containsKey(param.name())) {
                     HttpAuthSchemeParameter existingParam = httpAuthSchemeParameters.get(param.name());
                     if (!param.equals(existingParam)) {
-                        throw new CodegenException("Contradicting `HttpAuthSchemeParameter` defintions for `"
+                        throw new CodegenException("Contradicting `HttpAuthSchemeParameter` definitions for `"
                             + param.name()
                             + "`; existing: "
                             + existingParam

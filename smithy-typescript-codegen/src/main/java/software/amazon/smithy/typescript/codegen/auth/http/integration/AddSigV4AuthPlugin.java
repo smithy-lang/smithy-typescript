@@ -61,6 +61,7 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                         w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
                         w.write("AwsCredentialIdentityProvider");
                     })
+                    .configFieldWriter(ConfigField::writeDefaultMainConfigField)
                     .build())
                 .addConfigField(ConfigField.builder()
                     .name("region")
@@ -76,6 +77,7 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                         w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
                         w.write("__Provider<string>");
                     })
+                    .configFieldWriter(ConfigField::writeDefaultAuxiliaryConfigField)
                     .build())
                 .addHttpAuthSchemeParameter(HttpAuthSchemeParameter.builder()
                     .name("region")

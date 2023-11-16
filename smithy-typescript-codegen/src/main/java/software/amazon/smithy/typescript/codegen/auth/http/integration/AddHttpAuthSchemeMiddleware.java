@@ -8,6 +8,7 @@ package software.amazon.smithy.typescript.codegen.auth.http.integration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
@@ -23,6 +24,11 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeInputConfigInterfaceCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeResolvedConfigInterfaceCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpAuthSchemeConfigFunctionCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention;
 import software.amazon.smithy.typescript.codegen.sections.ClientPropertiesCodeSection;
@@ -35,6 +41,19 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptIntegration {
+    private static final String RESOLVE_FUNCTION_SIGNATURE = """
+        /**
+         * @internal
+         */
+        export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig): \
+        T & HttpAuthSchemeResolvedConfig => {""";
+    private static final String RESOLVE_FUNCTION_SIGNATURE_WITH_PREVIOUSLY_RESOLVED = """
+        /**
+         * @internal
+         */
+        export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig & PreviouslyResolved): \
+        T & HttpAuthSchemeResolvedConfig => {""";
+
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
      */
@@ -148,7 +167,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                             if (visitedConfigFields.containsKey(configField.name())) {
                                 ConfigField visitedConfigField = visitedConfigFields.get(configField.name());
                                 if (!configField.equals(visitedConfigField)) {
-                                    throw new CodegenException("Contradicting `ConfigField` defintions for `"
+                                    throw new CodegenException("Contradicting `ConfigField` definitions for `"
                                         + configField.name()
                                         + "`; existing: "
                                         + visitedConfigField
@@ -178,18 +197,37 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
 
         codegenContext.writerDelegator().useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
             SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(codegenContext.integrations());
-            String serviceName = CodegenUtils.getServiceName(
-                codegenContext.settings(), codegenContext.model(), codegenContext.symbolProvider());
             ServiceShape serviceShape = codegenContext.settings().getService(codegenContext.model());
             ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
-            Map<ShapeId, HttpAuthScheme> httpAuthSchemes
-                = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+            Map<ShapeId, HttpAuthScheme> httpAuthSchemes =
+                AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
             Map<String, ConfigField> configFields =
                 AuthUtils.collectConfigFields(httpAuthSchemes.values());
 
-            generateHttpAuthSchemeInputConfigInterface(w, configFields, serviceName);
-            generateHttpAuthSchemeResolvedConfigInterface(w, configFields, serviceName);
-            generateResolveHttpAuthSchemeConfigFunction(w, configFields, httpAuthSchemes, authIndex);
+            generateHttpAuthSchemeInputConfigInterface(w, HttpAuthSchemeInputConfigInterfaceCodeSection.builder()
+                .service(serviceShape)
+                .settings(codegenContext.settings())
+                .model(codegenContext.model())
+                .symbolProvider(codegenContext.symbolProvider())
+                .integrations(codegenContext.integrations())
+                .configFields(configFields)
+                .build());
+            generateHttpAuthSchemeResolvedConfigInterface(w, HttpAuthSchemeResolvedConfigInterfaceCodeSection.builder()
+                .service(serviceShape)
+                .settings(codegenContext.settings())
+                .model(codegenContext.model())
+                .symbolProvider(codegenContext.symbolProvider())
+                .integrations(codegenContext.integrations())
+                .configFields(configFields)
+                .build());
+            generateResolveHttpAuthSchemeConfigFunction(w, ResolveHttpAuthSchemeConfigFunctionCodeSection.builder()
+                .service(serviceShape)
+                .settings(codegenContext.settings())
+                .model(codegenContext.model())
+                .symbolProvider(codegenContext.symbolProvider())
+                .integrations(codegenContext.integrations())
+                .configFields(configFields)
+                .build());
         });
     }
 
@@ -210,9 +248,12 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     */
     private void generateHttpAuthSchemeInputConfigInterface(
         TypeScriptWriter w,
-        Map<String, ConfigField> configFields,
-        String serviceName
+        HttpAuthSchemeInputConfigInterfaceCodeSection s
     ) {
+        w.pushState(s);
+        Map<String, ConfigField> configFields = s.getConfigFields();
+        String serviceName = CodegenUtils.getServiceName(
+            s.getSettings(), s.getModel(), s.getSymbolProvider());
         w.openBlock("""
             /**
              * @internal
@@ -234,10 +275,13 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                 w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
 
                 for (ConfigField configField : configFields.values()) {
-                    w.writeDocs(() -> w.write("$C", configField.docs()));
-                    w.write("$L?: $C;", configField.name(), configField.inputType());
+                    if (!configField.type().equals(ConfigField.Type.PREVIOUSLY_RESOLVED)) {
+                        configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
+                        w.write("$L?: $C;", configField.name(), configField.inputType().get());
+                    }
                 }
             });
+        w.popState();
     }
 
     /*
@@ -257,9 +301,12 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     */
     private void generateHttpAuthSchemeResolvedConfigInterface(
         TypeScriptWriter w,
-        Map<String, ConfigField> configFields,
-        String serviceName
+        HttpAuthSchemeResolvedConfigInterfaceCodeSection s
     ) {
+        w.pushState(s);
+        Map<String, ConfigField> configFields = s.getConfigFields();
+        String serviceName = CodegenUtils.getServiceName(
+            s.getSettings(), s.getModel(), s.getSymbolProvider());
         w.openBlock("""
             /**
              * @internal
@@ -281,10 +328,13 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                 w.write("readonly httpAuthSchemeProvider: $L;\n", httpAuthSchemeProviderName);
 
                 for (ConfigField configField : configFields.values()) {
-                    w.writeDocs(() -> w.write("$C", configField.docs()));
-                    w.write("readonly $L?: $C;", configField.name(), configField.resolvedType());
+                    if (!configField.type().equals(ConfigField.Type.PREVIOUSLY_RESOLVED)) {
+                        configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
+                        w.write("readonly $L?: $C;", configField.name(), configField.resolvedType().get());
+                    }
                 }
             });
+        w.popState();
     }
 
     /*
@@ -304,48 +354,59 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     */
     private void generateResolveHttpAuthSchemeConfigFunction(
         TypeScriptWriter w,
-        Map<String, ConfigField> configFields,
-        Map<ShapeId, HttpAuthScheme> httpAuthSchemes,
-        SupportedHttpAuthSchemesIndex authIndex
+        ResolveHttpAuthSchemeConfigFunctionCodeSection s
     ) {
-        w.openBlock("""
-            /**
-             * @internal
-             */
-            export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig): \
-            T & HttpAuthSchemeResolvedConfig => {""", "};", () -> {
-                // TODO(experimentalIdentityAndAuth): figure out a better way to configure resolving identities
+        w.pushState(s);
+        Map<String, ConfigField> configFields = s.getConfigFields();
+
+        // interface PreviouslyResolved {}
+        Map<String, ConfigField> previouslyResolvedConfigFields = configFields.entrySet().stream()
+            .filter(e -> e.getValue().type().equals(ConfigField.Type.PREVIOUSLY_RESOLVED))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        String resolveHttpAuthSchemeConfigSignature = RESOLVE_FUNCTION_SIGNATURE;
+        if (!previouslyResolvedConfigFields.isEmpty()) {
+            resolveHttpAuthSchemeConfigSignature = RESOLVE_FUNCTION_SIGNATURE_WITH_PREVIOUSLY_RESOLVED;
+            w.openBlock("interface PreviouslyResolved {", "}\n", () -> {
+                for (ConfigField configField : previouslyResolvedConfigFields.values()) {
+                    configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
+                    w.write("readonly $L: $C;", configField.name(), configField.resolvedType().get());
+                }
+            });
+        }
+
+        // resolveHttpAuthSchemeConfig()
+        w.openBlock(resolveHttpAuthSchemeConfigSignature, "};", () -> {
+                w.pushState(ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection.builder()
+                    .service(s.getService())
+                    .settings(s.getSettings())
+                    .model(s.getModel())
+                    .symbolProvider(s.getSymbolProvider())
+                    .integrations(s.getIntegrations())
+                    .configFields(configFields)
+                    .build());
                 w.addDependency(TypeScriptDependency.SMITHY_CORE);
                 for (ConfigField configField : configFields.values()) {
-                    if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        w.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        w.addImport("memoizeIdentityProvider", null,
-                            TypeScriptDependency.SMITHY_CORE);
-                        w.addImport("isIdentityExpired", null,
-                            TypeScriptDependency.SMITHY_CORE);
-                        w.addImport("doesIdentityRequireRefresh", null,
-                            TypeScriptDependency.SMITHY_CORE);
-                        w.write("""
-                            const $L = memoizeIdentityProvider(config.$L, isIdentityExpired, \
-                            doesIdentityRequireRefresh);""",
-                            configField.name(),
-                            configField.name());
-                    }
-                    if (configField.type().equals(ConfigField.Type.AUXILIARY)) {
-                        w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-                        w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
-                        w.write("const $L = config.$L ? normalizeProvider(config.$L) : undefined;",
-                            configField.name(),
-                            configField.name(),
-                            configField.name());
-                    }
+                    configField.configFieldWriter().ifPresent(cfw -> cfw.accept(w, configField));
                 }
+                w.popState();
+                w.pushState(ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection.builder()
+                    .service(s.getService())
+                    .settings(s.getSettings())
+                    .model(s.getModel())
+                    .symbolProvider(s.getSymbolProvider())
+                    .integrations(s.getIntegrations())
+                    .configFields(configFields)
+                    .build());
                 w.openBlock("return {", "} as T & HttpAuthSchemeResolvedConfig;", () -> {
                     w.write("...config,");
                     for (ConfigField configField : configFields.values()) {
-                        w.write("$L,", configField.name());
+                        if (configField.configFieldWriter().isPresent()) {
+                            w.write("$L,", configField.name());
+                        }
                     }
                 });
+                w.popState();
             });
+        w.popState();
     }
 }

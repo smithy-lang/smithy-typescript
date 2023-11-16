@@ -64,6 +64,7 @@ public class AddHttpApiKeyAuthPlugin implements HttpAuthTypeScriptIntegration {
                             TypeScriptDependency.SMITHY_TYPES);
                         w.write("ApiKeyIdentityProvider");
                     })
+                    .configFieldWriter(ConfigField::writeDefaultMainConfigField)
                     .build())
                 .addHttpAuthOptionProperty(HttpAuthOptionProperty.builder()
                     .name("name")

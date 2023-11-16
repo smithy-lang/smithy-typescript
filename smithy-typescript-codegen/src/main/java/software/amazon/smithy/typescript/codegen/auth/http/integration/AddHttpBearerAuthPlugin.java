@@ -62,6 +62,7 @@ public final class AddHttpBearerAuthPlugin implements HttpAuthTypeScriptIntegrat
                             TypeScriptDependency.SMITHY_TYPES);
                         w.write("TokenIdentityProvider");
                     })
+                    .configFieldWriter(ConfigField::writeDefaultMainConfigField)
                     .build())
                 .putDefaultSigner(LanguageTarget.SHARED, HTTP_BEARER_AUTH_SIGNER)
                 .build());
