@@ -317,6 +317,16 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
         }
 
         /**
+         * Removes a config field by name.
+         * @param configField name of the config field to remove
+         * @return the builder
+         */
+        public Builder removeConfigField(String configField) {
+            this.configFields.get().removeIf(c -> c.name().equals(configField));
+            return this;
+        }
+
+        /**
          * Sets the httpAuthSchemeParameters.
          * @param httpAuthSchemeParameters auth scheme parameters to set
          * @return the builder
@@ -329,12 +339,22 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
         }
 
         /**
-         * Adds a auth scheme parameter.
+         * Adds an auth scheme parameter.
          * @param httpAuthSchemeParameter parameter to add
          * @return the builder
          */
         public Builder addHttpAuthSchemeParameter(HttpAuthSchemeParameter httpAuthSchemeParameter) {
             this.httpAuthSchemeParameters.get().add(httpAuthSchemeParameter);
+            return this;
+        }
+
+        /**
+         * Removes an auth scheme parameter by name.
+         * @param httpAuthSchemeParameter name of the auth scheme parameter to remove
+         * @return the builder
+         */
+        public Builder removeHttpAuthSchemeParameter(String httpAuthSchemeParameter) {
+            this.httpAuthSchemeParameters.get().removeIf(p -> p.name().equals(httpAuthSchemeParameter));
             return this;
         }
 
@@ -357,6 +377,16 @@ public final class HttpAuthScheme implements ToSmithyBuilder<HttpAuthScheme> {
          */
         public Builder addHttpAuthOptionProperty(HttpAuthOptionProperty httpAuthOptionProperty) {
             this.httpAuthOptionProperties.get().add(httpAuthOptionProperty);
+            return this;
+        }
+
+        /**
+         * Removes an auth option property.
+         * @param httpAuthOptionProperty name of the auth option property to remove
+         * @return the builder
+         */
+        public Builder removeHttpAuthOptionProperty(String httpAuthOptionProperty) {
+            this.httpAuthOptionProperties.get().removeIf(p -> p.name().equals(httpAuthOptionProperty));
             return this;
         }
 
