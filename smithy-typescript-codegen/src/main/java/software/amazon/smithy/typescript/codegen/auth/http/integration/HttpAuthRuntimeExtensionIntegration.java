@@ -7,6 +7,7 @@ package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.List;
 import java.util.Map;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -41,7 +42,10 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     }
 
     @Override
-    public List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces() {
+    public List<ExtensionConfigurationInterface> getExtensionConfigurationInterfaces(
+      Model model,
+      TypeScriptSettings settings
+    ) {
         return List.of(new HttpAuthExtensionConfigurationInterface());
     }
 

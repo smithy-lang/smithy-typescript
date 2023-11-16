@@ -30,6 +30,7 @@ public class ExtensionConfigurationGenerator {
     private static final String FILENAME = "extensionConfiguration.ts";
 
     private final Model model;
+    private final TypeScriptSettings settings;
     private final ServiceShape service;
     private final SymbolProvider symbolProvider;
     private final TypeScriptDelegator delegator;
@@ -37,12 +38,14 @@ public class ExtensionConfigurationGenerator {
 
     public ExtensionConfigurationGenerator(
         Model model,
+        TypeScriptSettings settings,
         ServiceShape service,
         SymbolProvider symbolProvider,
         TypeScriptDelegator delegator,
         List<TypeScriptIntegration> integrations
     ) {
         this.model = model;
+        this.settings = settings;
         this.service = service;
         this.symbolProvider = symbolProvider;
         this.delegator = delegator;
@@ -53,7 +56,7 @@ public class ExtensionConfigurationGenerator {
         Map<String, Dependency> interfaces = new HashMap<>();
 
         for (TypeScriptIntegration integration : integrations) {
-            integration.getExtensionConfigurationInterfaces().forEach(configurationInterface -> {
+            integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
                 interfaces.put(configurationInterface.name().left,
                         configurationInterface.name().right);
             });
