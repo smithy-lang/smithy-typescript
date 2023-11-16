@@ -259,15 +259,12 @@ final class ServiceBareBonesClientGenerator implements Runnable {
             writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
             writer.write("requestHandler?: __HttpHandler;\n");
 
-            writer.addImport("Hash", "__Hash", TypeScriptDependency.SMITHY_TYPES);
             writer.addImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
-
-            writer.addImport("Checksum", "__Checksum", TypeScriptDependency.SMITHY_TYPES);
             writer.addImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
-            writer.writeDocs("A constructor for a class implementing the {@link @smithy/types#ChecksumConstructor} "
-                            + "interface \n"
-                            + "that computes the SHA-256 HMAC or checksum of a string or binary buffer.\n"
-                            + "@internal");
+            writer.writeDocs("""
+                A constructor for a class implementing the {@link @smithy/types#ChecksumConstructor} interface
+                that computes the SHA-256 HMAC or checksum of a string or binary buffer.
+                @internal""");
             writer.write("sha256?: __ChecksumConstructor | __HashConstructor;\n");
 
             writer.addImport("UrlParser", "__UrlParser", TypeScriptDependency.SMITHY_TYPES);
