@@ -153,7 +153,10 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                     new DefaultIdentityProviderConfig({""", "});",
                     s.getSymbolProvider().toSymbol(s.getService()).getName(),
                     () -> {
-                    SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(s.getIntegrations());
+                    SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
+                        s.getIntegrations(),
+                        s.getModel(),
+                        s.getSettings());
                     ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
                     Map<ShapeId, HttpAuthScheme> httpAuthSchemes
                         = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(s.getService(), serviceIndex, authIndex);
@@ -196,7 +199,10 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
         }
 
         codegenContext.writerDelegator().useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(codegenContext.integrations());
+            SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
+                codegenContext.integrations(),
+                codegenContext.model(),
+                codegenContext.settings());
             ServiceShape serviceShape = codegenContext.settings().getService(codegenContext.model());
             ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
             Map<ShapeId, HttpAuthScheme> httpAuthSchemes =

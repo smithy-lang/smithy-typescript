@@ -84,7 +84,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         this.symbolProvider = symbolProvider;
         this.integrations = integrations;
 
-        this.authIndex = new SupportedHttpAuthSchemesIndex(integrations);
+        this.authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
         this.serviceIndex = ServiceIndex.of(model);
         this.serviceShape = settings.getService(model);
         this.serviceSymbol = symbolProvider.toSymbol(serviceShape);

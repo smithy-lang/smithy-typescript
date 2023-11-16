@@ -213,7 +213,7 @@ final class RuntimeConfigGenerator {
         TypeScriptWriter writer,
         LanguageTarget target
     ) {
-        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations);
+        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
 
         // feat(experimentalIdentityAndAuth): write the default imported HttpAuthSchemeProvider
         if (target.equals(LanguageTarget.SHARED)) {

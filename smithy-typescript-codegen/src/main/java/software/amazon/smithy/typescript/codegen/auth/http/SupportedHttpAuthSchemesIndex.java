@@ -8,7 +8,9 @@ package software.amazon.smithy.typescript.codegen.auth.http;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -30,7 +32,11 @@ public final class SupportedHttpAuthSchemesIndex {
      * Creates an index from registered {@link HttpAuthScheme}s in {@link TypeScriptIntegration}s.
      * @param integrations list of integrations to register HttpAuthSchemes
      */
-    public SupportedHttpAuthSchemesIndex(List<TypeScriptIntegration> integrations) {
+    public SupportedHttpAuthSchemesIndex(
+        List<TypeScriptIntegration> integrations,
+        Model model,
+        TypeScriptSettings settings
+    ) {
         for (TypeScriptIntegration integration : integrations) {
             if (!(integration instanceof HttpAuthTypeScriptIntegration)) {
                 continue;
@@ -40,7 +46,7 @@ public final class SupportedHttpAuthSchemesIndex {
                 HttpAuthScheme authScheme = httpAuthIntegration.getHttpAuthScheme().get();
                 this.putHttpAuthScheme(authScheme.getSchemeId(), authScheme);
             }
-            httpAuthIntegration.customizeSupportedHttpAuthSchemes(this);
+            httpAuthIntegration.customizeSupportedHttpAuthSchemes(this, model, settings);
         }
     }
 

@@ -51,8 +51,10 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
             return;
         }
         TypeScriptDelegator delegator = codegenContext.writerDelegator();
-        SupportedHttpAuthSchemesIndex authIndex =
-            new SupportedHttpAuthSchemesIndex(codegenContext.integrations());
+        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
+            codegenContext.integrations(),
+            codegenContext.model(),
+            codegenContext.settings());
         ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
         String serviceName = CodegenUtils.getServiceName(
             codegenContext.settings(), codegenContext.model(), codegenContext.symbolProvider());
