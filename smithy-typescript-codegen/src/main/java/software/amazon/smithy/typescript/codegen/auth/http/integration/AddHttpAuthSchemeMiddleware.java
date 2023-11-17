@@ -6,6 +6,7 @@
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -269,17 +270,16 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
         w.writeDocs("@internal");
         w.writeInline("export interface HttpAuthSchemeInputConfig");
         if (!resolveFunctions.isEmpty()) {
-            w.pushState();
             w.writeInline(" extends");
-            String resolveFunctionsInputStrings = String.join(", ", resolveFunctions.values().stream()
-                .map(c -> {
-                    String templateName = "${" + c.name() + ":C}";
-                    w.putContext(templateName, c.inputType().get());
-                    return templateName;
-                })
-                .collect(Collectors.toList()));
-            w.write(resolveFunctionsInputStrings + "{");
-            w.popState();
+            Iterator<ConfigField> iter = resolveFunctions.values().iterator();
+            while (iter.hasNext()) {
+                ConfigField entry = iter.next();
+                w.writeInline("$C", entry.inputType().get());
+                if (iter.hasNext()) {
+                    w.writeInline(", ");
+                }
+            }
+            w.write(" {");
         }
         w.indent();
         w.addDependency(TypeScriptDependency.SMITHY_TYPES);
