@@ -273,7 +273,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
             w.writeInline(" extends");
             String resolveFunctionsInputStrings = String.join(", ", resolveFunctions.values().stream()
                 .map(c -> {
-                    String templateName = "${" + c.name() + "}:C";
+                    String templateName = "${" + c.name() + ":C}";
                     w.putContext(templateName, c.inputType());
                     return templateName;
                 })
