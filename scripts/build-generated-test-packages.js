@@ -53,6 +53,7 @@ const httpBearerAuthClientDir = path.join(
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
+  try {
     console.log(`Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\``);
     // Yarn detects that the generated TypeScript package is nested beneath the
     // top-level package.json. Adding an empty lock file allows it to be treated
@@ -67,20 +68,20 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     await spawnProcess("mkdir", ["-p", packageName], { cwd: nodeModulesDir });
     const targetPackageDir = path.join(nodeModulesDir, packageName);
     await spawnProcess("tar", ["-xf", "package.tgz", "-C", targetPackageDir, "--strip-components", "1"], { cwd: codegenDir });
+  } catch (e) {
+    console.log(`Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\` failed:`)
+    console.log(e);
+    process.exit(1);
+  }
 };
 
 (async () => {
-  try {
-    await buildAndCopyToNodeModules("weather", weatherClientDir, nodeModulesDir);
-    await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
-    // TODO(experimentalIdentityAndAuth): build generic client for integration tests
-    await buildAndCopyToNodeModules("@smithy/weather-experimental-identity-and-auth", weatherExperimentalIdentityAndAuthClientDir, nodeModulesDir);
-    // TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
-    await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
-    // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
-    await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
- } catch (e) {
-    console.log(e);
-    process.exit(1);
- }
+  await buildAndCopyToNodeModules("weather", weatherClientDir, nodeModulesDir);
+  await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
+  // TODO(experimentalIdentityAndAuth): build generic client for integration tests
+  await buildAndCopyToNodeModules("@smithy/weather-experimental-identity-and-auth", weatherExperimentalIdentityAndAuthClientDir, nodeModulesDir);
+  // TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
+  await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
+  // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
+  await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
 })();
