@@ -270,7 +270,7 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
         w.writeDocs("@internal");
         w.writeInline("export interface HttpAuthSchemeInputConfig");
         if (!resolveFunctions.isEmpty()) {
-            w.writeInline(" extends");
+            w.writeInline(" extends ");
             Iterator<ConfigField> iter = resolveFunctions.values().iterator();
             while (iter.hasNext()) {
                 ConfigField entry = iter.next();
