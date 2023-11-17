@@ -5,10 +5,12 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
@@ -24,6 +26,8 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * @param inputType writer for the input type of the config field
  * @param resolvedType writer for the resolved type of the config field
  * @param docs writer for the docs of the config field
+ * 
+ * TODO(experimentalIdentityAndAuth): clean up how these config fields are defined
  */
 @SmithyUnstableApi
 public final record ConfigField(
@@ -34,12 +38,16 @@ public final record ConfigField(
     Optional<Consumer<TypeScriptWriter>> docs,
     Optional<BiConsumer<TypeScriptWriter, ConfigField>> configFieldWriter
 ) implements ToSmithyBuilder<ConfigField> {
-
     public ConfigField {
         switch (type) {
             case MAIN:
             case AUXILIARY:
-                String typeName = type.equals(Type.MAIN) ? "Main" : "Auxiliary";
+            case RESOLVE_FUNCTION: {
+                String typeName = type.equals(Type.MAIN) 
+                    ? "Main" 
+                    : (type.equals(Type.AUXILIARY) 
+                        ? "Auxiliary" 
+                        : "Resolve Function");
                 if (inputType.isEmpty() || resolvedType.isEmpty()) {
                     throw new CodegenException(
                         typeName
@@ -48,7 +56,8 @@ public final record ConfigField(
                         + "` is invalid, requires inputType, resolvedType, docs, and configFieldWriter to be defined");
                 }
                 break;
-            case PREVIOUSLY_RESOLVED:
+            }
+            case PREVIOUSLY_RESOLVED: {
                 if (resolvedType.isEmpty()) {
                     throw new CodegenException(
                         "Previously Resolved ConfigField `"
@@ -56,8 +65,10 @@ public final record ConfigField(
                         + "` is invalid, requires resolvedType");
                 }
                 break;
-            default:
+            }
+            default: {
                 throw new CodegenException("ConfigField Type is not recognized");
+            }
         }
     }
 
@@ -78,6 +89,10 @@ public final record ConfigField(
          * Specifies the property is previously resolved, e.g. in {@code resolve*Config} functions
          */
         PREVIOUSLY_RESOLVED,
+        /**
+         * Specifies the additional resolve*Config function to call, e.g. {@code resolveAWSSDKSigV4Config}
+         */
+        RESOLVE_FUNCTION
     }
 
     public static Builder builder() {

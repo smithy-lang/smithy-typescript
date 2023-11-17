@@ -8,6 +8,8 @@ package software.amazon.smithy.typescript.codegen.auth.http.integration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -258,35 +260,49 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
     ) {
         w.pushState(s);
         Map<String, ConfigField> configFields = s.getConfigFields();
+        Map<String, ConfigField> writableConfigFields =
+            collectConfigFieldsByTypes(configFields, Set.of(ConfigField.Type.MAIN, ConfigField.Type.AUXILIARY));
+        Map<String, ConfigField> resolveFunctions =
+            collectConfigFieldsByTypes(configFields, Set.of(ConfigField.Type.RESOLVE_FUNCTION));
         String serviceName = CodegenUtils.getServiceName(
             s.getSettings(), s.getModel(), s.getSymbolProvider());
-        w.openBlock("""
-            /**
-             * @internal
-             */
-            export interface HttpAuthSchemeInputConfig {""", "}\n", () -> {
-                w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
-                w.writeDocs("""
-                    experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
-                    default identity providers and signers per auth scheme.
-                    @internal""");
-                w.write("httpAuthSchemes?: HttpAuthScheme[];\n");
+        w.writeDocs("@internal");
+        w.writeInline("export interface HttpAuthSchemeInputConfig");
+        if (!resolveFunctions.isEmpty()) {
+            w.pushState();
+            w.writeInline(" extends");
+            String resolveFunctionsInputStrings = String.join(", ", resolveFunctions.values().stream()
+                .map(c -> {
+                    String templateName = "${" + c.name() + "}:C";
+                    w.putContext(templateName, c.inputType());
+                    return templateName;
+                })
+                .collect(Collectors.toList()));
+            w.write(resolveFunctionsInputStrings + "{");
+            w.popState();
+        }
+        w.indent();
+        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+        w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
+        w.writeDocs("""
+            experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
+            default identity providers and signers per auth scheme.
+            @internal""");
+        w.write("httpAuthSchemes?: HttpAuthScheme[];\n");
 
-                String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
-                w.writeDocs("""
-                    experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
-                    resolves which HttpAuthScheme to use.
-                    @internal""");
-                w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
+        String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
+        w.writeDocs("""
+            experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
+            resolves which HttpAuthScheme to use.
+            @internal""");
+        w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
 
-                for (ConfigField configField : configFields.values()) {
-                    if (!configField.type().equals(ConfigField.Type.PREVIOUSLY_RESOLVED)) {
-                        configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
-                        w.write("$L?: $C;", configField.name(), configField.inputType().get());
-                    }
-                }
-            });
+        for (ConfigField configField : writableConfigFields.values()) {
+            configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
+            w.write("$L?: $C;", configField.name(), configField.inputType().get());
+        }
+        w.dedent();
+        w.write("}");
         w.popState();
     }
 
@@ -414,5 +430,11 @@ public final class AddHttpAuthSchemeMiddleware implements HttpAuthTypeScriptInte
                 w.popState();
             });
         w.popState();
+    }
+
+    private Map<String, ConfigField> collectConfigFieldsByTypes(Map<String, ConfigField> configFields, Set<ConfigField.Type> types) {
+        return configFields.entrySet().stream()
+            .filter(c -> types.contains(c.getValue().type()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
