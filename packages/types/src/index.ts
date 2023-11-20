@@ -28,6 +28,7 @@ export * from "./streaming-payload/streaming-blob-payload-input-types";
 export * from "./streaming-payload/streaming-blob-payload-output-types";
 export * from "./transfer";
 export * from "./transform/client-payload-blob-type-narrow";
+export * from "./transform/no-undefined";
 export * from "./transform/type-transform";
 export * from "./uri";
 export * from "./util";
