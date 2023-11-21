@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
@@ -286,8 +287,10 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
 
         for (ConfigField configField : configFields.values()) {
-            configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
-            w.write("$L?: $T;", configField.name(), configField.inputType());
+            if (configField.configFieldWriter().isPresent()) {
+                configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
+                w.write("$L?: $T;", configField.name(), configField.inputType());
+            }
         }
         w.dedent();
         w.write("}\n");
@@ -349,8 +352,10 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             @internal""");
         w.write("readonly httpAuthSchemeProvider: $L;\n", httpAuthSchemeProviderName);
         for (ConfigField configField : configFields.values()) {
-            configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
-            w.write("readonly $L?: $T;", configField.name(), configField.resolvedType());
+            if (configField.configFieldWriter().isPresent()) {
+                configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
+                w.write("readonly $L?: $T;", configField.name(), configField.resolvedType());
+            }
         }
         w.dedent();
         w.write("}\n");
@@ -379,33 +384,23 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.pushState(s);
         Map<String, ConfigField> configFields = s.getConfigFields();
         Map<Symbol, ResolveConfigFunction> resolveConfigFunctions = s.getResolveConfigFunctions();
+        Map<Symbol, ResolveConfigFunction> previousResolvedFunctions = resolveConfigFunctions.entrySet().stream()
+            .filter(e -> e.getValue().previouslyResolved().isPresent())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         w.writeDocs("@internal");
         w.writeInline("export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig");
-        if (!resolveConfigFunctions.isEmpty()) {
+        if (!previousResolvedFunctions.isEmpty()) {
             w.writeInline(" & ");
-            Iterator<ResolveConfigFunction> iter = resolveConfigFunctions.values().iterator();
+            Iterator<ResolveConfigFunction> iter = previousResolvedFunctions.values().iterator();
             while (iter.hasNext()) {
                 ResolveConfigFunction entry = iter.next();
-                w.writeInline("$T", entry.inputConfig());
-                entry.previouslyResolved().ifPresent(p -> w.writeInline(" & $T", p));
+                w.writeInline("$T", entry.previouslyResolved().get());
                 if (iter.hasNext()) {
                     w.writeInline(" & ");
                 }
             }
         }
-        w.writeInline("): T & HttpAuthSchemeResolvedConfig");
-        if (!resolveConfigFunctions.isEmpty()) {
-            w.writeInline(" & ");
-            Iterator<ResolveConfigFunction> iter = resolveConfigFunctions.values().iterator();
-            while (iter.hasNext()) {
-                ResolveConfigFunction entry = iter.next();
-                w.writeInline("$T", entry.resolvedConfig());
-                if (iter.hasNext()) {
-                    w.writeInline(" & ");
-                }
-            }
-        }
-        w.write(" => {");
+        w.write("): T & HttpAuthSchemeResolvedConfig => {");
         w.indent();
         w.pushState(ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection.builder()
             .service(s.getService())
@@ -417,7 +412,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             .build());
         w.addDependency(TypeScriptDependency.SMITHY_CORE);
         for (ConfigField configField : configFields.values()) {
-            configField.configFieldWriter().accept(w, configField);
+            configField.configFieldWriter().ifPresent(cfw -> cfw.accept(w, configField));
         }
         w.popState();
         w.pushState(ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection.builder()
@@ -428,16 +423,23 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             .integrations(s.getIntegrations())
             .configFields(configFields)
             .build());
-
+        Integer i = 0;
+        String configName = "config";
         for (ResolveConfigFunction resolveConfigFunction : resolveConfigFunctions.values()) {
-            w.write("config = $T(config);", resolveConfigFunction.resolveConfigFunction());
+            w.write("const config_$L = $T($L);", i, resolveConfigFunction.resolveConfigFunction(), configName);
+            configName = "config_" + i;
+            i++;
         }
-        w.openBlock("return {", "} as T & HttpAuthSchemeResolvedConfig;", () -> {
-            w.write("...config,");
-            for (ConfigField configField : configFields.values()) {
+        w.write("return {");
+        w.indent();
+        w.write("...$L,", configName);
+        for (ConfigField configField : configFields.values()) {
+            if (configField.configFieldWriter().isPresent()) {
                 w.write("$L,", configField.name());
             }
-        });
+        }
+        w.dedent();
+        w.write("} as T & HttpAuthSchemeResolvedConfig;");
         w.popState();
         w.dedent();
         w.write("};");

@@ -33,7 +33,7 @@ public final record ConfigField(
     Type type,
     Symbol inputType,
     Symbol resolvedType,
-    BiConsumer<TypeScriptWriter, ConfigField> configFieldWriter,
+    Optional<BiConsumer<TypeScriptWriter, ConfigField>> configFieldWriter,
     Optional<Consumer<TypeScriptWriter>> docs
 ) implements ToSmithyBuilder<ConfigField> {
 
@@ -63,7 +63,7 @@ public final record ConfigField(
             .type(type)
             .inputType(inputType)
             .resolvedType(resolvedType)
-            .configFieldWriter(configFieldWriter)
+            .configFieldWriter(configFieldWriter.orElse(null))
             .docs(docs.orElse(null));
     }
 
@@ -77,17 +77,12 @@ public final record ConfigField(
 
         @Override
         public ConfigField build() {
-            if (configFieldWriter == null) {
-                configFieldWriter = type.equals(Type.MAIN)
-                    ? ConfigField::defaultMainConfigFieldWriter
-                    : ConfigField::defaultAuxiliaryConfigFieldWriter;
-            }
             return new ConfigField(
                 SmithyBuilder.requiredState("name", name),
                 SmithyBuilder.requiredState("type", type),
                 SmithyBuilder.requiredState("inputType", inputType),
                 SmithyBuilder.requiredState("resolvedType", resolvedType),
-                SmithyBuilder.requiredState("configFieldWriter", configFieldWriter),
+                Optional.ofNullable(configFieldWriter),
                 Optional.ofNullable(docs));
         }
 
