@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.5
+
+### Patch Changes
+
+- Updated dependencies [9bfc64ed]
+- Updated dependencies [9579a9a0]
+  - @smithy/types@2.6.0
+
 ## 2.2.4
 
 ### Patch Changes

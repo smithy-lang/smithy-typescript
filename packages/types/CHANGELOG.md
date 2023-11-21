@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.6.0
+
+### Minor Changes
+
+- 9bfc64ed: add type helper for nullability in clients
+
+### Patch Changes
+
+- 9579a9a0: Add internal error and success handlers to `HttpSigner`.
+
 ## 2.5.0
 
 ### Minor Changes

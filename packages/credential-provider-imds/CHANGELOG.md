@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.1.2
+
+### Patch Changes
+
+- Updated dependencies [9bfc64ed]
+- Updated dependencies [9579a9a0]
+  - @smithy/types@2.6.0
+  - @smithy/node-config-provider@2.1.6
+  - @smithy/property-provider@2.0.15
+  - @smithy/url-parser@2.0.14
+
 ## 2.1.1
 
 ### Patch Changes

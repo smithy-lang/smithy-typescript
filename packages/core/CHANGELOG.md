@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- 8c674e70: Copy `getSmithyContext()` and `normalizeProvider()` to `@smithy/core`.
+- 9579a9a0: Add internal error and success handlers to `HttpSigner`.
+- Updated dependencies [9bfc64ed]
+- Updated dependencies [9579a9a0]
+  - @smithy/types@2.6.0
+  - @smithy/middleware-endpoint@2.2.1
+  - @smithy/middleware-retry@2.0.21
+  - @smithy/middleware-serde@2.0.14
+  - @smithy/protocol-http@3.0.10
+
 ## 1.0.1
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.0.26
+
+### Patch Changes
+
+- Updated dependencies [9bfc64ed]
+- Updated dependencies [9579a9a0]
+  - @smithy/types@2.6.0
+  - @smithy/config-resolver@2.0.19
+  - @smithy/credential-provider-imds@2.1.2
+  - @smithy/node-config-provider@2.1.6
+  - @smithy/property-provider@2.0.15
+  - @smithy/smithy-client@2.1.16
+
 ## 2.0.25
 
 ### Patch Changes

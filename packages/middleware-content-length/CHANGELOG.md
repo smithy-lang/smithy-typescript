@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.16
+
+### Patch Changes
+
+- Updated dependencies [9bfc64ed]
+- Updated dependencies [9579a9a0]
+  - @smithy/types@2.6.0
+  - @smithy/protocol-http@3.0.10
+
 ## 2.0.15
 
 ### Patch Changes
