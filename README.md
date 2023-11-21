@@ -47,17 +47,17 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
     // Add the Smithy TypeScript code generator dependency
     "maven": {
         "dependencies": [
-            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.19.0"
+            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.19.0",
+            "software.amazon.smithy:smithy-aws-traits:1.41.1"
         ]
     },
     "plugins": {
         // Add the Smithy TypeScript client plugin
         "typescript-client-codegen": {
             // Minimal configuration: add package name and version
-            "package": {
-                "package": "@smithy/typescript-example-client",
-                "packageVersion": "0.0.1"
-            }
+            "package": "@smithy/typescript-example-client",
+            "packageVersion": "0.0.1",
+            "protocol": "aws.protocols#restJson1"
         }
     }
 }
