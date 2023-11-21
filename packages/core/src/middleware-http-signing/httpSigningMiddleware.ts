@@ -1,5 +1,6 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import {
+  ErrorHandler,
   FinalizeHandler,
   FinalizeHandlerArguments,
   FinalizeHandlerOutput,
@@ -7,6 +8,7 @@ import {
   HandlerExecutionContext,
   SelectedHttpAuthScheme,
   SMITHY_CONTEXT_KEY,
+  SuccessHandler,
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
@@ -23,6 +25,15 @@ interface HttpSigningMiddlewareSmithyContext extends Record<string, unknown> {
 interface HttpSigningMiddlewareHandlerExecutionContext extends HandlerExecutionContext {
   [SMITHY_CONTEXT_KEY]?: HttpSigningMiddlewareSmithyContext;
 }
+
+const defaultErrorHandler: ErrorHandler = (signingProperties) => (error) => {
+  throw error;
+};
+
+const defaultSuccessHandler: SuccessHandler = (
+  httpResponse: unknown,
+  signingProperties: Record<string, unknown>
+): void => {};
 
 /**
  * @internal
@@ -45,12 +56,14 @@ export const httpSigningMiddleware = <Input extends object, Output extends objec
     throw new Error(`No HttpAuthScheme was selected: unable to sign request`);
   }
   const {
-    httpAuthOption: { signingProperties },
+    httpAuthOption: { signingProperties = {} },
     identity,
     signer,
   } = scheme;
-  return next({
+  const output = await next({
     ...args,
-    request: await signer.sign(args.request, identity, signingProperties || {}),
-  });
+    request: await signer.sign(args.request, identity, signingProperties),
+  }).catch((signer.errorHandler || defaultErrorHandler)(signingProperties));
+  (signer.successHandler || defaultSuccessHandler)(output.response, signingProperties);
+  return output;
 };
