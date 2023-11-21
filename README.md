@@ -54,10 +54,8 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
         // Add the Smithy TypeScript client plugin
         "typescript-client-codegen": {
             // Minimal configuration: add package name and version
-            "package": {
-                "package": "@smithy/typescript-example-client",
-                "packageVersion": "0.0.1"
-            }
+            "package": "@smithy/typescript-example-client",
+            "packageVersion": "0.0.1"
         }
     }
 }
@@ -115,10 +113,8 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
         // Add the Smithy TypeScript client plugin
         "typescript-client-codegen": {
             // Minimal configuration: add package name and version
-            "package": {
-                "package": "@smithy/typescript-example-client",
-                "packageVersion": "0.0.1"
-            }
+            "package": "@smithy/typescript-example-client",
+            "packageVersion": "0.0.1"
         }
     }
 }
