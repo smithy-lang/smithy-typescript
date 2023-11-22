@@ -5,12 +5,10 @@
 
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -147,30 +145,15 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         s.getModel(),
                         s.getSettings());
                     ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
-                    Map<ShapeId, HttpAuthScheme> httpAuthSchemes
-                        = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(s.getService(), serviceIndex, authIndex);
-                    // TODO(experimentalIdentityAndAuth): figure out a better deduping strategy
-                    Map<String, ConfigField> visitedConfigFields = new HashMap<>();
+                    Map<ShapeId, HttpAuthScheme> httpAuthSchemes =
+                        AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(s.getService(), serviceIndex, authIndex);
                     for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
                         if (scheme == null) {
                             continue;
                         }
                         for (ConfigField configField : scheme.getConfigFields()) {
-                            if (visitedConfigFields.containsKey(configField.name())) {
-                                ConfigField visitedConfigField = visitedConfigFields.get(configField.name());
-                                if (!configField.equals(visitedConfigField)) {
-                                    throw new CodegenException("Contradicting `ConfigField` definitions for `"
-                                        + configField.name()
-                                        + "`; existing: "
-                                        + visitedConfigField
-                                        + ", conflict: "
-                                        + configField);
-                                }
-                            } else {
-                                visitedConfigFields.put(configField.name(), configField);
-                                if (configField.type().equals(ConfigField.Type.MAIN)) {
-                                    w.write("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
-                                }
+                            if (configField.type().equals(ConfigField.Type.MAIN)) {
+                                w.write("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
                             }
                         }
                     }
