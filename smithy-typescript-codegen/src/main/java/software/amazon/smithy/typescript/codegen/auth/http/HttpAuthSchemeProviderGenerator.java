@@ -330,7 +330,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         w.popState();
     }
 
-    private static String normalizeAuthSchemeName(ShapeId shapeId) {
+    public static String normalizeAuthSchemeName(ShapeId shapeId) {
         return String.join("", Arrays
             .asList(shapeId.toString().split("[.#]"))
             .stream().map(StringUtils::capitalize)
