@@ -31,6 +31,7 @@ import software.amazon.smithy.typescript.codegen.auth.http.sections.DefaultHttpA
 import software.amazon.smithy.typescript.codegen.auth.http.sections.DefaultHttpAuthSchemeProviderFunctionCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthOptionFunctionCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthOptionFunctionsCodeSection;
+import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeParametersInterfaceCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeParametersProviderInterfaceCodeSection;
 import software.amazon.smithy.typescript.codegen.auth.http.sections.HttpAuthSchemeProviderInterfaceCodeSection;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -116,11 +117,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     */
     private void generateHttpAuthSchemeParametersInterface() {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(HttpAuthSchemeProviderInterfaceCodeSection.builder()
+            w.pushState(HttpAuthSchemeParametersInterfaceCodeSection.builder()
                 .service(serviceShape)
                 .settings(settings)
                 .model(model)
                 .symbolProvider(symbolProvider)
+                .httpAuthSchemeParameters(httpAuthSchemeParameters)
                 .build());
             w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.addImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
