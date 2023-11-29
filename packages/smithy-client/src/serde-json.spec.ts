@@ -36,4 +36,17 @@ describe(_json.name, () => {
       a: { b: 5, c: [6] },
     });
   });
+
+  it("recursively removes nullish entries in arrays", () => {
+    expect(
+      _json({
+        a: {
+          b: 5,
+          c: [, , { a: 5, b: 6, c: null, d: undefined }, 6],
+        },
+      })
+    ).toEqual({
+      a: { b: 5, c: [{ a: 5, b: 6 }, 6] },
+    });
+  });
 });

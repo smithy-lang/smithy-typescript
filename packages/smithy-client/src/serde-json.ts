@@ -12,7 +12,7 @@ export const _json = (obj: any): any => {
     return {};
   }
   if (Array.isArray(obj)) {
-    return obj.filter((_: any) => _ != null);
+    return obj.filter((_: any) => _ != null).map(_json);
   }
   if (typeof obj === "object") {
     const target: any = {};
