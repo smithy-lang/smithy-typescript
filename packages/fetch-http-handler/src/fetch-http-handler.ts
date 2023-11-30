@@ -1,13 +1,13 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
+import type { FetchHttpHandlerOptions } from "@smithy/types";
 import { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
 import { requestTimeout } from "./request-timeout";
 
 declare let AbortController: any;
 
-import type { FetchHttpHandlerOptions } from '@smithy/types';
-export { FetchHttpHandlerOptions }
+export { FetchHttpHandlerOptions };
 
 type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 

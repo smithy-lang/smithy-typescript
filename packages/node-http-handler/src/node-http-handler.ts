@@ -1,9 +1,9 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
-import type { NodeHttpHandlerOptions } from '@smithy/types';
+import type { NodeHttpHandlerOptions } from "@smithy/types";
 import { HttpHandlerOptions, Provider } from "@smithy/types";
 import { Agent as hAgent, request as hRequest } from "http";
-import { Agent as hsAgent, request as hsRequest,RequestOptions } from "https";
+import { Agent as hsAgent, request as hsRequest, RequestOptions } from "https";
 
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";

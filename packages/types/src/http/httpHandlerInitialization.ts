@@ -17,6 +17,7 @@ export type RequestHandlerParams = NodeHttpHandlerOptions | FetchHttpHandlerOpti
 
 /**
  * Represents the http options that can be passed to a node http client.
+ * @public
  */
 export interface NodeHttpHandlerOptions {
   /**
@@ -47,6 +48,7 @@ export interface NodeHttpHandlerOptions {
 
 /**
  * Represents the http options that can be passed to a browser http client.
+ * @public
  */
 export interface FetchHttpHandlerOptions {
   /**
