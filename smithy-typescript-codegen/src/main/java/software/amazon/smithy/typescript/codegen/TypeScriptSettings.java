@@ -58,6 +58,7 @@ public final class TypeScriptSettings {
     private static final String PACKAGE_MANAGER = "packageManager";
     private static final String CREATE_DEFAULT_README = "createDefaultReadme";
     private static final String EXPERIMENTAL_IDENTITY_AND_AUTH = "experimentalIdentityAndAuth";
+    private static final String GENERATE_TYPEDOC = "generateTypeDoc";
 
     private String packageName;
     private String packageDescription = "";
@@ -75,6 +76,7 @@ public final class TypeScriptSettings {
     private PackageManager packageManager = PackageManager.YARN;
     private boolean createDefaultReadme = false;
     private boolean experimentalIdentityAndAuth = false;
+    private boolean generateTypeDoc = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -110,6 +112,8 @@ public final class TypeScriptSettings {
                 config.getBooleanMember(CREATE_DEFAULT_README).map(BooleanNode::getValue).orElse(false));
         settings.setExperimentalIdentityAndAuth(
                 config.getBooleanMemberOrDefault(EXPERIMENTAL_IDENTITY_AND_AUTH, false));
+        settings.setGenerateTypeDoc(
+                config.getBooleanMember(GENERATE_TYPEDOC).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
                 config.getStringMember(PACKAGE_MANAGER)
                     .map(s -> PackageManager.fromString(s.getValue()))
@@ -381,6 +385,24 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * Returns whether to generate typedoc support.
+     *
+     * @return whether to generate typedoc support. Default: false
+     */
+    public boolean generateTypeDoc() {
+        return generateTypeDoc;
+    }
+
+    /**
+     * Sets whether to generate typedoc support.
+     *
+     * @param generateTypeDoc whether to generate typedoc support
+     */
+    public void setGenerateTypeDoc(boolean generateTypeDoc) {
+        this.generateTypeDoc = generateTypeDoc;
+    }
+
+    /**
      * Gets the corresponding {@link ServiceShape} from a model.
      *
      * @param model Model to search for the service shape by ID.
@@ -468,11 +490,11 @@ public final class TypeScriptSettings {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                              CREATE_DEFAULT_README, EXPERIMENTAL_IDENTITY_AND_AUTH)),
+                              CREATE_DEFAULT_README, EXPERIMENTAL_IDENTITY_AND_AUTH, GENERATE_TYPEDOC)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                              DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README));
+                              DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README, GENERATE_TYPEDOC));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;

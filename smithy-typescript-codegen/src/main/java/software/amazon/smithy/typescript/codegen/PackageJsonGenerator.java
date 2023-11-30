@@ -31,6 +31,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class PackageJsonGenerator {
 
     public static final String PACKAGE_JSON_FILENAME = "package.json";
+    public static final String TYPEDOC_FILE_NAME = "typedoc.json";
     public static final String VITEST_CONFIG_FILENAME = "vite.config.js";
 
     private PackageJsonGenerator() {}
@@ -65,6 +66,24 @@ final class PackageJsonGenerator {
 
             manifest.writeFile(VITEST_CONFIG_FILENAME, IoUtils.toUtf8String(
                 PackageJsonGenerator.class.getResourceAsStream(VITEST_CONFIG_FILENAME)));
+        }
+
+        if (settings.generateTypeDoc()) {
+            // Add typedoc to the "devDependencies" if not present
+            if (devDeps.getMember(TypeScriptDependency.TYPEDOC.packageName).isEmpty()) {
+                devDeps = devDeps.withMember(
+                    TypeScriptDependency.TYPEDOC.packageName,
+                    TypeScriptDependency.TYPEDOC.version);
+                node = node.withMember("devDependencies", devDeps);
+            }
+
+            // Add build:docs script
+            ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
+            scripts = scripts.withMember("build:docs", "typedoc");
+            node = node.withMember("scripts", scripts);
+
+            // Write typedoc.json
+            manifest.writeFile(TYPEDOC_FILE_NAME, PackageJsonGenerator.class, TYPEDOC_FILE_NAME);
         }
 
         // These are currently only generated for clients, but they may be needed for ssdk as well.
