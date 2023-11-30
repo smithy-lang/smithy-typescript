@@ -2,6 +2,7 @@ export * from "./extensions";
 export * from "./Field";
 export * from "./Fields";
 export * from "./httpHandler";
+export * from "./httpHandlerInitialization";
 export * from "./httpRequest";
 export * from "./httpResponse";
 export * from "./isValidHostname";

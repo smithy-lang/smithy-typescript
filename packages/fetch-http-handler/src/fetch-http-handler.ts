@@ -47,6 +47,19 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
   private config?: FetchHttpHandlerConfig;
   private configProvider: Promise<FetchHttpHandlerConfig>;
 
+  /**
+   * @returns the input if it is an HttpHandler of any class,
+   * or instantiates a new instance of this handler.
+   */
+  public static create(instanceOrOptions?: HttpHandler<any> | FetchHttpHandlerConfig) {
+    if (typeof (instanceOrOptions as any)?.handle === "function") {
+      // is already an instance of HttpHandler.
+      return instanceOrOptions as HttpHandler<any>;
+    }
+    // input is ctor options or undefined.
+    return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerConfig);
+  }
+
   constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | undefined>) {
     if (typeof options === "function") {
       this.configProvider = options().then((opts) => opts || {});

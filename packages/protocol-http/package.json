@@ -16,6 +16,13 @@
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
+  "browser": {
+    "./dist-es/httpHandlerInitialization": "./dist-es/httpHandlerInitialization.browser"
+  },
+  "react-native": {
+    "./dist-es/httpHandlerInitialization": "./dist-es/httpHandlerInitialization.browser",
+    "./dist-cjs/httpHandlerInitialization": "./dist-cjs/httpHandlerInitialization.browser"
+  },
   "author": {
     "name": "AWS Smithy Team",
     "email": "",

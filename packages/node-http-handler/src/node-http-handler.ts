@@ -57,6 +57,19 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
 
+  /**
+   * @returns the input if it is an HttpHandler of any class,
+   * or instantiates a new instance of this handler.
+   */
+  public static create(instanceOrOptions?: HttpHandler<any> | NodeHttpHandlerOptions) {
+    if (typeof (instanceOrOptions as any)?.handle === "function") {
+      // is already an instance of HttpHandler.
+      return instanceOrOptions as HttpHandler<any>;
+    }
+    // input is ctor options or undefined.
+    return new NodeHttpHandler(instanceOrOptions as NodeHttpHandlerOptions);
+  }
+
   constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>) {
     this.configProvider = new Promise((resolve, reject) => {
       if (typeof options === "function") {

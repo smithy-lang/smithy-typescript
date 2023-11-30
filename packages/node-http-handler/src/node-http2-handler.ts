@@ -49,6 +49,19 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
 
   private readonly connectionManager: NodeHttp2ConnectionManager = new NodeHttp2ConnectionManager({});
 
+  /**
+   * @returns the input if it is an HttpHandler of any class,
+   * or instantiates a new instance of this handler.
+   */
+  public static create(instanceOrOptions?: HttpHandler<any> | NodeHttp2HandlerOptions) {
+    if (typeof (instanceOrOptions as any)?.handle === "function") {
+      // is already an instance of HttpHandler.
+      return instanceOrOptions as HttpHandler<any>;
+    }
+    // input is ctor options or undefined.
+    return new NodeHttp2Handler(instanceOrOptions as NodeHttp2HandlerOptions);
+  }
+
   constructor(options?: NodeHttp2HandlerOptions | Provider<NodeHttp2HandlerOptions | void>) {
     this.configProvider = new Promise((resolve, reject) => {
       if (typeof options === "function") {
