@@ -1,8 +1,9 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
+import type { NodeHttpHandlerOptions } from '@smithy/types';
 import { HttpHandlerOptions, Provider } from "@smithy/types";
 import { Agent as hAgent, request as hRequest } from "http";
-import { Agent as hsAgent, request as hsRequest, RequestOptions } from "https";
+import { Agent as hsAgent, request as hsRequest,RequestOptions } from "https";
 
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";
@@ -11,35 +12,7 @@ import { setSocketKeepAlive } from "./set-socket-keep-alive";
 import { setSocketTimeout } from "./set-socket-timeout";
 import { writeRequestBody } from "./write-request-body";
 
-/**
- * Represents the http options that can be passed to a node http client.
- */
-export interface NodeHttpHandlerOptions {
-  /**
-   * The maximum time in milliseconds that the connection phase of a request
-   * may take before the connection attempt is abandoned.
-   *
-   * Defaults to 0, which disables the timeout.
-   */
-  connectionTimeout?: number;
-
-  /**
-   * The number of milliseconds a request can take before automatically being terminated.
-   * Defaults to 0, which disables the timeout.
-   */
-  requestTimeout?: number;
-
-  /**
-   * @deprecated Use {@link requestTimeout}
-   *
-   * The maximum time in milliseconds that a socket may remain idle before it
-   * is closed.
-   */
-  socketTimeout?: number;
-
-  httpAgent?: hAgent;
-  httpsAgent?: hsAgent;
-}
+export { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig {
   requestTimeout?: number;

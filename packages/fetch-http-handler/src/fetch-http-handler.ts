@@ -6,27 +6,8 @@ import { requestTimeout } from "./request-timeout";
 
 declare let AbortController: any;
 
-/**
- * Represents the http options that can be passed to a browser http client.
- */
-export interface FetchHttpHandlerOptions {
-  /**
-   * The number of milliseconds a request can take before being automatically
-   * terminated.
-   */
-  requestTimeout?: number;
-
-  /**
-   * Whether to allow the request to outlive the page. Default value is false.
-   *
-   * There may be limitations to the payload size, number of concurrent requests,
-   * request duration etc. when using keepalive in browsers.
-   *
-   * These may change over time, so look for up to date information about
-   * these limitations before enabling keepalive.
-   */
-  keepAlive?: boolean;
-}
+import type { FetchHttpHandlerOptions } from '@smithy/types';
+export { FetchHttpHandlerOptions }
 
 type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 
