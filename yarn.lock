@@ -2117,6 +2117,7 @@ __metadata:
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/service-error-classification": "workspace:^"
+    "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"

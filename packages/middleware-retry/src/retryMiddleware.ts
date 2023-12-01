@@ -1,5 +1,6 @@
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
+import { NoOpLogger } from "@smithy/smithy-client";
 import {
   AbsoluteLocation,
   FinalizeHandler,
@@ -20,6 +21,7 @@ import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
 
 import { RetryResolvedConfig } from "./configurations";
+import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
 import { asSdkError } from "./util";
 
 export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends MetadataBearer = MetadataBearer>(
@@ -38,12 +40,14 @@ export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends
     let attempts = 0;
     let totalRetryDelay = 0;
     const { request } = args;
-    if (HttpRequest.isInstance(request)) {
+    const isRequest = HttpRequest.isInstance(request);
+
+    if (isRequest) {
       request.headers[INVOCATION_ID_HEADER] = v4();
     }
     while (true) {
       try {
-        if (HttpRequest.isInstance(request)) {
+        if (isRequest) {
           request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
         }
         const { response, output } = await next(args);
@@ -54,6 +58,14 @@ export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends
       } catch (e) {
         const retryErrorInfo = getRetryErrorInfo(e);
         lastError = asSdkError(e);
+
+        if (isRequest && isStreamingPayload(request)) {
+          (context.logger instanceof NoOpLogger ? console : context.logger)?.warn(
+            "An error was encountered in a non-retryable streaming request."
+          );
+          throw lastError;
+        }
+
         try {
           retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
         } catch (refreshError) {
