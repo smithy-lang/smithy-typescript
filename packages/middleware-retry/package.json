@@ -18,6 +18,13 @@
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
+  "browser": {
+    "./dist-es/isStreamingPayload/isStreamingPayload": "./dist-es/isStreamingPayload/isStreamingPayload.browser"
+  },
+  "react-native": {
+    "./dist-cjs/isStreamingPayload/isStreamingPayload": "./dist-cjs/isStreamingPayload/isStreamingPayload.browser",
+    "./dist-es/isStreamingPayload/isStreamingPayload": "./dist-es/isStreamingPayload/isStreamingPayload.browser"
+  },
   "author": {
     "name": "AWS SDK for JavaScript Team",
     "url": "https://aws.amazon.com/javascript/"
@@ -27,6 +34,7 @@
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/service-error-classification": "workspace:^",
+    "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-retry": "workspace:^",
