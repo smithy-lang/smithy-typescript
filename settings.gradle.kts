@@ -20,6 +20,7 @@ rootProject.name = "smithy-typescript"
 include(":smithy-typescript-codegen")
 include(":smithy-typescript-codegen-test")
 include(":smithy-typescript-codegen-test:example-weather-customizations")
+include(":smithy-typescript-codegen-test:released-version-test")
 include(":smithy-typescript-ssdk-codegen-test-utils")
 
 file(

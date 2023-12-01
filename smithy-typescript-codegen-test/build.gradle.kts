@@ -16,8 +16,6 @@
 extra["displayName"] = "Smithy :: Typescript :: Codegen :: Test"
 extra["moduleName"] = "software.amazon.smithy.typescript.codegen.test"
 
-tasks["jar"].enabled = false
-
 val smithyVersion: String by project
 
 buildscript {
