@@ -12,6 +12,7 @@ export * from "./endpoints";
 export * from "./eventStream";
 export * from "./extensions";
 export * from "./http";
+export * from "./http/httpHandlerInitialization";
 export * from "./identity";
 export * from "./logger";
 export * from "./middleware";

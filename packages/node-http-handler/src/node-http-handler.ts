@@ -1,5 +1,6 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
+import type { NodeHttpHandlerOptions } from "@smithy/types";
 import { HttpHandlerOptions, Provider } from "@smithy/types";
 import { Agent as hAgent, request as hRequest } from "http";
 import { Agent as hsAgent, request as hsRequest, RequestOptions } from "https";
@@ -11,35 +12,7 @@ import { setSocketKeepAlive } from "./set-socket-keep-alive";
 import { setSocketTimeout } from "./set-socket-timeout";
 import { writeRequestBody } from "./write-request-body";
 
-/**
- * Represents the http options that can be passed to a node http client.
- */
-export interface NodeHttpHandlerOptions {
-  /**
-   * The maximum time in milliseconds that the connection phase of a request
-   * may take before the connection attempt is abandoned.
-   *
-   * Defaults to 0, which disables the timeout.
-   */
-  connectionTimeout?: number;
-
-  /**
-   * The number of milliseconds a request can take before automatically being terminated.
-   * Defaults to 0, which disables the timeout.
-   */
-  requestTimeout?: number;
-
-  /**
-   * @deprecated Use {@link requestTimeout}
-   *
-   * The maximum time in milliseconds that a socket may remain idle before it
-   * is closed.
-   */
-  socketTimeout?: number;
-
-  httpAgent?: hAgent;
-  httpsAgent?: hsAgent;
-}
+export { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig {
   requestTimeout?: number;
@@ -56,6 +29,19 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
+
+  /**
+   * @returns the input if it is an HttpHandler of any class,
+   * or instantiates a new instance of this handler.
+   */
+  public static create(instanceOrOptions?: HttpHandler<any> | NodeHttpHandlerOptions) {
+    if (typeof (instanceOrOptions as any)?.handle === "function") {
+      // is already an instance of HttpHandler.
+      return instanceOrOptions as HttpHandler<any>;
+    }
+    // input is ctor options or undefined.
+    return new NodeHttpHandler(instanceOrOptions as NodeHttpHandlerOptions);
+  }
 
   constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>) {
     this.configProvider = new Promise((resolve, reject) => {

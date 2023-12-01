@@ -1,32 +1,13 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
+import type { FetchHttpHandlerOptions } from "@smithy/types";
 import { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
 import { requestTimeout } from "./request-timeout";
 
 declare let AbortController: any;
 
-/**
- * Represents the http options that can be passed to a browser http client.
- */
-export interface FetchHttpHandlerOptions {
-  /**
-   * The number of milliseconds a request can take before being automatically
-   * terminated.
-   */
-  requestTimeout?: number;
-
-  /**
-   * Whether to allow the request to outlive the page. Default value is false.
-   *
-   * There may be limitations to the payload size, number of concurrent requests,
-   * request duration etc. when using keepalive in browsers.
-   *
-   * These may change over time, so look for up to date information about
-   * these limitations before enabling keepalive.
-   */
-  keepAlive?: boolean;
-}
+export { FetchHttpHandlerOptions };
 
 type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 
@@ -46,6 +27,19 @@ export const keepAliveSupport = {
 export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
   private config?: FetchHttpHandlerConfig;
   private configProvider: Promise<FetchHttpHandlerConfig>;
+
+  /**
+   * @returns the input if it is an HttpHandler of any class,
+   * or instantiates a new instance of this handler.
+   */
+  public static create(instanceOrOptions?: HttpHandler<any> | FetchHttpHandlerConfig) {
+    if (typeof (instanceOrOptions as any)?.handle === "function") {
+      // is already an instance of HttpHandler.
+      return instanceOrOptions as HttpHandler<any>;
+    }
+    // input is ctor options or undefined.
+    return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerConfig);
+  }
 
   constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | undefined>) {
     if (typeof options === "function") {
