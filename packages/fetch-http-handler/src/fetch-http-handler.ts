@@ -32,7 +32,9 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
    * @returns the input if it is an HttpHandler of any class,
    * or instantiates a new instance of this handler.
    */
-  public static create(instanceOrOptions?: HttpHandler<any> | FetchHttpHandlerConfig) {
+  public static create(
+    instanceOrOptions?: HttpHandler<any> | FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | void>
+  ) {
     if (typeof (instanceOrOptions as any)?.handle === "function") {
       // is already an instance of HttpHandler.
       return instanceOrOptions as HttpHandler<any>;
@@ -41,7 +43,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerConfig);
   }
 
-  constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | undefined>) {
+  constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | void>) {
     if (typeof options === "function") {
       this.configProvider = options().then((opts) => opts || {});
     } else {
