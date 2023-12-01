@@ -1,8 +1,14 @@
+const TEXT_ENCODER = typeof TextEncoder == "function" ? new TextEncoder() : null;
+
 /**
  * @internal
  */
 export const calculateBodyLength = (body: any): number | undefined => {
   if (typeof body === "string") {
+    if (TEXT_ENCODER) {
+      return TEXT_ENCODER.encode(body).byteLength;
+    }
+
     let len = body.length;
 
     for (let i = len - 1; i >= 0; i--) {
