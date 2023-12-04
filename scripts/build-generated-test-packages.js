@@ -9,9 +9,13 @@ const { spawnProcess } = require("./utils/spawn-process");
 
 const root = path.join(__dirname, "..");
 
-const codegenTestDir = path.join(
+const testProjectDir = path.join(
     root,
     "smithy-typescript-codegen-test",
+);
+
+const codegenTestDir = path.join(
+    testProjectDir,
     "build",
     "smithyprojections",
     "smithy-typescript-codegen-test",
@@ -21,6 +25,16 @@ const weatherClientDir = path.join(
     codegenTestDir,
     "source",
     "typescript-client-codegen"
+);
+
+const releasedClientDir = path.join(
+    testProjectDir,
+    "released-version-test",
+    "build",
+    "smithyprojections",
+    "released-version-test",
+    "source",
+    "typescript-codegen"
 );
 
 // TODO(experimentalIdentityAndAuth): build generic client for integration tests
@@ -61,13 +75,15 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     await spawnProcess("touch", ["yarn.lock"], { cwd: codegenDir });
     await spawnProcess("yarn", { cwd: codegenDir });
     await spawnProcess("yarn", ["build"], { cwd: codegenDir });
-    // After building the package, it's packed and copied to node_modules so that
+    // Optionally, after building the package, it's packed and copied to node_modules so that
     // it can be used in integration tests by other packages within the monorepo.
-    await spawnProcess("yarn", ["pack"], { cwd: codegenDir });
-    await spawnProcess("rm", ["-rf", packageName], { cwd: nodeModulesDir });
-    await spawnProcess("mkdir", ["-p", packageName], { cwd: nodeModulesDir });
-    const targetPackageDir = path.join(nodeModulesDir, packageName);
-    await spawnProcess("tar", ["-xf", "package.tgz", "-C", targetPackageDir, "--strip-components", "1"], { cwd: codegenDir });
+    if (nodeModulesDir != undefined) {
+      await spawnProcess("yarn", ["pack"], { cwd: codegenDir });
+      await spawnProcess("rm", ["-rf", packageName], { cwd: nodeModulesDir });
+      await spawnProcess("mkdir", ["-p", packageName], { cwd: nodeModulesDir });
+      const targetPackageDir = path.join(nodeModulesDir, packageName);
+      await spawnProcess("tar", ["-xf", "package.tgz", "-C", targetPackageDir, "--strip-components", "1"], { cwd: codegenDir });
+    }
   } catch (e) {
     console.log(`Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\` failed:`)
     console.log(e);
@@ -84,4 +100,6 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
   await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
   // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
   await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
+  // Test released version of smithy-typescript codegenerators, but
+  await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
 })();

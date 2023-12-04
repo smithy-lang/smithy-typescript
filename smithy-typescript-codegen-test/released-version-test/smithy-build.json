@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "plugins": {
+        "typescript-codegen": {
+            "service": "example.weather#Weather",
+            "package": "weather",
+            "packageVersion": "0.0.1",
+            "packageJson": {
+                "license": "Apache-2.0",
+                "private": true
+            }
+        }
+    }
+}
