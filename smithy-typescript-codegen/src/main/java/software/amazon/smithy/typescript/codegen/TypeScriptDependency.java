@@ -129,6 +129,9 @@ public enum TypeScriptDependency implements Dependency {
     // Conditionally added when specs have been generated.
     VITEST("devDependencies", "vitest", "^0.33.0", false),
 
+    // Conditionally added when `generateTypeDoc` is true.
+    TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
+
     // Server dependency for SSDKs
     SERVER_COMMON("dependencies", "@aws-smithy/server-common", false);
 
