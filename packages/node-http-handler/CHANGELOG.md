@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- e2e3f7d5: align ctor and static creation signatures for http handlers
+
 ## 2.2.0
 
 ### Minor Changes
