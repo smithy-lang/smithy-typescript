@@ -1229,9 +1229,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
         @Override
         public Void numberNode(NumberNode node) {
             // Handle timestamps needing to be converted from numbers to their input type of Date.
-            // Also handle that a Date in TS takes milliseconds, so add 000 to the end.
+            // Also handle that a Date in TS takes milliseconds, so add * 1000 to the end.
             if (workingShape.isTimestampShape()) {
-                writer.write("new Date($L000),", node.getValue());
+                writer.write("new Date($L * 1000),", node.getValue());
             } else {
                 writer.write("$L,", node.getValue().toString());
             }
