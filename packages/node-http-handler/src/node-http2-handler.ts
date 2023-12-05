@@ -53,7 +53,9 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
    * @returns the input if it is an HttpHandler of any class,
    * or instantiates a new instance of this handler.
    */
-  public static create(instanceOrOptions?: HttpHandler<any> | NodeHttp2HandlerOptions) {
+  public static create(
+    instanceOrOptions?: HttpHandler<any> | NodeHttp2HandlerOptions | Provider<NodeHttp2HandlerOptions | void>
+  ) {
     if (typeof (instanceOrOptions as any)?.handle === "function") {
       // is already an instance of HttpHandler.
       return instanceOrOptions as HttpHandler<any>;

@@ -34,7 +34,9 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
    * @returns the input if it is an HttpHandler of any class,
    * or instantiates a new instance of this handler.
    */
-  public static create(instanceOrOptions?: HttpHandler<any> | NodeHttpHandlerOptions) {
+  public static create(
+    instanceOrOptions?: HttpHandler<any> | NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>
+  ) {
     if (typeof (instanceOrOptions as any)?.handle === "function") {
       // is already an instance of HttpHandler.
       return instanceOrOptions as HttpHandler<any>;
