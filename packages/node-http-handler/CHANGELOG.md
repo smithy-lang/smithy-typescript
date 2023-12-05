@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 340634a5: move default fetch and http handler ctor types to the types package
+
+### Patch Changes
+
+- Updated dependencies [340634a5]
+  - @smithy/types@2.7.0
+  - @smithy/abort-controller@2.0.15
+  - @smithy/protocol-http@3.0.11
+  - @smithy/querystring-builder@2.0.15
+
 ## 2.1.10
 
 ### Patch Changes

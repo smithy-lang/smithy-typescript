@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.7.0
+
+### Minor Changes
+
+- 340634a5: move default fetch and http handler ctor types to the types package
+
 ## 2.6.0
 
 ### Minor Changes

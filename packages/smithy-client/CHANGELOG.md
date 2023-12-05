@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.17
+
+### Patch Changes
+
+- 07ff207b: apply json default filtering when walking through arrays
+- Updated dependencies [340634a5]
+  - @smithy/types@2.7.0
+  - @smithy/util-stream@2.0.22
+  - @smithy/middleware-stack@2.0.9
+
 ## 2.1.16
 
 ### Patch Changes

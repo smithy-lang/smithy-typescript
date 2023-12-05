@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.1
+
+### Patch Changes
+
+- 599e95a8: Use TextEncoder to calculate body length on browsers (where available)
+
 ## 2.0.0
 
 ### Major Changes

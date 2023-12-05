@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.17
+
+### Patch Changes
+
+- 3ba4bd93: add readme content for signature-v4
+- Updated dependencies [340634a5]
+  - @smithy/types@2.7.0
+  - @smithy/eventstream-codec@2.0.15
+  - @smithy/util-middleware@2.0.8
+
 ## 2.0.16
 
 ### Patch Changes

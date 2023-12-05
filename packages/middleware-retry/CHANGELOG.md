@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.0.22
+
+### Patch Changes
+
+- 44f78bd9: prevent retries of streaming requests
+- Updated dependencies [07ff207b]
+- Updated dependencies [340634a5]
+  - @smithy/smithy-client@2.1.17
+  - @smithy/types@2.7.0
+  - @smithy/node-config-provider@2.1.7
+  - @smithy/protocol-http@3.0.11
+  - @smithy/service-error-classification@2.0.8
+  - @smithy/util-middleware@2.0.8
+  - @smithy/util-retry@2.0.8
+
 ## 2.0.21
 
 ### Patch Changes

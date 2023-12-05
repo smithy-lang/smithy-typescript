@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.21
+
+### Patch Changes
+
+- Updated dependencies [07ff207b]
+- Updated dependencies [340634a5]
+  - @smithy/smithy-client@2.1.17
+  - @smithy/types@2.7.0
+  - @smithy/property-provider@2.0.16
+
 ## 2.0.20
 
 ### Patch Changes
