@@ -2,4 +2,4 @@
 "@smithy/shared-ini-file-loader": patch
 ---
 
-Validate IniSectionType for profile names containing config prefix separator
+Process config files for profile names containing prefix separator
