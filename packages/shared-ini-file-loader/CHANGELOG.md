@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.7
+
+### Patch Changes
+
+- 68849108: Process config files for profile names containing prefix separator
+
 ## 2.2.6
 
 ### Patch Changes

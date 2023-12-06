@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.3
+
+### Patch Changes
+
+- Updated dependencies [68849108]
+  - @smithy/shared-ini-file-loader@2.2.7
+  - @smithy/node-config-provider@2.1.8
+
 ## 2.2.2
 
 ### Patch Changes

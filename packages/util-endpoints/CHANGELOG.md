@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.7
+
+### Patch Changes
+
+- @smithy/node-config-provider@2.1.8
+
 ## 1.0.6
 
 ### Patch Changes
