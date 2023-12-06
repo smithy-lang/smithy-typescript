@@ -43,6 +43,13 @@ describe(getConfigData.name, () => {
         {}
       );
 
+    it("profile containing CONFIG_PREFIX_SEPARATOR", () => {
+      const profileName = ["foo", "bar"].join(CONFIG_PREFIX_SEPARATOR);
+      const mockOutput = getMockOutput([profileName]);
+      const mockInput = getMockInput(mockOutput);
+      expect(getConfigData(mockInput)).toStrictEqual(mockOutput);
+    });
+
     it("single profile", () => {
       const mockOutput = getMockOutput(["one"]);
       const mockInput = getMockInput(mockOutput);
