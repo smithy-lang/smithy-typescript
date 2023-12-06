@@ -21,6 +21,11 @@ describe(getConfigData.name, () => {
   it.each([IniSectionType.SSO_SESSION, IniSectionType.SERVICES])("includes sections with '%s' prefix", (prefix) => {
     const mockInput = { [[prefix, "test"].join(CONFIG_PREFIX_SEPARATOR)]: { key: "value" } };
     expect(getConfigData(mockInput)).toStrictEqual(mockInput);
+
+    // Profile name containing CONFIG_PREFIX_SEPARATOR
+    const profileName = ["foo", "bar"].join(CONFIG_PREFIX_SEPARATOR);
+    const mockInput2 = { [[prefix, profileName].join(CONFIG_PREFIX_SEPARATOR)]: { key: "value" } };
+    expect(getConfigData(mockInput2)).toStrictEqual(mockInput2);
   });
 
   describe("normalizes profile names", () => {
@@ -37,6 +42,13 @@ describe(getConfigData.name, () => {
         (acc, [key, value]) => ({ ...acc, [[IniSectionType.PROFILE, key].join(CONFIG_PREFIX_SEPARATOR)]: value }),
         {}
       );
+
+    it("profile containing CONFIG_PREFIX_SEPARATOR", () => {
+      const profileName = ["foo", "bar"].join(CONFIG_PREFIX_SEPARATOR);
+      const mockOutput = getMockOutput([profileName]);
+      const mockInput = getMockInput(mockOutput);
+      expect(getConfigData(mockInput)).toStrictEqual(mockOutput);
+    });
 
     it("single profile", () => {
       const mockOutput = getMockOutput(["one"]);

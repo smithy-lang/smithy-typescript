@@ -10,18 +10,21 @@ import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
  */
 export const getConfigData = (data: ParsedIniData): ParsedIniData =>
   Object.entries(data)
-    // filter out
     .filter(([key]) => {
-      const sections = key.split(CONFIG_PREFIX_SEPARATOR);
-      if (sections.length === 2 && Object.values(IniSectionType).includes(sections[0] as IniSectionType)) {
-        return true;
+      const indexOfSeparator = key.indexOf(CONFIG_PREFIX_SEPARATOR);
+      if (indexOfSeparator === -1) {
+        // filter out keys which do not contain CONFIG_PREFIX_SEPARATOR.
+        return false;
       }
-      return false;
+      // Check if prefix is a valid IniSectionType.
+      return Object.values(IniSectionType).includes(key.substring(0, indexOfSeparator) as IniSectionType);
     })
-    // replace profile prefix, if present.
+    // remove profile prefix, if present.
     .reduce(
       (acc, [key, value]) => {
-        const updatedKey = key.startsWith(IniSectionType.PROFILE) ? key.split(CONFIG_PREFIX_SEPARATOR)[1] : key;
+        const indexOfSeparator = key.indexOf(CONFIG_PREFIX_SEPARATOR);
+        const updatedKey =
+          key.substring(0, indexOfSeparator) === IniSectionType.PROFILE ? key.substring(indexOfSeparator + 1) : key;
         acc[updatedKey] = value;
         return acc;
       },
