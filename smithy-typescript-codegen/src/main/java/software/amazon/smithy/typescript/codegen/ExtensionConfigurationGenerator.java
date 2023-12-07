@@ -23,6 +23,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 
 public class ExtensionConfigurationGenerator {
 
@@ -62,9 +63,13 @@ public class ExtensionConfigurationGenerator {
             });
         }
 
-        String clientName = symbolProvider.toSymbol(service).getName()
-                .replace("Client", "")
-                .replace("client", "");
+        String clientName = ReplaceLast.in(
+            ReplaceLast.in(
+                symbolProvider.toSymbol(service).getName(),
+                "Client", ""
+            ),
+            "client", ""
+        );
 
         String clientConfigurationContent = TypeScriptUtils
             .loadResourceAsString(CLIENT_CONFIGURATION_TEMPLATE)

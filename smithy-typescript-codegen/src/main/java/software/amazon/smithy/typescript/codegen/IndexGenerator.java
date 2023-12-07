@@ -29,6 +29,7 @@ import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
 
@@ -99,7 +100,7 @@ final class IndexGenerator {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
         // Normalizes client name, e.g. WeatherClient => Weather
-        String normalizedClientName = symbol.getName().replace("Client", "");
+        String normalizedClientName = ReplaceLast.in(symbol.getName(), "Client", "");
 
         // Write export statement for bare-bones client.
         writer.write("export * from \"./$L\";", symbol.getName());

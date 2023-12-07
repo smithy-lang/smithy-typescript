@@ -56,6 +56,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.typescript.codegen.validation.LongValidator;
+import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.waiters.WaitableTrait;
@@ -249,8 +250,8 @@ final class DirectedTypeScriptCodegen
 
         // Generate the aggregated service client.
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
-        String aggregatedClientName = serviceSymbol.getName().replace("Client", "");
-        String filename = serviceSymbol.getDefinitionFile().replace("Client", "");
+        String aggregatedClientName = ReplaceLast.in(serviceSymbol.getName(), "Client", "");
+        String filename = ReplaceLast.in(serviceSymbol.getDefinitionFile(), "Client", "");
         delegator.useFileWriter(filename, writer -> new ServiceAggregatedClientGenerator(
                 settings, model, symbolProvider, aggregatedClientName, writer, applicationProtocol).run());
 

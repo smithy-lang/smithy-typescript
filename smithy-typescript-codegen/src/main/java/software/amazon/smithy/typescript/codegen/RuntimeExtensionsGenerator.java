@@ -21,6 +21,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 
 public class RuntimeExtensionsGenerator {
 
@@ -52,9 +53,13 @@ public class RuntimeExtensionsGenerator {
     }
 
     void generate() {
-        String clientName = symbolProvider.toSymbol(service).getName()
-                .replace("Client", "")
-                .replace("client", "");
+        String clientName = ReplaceLast.in(
+            ReplaceLast.in(
+                symbolProvider.toSymbol(service).getName(),
+                "Client", ""
+            ),
+            "client", ""
+        );
 
         String template1Contents = TypeScriptUtils.loadResourceAsString(TEMPLATE_1)
             .replace("${extensionConfigName}", clientName + "ExtensionConfiguration")
