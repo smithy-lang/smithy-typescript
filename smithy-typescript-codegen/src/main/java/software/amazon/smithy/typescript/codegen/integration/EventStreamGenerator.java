@@ -493,8 +493,9 @@ public class EventStreamGenerator {
                 .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
-            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", memberName, () -> {
-                writer.write("contents.$1L = output.headers[$1S].value;", memberName);
+            String varName = context.getStringStore().var(memberName);
+            writer.openBlock("if (output.headers[$L] !== undefined) {", "}", varName, () -> {
+                writer.write("contents[$1L] = output.headers[$1L].value;", varName);
             });
         }
     }
