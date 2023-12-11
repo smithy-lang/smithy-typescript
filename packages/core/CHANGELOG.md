@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- 75cbb3e8: add requestBuilder
+
 ## 1.0.5
 
 ### Patch Changes

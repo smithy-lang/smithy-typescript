@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.29
+
+### Patch Changes
+
+- Updated dependencies [7a8023b2]
+  - @smithy/signature-v4@2.0.18
+
 ## 0.0.28
 
 ### Patch Changes

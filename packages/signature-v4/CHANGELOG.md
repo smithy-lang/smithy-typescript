@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.18
+
+### Patch Changes
+
+- 7a8023b2: fix readme brackets
+
 ## 2.0.17
 
 ### Patch Changes
