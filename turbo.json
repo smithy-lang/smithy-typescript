@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["src/**/*", "package.json"],
-      "outputs": ["dist-types", "dist-cjs", "dist-es"]
+      "outputs": ["dist-types/**", "dist-cjs/**", "dist-es/**"]
     },
     "test": {
       "dependsOn": ["build"],
