@@ -10,7 +10,12 @@ import { EventStreamSerdeContext } from "@smithy/types";
  * iterator and the remaining iterations are pass-through to the
  * event stream.
  */
-export async function bufferInitialResponse(field: string, deser: Function, output: any, context: EventStreamSerdeContext) {
+export async function bufferInitialResponse(
+  field: string,
+  deser: Function,
+  output: any,
+  context: EventStreamSerdeContext
+) {
   const contents = { [field]: null as any };
   const controller = deser(output.body, context) as any;
   const it = controller[Symbol.asyncIterator]() as any;

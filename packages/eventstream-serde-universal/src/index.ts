@@ -9,4 +9,4 @@ export * from "./provider";
 /**
  * @internal
  */
-export * from './bufferInitialResponse';
+export * from "./bufferInitialResponse";
