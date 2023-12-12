@@ -17,6 +17,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.Trait;
@@ -75,7 +76,8 @@ public final class AuthUtils {
     public static Map<ShapeId, HttpAuthScheme> getAllEffectiveNoAuthAwareAuthSchemes(
         ServiceShape serviceShape,
         ServiceIndex serviceIndex,
-        SupportedHttpAuthSchemesIndex authIndex
+        SupportedHttpAuthSchemesIndex authIndex,
+        TopDownIndex topDownIndex
     ) {
         Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes = new TreeMap<>();
         var serviceEffectiveAuthSchemes =
@@ -83,7 +85,7 @@ public final class AuthUtils {
         for (ShapeId shapeId : serviceEffectiveAuthSchemes.keySet()) {
             effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
         }
-        for (var operation : serviceShape.getAllOperations()) {
+        for (var operation : topDownIndex.getContainedOperations(serviceShape)) {
             var operationEffectiveAuthSchemes =
                 serviceIndex.getEffectiveAuthSchemes(serviceShape, operation, AuthSchemeMode.NO_AUTH_AWARE);
             for (ShapeId shapeId : operationEffectiveAuthSchemes.keySet()) {

@@ -28,6 +28,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.auth.AuthUtils;
@@ -229,8 +230,9 @@ final class RuntimeConfigGenerator {
 
         // feat(experimentalIdentityAndAuth): gather HttpAuthSchemes to generate
         ServiceIndex serviceIndex = ServiceIndex.of(model);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
         Map<ShapeId, HttpAuthScheme> allEffectiveHttpAuthSchemes =
-            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(service, serviceIndex, authIndex);
+            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(service, serviceIndex, authIndex, topDownIndex);
         List<HttpAuthSchemeTarget> targetAuthSchemes = getHttpAuthSchemeTargets(target, allEffectiveHttpAuthSchemes);
 
         // Generate only if the "inherited" target is different than the current target
