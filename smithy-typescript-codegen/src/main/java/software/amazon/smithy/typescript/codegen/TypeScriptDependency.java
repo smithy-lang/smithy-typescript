@@ -101,6 +101,7 @@ public enum TypeScriptDependency implements Dependency {
         false),
     AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", false),
     AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", false),
+    AWS_SDK_EVENTSTREAM_SERDE_UNIVERSAL("dependencies", "@smithy/eventstream-serde-universal", false),
 
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^6.0.0", false),

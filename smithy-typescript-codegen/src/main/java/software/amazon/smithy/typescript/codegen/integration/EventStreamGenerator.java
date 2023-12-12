@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -38,7 +39,9 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
+import software.amazon.smithy.model.traits.JsonNameTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
+import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -110,7 +113,7 @@ public class EventStreamGenerator {
                 Set<StructureShape> eventShapes = eventsUnion.members().stream()
                         .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
                         .collect(Collectors.toSet());
-                eventShapes.forEach(eventShapesToMarshall::add);
+                eventShapesToMarshall.addAll(eventShapes);
             }
         }
 
@@ -153,22 +156,21 @@ public class EventStreamGenerator {
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
-        TreeSet<UnionShape> eventUnionsToDeserialize = new TreeSet<>();
+        TreeMap<UnionShape, OperationShape> eventUnionsToDeserialize = new TreeMap<>();
         TreeSet<StructureShape> eventShapesToUnmarshall = new TreeSet<>();
         for (OperationShape operation : operations) {
             if (hasEventStreamOutput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
-                eventUnionsToDeserialize.add(eventsUnion);
+                eventUnionsToDeserialize.put(eventsUnion, operation);
                 Set<StructureShape> eventShapes = eventsUnion.members().stream()
                         .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
                         .collect(Collectors.toSet());
-                eventShapes.forEach(eventShapesToUnmarshall::add);
+                eventShapesToUnmarshall.addAll(eventShapes);
             }
         }
 
-        eventUnionsToDeserialize.forEach(eventsUnion -> {
-            generateEventStreamDeserializer(context, eventsUnion);
-        });
+        eventUnionsToDeserialize.forEach((key, value) -> generateEventStreamDeserializer(context, key, value));
+
         eventShapesToUnmarshall.forEach(event -> {
             generateEventUnmarshaller(
                 context,
@@ -393,7 +395,9 @@ public class EventStreamGenerator {
         }
     }
 
-    private void generateEventStreamDeserializer(GenerationContext context, UnionShape eventsUnion) {
+    private void generateEventStreamDeserializer(GenerationContext context,
+                                                 UnionShape eventsUnion,
+                                                 OperationShape operation) {
         String methodName = getDeserFunctionName(context, eventsUnion);
         String methodLongName = ProtocolGenerator.getDeserFunctionName(getSymbol(context, eventsUnion),
                 context.getProtocolName());
@@ -410,6 +414,7 @@ public class EventStreamGenerator {
             writer.openBlock("return context.eventStreamMarshaller.deserialize(", ");", () -> {
                 writer.write("output,");
                 writer.openBlock("async event => {", "}", () -> {
+                    // regular union members.
                     eventsUnion.getAllMembers().forEach((name, member) -> {
                         StructureShape event = model.expectShape(member.getTarget(), StructureShape.class);
                         writer.openBlock("if (event[$S] != null) {", "}", name, () -> {
@@ -419,6 +424,26 @@ public class EventStreamGenerator {
                             });
                         });
                     });
+                    // implicit initial-response union member.
+                    writer.openBlock("if (event['initial-response'] != null) {", "}", () -> {
+                        writer.write("const ir = await parseBody(event['initial-response'].body, context)");
+                        writer.addImport("map", "", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                        writer.openBlock("return { 'initial-response': map({", "}) } as any", () -> {
+                            context.getModel().expectShape(operation.getOutputShape()).members().forEach(member -> {
+                                boolean isStreaming = model.expectShape(member.getTarget())
+                                    .hasTrait(StreamingTrait.class);
+                                if (!isStreaming) {
+                                    writer.write("$L: [, ir.$L]",
+                                        member.getTrait(JsonNameTrait.class)
+                                            .map(StringTrait::getValue)
+                                            .orElse(member.getMemberName()),
+                                        member.getMemberName()
+                                    );
+                                }
+                            });
+                        });
+                    });
+
                     writer.write("return {$$unknown: output};");
                 });
             });

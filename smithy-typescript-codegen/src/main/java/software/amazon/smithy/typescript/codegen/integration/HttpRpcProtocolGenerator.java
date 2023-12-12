@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -528,11 +529,23 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
                     if (EventStreamGenerator.hasEventStreamOutput(context, operation)) {
                         // There must only one eventstream member in response structure.
-                        MemberShape member = outputShape.members().stream().collect(Collectors.toList()).get(0);
+                        MemberShape member = outputShape.members().stream().filter(
+                            (MemberShape m) -> context.getModel()
+                                .expectShape(m.getTarget())
+                                .hasTrait(StreamingTrait.class)
+                        ).findFirst().orElseThrow();
                         Shape target = context.getModel().expectShape(member.getTarget());
                         Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
-                        writer.write("const contents = { $L: $L(output.body, context) };", member.getMemberName(),
-                                ProtocolGenerator.getDeserFunctionShortName(targetSymbol));
+
+                        writer.addImport(
+                            "bufferInitialResponse", null,
+                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_UNIVERSAL
+                        );
+                        writer.write(
+                            "const contents = await bufferInitialResponse($S, $L, output, context);",
+                            member.getMemberName(),
+                            ProtocolGenerator.getDeserFunctionShortName(targetSymbol)
+                        );
                     } else {
                         // We only need to load the body and prepare a contents object if there is a response.
                         writer.write("const data: any = await parseBody(output.body, context)");
