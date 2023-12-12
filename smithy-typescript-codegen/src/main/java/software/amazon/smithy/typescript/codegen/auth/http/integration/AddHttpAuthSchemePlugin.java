@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
@@ -145,8 +146,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         s.getModel(),
                         s.getSettings());
                     ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
-                    Map<ShapeId, HttpAuthScheme> httpAuthSchemes =
-                        AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(s.getService(), serviceIndex, authIndex);
+                    TopDownIndex topDownIndex = TopDownIndex.of(s.getModel());
+                    Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
+                        s.getService(), serviceIndex, authIndex, topDownIndex);
                     for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
                         if (scheme == null) {
                             continue;
@@ -177,8 +179,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 codegenContext.settings());
             ServiceShape serviceShape = codegenContext.settings().getService(codegenContext.model());
             ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
+            TopDownIndex topDownIndex = TopDownIndex.of(codegenContext.model());
             Map<ShapeId, HttpAuthScheme> httpAuthSchemes =
-                AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+                AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex, topDownIndex);
             Map<String, ConfigField> configFields =
                 AuthUtils.collectConfigFields(httpAuthSchemes.values());
             Map<Symbol, ResolveConfigFunction> resolveConfigFunctions =

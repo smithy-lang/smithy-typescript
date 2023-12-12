@@ -13,9 +13,9 @@ import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.HttpApiKeyAuthTrait;
 import software.amazon.smithy.model.traits.OptionalAuthTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
@@ -155,8 +155,8 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         ServiceShape service
     ) {
         ServiceIndex serviceIndex = ServiceIndex.of(model);
-        for (ShapeId id : service.getAllOperations()) {
-            OperationShape operation = model.expectShape(id, OperationShape.class);
+        TopDownIndex topDownIndex = TopDownIndex.of(model);
+        for (OperationShape operation : topDownIndex.getContainedOperations(service)) {
             if (operation.hasTrait(OptionalAuthTrait.ID)) {
                 continue;
             }

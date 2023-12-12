@@ -16,6 +16,8 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.ServiceIndex.AuthSchemeMode;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.Trait;
@@ -59,6 +61,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
     private final SupportedHttpAuthSchemesIndex authIndex;
     private final ServiceIndex serviceIndex;
+    private final TopDownIndex topDownIndex;
     private final ServiceShape serviceShape;
     private final Symbol serviceSymbol;
     private final String serviceName;
@@ -88,11 +91,12 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
         this.authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
         this.serviceIndex = ServiceIndex.of(model);
+        this.topDownIndex = TopDownIndex.of(model);
         this.serviceShape = settings.getService(model);
         this.serviceSymbol = symbolProvider.toSymbol(serviceShape);
         this.serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
         this.effectiveHttpAuthSchemes =
-            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex, topDownIndex);
         this.httpAuthSchemeParameters =
             AuthUtils.collectHttpAuthSchemeParameters(effectiveHttpAuthSchemes.values());
     }
@@ -395,7 +399,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 w.openBlock("switch (authParameters.operation) {", "};", () -> {
                     var serviceAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
                         serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
-                    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
+                    for (OperationShape operationShape : topDownIndex.getContainedOperations(serviceShape)) {
+                        ShapeId operationShapeId = operationShape.getId();
                         var operationAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
                             serviceShape, operationShapeId, AuthSchemeMode.NO_AUTH_AWARE);
                         // Skip operation generation if operation auth schemes are equivalent to the default service

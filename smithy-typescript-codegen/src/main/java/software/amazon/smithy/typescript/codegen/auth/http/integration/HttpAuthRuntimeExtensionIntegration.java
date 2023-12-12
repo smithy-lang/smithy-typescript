@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
@@ -60,11 +61,12 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
             codegenContext.model(),
             codegenContext.settings());
         ServiceIndex serviceIndex = ServiceIndex.of(codegenContext.model());
+        TopDownIndex topDownIndex = TopDownIndex.of(codegenContext.model());
         String serviceName = CodegenUtils.getServiceName(
             codegenContext.settings(), codegenContext.model(), codegenContext.symbolProvider());
         ServiceShape serviceShape = codegenContext.settings().getService(codegenContext.model());
         Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes =
-            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex);
+            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(serviceShape, serviceIndex, authIndex, topDownIndex);
         Map<String, ConfigField> configFields = AuthUtils.collectConfigFields(effectiveAuthSchemes.values());
 
         generateHttpAuthExtensionConfigurationInterface(
