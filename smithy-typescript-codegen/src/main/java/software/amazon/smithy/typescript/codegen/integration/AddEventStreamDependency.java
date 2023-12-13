@@ -27,9 +27,13 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
+import software.amazon.smithy.utils.CodeInterceptor;
+import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -97,6 +101,31 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
             default:
                 return Collections.emptyMap();
         }
+    }
+
+    @Override
+    public List<? extends CodeInterceptor<? extends CodeSection, TypeScriptWriter>> interceptors(
+        TypeScriptCodegenContext codegenContext
+    ) {
+        return List.of(CodeInterceptor.appender(SmithyContextCodeSection.class, (w, s) -> {
+            EventStreamIndex eventStreamIndex = EventStreamIndex.of(s.getModel());
+            boolean input = eventStreamIndex.getInputInfo(s.getOperation()).isPresent();
+            boolean output = eventStreamIndex.getOutputInfo(s.getOperation()).isPresent();
+            // If not event streaming for I/O, don't write anything
+            if (!input && !output) {
+                return;
+            }
+            // Otherwise, write present input and output streaming
+            w.writeDocs("@internal");
+            w.openBlock("eventStream: {", "},", () -> {
+                if (input) {
+                    w.write("input: true,");
+                }
+                if (output) {
+                    w.write("output: true,");
+                }
+            });
+        }));
     }
 
     private static boolean hasEventStream(
