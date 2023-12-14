@@ -1,11 +1,13 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import {
   ErrorHandler,
+  EventStreamPayloadHandler,
   FinalizeHandler,
   FinalizeHandlerArguments,
   FinalizeHandlerOutput,
   FinalizeRequestMiddleware,
   HandlerExecutionContext,
+  MetadataBearer,
   SelectedHttpAuthScheme,
   SMITHY_CONTEXT_KEY,
   SuccessHandler,
@@ -15,8 +17,24 @@ import { getSmithyContext } from "@smithy/util-middleware";
 /**
  * @internal
  */
+interface HttpSigningMiddlewareConfig {
+  /**
+   * @internal
+   */
+  eventStreamPayloadHandler?: EventStreamPayloadHandler;
+}
+
+/**
+ * @internal
+ */
 interface HttpSigningMiddlewareSmithyContext extends Record<string, unknown> {
   selectedHttpAuthScheme?: SelectedHttpAuthScheme;
+  /**
+   * @internal
+   */
+  eventStream?: {
+    input?: boolean;
+  };
 }
 
 /**
@@ -26,10 +44,16 @@ interface HttpSigningMiddlewareHandlerExecutionContext extends HandlerExecutionC
   [SMITHY_CONTEXT_KEY]?: HttpSigningMiddlewareSmithyContext;
 }
 
+/**
+ * @internal
+ */
 const defaultErrorHandler: ErrorHandler = (signingProperties) => (error) => {
   throw error;
 };
 
+/**
+ * @internal
+ */
 const defaultSuccessHandler: SuccessHandler = (
   httpResponse: unknown,
   signingProperties: Record<string, unknown>
@@ -38,8 +62,16 @@ const defaultSuccessHandler: SuccessHandler = (
 /**
  * @internal
  */
+const isEventStreamInputSupported = (
+  smithyContext: HttpSigningMiddlewareSmithyContext,
+  config: HttpSigningMiddlewareConfig
+) => smithyContext?.eventStream?.input && config.eventStreamPayloadHandler;
+
+/**
+ * @internal
+ */
 export const httpSigningMiddleware = <Input extends object, Output extends object>(
-  config: object
+  config: HttpSigningMiddlewareConfig
 ): FinalizeRequestMiddleware<Input, Output> => (
   next: FinalizeHandler<Input, Output>,
   context: HttpSigningMiddlewareHandlerExecutionContext
@@ -60,7 +92,13 @@ export const httpSigningMiddleware = <Input extends object, Output extends objec
     identity,
     signer,
   } = scheme;
-  const output = await next({
+  // If the input is an event stream and has a handler, use the eventStreamPayloadHandler
+  // right after signing the initial request.
+  const wrappedNext: FinalizeHandler<Input, Output> = isEventStreamInputSupported(smithyContext, config)
+    ? async (args) =>
+        config.eventStreamPayloadHandler!.handle(next as FinalizeHandler<Input, Output & MetadataBearer>, args, context)
+    : next;
+  const output = await wrappedNext({
     ...args,
     request: await signer.sign(args.request, identity, signingProperties),
   }).catch((signer.errorHandler || defaultErrorHandler)(signingProperties));
