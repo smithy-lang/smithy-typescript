@@ -5,7 +5,6 @@
 
 package software.amazon.smithy.typescript.codegen.util;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
