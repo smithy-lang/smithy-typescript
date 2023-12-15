@@ -10,9 +10,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Intended for use at the
@@ -20,6 +22,7 @@ import java.util.TreeMap;
  * level, this class allocates and tracks variables assigned to string literals, allowing a
  * form of compression on long protocol serde files.
  */
+@SmithyInternalApi
 public class StringStore {
     // order doesn't matter for this map.
     private final Map<String, String> literalToVariable = new HashMap<>();
@@ -35,36 +38,24 @@ public class StringStore {
      * @return the variable name assigned for that string, which may have been encountered before.
      */
     public String var(String literal) {
-        if (literal == null) {
-            throw new RuntimeException("Literal must not be null.");
-        }
-        if (literalToVariable.containsKey(literal)) {
-            return literalToVariable.get(literal);
-        }
-        literalToVariable.put(literal, this.assignKey(literal));
-        return literalToVariable.get(literal);
+        Objects.requireNonNull(literal);
+        return literalToVariable.computeIfAbsent(literal, this::assignKey);
     }
 
     /**
      * Outputs the generated code for any constants that have been
      * allocated but not yet retrieved.
      */
-    public String getIncremental() {
+    public String flushVariableDeclarationCode() {
         StringBuilder sourceCode = new StringBuilder();
-        Set<String> incrementalKeys = new HashSet<>();
 
         for (Map.Entry<String, String> entry : variableToLiteral.entrySet()) {
             String v = entry.getKey();
             String l = entry.getValue();
-            if (writelog.contains(v)) {
-                // sourceCode.append(String.format("// const %s = \"%s\";%n", v, l));
-            } else {
-                incrementalKeys.add(v);
+            if (writelog.add(v)) {
                 sourceCode.append(String.format("const %s = \"%s\";%n", v, l));
             }
         }
-
-        writelog.addAll(incrementalKeys);
 
         return sourceCode.toString();
     }
@@ -74,11 +65,10 @@ public class StringStore {
      */
     private String assignKey(String literal) {
         if (literalToVariable.containsKey(literal)) {
-            return literalToVariable.get(literal);
+            throw new IllegalArgumentException("Variable was already allocated for " + literal);
         }
         String variable = allocateVariable(literal);
         variableToLiteral.put(variable, literal);
-        literalToVariable.put(literal, variable);
         return variable;
     }
 
@@ -91,10 +81,12 @@ public class StringStore {
         StringBuilder v = new StringBuilder("_");
         Queue<Character> deconfliction = new LinkedList<>();
         if (sections.length > 1) {
-            Arrays.stream(sections)
-                .map(s -> s.charAt(0))
-                .filter(this::isAllowedChar)
-                .forEach(v::append);
+            for (String s : sections) {
+                char c = s.charAt(0);
+                if (isAllowedChar(c)) {
+                    v.append(c);
+                }
+            }
         } else {
             for (int i = 0; i < literal.length(); ++i) {
                 char c = literal.charAt(i);
@@ -119,7 +111,7 @@ public class StringStore {
     }
 
     /**
-     * char is in A-Za-z.
+     * @return true if char is in A-Za-z.
      */
     private boolean isAllowedChar(char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -129,6 +121,11 @@ public class StringStore {
      * @return true if the variable has only underscores.
      */
     private boolean isNeutral(String variable) {
-        return variable.chars().allMatch(c -> c == '_');
+        for (int i = 0; i < variable.length(); i++) {
+            if (variable.charAt(i) != '_') {
+                return false;
+            }
+        }
+        return true;
     }
 }

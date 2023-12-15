@@ -204,7 +204,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         HttpProtocolGeneratorUtils.generateHttpBindingUtils(context);
 
         writer.write(
-            context.getStringStore().getIncremental()
+            context.getStringStore().flushVariableDeclarationCode()
         );
     }
 

@@ -175,7 +175,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
 
         writer.write(
-            context.getStringStore().getIncremental()
+            context.getStringStore().flushVariableDeclarationCode()
         );
     }
 
