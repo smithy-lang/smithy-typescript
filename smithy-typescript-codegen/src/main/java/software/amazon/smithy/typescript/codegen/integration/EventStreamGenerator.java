@@ -490,7 +490,7 @@ public class EventStreamGenerator {
     private void readEventHeaders(GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
         List<MemberShape> headerMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
+                .filter(member -> member.hasTrait(EventHeaderTrait.class)).toList();
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
             String varName = context.getStringStore().var(memberName);

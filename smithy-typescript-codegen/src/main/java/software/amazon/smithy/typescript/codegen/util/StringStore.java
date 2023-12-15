@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -60,12 +61,12 @@ public class StringStore {
     }
 
     /**
-     * Assigns a new variable or returns the existing variable for a given string literal.
+     * Assigns a new variable for a given string literal.
+     * Avoid calling assignKey more than once for a given literal, for example with
+     * {@link HashMap#computeIfAbsent(Object, Function)}, since it would
+     * allocate two different variables.
      */
     private String assignKey(String literal) {
-        if (literalToVariable.containsKey(literal)) {
-            throw new IllegalArgumentException("Variable was already allocated for " + literal);
-        }
         String variable = allocateVariable(literal);
         variableToLiteral.put(variable, literal);
         return variable;
