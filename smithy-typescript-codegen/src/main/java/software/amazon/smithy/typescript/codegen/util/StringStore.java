@@ -6,13 +6,13 @@
 package software.amazon.smithy.typescript.codegen.util;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Intended for use at the
@@ -21,8 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * form of compression on long protocol serde files.
  */
 public class StringStore {
-    private final ConcurrentHashMap<String, String> literalToVariable = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, String> variableToLiteral = new ConcurrentHashMap<>();
+    // order doesn't matter for this map.
+    private final Map<String, String> literalToVariable = new HashMap<>();
+
+    // this map should be ordered for consistent codegen output.
+    private final TreeMap<String, String> variableToLiteral = new TreeMap<>();
+
+    // controls incremental output.
     private final Set<String> writelog = new HashSet<>();
 
     /**
@@ -45,12 +50,10 @@ public class StringStore {
      * allocated but not yet retrieved.
      */
     public String getIncremental() {
-        TreeMap<String, String> map = new TreeMap<>(variableToLiteral);
-
         StringBuilder sourceCode = new StringBuilder();
         Set<String> incrementalKeys = new HashSet<>();
 
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        for (Map.Entry<String, String> entry : variableToLiteral.entrySet()) {
             String v = entry.getKey();
             String l = entry.getValue();
             if (writelog.contains(v)) {
