@@ -23,7 +23,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * form of compression on long protocol serde files.
  */
 @SmithyInternalApi
-public class StringStore {
+public final class StringStore {
     // order doesn't matter for this map.
     private final Map<String, String> literalToVariable = new HashMap<>();
 
@@ -88,7 +88,7 @@ public class StringStore {
                 }
             }
         } else {
-            for (int i = 0; i < literal.length(); ++i) {
+            for (int i = 0; i < literal.length(); i++) {
                 char c = literal.charAt(i);
                 if ((c >= 'A' && c <= 'Z') || (isNeutral(v.toString()) && isAllowedChar(c))) {
                     v.append(c);

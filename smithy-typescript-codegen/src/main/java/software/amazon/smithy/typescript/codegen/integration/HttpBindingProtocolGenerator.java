@@ -882,14 +882,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             target
         );
 
+        String simpleAccessExpression = "input["
+            + context.getStringStore().var(memberName)
+            + "]" + memberAssertionComponent;
+
+        boolean isSimpleAccessExpression = Objects.equals(
+            simpleAccessExpression,
+            queryValue
+        );
+
         writer.addImport("expectNonNull", "__expectNonNull", TypeScriptDependency.AWS_SMITHY_CLIENT);
 
-        if (
-            Objects.equals(
-                "input[" + context.getStringStore().var(memberName) + "]" + memberAssertionComponent,
-                queryValue
-            )
-        ) {
+        if (isSimpleAccessExpression) {
             String value = isRequired ? "__expectNonNull($L, `" + memberName + "`)" : "$L";
             // simple undefined check
             writer.write(
