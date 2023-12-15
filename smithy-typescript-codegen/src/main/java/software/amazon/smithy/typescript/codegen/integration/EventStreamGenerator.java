@@ -494,9 +494,15 @@ public class EventStreamGenerator {
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
             String varName = context.getStringStore().var(memberName);
-            writer.openBlock("if (output.headers[$L] !== undefined) {", "}", varName, () -> {
-                writer.write("contents[$1L] = output.headers[$1L].value;", varName);
-            });
+
+            writer.write(
+                """
+                if (output.headers[$1L] !== undefined) {
+                    contents[$1L] = output.headers[$1L].value;
+                }
+                """,
+                varName
+            );
         }
     }
 
