@@ -678,6 +678,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Then construct the request from them. The client's resolved endpoint can
             // be default one or supplied by users.
 
+            writer.addDependency(TypeScriptDependency.SMITHY_CORE);
             writer.addImport("requestBuilder", "rb", TypeScriptDependency.SMITHY_CORE);
             writer.write("const b = rb(input, context);");
 
