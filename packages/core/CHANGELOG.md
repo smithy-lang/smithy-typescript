@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.2.0
+
+### Minor Changes
+
+- 12adf848: add paginator factory
+
+### Patch Changes
+
+- 3eb09aae: fix(core): strict core deps
+
 ## 1.1.0
 
 ### Minor Changes
