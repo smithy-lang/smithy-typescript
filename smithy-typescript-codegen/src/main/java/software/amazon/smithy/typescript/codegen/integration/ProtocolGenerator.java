@@ -30,6 +30,7 @@ import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.util.StringStore;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -313,6 +314,7 @@ public interface ProtocolGenerator {
         private TypeScriptDelegator writerDelegator;
         private TypeScriptWriter writer;
         private String protocolName;
+        private StringStore stringStore = new StringStore();
 
         public TypeScriptSettings getSettings() {
             return settings;
@@ -399,6 +401,10 @@ public interface ProtocolGenerator {
             GenerationContext copyContext = copy();
             copyContext.setWriter(newWriter);
             return copyContext;
+        }
+
+        public StringStore getStringStore() {
+            return stringStore;
         }
     }
 }

@@ -490,12 +490,19 @@ public class EventStreamGenerator {
     private void readEventHeaders(GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
         List<MemberShape> headerMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
+                .filter(member -> member.hasTrait(EventHeaderTrait.class)).toList();
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
-            writer.openBlock("if (output.headers[$S] !== undefined) {", "}", memberName, () -> {
-                writer.write("contents.$1L = output.headers[$1S].value;", memberName);
-            });
+            String varName = context.getStringStore().var(memberName);
+
+            writer.write(
+                """
+                if (output.headers[$1L] !== undefined) {
+                    contents[$1L] = output.headers[$1L].value;
+                }
+                """,
+                varName
+            );
         }
     }
 

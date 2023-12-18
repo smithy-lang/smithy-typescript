@@ -173,6 +173,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Write common request header to be shared by all requests
         writeSharedRequestHeaders(context);
         writer.write("");
+
+        writer.write(
+            context.getStringStore().flushVariableDeclarationCode()
+        );
     }
 
     @Override
