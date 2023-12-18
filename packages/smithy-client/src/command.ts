@@ -53,6 +53,7 @@ export abstract class Command<
   /**
    * @internal
    */
+<<<<<<< HEAD
   public resolveMiddlewareWithContext(
     clientStack: IMiddlewareStack<any, any>,
     configuration: { logger: Logger; requestHandler: RequestHandler<any, any, any> },
@@ -69,6 +70,68 @@ export abstract class Command<
     }: ResolveMiddlewareContextArgs
   ) {
     for (const mw of middlewareFn.bind(this)(CommandCtor, clientStack, configuration, options)) {
+=======
+  protected resolveBuilder() {
+    const args: ResolveMiddlewareContextArgs = {
+      middlewareQueue: [] as Pluggable<any, any>[],
+      commandName: "",
+      clientName: "",
+      service: "",
+      operation: "",
+      inputFilterSensitiveLog: () => {},
+      outputFilterSensitiveLog: () => {},
+    };
+    return {
+      m(...middleware: Pluggable<any, any>[]) {
+        args.middlewareQueue.push(...middleware);
+        return this;
+      },
+      n(clientName: string, commandName: string, service: string, operation: string) {
+        args.clientName = clientName;
+        args.commandName = commandName;
+        args.service = service;
+        args.operation = operation;
+        return this;
+      },
+      f(inputFilter: (_: any) => any = (_) => _, outputFilter: (_: any) => any = (_) => _) {
+        args.inputFilterSensitiveLog = inputFilter;
+        args.outputFilterSensitiveLog = outputFilter;
+        return this;
+      },
+      build() {
+        return (
+          clientStack: IMiddlewareStack<ClientInput, ClientOutput>,
+          configuration: ResolvedClientConfiguration & {
+            logger: Logger;
+            requestHandler: RequestHandler<any, any, any>;
+          },
+          options: any
+        ) => {
+          this.__resolveMiddleware(clientStack, configuration, options, args);
+        };
+      },
+    };
+  }
+
+  /**
+   * @internal
+   */
+  protected __resolveMiddleware(
+    clientStack: IMiddlewareStack<ClientInput, ClientOutput>,
+    configuration: ResolvedClientConfiguration & { logger: Logger; requestHandler: RequestHandler<any, any, any> },
+    options: any,
+    {
+      middlewareQueue,
+      clientName,
+      commandName,
+      service,
+      operation,
+      inputFilterSensitiveLog,
+      outputFilterSensitiveLog,
+    }: ResolveMiddlewareContextArgs
+  ) {
+    for (const mw of middlewareQueue) {
+>>>>>>> 74a500ee1 (feat: command codegen)
       this.middlewareStack.use(mw);
     }
     const stack = clientStack.concat(this.middlewareStack);
@@ -80,6 +143,7 @@ export abstract class Command<
       inputFilterSensitiveLog,
       outputFilterSensitiveLog,
       [SMITHY_CONTEXT_KEY]: {
+<<<<<<< HEAD
         ...smithyContext,
       },
       ...additionalContext,
@@ -284,4 +348,30 @@ export interface CommandImpl<
 > extends Command<I, O, C, SI, SO> {
   readonly input: I;
   resolveMiddleware(stack: IMiddlewareStack<SI, SO>, configuration: C, options: any): Handler<I, O>;
+=======
+        service,
+        operation,
+      },
+    };
+    const { requestHandler } = configuration;
+    return stack.resolve(
+      (request: FinalizeHandlerArguments<any>) =>
+        requestHandler.handle(request.request as __HttpRequest, options || {}),
+      handlerExecutionContext
+    );
+  }
+>>>>>>> 74a500ee1 (feat: command codegen)
 }
+
+/**
+ * @internal
+ */
+type ResolveMiddlewareContextArgs = {
+  middlewareQueue: Pluggable<any, any>[];
+  clientName: string;
+  commandName: string;
+  service: string;
+  operation: string;
+  inputFilterSensitiveLog: (_: any) => any;
+  outputFilterSensitiveLog: (_: any) => any;
+};
