@@ -32,6 +32,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
@@ -163,38 +164,38 @@ final class PaginationGenerator implements Runnable {
         writer.addImport("createPaginator", null, TypeScriptDependency.SMITHY_CORE);
 
         writer.writeDocs("@public");
-        writer.write(
-            """
-            export const paginate$L: (config: $LPaginationConfiguration, input: $L, ...rest: any[]) => Paginator<$L> =
-            """,
-            operationName,
-            aggregatedClientName,
-            inputTypeName,
-            outputTypeName
-        );
+
         writer
-            .openBlock(
-                "createPaginator<$L, $L, $L>(",
-                ");",
-                paginationType,
-                inputTypeName,
-                outputTypeName,
-                () -> {
-                    writer.write(
-                        """
-                        $L,
-                        $L,
-                        $S,
-                        $S,
-                        $S
-                        """,
-                        serviceTypeName,
-                        operationSymbol.getName(),
-                        inputTokenName,
-                        outputTokenName,
-                        paginatedInfo.getPageSizeMember().map(MemberShape::getMemberName).orElse("")
+            .pushState()
+            .putContext(MapUtils.of(
+                "operation", operationName,
+                "aggClient", aggregatedClientName,
+                "inputType", inputTypeName,
+                "outputType", outputTypeName,
+                "paginationType", paginationType,
+
+                "serviceTypeName", serviceTypeName,
+                "operationName", operationSymbol.getName(),
+                "inputToken", inputTokenName,
+                "outputToken", outputTokenName,
+                "pageSizeMember", paginatedInfo.getPageSizeMember().map(MemberShape::getMemberName).orElse("")
+            ))
+            .write(
+                """
+                export const paginate$operation:L: (
+                    config: $aggClient:LPaginationConfiguration,
+                    input: $inputType:L,
+                    ...rest: any[]
+                ) => Paginator<$outputType:L> =
+                    createPaginator<$paginationType:L, $inputType:L, $outputType:L>(
+                        $serviceTypeName:L,
+                        $operationName:L,
+                        $inputToken:S,
+                        $outputToken:S,
+                        $pageSizeMember:S
                     );
-                }
-            );
+                """
+            )
+            .popState();
     }
 }
