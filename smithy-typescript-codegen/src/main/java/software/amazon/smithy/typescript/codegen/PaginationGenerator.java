@@ -32,7 +32,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
-import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
@@ -167,32 +166,32 @@ final class PaginationGenerator implements Runnable {
 
         writer
             .pushState()
-            .putContext(MapUtils.of(
-                "operation", operationName,
-                "aggClient", aggregatedClientName,
-                "inputType", inputTypeName,
-                "outputType", outputTypeName,
-                "paginationType", paginationType,
-
-                "serviceTypeName", serviceTypeName,
-                "operationName", operationSymbol.getName(),
-                "inputToken", inputTokenName,
-                "outputToken", outputTokenName,
-                "pageSizeMember", paginatedInfo.getPageSizeMember().map(MemberShape::getMemberName).orElse("")
-            ))
+                .putContext("operation", operationName)
+                .putContext("aggClient", aggregatedClientName)
+                .putContext("inputType", inputTypeName)
+                .putContext("outputType", outputTypeName)
+                .putContext("paginationType", paginationType)
+                .putContext("serviceTypeName", serviceTypeName)
+                .putContext("operationName", operationSymbol.getName())
+                .putContext("inputToken", inputTokenName)
+                .putContext("outputToken", outputTokenName)
+                .putContext(
+                    "pageSizeMember",
+                    paginatedInfo.getPageSizeMember().map(MemberShape::getMemberName).orElse("")
+                )
             .write(
                 """
-                export const paginate$operation:L: (
-                    config: $aggClient:LPaginationConfiguration,
-                    input: $inputType:L,
+                export const paginate${operation:L}: (
+                    config: ${aggClient:L}PaginationConfiguration,
+                    input: ${inputType:L},
                     ...rest: any[]
-                ) => Paginator<$outputType:L> =
-                    createPaginator<$paginationType:L, $inputType:L, $outputType:L>(
-                        $serviceTypeName:L,
-                        $operationName:L,
-                        $inputToken:S,
-                        $outputToken:S,
-                        $pageSizeMember:S
+                ) => Paginator<${outputType:L}> =
+                    createPaginator<${paginationType:L}, ${inputType:L}, ${outputType:L}>(
+                        ${serviceTypeName:L},
+                        ${operationName:L},
+                        ${inputToken:S},
+                        ${outputToken:S},
+                        ${pageSizeMember:S}
                     );
                 """
             )
