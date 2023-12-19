@@ -76,29 +76,45 @@ export abstract class Command<
       middlewareQueue: [] as Pluggable<any, any>[],
       commandName: "",
       clientName: "",
-      service: "",
-      operation: "",
+      smithyContext: {},
       inputFilterSensitiveLog: () => {},
       outputFilterSensitiveLog: () => {},
     };
     return {
+      /**
+       * Add any number of middleware.
+       */
       m(...middleware: Pluggable<any, any>[]) {
         args.middlewareQueue.push(...middleware);
         return this;
       },
-      n(clientName: string, commandName: string, service: string, operation: string) {
-        args.clientName = clientName;
-        args.commandName = commandName;
-        args.service = service;
-        args.operation = operation;
+      /**
+       * Set the Smithy context record.
+       */
+      sc(smithyContext: Record<string, unknown>) {
+        args.smithyContext = smithyContext;
         return this;
       },
+      /**
+       * Set constant string identifiers for the operation.
+       */
+      n(clientName: string, commandName: string) {
+        args.clientName = clientName;
+        args.commandName = commandName;
+        return this;
+      },
+      /**
+       * Set the input and output sensistive log filters.
+       */
       f(inputFilter: (_: any) => any = (_) => _, outputFilter: (_: any) => any = (_) => _) {
         args.inputFilterSensitiveLog = inputFilter;
         args.outputFilterSensitiveLog = outputFilter;
         return this;
       },
-      build() {
+      /**
+       * @returns the implementation of the built resolveMiddleware function.
+       */
+      build: () => {
         return (
           clientStack: IMiddlewareStack<ClientInput, ClientOutput>,
           configuration: ResolvedClientConfiguration & {
@@ -107,7 +123,7 @@ export abstract class Command<
           },
           options: any
         ) => {
-          this.__resolveMiddleware(clientStack, configuration, options, args);
+          return this.__resolveMiddleware(clientStack, configuration, options, args);
         };
       },
     };
@@ -124,10 +140,9 @@ export abstract class Command<
       middlewareQueue,
       clientName,
       commandName,
-      service,
-      operation,
       inputFilterSensitiveLog,
       outputFilterSensitiveLog,
+      smithyContext,
     }: ResolveMiddlewareContextArgs
   ) {
     for (const mw of middlewareQueue) {
@@ -143,6 +158,7 @@ export abstract class Command<
       inputFilterSensitiveLog,
       outputFilterSensitiveLog,
       [SMITHY_CONTEXT_KEY]: {
+<<<<<<< HEAD
 <<<<<<< HEAD
         ...smithyContext,
       },
@@ -351,6 +367,9 @@ export interface CommandImpl<
 =======
         service,
         operation,
+=======
+        ...smithyContext,
+>>>>>>> 8fc21143c (update ts pkg)
       },
     };
     const { requestHandler } = configuration;
@@ -370,8 +389,7 @@ type ResolveMiddlewareContextArgs = {
   middlewareQueue: Pluggable<any, any>[];
   clientName: string;
   commandName: string;
-  service: string;
-  operation: string;
+  smithyContext: Record<string, unknown>;
   inputFilterSensitiveLog: (_: any) => any;
   outputFilterSensitiveLog: (_: any) => any;
 };
