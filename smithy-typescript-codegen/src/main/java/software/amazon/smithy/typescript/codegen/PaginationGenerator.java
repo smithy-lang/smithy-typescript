@@ -160,6 +160,7 @@ final class PaginationGenerator implements Runnable {
         String inputTokenName = paginatedInfo.getPaginatedTrait().getInputToken().get();
         String outputTokenName = paginatedInfo.getPaginatedTrait().getOutputToken().get();
 
+        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
         writer.addImport("createPaginator", null, TypeScriptDependency.SMITHY_CORE);
 
         writer.writeDocs("@public");
