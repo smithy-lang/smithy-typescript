@@ -56,6 +56,7 @@ import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -382,6 +383,25 @@ final class CommandGenerator implements Runnable {
                         )
                         .n($client:S, $command:S, $service:S, $operation:S)
                         .f($inputFilter:L, $outputFilter:L)
+            """
+        );
+        writer.openBlock(".sc({", "})", () -> {
+            writer.pushState(SmithyContextCodeSection.builder()
+                .settings(settings)
+                .model(model)
+                .service(service)
+                .operation(operation)
+                .symbolProvider(symbolProvider)
+                .runtimeClientPlugins(runtimePlugins)
+                .protocolGenerator(protocolGenerator)
+                .applicationProtocol(applicationProtocol)
+                .build());
+            writer.write("service: $S,", service.toShapeId().getName());
+            writer.write("operation: $S,", operation.toShapeId().getName());
+            writer.popState();
+        });
+        writer.write(
+            """
                         .build()(clientStack, config, options);
             }
             """

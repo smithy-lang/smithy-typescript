@@ -89,9 +89,9 @@ export abstract class Command<
         return this;
       },
       /**
-       * Set the Smithy context record.
+       * Set the context record.
        */
-      sc(smithyContext: Record<string, unknown>) {
+      c(smithyContext: Record<string, unknown>) {
         args.smithyContext = smithyContext;
         return this;
       },
