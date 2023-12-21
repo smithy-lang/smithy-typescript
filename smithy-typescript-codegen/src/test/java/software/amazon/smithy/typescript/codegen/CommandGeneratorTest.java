@@ -23,7 +23,7 @@ public class CommandGeneratorTest {
     public void writesSerializer() {
         testCommmandCodegen(
             "output-structure.smithy",
-            "private serialize = "
+            ".ser("
         );
     }
 
@@ -31,7 +31,7 @@ public class CommandGeneratorTest {
     public void writesDeserializer() {
         testCommmandCodegen(
             "output-structure.smithy",
-        "private deserialize ="
+        ".de("
         );
     }
 

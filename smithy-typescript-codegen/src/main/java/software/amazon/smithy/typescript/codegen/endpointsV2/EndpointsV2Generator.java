@@ -74,7 +74,6 @@ public final class EndpointsV2Generator implements Runnable {
     static final String ENDPOINT_PARAMETERS_FILE = ENDPOINT_PARAMETERS_MODULE_NAME + ".ts";
     static final String ENDPOINT_RESOLVER_FILE = ENDPOINT_RESOLVER_MODULE_NAME + ".ts";
     static final String ENDPOINT_RULESET_FILE = "ruleset.ts";
-    static final String ENDPOINT_COMMON_PARAMETERS_FILE = "commonParams.ts";
 
     private final TypeScriptDelegator delegator;
     private final EndpointRuleSetTrait endpointRuleSetTrait;
@@ -98,7 +97,6 @@ public final class EndpointsV2Generator implements Runnable {
         generateEndpointParameters();
         generateEndpointResolver();
         generateEndpointRuleset();
-        generateClientCommonParameters();
     }
 
     /**
@@ -154,6 +152,34 @@ public final class EndpointsV2Generator implements Runnable {
                                 "defaultSigningName: \"$L\",",
                                 settings.getDefaultSigningName()
                             );
+                        });
+                    }
+                );
+
+                writer.write("");
+
+                writer.openBlock(
+                    "export const commonParams = {", "} as const",
+                    () -> {
+                        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
+                        Set<String> paramNames = new HashSet<>();
+
+                        parameterFinder.getClientContextParams().forEach((name, type) -> {
+                            if (!paramNames.contains(name)) {
+                                writer.write(
+                                    "$L: { type: \"clientContextParams\", name: \"$L\" },",
+                                    name, EndpointsParamNameMap.getLocalName(name));
+                            }
+                            paramNames.add(name);
+                        });
+
+                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
+                            if (!paramNames.contains(name)) {
+                                writer.write(
+                                    "$L: { type: \"builtInParams\", name: \"$L\" },",
+                                    name, EndpointsParamNameMap.getLocalName(name));
+                            }
+                            paramNames.add(name);
                         });
                     }
                 );
@@ -236,41 +262,6 @@ public final class EndpointsV2Generator implements Runnable {
                     }
                 );
 
-            }
-        );
-    }
-
-    /**
-     * Generates client-level params to share with commands.
-     */
-    private void generateClientCommonParameters() {
-        this.delegator.useFileWriter(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_COMMON_PARAMETERS_FILE).toString(),
-            writer -> {
-                writer.openBlock(
-                    "export const commonParams = {", "} as const",
-                    () -> {
-                        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
-                        Set<String> paramNames = new HashSet<>();
-
-                        parameterFinder.getClientContextParams().forEach((name, type) -> {
-                            if (!paramNames.contains(name)) {
-                                writer.write(
-                                    "$L: { type: \"clientContextParams\", name: \"$L\" },",
-                                    name, EndpointsParamNameMap.getLocalName(name));
-                            }
-                            paramNames.add(name);
-                        });
-
-                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
-                            if (!paramNames.contains(name)) {
-                                writer.write(
-                                    "$L: { type: \"builtInParams\", name: \"$L\" },",
-                                    name, EndpointsParamNameMap.getLocalName(name));
-                            }
-                            paramNames.add(name);
-                        });
-                    });
             }
         );
     }
