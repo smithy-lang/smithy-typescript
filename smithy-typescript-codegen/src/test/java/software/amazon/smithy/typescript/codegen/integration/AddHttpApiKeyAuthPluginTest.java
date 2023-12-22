@@ -29,7 +29,6 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
 
-@Disabled("WIP")
 public class AddHttpApiKeyAuthPluginTest {
     @Test
     public void httpApiKeyAuthClientOnService() {
@@ -63,13 +62,13 @@ public class AddHttpApiKeyAuthPluginTest {
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
                 containsString("from \"../middleware/HttpApiKeyAuth\""));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
-                containsString("this.middlewareStack.use(getHttpApiKeyAuthPlugin(configuration" + extra + "));"));
+                containsString("getHttpApiKeyAuthPlugin(config" + extra + ")"));
 
         // Ensure that the GetBar operation does not import the middleware or use it.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetBarCommand.ts").get(),
                 not(containsString("from \"../middleware/HttpApiKeyAuth\"")));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetBarCommand.ts").get(),
-                not(containsString("this.middlewareStack.use(getHttpApiKeyAuthPlugin")));
+                not(containsString("getHttpApiKeyAuthPlugin")));
 
         // Make sure that the middleware file was written and exports the plugin symbol.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth/index.ts").get(),
@@ -126,7 +125,7 @@ public class AddHttpApiKeyAuthPluginTest {
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
                 not(containsString("from \"../middleware/HttpApiKeyAuth\"")));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
-                not(containsString("this.middlewareStack.use(getHttpApiKeyAuthPlugin(configuration")));
+                not(containsString("getHttpApiKeyAuthPlugin(configuration")));
 
         // Make sure that the middleware file was not written.
         assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth/index.ts"),

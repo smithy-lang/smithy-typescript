@@ -13,7 +13,6 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
 
-@Disabled("WIP")
 public class EndpointsV2GeneratorTest {
     @Test
     public void containsTrailingSemicolon() {
