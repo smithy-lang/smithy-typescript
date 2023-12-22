@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.25
+
+### Patch Changes
+
+- Updated dependencies [164f3bbd]
+- Updated dependencies [164f3bbd]
+  - @smithy/smithy-client@2.2.0
+
 ## 2.0.24
 
 ### Patch Changes

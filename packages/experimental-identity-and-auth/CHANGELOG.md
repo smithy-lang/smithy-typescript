@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.30
+
+### Patch Changes
+
+- 164f3bbd: add missing dependency declarations
+  - @smithy/middleware-retry@2.0.25
+
 ## 0.0.29
 
 ### Patch Changes

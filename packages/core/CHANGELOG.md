@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [164f3bbd]
+- Updated dependencies [164f3bbd]
+  - @smithy/smithy-client@2.2.0
+  - @smithy/middleware-retry@2.0.25
+
 ## 1.2.0
 
 ### Minor Changes

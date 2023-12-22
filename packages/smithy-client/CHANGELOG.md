@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 164f3bbd: add Command classBuilder
+
+### Patch Changes
+
+- 164f3bbd: add missing dependency declarations
+
 ## 2.1.18
 
 ### Patch Changes
