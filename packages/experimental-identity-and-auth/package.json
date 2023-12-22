@@ -30,6 +30,7 @@
     "@smithy/protocol-http": "workspace:^",
     "@smithy/signature-v4": "workspace:^",
     "@smithy/types": "workspace:^",
+    "@smithy/util-middleware": "workspace:^",
     "tslib": "^2.5.0"
   },
   "engines": {

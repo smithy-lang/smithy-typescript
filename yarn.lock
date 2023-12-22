@@ -1900,6 +1900,7 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-middleware": "workspace:^"
     "@smithy/util-test": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     concurrently: 7.0.0
@@ -2323,7 +2324,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-client@workspace:packages/smithy-client"
   dependencies:
+    "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
+    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-stream": "workspace:^"
     "@tsconfig/recommended": 1.0.1
