@@ -1,4 +1,4 @@
-import { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
+import type { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
 import { constructStack } from "@smithy/middleware-stack";
 import type { HttpRequest } from "@smithy/protocol-http";
 import type {
