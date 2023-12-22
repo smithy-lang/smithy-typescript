@@ -17,8 +17,10 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -150,6 +152,34 @@ public final class EndpointsV2Generator implements Runnable {
                                 "defaultSigningName: \"$L\",",
                                 settings.getDefaultSigningName()
                             );
+                        });
+                    }
+                );
+
+                writer.write("");
+
+                writer.openBlock(
+                    "export const commonParams = {", "} as const",
+                    () -> {
+                        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
+                        Set<String> paramNames = new HashSet<>();
+
+                        parameterFinder.getClientContextParams().forEach((name, type) -> {
+                            if (!paramNames.contains(name)) {
+                                writer.write(
+                                    "$L: { type: \"clientContextParams\", name: \"$L\" },",
+                                    name, EndpointsParamNameMap.getLocalName(name));
+                            }
+                            paramNames.add(name);
+                        });
+
+                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
+                            if (!paramNames.contains(name)) {
+                                writer.write(
+                                    "$L: { type: \"builtInParams\", name: \"$L\" },",
+                                    name, EndpointsParamNameMap.getLocalName(name));
+                            }
+                            paramNames.add(name);
                         });
                     }
                 );

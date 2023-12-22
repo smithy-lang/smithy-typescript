@@ -80,7 +80,7 @@ public class EndpointsV2GeneratorTest {
                 .build();
 
         new TypeScriptCodegenPlugin().execute(context);
-       
+
         assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts"),
                 is(true));
         assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/endpointResolver.ts"),

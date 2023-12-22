@@ -61,13 +61,13 @@ public class AddHttpApiKeyAuthPluginTest {
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
                 containsString("from \"../middleware/HttpApiKeyAuth\""));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
-                containsString("this.middlewareStack.use(getHttpApiKeyAuthPlugin(configuration" + extra + "));"));
+                containsString("getHttpApiKeyAuthPlugin(config" + extra + ")"));
 
         // Ensure that the GetBar operation does not import the middleware or use it.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetBarCommand.ts").get(),
                 not(containsString("from \"../middleware/HttpApiKeyAuth\"")));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetBarCommand.ts").get(),
-                not(containsString("this.middlewareStack.use(getHttpApiKeyAuthPlugin")));
+                not(containsString("getHttpApiKeyAuthPlugin")));
 
         // Make sure that the middleware file was written and exports the plugin symbol.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth/index.ts").get(),
@@ -75,7 +75,7 @@ public class AddHttpApiKeyAuthPluginTest {
 
         // Ensure that the middleware was being exported in the index file.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/index.ts").get(),
-                containsString("from \"./middleware/HttpApiKeyAuth\""));  
+                containsString("from \"./middleware/HttpApiKeyAuth\""));
     }
 
     private MockManifest generate(String filename)
@@ -124,7 +124,7 @@ public class AddHttpApiKeyAuthPluginTest {
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
                 not(containsString("from \"../middleware/HttpApiKeyAuth\"")));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
-                not(containsString("this.middlewareStack.use(getHttpApiKeyAuthPlugin(configuration")));
+                not(containsString("getHttpApiKeyAuthPlugin(configuration")));
 
         // Make sure that the middleware file was not written.
         assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/middleware/HttpApiKeyAuth/index.ts"),
@@ -132,6 +132,6 @@ public class AddHttpApiKeyAuthPluginTest {
 
         // Ensure that the middleware was not being exported in the index file.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/index.ts").get(),
-            not(containsString("from \"./middleware/HttpApiKeyAuth\""))); 
+            not(containsString("from \"./middleware/HttpApiKeyAuth\"")));
     }
 }

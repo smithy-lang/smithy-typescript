@@ -12,33 +12,26 @@ import software.amazon.smithy.model.node.Node;
 public class CommandGeneratorTest {
     @Test
     public void addsCommandSpecificPlugins() {
-        testCommmandCodegen("output-structure.smithy",
-                "  resolveMiddleware(\n" +
-                "    clientStack: MiddlewareStack<ServiceInputTypes, ServiceOutputTypes>,\n" +
-                "    configuration: ExampleClientResolvedConfig,\n" +
-                "    options?: __HttpHandlerOptions\n" +
-                "  ): Handler<GetFooCommandInput, GetFooCommandOutput> {\n" +
-                "    this.middlewareStack.use(getSerdePlugin(configuration, this.serialize, this.deserialize));\n" +
-                "\n" +
-                "    const stack = clientStack.concat(this.middlewareStack);");
+        testCommmandCodegen(
+            "output-structure.smithy",
+            "getSerdePlugin(config, this.serialize, this.deserialize)"
+        );
     }
 
     @Test
     public void writesSerializer() {
-        testCommmandCodegen("output-structure.smithy",
-                "  private serialize(\n" +
-                "    input: GetFooCommandInput,\n" +
-                "    context: __SerdeContext\n" +
-                "  ): Promise<__HttpRequest> {");
+        testCommmandCodegen(
+            "output-structure.smithy",
+            ".ser("
+        );
     }
 
     @Test
     public void writesDeserializer() {
-        testCommmandCodegen("output-structure.smithy",
-                "  private deserialize(\n" +
-                "    output: __HttpResponse,\n" +
-                "    context: __SerdeContext\n" +
-                "  ): Promise<GetFooCommandOutput> {");
+        testCommmandCodegen(
+            "output-structure.smithy",
+        ".de("
+        );
     }
 
     private void testCommmandCodegen(String file, String expectedType) {
