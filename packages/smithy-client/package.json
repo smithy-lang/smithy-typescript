@@ -27,6 +27,8 @@
     "@smithy/middleware-stack": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
+    "@smithy/middleware-endpoint": "workspace:^",
+    "@smithy/protocol-http": "workspace:^",
     "@smithy/util-stream": "workspace:^",
     "tslib": "^2.5.0"
   },

@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import type { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
 =======
 import { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
 >>>>>>> d3694aaca (command class builder)
+=======
+import type { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
+>>>>>>> 4c8f1da50 (fix: add check dependency script)
 import { constructStack } from "@smithy/middleware-stack";
 import type { HttpRequest } from "@smithy/protocol-http";
 import type {
