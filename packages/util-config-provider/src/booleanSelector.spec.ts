@@ -1,4 +1,5 @@
-import { booleanSelector, SelectorType } from "./booleanSelector";
+import { booleanSelector } from "./booleanSelector";
+import { SelectorType } from "./types";
 
 describe(booleanSelector.name, () => {
   const key = "key";
