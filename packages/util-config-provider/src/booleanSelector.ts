@@ -1,7 +1,4 @@
-export enum SelectorType {
-  ENV = "env",
-  CONFIG = "shared config entry",
-}
+import { SelectorType } from "./types";
 
 /**
  * Returns boolean value true/false for string value "true"/"false",
