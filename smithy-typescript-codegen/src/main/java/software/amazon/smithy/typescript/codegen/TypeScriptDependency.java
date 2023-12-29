@@ -102,6 +102,10 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", false),
     AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", false),
 
+    // Conditionally added if a requestCompression shape is found on any model operation.
+    // ToDo: Change to @smithy/middleware-compression when it is moved.
+    MIDDLEWARE_COMPRESSION("dependencies", "@aws-sdk/middleware-compression", false),
+
     // Conditionally added if a big decimal shape is found in a model.
     BIG_JS("dependencies", "big.js", "^6.0.0", false),
     TYPES_BIG_JS("devDependencies", "@types/big.js", "^6.0.0", false),
