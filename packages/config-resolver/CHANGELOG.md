@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.22
+
+### Patch Changes
+
+- Updated dependencies [dd2b9c70]
+  - @smithy/util-config-provider@2.1.0
+
 ## 2.0.21
 
 ### Patch Changes

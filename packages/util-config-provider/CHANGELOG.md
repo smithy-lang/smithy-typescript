@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- dd2b9c70: Add numberSelector utility
+
 ## 2.0.0
 
 ### Major Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.31
+
+### Patch Changes
+
+- @smithy/config-resolver@2.0.22
+
 ## 2.0.30
 
 ### Patch Changes
