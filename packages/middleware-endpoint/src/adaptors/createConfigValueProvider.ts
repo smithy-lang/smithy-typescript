@@ -24,6 +24,13 @@ export const createConfigValueProvider = <Config extends Record<string, unknown>
     }
     return configValue;
   };
+  if (configKey === "credentialScope" || canonicalEndpointParamKey === "CredentialScope") {
+    return async () => {
+      const credentials = typeof config.credentials === "function" ? await config.credentials() : config.credentials;
+      const configValue: string = credentials?.credentialScope ?? credentials?.CredentialScope;
+      return configValue;
+    };
+  }
   if (configKey === "endpoint" || canonicalEndpointParamKey === "endpoint") {
     return async () => {
       const endpoint = await configProvider();

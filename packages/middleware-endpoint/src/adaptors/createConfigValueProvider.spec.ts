@@ -20,6 +20,17 @@ describe(createConfigValueProvider.name, () => {
     expect(await createConfigValueProvider("x", "a", config)()).toEqual(1);
   });
 
+  it("uses a special lookup for CredentialScope", async () => {
+    const config = {
+      credentials: async () => {
+        return {
+          credentialScope: "cred-scope",
+        };
+      },
+    };
+    expect(await createConfigValueProvider("credentialScope", "CredentialScope", config)()).toEqual("cred-scope");
+  });
+
   it("should normalize endpoint objects into URLs", async () => {
     const sampleUrl = "https://aws.amazon.com/";
     const config = {

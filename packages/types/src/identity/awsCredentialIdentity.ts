@@ -19,6 +19,11 @@ export interface AwsCredentialIdentity extends Identity {
    * present for temporary credentials.
    */
   readonly sessionToken?: string;
+
+  /**
+   * AWS credential scope for this set of credentials.
+   */
+  readonly credentialScope?: string;
 }
 
 /**
