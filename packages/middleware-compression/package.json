@@ -4,14 +4,13 @@
   "description": "Middleware and Plugin for request compression.",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:es": "tsc -p tsconfig.es.json",
-    "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
-    "build:types": "tsc -p tsconfig.types.json",
+    "build:cjs": "yarn g:tsc -p tsconfig.cjs.json",
+    "build:es": "yarn g:tsc -p tsconfig.es.json",
+    "build:types": "yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
-    "extract:docs": "api-extractor run --local",
-    "test": "jest"
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
+    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
+    "test": "yarn g:jest"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -59,5 +58,8 @@
     "type": "git",
     "url": "https://github.com/awslabs/smithy-typescript.git",
     "directory": "packages/middleware-compression"
+  },
+  "publishConfig": {
+    "directory": ".release/package"
   }
 }
