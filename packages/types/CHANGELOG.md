@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.8.0
+
+### Minor Changes
+
+- 590af6b7: support credential scope
+
 ## 2.7.0
 
 ### Minor Changes

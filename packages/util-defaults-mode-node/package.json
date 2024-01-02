@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-defaults-mode-node",
-  "version": "2.0.31",
+  "version": "2.0.32",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "yarn g:tsc -p tsconfig.cjs.json",

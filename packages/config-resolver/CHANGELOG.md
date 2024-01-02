@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.23
+
+### Patch Changes
+
+- Updated dependencies [590af6b7]
+  - @smithy/types@2.8.0
+  - @smithy/node-config-provider@2.1.9
+  - @smithy/util-middleware@2.0.9
+
 ## 2.0.22
 
 ### Patch Changes

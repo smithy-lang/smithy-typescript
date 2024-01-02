@@ -1,5 +1,21 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- 590af6b7: support credential scope
+
+### Patch Changes
+
+- Updated dependencies [590af6b7]
+  - @smithy/types@2.8.0
+  - @smithy/middleware-serde@2.0.16
+  - @smithy/node-config-provider@2.1.9
+  - @smithy/shared-ini-file-loader@2.2.8
+  - @smithy/url-parser@2.0.16
+  - @smithy/util-middleware@2.0.9
+
 ## 2.2.3
 
 ### Patch Changes

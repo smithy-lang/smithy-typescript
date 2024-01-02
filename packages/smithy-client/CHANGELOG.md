@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies [590af6b7]
+  - @smithy/middleware-endpoint@2.3.0
+  - @smithy/types@2.8.0
+  - @smithy/middleware-stack@2.0.10
+  - @smithy/protocol-http@3.0.12
+  - @smithy/util-stream@2.0.24
+
 ## 2.2.0
 
 ### Minor Changes
