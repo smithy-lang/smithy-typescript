@@ -1,0 +1,65 @@
+{
+  "name": "@smithy/middleware-compression",
+  "version": "1.0.0",
+  "description": "Middleware and Plugin for request compression.",
+  "scripts": {
+    "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
+    "build:cjs": "yarn g:tsc -p tsconfig.cjs.json",
+    "build:es": "yarn g:tsc -p tsconfig.es.json",
+    "build:types": "yarn g:tsc -p tsconfig.types.json",
+    "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
+    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
+    "test": "yarn g:jest"
+  },
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "dependencies": {
+    "@smithy/node-config-provider": "workspace:^",
+    "@smithy/types": "workspace:^",
+    "@smithy/util-config-provider": "workspace:^",
+    "fflate": "0.8.1",
+    "tslib": "^2.5.0"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "1.0.1",
+    "concurrently": "7.0.0",
+    "downlevel-dts": "0.10.1",
+    "rimraf": "3.0.2",
+    "web-streams-polyfill": "3.2.1"
+  },
+  "types": "./dist-types/index.d.ts",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "typesVersions": {
+    "<4.0": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "keywords": [
+    "middleware",
+    "compression",
+    "gzip"
+  ],
+  "license": "Apache-2.0",
+  "browser": {
+    "./dist-es/compressStream": "./dist-es/compressStream.browser",
+    "./dist-es/compressString": "./dist-es/compressString.browser"
+  },
+  "react-native": {},
+  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/middleware-compression",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "directory": "packages/middleware-compression"
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  }
+}
