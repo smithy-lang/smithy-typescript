@@ -128,7 +128,7 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
         return params;
     }
 
-    // return true if operation shape is decorated with `httpChecksum` trait.
+    // return true if operation shape is decorated with `requestCompression` trait.
     private static boolean hasRequestCompressionTrait(OperationShape operation) {
         return operation.hasTrait(RequestCompressionTrait.class);
     }
