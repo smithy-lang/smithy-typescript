@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -30,6 +31,7 @@ import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -92,6 +94,17 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
             default:
                 return Collections.emptyMap();
         }
+    }
+
+    @Override
+    public List<RuntimeClientPlugin> getClientPlugins() {
+        return ListUtils.of(
+            RuntimeClientPlugin.builder()
+                .withConventions(TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
+                    "Compression", RuntimeClientPlugin.Convention.HAS_CONFIG)
+                .servicePredicate((m, s) -> hasRequestCompressionTrait(m, s))
+                .build()
+        );
     }
 
     // return true if operation shape is decorated with `httpChecksum` trait.
