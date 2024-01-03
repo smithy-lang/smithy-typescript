@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -103,8 +104,28 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                 .withConventions(TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
                     "Compression", RuntimeClientPlugin.Convention.HAS_CONFIG)
                 .servicePredicate((m, s) -> hasRequestCompressionTrait(m, s))
+                .build(),
+            RuntimeClientPlugin.builder()
+                .withConventions(TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
+                    "Compression", RuntimeClientPlugin.Convention.HAS_MIDDLEWARE)
+                .additionalPluginFunctionParamsSupplier((m, s, o) -> getPluginFunctionParams(m, s, o))
+                .operationPredicate((m, s, o) -> hasRequestCompressionTrait(o))
                 .build()
         );
+    }
+
+    private static Map<String, Object> getPluginFunctionParams(
+        Model model,
+        ServiceShape service,
+        OperationShape operation
+    ) {
+        Map<String, Object> params = new TreeMap<String, Object>();
+
+        // Populate encodings from requestCompression trait
+        RequestCompressionTrait requestCompressionTrait = operation.expectTrait(RequestCompressionTrait.class);
+        params.put("encodings", requestCompressionTrait.getEncodings());
+
+        return params;
     }
 
     // return true if operation shape is decorated with `httpChecksum` trait.
