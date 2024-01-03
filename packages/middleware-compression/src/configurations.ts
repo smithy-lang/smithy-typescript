@@ -1,27 +1,42 @@
-import { BodyLengthCalculator } from "@smithy/types";
+import { BodyLengthCalculator, Provider } from "@smithy/types";
 
 /**
  * @public
  */
 export interface CompressionInputConfig {
   /**
-   * A function that can calculate the length of a body.
-   */
-  bodyLengthChecker: BodyLengthCalculator;
-
-  /**
    * Whether to disable request compression.
    */
-  disableRequestCompression: boolean;
+  disableRequestCompression: boolean | Provider<boolean>;
 
   /**
    * The minimum size in bytes that a request body should be to trigger compression.
    * The value must be a non-negative integer value between 0 and 10485760 bytes inclusive.
    */
-  requestMinCompressionSizeBytes: number;
+  requestMinCompressionSizeBytes: number | Provider<number>;
 }
 
 /**
  * @internal
  */
-export interface CompressionResolvedConfig extends CompressionInputConfig {}
+export interface CompressionPreviouslyResolved {
+  /**
+   * A function that can calculate the length of a body.
+   */
+  bodyLengthChecker: BodyLengthCalculator;
+}
+
+/**
+ * @internal
+ */
+export interface CompressionResolvedConfig {
+  /**
+   * Resolved value for input config {@link CompressionInputConfig.disableRequestCompression}
+   */
+  disableRequestCompression: Provider<boolean>;
+
+  /**
+   * Resolved value for input config {@link CompressionInputConfig.requestMinCompressionSizeBytes}
+   */
+  requestMinCompressionSizeBytes: Provider<number>;
+}
