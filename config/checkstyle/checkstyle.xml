@@ -19,7 +19,7 @@
         <property name="fileNamePattern" value="(module\-info\.java$|Test.java$|src/test/java)"/>
     </module>
 
-    <!-- Files must contain a copyright header, with or without a year. -->
+    <!-- Files must contain a copyright header without a year. The check for 2019-2023 is retained for historical purposes. -->
     <module name="RegexpHeader">
         <property name="header"
                   value="/\*\n \* Copyright( 20(19|20|21|22|23)|) Amazon\.com, Inc\. or its affiliates\. All Rights Reserved\.\n"/>
