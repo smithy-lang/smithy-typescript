@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.2
+
+### Patch Changes
+
+- f48de633: Make CompressionInputConfig properties optional
+
 ## 2.0.1
 
 ### Patch Changes
