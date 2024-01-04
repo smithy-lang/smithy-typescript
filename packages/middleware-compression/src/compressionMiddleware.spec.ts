@@ -15,8 +15,8 @@ describe(compressionMiddleware.name, () => {
   const mockBody = "body";
   const mockConfig = {
     bodyLengthChecker: jest.fn().mockReturnValue(mockBody.length),
-    disableRequestCompression: () => Promise.resolve(false),
-    requestMinCompressionSizeBytes: () => Promise.resolve(0),
+    disableRequestCompression: async () => false,
+    requestMinCompressionSizeBytes: async () => 0,
   };
   const mockMiddlewareConfig = {
     encodings: [CompressionAlgorithm.GZIP],
@@ -45,10 +45,7 @@ describe(compressionMiddleware.name, () => {
     });
 
     it("skips compression if disabled", async () => {
-      await compressionMiddleware(
-        { ...mockConfig, disableRequestCompression: () => Promise.resolve(true) },
-        mockMiddlewareConfig
-      )(
+      await compressionMiddleware({ ...mockConfig, disableRequestCompression: async () => true }, mockMiddlewareConfig)(
         mockNext,
         mockContext
       )({ ...mockArgs } as any);
@@ -110,7 +107,7 @@ describe(compressionMiddleware.name, () => {
     describe("not streaming", () => {
       it("skips compression if body is smaller than min size", async () => {
         await compressionMiddleware(
-          { ...mockConfig, requestMinCompressionSizeBytes: () => Promise.resolve(mockBody.length + 1) },
+          { ...mockConfig, requestMinCompressionSizeBytes: async () => mockBody.length + 1 },
           mockMiddlewareConfig
         )(
           mockNext,
