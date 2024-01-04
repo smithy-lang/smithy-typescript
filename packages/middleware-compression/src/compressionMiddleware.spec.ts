@@ -15,8 +15,8 @@ describe(compressionMiddleware.name, () => {
   const mockBody = "body";
   const mockConfig = {
     bodyLengthChecker: jest.fn().mockReturnValue(mockBody.length),
-    disableRequestCompression: false,
-    requestMinCompressionSizeBytes: 0,
+    disableRequestCompression: async () => false,
+    requestMinCompressionSizeBytes: async () => 0,
   };
   const mockMiddlewareConfig = {
     encodings: [CompressionAlgorithm.GZIP],
@@ -32,7 +32,7 @@ describe(compressionMiddleware.name, () => {
 
   it("skips compression if it's not an HttpRequest", async () => {
     const { isInstance } = HttpRequest;
-    (isInstance as unknown as jest.Mock).mockReturnValue(false);
+    ((isInstance as unknown) as jest.Mock).mockReturnValue(false);
     await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
     expect(mockNext).toHaveBeenCalledWith(mockArgs);
   });
@@ -40,12 +40,12 @@ describe(compressionMiddleware.name, () => {
   describe("HttpRequest", () => {
     beforeEach(() => {
       const { isInstance } = HttpRequest;
-      (isInstance as unknown as jest.Mock).mockReturnValue(true);
+      ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
       (isStreaming as jest.Mock).mockReturnValue(false);
     });
 
     it("skips compression if disabled", async () => {
-      await compressionMiddleware({ ...mockConfig, disableRequestCompression: true }, mockMiddlewareConfig)(
+      await compressionMiddleware({ ...mockConfig, disableRequestCompression: async () => true }, mockMiddlewareConfig)(
         mockNext,
         mockContext
       )({ ...mockArgs } as any);
@@ -107,7 +107,7 @@ describe(compressionMiddleware.name, () => {
     describe("not streaming", () => {
       it("skips compression if body is smaller than min size", async () => {
         await compressionMiddleware(
-          { ...mockConfig, requestMinCompressionSizeBytes: mockBody.length + 1 },
+          { ...mockConfig, requestMinCompressionSizeBytes: async () => mockBody.length + 1 },
           mockMiddlewareConfig
         )(
           mockNext,

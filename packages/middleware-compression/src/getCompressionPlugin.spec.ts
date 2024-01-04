@@ -6,8 +6,8 @@ jest.mock("./compressionMiddleware");
 describe(getCompressionPlugin.name, () => {
   const config = {
     bodyLengthChecker: jest.fn(),
-    disableRequestCompression: false,
-    requestMinCompressionSizeBytes: 0,
+    disableRequestCompression: async () => false,
+    requestMinCompressionSizeBytes: async () => 0,
   };
   const middlewareConfig = { encodings: [] };
 
