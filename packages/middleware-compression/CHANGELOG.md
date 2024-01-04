@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.1
+
+### Patch Changes
+
+- e21ed11d: Accept Provider in CompressionInputConfig
+
 ## 2.0.0
 
 ### Major Changes
