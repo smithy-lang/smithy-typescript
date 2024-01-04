@@ -5,7 +5,9 @@ import { CompressionInputConfig, CompressionResolvedConfig } from "./configurati
 /**
  * @internal
  */
-export const resolveCompressionConfig = <T>(input: T & CompressionInputConfig): T & CompressionResolvedConfig => ({
+export const resolveCompressionConfig = <T>(
+  input: T & Required<CompressionInputConfig>
+): T & CompressionResolvedConfig => ({
   ...input,
   disableRequestCompression: normalizeProvider(input.disableRequestCompression),
   requestMinCompressionSizeBytes: async () => {
