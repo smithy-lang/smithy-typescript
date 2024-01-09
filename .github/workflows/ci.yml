@@ -62,7 +62,7 @@ jobs:
       - name: Build packages
         run: yarn build
       - name: Run unit tests
-        run: yarn test
+        run: yarn test:changed
       - name: Run integration tests
         run: |
           yarn config set enableImmutableInstalls false
