@@ -463,9 +463,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             }
             // Add models into buckets no bigger than chunk size.
             String path;
-            if (shape.getId().equals(UnitTypeTrait.UNIT)) {
-                // Unit should only be put in the zero bucket, since it does not
-                // generate anything. It also does not contribute to bucket size.
+            if (shape.getId().equals(UnitTypeTrait.UNIT) || shape.isResourceShape()) {
+                // Unit or Resource shapes should only be put in the zero bucket, since they do not
+                // generate anything. They also do not contribute to bucket size.
                 path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "models_0");
             } else {
                 path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "models_" + bucketCount);
