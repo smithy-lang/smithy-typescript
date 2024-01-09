@@ -15,10 +15,13 @@
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "dependencies": {
+    "@smithy/is-array-buffer": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
+    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-config-provider": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
+    "@smithy/util-utf8": "workspace:^",
     "fflate": "0.8.1",
     "tslib": "^2.5.0"
   },
