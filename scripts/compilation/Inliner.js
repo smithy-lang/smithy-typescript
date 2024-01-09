@@ -24,6 +24,12 @@ module.exports = class Inliner {
     this.packageDirectory = path.join(root, this.subfolder, pkg);
 
     this.outfile = path.join(root, this.subfolder, pkg, "dist-cjs", "index.js");
+
+    this.pkgJson = require(path.join(root, this.subfolder, this.package, "package.json"));
+    /**
+     * If the react entrypoint is another file entirely, then bail out of inlining.
+     */
+    this.bailout = typeof this.pkgJson["react-native"] === "string";
   }
 
   /**
@@ -50,8 +56,10 @@ module.exports = class Inliner {
    * these files will not be inlined, in order to preserve the react-native dist-cjs file replacement behavior.
    */
   async discoverVariants() {
-    const pkgJson = require(path.join(root, this.subfolder, this.package, "package.json"));
-    this.variantEntries = Object.entries(pkgJson["react-native"] ?? {});
+    if (this.bailout) {
+      return this;
+    }
+    this.variantEntries = Object.entries(this.pkgJson["react-native"] ?? {});
 
     for await (const file of walk(path.join(this.packageDirectory, "dist-cjs"))) {
       if (file.endsWith(".js") && fs.existsSync(file.replace(/\.js$/, ".native.js"))) {
@@ -87,8 +95,13 @@ module.exports = class Inliner {
               .normalize(path.join(path.dirname(keyFile), requireStatement[1]))
               .replace(/(.*?)dist-cjs\//, "./dist-cjs/");
             console.log("Transitive variant file:", key);
-            this.variantEntries.push([key, key]);
-            this.transitiveVariants.push(key.replace(/(.*?)dist-cjs\//, "").replace(/(\.js)?$/, ""));
+
+            const transitiveVariant = key.replace(/(.*?)dist-cjs\//, "").replace(/(\.js)?$/, "");
+
+            if (!this.transitiveVariants.includes(transitiveVariant)) {
+              this.variantEntries.push([key, key]);
+              this.transitiveVariants.push(transitiveVariant);
+            }
           }
         }
       }
@@ -126,6 +139,10 @@ module.exports = class Inliner {
    * and also excluding any local files that have variants for react-native.
    */
   async bundle() {
+    if (this.bailout) {
+      return this;
+    }
+
     this.variantExternalsForEsBuild = this.variantExternals.map(
       (variant) => "*/" + path.basename(variant).replace(/.js$/, "")
     );
@@ -138,18 +155,9 @@ module.exports = class Inliner {
       allowOverwrite: true,
       entryPoints: [path.join(root, this.subfolder, this.package, "src", "index.ts")],
       outfile: this.outfile,
-      external: [
-        "tslib",
-        "@aws-crypto/*",
-        "@smithy/*",
-        "@aws-sdk/*",
-        "typescript",
-        "vscode-oniguruma",
-        "pnpapi",
-        "fast-xml-parser",
-        "node_modules/*",
-        ...this.variantExternalsForEsBuild,
-      ],
+      keepNames: true,
+      packages: "external",
+      external: [...this.variantExternalsForEsBuild],
     });
     return this;
   }
@@ -159,8 +167,18 @@ module.exports = class Inliner {
    * These now become re-exports of the index to preserve deep-import behavior.
    */
   async rewriteStubs() {
+    if (this.bailout) {
+      return this;
+    }
+
     for await (const file of walk(path.join(this.packageDirectory, "dist-cjs"))) {
       const relativePath = file.replace(path.join(this.packageDirectory, "dist-cjs"), "").slice(1);
+
+      if (!file.endsWith(".js")) {
+        console.log("Skipping", path.basename(file), "file extension is not .js.");
+        continue;
+      }
+
       if (relativePath === "index.js") {
         console.log("Skipping index.js");
         continue;
@@ -193,17 +211,20 @@ module.exports = class Inliner {
    * which need to be rewritten when in the index.js file.
    */
   async fixVariantImportPaths() {
+    if (this.bailout) {
+      return this;
+    }
     this.indexContents = fs.readFileSync(this.outfile, "utf-8");
     for (const variant of Object.keys(this.variantMap)) {
       const basename = path.basename(variant).replace(/.js$/, "");
       const dirname = path.dirname(variant);
 
-      const find = new RegExp(`require\\("./(.*?)/${basename}"\\)`);
+      const find = new RegExp(`require\\("\\.(.*?)/${basename}"\\)`, "g");
       const replace = `require("./${dirname}/${basename}")`;
 
       this.indexContents = this.indexContents.replace(find, replace);
 
-      console.log("replacing", find, "with", replace);
+      console.log("Replacing", find, "with", replace);
     }
 
     fs.writeFileSync(this.outfile, this.indexContents, "utf-8");
@@ -214,6 +235,9 @@ module.exports = class Inliner {
    * Step 5.5, dedupe imported externals.
    */
   async dedupeExternals() {
+    if (this.bailout) {
+      return this;
+    }
     const redundantRequireStatements = this.indexContents.matchAll(
       /var import_([a-z_]+)(\d+) = require\("([@a-z\/-0-9]+)"\);/g
     );
@@ -235,7 +259,7 @@ module.exports = class Inliner {
           const redundantVariable = `import_${variableSuffix}${redundancyIndex}`;
 
           if (this.indexContents.match(new RegExp(redundantRequire))) {
-            console.log("replacing", redundantVariable);
+            console.log("Replacing var", redundantVariable);
             this.indexContents = this.indexContents
               .replace(new RegExp(redundantRequire, "g"), "")
               .replace(new RegExp(redundantVariable, "g"), `import_${variableSuffix}`);
@@ -255,11 +279,14 @@ module.exports = class Inliner {
    * for any variant files, to ensure they are not in the inlined (bundled) index.
    */
   async validate() {
+    if (this.bailout) {
+      return this;
+    }
     this.indexContents = fs.readFileSync(this.outfile, "utf-8");
 
     const externalsToCheck = new Set(
       Object.keys(this.variantMap)
-        .filter((variant) => !this.transitiveVariants.includes(variant))
+        .filter((variant) => !this.transitiveVariants.includes(variant) && !variant.endsWith("index"))
         .map((variant) => path.basename(variant).replace(/.js$/, ""))
     );
 
