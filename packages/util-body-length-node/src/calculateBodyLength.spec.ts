@@ -1,4 +1,4 @@
-import { createReadStream, lstatSync, promises, writeFileSync } from "fs";
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
@@ -41,49 +41,52 @@ describe(calculateBodyLength.name, () => {
   });
 
   it("should handle a Readable from a file", async () => {
-    const tmpDir = await promises.mkdtemp(path.join(os.tmpdir(), "test1-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "test1-"));
     const filePath = path.join(tmpDir, "foo");
-    writeFileSync(filePath, "foo");
-    const handle = await promises.open(filePath, "r");
-    const readStream = createReadStream(filePath, { fd: handle.fd });
+    fs.writeFileSync(filePath, "foo");
+    const handle = fs.openSync(filePath, "r");
+    const readStream = fs.createReadStream(filePath, { fd: handle });
     expect(calculateBodyLength(readStream)).toEqual(3);
     readStream.destroy();
-    await promises.unlink(filePath);
-    await promises.rmdir(tmpDir);
+    fs.unlinkSync(filePath);
+    fs.rmdirSync(tmpDir);
   });
 
   it("should handle Readable with start end from a file", async () => {
-    const tmpDir = await promises.mkdtemp(path.join(os.tmpdir(), "test2-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "test2-"));
     const filePath = path.join(tmpDir, "foo");
-    writeFileSync(filePath, "foo");
-    const handle = await promises.open(filePath, "r");
-    const readStream = createReadStream(filePath, { fd: handle.fd, start: 1, end: 1 });
+    fs.writeFileSync(filePath, "foo");
+    const handle = fs.openSync(filePath, "r");
+    const readStream = fs.createReadStream(filePath, { fd: handle, start: 1, end: 1 });
     expect(calculateBodyLength(readStream)).toEqual(1);
     readStream.destroy();
-    await promises.unlink(filePath);
-    await promises.rmdir(tmpDir);
+    fs.unlinkSync(filePath);
+    fs.rmdirSync(tmpDir);
   });
 
   describe("fs.ReadStream", () => {
-    const fileSize = lstatSync(__filename).size;
+    const fileSize = fs.lstatSync(__filename).size;
 
     describe("should handle stream created using fs.createReadStream", () => {
       it("when path is a string", () => {
-        const fsReadStream = createReadStream(__filename);
+        const fsReadStream = fs.createReadStream(__filename);
         expect(calculateBodyLength(fsReadStream)).toEqual(fileSize);
+        fsReadStream.close();
       });
 
       it("when path is a Buffer", () => {
-        const fsReadStream = createReadStream(Buffer.from(__filename));
+        const fsReadStream = fs.createReadStream(Buffer.from(__filename));
         expect(calculateBodyLength(fsReadStream)).toEqual(fileSize);
+        fsReadStream.close();
       });
     });
 
     it("should handle stream created using fd.createReadStream", async () => {
-      const fd = await promises.open(__filename, "r");
+      const fd = await fs.promises.open(__filename, "r");
       if ((fd as any).createReadStream) {
         const fdReadStream = (fd as any).createReadStream();
         expect(calculateBodyLength(fdReadStream)).toEqual(fileSize);
+        fdReadStream.close();
       }
     });
   });
