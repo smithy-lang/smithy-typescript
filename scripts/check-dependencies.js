@@ -34,7 +34,6 @@ const pkgJsonEnforcement = require("./package-json-enforcement");
       importedDependencies.push(
         ...new Set(
           [...(contents.toString().match(/from "(@(aws-sdk|smithy)\/.*?)"/g) || [])]
-            .slice(1)
             .map((_) => _.replace(/from "/g, "").replace(/"$/, ""))
         )
       );
