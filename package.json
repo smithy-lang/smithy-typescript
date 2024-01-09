@@ -8,7 +8,7 @@
     "clean": "turbo run clean --force --parallel",
     "build": "turbo run build",
     "test": "turbo run test",
-    "test:changed": "turbo run test --filter=\\[origin/main\\]",
+    "test:changed": "git fetch origin main && turbo run test --filter=\\[origin/main\\]",
     "test:integration": "yarn build-test-packages && turbo run test:integration",
     "lint": "turbo run lint",
     "lint-fix": "turbo run lint -- --fix",
