@@ -32,7 +32,7 @@ import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpA
 import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention;
-import software.amazon.smithy.typescript.codegen.sections.ClientPropertiesCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.ClientBodyExtraCodeSection;
 import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -104,7 +104,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     public List<? extends CodeInterceptor<? extends CodeSection, TypeScriptWriter>> interceptors(
         TypeScriptCodegenContext codegenContext
     ) {
-        return List.of(CodeInterceptor.appender(ClientPropertiesCodeSection.class, (w, s) -> {
+        return List.of(CodeInterceptor.appender(ClientBodyExtraCodeSection.class, (w, s) -> {
             if (!s.getSettings().generateClient()
                 || !s.getSettings().getExperimentalIdentityAndAuth()
                 || !s.getApplicationProtocol().isHttpProtocol()) {
@@ -116,7 +116,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
               return defaultWeatherHttpAuthSchemeParametersProvider;
             }
             */
-            w.openBlock("private getDefaultHttpAuthSchemeParametersProvider() {", "}\n", () -> {
+            w.openBlock("private getDefaultHttpAuthSchemeParametersProvider() {", "}", () -> {
                 String httpAuthSchemeParametersProviderName = "default"
                     + CodegenUtils.getServiceName(s.getSettings(), s.getModel(), s.getSymbolProvider())
                     + "HttpAuthSchemeParametersProvider";
@@ -133,7 +133,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
               });
             }
             */
-            w.openBlock("private getIdentityProviderConfigProvider() {", "}\n", () -> {
+            w.openBlock("private getIdentityProviderConfigProvider() {", "}", () -> {
                 w.addDependency(TypeScriptDependency.SMITHY_CORE);
                 w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.SMITHY_CORE);
                 w.openBlock("""
