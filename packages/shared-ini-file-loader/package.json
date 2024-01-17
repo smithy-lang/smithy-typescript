@@ -34,6 +34,16 @@
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
+  "browser": {
+    "./dist-es/getSSOTokenFromFile": false,
+    "./dist-es/slurpFile": false
+  },
+  "react-native": {
+    "./dist-cjs/getSSOTokenFromFile": false,
+    "./dist-cjs/slurpFile": false,
+    "./dist-es/getSSOTokenFromFile": false,
+    "./dist-es/slurpFile": false
+  },
   "engines": {
     "node": ">=14.0.0"
   },
