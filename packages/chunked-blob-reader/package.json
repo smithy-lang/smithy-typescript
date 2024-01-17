@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
-    "build:cjs": "yarn g:tsc -p tsconfig.cjs.json",
+    "build:cjs": "node ../../scripts/inline chunked-blob-reader",
     "build:es": "yarn g:tsc -p tsconfig.es.json",
     "build:types": "yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
