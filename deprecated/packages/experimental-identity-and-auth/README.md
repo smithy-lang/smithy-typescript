@@ -5,6 +5,8 @@
 
 ## Usage
 
+**WARNING: This package is deprecated. See implementations in [`@smithy/core`](../../../packages/core/).**
+
 **WARNING: This package should NOT be consumed directly in any way.**
 
 This package is experimental for the development of `experimentalIdentityAndAuth`.
