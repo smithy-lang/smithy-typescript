@@ -1,5 +1,22 @@
 # Change Log
 
+## 0.1.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+### Patch Changes
+
+- Updated dependencies [9939f823]
+  - @smithy/middleware-endpoint@2.4.0
+  - @smithy/middleware-retry@2.1.0
+  - @smithy/middleware-serde@2.1.0
+  - @smithy/util-middleware@2.1.0
+  - @smithy/protocol-http@3.1.0
+  - @smithy/signature-v4@2.1.0
+  - @smithy/types@2.9.0
+
 ## 0.0.31
 
 ### Patch Changes

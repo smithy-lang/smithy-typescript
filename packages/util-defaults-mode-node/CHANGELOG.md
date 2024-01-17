@@ -1,5 +1,21 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+### Patch Changes
+
+- Updated dependencies [9939f823]
+  - @smithy/credential-provider-imds@2.2.0
+  - @smithy/node-config-provider@2.2.0
+  - @smithy/property-provider@2.1.0
+  - @smithy/config-resolver@2.1.0
+  - @smithy/smithy-client@2.3.0
+  - @smithy/types@2.9.0
+
 ## 2.0.32
 
 ### Patch Changes

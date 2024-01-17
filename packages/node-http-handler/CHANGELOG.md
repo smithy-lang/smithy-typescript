@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+### Patch Changes
+
+- Updated dependencies [9939f823]
+  - @smithy/querystring-builder@2.1.0
+  - @smithy/abort-controller@2.1.0
+  - @smithy/protocol-http@3.1.0
+  - @smithy/types@2.9.0
+
 ## 2.2.2
 
 ### Patch Changes

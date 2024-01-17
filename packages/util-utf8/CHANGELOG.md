@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+### Patch Changes
+
+- Updated dependencies [9939f823]
+  - @smithy/util-buffer-from@2.1.0
+
 ## 2.0.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
 ## 2.1.0
 
 ### Minor Changes

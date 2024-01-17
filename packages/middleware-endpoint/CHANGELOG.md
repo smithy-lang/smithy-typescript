@@ -1,5 +1,21 @@
 # Change Log
 
+## 2.4.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+### Patch Changes
+
+- Updated dependencies [9939f823]
+  - @smithy/shared-ini-file-loader@2.3.0
+  - @smithy/node-config-provider@2.2.0
+  - @smithy/middleware-serde@2.1.0
+  - @smithy/util-middleware@2.1.0
+  - @smithy/url-parser@2.1.0
+  - @smithy/types@2.9.0
+
 ## 2.3.0
 
 ### Minor Changes

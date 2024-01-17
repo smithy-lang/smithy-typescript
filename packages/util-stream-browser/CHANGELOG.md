@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+### Patch Changes
+
+- Updated dependencies [9939f823]
+  - @smithy/fetch-http-handler@2.4.0
+  - @smithy/util-hex-encoding@2.1.0
+  - @smithy/util-base64@2.1.0
+  - @smithy/util-utf8@2.1.0
+  - @smithy/types@2.9.0
+
 ## 2.0.23
 
 ### Patch Changes
