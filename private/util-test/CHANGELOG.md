@@ -1,5 +1,14 @@
 # @smithy/util-test
 
+## 0.1.14
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+- Updated dependencies [2b1bf055]
+  - @smithy/protocol-http@3.1.1
+  - @smithy/types@2.9.1
+
 ## 0.1.13
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+- Updated dependencies [2b1bf055]
+  - @smithy/property-provider@2.1.1
+  - @smithy/shared-ini-file-loader@2.3.1
+  - @smithy/types@2.9.1
+
 ## 2.2.0
 
 ### Minor Changes

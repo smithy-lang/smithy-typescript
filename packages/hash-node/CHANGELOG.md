@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+- Updated dependencies [2b1bf055]
+  - @smithy/types@2.9.1
+  - @smithy/util-buffer-from@2.1.1
+  - @smithy/util-utf8@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes

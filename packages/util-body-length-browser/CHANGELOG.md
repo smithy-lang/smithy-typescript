@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+
 ## 2.1.0
 
 ### Minor Changes

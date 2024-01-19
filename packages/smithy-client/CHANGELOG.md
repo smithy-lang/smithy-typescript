@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.3.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+- Updated dependencies [2b1bf055]
+  - @smithy/middleware-endpoint@2.4.1
+  - @smithy/middleware-stack@2.1.1
+  - @smithy/protocol-http@3.1.1
+  - @smithy/types@2.9.1
+  - @smithy/util-stream@2.1.1
+
 ## 2.3.0
 
 ### Minor Changes

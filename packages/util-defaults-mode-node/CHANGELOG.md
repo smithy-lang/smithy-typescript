@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.1.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+- Updated dependencies [2b1bf055]
+  - @smithy/config-resolver@2.1.1
+  - @smithy/credential-provider-imds@2.2.1
+  - @smithy/node-config-provider@2.2.1
+  - @smithy/property-provider@2.1.1
+  - @smithy/smithy-client@2.3.1
+  - @smithy/types@2.9.1
+
 ## 2.1.0
 
 ### Minor Changes

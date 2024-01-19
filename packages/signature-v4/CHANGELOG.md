@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.1.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+- Updated dependencies [2b1bf055]
+  - @smithy/eventstream-codec@2.1.1
+  - @smithy/is-array-buffer@2.1.1
+  - @smithy/types@2.9.1
+  - @smithy/util-hex-encoding@2.1.1
+  - @smithy/util-middleware@2.1.1
+  - @smithy/util-uri-escape@2.1.1
+  - @smithy/util-utf8@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
