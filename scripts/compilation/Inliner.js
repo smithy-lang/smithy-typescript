@@ -48,6 +48,7 @@ module.exports = class Inliner {
   async tsc() {
     await spawnProcess("yarn", ["g:tsc", "-p", "tsconfig.cjs.json"], { cwd: this.packageDirectory });
     console.log("Finished recompiling ./dist-cjs in " + this.package);
+    this.canonicalExports = Object.keys(require(this.outfile));
     return this;
   }
 
@@ -57,6 +58,7 @@ module.exports = class Inliner {
    */
   async discoverVariants() {
     if (this.bailout) {
+      console.log("Inliner bailout.");
       return this;
     }
     this.variantEntries = Object.entries(this.pkgJson["react-native"] ?? {});
@@ -155,6 +157,9 @@ module.exports = class Inliner {
       mainFields: ["main"],
       allowOverwrite: true,
       entryPoints: [path.join(root, this.subfolder, this.package, "src", "index.ts")],
+      supported: {
+        "dynamic-import": false,
+      },
       outfile: this.outfile,
       keepNames: true,
       packages: "external",
@@ -338,6 +343,17 @@ module.exports = class Inliner {
           " were not found in the index."
       );
     }
+
+    // check ESM compat.
+    const tmpFileContents = this.canonicalExports
+      .filter((sym) => !sym.includes(":"))
+      .map((sym) => `import { ${sym} } from "${this.pkgJson.name}";`)
+      .join("\n");
+    fs.writeFileSync(path.join(__dirname, "tmp", this.package + ".mjs"), tmpFileContents, "utf-8");
+    await spawnProcess("node", [path.join(__dirname, "tmp", this.package + ".mjs")]);
+    console.log("ESM compatibility verified.");
+    fs.rmSync(path.join(__dirname, "tmp", this.package + ".mjs"));
+
     return this;
   }
 };
