@@ -1,5 +1,4 @@
 import { NODE_REGION_CONFIG_OPTIONS } from "@smithy/config-resolver";
-import { getInstanceMetadataEndpoint, httpRequest } from "@smithy/credential-provider-imds";
 import { loadConfig } from "@smithy/node-config-provider";
 import { memoize } from "@smithy/property-provider";
 import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/smithy-client";
@@ -82,6 +81,7 @@ const inferPhysicalRegion = async (): Promise<string | undefined> => {
   if (!process.env[ENV_IMDS_DISABLED]) {
     // We couldn't figure out the region from environment variables. Check IMDSv2
     try {
+      const { getInstanceMetadataEndpoint, httpRequest } = await import("@smithy/credential-provider-imds");
       const endpoint = await getInstanceMetadataEndpoint();
       return (await httpRequest({ ...endpoint, path: IMDS_REGION_PATH })).toString();
     } catch (e) {
