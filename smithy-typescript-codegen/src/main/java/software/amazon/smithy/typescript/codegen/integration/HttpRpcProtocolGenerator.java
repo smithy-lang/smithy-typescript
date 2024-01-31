@@ -224,6 +224,18 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         for (OperationShape operation : containedOperations) {
             generateOperationDeserializer(context, operation);
         }
+
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateUnifiedErrorDispatcher(
+            context,
+            containedOperations.stream().toList(),
+            responseType,
+            this::writeErrorCodeParser,
+            isErrorCodeInBody,
+            this::getErrorBodyLocation,
+            this::getOperationErrors
+        );
+        deserializingErrorShapes.addAll(errorShapes);
     }
 
     private void generateOperationSerializer(GenerationContext context, OperationShape operation) {
@@ -435,7 +447,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
         String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
-        String errorMethodName = methodName + "Error";
+        String errorMethodName = "de_CommandError";
         String serdeContextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
                 context.getModel(), operation);
         // Add the normalized output type.
@@ -449,7 +461,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "): Promise<$T> => {", "}", methodName, responseType, serdeContextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode >= 300) {", "}", () -> {
-                writer.write("return $L(output, context);", errorMethodName);
+                writer.write("return $L(output, context) as any;", errorMethodName);
             });
 
             // Start deserializing the response.
@@ -465,12 +477,6 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             writer.write("return response;");
         });
         writer.write("");
-
-        // Write out the error deserialization dispatcher.
-        Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser,
-                isErrorCodeInBody, this::getErrorBodyLocation, this::getOperationErrors);
-        deserializingErrorShapes.addAll(errorShapes);
     }
 
     private void generateErrorDeserializer(GenerationContext context, StructureShape error) {

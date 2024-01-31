@@ -298,12 +298,11 @@ public final class HttpProtocolGeneratorUtils {
 
     /**
      * Writes a function used to dispatch to the proper error deserializer
-     * for each error that the operation can return. The generated function
+     * for each error that any operation can return. The generated function
      * assumes a deserialization function is generated for the structures
      * returned.
      *
      * @param context The generation context.
-     * @param operation The operation to generate for.
      * @param responseType The response type for the HTTP protocol.
      * @param errorCodeGenerator A consumer
      * @param shouldParseErrorBody Flag indicating whether need to parse response body in this dispatcher function
@@ -311,38 +310,37 @@ public final class HttpProtocolGeneratorUtils {
      * @param operationErrorsToShapes A map of error names to their {@link ShapeId}.
      * @return A set of all error structure shapes for the operation that were dispatched to.
      */
-    static Set<StructureShape> generateErrorDispatcher(
-            GenerationContext context,
-            OperationShape operation,
-            SymbolReference responseType,
-            Consumer<GenerationContext> errorCodeGenerator,
-            boolean shouldParseErrorBody,
-            BiFunction<GenerationContext, String, String> bodyErrorLocationModifier,
-            BiFunction<GenerationContext, OperationShape, Map<String, ShapeId>> operationErrorsToShapes
+    static Set<StructureShape> generateUnifiedErrorDispatcher(
+        GenerationContext context,
+        List<OperationShape> operations,
+        SymbolReference responseType,
+        Consumer<GenerationContext> errorCodeGenerator,
+        boolean shouldParseErrorBody,
+        BiFunction<GenerationContext, String, String> bodyErrorLocationModifier,
+        BiFunction<GenerationContext, List<OperationShape>, Map<String, ShapeId>> operationErrorsToShapes
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Set<StructureShape> errorShapes = new TreeSet<>();
 
-        Symbol symbol = symbolProvider.toSymbol(operation);
-        Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
-        String errorMethodName = ProtocolGenerator.getDeserFunctionShortName(symbol) + "Error";
-        String errorMethodLongName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName())
-                + "Error";
+        String errorMethodName = "de_CommandError";
+        String errorMethodLongName = "deserialize_"
+            + ProtocolGenerator.getSanitizedName(context.getProtocolName())
+            + "CommandError";
 
         writer.writeDocs(errorMethodLongName);
-                writer.openBlock("const $L = async(\n"
-                               + "  output: $T,\n"
-                               + "  context: __SerdeContext,\n"
-                               + "): Promise<$T> => {", "}", errorMethodName, responseType, outputType, () -> {
+        writer.openBlock("const $L = async(\n"
+            + "  output: $T,\n"
+            + "  context: __SerdeContext,\n"
+            + "): Promise<unknown> => {", "}", errorMethodName, responseType, () -> {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
             if (shouldParseErrorBody) {
                 writer.openBlock("const parsedOutput: any = {", "};",
-                        () -> {
-                            writer.write("...output,");
-                            writer.write("body: await parseErrorBody(output.body, context)");
-                        });
+                    () -> {
+                        writer.write("...output,");
+                        writer.write("body: await parseErrorBody(output.body, context)");
+                    });
             }
 
             // Error responses must be at least BaseException interface
@@ -370,7 +368,8 @@ public final class HttpProtocolGeneratorUtils {
                 });
             };
 
-            Map<String, ShapeId> operationNamesToShapes = operationErrorsToShapes.apply(context, operation);
+            Map<String, ShapeId> operationNamesToShapes = operationErrorsToShapes.apply(context, operations);
+
             if (!operationNamesToShapes.isEmpty()) {
                 writer.openBlock("switch (errorCode) {", "}", () -> {
                     // Generate the case statement for each error, invoking the specific deserializer.
