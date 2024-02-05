@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -301,6 +302,23 @@ public interface ProtocolGenerator {
      */
     default Map<String, ShapeId> getOperationErrors(GenerationContext context, OperationShape operation) {
         return HttpProtocolGeneratorUtils.getOperationErrors(context, operation);
+    }
+
+    /**
+     * Returns a map of error names to their {@link ShapeId}.
+     *
+     * @param context the generation context
+     * @param operations the operation shapes to retrieve errors for
+     * @return map of error names to {@link ShapeId}
+     */
+    default Map<String, ShapeId> getOperationErrors(GenerationContext context, Collection<OperationShape> operations) {
+        Map<String, ShapeId> errors = new LinkedHashMap<>();
+        for (OperationShape operation : operations) {
+            errors.putAll(
+                getOperationErrors(context, operation)
+            );
+        }
+        return errors;
     }
 
     /**

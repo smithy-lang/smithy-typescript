@@ -517,6 +517,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         Set<OperationShape> containedOperations = new TreeSet<>(
                 topDownIndex.getContainedOperations(context.getService()));
+
         for (OperationShape operation : containedOperations) {
             OptionalUtils.ifPresentOrElse(
                     operation.getTrait(HttpTrait.class),
@@ -525,6 +526,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                             "Unable to generate %s protocol response bindings for %s because it does not have an "
                             + "http binding trait", getName(), operation.getId())));
         }
+
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateUnifiedErrorDispatcher(
+            context,
+            containedOperations.stream().toList(),
+            responseType,
+            this::writeErrorCodeParser,
+            isErrorCodeInBody,
+            this::getErrorBodyLocation,
+            this::getOperationErrors
+        );
+        deserializingErrorShapes.addAll(errorShapes);
     }
 
     private void generateOperationResponseSerializer(
@@ -2091,7 +2104,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // e.g., deserializeAws_restJson1_1ExecuteStatement
         String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
         String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
-        String errorMethodName = methodName + "Error";
+        String errorMethodName = "de_CommandError";
         // Add the normalized output type.
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         String contextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
@@ -2129,11 +2142,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writer.write("return contents;");
         });
         writer.write("");
-        // Write out the error deserialization dispatcher.
-        Set<StructureShape> errorShapes = HttpProtocolGeneratorUtils.generateErrorDispatcher(
-                context, operation, responseType, this::writeErrorCodeParser,
-                isErrorCodeInBody, this::getErrorBodyLocation, this::getOperationErrors);
-        deserializingErrorShapes.addAll(errorShapes);
     }
 
     private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
