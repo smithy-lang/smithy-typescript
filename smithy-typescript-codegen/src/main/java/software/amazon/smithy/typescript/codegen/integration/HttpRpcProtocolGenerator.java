@@ -461,7 +461,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                        + "): Promise<$T> => {", "}", methodName, responseType, serdeContextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher
             writer.openBlock("if (output.statusCode >= 300) {", "}", () -> {
-                writer.write("return $L(output, context) as any;", errorMethodName);
+                writer.write("return $L(output, context);", errorMethodName);
             });
 
             // Start deserializing the response.

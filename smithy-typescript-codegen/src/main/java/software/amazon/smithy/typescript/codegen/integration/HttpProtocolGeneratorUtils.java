@@ -332,7 +332,7 @@ public final class HttpProtocolGeneratorUtils {
         writer.openBlock("const $L = async(\n"
             + "  output: $T,\n"
             + "  context: __SerdeContext,\n"
-            + "): Promise<unknown> => {", "}", errorMethodName, responseType, () -> {
+            + "): Promise<never> => {", "}", errorMethodName, responseType, () -> {
             // Prepare error response for parsing error code. If error code needs to be parsed from response body
             // then we collect body and parse it to JS object, otherwise leave the response body as is.
             if (shouldParseErrorBody) {

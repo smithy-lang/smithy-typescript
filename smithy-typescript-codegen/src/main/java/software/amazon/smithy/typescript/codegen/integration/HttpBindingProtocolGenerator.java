@@ -2121,7 +2121,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // status code that's not the modeled code (300 or higher). This allows for
             // returning other 2XX codes that don't match the defined value.
             writer.openBlock("if (output.statusCode !== $L && output.statusCode >= 300) {", "}", trait.getCode(),
-                    () -> writer.write("return $L(output, context) as any;", errorMethodName));
+                    () -> writer.write("return $L(output, context);", errorMethodName));
 
             // Start deserializing the response.
             writer.openBlock("const contents: any = map({", "});", () -> {
