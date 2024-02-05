@@ -357,7 +357,7 @@ public final class HttpProtocolGeneratorUtils {
 
                 // Get the protocol specific error location for retrieving contents.
                 String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                writer.openBlock("return throwDefaultError({", "})", () -> {
+                writer.openBlock("return throwDefaultError({", "}) as never", () -> {
                     writer.write("output,");
                     if (errorLocation.equals("parsedBody")) {
                         writer.write("parsedBody,");
