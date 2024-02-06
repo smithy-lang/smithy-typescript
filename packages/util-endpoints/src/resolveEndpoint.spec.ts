@@ -1,3 +1,4 @@
+import { EndpointResolverCache } from "./EndpointResolverCache";
 import { resolveEndpoint } from "./resolveEndpoint";
 import { EndpointError, EndpointParams, ParameterObject, RuleSetObject } from "./types";
 import { evaluateRules } from "./utils";
@@ -45,6 +46,7 @@ describe(resolveEndpoint.name, () => {
   const mockResolvedEndpoint = { url: new URL("http://example.com") };
 
   beforeEach(() => {
+    EndpointResolverCache.clearAll();
     (evaluateRules as jest.Mock).mockReturnValue(mockResolvedEndpoint);
   });
 

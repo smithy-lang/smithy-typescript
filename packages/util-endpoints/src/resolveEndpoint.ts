@@ -1,6 +1,7 @@
 import { EndpointV2 } from "@smithy/types";
 
 import { debugId, toDebugString } from "./debug";
+import { EndpointResolverCache } from "./EndpointResolverCache";
 import { EndpointError, EndpointResolverOptions, RuleSetObject } from "./types";
 import { evaluateRules } from "./utils";
 
@@ -10,6 +11,14 @@ import { evaluateRules } from "./utils";
 export const resolveEndpoint = (ruleSetObject: RuleSetObject, options: EndpointResolverOptions): EndpointV2 => {
   const { endpointParams, logger } = options;
   const { parameters, rules } = ruleSetObject;
+
+  const cache = EndpointResolverCache.forRuleset(ruleSetObject);
+  const key = cache.key(endpointParams);
+  const cachedEndpoint = cache.get(key);
+  if (cachedEndpoint) {
+    options.logger?.debug?.(`${debugId} returning cached endpoint: ${toDebugString(cachedEndpoint)}`);
+    return cachedEndpoint;
+  }
 
   options.logger?.debug?.(`${debugId} Initial EndpointParams: ${toDebugString(endpointParams)}`);
 
@@ -49,6 +58,8 @@ export const resolveEndpoint = (ruleSetObject: RuleSetObject, options: EndpointR
   }
 
   options.logger?.debug?.(`${debugId} Resolved endpoint: ${toDebugString(endpoint)}`);
+
+  cache.set(key, endpoint);
 
   return endpoint;
 };
