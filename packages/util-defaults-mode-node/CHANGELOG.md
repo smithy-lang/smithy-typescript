@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 280ef3a9: defer loading of credential-provider-imds in util-defaults-mode-node
+
 ## 2.1.1
 
 ### Patch Changes
