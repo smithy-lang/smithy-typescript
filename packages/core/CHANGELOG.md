@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.2
+
+### Patch Changes
+
+- 88980bc5: handle multi-part input token in paginator
+
 ## 1.3.1
 
 ### Patch Changes
