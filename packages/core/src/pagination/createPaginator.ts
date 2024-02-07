@@ -49,10 +49,25 @@ export function createPaginator<
       }
       yield page;
       const prevToken = token;
-      token = (page as any)[outputTokenName];
+      token = get(page, outputTokenName);
       hasNext = !!(token && (!config.stopOnSameToken || token !== prevToken));
     }
     // @ts-ignore
     return undefined;
   };
 }
+
+/**
+ * @internal
+ */
+const get = (fromObject: any, path: string): any => {
+  let cursor = fromObject;
+  const pathComponents = path.split(".");
+  for (const step of pathComponents) {
+    if (!cursor || typeof cursor !== "object") {
+      return undefined;
+    }
+    cursor = cursor[step];
+  }
+  return cursor;
+};
