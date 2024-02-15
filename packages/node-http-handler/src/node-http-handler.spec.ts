@@ -704,4 +704,37 @@ describe("NodeHttpHandler", () => {
       expect(nodeHttpHandler.httpHandlerConfigs()).toEqual({});
     });
   });
+
+  describe("checkSocketUsage", () => {
+    beforeEach(() => {
+      jest.spyOn(console, "warn").mockImplementation(jest.fn());
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it("warns when socket exhaustion is detected", async () => {
+      const lastTimestamp = Date.now() - 30_000;
+      const warningTimestamp = NodeHttpHandler.checkSocketUsage(
+        {
+          maxSockets: 2,
+          sockets: {
+            addr: [null, null],
+          },
+          requests: {
+            addr: [null, null, null, null],
+          },
+        } as any,
+        lastTimestamp
+      );
+
+      expect(warningTimestamp).toBeGreaterThan(lastTimestamp);
+      expect(console.warn).toHaveBeenCalledWith(
+        "@smithy/node-http-handler:WARN",
+        "socket usage at capacity=2 and 4 additional requests are enqueued.",
+        "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html"
+      );
+    });
+  });
 });

@@ -17,6 +17,7 @@ export { NodeHttpHandlerOptions };
 interface ResolvedNodeHttpHandlerConfig {
   requestTimeout?: number;
   connectionTimeout?: number;
+  socketAcquisitionWarningTimeout?: number;
   httpAgent: hAgent;
   httpsAgent: hsAgent;
 }
@@ -26,6 +27,8 @@ export const DEFAULT_REQUEST_TIMEOUT = 0;
 export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private config?: ResolvedNodeHttpHandlerConfig;
   private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
+  private socketWarningTimestamp = 0;
+  private socketCheckTimeoutId = (null as unknown) as NodeJS.Timeout;
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
@@ -43,6 +46,53 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
     }
     // input is ctor options or undefined.
     return new NodeHttpHandler(instanceOrOptions as NodeHttpHandlerOptions);
+  }
+
+  /**
+   * @internal
+   *
+   * @param agent - http(s) agent in use by the NodeHttpHandler instance.
+   * @returns timestamp of last emitted warning.
+   */
+  public static checkSocketUsage(agent: hAgent | hsAgent, socketWarningTimestamp: number): number {
+    // note, maxSockets is per origin.
+    const { sockets, requests, maxSockets } = agent;
+
+    if (typeof maxSockets !== "number" || maxSockets === Infinity) {
+      return socketWarningTimestamp;
+    }
+
+    const interval = 15_000;
+    if (Date.now() - interval < socketWarningTimestamp) {
+      return socketWarningTimestamp;
+    }
+
+    let socketsInUse = 0;
+    let requestsEnqueued = 0;
+
+    if (sockets) {
+      for (const key in sockets) {
+        socketsInUse = Math.max(socketsInUse, sockets[key]?.length ?? 0);
+      }
+    }
+
+    if (requests) {
+      for (const key in requests) {
+        requestsEnqueued = Math.max(requestsEnqueued, requests[key]?.length ?? 0);
+      }
+    }
+
+    // This threshold is somewhat arbitrary.
+    // A few enqueued requests is not worth warning about.
+    if (socketsInUse >= maxSockets && requestsEnqueued >= 2 * maxSockets) {
+      console.warn(
+        "@smithy/node-http-handler:WARN",
+        `socket usage at capacity=${socketsInUse} and ${requestsEnqueued} additional requests are enqueued.`,
+        "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html"
+      );
+      return Date.now();
+    }
+    return socketWarningTimestamp;
   }
 
   constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>) {
@@ -81,10 +131,13 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
     if (!this.config) {
       this.config = await this.configProvider;
     }
+
     return new Promise((_resolve, _reject) => {
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
       const resolve = async (arg: { response: HttpResponse }) => {
         await writeRequestBodyPromise;
+        // if requests are still resolving, cancel the socket usage check.
+        clearTimeout(this.socketCheckTimeoutId);
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
@@ -106,6 +159,14 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
       // determine which http(s) client to use
       const isSSL = request.protocol === "https:";
+      const agent = isSSL ? this.config.httpsAgent : this.config.httpAgent;
+
+      // If the request is taking a long time, check socket usage and potentially warn.
+      // This warning will be cancelled if the request resolves.
+      this.socketCheckTimeoutId = setTimeout(() => {
+        this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent, this.socketWarningTimestamp);
+      }, this.config.socketAcquisitionWarningTimeout ?? (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000));
+
       const queryString = buildQueryString(request.query || {});
       let auth = undefined;
       if (request.username != null || request.password != null) {
@@ -126,7 +187,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
         method: request.method,
         path,
         port: request.port,
-        agent: isSSL ? this.config.httpsAgent : this.config.httpAgent,
+        agent,
         auth,
       };
 

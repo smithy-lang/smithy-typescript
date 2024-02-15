@@ -35,6 +35,15 @@ export interface NodeHttpHandlerOptions {
   requestTimeout?: number;
 
   /**
+   * Delay before the NodeHttpHandler checks for socket exhaustion,
+   * and emits a warning if the active sockets and enqueued request count is greater than
+   * 2x the maxSockets count.
+   *
+   * Defaults to connectionTimeout + requestTimeout or 3000ms if those are not set.
+   */
+  socketAcquisitionWarningTimeout?: number;
+
+  /**
    * @deprecated Use {@link requestTimeout}
    *
    * The maximum time in milliseconds that a socket may remain idle before it
