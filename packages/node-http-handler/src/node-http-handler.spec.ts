@@ -720,10 +720,18 @@ describe("NodeHttpHandler", () => {
         {
           maxSockets: 2,
           sockets: {
-            addr: [null, null],
+            addr: [],
+            addr2: [null],
+            addr3: [null, null],
+            // this is not checked because an earlier addr causes the warning to be emitted.
+            addr4: Array.from({ length: 400 }),
           },
           requests: {
-            addr: [null, null, null, null],
+            addr: Array.from({ length: 0 }),
+            addr2: Array.from({ length: 3 }),
+            addr3: Array.from({ length: 4 }),
+            // this is not checked because an earlier addr causes the warning to be emitted.
+            addr4: Array.from({ length: 800 }),
           },
         } as any,
         lastTimestamp

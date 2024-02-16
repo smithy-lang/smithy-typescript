@@ -67,31 +67,32 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
       return socketWarningTimestamp;
     }
 
-    let socketsInUse = 0;
-    let requestsEnqueued = 0;
+    if (sockets && requests) {
+      for (const origin in sockets) {
+        const socketsInUse = sockets[origin]?.length ?? 0;
+        const requestsEnqueued = requests[origin]?.length ?? 0;
 
-    if (sockets) {
-      for (const key in sockets) {
-        socketsInUse = Math.max(socketsInUse, sockets[key]?.length ?? 0);
+        /**
+         * Running at maximum socket usage can be intentional and normal.
+         * That is why this warning emits at a delay which can be seen
+         * at the call site's setTimeout wrapper. The warning will be cancelled
+         * if the request finishes in a reasonable amount of time regardless
+         * of socket saturation.
+         *
+         * Additionally, when the warning is emitted, there is an interval
+         * lockout.
+         */
+        if (socketsInUse >= maxSockets && requestsEnqueued >= 2 * maxSockets) {
+          console.warn(
+            "@smithy/node-http-handler:WARN",
+            `socket usage at capacity=${socketsInUse} and ${requestsEnqueued} additional requests are enqueued.`,
+            "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html"
+          );
+          return Date.now();
+        }
       }
     }
 
-    if (requests) {
-      for (const key in requests) {
-        requestsEnqueued = Math.max(requestsEnqueued, requests[key]?.length ?? 0);
-      }
-    }
-
-    // This threshold is somewhat arbitrary.
-    // A few enqueued requests is not worth warning about.
-    if (socketsInUse >= maxSockets && requestsEnqueued >= 2 * maxSockets) {
-      console.warn(
-        "@smithy/node-http-handler:WARN",
-        `socket usage at capacity=${socketsInUse} and ${requestsEnqueued} additional requests are enqueued.`,
-        "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html"
-      );
-      return Date.now();
-    }
     return socketWarningTimestamp;
   }
 
