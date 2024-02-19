@@ -28,7 +28,6 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private config?: ResolvedNodeHttpHandlerConfig;
   private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
   private socketWarningTimestamp = 0;
-  private socketCheckTimeoutId = (null as unknown) as NodeJS.Timeout;
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
@@ -133,12 +132,14 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
       this.config = await this.configProvider;
     }
 
+    let socketCheckTimeoutId: NodeJS.Timeout;
+
     return new Promise((_resolve, _reject) => {
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
       const resolve = async (arg: { response: HttpResponse }) => {
         await writeRequestBodyPromise;
         // if requests are still resolving, cancel the socket usage check.
-        clearTimeout(this.socketCheckTimeoutId);
+        clearTimeout(socketCheckTimeoutId);
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
@@ -164,7 +165,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
       // If the request is taking a long time, check socket usage and potentially warn.
       // This warning will be cancelled if the request resolves.
-      this.socketCheckTimeoutId = setTimeout(() => {
+      socketCheckTimeoutId = setTimeout(() => {
         this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent, this.socketWarningTimestamp);
       }, this.config.socketAcquisitionWarningTimeout ?? (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000));
 
