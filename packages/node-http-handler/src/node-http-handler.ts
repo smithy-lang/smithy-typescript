@@ -85,7 +85,8 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
           console.warn(
             "@smithy/node-http-handler:WARN",
             `socket usage at capacity=${socketsInUse} and ${requestsEnqueued} additional requests are enqueued.`,
-            "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html"
+            "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html",
+            "or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config."
           );
           return Date.now();
         }
