@@ -253,11 +253,13 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
 
         writer.writeDocs("@public")
             .openBlock("export interface ClientDefaults\n"
-                         + "  extends Partial<__SmithyResolvedConfiguration<$T>> {", "}",
+                         + "  extends Partial<__SmithyConfiguration<$T>> {", "}",
                 applicationProtocol.getOptionsType(), () -> {
-            writer.addImport("HttpHandler", "__HttpHandler", TypeScriptDependency.PROTOCOL_HTTP);
-            writer.writeDocs("The HTTP handler to use. Fetch in browser and Https in Nodejs.");
-            writer.write("requestHandler?: __HttpHandler;\n");
+            writer.addImport("HttpHandlerUserInput", "__HttpHandlerUserInput", TypeScriptDependency.PROTOCOL_HTTP);
+            writer.writeDocs(
+                "The HTTP handler to use or its constructor options. Fetch in browser and Https in Nodejs."
+            );
+            writer.write("requestHandler?: __HttpHandlerUserInput;\n");
 
             writer.addImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
             writer.addImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);

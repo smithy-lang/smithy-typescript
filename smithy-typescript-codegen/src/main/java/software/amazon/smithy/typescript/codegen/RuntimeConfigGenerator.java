@@ -58,7 +58,7 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("NodeHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-                writer.write("new RequestHandler(defaultConfigProvider)");
+                writer.write("RequestHandler.create(config.requestHandler ?? defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
@@ -81,7 +81,7 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("FetchHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
-                writer.write("new RequestHandler(defaultConfigProvider)");
+                writer.write("RequestHandler.create(config.requestHandler ?? defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
@@ -197,11 +197,20 @@ final class RuntimeConfigGenerator {
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
                 configs.forEach((key, value) -> {
-                    writer.indent(indentation).disableNewlines().openBlock("$1L: config?.$1L ?? ", ",\n", key,
-                        () -> {
-                            value.accept(writer);
-                        });
-                    writer.dedent(indentation);
+                    String defaultPrefix = "config?.$1L ?? ";
+                    if (key.equals("requestHandler")) {
+                        defaultPrefix = "";
+                    }
+                    writer
+                        .indent(indentation)
+                        .disableNewlines()
+                        .openBlock(
+                            "$1L: " + defaultPrefix, ",\n", key,
+                            () -> {
+                                value.accept(writer);
+                            }
+                        )
+                        .dedent(indentation);
                 });
             });
             writer.dedent();
