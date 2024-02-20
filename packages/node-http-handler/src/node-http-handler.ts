@@ -116,18 +116,16 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
       connectionTimeout,
       requestTimeout: requestTimeout ?? socketTimeout,
       httpAgent: (() => {
-        if (httpAgent instanceof hAgent) {
-          return httpAgent;
+        if (httpAgent instanceof hAgent || typeof (httpAgent as hAgent)?.destroy === "function") {
+          return httpAgent as hAgent;
         }
-        return httpAgent ? new hAgent({ keepAlive, maxSockets, ...httpAgent }) : new hAgent({ keepAlive, maxSockets });
+        return new hAgent({ keepAlive, maxSockets, ...httpAgent });
       })(),
       httpsAgent: (() => {
-        if (httpsAgent instanceof hsAgent) {
-          return httpsAgent;
+        if (httpsAgent instanceof hsAgent || typeof (httpsAgent as hsAgent)?.destroy === "function") {
+          return httpsAgent as hsAgent;
         }
-        return httpsAgent
-          ? new hsAgent({ keepAlive, maxSockets, ...httpsAgent })
-          : new hsAgent({ keepAlive, maxSockets });
+        return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
     };
   }
