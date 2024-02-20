@@ -37,7 +37,22 @@ describe("NodeHttpHandler", () => {
       hRequestSpy.mockRestore();
       hsRequestSpy.mockRestore();
     });
+
     describe("constructor", () => {
+      it("allows https.Agent and http.Agent ctor args in place of actual instances", async () => {
+        const nodeHttpHandler = new NodeHttpHandler({
+          httpAgent: { maxSockets: 37 },
+          httpsAgent: { maxSockets: 39, keepAlive: false },
+        });
+
+        await nodeHttpHandler.handle({} as any);
+        expect(hRequestSpy.mock.calls[0][0]?.agent.maxSockets).toEqual(37);
+        expect(hRequestSpy.mock.calls[0][0]?.agent.keepAlive).toEqual(true);
+
+        expect((nodeHttpHandler as any).config.httpsAgent.maxSockets).toEqual(39);
+        expect((nodeHttpHandler as any).config.httpsAgent.keepAlive).toEqual(false);
+      });
+
       it.each([
         ["empty", undefined],
         ["a provider", async () => {}],
