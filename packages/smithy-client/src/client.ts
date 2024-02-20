@@ -1,11 +1,19 @@
 import { constructStack } from "@smithy/middleware-stack";
-import { Client as IClient, Command, MetadataBearer, MiddlewareStack, RequestHandler } from "@smithy/types";
+import {
+  Client as IClient,
+  Command,
+  FetchHttpHandlerOptions,
+  MetadataBearer,
+  MiddlewareStack,
+  NodeHttpHandlerOptions,
+  RequestHandler,
+} from "@smithy/types";
 
 /**
  * @public
  */
 export interface SmithyConfiguration<HandlerOptions> {
-  requestHandler: RequestHandler<any, any, HandlerOptions>;
+  requestHandler: RequestHandler<any, any, HandlerOptions> | NodeHttpHandlerOptions | FetchHttpHandlerOptions | any;
   /**
    * The API version set internally by the SDK, and is
    * not planned to be used by customer code.
@@ -17,7 +25,10 @@ export interface SmithyConfiguration<HandlerOptions> {
 /**
  * @internal
  */
-export type SmithyResolvedConfiguration<HandlerOptions> = SmithyConfiguration<HandlerOptions>;
+export type SmithyResolvedConfiguration<HandlerOptions> = {
+  requestHandler: RequestHandler<any, any, HandlerOptions>;
+  readonly apiVersion: string;
+};
 
 /**
  * @public
