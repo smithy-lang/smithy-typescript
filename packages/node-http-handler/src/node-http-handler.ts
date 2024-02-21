@@ -14,10 +14,7 @@ import { writeRequestBody } from "./write-request-body";
 
 export { NodeHttpHandlerOptions };
 
-interface ResolvedNodeHttpHandlerConfig {
-  requestTimeout?: number;
-  connectionTimeout?: number;
-  socketAcquisitionWarningTimeout?: number;
+interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
   httpAgent: hAgent;
   httpsAgent: hsAgent;
 }
@@ -118,8 +115,18 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
     return {
       connectionTimeout,
       requestTimeout: requestTimeout ?? socketTimeout,
-      httpAgent: httpAgent || new hAgent({ keepAlive, maxSockets }),
-      httpsAgent: httpsAgent || new hsAgent({ keepAlive, maxSockets }),
+      httpAgent: (() => {
+        if (httpAgent instanceof hAgent || typeof (httpAgent as hAgent)?.destroy === "function") {
+          return httpAgent as hAgent;
+        }
+        return new hAgent({ keepAlive, maxSockets, ...httpAgent });
+      })(),
+      httpsAgent: (() => {
+        if (httpsAgent instanceof hsAgent || typeof (httpsAgent as hsAgent)?.destroy === "function") {
+          return httpsAgent as hsAgent;
+        }
+        return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
+      })(),
     };
   }
 

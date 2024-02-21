@@ -1,5 +1,5 @@
-import type { Agent as hAgent } from "http";
-import type { Agent as hsAgent } from "https";
+import type { Agent as hAgent, AgentOptions as hAgentOptions } from "http";
+import type { Agent as hsAgent, AgentOptions as hsAgentOptions } from "https";
 
 /**
  *
@@ -51,8 +51,15 @@ export interface NodeHttpHandlerOptions {
    */
   socketTimeout?: number;
 
-  httpAgent?: hAgent;
-  httpsAgent?: hsAgent;
+  /**
+   * You can pass http.Agent or its constructor options.
+   */
+  httpAgent?: hAgent | hAgentOptions;
+
+  /**
+   * You can pass https.Agent or its constructor options.
+   */
+  httpsAgent?: hsAgent | hsAgentOptions;
 }
 
 /**
