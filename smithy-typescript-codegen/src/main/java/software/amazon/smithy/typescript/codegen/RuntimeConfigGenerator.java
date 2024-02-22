@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -185,9 +186,16 @@ final class RuntimeConfigGenerator {
                 // Start with defaults, use a TreeMap for keeping entries sorted.
                 Map<String, Consumer<TypeScriptWriter>> configs =
                         new TreeMap<>(getDefaultRuntimeConfigs(target));
+                Map<String, String> configValuePrefixes = new HashMap<>();
+
                 // Add any integration supplied runtime config writers.
                 for (TypeScriptIntegration integration : integrations) {
-                    configs.putAll(integration.getRuntimeConfigWriters(settings, model, symbolProvider, target));
+                    configs.putAll(
+                        integration.getRuntimeConfigWriters(settings, model, symbolProvider, target)
+                    );
+                    configValuePrefixes.putAll(
+                        integration.getRuntimeConfigValuePrefixes(settings, model, symbolProvider, target)
+                    );
                 }
                 // feat(experimentalIdentityAndAuth): add config writers for httpAuthScheme and httpAuthSchemes
                 // Needs a separate integration point since not all the information is accessible in
@@ -197,15 +205,12 @@ final class RuntimeConfigGenerator {
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
                 configs.forEach((key, value) -> {
-                    String defaultPrefix = "config?.$1L ?? ";
-                    if (key.equals("requestHandler")) {
-                        defaultPrefix = "";
-                    }
+                    String valuePrefix = configValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
                     writer
                         .indent(indentation)
                         .disableNewlines()
                         .openBlock(
-                            "$1L: " + defaultPrefix, ",\n", key,
+                            "$1L: " + valuePrefix, ",\n", key,
                             () -> {
                                 value.accept(writer);
                             }
