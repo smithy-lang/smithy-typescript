@@ -1,5 +1,22 @@
 # Change Log
 
+## 2.4.0
+
+### Minor Changes
+
+- 929801bc: allow constructor parameters pass-through when initializing requestHandler
+
+### Patch Changes
+
+- Updated dependencies [d70a00ac]
+- Updated dependencies [1e23f967]
+- Updated dependencies [929801bc]
+  - @smithy/types@2.10.0
+  - @smithy/protocol-http@3.2.0
+  - @smithy/util-stream@2.1.2
+  - @smithy/middleware-endpoint@2.4.2
+  - @smithy/middleware-stack@2.1.2
+
 ## 2.3.1
 
 ### Patch Changes

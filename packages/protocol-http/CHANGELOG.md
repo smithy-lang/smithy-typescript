@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 929801bc: allow constructor parameters pass-through when initializing requestHandler
+
+### Patch Changes
+
+- Updated dependencies [d70a00ac]
+- Updated dependencies [1e23f967]
+  - @smithy/types@2.10.0
+
 ## 3.1.1
 
 ### Patch Changes

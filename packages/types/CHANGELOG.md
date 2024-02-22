@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.10.0
+
+### Minor Changes
+
+- d70a00ac: allow ctor args in lieu of Agent instances in node-http-handler ctor
+- 1e23f967: add socket exhaustion checked warning to node-http-handler
+
 ## 2.9.1
 
 ### Patch Changes

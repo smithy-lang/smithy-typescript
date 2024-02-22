@@ -1,5 +1,22 @@
 # Change Log
 
+## 2.4.0
+
+### Minor Changes
+
+- d70a00ac: allow ctor args in lieu of Agent instances in node-http-handler ctor
+- 1e23f967: add socket exhaustion checked warning to node-http-handler
+
+### Patch Changes
+
+- Updated dependencies [d70a00ac]
+- Updated dependencies [1e23f967]
+- Updated dependencies [929801bc]
+  - @smithy/types@2.10.0
+  - @smithy/protocol-http@3.2.0
+  - @smithy/abort-controller@2.1.2
+  - @smithy/querystring-builder@2.1.2
+
 ## 2.3.1
 
 ### Patch Changes
