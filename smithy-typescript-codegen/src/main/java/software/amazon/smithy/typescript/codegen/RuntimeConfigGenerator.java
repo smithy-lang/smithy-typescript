@@ -58,7 +58,7 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("NodeHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-                writer.write("new RequestHandler(defaultConfigProvider)");
+                writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
@@ -81,7 +81,7 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("FetchHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
-                writer.write("new RequestHandler(defaultConfigProvider)");
+                writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
@@ -145,6 +145,9 @@ final class RuntimeConfigGenerator {
                 writer.write("[]");
             }
     );
+    private final Map<String, String> runtimeConfigDefaultValuePrefixes = MapUtils.of(
+        "requestHandler", ""
+    );
 
     RuntimeConfigGenerator(
             TypeScriptSettings settings,
@@ -184,10 +187,13 @@ final class RuntimeConfigGenerator {
             writer.indent().onSection("customizations", original -> {
                 // Start with defaults, use a TreeMap for keeping entries sorted.
                 Map<String, Consumer<TypeScriptWriter>> configs =
-                        new TreeMap<>(getDefaultRuntimeConfigs(target));
+                    new TreeMap<>(getDefaultRuntimeConfigs(target));
+
                 // Add any integration supplied runtime config writers.
                 for (TypeScriptIntegration integration : integrations) {
-                    configs.putAll(integration.getRuntimeConfigWriters(settings, model, symbolProvider, target));
+                    configs.putAll(
+                        integration.getRuntimeConfigWriters(settings, model, symbolProvider, target)
+                    );
                 }
                 // feat(experimentalIdentityAndAuth): add config writers for httpAuthScheme and httpAuthSchemes
                 // Needs a separate integration point since not all the information is accessible in
@@ -197,11 +203,18 @@ final class RuntimeConfigGenerator {
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
                 configs.forEach((key, value) -> {
-                    writer.indent(indentation).disableNewlines().openBlock("$1L: config?.$1L ?? ", ",\n", key,
-                        () -> {
-                            value.accept(writer);
-                        });
-                    writer.dedent(indentation);
+                    String valuePrefix =
+                        runtimeConfigDefaultValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
+                    writer
+                        .indent(indentation)
+                        .disableNewlines()
+                        .openBlock(
+                            "$1L: " + valuePrefix, ",\n", key,
+                            () -> {
+                                value.accept(writer);
+                            }
+                        )
+                        .dedent(indentation);
                 });
             });
             writer.dedent();
