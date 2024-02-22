@@ -13,7 +13,11 @@ import {
  * @public
  */
 export interface SmithyConfiguration<HandlerOptions> {
-  requestHandler: RequestHandler<any, any, HandlerOptions> | NodeHttpHandlerOptions | FetchHttpHandlerOptions | Record<string, unknown>;
+  requestHandler:
+    | RequestHandler<any, any, HandlerOptions>
+    | NodeHttpHandlerOptions
+    | FetchHttpHandlerOptions
+    | Record<string, unknown>;
   /**
    * The API version set internally by the SDK, and is
    * not planned to be used by customer code.
