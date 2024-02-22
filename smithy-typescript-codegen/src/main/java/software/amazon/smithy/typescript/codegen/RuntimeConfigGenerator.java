@@ -189,16 +189,11 @@ final class RuntimeConfigGenerator {
                 // Start with defaults, use a TreeMap for keeping entries sorted.
                 Map<String, Consumer<TypeScriptWriter>> configs =
                     new TreeMap<>(getDefaultRuntimeConfigs(target));
-                Map<String, String> configValuePrefixes =
-                    new HashMap<>(getDefaultRuntimeConfigValuePrefixes(target));
 
                 // Add any integration supplied runtime config writers.
                 for (TypeScriptIntegration integration : integrations) {
                     configs.putAll(
                         integration.getRuntimeConfigWriters(settings, model, symbolProvider, target)
-                    );
-                    configValuePrefixes.putAll(
-                        integration.getRuntimeConfigValuePrefixes(settings, model, symbolProvider, target)
                     );
                 }
                 // feat(experimentalIdentityAndAuth): add config writers for httpAuthScheme and httpAuthSchemes
@@ -209,7 +204,8 @@ final class RuntimeConfigGenerator {
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
                 configs.forEach((key, value) -> {
-                    String valuePrefix = configValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
+                    String valuePrefix =
+                        runtimeConfigDefaultValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
                     writer
                         .indent(indentation)
                         .disableNewlines()
@@ -424,9 +420,5 @@ final class RuntimeConfigGenerator {
             default:
                 throw new SmithyBuildException("Unknown target: " + target);
         }
-    }
-
-    private Map<String, String> getDefaultRuntimeConfigValuePrefixes(LanguageTarget target) {
-        return runtimeConfigDefaultValuePrefixes;
     }
 }

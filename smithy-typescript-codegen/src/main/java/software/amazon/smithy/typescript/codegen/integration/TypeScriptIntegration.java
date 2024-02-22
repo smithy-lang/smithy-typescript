@@ -224,24 +224,6 @@ public interface TypeScriptIntegration
     }
 
     /**
-     * The default value prefix for any config field PROP is "config?.PROP ?? ...",
-     * where the trailing value is whatever was returned by {@link #getRuntimeConfigWriters}.
-     *
-     * If this default prefix needs modification, return the desired value from this method.
-     *
-     * @return map of config entries to their desired value prefix.
-     */
-    @SmithyInternalApi
-    default Map<String, String> getRuntimeConfigValuePrefixes(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        LanguageTarget target
-    ) {
-         return Collections.emptyMap();
-    }
-
-    /**
      * Define a list of client configuration interfaces
      *
      * A client configuration interface contains settings that modify a service client.
