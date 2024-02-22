@@ -44,5 +44,7 @@ export type HttpHandler<HttpHandlerConfig extends object = {}> = RequestHandler<
  * default is the FetchHttpHandler. In rarer cases specific clients may be
  * configured to use other default implementations such as Websocket or HTTP2.
  *
+ * The fallback type Record<string, unknown> is part of the union to allow
+ * passing constructor params to an unknown requestHandler type.
  */
-export type HttpHandlerUserInput = HttpHandler | NodeHttpHandlerOptions | FetchHttpHandlerOptions;
+export type HttpHandlerUserInput = HttpHandler | NodeHttpHandlerOptions | FetchHttpHandlerOptions | Record<string, unknown>;
