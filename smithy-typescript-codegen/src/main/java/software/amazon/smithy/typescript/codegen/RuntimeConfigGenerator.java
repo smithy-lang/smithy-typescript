@@ -146,6 +146,9 @@ final class RuntimeConfigGenerator {
                 writer.write("[]");
             }
     );
+    private final Map<String, String> runtimeConfigDefaultValuePrefixes = MapUtils.of(
+        "requestHandler", ""
+    );
 
     RuntimeConfigGenerator(
             TypeScriptSettings settings,
@@ -185,8 +188,9 @@ final class RuntimeConfigGenerator {
             writer.indent().onSection("customizations", original -> {
                 // Start with defaults, use a TreeMap for keeping entries sorted.
                 Map<String, Consumer<TypeScriptWriter>> configs =
-                        new TreeMap<>(getDefaultRuntimeConfigs(target));
-                Map<String, String> configValuePrefixes = new HashMap<>();
+                    new TreeMap<>(getDefaultRuntimeConfigs(target));
+                Map<String, String> configValuePrefixes =
+                    new HashMap<>(getDefaultRuntimeConfigValuePrefixes(target));
 
                 // Add any integration supplied runtime config writers.
                 for (TypeScriptIntegration integration : integrations) {
@@ -420,5 +424,9 @@ final class RuntimeConfigGenerator {
             default:
                 throw new SmithyBuildException("Unknown target: " + target);
         }
+    }
+
+    private Map<String, String> getDefaultRuntimeConfigValuePrefixes(LanguageTarget target) {
+        return runtimeConfigDefaultValuePrefixes;
     }
 }

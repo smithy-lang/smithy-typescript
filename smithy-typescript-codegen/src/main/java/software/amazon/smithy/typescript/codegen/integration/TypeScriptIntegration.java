@@ -30,7 +30,6 @@ import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.extensions.ExtensionConfigurationInterface;
-import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -232,17 +231,14 @@ public interface TypeScriptIntegration
      *
      * @return map of config entries to their desired value prefix.
      */
+    @SmithyInternalApi
     default Map<String, String> getRuntimeConfigValuePrefixes(
         TypeScriptSettings settings,
         Model model,
         SymbolProvider symbolProvider,
         LanguageTarget target
     ) {
-         return MapUtils.of(
-            // requestHandler has a special factory method, and does not use "config?.requestHandler ??"
-            // as its value prefix.
-            "requestHandler", ""
-         );
+         return Collections.emptyMap();
     }
 
     /**
