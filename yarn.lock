@@ -9995,7 +9995,7 @@ __metadata:
     typescript: ~4.9.5
     webpack: 5.76.0
     webpack-cli: 4.10.0
-    yarn: 1.22.10
+    yarn: 1.22.13
   languageName: unknown
   linkType: soft
 
@@ -11686,13 +11686,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yarn@npm:1.22.10":
-  version: 1.22.10
-  resolution: "yarn@npm:1.22.10"
+"yarn@npm:1.22.13":
+  version: 1.22.13
+  resolution: "yarn@npm:1.22.13"
   bin:
     yarn: bin/yarn.js
     yarnpkg: bin/yarn.js
-  checksum: bc7ebba3d91090310b1db28af1f9fc913b8936693f4c41031db67e5c10ba171a23b343173cd3d0ea91d388e38e6244d17292278cf6c563b1dd7f8e5d0df77b4c
+  checksum: 3e928a3c07d63747d7ef861e3bf2664af202f5d3edeee0030d42853a62226b3cbee12a021ae86d01024a9f63ca7efccbbff4a946558dce8e60b5fa0a394546eb
   languageName: node
   linkType: hard
 
