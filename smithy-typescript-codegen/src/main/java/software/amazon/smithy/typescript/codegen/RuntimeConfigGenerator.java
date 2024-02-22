@@ -58,7 +58,7 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.addImport("NodeHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-                writer.write("RequestHandler.create(config.requestHandler ?? defaultConfigProvider)");
+                writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
@@ -81,7 +81,7 @@ final class RuntimeConfigGenerator {
                 writer.addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
                 writer.addImport("FetchHttpHandler", "RequestHandler",
                         TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
-                writer.write("RequestHandler.create(config.requestHandler ?? defaultConfigProvider)");
+                writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
             },
             "sha256", writer -> {
                 writer.addDependency(TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
