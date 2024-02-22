@@ -47,4 +47,8 @@ export type HttpHandler<HttpHandlerConfig extends object = {}> = RequestHandler<
  * The fallback type Record<string, unknown> is part of the union to allow
  * passing constructor params to an unknown requestHandler type.
  */
-export type HttpHandlerUserInput = HttpHandler | NodeHttpHandlerOptions | FetchHttpHandlerOptions | Record<string, unknown>;
+export type HttpHandlerUserInput =
+  | HttpHandler
+  | NodeHttpHandlerOptions
+  | FetchHttpHandlerOptions
+  | Record<string, unknown>;
