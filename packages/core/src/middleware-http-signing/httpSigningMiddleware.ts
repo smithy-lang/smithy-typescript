@@ -67,7 +67,7 @@ export const httpSigningMiddleware = <Input extends object, Output extends objec
     identity,
     signer,
   } = scheme;
-  const lastSystemClockOffset = config.systemClockOffset | 0;
+  const initialSystemClockOffset = config.systemClockOffset | 0;
 
   const makeSignedRequest = async () =>
     next({
@@ -86,14 +86,14 @@ export const httpSigningMiddleware = <Input extends object, Output extends objec
       thrownError = e;
     }
     const latestSystemClockOffset = config.systemClockOffset | 0;
-    const systemClockOffsetModified = lastSystemClockOffset !== latestSystemClockOffset;
+    const systemClockOffsetWasModified = initialSystemClockOffset !== latestSystemClockOffset;
 
-    if (systemClockOffsetModified) {
+    if (systemClockOffsetWasModified) {
       return makeSignedRequest().catch(onError);
-    } else {
-      if (thrownError) {
-        throw thrownError;
-      }
+    }
+
+    if (thrownError) {
+      throw thrownError;
     }
   });
   onSuccess(output.response, signingProperties);
