@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.10.1
+
+### Patch Changes
+
+- dd0d9b4b: make clock skew correcting errors transient
+
 ## 2.10.0
 
 ### Minor Changes

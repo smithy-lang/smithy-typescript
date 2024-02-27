@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.1.3
+
+### Patch Changes
+
+- dd0d9b4b: make clock skew correcting errors transient
+- Updated dependencies [dd0d9b4b]
+  - @smithy/service-error-classification@2.1.3
+  - @smithy/types@2.10.1
+  - @smithy/util-retry@2.1.3
+  - @smithy/node-config-provider@2.2.3
+  - @smithy/protocol-http@3.2.1
+  - @smithy/smithy-client@2.4.1
+  - @smithy/util-middleware@2.1.3
+
 ## 2.1.2
 
 ### Patch Changes

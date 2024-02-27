@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [dd0d9b4b]
+  - @smithy/types@2.10.1
+  - @smithy/eventstream-serde-universal@2.1.3
+
 ## 2.1.2
 
 ### Patch Changes
