@@ -57,8 +57,6 @@ export interface PreviouslyResolved {
    * @internal
    */
   retryMode: string | Provider<string>;
-
-  systemClockOffset?: number;
 }
 
 /**
