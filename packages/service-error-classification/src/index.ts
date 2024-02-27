@@ -23,13 +23,13 @@ export const isThrottlingError = (error: SdkError) =>
  * cause where the NodeHttpHandler does not decorate the Error with
  * the name "TimeoutError" to be checked by the TRANSIENT_ERROR_CODES condition.
  */
-export const isTransientError = (error: SkdErrorWithClockSkewMetadata) =>
-  error.$metadata?.clockSkewCorrected ||
+export const isTransientError = (error: SdkError | SkdErrorWithClockSkewMetadata) =>
+  (error as SkdErrorWithClockSkewMetadata).$metadata?.clockSkewCorrected ||
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
   TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0);
 
-export const isServerError = (error: SkdErrorWithClockSkewMetadata) => {
+export const isServerError = (error: SdkError | SkdErrorWithClockSkewMetadata) => {
   if (error.$metadata?.httpStatusCode !== undefined) {
     const statusCode = error.$metadata.httpStatusCode;
     if (500 <= statusCode && statusCode <= 599 && !isTransientError(error)) {

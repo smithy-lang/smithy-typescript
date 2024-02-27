@@ -56,14 +56,14 @@ export const retryMiddleware = (options: RetryResolvedConfig & Partial<Previousl
         if (isRequest) {
           request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
         }
-        initialSystemClockOffset = options.systemClockOffset | 0;
+        initialSystemClockOffset = options.systemClockOffset ?? 0 | 0;
         const { response, output } = await next(args);
         retryStrategy.recordSuccess(retryToken);
         output.$metadata.attempts = attempts + 1;
         output.$metadata.totalRetryDelay = totalRetryDelay;
         return { response, output };
       } catch (e: unknown) {
-        const latestSystemClockOffset = options.systemClockOffset | 0;
+        const latestSystemClockOffset = options.systemClockOffset ?? 0 | 0;
         const clockSkewCorrected = initialSystemClockOffset !== latestSystemClockOffset;
 
         const sdkError = e as SkdErrorWithClockSkewMetadata;
