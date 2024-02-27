@@ -38,15 +38,8 @@ const defaultSuccessHandler: SuccessHandler = (
 /**
  * @internal
  */
-interface HttpSigningMiddlewarePreviouslyResolved {
-  systemClockOffset?: number;
-}
-
-/**
- * @internal
- */
 export const httpSigningMiddleware = <Input extends object, Output extends object>(
-  config: HttpSigningMiddlewarePreviouslyResolved
+  config: object
 ): FinalizeRequestMiddleware<Input, Output> => (
   next: FinalizeHandler<Input, Output>,
   context: HttpSigningMiddlewareHandlerExecutionContext
@@ -67,35 +60,10 @@ export const httpSigningMiddleware = <Input extends object, Output extends objec
     identity,
     signer,
   } = scheme;
-  const initialSystemClockOffset = config.systemClockOffset | 0;
-
-  const makeSignedRequest = async () =>
-    next({
-      ...args,
-      request: await signer.sign(args.request as HttpRequest, identity, signingProperties),
-    });
-
-  const onError = (signer.errorHandler || defaultErrorHandler)(signingProperties);
-  const onSuccess = signer.successHandler || defaultSuccessHandler;
-
-  const output = await makeSignedRequest().catch(async (error: unknown) => {
-    let thrownError: unknown;
-    try {
-      onError(error as Error);
-    } catch (e) {
-      thrownError = e;
-    }
-    const latestSystemClockOffset = config.systemClockOffset | 0;
-    const systemClockOffsetWasModified = initialSystemClockOffset !== latestSystemClockOffset;
-
-    if (systemClockOffsetWasModified) {
-      return makeSignedRequest().catch(onError);
-    }
-
-    if (thrownError) {
-      throw thrownError;
-    }
-  });
-  onSuccess(output.response, signingProperties);
+  const output = await next({
+    ...args,
+    request: await signer.sign(args.request, identity, signingProperties),
+  }).catch((signer.errorHandler || defaultErrorHandler)(signingProperties));
+  (signer.successHandler || defaultSuccessHandler)(output.response, signingProperties);
   return output;
 };

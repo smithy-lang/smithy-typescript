@@ -16,15 +16,18 @@ import {
   RetryStrategyV2,
   RetryToken,
   SdkError,
+  SkdErrorWithClockSkewMetadata,
 } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
 
-import { RetryResolvedConfig } from "./configurations";
+import { PreviouslyResolved, RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
 import { asSdkError } from "./util";
 
-export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends MetadataBearer = MetadataBearer>(
+export const retryMiddleware = (options: RetryResolvedConfig & Partial<PreviouslyResolved>) => <
+  Output extends MetadataBearer = MetadataBearer
+>(
   next: FinalizeHandler<any, Output>,
   context: HandlerExecutionContext
 ): FinalizeHandler<any, Output> => async (
@@ -45,19 +48,31 @@ export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends
     if (isRequest) {
       request.headers[INVOCATION_ID_HEADER] = v4();
     }
+
+    let initialSystemClockOffset = 0;
+
     while (true) {
       try {
         if (isRequest) {
           request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
         }
+        initialSystemClockOffset = options.systemClockOffset | 0;
         const { response, output } = await next(args);
         retryStrategy.recordSuccess(retryToken);
         output.$metadata.attempts = attempts + 1;
         output.$metadata.totalRetryDelay = totalRetryDelay;
         return { response, output };
-      } catch (e) {
-        const retryErrorInfo = getRetryErrorInfo(e);
-        lastError = asSdkError(e);
+      } catch (e: unknown) {
+        const latestSystemClockOffset = options.systemClockOffset | 0;
+        const clockSkewCorrected = initialSystemClockOffset !== latestSystemClockOffset;
+
+        const sdkError = e as SkdErrorWithClockSkewMetadata;
+        if (clockSkewCorrected && sdkError.$metadata && typeof sdkError.$metadata === "object") {
+          sdkError.$metadata.clockSkewCorrected = true;
+        }
+
+        const retryErrorInfo = getRetryErrorInfo(sdkError);
+        lastError = asSdkError(sdkError);
 
         if (isRequest && isStreamingPayload(request)) {
           (context.logger instanceof NoOpLogger ? console : context.logger)?.warn(
@@ -95,8 +110,9 @@ const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).refreshRetryTokenForRetry !== "undefined" &&
   typeof (retryStrategy as RetryStrategyV2).recordSuccess !== "undefined";
 
-const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
+const getRetryErrorInfo = (error: SkdErrorWithClockSkewMetadata): RetryErrorInfo => {
   const errorInfo: RetryErrorInfo = {
+    error,
     errorType: getRetryErrorType(error),
   };
   const retryAfterHint = getRetryAfterHint(error.$response);
@@ -106,7 +122,7 @@ const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
   return errorInfo;
 };
 
-const getRetryErrorType = (error: SdkError): RetryErrorType => {
+const getRetryErrorType = (error: SkdErrorWithClockSkewMetadata): RetryErrorType => {
   if (isThrottlingError(error)) return "THROTTLING";
   if (isTransientError(error)) return "TRANSIENT";
   if (isServerError(error)) return "SERVER_ERROR";

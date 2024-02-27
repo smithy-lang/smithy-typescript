@@ -80,3 +80,14 @@ export interface SmithyException {
  * a base ServiceException prefixed with the service name.
  */
 export type SdkError = Error & Partial<SmithyException> & Partial<MetadataBearer>;
+
+/**
+ * @internal
+ *
+ * @deprecated for same reason as SdkError. Use public client modeled exceptions in application code.
+ */
+export type SkdErrorWithClockSkewMetadata = SdkError & {
+  $metadata: SdkError["$metadata"] & {
+    clockSkewCorrected?: boolean;
+  };
+};
