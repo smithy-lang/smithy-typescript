@@ -11,4 +11,4 @@ export const getSsoSessionData = (data: ParsedIniData): ParsedIniData =>
     // filter out non sso-session keys
     .filter(([key]) => key.startsWith(IniSectionType.SSO_SESSION + CONFIG_PREFIX_SEPARATOR))
     // replace sso-session key with sso-session name
-    .reduce((acc, [key, value]) => ({ ...acc, [key.split(CONFIG_PREFIX_SEPARATOR)[1]]: value }), {});
+    .reduce((acc, [key, value]) => ({ ...acc, [key.substring(key.indexOf(CONFIG_PREFIX_SEPARATOR) + 1)]: value }), {});
