@@ -1,5 +1,5 @@
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
+import { isClockSkewError, isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import { NoOpLogger } from "@smithy/smithy-client";
 import {
   AbsoluteLocation,
@@ -97,6 +97,7 @@ const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
 
 const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
   const errorInfo: RetryErrorInfo = {
+    error,
     errorType: getRetryErrorType(error),
   };
   const retryAfterHint = getRetryAfterHint(error.$response);
@@ -109,6 +110,7 @@ const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
 const getRetryErrorType = (error: SdkError): RetryErrorType => {
   if (isThrottlingError(error)) return "THROTTLING";
   if (isTransientError(error)) return "TRANSIENT";
+  if (isClockSkewError(error)) return "TRANSIENT";
   if (isServerError(error)) return "SERVER_ERROR";
   return "CLIENT_ERROR";
 };

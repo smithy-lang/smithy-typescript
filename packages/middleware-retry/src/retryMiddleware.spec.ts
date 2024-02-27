@@ -138,6 +138,7 @@ describe(retryMiddleware.name, () => {
         (isThrottlingError as jest.Mock).mockReturnValue(true);
         const next = jest.fn().mockRejectedValue(requestError);
         const errorInfo = {
+          error: requestError,
           errorType: "THROTTLING",
         };
         const mockRetryStrategy = {
@@ -172,6 +173,7 @@ describe(retryMiddleware.name, () => {
         (isThrottlingError as jest.Mock).mockReturnValue(true);
         const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
+          error: mockError,
           errorType: "THROTTLING",
         };
         const { response, output } = await retryMiddleware({
@@ -193,6 +195,7 @@ describe(retryMiddleware.name, () => {
         (isThrottlingError as jest.Mock).mockReturnValue(false);
         const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
+          error: mockError,
           errorType: "TRANSIENT",
         };
         const { response, output } = await retryMiddleware({
@@ -215,6 +218,7 @@ describe(retryMiddleware.name, () => {
         (isThrottlingError as jest.Mock).mockReturnValue(false);
         const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
+          error: mockError,
           errorType: "SERVER_ERROR",
         };
         const { response, output } = await retryMiddleware({
@@ -237,6 +241,7 @@ describe(retryMiddleware.name, () => {
         (isThrottlingError as jest.Mock).mockReturnValue(false);
         const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
+          error: mockError,
           errorType: "CLIENT_ERROR",
         };
         const { response, output } = await retryMiddleware({
@@ -265,6 +270,7 @@ describe(retryMiddleware.name, () => {
           });
           const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
           const errorInfo = {
+            error: mockError,
             errorType: "CLIENT_ERROR",
           };
           const { response, output } = await retryMiddleware({
@@ -289,6 +295,7 @@ describe(retryMiddleware.name, () => {
         const { isInstance } = HttpResponse;
         ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
         const errorInfo = {
+          error: mockError,
           errorType: "CLIENT_ERROR",
           retryAfterHint: retryAfterDate,
         };
