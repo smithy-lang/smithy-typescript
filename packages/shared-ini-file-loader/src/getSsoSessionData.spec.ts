@@ -34,7 +34,7 @@ describe(getSsoSessionData.name, () => {
       );
 
     it(`sso-session section with prefix separator ${CONFIG_PREFIX_SEPARATOR}`, () => {
-      const mockOutput = getMockOutput(["prefix.suffix"]);
+      const mockOutput = getMockOutput([["prefix", "suffix"].join(CONFIG_PREFIX_SEPARATOR)]);
       const mockInput = getMockInput(mockOutput);
       expect(getSsoSessionData(mockInput)).toStrictEqual(mockOutput);
     });
