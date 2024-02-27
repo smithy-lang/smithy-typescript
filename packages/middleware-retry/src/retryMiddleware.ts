@@ -45,7 +45,6 @@ export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends
     if (isRequest) {
       request.headers[INVOCATION_ID_HEADER] = v4();
     }
-
     while (true) {
       try {
         if (isRequest) {
