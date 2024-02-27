@@ -48,7 +48,10 @@ export interface RetryInputConfig {
   retryStrategy?: RetryStrategy | RetryStrategyV2;
 }
 
-interface PreviouslyResolved {
+/**
+ * @internal
+ */
+export interface PreviouslyResolved {
   /**
    * Specifies provider for retry algorithm to use.
    * @internal
@@ -56,6 +59,9 @@ interface PreviouslyResolved {
   retryMode: string | Provider<string>;
 }
 
+/**
+ * @internal
+ */
 export interface RetryResolvedConfig {
   /**
    * Resolved value for input config {@link RetryInputConfig.maxAttempts}

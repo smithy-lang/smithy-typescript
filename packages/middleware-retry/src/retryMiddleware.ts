@@ -55,7 +55,7 @@ export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends
         output.$metadata.attempts = attempts + 1;
         output.$metadata.totalRetryDelay = totalRetryDelay;
         return { response, output };
-      } catch (e) {
+      } catch (e: any) {
         const retryErrorInfo = getRetryErrorInfo(e);
         lastError = asSdkError(e);
 
@@ -97,6 +97,7 @@ const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
 
 const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
   const errorInfo: RetryErrorInfo = {
+    error,
     errorType: getRetryErrorType(error),
   };
   const retryAfterHint = getRetryAfterHint(error.$response);

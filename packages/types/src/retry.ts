@@ -1,3 +1,5 @@
+import { SdkError } from "./shapes";
+
 /**
  * @public
  */
@@ -33,6 +35,11 @@ export type RetryErrorType =
  * @public
  */
 export interface RetryErrorInfo {
+  /**
+   * The error thrown during the initial request, if available.
+   */
+  error?: SdkError;
+
   errorType: RetryErrorType;
 
   /**
@@ -40,7 +47,7 @@ export interface RetryErrorInfo {
    * something from MQTT or any other protocol that has the ability to convey
    * retry info from a peer.
    *
-   * @returns the Date after which a retry should be attempted.
+   * The Date after which a retry should be attempted.
    */
   retryAfterHint?: Date;
 }

@@ -79,4 +79,15 @@ export interface SmithyException {
  * the base exception for the service should be used. Each client exports
  * a base ServiceException prefixed with the service name.
  */
-export type SdkError = Error & Partial<SmithyException> & Partial<MetadataBearer>;
+export type SdkError = Error &
+  Partial<SmithyException> &
+  Partial<MetadataBearer> & {
+    $metadata?: Partial<MetadataBearer>["$metadata"] & {
+      /**
+       * If present, will have value of true and indicates that the error resulted in a
+       * correction of the clock skew, a.k.a. config.systemClockOffset.
+       * This is specific to AWS SDK and sigv4.
+       */
+      readonly clockSkewCorrected?: true;
+    };
+  };
