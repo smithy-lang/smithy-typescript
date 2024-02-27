@@ -77,17 +77,23 @@ class PackageJsonGeneratorTest {
         assertTrue(manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).isPresent());
 
         String packageJson = manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).get();
+        ObjectNode packageJsonNode = Node.parse(packageJson).expectObjectNode();
 
-        assertThat(packageJson, containsString("""
-                  "browser": {
-                      "example-browser": "example",
-                      "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-                  },
-                  "react-native": {
+        Node expectedBrowserNode = Node.parse("""
+                {
+                    "example-browser": "example",
+                    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
+                }
+                """);
+        Node expectedReactNativeNode = Node.parse("""
+                {
                       "example-react-native": "example",
                       "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
-                  }
-              """));
+                }
+                """);
+
+        Node.assertEquals(packageJsonNode.expectObjectMember("browser"), expectedBrowserNode);
+        Node.assertEquals(packageJsonNode.expectObjectMember("react-native"), expectedReactNativeNode);
     }
 
     @Test
