@@ -213,7 +213,10 @@ subprojects {
         // Log on passed, skipped, and failed test events if the `-Plog-tests` property is set.
         if (project.hasProperty("log-tests")) {
             tasks.test {
-                testLogging.events("passed", "skipped", "failed")
+                testLogging {
+                    events("passed", "skipped", "failed")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
             }
         }
 
