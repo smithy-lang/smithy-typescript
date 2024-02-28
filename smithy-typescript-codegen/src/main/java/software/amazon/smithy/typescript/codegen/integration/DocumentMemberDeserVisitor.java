@@ -293,6 +293,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
 
         if (serdeElisionEnabled && serdeElisionIndex.mayElide(shape)) {
+            context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
             return "_json(" + customDataSource + ")";
         }
 

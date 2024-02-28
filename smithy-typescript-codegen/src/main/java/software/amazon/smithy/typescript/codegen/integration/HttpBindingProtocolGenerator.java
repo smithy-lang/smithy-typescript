@@ -1388,6 +1388,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         && (enableSerdeElision() && !context.getSettings().generateServerSdk());
 
                 if (mayElideInput) {
+                    context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                     return "_json(" + dataSource + ")";
                 }
 
@@ -2730,6 +2731,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         && (enableSerdeElision() && !context.getSettings().generateServerSdk());
 
                 if (mayElideOutput) {
+                    context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                     return "_json(" + dataSource + ")";
                 }
 

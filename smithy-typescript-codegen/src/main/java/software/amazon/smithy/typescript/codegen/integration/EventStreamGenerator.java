@@ -363,6 +363,7 @@ public class EventStreamGenerator {
                     boolean mayElide = serdeElisionIndex.mayElide(payloadShape);
                     documentShapesToSerialize.add(payloadShape);
                     if (mayElide) {
+                        writer.addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                         writer.write("body = $L(input.$L);", "_json", payloadMemberName);
                     } else {
                         writer.write("body = $L(input.$L, context);", serFunctionName, payloadMemberName);
@@ -385,7 +386,8 @@ public class EventStreamGenerator {
             documentShapesToSerialize.add(event);
             boolean mayElide = serdeElisionIndex.mayElide(event);
             if (mayElide) {
-               writer.write("body = $L(input);", "_json");
+                writer.addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+                writer.write("body = $L(input);", "_json");
             } else {
                 writer.write("body = $L(input, context);", serFunctionName);
             }
