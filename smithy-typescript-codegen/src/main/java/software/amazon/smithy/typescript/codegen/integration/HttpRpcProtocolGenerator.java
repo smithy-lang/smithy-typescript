@@ -508,6 +508,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             }
 
             if (SerdeElisionIndex.of(context.getModel()).mayElide(error) && enableSerdeElision()) {
+                writer.addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                 writer.write("const deserialized: any = _json($L);",
                 getErrorBodyLocation(context, "body"));
             } else {
