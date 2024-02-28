@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.4
+
+### Patch Changes
+
+- 8fd51967: Process sso-session names with config prefix separator
+
 ## 2.3.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.4
+
+### Patch Changes
+
+- @smithy/node-config-provider@2.2.4
+
 ## 1.1.3
 
 ### Patch Changes
