@@ -19,7 +19,7 @@ export const getExtendedInstanceMetadataCredentials = (
   const newExpiration = new Date(Date.now() + refreshInterval * 1000);
   logger.warn(
     "Attempting credential expiration extension due to a credential service availability issue. A refresh of these " +
-      "credentials will be attempted after ${new Date(newExpiration)}.\nFor more information, please visit: " +
+      `credentials will be attempted after ${new Date(newExpiration)}.\nFor more information, please visit: ` +
       STATIC_STABILITY_DOC_URL
   );
   const originalExpiration = credentials.originalExpiration ?? credentials.expiration;
