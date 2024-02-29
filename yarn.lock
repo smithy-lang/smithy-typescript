@@ -2554,6 +2554,7 @@ __metadata:
   resolution: "@smithy/util-base64@workspace:packages/util-base64"
   dependencies:
     "@smithy/util-buffer-from": "workspace:^"
+    "@smithy/util-utf8": "workspace:^"
     "@tsconfig/recommended": 1.0.1
     "@types/node": ^14.14.31
     concurrently: 7.0.0

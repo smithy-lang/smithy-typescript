@@ -8,6 +8,7 @@ import {
   Provider,
   RequestSerializer,
   ResponseDeserializer,
+  SerdeFunctions,
   SerializeHandlerOptions,
   UrlParser,
 } from "@smithy/types";
@@ -39,14 +40,19 @@ export type V1OrV2Endpoint = {
   endpoint?: Provider<Endpoint>;
 };
 
-export function getSerdePlugin<InputType extends object, SerDeContext, OutputType extends MetadataBearer>(
-  config: V1OrV2Endpoint,
-  serializer: RequestSerializer<any, SerDeContext & EndpointBearer>,
-  deserializer: ResponseDeserializer<OutputType, any, SerDeContext>
+/**
+ * @internal
+ *
+ * Note: 2nd type parameter is deprecated and unused.
+ */
+export function getSerdePlugin<InputType extends object, _, OutputType extends MetadataBearer>(
+  config: V1OrV2Endpoint & SerdeFunctions,
+  serializer: RequestSerializer<any, SerdeFunctions & EndpointBearer>,
+  deserializer: ResponseDeserializer<OutputType, any, SerdeFunctions>
 ): Pluggable<InputType, OutputType> {
   return {
     applyToStack: (commandStack: MiddlewareStack<InputType, OutputType>) => {
-      commandStack.add(deserializerMiddleware(config as SerDeContext, deserializer), deserializerMiddlewareOption);
+      commandStack.add(deserializerMiddleware(config, deserializer), deserializerMiddlewareOption);
       commandStack.add(serializerMiddleware(config, serializer), serializerMiddlewareOption);
     },
   };

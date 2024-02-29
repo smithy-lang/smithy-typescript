@@ -1,3 +1,5 @@
+import { EndpointBearer, SerdeFunctions } from "@smithy/types";
+
 import { deserializerMiddleware } from "./deserializerMiddleware";
 
 describe("deserializerMiddleware", () => {
@@ -11,7 +13,7 @@ describe("deserializerMiddleware", () => {
         hostname: "hostname",
         path: "path",
       }),
-  };
+  } as EndpointBearer & SerdeFunctions;
 
   const mockArgs = {
     input: {

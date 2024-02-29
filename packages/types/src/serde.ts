@@ -31,14 +31,22 @@ export interface StreamCollector {
  *
  * Request and Response serde util functions and settings for AWS services
  */
-export interface SerdeContext extends EndpointBearer {
+export interface SerdeContext extends SerdeFunctions, EndpointBearer {
+  requestHandler: RequestHandler<any, any>;
+  disableHostPrefix: boolean;
+}
+
+/**
+ * @public
+ *
+ * Serde functions from the client config.
+ */
+export interface SerdeFunctions {
   base64Encoder: Encoder;
   base64Decoder: Decoder;
   utf8Encoder: Encoder;
   utf8Decoder: Decoder;
   streamCollector: StreamCollector;
-  requestHandler: RequestHandler<any, any>;
-  disableHostPrefix: boolean;
 }
 
 /**
