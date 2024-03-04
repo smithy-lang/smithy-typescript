@@ -1,7 +1,7 @@
 import { StreamCollector } from "@smithy/types";
 
 //reference: https://snack.expo.io/r1JCSWRGU
-export const streamCollector: StreamCollector = (stream: Blob | ReadableStream): Promise<Uint8Array> => {
+export const streamCollector: StreamCollector = async (stream: Blob | ReadableStream): Promise<Uint8Array> => {
   if (typeof Blob === "function" && stream instanceof Blob) {
     return new Uint8Array(await stream.arrayBuffer());
   }
