@@ -21,6 +21,13 @@ export type Exact<Type1, Type2> = [Type1] extends [Type2] ? ([Type2] extends [Ty
  * `new Uint8Array([104, 101, 108, 108, 111])`.
  */
 export interface Encoder {
+  /**
+   * Caution: the `any` type on the input is for backwards compatibility.
+   * Runtime support is limited to Uint8Array and string by default.
+   *
+   * You may choose to support more encoder input types if overriding the default
+   * implementations.
+   */
   (input: Uint8Array | string | any): string;
 }
 
@@ -28,15 +35,14 @@ export interface Encoder {
  * @public
  *
  * A function that, given a string, can derive the bytes represented by that
- * string. The function may optionally attempt to
- * convert other input types to string before decoding.
+ * string.
  *
  * @example A decoder function that converts bytes to hexadecimal
  * representation would return `new Uint8Array([104, 101, 108, 108, 111])` when
  * given the string `'hello'`.
  */
 export interface Decoder {
-  (input: Uint8Array | string | any): Uint8Array;
+  (input: string): Uint8Array;
 }
 
 /**

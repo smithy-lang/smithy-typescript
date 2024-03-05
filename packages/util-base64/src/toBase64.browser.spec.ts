@@ -1,6 +1,8 @@
 /**
  * @jest-environment jsdom
  */
+import type { Encoder } from "@smithy/types";
+
 import testCases from "./__mocks__/testCases.json";
 import { toBase64 } from "./toBase64.browser";
 
@@ -11,5 +13,10 @@ describe(toBase64.name, () => {
 
   it("also converts strings", () => {
     expect(toBase64("hello")).toEqual("aGVsbG8=");
+  });
+
+  it("throws on non-string non-Uint8Array", () => {
+    expect(() => (toBase64 as Encoder)(new Date())).toThrow();
+    expect(() => (toBase64 as Encoder)({})).toThrow();
   });
 });

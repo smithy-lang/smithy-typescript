@@ -15,5 +15,8 @@ export const toBase64 = (_input: Uint8Array | string): string => {
   } else {
     input = _input as Uint8Array;
   }
+  if (typeof input !== "object" || typeof input.byteOffset !== "number" || typeof input.byteLength !== "number") {
+    throw new Error("@smithy/util-base64: toBase64 encoder function only accepts string | Uint8Array.");
+  }
   return fromArrayBuffer(input.buffer, input.byteOffset, input.byteLength).toString("base64");
 };
