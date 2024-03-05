@@ -5,3 +5,7 @@ export * from "./getSmithyContext";
 export * from "./normalizeProvider";
 export * from "./protocols/requestBuilder";
 export { createPaginator } from "./pagination/createPaginator";
+export * from "./protocols/serde/SmithyModel";
+export * from "./protocols/serde/RuntimeModelInterpreter";
+export type { RuntimeModelInterpreterSerialization } from "./protocols/serde/RuntimeModelInterpreterSerialization";
+export type { RuntimeModelInterpreterDeserialization } from "./protocols/serde/RuntimeModelInterpreterDeserialization";
