@@ -8,4 +8,8 @@ describe(toBase64.name, () => {
   it.each(testCases as Array<[string, string, number[]]>)("%s", (desc, encoded, decoded) => {
     expect(toBase64(new Uint8Array(decoded))).toEqual(encoded);
   });
+
+  it("also converts strings", () => {
+    expect(toBase64("hello")).toEqual("aGVsbG8=");
+  });
 });

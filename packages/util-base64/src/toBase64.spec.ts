@@ -9,4 +9,8 @@ describe(toBase64.name, () => {
   it("should throw when given a number", () => {
     expect(() => toBase64(0xdeadbeefface as any)).toThrow();
   });
+
+  it("also converts strings", () => {
+    expect(toBase64("hello")).toEqual("aGVsbG8=");
+  });
 });
