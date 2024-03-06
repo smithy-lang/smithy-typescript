@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.2.5
+
+### Patch Changes
+
+- eea7af7d: fix: credential expiration extension log message
+- e136eb93: exporting Endpoint from credential-provider-imds to use for JSv3 EC2 IMDS utils
+
 ## 2.2.4
 
 ### Patch Changes

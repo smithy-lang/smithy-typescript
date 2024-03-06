@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.4
+
+### Patch Changes
+
+- Updated dependencies [eea7af7d]
+- Updated dependencies [e136eb93]
+  - @smithy/credential-provider-imds@2.2.5
+
 ## 2.2.3
 
 ### Patch Changes
