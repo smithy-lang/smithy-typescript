@@ -1,3 +1,5 @@
+import type { Encoder } from "@smithy/types";
+
 import { toUtf8 } from "./toUtf8";
 
 const utf8StringsToByteArrays: Record<string, Uint8Array> = {
@@ -143,5 +145,14 @@ describe("toUtf8", () => {
 
   it("should throw when given a number", () => {
     expect(() => toUtf8(255 as any)).toThrow();
+  });
+
+  it("passes through strings", () => {
+    expect(toUtf8("hello")).toEqual("hello");
+  });
+
+  it("throws on non-string non-Uint8Array", () => {
+    expect(() => (toUtf8 as Encoder)(new Date())).toThrow();
+    expect(() => (toUtf8 as Encoder)({})).toThrow();
   });
 });

@@ -12,15 +12,23 @@ export type Exact<Type1, Type2> = [Type1] extends [Type2] ? ([Type2] extends [Ty
 /**
  * @public
  *
- * A function that, given a TypedArray of bytes, can produce a string
- * representation thereof.
+ * A function that, given a Uint8Array of bytes, can produce a string
+ * representation thereof. The function may optionally attempt to
+ * convert other input types to Uint8Array before encoding.
  *
  * @example An encoder function that converts bytes to hexadecimal
- * representation would return `'deadbeef'` when given
- * `new Uint8Array([0xde, 0xad, 0xbe, 0xef])`.
+ * representation would return `'hello'` when given
+ * `new Uint8Array([104, 101, 108, 108, 111])`.
  */
 export interface Encoder {
-  (input: Uint8Array): string;
+  /**
+   * Caution: the `any` type on the input is for backwards compatibility.
+   * Runtime support is limited to Uint8Array and string by default.
+   *
+   * You may choose to support more encoder input types if overriding the default
+   * implementations.
+   */
+  (input: Uint8Array | string | any): string;
 }
 
 /**
@@ -30,8 +38,8 @@ export interface Encoder {
  * string.
  *
  * @example A decoder function that converts bytes to hexadecimal
- * representation would return `new Uint8Array([0xde, 0xad, 0xbe, 0xef])` when
- * given the string `'deadbeef'`.
+ * representation would return `new Uint8Array([104, 101, 108, 108, 111])` when
+ * given the string `'hello'`.
  */
 export interface Decoder {
   (input: string): Uint8Array;

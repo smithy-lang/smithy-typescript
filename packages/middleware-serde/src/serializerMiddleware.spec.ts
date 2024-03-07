@@ -1,4 +1,4 @@
-import { EndpointBearer } from "@smithy/types";
+import { EndpointBearer, SerdeFunctions } from "@smithy/types";
 
 import { serializerMiddleware } from "./serializerMiddleware";
 
@@ -13,7 +13,7 @@ describe("serializerMiddleware", () => {
         hostname: "hostname",
         path: "path",
       }),
-  };
+  } as EndpointBearer & SerdeFunctions;
 
   const mockRequest = {
     method: "GET",

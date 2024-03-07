@@ -5,11 +5,17 @@ import {
   DeserializeMiddleware,
   HandlerExecutionContext,
   ResponseDeserializer,
+  SerdeFunctions,
 } from "@smithy/types";
 
-export const deserializerMiddleware = <Input extends object, Output extends object, RuntimeUtils = any>(
-  options: RuntimeUtils,
-  deserializer: ResponseDeserializer<any, any, RuntimeUtils>
+/**
+ * @internal
+ *
+ * 3rd type parameter is deprecated and unused.
+ */
+export const deserializerMiddleware = <Input extends object, Output extends object, _ = any>(
+  options: SerdeFunctions,
+  deserializer: ResponseDeserializer<any, any, SerdeFunctions>
 ): DeserializeMiddleware<Input, Output> => (
   next: DeserializeHandler<Input, Output>,
   context: HandlerExecutionContext

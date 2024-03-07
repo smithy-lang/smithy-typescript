@@ -2,6 +2,7 @@ import {
   EndpointBearer,
   HandlerExecutionContext,
   RequestSerializer,
+  SerdeFunctions,
   SerializeHandler,
   SerializeHandlerArguments,
   SerializeHandlerOutput,
@@ -10,9 +11,14 @@ import {
 
 import type { V1OrV2Endpoint } from "./serdePlugin";
 
-export const serializerMiddleware = <Input extends object, Output extends object, RuntimeUtils extends EndpointBearer>(
-  options: V1OrV2Endpoint,
-  serializer: RequestSerializer<any, RuntimeUtils>
+/**
+ * @internal
+ *
+ * Note: 3rd type parameter is deprecated and unused.
+ */
+export const serializerMiddleware = <Input extends object, Output extends object, _>(
+  options: V1OrV2Endpoint & SerdeFunctions,
+  serializer: RequestSerializer<any, SerdeFunctions & EndpointBearer>
 ): SerializeMiddleware<Input, Output> => (
   next: SerializeHandler<Input, Output>,
   context: HandlerExecutionContext
@@ -28,7 +34,7 @@ export const serializerMiddleware = <Input extends object, Output extends object
     throw new Error("No valid endpoint provider available.");
   }
 
-  const request = await serializer(args.input, { ...options, endpoint } as RuntimeUtils);
+  const request = await serializer(args.input, { ...options, endpoint });
 
   return next({
     ...args,
