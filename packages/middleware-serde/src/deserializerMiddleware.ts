@@ -11,8 +11,6 @@ import {
 
 /**
  * @internal
- *
- * 3rd type parameter is deprecated and unused.
  */
 export const deserializerMiddleware = <
   Input extends object = any,
