@@ -1,13 +1,13 @@
 import {
   DeserializeHandlerOptions,
   Endpoint,
-  EndpointBearer,
   MetadataBearer,
   MiddlewareStack,
   Pluggable,
   Provider,
   RequestSerializer,
   ResponseDeserializer,
+  SerdeContext,
   SerdeFunctions,
   SerializeHandlerOptions,
   UrlParser,
@@ -45,10 +45,10 @@ export type V1OrV2Endpoint = {
  *
  * Note: 2nd type parameter is deprecated and unused.
  */
-export function getSerdePlugin<InputType extends object, _, OutputType extends MetadataBearer>(
+export function getSerdePlugin<InputType extends object, CommandSerdeContext extends SerdeContext, OutputType extends MetadataBearer>(
   config: V1OrV2Endpoint & SerdeFunctions,
-  serializer: RequestSerializer<any, SerdeFunctions & EndpointBearer>,
-  deserializer: ResponseDeserializer<OutputType, any, SerdeFunctions>
+  serializer: RequestSerializer<any, CommandSerdeContext>,
+  deserializer: ResponseDeserializer<OutputType, any, CommandSerdeContext>
 ): Pluggable<InputType, OutputType> {
   return {
     applyToStack: (commandStack: MiddlewareStack<InputType, OutputType>) => {

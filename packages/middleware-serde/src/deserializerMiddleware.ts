@@ -5,6 +5,7 @@ import {
   DeserializeMiddleware,
   HandlerExecutionContext,
   ResponseDeserializer,
+  SerdeContext,
   SerdeFunctions,
 } from "@smithy/types";
 
@@ -13,9 +14,9 @@ import {
  *
  * 3rd type parameter is deprecated and unused.
  */
-export const deserializerMiddleware = <Input extends object, Output extends object, _ = any>(
+export const deserializerMiddleware = <Input extends object, Output extends object, CommandSerdeContext extends SerdeContext = any>(
   options: SerdeFunctions,
-  deserializer: ResponseDeserializer<any, any, SerdeFunctions>
+  deserializer: ResponseDeserializer<any, any, CommandSerdeContext>
 ): DeserializeMiddleware<Input, Output> => (
   next: DeserializeHandler<Input, Output>,
   context: HandlerExecutionContext
@@ -24,7 +25,7 @@ export const deserializerMiddleware = <Input extends object, Output extends obje
 ): Promise<DeserializeHandlerOutput<Output>> => {
   const { response } = await next(args);
   try {
-    const parsed = await deserializer(response, options);
+    const parsed = await deserializer(response, options as CommandSerdeContext);
     return {
       response,
       output: parsed as Output,
