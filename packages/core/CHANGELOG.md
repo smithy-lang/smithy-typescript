@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.3.7
+
+### Patch Changes
+
+- Updated dependencies [32e3f6ff]
+  - @smithy/middleware-serde@2.2.1
+  - @smithy/middleware-endpoint@2.4.6
+  - @smithy/smithy-client@2.4.4
+  - @smithy/middleware-retry@2.1.6
+
 ## 1.3.6
 
 ### Patch Changes

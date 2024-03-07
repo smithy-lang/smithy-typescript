@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- 32e3f6ff: use SerdeFunctions as input type and SerdeContext as resolved type for serde plugin
+
 ## 2.2.0
 
 ### Minor Changes
