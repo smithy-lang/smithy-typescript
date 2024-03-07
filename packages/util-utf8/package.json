@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-utf8",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "A UTF-8 string <-> UInt8Array converter",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

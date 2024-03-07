@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.1.5
+
+### Patch Changes
+
+- Updated dependencies [43f3e1e2]
+  - @smithy/util-utf8@2.2.0
+  - @smithy/types@2.11.0
+  - @smithy/node-config-provider@2.2.5
+  - @smithy/protocol-http@3.2.2
+  - @smithy/util-middleware@2.1.4
+
 ## 2.1.4
 
 ### Patch Changes

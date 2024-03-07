@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.4.4
+
+### Patch Changes
+
+- Updated dependencies [43f3e1e2]
+  - @smithy/util-base64@2.2.0
+  - @smithy/types@2.11.0
+  - @smithy/protocol-http@3.2.2
+  - @smithy/querystring-builder@2.1.4
+
 ## 2.4.3
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.1.4
+
+### Patch Changes
+
+- Updated dependencies [43f3e1e2]
+  - @smithy/types@2.11.0
+  - @smithy/chunked-blob-reader-native@2.1.2
+
 ## 2.1.3
 
 ### Patch Changes

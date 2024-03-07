@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.11.0
+
+### Minor Changes
+
+- 43f3e1e2: encoders allow string inputs
+
 ## 2.10.1
 
 ### Patch Changes

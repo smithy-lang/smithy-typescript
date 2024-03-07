@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 43f3e1e2: encoders allow string inputs
+
+### Patch Changes
+
+- 49640d6c: allow deserializers to populate error response body
+- Updated dependencies [43f3e1e2]
+  - @smithy/types@2.11.0
+
 ## 2.1.3
 
 ### Patch Changes
