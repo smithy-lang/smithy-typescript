@@ -78,7 +78,12 @@ describe("deserializerMiddleware", () => {
   });
 
   it("adds a hint about $response to the message of the thrown error", async () => {
-    const exception = Object.assign(new Error("MockException"), mockNextResponse.response);
+    const exception = Object.assign(new Error("MockException"), mockNextResponse.response, {
+      $response: {
+        body: "",
+      },
+      $responseBodyText: "oh no",
+    });
     mockDeserializer.mockReset();
     mockDeserializer.mockRejectedValueOnce(exception);
     try {
@@ -88,6 +93,7 @@ describe("deserializerMiddleware", () => {
       expect(e.message).toContain(
         "to see the raw response, inspect the hidden field {error}.$response on this object."
       );
+      expect(e.$response.body).toEqual("oh no");
     }
   });
 });
