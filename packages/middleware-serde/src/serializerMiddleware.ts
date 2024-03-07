@@ -19,8 +19,8 @@ import type { V1OrV2Endpoint } from "./serdePlugin";
  * Note: 3rd type parameter is deprecated and unused.
  */
 export const serializerMiddleware = <
-  Input extends object,
-  Output extends object,
+  Input extends object = any,
+  Output extends object = any,
   CommandSerdeContext extends SerdeContext = any
 >(
   options: V1OrV2Endpoint & SerdeFunctions,

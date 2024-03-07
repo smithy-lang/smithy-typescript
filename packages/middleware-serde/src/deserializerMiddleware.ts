@@ -15,8 +15,8 @@ import {
  * 3rd type parameter is deprecated and unused.
  */
 export const deserializerMiddleware = <
-  Input extends object,
-  Output extends object,
+  Input extends object = any,
+  Output extends object = any,
   CommandSerdeContext extends SerdeContext = any
 >(
   options: SerdeFunctions,

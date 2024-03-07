@@ -43,12 +43,11 @@ export type V1OrV2Endpoint = {
 /**
  * @internal
  *
- * Note: 2nd type parameter is deprecated and unused.
  */
 export function getSerdePlugin<
-  InputType extends object,
-  CommandSerdeContext extends SerdeContext,
-  OutputType extends MetadataBearer
+  InputType extends object = any,
+  CommandSerdeContext extends SerdeContext = any,
+  OutputType extends MetadataBearer = any
 >(
   config: V1OrV2Endpoint & SerdeFunctions,
   serializer: RequestSerializer<any, CommandSerdeContext>,
