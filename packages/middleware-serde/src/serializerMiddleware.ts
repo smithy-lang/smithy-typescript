@@ -1,5 +1,7 @@
 import {
+  Endpoint,
   HandlerExecutionContext,
+  Provider,
   RequestSerializer,
   SerdeContext,
   SerdeFunctions,
@@ -16,7 +18,11 @@ import type { V1OrV2Endpoint } from "./serdePlugin";
  *
  * Note: 3rd type parameter is deprecated and unused.
  */
-export const serializerMiddleware = <Input extends object, Output extends object, CommandSerdeContext extends SerdeContext = any>(
+export const serializerMiddleware = <
+  Input extends object,
+  Output extends object,
+  CommandSerdeContext extends SerdeContext = any
+>(
   options: V1OrV2Endpoint & SerdeFunctions,
   serializer: RequestSerializer<any, CommandSerdeContext>
 ): SerializeMiddleware<Input, Output> => (
@@ -25,7 +31,7 @@ export const serializerMiddleware = <Input extends object, Output extends object
 ): SerializeHandler<Input, Output> => async (
   args: SerializeHandlerArguments<Input>
 ): Promise<SerializeHandlerOutput<Output>> => {
-  const endpoint =
+  const endpoint: Provider<Endpoint> =
     context.endpointV2?.url && options.urlParser
       ? async () => options.urlParser!(context.endpointV2!.url as URL)
       : options.endpoint!;
@@ -34,6 +40,13 @@ export const serializerMiddleware = <Input extends object, Output extends object
     throw new Error("No valid endpoint provider available.");
   }
 
+  /**
+   * [options] is upgraded from SerdeFunctions to CommandSerdeContext,
+   * since the generated serializer expects CommandSerdeContext.
+   *
+   * This is okay because options is from the same client's resolved config,
+   * and `endpoint` has been provided here by checking two sources.
+   */
   const request = await serializer(args.input, { ...options, endpoint } as CommandSerdeContext);
 
   return next({

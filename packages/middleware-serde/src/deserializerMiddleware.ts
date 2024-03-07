@@ -14,7 +14,11 @@ import {
  *
  * 3rd type parameter is deprecated and unused.
  */
-export const deserializerMiddleware = <Input extends object, Output extends object, CommandSerdeContext extends SerdeContext = any>(
+export const deserializerMiddleware = <
+  Input extends object,
+  Output extends object,
+  CommandSerdeContext extends SerdeContext = any
+>(
   options: SerdeFunctions,
   deserializer: ResponseDeserializer<any, any, CommandSerdeContext>
 ): DeserializeMiddleware<Input, Output> => (
@@ -25,6 +29,13 @@ export const deserializerMiddleware = <Input extends object, Output extends obje
 ): Promise<DeserializeHandlerOutput<Output>> => {
   const { response } = await next(args);
   try {
+    /**
+     * [options] is upgraded from SerdeFunctions to CommandSerdeContext,
+     * since the generated deserializer expects CommandSerdeContext.
+     *
+     * This is okay because options is from the same client's resolved config,
+     * and the deserializer doesn't need the `endpoint` field.
+     */
     const parsed = await deserializer(response, options as CommandSerdeContext);
     return {
       response,
