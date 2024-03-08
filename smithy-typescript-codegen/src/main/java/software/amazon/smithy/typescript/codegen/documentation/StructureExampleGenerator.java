@@ -132,7 +132,8 @@ public abstract class StructureExampleGenerator {
                     if (isInput) {
                         if (target.hasTrait(StreamingTrait.class)) {
                             append(indentation, buffer,
-                                "\"MULTIPLE_TYPES_ACCEPTED\", // see \@smithy/types -> StreamingBlobPayloadInputTypes");
+                                "\"MULTIPLE_TYPES_ACCEPTED\", // see \\@smithy/types -> StreamingBlobPayloadInputTypes"
+                            );
                         } else {
                             append(indentation, buffer,
                                 """
@@ -141,7 +142,7 @@ public abstract class StructureExampleGenerator {
                     } else {
                         if (target.hasTrait(StreamingTrait.class)) {
                             append(indentation, buffer,
-                                "\"<SdkStream>\", // see \@smithy/types -> StreamingBlobPayloadOutputTypes");
+                                "\"<SdkStream>\", // see \\@smithy/types -> StreamingBlobPayloadOutputTypes");
                         } else {
                             append(indentation, buffer,
                                 "new Uint8Array(),");
