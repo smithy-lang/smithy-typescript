@@ -212,12 +212,12 @@ final class CommandGenerator implements Runnable {
                 + String.format("const client = new %s(config);%n", serviceName)
                 + String.format("const input = %s%n",
                         StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getInputShape()).get(), model, false))
+                                model.getShape(operation.getInputShape()).get(), model, false, true))
                 + String.format("const command = new %s(input);%n", commandName)
                 + "const response = await client.send(command);\n"
                 + String.format("%s%n",
                         StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getOutputShape()).get(), model, true))
+                                model.getShape(operation.getOutputShape()).get(), model, true, false))
                 + "\n```\n"
                 + "\n"
                 + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
