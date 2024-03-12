@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- 8e8f3513: allow arrays to stand in for Uint8Array in toBase64
+
 ## 2.2.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.2
+
+### Patch Changes
+
+- 511206e5: reduce buffer copies
+
 ## 2.2.1
 
 ### Patch Changes

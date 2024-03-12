@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.5
+
+### Patch Changes
+
+- Updated dependencies [8e8f3513]
+- Updated dependencies [511206e5]
+  - @smithy/util-base64@2.2.1
+  - @smithy/node-http-handler@2.4.3
+  - @smithy/fetch-http-handler@2.4.5
+
 ## 2.1.4
 
 ### Patch Changes
