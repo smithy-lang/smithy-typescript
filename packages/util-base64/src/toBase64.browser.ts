@@ -17,9 +17,17 @@ export function toBase64(_input: Uint8Array | string): string {
   } else {
     input = _input as Uint8Array;
   }
-  if (typeof input !== "object" || typeof input.byteOffset !== "number" || typeof input.byteLength !== "number") {
+
+  const isArrayLike = typeof input === "object" && typeof input.length === "number";
+  const isUint8Array =
+    typeof input === "object" &&
+    typeof (input as Uint8Array).byteOffset === "number" &&
+    typeof (input as Uint8Array).byteLength === "number";
+
+  if (!isArrayLike && !isUint8Array) {
     throw new Error("@smithy/util-base64: toBase64 encoder function only accepts string | Uint8Array.");
   }
+
   let str = "";
   for (let i = 0; i < input.length; i += 3) {
     let bits = 0;
