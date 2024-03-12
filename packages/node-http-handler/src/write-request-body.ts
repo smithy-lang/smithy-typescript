@@ -58,9 +58,30 @@ function writeBody(
   if (body instanceof Readable) {
     // pipe automatically handles end
     body.pipe(httpRequest);
-  } else if (body) {
-    httpRequest.end(Buffer.from(body as Parameters<typeof Buffer.from>[0]));
-  } else {
-    httpRequest.end();
+    return;
   }
+
+  if (body) {
+    if (Buffer.isBuffer(body) || typeof body === "string") {
+      httpRequest.end(body);
+      return;
+    }
+
+    const uint8 = body as Uint8Array;
+    if (
+      typeof uint8 === "object" &&
+      uint8.buffer &&
+      typeof uint8.byteOffset === "number" &&
+      typeof uint8.byteLength === "number"
+    ) {
+      // this avoids copying the array.
+      httpRequest.end(Buffer.from(uint8.buffer, uint8.byteOffset, uint8.byteLength));
+      return;
+    }
+
+    httpRequest.end(Buffer.from(body as ArrayBuffer));
+    return;
+  }
+
+  httpRequest.end();
 }
