@@ -16,7 +16,7 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: gradle/wrapper-validation-action@v1
 
       - name: Set up JDK ${{ matrix.java }}
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     name: TypeScript Lint
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -46,7 +46,7 @@ jobs:
     runs-on: smithy-typescript_ubuntu-latest_8-core
     name: TypeScript Test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 14
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ensure TypeScript is formatted
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ensure TypeScript packages have changesets
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         # Include full git history needed for `yarn changeset status`
         with:
           ref: ${{github.event.pull_request.head.sha}}
