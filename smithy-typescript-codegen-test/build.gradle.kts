@@ -30,7 +30,7 @@ repositories {
 dependencies {
     val smithyVersion: String by project
 
-    // Put plugins and integrations on the
+    // Put plugins and integrations on the smithy build classpath
     smithyBuild(project(":smithy-typescript-codegen"))
     smithyBuild(project(":smithy-typescript-codegen-test:example-weather-customizations"))
     smithyBuild(project(":smithy-typescript-ssdk-codegen-test-utils"))
