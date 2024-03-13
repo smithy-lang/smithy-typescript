@@ -1,5 +1,13 @@
 $version: "2.0"
 
+metadata suppressions = [
+    {
+        id: "UnstableTrait.smithy"
+        namespace: "example.weather"
+        reason: "Unstable traits are expected in test model, do not emit warning on them."
+    }
+]
+
 namespace example.weather
 
 use aws.auth#sigv4
@@ -39,50 +47,61 @@ service Weather {
     ]
 }
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpApiKeyAuth")
 @auth([httpApiKeyAuth])
 operation OnlyHttpApiKeyAuth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpBearerAuth")
 @auth([httpBearerAuth])
 operation OnlyHttpBearerAuth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlySigv4Auth")
 @auth([sigv4])
 operation OnlySigv4Auth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpApiKeyAndBearerAuth")
 @auth([httpApiKeyAuth, httpBearerAuth])
 operation OnlyHttpApiKeyAndBearerAuth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpApiKeyAndBearerAuthReversed")
 @auth([httpBearerAuth, httpApiKeyAuth])
 operation OnlyHttpApiKeyAndBearerAuthReversed {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpApiKeyAuthOptional")
 @auth([httpApiKeyAuth])
 @optionalAuth
 operation OnlyHttpApiKeyAuthOptional {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpBearerAuthOptional")
 @auth([httpBearerAuth])
 @optionalAuth
 operation OnlyHttpBearerAuthOptional {}
 
+@readonly
 @http(method: "GET", uri: "/OnlySigv4AuthOptional")
 @auth([sigv4])
 @optionalAuth
 operation OnlySigv4AuthOptional {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyFakeAuth")
 @auth([fakeAuth])
 operation OnlyFakeAuth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyFakeAuthOptional")
 @auth([fakeAuth])
 @optionalAuth
 operation OnlyFakeAuthOptional {}
 
+@readonly
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
 

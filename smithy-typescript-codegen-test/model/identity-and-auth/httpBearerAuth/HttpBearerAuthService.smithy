@@ -14,14 +14,17 @@ service HttpBearerAuthService {
     ]
 }
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpBearerAuth")
 @auth([httpBearerAuth])
 operation OnlyHttpBearerAuth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpBearerAuthOptional")
 @auth([httpBearerAuth])
 @optionalAuth
 operation OnlyHttpBearerAuthOptional {}
 
+@readonly
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
