@@ -3,7 +3,41 @@ updates:
   - package-ecosystem: "gradle"
     # Look for `build.gradle.kts` file in the `root` directory
     directory: "/"
-    # Check for updates every day (weekdays)
+    # Check for updates every wednesday
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+      day: "wednesday"
+    groups:
+      test-deps:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.hamcrest:*"
+        # Ignore major version updates
+        update-types:
+          - "minor"
+          - "patch"
+      gradle-deps:
+        # Ignore major version updates
+        update-types:
+          - "minor"
+          - "patch"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "npm"
+    # Look for `yarn.lock` file in the `root` directory
+    directory: "/"
+    # Check for updates every wednesday
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    # Check for updates every wednesday
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    groups:
+      github:
+        # Ignore major version updates
+        update-types:
+          - "minor"
+          - "patch"
