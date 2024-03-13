@@ -104,12 +104,13 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
     /**
      * Imports a type using an alias from a module only if necessary.
      *
-     * @deprecated Use {@link TypeScriptWriter#addImport(String, String, TypeScriptDependency)} addImport}
-     *
      * @param name Type to import.
      * @param as Alias to refer to the type as.
      * @param from Module to import the type from.
+     *
      * @return Returns the writer.
+     *
+     * @deprecated Use {@link TypeScriptWriter#addImport(String, String, TypeScriptDependency)} addImport}
      */
     @Deprecated
     public TypeScriptWriter addImport(String name, String as, String from) {
