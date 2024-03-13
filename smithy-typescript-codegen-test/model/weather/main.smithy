@@ -11,11 +11,11 @@ metadata suppressions = [
 namespace example.weather
 
 use aws.auth#sigv4
+use common#fakeAuth
+use common#fakeProtocol
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 use smithy.waiters#waitable
-use common#fakeProtocol
-use common#fakeAuth
 
 /// Provides weather forecasts.
 @fakeProtocol
@@ -27,7 +27,9 @@ use common#fakeAuth
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
 service Weather {
     version: "2006-03-01"
-    resources: [City]
+    resources: [
+        City
+    ]
     operations: [
         GetCurrentTime
         // util-stream.integ.spec.ts
@@ -106,21 +108,26 @@ operation OnlyFakeAuthOptional {}
 operation SameAsService {}
 
 resource City {
-    identifiers: {cityId: CityId}
+    identifiers: { cityId: CityId }
     create: CreateCity
     read: GetCity
     list: ListCities
-    resources: [Forecast, CityImage]
-    operations: [GetCityAnnouncements]
+    resources: [
+        Forecast
+        CityImage
+    ]
+    operations: [
+        GetCityAnnouncements
+    ]
 }
 
 resource Forecast {
-    identifiers: {cityId: CityId}
+    identifiers: { cityId: CityId }
     read: GetForecast
 }
 
 resource CityImage {
-    identifiers: {cityId: CityId}
+    identifiers: { cityId: CityId }
     read: GetCityImage
 }
 
@@ -134,32 +141,31 @@ string CityId
 operation GetCity {
     input: GetCityInput
     output: GetCityOutput
-    errors: [NoSuchResource]
+    errors: [
+        NoSuchResource
+    ]
 }
 
 // Tests that HTTP protocol tests are generated.
-apply GetCity @httpRequestTests(
-    [
-        {
-            id: "WriteGetCityAssertions"
-            documentation: "Does something"
-            protocol: "common#fakeProtocol"
-            method: "GET"
-            uri: "/cities/123"
-            body: ""
-            params: {cityId: "123"}
-        }
-    ]
-)
+apply GetCity @httpRequestTests([
+    {
+        id: "WriteGetCityAssertions"
+        documentation: "Does something"
+        protocol: "common#fakeProtocol"
+        method: "GET"
+        uri: "/cities/123"
+        body: ""
+        params: { cityId: "123" }
+    }
+])
 
-apply GetCity @httpResponseTests(
-    [
-        {
-            id: "WriteGetCityResponseAssertions"
-            documentation: "Does something"
-            protocol: "common#fakeProtocol"
-            code: 200
-            body: """
+apply GetCity @httpResponseTests([
+    {
+        id: "WriteGetCityResponseAssertions"
+        documentation: "Does something"
+        protocol: "common#fakeProtocol"
+        code: 200
+        body: """
             {
                 "name": "Seattle",
                 "coordinates": {
@@ -173,15 +179,14 @@ apply GetCity @httpResponseTests(
                     "case": "Upper"
                 }
             }"""
-            bodyMediaType: "application/json"
-            params: {
-                name: "Seattle"
-                coordinates: {latitude: 12.34, longitude: -56.78}
-                city: {cityId: "123", name: "Seattle", number: "One", case: "Upper"}
-            }
+        bodyMediaType: "application/json"
+        params: {
+            name: "Seattle"
+            coordinates: { latitude: 12.34, longitude: -56.78 }
+            city: { cityId: "123", name: "Seattle", number: "One", case: "Upper" }
         }
-    ]
-)
+    }
+])
 
 /// The input used to get a city.
 structure GetCityInput {
@@ -246,23 +251,21 @@ structure NoSuchResource {
     message: String
 }
 
-apply NoSuchResource @httpResponseTests(
-    [
-        {
-            id: "WriteNoSuchResourceAssertions"
-            documentation: "Does something"
-            protocol: "common#fakeProtocol"
-            code: 404
-            body: """
+apply NoSuchResource @httpResponseTests([
+    {
+        id: "WriteNoSuchResourceAssertions"
+        documentation: "Does something"
+        protocol: "common#fakeProtocol"
+        code: 404
+        body: """
             {
                 "resourceType": "City",
                 "message": "Your custom message"
             }"""
-            bodyMediaType: "application/json"
-            params: {resourceType: "City", message: "Your custom message"}
-        }
-    ]
-)
+        bodyMediaType: "application/json"
+        params: { resourceType: "City", message: "Your custom message" }
+    }
+])
 
 // The paginated trait indicates that the operation may
 // return truncated results.
@@ -275,12 +278,12 @@ apply NoSuchResource @httpResponseTests(
             {
                 state: "success"
                 matcher: {
-                    output: {path: "length(items[]) > `0`", comparator: "booleanEquals", expected: "true"}
+                    output: { path: "length(items[]) > `0`", comparator: "booleanEquals", expected: "true" }
                 }
             }
             {
                 state: "failure"
-                matcher: {errorType: "NoSuchResource"}
+                matcher: { errorType: "NoSuchResource" }
             }
         ]
     }
@@ -288,24 +291,24 @@ apply NoSuchResource @httpResponseTests(
 operation ListCities {
     input: ListCitiesInput
     output: ListCitiesOutput
-    errors: [NoSuchResource]
+    errors: [
+        NoSuchResource
+    ]
 }
 
-apply ListCities @httpRequestTests(
-    [
-        {
-            id: "WriteListCitiesAssertions"
-            documentation: "Does something"
-            protocol: "common#fakeProtocol"
-            method: "GET"
-            uri: "/cities"
-            body: ""
-            queryParams: ["pageSize=50"]
-            forbidQueryParams: ["nextToken"]
-            params: {pageSize: 50}
-        }
-    ]
-)
+apply ListCities @httpRequestTests([
+    {
+        id: "WriteListCitiesAssertions"
+        documentation: "Does something"
+        protocol: "common#fakeProtocol"
+        method: "GET"
+        uri: "/cities"
+        body: ""
+        queryParams: ["pageSize=50"]
+        forbidQueryParams: ["nextToken"]
+        params: { pageSize: 50 }
+    }
+])
 
 structure ListCitiesInput {
     @httpQuery("nextToken")
@@ -328,11 +331,11 @@ list CitySummaries {
 }
 
 // CitySummary contains a reference to a City.
-@references(
-    [
-        {resource: City}
-    ]
-)
+@references([
+    {
+        resource: City
+    }
+])
 structure CitySummary {
     @required
     cityId: CityId
@@ -426,7 +429,9 @@ map StringMap {
 operation GetCityImage {
     input: GetCityImageInput
     output: GetCityImageOutput
-    errors: [NoSuchResource]
+    errors: [
+        NoSuchResource
+    ]
 }
 
 structure GetCityImageInput {
@@ -450,7 +455,9 @@ blob CityImageData
 operation GetCityAnnouncements {
     input: GetCityAnnouncementsInput
     output: GetCityAnnouncementsOutput
-    errors: [NoSuchResource]
+    errors: [
+        NoSuchResource
+    ]
 }
 
 structure GetCityAnnouncementsInput {
@@ -480,28 +487,24 @@ structure Message {
 }
 
 apply Weather @smithy.rules#endpointRuleSet({
-  "version": "1.3",
-  "parameters": {
-    "Region": {
-      "required": true,
-      "type": "String",
-      "documentation": "docs"
+    version: "1.3"
+    parameters: {
+        Region: { required: true, type: "String", documentation: "docs" }
     }
-  },
-  "rules": [
-    {
-      "conditions": [],
-      "documentation": "base rule",
-      "endpoint": {
-        "url": "https://{Region}.amazonaws.com",
-        "properties": {},
-        "headers": {}
-      },
-      "type": "endpoint"
-    }
-  ]
+    rules: [
+        {
+            conditions: []
+            documentation: "base rule"
+            endpoint: {
+                url: "https://{Region}.amazonaws.com"
+                properties: {}
+                headers: {}
+            }
+            type: "endpoint"
+        }
+    ]
 })
 
 apply Weather @smithy.rules#clientContextParams(
-  Region: {type: "string", documentation: "docs"}
+    Region: { type: "string", documentation: "docs" }
 )
