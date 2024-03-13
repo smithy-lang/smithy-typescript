@@ -13,13 +13,15 @@
  * permissions and limitations under the License.
  */
 
+import com.github.spotbugs.snom.Effort
+
 plugins {
     `java-library`
     `maven-publish`
     signing
     checkstyle
     jacoco
-    id("com.github.spotbugs") version "5.1.3"
+    id("com.github.spotbugs") version "6.0.8"
     id("io.codearte.nexus-staging") version "0.30.0"
 }
 
@@ -87,9 +89,9 @@ subprojects {
 
         // Apply junit 5 and hamcrest test dependencies to all java projects.
         dependencies {
-            testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-            testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+            testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+            testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
             testImplementation("org.hamcrest:hamcrest:2.2")
         }
 
@@ -249,7 +251,7 @@ subprojects {
 
         // Configure the bug filter for spotbugs.
         spotbugs {
-            setEffort("max")
+            effort.set(Effort.MAX)
             val excludeFile = File("${project.rootDir}/config/spotbugs/filter.xml")
             if (excludeFile.exists()) {
                 excludeFilter.set(excludeFile)
