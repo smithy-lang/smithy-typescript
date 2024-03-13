@@ -14,14 +14,17 @@ service HttpApiKeyAuthService {
     ]
 }
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpApiKeyAuth")
 @auth([httpApiKeyAuth])
 operation OnlyHttpApiKeyAuth {}
 
+@readonly
 @http(method: "GET", uri: "/OnlyHttpApiKeyAuthOptional")
 @auth([httpApiKeyAuth])
 @optionalAuth
 operation OnlyHttpApiKeyAuthOptional {}
 
+@readonly
 @http(method: "GET", uri: "/SameAsService")
 operation SameAsService {}
