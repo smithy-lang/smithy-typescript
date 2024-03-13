@@ -3,24 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-tasks["jar"].enabled = false
-
-val smithyVersion: String by project
-val version: String by project
-
-buildscript {
-    val smithyVersion: String by project
-
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
-    }
-}
-
 plugins {
-    id("software.amazon.smithy")
+    java
+    id("software.amazon.smithy.gradle.smithy-base")
 }
 
 repositories {
@@ -28,8 +13,18 @@ repositories {
 }
 
 dependencies {
-    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:$version!!")
-    implementation("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:$version!!")
+    val smithyVersion: String by project
+    val version: String by project
+
+    smithyBuild("software.amazon.smithy.typescript:smithy-typescript-codegen:$version!!")
+    smithyBuild("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:$version!!")
+    smithyBuild(project(":smithy-typescript-codegen-test:example-weather-customizations"))
+
+    // Explicitly configure for CLI version
+    smithyBuild("software.amazon.smithy:smithy-model:$smithyVersion")
+
+    // Includes example model so must be runtime dependency
     implementation(project(":smithy-typescript-codegen-test"))
-    implementation(project(":smithy-typescript-codegen-test:example-weather-customizations"))
 }
+
+tasks["jar"].enabled = false

@@ -27,16 +27,20 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
     dependencies {
-        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
+        classpath("software.amazon.smithy:smithy-model:$smithyVersion")
     }
 }
 
 dependencies {
+    val smithyVersion: String by project
+
     api("software.amazon.smithy:smithy-codegen-core:$smithyVersion")
     api("software.amazon.smithy:smithy-model:$smithyVersion")
     api("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
     api("software.amazon.smithy:smithy-waiters:$smithyVersion")
+
     implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
 }
 
@@ -51,16 +55,16 @@ sourceSets {
 tasks.register("set-dependency-versions") {
     doLast {
         mkdir("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen")
-        var versionsFile =
+        val versionsFile =
                 file("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties")
-        var roots = project.file("../packages").listFiles().toMutableList() + project.file("../smithy-typescript-ssdk-libs").listFiles().toList()
+        val roots = project.file("../packages").listFiles().toMutableList() + project.file("../smithy-typescript-ssdk-libs").listFiles().toList()
         roots.forEach { packageDir ->
-            var packageJsonFile = File(packageDir, "package.json")
+            val packageJsonFile = File(packageDir, "package.json")
             if (packageJsonFile.isFile()) {
-                var packageJson = Node.parse(packageJsonFile.readText()).expectObjectNode()
-                var packageName = packageJson.expectStringMember("name").getValue()
-                var packageVersion = packageJson.expectStringMember("version").getValue()
-                var isPrivate = packageJson.getBooleanMemberOrDefault("private", false)
+                val packageJson = Node.parse(packageJsonFile.readText()).expectObjectNode()
+                val packageName = packageJson.expectStringMember("name").getValue()
+                val packageVersion = packageJson.expectStringMember("version").getValue()
+                val isPrivate = packageJson.getBooleanMemberOrDefault("private", false)
                 if (!isPrivate) {
                     versionsFile.appendText("$packageName=$packageVersion\n")
                 }

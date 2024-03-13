@@ -16,23 +16,10 @@
 extra["displayName"] = "Smithy :: Typescript :: Codegen :: Test"
 extra["moduleName"] = "software.amazon.smithy.typescript.codegen.test"
 
-val smithyVersion: String by project
-
-buildscript {
-    val smithyVersion: String by project
-
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
-    }
-}
 
 plugins {
-    val smithyGradleVersion: String by project
-
-    id("software.amazon.smithy").version(smithyGradleVersion)
+    `java-library`
+    id("software.amazon.smithy.gradle.smithy-jar")
 }
 
 repositories {
@@ -41,9 +28,13 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":smithy-typescript-codegen"))
-    implementation(project(":smithy-typescript-codegen-test:example-weather-customizations"))
-    implementation(project(":smithy-typescript-ssdk-codegen-test-utils"))
+    val smithyVersion: String by project
+
+    // Put plugins and integrations on the smithy build classpath
+    smithyBuild(project(":smithy-typescript-codegen"))
+    smithyBuild(project(":smithy-typescript-codegen-test:example-weather-customizations"))
+    smithyBuild(project(":smithy-typescript-ssdk-codegen-test-utils"))
+
     implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
     implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
