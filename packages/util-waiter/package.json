@@ -5,7 +5,7 @@
   "dependencies": {
     "@smithy/abort-controller": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   },
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",

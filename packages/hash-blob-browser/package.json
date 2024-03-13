@@ -25,7 +25,7 @@
     "@smithy/chunked-blob-reader": "workspace:^",
     "@smithy/chunked-blob-reader-native": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@aws-crypto/sha256-js": "3.0.0",
@@ -39,9 +39,9 @@
     "karma": "6.4.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "3.1.1",
-    "karma-coverage": "2.2.0",
+    "karma-coverage": "2.2.1",
     "karma-env-preprocessor": "0.1.1",
-    "karma-firefox-launcher": "2.1.2",
+    "karma-firefox-launcher": "2.1.3",
     "karma-jasmine": "5.1.0",
     "karma-mocha": "2.0.1",
     "karma-sourcemap-loader": "0.3.8",
