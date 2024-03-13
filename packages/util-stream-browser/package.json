@@ -27,7 +27,7 @@
     "@smithy/util-base64": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "concurrently": "7.0.0",
