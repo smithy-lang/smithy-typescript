@@ -14,6 +14,7 @@
  */
 
 import com.github.spotbugs.snom.Effort
+import org.jreleaser.model.Active
 
 plugins {
     `java-library`
@@ -22,7 +23,7 @@ plugins {
     checkstyle
     jacoco
     id("com.github.spotbugs") version "6.0.8"
-    id("io.codearte.nexus-staging") version "0.30.0"
+    id("org.jreleaser") version "1.9.0"
 }
 
 allprojects {
@@ -36,27 +37,6 @@ tasks["jar"].enabled = false
 // Load the Sonatype user/password for use in publishing tasks.
 val sonatypeUser: String? by project
 val sonatypePassword: String? by project
-
-/*
- * Sonatype Staging Finalization
- * ====================================================
- *
- * When publishing to Maven Central, we need to close the staging
- * repository and release the artifacts after they have been
- * validated. This configuration is for the root project because
- * it operates at the "group" level.
- */
-if (sonatypeUser != null && sonatypePassword != null) {
-    apply(plugin = "io.codearte.nexus-staging")
-
-    nexusStaging {
-        packageGroup = "software.amazon"
-        stagingProfileId = "e789115b6c941"
-
-        username = sonatypeUser
-        password = sonatypePassword
-    }
-}
 
 repositories {
     mavenLocal()
@@ -140,12 +120,9 @@ subprojects {
 
         publishing {
             repositories {
-                mavenCentral {
-                    url = uri("https://aws.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = sonatypeUser
-                        password = sonatypePassword
-                    }
+                maven {
+                    name = "stagingRepository"
+                    url = uri("${rootProject.buildDir}/staging")
                 }
             }
 
@@ -162,7 +139,7 @@ subprojects {
                         pom {
                             name.set(subproject.extra["displayName"].toString())
                             description.set(subproject.description)
-                            url.set("https://github.com/awslabs/smithy")
+                            url.set("https://github.com/smithy-lang/smithy-typescript")
                             licenses {
                                 license {
                                     name.set("Apache License 2.0")
@@ -180,7 +157,7 @@ subprojects {
                                 }
                             }
                             scm {
-                                url.set("https://github.com/awslabs/smithy.git")
+                                url.set("https://github.com/smithy-lang/smithy-typescript.git")
                             }
                         }
                     }
@@ -255,6 +232,54 @@ subprojects {
             val excludeFile = File("${project.rootDir}/config/spotbugs/filter.xml")
             if (excludeFile.exists()) {
                 excludeFilter.set(excludeFile)
+            }
+        }
+    }
+}
+
+/*
+ * Jreleaser (https://jreleaser.org) config.
+ */
+jreleaser {
+    dryrun = false
+
+    // Used for creating a tagged release, uploading files and generating changelog.
+    // In the future we can set this up to push release tags to GitHub, but for now it's
+    // set up to do nothing.
+    // https://jreleaser.org/guide/latest/reference/release/index.html
+    release {
+        generic {
+            enabled = true
+            skipRelease = true
+        }
+    }
+
+    // Used to announce a release to configured announcers.
+    // https://jreleaser.org/guide/latest/reference/announce/index.html
+    announce {
+        active = Active.NEVER
+    }
+
+    // Signing configuration.
+    // https://jreleaser.org/guide/latest/reference/signing.html
+    signing {
+        active = Active.ALWAYS
+        armored = true
+    }
+
+    // Configuration for deploying to Maven Central.
+    // https://jreleaser.org/guide/latest/examples/maven/maven-central.html#_gradle
+    deploy {
+        maven {
+            nexus2 {
+                create("maven-central") {
+                    active = Active.ALWAYS
+                    url = "https://aws.oss.sonatype.org/service/local"
+                    snapshotUrl = "https://aws.oss.sonatype.org/content/repositories/snapshots"
+                    closeRepository.set(true)
+                    releaseRepository.set(true)
+                    stagingRepositories.add("${rootProject.buildDir}/staging")
+                }
             }
         }
     }
