@@ -33,7 +33,7 @@ jobs:
     name: TypeScript Lint
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: "yarn"
@@ -47,7 +47,7 @@ jobs:
     name: TypeScript Test
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 14
           cache: "yarn"
@@ -73,7 +73,7 @@ jobs:
     name: Ensure TypeScript is formatted
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: "yarn"
@@ -97,7 +97,7 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.sha}}
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: "yarn"
