@@ -29,7 +29,7 @@
     "@smithy/types": "workspace:^",
     "@smithy/url-parser": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@tsconfig/recommended": "1.0.1",

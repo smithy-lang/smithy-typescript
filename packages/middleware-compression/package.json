@@ -23,7 +23,7 @@
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
     "fflate": "0.8.1",
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@tsconfig/recommended": "1.0.1",

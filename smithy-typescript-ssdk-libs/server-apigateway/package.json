@@ -30,7 +30,7 @@
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@types/aws-lambda": "^8.10.72",
-    "tslib": "^1.8.0"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@types/node": "^14.14.37",

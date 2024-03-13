@@ -78,7 +78,7 @@ __metadata:
     downlevel-dts: ^0.7.0
     jest: 28.1.1
     rimraf: ^3.0.2
-    tslib: ^1.8.0
+    tslib: ^2.6.2
     typescript: ~4.9.5
   languageName: unknown
   linkType: soft
@@ -95,7 +95,7 @@ __metadata:
     jest: 28.1.1
     re2-wasm: ^1.0.2
     rimraf: ^3.0.2
-    tslib: ^1.8.0
+    tslib: ^2.6.2
     typescript: ^4.9.5
   languageName: unknown
   linkType: soft
@@ -111,7 +111,7 @@ __metadata:
     downlevel-dts: ^0.7.0
     jest: 28.1.1
     rimraf: ^3.0.2
-    tslib: ^1.8.0
+    tslib: ^2.6.2
     typescript: ~4.9.5
   languageName: unknown
   linkType: soft
@@ -1883,7 +1883,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1897,7 +1897,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1910,7 +1910,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1927,7 +1927,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1947,7 +1947,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1966,7 +1966,7 @@ __metadata:
     downlevel-dts: 0.10.1
     nock: ^13.0.2
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1984,7 +1984,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -1999,7 +1999,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2013,7 +2013,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2029,7 +2029,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2046,7 +2046,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2067,7 +2067,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2099,7 +2099,7 @@ __metadata:
     karma-typescript: 5.5.3
     karma-webpack: 5.0.0
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
     webpack: 5.76.0
     webpack-cli: 4.10.0
@@ -2133,7 +2133,7 @@ __metadata:
     karma-typescript: 5.5.3
     karma-webpack: 5.0.0
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
     webpack: 5.76.0
     webpack-cli: 4.10.0
@@ -2153,7 +2153,7 @@ __metadata:
     downlevel-dts: 0.10.1
     hash-test-vectors: ^1.3.2
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2171,7 +2171,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2185,7 +2185,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2198,7 +2198,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2217,7 +2217,7 @@ __metadata:
     downlevel-dts: 0.10.1
     hash-test-vectors: ^1.3.2
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2234,7 +2234,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2255,7 +2255,7 @@ __metadata:
     downlevel-dts: 0.10.1
     fflate: 0.8.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     web-streams-polyfill: 3.2.1
   languageName: unknown
   linkType: soft
@@ -2271,7 +2271,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2290,7 +2290,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2312,7 +2312,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
     uuid: ^8.3.2
   languageName: unknown
@@ -2328,7 +2328,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2342,7 +2342,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2359,7 +2359,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2377,7 +2377,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2391,7 +2391,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2405,7 +2405,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2420,7 +2420,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2434,7 +2434,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2448,7 +2448,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
   languageName: unknown
   linkType: soft
 
@@ -2475,7 +2475,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2497,7 +2497,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2516,7 +2516,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2529,7 +2529,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2544,7 +2544,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2560,7 +2560,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2573,7 +2573,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2587,7 +2587,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2602,7 +2602,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2616,7 +2616,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2634,7 +2634,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2654,7 +2654,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2670,7 +2670,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2683,7 +2683,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2698,7 +2698,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2714,7 +2714,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2731,7 +2731,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2747,7 +2747,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2782,7 +2782,7 @@ __metadata:
     karma-typescript: 5.5.3
     karma-webpack: 5.0.0
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
     webpack: 5.76.0
     webpack-cli: 4.10.0
@@ -2799,7 +2799,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
     typescript: ~4.9.5
   languageName: unknown
@@ -2813,7 +2813,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2827,7 +2827,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -2842,7 +2842,7 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     rimraf: 3.0.2
-    tslib: ^2.5.0
+    tslib: ^2.6.2
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
@@ -10662,7 +10662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.11.1, tslib@npm:^1.8.0, tslib@npm:^1.8.1, tslib@npm:^1.9.0":
+"tslib@npm:^1.11.1, tslib@npm:^1.8.1, tslib@npm:^1.9.0":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
@@ -10680,6 +10680,13 @@ __metadata:
   version: 2.5.0
   resolution: "tslib@npm:2.5.0"
   checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.6.2":
+  version: 2.6.2
+  resolution: "tslib@npm:2.6.2"
+  checksum: 329ea56123005922f39642318e3d1f0f8265d1e7fcb92c633e0809521da75eeaca28d2cf96d7248229deb40e5c19adf408259f4b9640afd20d13aecc1430f3ad
   languageName: node
   linkType: hard
 
