@@ -27,7 +27,7 @@ jobs:
           echo "porcelain=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
       - name: Configure AWS Credentials
         id: credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
