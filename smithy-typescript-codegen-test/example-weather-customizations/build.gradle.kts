@@ -3,20 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-val smithyVersion: String by project
-
-buildscript {
-    val smithyVersion: String by project
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-    dependencies {
-        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
-    }
-}
-
 plugins {
     `java-library`
 }
