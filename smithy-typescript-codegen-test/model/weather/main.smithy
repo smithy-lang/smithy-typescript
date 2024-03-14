@@ -167,17 +167,17 @@ apply GetCity @httpResponseTests([
         code: 200
         body: """
             {
-            "name": "Seattle",
-            "coordinates": {
-            "latitude": 12.34,
-            "longitude": -56.78
-            },
-            "city": {
-            "cityId": "123",
-            "name": "Seattle",
-            "number": "One",
-            "case": "Upper"
-            }
+                "name": "Seattle",
+                "coordinates": {
+                    "latitude": 12.34,
+                    "longitude": -56.78
+                },
+                "city": {
+                    "cityId": "123",
+                    "name": "Seattle",
+                    "number": "One",
+                    "case": "Upper"
+                }
             }"""
         bodyMediaType: "application/json"
         params: {
@@ -259,8 +259,8 @@ apply NoSuchResource @httpResponseTests([
         code: 404
         body: """
             {
-            "resourceType": "City",
-            "message": "Your custom message"
+                "resourceType": "City",
+                "message": "Your custom message"
             }"""
         bodyMediaType: "application/json"
         params: { resourceType: "City", message: "Your custom message" }
