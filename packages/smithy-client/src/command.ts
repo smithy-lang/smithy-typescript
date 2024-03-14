@@ -11,6 +11,7 @@ import type {
   Logger,
   MetadataBearer,
   MiddlewareStack as IMiddlewareStack,
+  OptionalParameter,
   Pluggable,
   RequestHandler,
   SerdeContext,
@@ -218,6 +219,7 @@ class ClassBuilder<
    */
   public build(): {
     new (input: I): CommandImpl<I, O, C, SI, SO>;
+    new (...[input]: OptionalParameter<I>): CommandImpl<I, O, C, SI, SO>;
     getEndpointParameterInstructions(): EndpointParameterInstructions;
   } {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -225,6 +227,8 @@ class ClassBuilder<
     let CommandRef: any;
 
     return (CommandRef = class extends Command<I, O, C, SI, SO> {
+      public readonly input: I;
+
       /**
        * @public
        */
@@ -235,8 +239,9 @@ class ClassBuilder<
       /**
        * @public
        */
-      public constructor(readonly input: I) {
+      public constructor(...[input]: OptionalParameter<I>) {
         super();
+        this.input = input ?? (({} as unknown) as I);
         closure._init(this);
       }
 

@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -94,19 +95,28 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 writer.writeDocs(
                     "@see {@link " + operationSymbol.getName() + "}"
                 );
-                writer.write("$L(\n"
-                            + "  args: $T,\n"
-                            + "  options?: $T,\n"
-                            + "): Promise<$T>;", methodName, input, applicationProtocol.getOptionsType(), output);
-                writer.write("$L(\n"
-                             + "  args: $T,\n"
-                             + "  cb: (err: any, data?: $T) => void\n"
-                             + "): void;", methodName, input, output);
-                writer.write("$L(\n"
-                            + "  args: $T,\n"
-                            + "  options: $T,\n"
-                            + "  cb: (err: any, data?: $T) => void\n"
-                            + "): void;", methodName, input, applicationProtocol.getOptionsType(), output);
+                boolean inputOptional = model.getShape(operation.getInputShape()).map(
+                    shape -> shape.getAllMembers().values().stream().noneMatch(MemberShape::isRequired)
+                ).orElse(true);
+                if (inputOptional) {
+                    writer.write("$L(): Promise<$T>;", methodName, output);
+                }
+                writer.write("""
+                    $1L(
+                      args: $2T,
+                      options?: $3T,
+                    ): Promise<$4T>;
+                    $1L(
+                      args: $2T,
+                      cb: (err: any, data?: $4T) => void
+                    ): void;
+                    $1L(
+                      args: $2T,
+                      options: $3T,
+                      cb: (err: any, data?: $4T) => void
+                    ): void;""",
+                    methodName, input, applicationProtocol.getOptionsType(), output
+                );
                 writer.write("");
             }
         });
