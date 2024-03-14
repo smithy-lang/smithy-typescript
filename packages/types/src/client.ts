@@ -1,7 +1,7 @@
 import { Command } from "./command";
 import { MiddlewareStack } from "./middleware";
 import { MetadataBearer } from "./response";
-import { Exact } from "./util";
+import { OptionalParameter } from "./util";
 
 /**
  * @public
@@ -9,7 +9,7 @@ import { Exact } from "./util";
  * A type which checks if the client configuration is optional.
  * If all entries of the client configuration are optional, it allows client creation without passing any config.
  */
-export type CheckOptionalClientConfig<T> = Exact<Partial<T>, T> extends true ? [] | [T] : [T];
+export type CheckOptionalClientConfig<T> = OptionalParameter<T>;
 
 /**
  * @public

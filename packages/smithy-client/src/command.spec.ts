@@ -1,6 +1,27 @@
 import { Command } from "./command";
 
 describe(Command.name, () => {
+  it("has optional argument if the input type has no required members", async () => {
+    type OptionalInput = {
+      key?: string;
+      optional?: string;
+    };
+
+    type RequiredInput = {
+      key: string | undefined;
+      optional?: string;
+    };
+
+    class WithRequiredInputCommand extends Command.classBuilder<RequiredInput, any, any, any, any>()
+      .build() {}
+
+    class WithOptionalInputCommand extends Command.classBuilder<OptionalInput, any, any, any, any>()
+      .build() {}
+
+    new WithRequiredInputCommand({ key: "1" });
+
+    new WithOptionalInputCommand(); // expect no type error.
+  });
   it("implements a classBuilder", async () => {
     class MyCommand extends Command.classBuilder<any, any, any, any, any>()
       .ep({
