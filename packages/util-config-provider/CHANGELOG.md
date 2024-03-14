@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
 ## 2.2.1
 
 ### Patch Changes

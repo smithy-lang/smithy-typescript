@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- Updated dependencies [38f9a61f]
+  - @smithy/is-array-buffer@2.2.0
+
 ## 2.1.1
 
 ### Patch Changes

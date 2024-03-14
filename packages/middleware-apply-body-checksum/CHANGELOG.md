@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- Updated dependencies [38f9a61f]
+- Updated dependencies [661f1d60]
+  - @smithy/is-array-buffer@2.2.0
+  - @smithy/protocol-http@3.3.0
+  - @smithy/types@2.12.0
+
 ## 2.1.4
 
 ### Patch Changes

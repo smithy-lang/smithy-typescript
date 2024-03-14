@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.2.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- Updated dependencies [38f9a61f]
+- Updated dependencies [661f1d60]
+  - @smithy/node-config-provider@2.3.0
+  - @smithy/types@2.12.0
+
 ## 1.1.5
 
 ### Patch Changes

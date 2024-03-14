@@ -1,5 +1,23 @@
 # Change Log
 
+## 1.4.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- Updated dependencies [38f9a61f]
+- Updated dependencies [661f1d60]
+  - @smithy/middleware-endpoint@2.5.0
+  - @smithy/middleware-retry@2.2.0
+  - @smithy/middleware-serde@2.3.0
+  - @smithy/util-middleware@2.2.0
+  - @smithy/protocol-http@3.3.0
+  - @smithy/smithy-client@2.5.0
+  - @smithy/types@2.12.0
+
 ## 1.3.8
 
 ### Patch Changes

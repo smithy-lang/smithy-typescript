@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- Updated dependencies [38f9a61f]
+  - @smithy/util-buffer-from@2.2.0
+  - @smithy/util-utf8@2.3.0
+
 ## 2.2.1
 
 ### Patch Changes

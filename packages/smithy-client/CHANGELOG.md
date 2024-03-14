@@ -1,5 +1,22 @@
 # Change Log
 
+## 2.5.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- 661f1d60: allow command constructor argument to be omitted if no required members
+- Updated dependencies [38f9a61f]
+- Updated dependencies [661f1d60]
+  - @smithy/middleware-endpoint@2.5.0
+  - @smithy/middleware-stack@2.2.0
+  - @smithy/protocol-http@3.3.0
+  - @smithy/util-stream@2.2.0
+  - @smithy/types@2.12.0
+
 ## 2.4.5
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.12.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+### Patch Changes
+
+- 661f1d60: allow command constructor argument to be omitted if no required members
+
 ## 2.11.0
 
 ### Minor Changes
