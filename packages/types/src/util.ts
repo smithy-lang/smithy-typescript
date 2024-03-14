@@ -188,4 +188,4 @@ export interface RetryStrategy {
  * Indicates the parameter may be omitted if the parameter object T
  * is equivalent to a Partial<T>, i.e. all properties optional.
  */
-export type OptionalParameter<T> = Exact<Partial<T>, T> extends true ? [] | [T] : [T]
+export type OptionalParameter<T> = Exact<Partial<T>, T> extends true ? [] | [T] : [T];

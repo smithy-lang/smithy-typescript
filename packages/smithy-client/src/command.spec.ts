@@ -12,11 +12,9 @@ describe(Command.name, () => {
       optional?: string;
     };
 
-    class WithRequiredInputCommand extends Command.classBuilder<RequiredInput, any, any, any, any>()
-      .build() {}
+    class WithRequiredInputCommand extends Command.classBuilder<RequiredInput, any, any, any, any>().build() {}
 
-    class WithOptionalInputCommand extends Command.classBuilder<OptionalInput, any, any, any, any>()
-      .build() {}
+    class WithOptionalInputCommand extends Command.classBuilder<OptionalInput, any, any, any, any>().build() {}
 
     new WithRequiredInputCommand({ key: "1" });
 
