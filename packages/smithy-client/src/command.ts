@@ -218,6 +218,7 @@ class ClassBuilder<
    * @returns a Command class with the classBuilder properties.
    */
   public build(): {
+    new (input: I): CommandImpl<I, O, C, SI, SO>;
     new (...[input]: OptionalParameter<I>): CommandImpl<I, O, C, SI, SO>;
     getEndpointParameterInstructions(): EndpointParameterInstructions;
   } {

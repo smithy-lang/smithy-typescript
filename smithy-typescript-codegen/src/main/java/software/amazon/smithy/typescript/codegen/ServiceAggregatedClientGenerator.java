@@ -22,6 +22,7 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -94,11 +95,14 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 writer.writeDocs(
                     "@see {@link " + operationSymbol.getName() + "}"
                 );
-                writer.addImport("OptionalParameter", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.write("""
-                    $L(
-                      ...[args]: OptionalParameter<$T>,
-                    ): Promise<$T>;""", methodName, input, output);
+                boolean inputOptional = model.getShape(operation.getInputShape()).map(
+                    shape -> shape.getAllMembers().values().stream().noneMatch(MemberShape::isRequired)
+                ).orElse(true);
+                if (inputOptional) {
+                    writer.addImport("OptionalParameter", null, TypeScriptDependency.SMITHY_TYPES);
+                    writer.write("""
+                        $L(): Promise<$T>;""", methodName, output);
+                }
                 writer.write("""
                     $L(
                       args: $T,
