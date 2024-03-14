@@ -94,19 +94,27 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 writer.writeDocs(
                     "@see {@link " + operationSymbol.getName() + "}"
                 );
-                writer.write("$L(\n"
-                            + "  args: $T,\n"
-                            + "  options?: $T,\n"
-                            + "): Promise<$T>;", methodName, input, applicationProtocol.getOptionsType(), output);
-                writer.write("$L(\n"
-                             + "  args: $T,\n"
-                             + "  cb: (err: any, data?: $T) => void\n"
-                             + "): void;", methodName, input, output);
-                writer.write("$L(\n"
-                            + "  args: $T,\n"
-                            + "  options: $T,\n"
-                            + "  cb: (err: any, data?: $T) => void\n"
-                            + "): void;", methodName, input, applicationProtocol.getOptionsType(), output);
+                writer.addImport("OptionalParameter", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.write("""
+                    $L(
+                      ...[args]: OptionalParameter<$T>,
+                    ): Promise<$T>;""", methodName, input, output);
+                writer.write("""
+                    $L(
+                      args: $T,
+                      options?: $T,
+                    ): Promise<$T>;""", methodName, input, applicationProtocol.getOptionsType(), output);
+                writer.write("""
+                    $L(
+                      args: $T,
+                      cb: (err: any, data?: $T) => void
+                    ): void;""", methodName, input, output);
+                writer.write("""
+                    $L(
+                      args: $T,
+                      options: $T,
+                      cb: (err: any, data?: $T) => void
+                    ): void;""", methodName, input, applicationProtocol.getOptionsType(), output);
                 writer.write("");
             }
         });
