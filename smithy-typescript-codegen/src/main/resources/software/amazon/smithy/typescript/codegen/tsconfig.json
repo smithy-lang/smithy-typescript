@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
+    "lib": ["es2020", "dom"],
     "downlevelIteration": true,
     "importHelpers": true,
     "incremental": true,
@@ -9,5 +10,5 @@
     "rootDir": "src",
     "useUnknownInCatchVariables": false
   },
-  "exclude": ["test/"]
+  "exclude": ["node_modules/", "test/"]
 }
