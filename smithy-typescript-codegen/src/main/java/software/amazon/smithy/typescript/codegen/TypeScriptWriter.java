@@ -188,16 +188,16 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     // Escape valid '{' and '}'
                     docs = docs.replace("{", "\\{")
                         .replace("}", "\\}");
-                    docs = preprocessor.apply(docs);
-                    docs = addReleaseTag(shape, docs);
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
                         String deprecationMessage = deprecatedTrait.getMessage()
                             .map(msg -> " " + msg)
                             .orElse("");
                         String deprecationString = "@deprecated" + deprecationMessage;
-                        docs = docs + "\n" + deprecationString;
+                        docs = docs + "\n\n" + deprecationString;
                     }
+                    docs = preprocessor.apply(docs);
+                    docs = addReleaseTag(shape, docs);
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
