@@ -190,10 +190,11 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                         .replace("}", "\\}");
                     docs = preprocessor.apply(docs);
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
-                        DeprecatedTrait deprecatedTrait = shape.getTrait(DeprecatedTrait.class).get();
-                        String deprecationMessage = deprecatedTrait.getMessage().orElse("");
-                        String deprecationString = "@deprecated"
-                            + (deprecationMessage.isEmpty() ? "" : " " + deprecationMessage);
+                        DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
+                        String deprecationMessage = deprecatedTrait.getMessage()
+                            .map(msg -> " " + msg)
+                            .orElse("");
+                        String deprecationString = "@deprecated" + deprecationMessage;
                         docs = deprecationString + "\n\n" + docs;
                     }
                     docs = addReleaseTag(shape, docs);
