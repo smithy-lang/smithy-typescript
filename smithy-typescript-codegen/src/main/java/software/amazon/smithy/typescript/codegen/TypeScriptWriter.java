@@ -189,15 +189,15 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     docs = docs.replace("{", "\\{")
                         .replace("}", "\\}");
                     docs = preprocessor.apply(docs);
+                    docs = addReleaseTag(shape, docs);
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
                         String deprecationMessage = deprecatedTrait.getMessage()
                             .map(msg -> " " + msg)
                             .orElse("");
                         String deprecationString = "@deprecated" + deprecationMessage;
-                        docs = deprecationString + "\n\n" + docs;
+                        docs = docs + "\n" + deprecationString;
                     }
-                    docs = addReleaseTag(shape, docs);
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -248,9 +248,9 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
 
     private String addReleaseTag(Shape shape, String docs) {
         if (shape.getTrait(InternalTrait.class).isPresent()) {
-            docs = "@internal\n" + docs;
+            docs = docs + "\n@internal";
         } else {
-            docs = "@public\n" + docs;
+            docs = docs + "\n@public";
         }
         return docs;
     }
