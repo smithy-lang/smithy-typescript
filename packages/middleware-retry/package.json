@@ -39,7 +39,7 @@
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-retry": "workspace:^",
     "tslib": "^2.6.2",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@smithy/util-test": "workspace:^",
