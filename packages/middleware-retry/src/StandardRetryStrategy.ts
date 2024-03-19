@@ -1,3 +1,4 @@
+import { v4 } from "@smithy/external/uuid";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
 import { SdkError } from "@smithy/types";
@@ -11,7 +12,6 @@ import {
   RETRY_MODES,
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
-import { v4 } from "uuid";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
