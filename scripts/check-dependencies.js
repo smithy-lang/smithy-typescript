@@ -11,6 +11,34 @@ const packages = path.join(root, "packages");
 const walk = require("./utils/walk");
 const pkgJsonEnforcement = require("./package-json-enforcement");
 
+const node_libraries = [
+  "buffer",
+  "child_process",
+  "crypto",
+  "dns",
+  "dns/promises",
+  "events",
+  "fs",
+  "fs/promises",
+  "http",
+  "http2",
+  "https",
+  "net",
+  "os",
+  "path",
+  "path/posix",
+  "path/win32",
+  "process",
+  "stream",
+  "stream/consumers",
+  "stream/promises",
+  "stream/web",
+  "tls",
+  "url",
+  "util",
+  "zlib",
+];
+
 (async () => {
   const errors = [];
   for (const folder of fs.readdirSync(packages)) {
@@ -33,14 +61,16 @@ const pkgJsonEnforcement = require("./package-json-enforcement");
       const importedDependencies = [];
       importedDependencies.push(
         ...new Set(
-          [...(contents.toString().match(/(from\s|import\()"(@(aws-sdk|smithy)\/.*?)";/g) || [])]
+          [...(contents.toString().match(/(from |import\()"(.*?)";/g) || [])]
             .map((_) => _.replace(/from "/g, "").replace(/";$/, ""))
+            .filter((_) => !_.startsWith(".") && !node_libraries.includes(_))
         )
       );
 
       for (const dependency of importedDependencies) {
-        if (!(dependency in pkgJson.dependencies) && dependency !== pkgJson.name) {
-          errors.push(`${dependency} undeclared but imported in ${pkgJson.name} ${file}}`);
+        const depdencyPackageName = dependency.split("/").slice(0, 2).join("/");
+        if (!(depdencyPackageName in pkgJson.dependencies) && depdencyPackageName !== pkgJson.name) {
+          errors.push(`${depdencyPackageName} undeclared but imported in ${pkgJson.name} ${file}}`);
         }
       }
 

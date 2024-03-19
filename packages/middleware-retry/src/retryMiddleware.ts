@@ -1,3 +1,4 @@
+import { v4 } from "@smithy/external/uuid";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import { NoOpLogger } from "@smithy/smithy-client";
@@ -18,7 +19,6 @@ import {
   SdkError,
 } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
-import { v4 } from "uuid";
 
 import { RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";

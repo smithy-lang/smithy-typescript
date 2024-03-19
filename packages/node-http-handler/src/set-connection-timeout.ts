@@ -1,5 +1,5 @@
 import { ClientRequest } from "http";
-import { Socket } from "net";
+import type { Socket } from "net";
 
 export const setConnectionTimeout = (request: ClientRequest, reject: (err: Error) => void, timeoutInMs = 0) => {
   if (!timeoutInMs) {
