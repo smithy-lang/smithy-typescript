@@ -2087,7 +2087,7 @@ __metadata:
     chai-as-promised: ^7.1.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
-    karma: 6.4.0
+    karma: 6.4.3
     karma-chai: 0.1.0
     karma-chrome-launcher: 3.1.1
     karma-coverage: 2.2.1
@@ -2121,7 +2121,7 @@ __metadata:
     chai-as-promised: ^7.1.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
-    karma: 6.4.0
+    karma: 6.4.3
     karma-chai: 0.1.0
     karma-chrome-launcher: 3.1.1
     karma-coverage: 2.2.1
@@ -2770,7 +2770,7 @@ __metadata:
     chai-as-promised: ^7.1.1
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
-    karma: 6.4.0
+    karma: 6.4.3
     karma-chai: 0.1.0
     karma-chrome-launcher: 3.1.1
     karma-coverage: 2.2.1
@@ -5261,16 +5261,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"engine.io-parser@npm:~5.0.3":
-  version: 5.0.7
-  resolution: "engine.io-parser@npm:5.0.7"
-  checksum: 70ce4e22429ad4afbba187a0f71f87eb1448dbc2e4ff611857e46ca5ad09951408afa97f216e5fda993be4a944815b6f8eaebd6f70a9de522b54c7b8262fafb4
+"engine.io-parser@npm:~5.2.1":
+  version: 5.2.2
+  resolution: "engine.io-parser@npm:5.2.2"
+  checksum: 470231215f3136a9259efb1268bc9a71f789af4e8c74da8d3b49ceb149fe3cd5c315bf0cd13d2d8d9c8f0f051c6f93b68e8fa9c89a3b612b9217bf33765c943a
   languageName: node
   linkType: hard
 
-"engine.io@npm:~6.4.2":
-  version: 6.4.2
-  resolution: "engine.io@npm:6.4.2"
+"engine.io@npm:~6.5.2":
+  version: 6.5.4
+  resolution: "engine.io@npm:6.5.4"
   dependencies:
     "@types/cookie": ^0.4.1
     "@types/cors": ^2.8.12
@@ -5280,9 +5280,9 @@ __metadata:
     cookie: ~0.4.1
     cors: ~2.8.5
     debug: ~4.3.1
-    engine.io-parser: ~5.0.3
+    engine.io-parser: ~5.2.1
     ws: ~8.11.0
-  checksum: c4ca538c98d251ff00756ed955d924c3fd78e61af0a5825c9fa1d77ebb661ead7971598fb61daf079c2655c7be2d4a26094e446759e3c6786d8ac75ccffe36d5
+  checksum: d5b55cbac718c5b1c10800314379923f8c7ef9e3a8a60c6827ed86303d1154b81d354a89fdecf4cbb773515c82c84a98d3c791ff88279393b53625dd67299d30
   languageName: node
   linkType: hard
 
@@ -7912,9 +7912,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"karma@npm:6.4.0":
-  version: 6.4.0
-  resolution: "karma@npm:6.4.0"
+"karma@npm:6.4.3":
+  version: 6.4.3
+  resolution: "karma@npm:6.4.3"
   dependencies:
     "@colors/colors": 1.5.0
     body-parser: ^1.19.0
@@ -7935,14 +7935,14 @@ __metadata:
     qjobs: ^1.2.0
     range-parser: ^1.2.1
     rimraf: ^3.0.2
-    socket.io: ^4.4.1
+    socket.io: ^4.7.2
     source-map: ^0.6.1
     tmp: ^0.2.1
     ua-parser-js: ^0.7.30
     yargs: ^16.1.1
   bin:
     karma: bin/karma
-  checksum: c449df10aebea344ec8771b7cc35e571c783e452a1e4659a90849d0695488bebca8bf27d5ee9165de6dc3c5f4ba04ee5d67789c2b6ed45f1400268fa27f6682e
+  checksum: 4eee6f52c7cf54d860bb35600b61eac3631647efa01282671c9f799dbe4ea80ac729946c8c82e53be778905b5920d221b527c86bd9bec73214ca2f84339aebbe
   languageName: node
   linkType: hard
 
@@ -9977,7 +9977,7 @@ __metadata:
     husky: ^4.2.3
     jest: 28.1.1
     jest-environment-jsdom: 28.1.1
-    karma: 6.4.0
+    karma: 6.4.3
     karma-chai: 0.1.0
     karma-chrome-launcher: 3.1.1
     karma-coverage: 2.2.1
@@ -10019,17 +10019,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"socket.io@npm:^4.4.1":
-  version: 4.6.2
-  resolution: "socket.io@npm:4.6.2"
+"socket.io@npm:^4.7.2":
+  version: 4.7.5
+  resolution: "socket.io@npm:4.7.5"
   dependencies:
     accepts: ~1.3.4
     base64id: ~2.0.0
+    cors: ~2.8.5
     debug: ~4.3.2
-    engine.io: ~6.4.2
+    engine.io: ~6.5.2
     socket.io-adapter: ~2.5.2
     socket.io-parser: ~4.2.4
-  checksum: 17f48c65627f6663384529072e33bff631eb496f6189a1325dd6775b2a50779b2acb36b6f57c9fc26f28e3ae109fb238d39167aebfbf96838a5fb7dd1b74c209
+  checksum: b8b57216152cf230bdcb77b5450e124ebe1fee7482eeb50a6ef760b69f2f5a064e9b8640ce9c1efc5c9e081f5d797d3f6ff3f81606e19ddaf5d4114aad9ec7d3
   languageName: node
   linkType: hard
 
