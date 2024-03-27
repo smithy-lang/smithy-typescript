@@ -1,5 +1,53 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.20.0 (2024-03-21)
+
+### Features
+
+- codegen: Identity and Auth, support for the `@auth` Smithy trait. See https://smithy.io/2.0/spec/authentication-traits.html#auth-trait.
+- codegen: Support request compression ([#1129](https://github.com/smithy-lang/smithy-typescript/pull/1129))
+- codegen: Allow commands to be constructed without arg if all arg fields optional ([#1206](https://github.com/smithy-lang/smithy-typescript/pull/1206))
+- codegen: Generate unified error dispatcher ([#1150](https://github.com/smithy-lang/smithy-typescript/pull/1150))
+- codegen: Generate Commands using Command classBuilder ([#1118](https://github.com/smithy-lang/smithy-typescript/pull/1118))
+- codegen: Paginator factory ([#1115](https://github.com/smithy-lang/smithy-typescript/pull/1115))
+- codegen: Generate paginators using a factory ([#1114](https://github.com/smithy-lang/smithy-typescript/pull/1114))
+- codegen: XML serde reduction ([#1108](https://github.com/smithy-lang/smithy-typescript/pull/1108))
+- codegen: Add requestBuilder, generate requests using a builder pattern ([#1107](https://github.com/smithy-lang/smithy-typescript/pull/1107))
+- codegen-docs: Add deprecation message in shape docs ([#1209](https://github.com/smithy-lang/smithy-typescript/pull/1209))
+- codegen-docs: Move documentation before release tag and deprecation ([#1211](https://github.com/smithy-lang/smithy-typescript/pull/1211))
+- codegen-docs: Move deprecation after description in docs ([#1212](https://github.com/smithy-lang/smithy-typescript/pull/1212))
+- codegen-docs: Add more information about BLOB values in structures ([#1182](https://github.com/smithy-lang/smithy-typescript/pull/1182))
+- `@smithy/types`: Assertive client type helper ([#1076](https://github.com/smithy-lang/smithy-typescript/pull/1076))
+- `@smithy/*`: `dist-cjs` artifacts are now generated as a bundle ([#1146](https://github.com/smithy-lang/smithy-typescript/pull/1146))
+- `@smithy/util-base64`: Encoders now accept strings ([#1176](https://github.com/smithy-lang/smithy-typescript/pull/1176))
+- `@smithy/node-http-handler`: Enable ctor arg passthrough for requestHandler ([#1167](https://github.com/smithy-lang/smithy-typescript/pull/1167))
+- `@smithy/node-http-handler`: Add checked socket exhaustion warning when throughput is slow ([#1164](https://github.com/smithy-lang/smithy-typescript/pull/1164))
+- `@smithy/node-http-handler`: Allow http(s).Agent ctor arg in lieu of instance ([#1165](https://github.com/smithy-lang/smithy-typescript/pull/1165))
+- `@smithy/node-http-handler`: Reduce buffer copies ([#867](https://github.com/smithy-lang/smithy-typescript/pull/867))
+
+### Bug Fixes
+
+- codegen: Empty the contents of the dependencyVersions.properties file when creating it ([#1213](https://github.com/smithy-lang/smithy-typescript/pull/1213))
+- codegen: Import _json function at call sites ([#1174](https://github.com/smithy-lang/smithy-typescript/pull/1174))
+- codegen: Model bucketing edge case with resource shape ([#1123](https://github.com/smithy-lang/smithy-typescript/pull/1123))
+- codegen: Use `TopDownIndex::getContainedOperations()` for operation iterations ([#1109](https://github.com/smithy-lang/smithy-typescript/pull/1109))
+- codegen: Accommodate services with the world Client in their names ([#1102](https://github.com/smithy-lang/smithy-typescript/pull/1102))
+- `@smithy/middleware-retry`: Retry after clock skew correction ([#1170](https://github.com/smithy-lang/smithy-typescript/pull/1170))
+- `@smithy/middleware-retry`: Warn streaming requests are not retryable ([#1092](https://github.com/smithy-lang/smithy-typescript/pull/1092))
+- `@smithy/core`: Handle multi-part token paths in paginator ([#1160](https://github.com/smithy-lang/smithy-typescript/pull/1160))
+- `@smithy/util-utf8`: Use Node.js implementations in react-native ([#1070](https://github.com/smithy-lang/smithy-typescript/pull/1070))
+- `@smithy/smithy-client`: Apply filtering when walking json arrays ([#1086](https://github.com/smithy-lang/smithy-typescript/pull/1086))
+- `@smithy/util-body-length-browser`: Increase performance of body length calculation for larger payloads on browser ([#1088](https://github.com/smithy-lang/smithy-typescript/pull/1088))
+- `@smithy/middleware-serde`: Allow error deserializers to populate error response body ([#1180](https://github.com/smithy-lang/smithy-typescript/pull/1180))
+- `@smithy/shared-ini-file-loader`: Process sso-session names with config prefix separator ([#1173](https://github.com/smithy-lang/smithy-typescript/pull/1173))
+- `@smithy/shared-ini-file-loader`: Process config files for profile names containing prefix separator ([#1100](https://github.com/smithy-lang/smithy-typescript/pull/1100))
+- `@smithy/shared-ini-file-loader`: Allow dot, solidus, percent and colon characters in profile names ([#1067](https://github.com/smithy-lang/smithy-typescript/pull/1067))
+
+### Documentation
+- Add readme content for signature-v4 ([#1087](https://github.com/smithy-lang/smithy-typescript/pull/1087))
+- Sigv4 README.md brackets ([#1103](https://github.com/smithy-lang/smithy-typescript/pull/1103))
+- Fix README `smithy-build.json` examples ([#1082](https://github.com/smithy-lang/smithy-typescript/pull/1082))
+
 ## 0.19.0 (2023-11-02)
 
 ### Features
