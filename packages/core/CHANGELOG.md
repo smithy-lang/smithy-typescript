@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.4.1
+
+### Patch Changes
+
+- Updated dependencies [e03a10ac]
+  - @smithy/middleware-retry@2.3.0
+
 ## 1.4.0
 
 ### Minor Changes

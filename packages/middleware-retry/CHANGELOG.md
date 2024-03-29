@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- e03a10ac: Set uuid to ^9.0.1
+
 ## 2.2.0
 
 ### Minor Changes
