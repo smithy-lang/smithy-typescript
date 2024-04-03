@@ -168,7 +168,7 @@ describe("SignatureV4", () => {
       /**
        * An environment specific stream that the signer knows nothing about.
        */
-      class ExoticStream {}
+      class ExoticStream { }
 
       const { query } = await signer.presign(
         new HttpRequest({
@@ -450,7 +450,7 @@ describe("SignatureV4", () => {
       /**
        * An environment specific stream that the signer knows nothing about.
        */
-      class ExoticStream {}
+      class ExoticStream { }
       const { headers } = await signer.sign(
         new HttpRequest({
           ...minimalRequest,
@@ -628,6 +628,13 @@ describe("SignatureV4", () => {
         const { headers } = await signer.sign({ ...minimalRequest, path: "//foo%3Dbar" }, signingOptions);
         expect(headers[AUTH_HEADER]).toEqual(
           expect.stringContaining("Signature=fb4948cab44a9c47ce3b1a2489d01ec939fea9e79eccdb4593c11a94f207e075")
+        );
+      });
+
+      it("should normalize path with non-standard characters by default", async () => {
+        const { headers } = await signer.sign({ ...minimalRequest, path: "/foo/!'()*" }, signingOptions);
+        expect(headers[AUTH_HEADER]).toEqual(
+          expect.stringContaining("Signature=698b237cc68fe34535e57f374fa81f63219314b5a877742f889f6222c9ecab7b")
         );
       });
 

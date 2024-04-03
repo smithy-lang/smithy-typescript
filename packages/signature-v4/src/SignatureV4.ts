@@ -48,6 +48,7 @@ import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
 import { iso8601 } from "./utilDate";
+import { escapeUri } from "@smithy/util-uri-escape";
 
 export interface SignatureV4Init {
   /**
@@ -331,7 +332,8 @@ ${toHex(hashedRequest)}`;
         normalizedPathSegments.length > 0 && path?.endsWith("/") ? "/" : ""
       }`;
 
-      const doubleEncoded = encodeURIComponent(normalizedPath);
+      // Double encode and replace non-standard characters !'()* according to RFC 3986
+      const doubleEncoded = escapeUri(normalizedPath);
       return doubleEncoded.replace(/%2F/g, "/");
     }
 
