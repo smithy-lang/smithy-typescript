@@ -59,12 +59,15 @@ export const isDnsCompatibleBucketName = (bucketName: string): boolean =>
  * @internal
  */
 export const isArnBucketName = (bucketName: string): boolean => {
-  const [arn, partition, service, region, account, typeOrId] = bucketName.split(":");
+  // region and account are unused between service and bucket.
+  const [arn, partition, service, , , bucket] = bucketName.split(":");
+
   const isArn = arn === "arn" && bucketName.split(":").length >= 6;
-  const isValidArn =
-    [arn, partition, service, typeOrId].filter(Boolean).length === 4 && [region, account].filter(Boolean).length == 0;
+  const isValidArn = Boolean(isArn && partition && service && bucket);
+
   if (isArn && !isValidArn) {
     throw new Error(`Invalid ARN: ${bucketName} was an invalid ARN.`);
   }
-  return arn === "arn" && !!partition && !!service && !!typeOrId;
+
+  return isValidArn;
 };

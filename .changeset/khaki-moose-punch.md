@@ -2,4 +2,4 @@
 "@smithy/middleware-endpoint": patch
 ---
 
-fix s3 arn check not checking for region or account
+Do not require account in checking whether a string is an S3 bucket ARN.
