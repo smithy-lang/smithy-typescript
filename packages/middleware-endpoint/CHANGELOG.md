@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.5.1
+
+### Patch Changes
+
+- cc54b8d1: Do not require account in checking whether a string is an S3 bucket ARN.
+
 ## 2.5.0
 
 ### Minor Changes

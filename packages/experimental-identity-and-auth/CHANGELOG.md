@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [9961e59d]
+- Updated dependencies [cc54b8d1]
+  - @smithy/signature-v4@2.2.1
+  - @smithy/middleware-endpoint@2.5.1
+  - @smithy/middleware-retry@2.3.1
+
 ## 0.2.1
 
 ### Patch Changes

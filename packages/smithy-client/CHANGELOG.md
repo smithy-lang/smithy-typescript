@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [cc54b8d1]
+  - @smithy/middleware-endpoint@2.5.1
+
 ## 2.5.0
 
 ### Minor Changes

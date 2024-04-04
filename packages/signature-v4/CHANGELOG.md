@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- 9961e59d: internalize header format function from eventstream-codec into signature-v4
+
 ## 2.2.0
 
 ### Minor Changes
