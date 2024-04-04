@@ -1,4 +1,3 @@
-import { HeaderMarshaller } from "@smithy/eventstream-codec";
 import {
   AwsCredentialIdentity,
   ChecksumConstructor,
@@ -22,7 +21,7 @@ import {
 } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 import { normalizeProvider } from "@smithy/util-middleware";
-import { fromUtf8, toUint8Array, toUtf8 } from "@smithy/util-utf8";
+import { toUint8Array } from "@smithy/util-utf8";
 
 import {
   ALGORITHM_IDENTIFIER,
@@ -44,6 +43,7 @@ import { createScope, getSigningKey } from "./credentialDerivation";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";
 import { getCanonicalQuery } from "./getCanonicalQuery";
 import { getPayloadHash } from "./getPayloadHash";
+import { HeaderFormatter } from "./HeaderFormatter";
 import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
@@ -104,7 +104,7 @@ export class SignatureV4 implements RequestPresigner, RequestSigner, StringSigne
   private readonly sha256: ChecksumConstructor | HashConstructor;
   private readonly uriEscapePath: boolean;
   private readonly applyChecksum: boolean;
-  private readonly headerMarshaller = new HeaderMarshaller(toUtf8, fromUtf8);
+  private readonly headerFormatter = new HeaderFormatter();
 
   constructor({
     applyChecksum,
@@ -212,7 +212,7 @@ export class SignatureV4 implements RequestPresigner, RequestSigner, StringSigne
   ): Promise<SignedMessage> {
     const promise = this.signEvent(
       {
-        headers: this.headerMarshaller.format(signableMessage.message.headers),
+        headers: this.headerFormatter.format(signableMessage.message.headers),
         payload: signableMessage.message.body,
       },
       {
