@@ -24,7 +24,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@smithy/eventstream-codec": "workspace:^",
     "@smithy/is-array-buffer": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",

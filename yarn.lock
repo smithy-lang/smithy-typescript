@@ -2485,7 +2485,6 @@ __metadata:
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
     "@aws-crypto/sha256-js": 3.0.0
-    "@smithy/eventstream-codec": "workspace:^"
     "@smithy/is-array-buffer": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
