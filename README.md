@@ -47,7 +47,7 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
     // Add the Smithy TypeScript code generator dependency
     "maven": {
         "dependencies": [
-            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.20.0"
+            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.20.1"
         ]
     },
     "plugins": {
@@ -141,7 +141,7 @@ dependencies {
     smithyCli("software.amazon.smithy:smithy-cli:$smithyVersion")
 
     // Add the Smithy TypeScript code generator dependency
-    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.20.0")
+    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.20.1")
 
     // Uncomment below to add various smithy dependencies (see full list of smithy dependencies in https://github.com/awslabs/smithy)
     // implementation("software.amazon.smithy:smithy-model:$smithyVersion")
@@ -630,3 +630,4 @@ Many Gradle issues can be fixed by stopping the Gradle daemon by running `./grad
 ## License
 
 This library is licensed under the Apache 2.0 License.
+
