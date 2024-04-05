@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.20.1 (2024-04-05)
+
+### Features
+
+- Updated SigV4 with its own header formatter to avoid import of entire eventstream-codec package ([#1233](https://github.com/smithy-lang/smithy-typescript/pull/1233))
+- Updated Smithy Version to 1.47.0 ([#1225](https://github.com/smithy-lang/smithy-typescript/pull/1225))
+
+### Bug Fixes
+
+- Fix middleware-endpoint to check for s3 arn parts ([#1227](https://github.com/smithy-lang/smithy-typescript/pull/1227))
+
 ## 0.20.0 (2024-03-21)
 
 ### Features
