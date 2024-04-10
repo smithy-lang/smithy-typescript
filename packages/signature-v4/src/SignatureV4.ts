@@ -21,6 +21,7 @@ import {
 } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 import { normalizeProvider } from "@smithy/util-middleware";
+import { escapeUri } from "@smithy/util-uri-escape";
 import { toUint8Array } from "@smithy/util-utf8";
 
 import {
@@ -48,7 +49,6 @@ import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
 import { iso8601 } from "./utilDate";
-import { escapeUri } from "@smithy/util-uri-escape";
 
 export interface SignatureV4Init {
   /**
