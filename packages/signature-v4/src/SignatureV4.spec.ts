@@ -168,7 +168,7 @@ describe("SignatureV4", () => {
       /**
        * An environment specific stream that the signer knows nothing about.
        */
-      class ExoticStream { }
+      class ExoticStream {}
 
       const { query } = await signer.presign(
         new HttpRequest({
@@ -450,7 +450,7 @@ describe("SignatureV4", () => {
       /**
        * An environment specific stream that the signer knows nothing about.
        */
-      class ExoticStream { }
+      class ExoticStream {}
       const { headers } = await signer.sign(
         new HttpRequest({
           ...minimalRequest,
