@@ -7,10 +7,12 @@ package software.amazon.smithy.typescript.codegen.validation;
 
 import java.util.Set;
 import software.amazon.smithy.utils.SetUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Interprets the string portion of an import statement.
  */
+@SmithyInternalApi
 public class ImportFrom {
     public static final Set<String> NODE_NATIVE_DEPENDENCIES = SetUtils.of(
         "buffer",
