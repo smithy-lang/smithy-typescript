@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- 2e090d70: Escape non-standard characters in URI paths according to RFC 3986
+
 ## 2.2.1
 
 ### Patch Changes
