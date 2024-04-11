@@ -16,11 +16,11 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.model.Model;
@@ -30,7 +30,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
-import software.amazon.smithy.utils.SetUtils;
+import software.amazon.smithy.typescript.codegen.validation.ImportFrom;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -51,32 +51,6 @@ import software.amazon.smithy.utils.StringUtils;
 @SmithyUnstableApi
 public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, ImportDeclarations> {
     public static final String CODEGEN_INDICATOR = "// smithy-typescript generated code\n";
-    public static final Set<String> EXEMPT_DEPENDENCIES = SetUtils.of(
-        "buffer",
-        "child_process",
-        "crypto",
-        "dns",
-        "dns/promises",
-        "events",
-        "fs",
-        "fs/promises",
-        "http",
-        "http2",
-        "https",
-        "os",
-        "path",
-        "path/posix",
-        "path/win32",
-        "process",
-        "stream",
-        "stream/consumers",
-        "stream/promises",
-        "stream/web",
-        "tls",
-        "url",
-        "util",
-        "zlib"
-    );
 
     private final String moduleName;
     private final boolean withAttribution;
@@ -142,28 +116,14 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     @Deprecated
     public TypeScriptWriter addImport(String name, String as, String from) {
-        boolean isNodePackage = from.startsWith("node:");
-        boolean isNamespacePackage = from.startsWith("@");
-        boolean isRelativeImport = from.startsWith("/") || from.startsWith(".");
+        ImportFrom importFrom = new ImportFrom(from);
 
-        final boolean isPackageImport =
-            isNodePackage
-                || isNamespacePackage
-                || !isRelativeImport;
-
-        if (isPackageImport) {
-            String[] packageNameSegments = from.split("/");
-            String packageName;
-            if (isNodePackage) {
-                packageName = from.substring("node:".length(), from.indexOf('/'));
-            } else if (isNamespacePackage) {
-                packageName = packageNameSegments[0] + "/" + packageNameSegments[1];
-            } else {
-                packageName = packageNameSegments[0];
-            }
-            if (!EXEMPT_DEPENDENCIES.contains(packageName)
-                && !isNodePackage
-                && getDependencies().stream().noneMatch(dep -> dep.getPackageName().equals(packageName))) {
+        if (importFrom.isDeclarablePackageImport()) {
+            String packageName = importFrom.getPackageName();
+            if (getDependencies()
+                .stream()
+                .map(SymbolDependency::getPackageName)
+                .noneMatch(packageName::equals)) {
                 throw new CodegenException(
                     """
                     The import %s does not correspond to a registered dependency.
