@@ -186,7 +186,6 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @param from PackageContainer to import the type from.
      * @return Returns the writer.
      */
-    @Deprecated
     public TypeScriptWriter addImport(String name, String as, PackageContainer from) {
         if (from instanceof Dependency) {
             addDependency((Dependency) from);
