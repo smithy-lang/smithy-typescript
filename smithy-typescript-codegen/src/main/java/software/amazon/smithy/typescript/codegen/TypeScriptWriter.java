@@ -162,6 +162,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 packageName = packageNameSegments[0];
             }
             if (!EXEMPT_DEPENDENCIES.contains(packageName)
+                && !isNodePackage
                 && getDependencies().stream().noneMatch(dep -> dep.getPackageName().equals(packageName))) {
                 throw new CodegenException(
                     """
