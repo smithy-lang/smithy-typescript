@@ -16,10 +16,13 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.model.Model;
@@ -29,6 +32,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -49,6 +53,32 @@ import software.amazon.smithy.utils.StringUtils;
 @SmithyUnstableApi
 public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, ImportDeclarations> {
     public static final String CODEGEN_INDICATOR = "// smithy-typescript generated code\n";
+    public static final Set<String> EXEMPT_DEPENDENCIES = SetUtils.of(
+        "buffer",
+        "child_process",
+        "crypto",
+        "dns",
+        "dns/promises",
+        "events",
+        "fs",
+        "fs/promises",
+        "http",
+        "http2",
+        "https",
+        "os",
+        "path",
+        "path/posix",
+        "path/win32",
+        "process",
+        "stream",
+        "stream/consumers",
+        "stream/promises",
+        "stream/web",
+        "tls",
+        "url",
+        "util",
+        "zlib"
+    );
 
     private final String moduleName;
     private final boolean withAttribution;
@@ -114,6 +144,40 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     @Deprecated
     public TypeScriptWriter addImport(String name, String as, String from) {
+        final boolean isPackageImport =
+            from.startsWith("@")
+                || (!from.startsWith("/") && !from.startsWith("."));
+
+        if (isPackageImport) {
+            String[] packageNameSegments = from.split("/");
+            String packageName =
+                from.startsWith("@")
+                    ? packageNameSegments[0] + "/" + packageNameSegments[1]
+                    : packageNameSegments[0];
+            List<SymbolDependency> dependencies = getDependencies();
+            if (!EXEMPT_DEPENDENCIES.contains(packageName)
+                && dependencies.stream().noneMatch(dep -> dep.getPackageName().equals(packageName))) {
+                throw new CodegenException(
+                    """
+                    The import %s does not correspond to a registered dependency.
+                    TypeScriptWriter::addDependency() is required before ::addImport(), or call ::addImportUnchecked().
+                    """.formatted(from)
+                );
+            }
+        }
+
+        getImportContainer().addImport(name, as, from);
+        return this;
+    }
+
+    /**
+     * Imports a type using an alias from a module only if necessary.
+     * @return Returns the writer.
+     *
+     * @deprecated Use {@link TypeScriptWriter#addImport(String, String, TypeScriptDependency)} addImport}
+     */
+    @Deprecated
+    public TypeScriptWriter addImportUnchecked(String name, String as, String from) {
         getImportContainer().addImport(name, as, from);
         return this;
     }
@@ -126,6 +190,15 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @param from PackageContainer to import the type from.
      * @return Returns the writer.
      */
+    public TypeScriptWriter addImport(String name, String as, Dependency from) {
+        addDependency(from);
+        return this.addImport(name, as, from.getPackageName());
+    }
+
+    /**
+     * @deprecated use {@link #addImport(String name, String as, Dependency from)}.
+     */
+    @Deprecated
     public TypeScriptWriter addImport(String name, String as, PackageContainer from) {
         return this.addImport(name, as, from.getPackageName());
     }
