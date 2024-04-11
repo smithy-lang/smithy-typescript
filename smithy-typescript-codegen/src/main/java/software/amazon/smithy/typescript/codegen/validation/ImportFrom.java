@@ -40,9 +40,9 @@ public class ImportFrom {
 
     /**
      * @return whether we recognize it as a Node.js native module. These
-     * do not need to be declared in package.json, however this check
-     * is not exhaustive as the true nature of a package depends on the
-     * Node.js version.
+     * do not need to be declared in package.json. This check
+     * is not exhaustive since the list of native modules varies
+     * by version.
      */
     public boolean isNodejsNative() {
         String[] packageNameSegments = from.split("/");
