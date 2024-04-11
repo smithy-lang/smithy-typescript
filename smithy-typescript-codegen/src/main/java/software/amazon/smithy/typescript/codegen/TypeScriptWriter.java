@@ -16,13 +16,11 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.model.Model;
@@ -144,19 +142,27 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     @Deprecated
     public TypeScriptWriter addImport(String name, String as, String from) {
+        boolean isNodePackage = from.startsWith("node:");
+        boolean isNamespacePackage = from.startsWith("@");
+        boolean isRelativeImport = from.startsWith("/") || from.startsWith(".");
+
         final boolean isPackageImport =
-            from.startsWith("@")
-                || (!from.startsWith("/") && !from.startsWith("."));
+            isNodePackage
+                || isNamespacePackage
+                || !isRelativeImport;
 
         if (isPackageImport) {
             String[] packageNameSegments = from.split("/");
-            String packageName =
-                from.startsWith("@")
-                    ? packageNameSegments[0] + "/" + packageNameSegments[1]
-                    : packageNameSegments[0];
-            List<SymbolDependency> dependencies = getDependencies();
+            String packageName;
+            if (isNodePackage) {
+                packageName = from.substring("node:".length(), from.indexOf('/'));
+            } else if (isNamespacePackage) {
+                packageName = packageNameSegments[0] + "/" + packageNameSegments[1];
+            } else {
+                packageName = packageNameSegments[0];
+            }
             if (!EXEMPT_DEPENDENCIES.contains(packageName)
-                && dependencies.stream().noneMatch(dep -> dep.getPackageName().equals(packageName))) {
+                && getDependencies().stream().noneMatch(dep -> dep.getPackageName().equals(packageName))) {
                 throw new CodegenException(
                     """
                     The import %s does not correspond to a registered dependency.
