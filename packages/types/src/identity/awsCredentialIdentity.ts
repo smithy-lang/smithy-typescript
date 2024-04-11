@@ -26,7 +26,7 @@ export interface AwsCredentialIdentity extends Identity {
   readonly credentialScope?: string;
 
   /**
-   * AWS accountId that may be used for endpoint routing.
+   * AWS accountId.
    */
   readonly accountId?: string;
 }
