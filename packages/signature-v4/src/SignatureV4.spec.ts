@@ -631,6 +631,13 @@ describe("SignatureV4", () => {
         );
       });
 
+      it("should normalize path with non-standard characters by default", async () => {
+        const { headers } = await signer.sign({ ...minimalRequest, path: "/foo/!'()*" }, signingOptions);
+        expect(headers[AUTH_HEADER]).toEqual(
+          expect.stringContaining("Signature=698b237cc68fe34535e57f374fa81f63219314b5a877742f889f6222c9ecab7b")
+        );
+      });
+
       it("should not URI-encode the path if URI path escaping was disabled on the signer", async () => {
         // Setting `uriEscapePath` to `false` creates an
         // S3-compatible signer. The expected authorization header

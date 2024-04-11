@@ -21,6 +21,7 @@ import {
 } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 import { normalizeProvider } from "@smithy/util-middleware";
+import { escapeUri } from "@smithy/util-uri-escape";
 import { toUint8Array } from "@smithy/util-utf8";
 
 import {
@@ -331,7 +332,8 @@ ${toHex(hashedRequest)}`;
         normalizedPathSegments.length > 0 && path?.endsWith("/") ? "/" : ""
       }`;
 
-      const doubleEncoded = encodeURIComponent(normalizedPath);
+      // Double encode and replace non-standard characters !'()* according to RFC 3986
+      const doubleEncoded = escapeUri(normalizedPath);
       return doubleEncoded.replace(/%2F/g, "/");
     }
 
