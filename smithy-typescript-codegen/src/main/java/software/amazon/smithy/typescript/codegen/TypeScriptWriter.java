@@ -167,24 +167,12 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 throw new CodegenException(
                     """
                     The import %s does not correspond to a registered dependency.
-                    TypeScriptWriter::addDependency() is required before ::addImport(), or call ::addImportUnchecked().
+                    TypeScriptWriter::addDependency() is required before ::addImport().
                     """.formatted(from)
                 );
             }
         }
 
-        getImportContainer().addImport(name, as, from);
-        return this;
-    }
-
-    /**
-     * Imports a type using an alias from a module only if necessary.
-     * @return Returns the writer.
-     *
-     * @deprecated Use {@link TypeScriptWriter#addImport(String, String, TypeScriptDependency)} addImport}
-     */
-    @Deprecated
-    public TypeScriptWriter addImportUnchecked(String name, String as, String from) {
         getImportContainer().addImport(name, as, from);
         return this;
     }
