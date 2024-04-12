@@ -20,6 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.model.Model;
@@ -29,6 +30,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.typescript.codegen.validation.ImportFrom;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -114,12 +116,30 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     @Deprecated
     public TypeScriptWriter addImport(String name, String as, String from) {
+        ImportFrom importFrom = new ImportFrom(from);
+
+        if (importFrom.isDeclarablePackageImport()) {
+            String packageName = importFrom.getPackageName();
+            if (getDependencies()
+                .stream()
+                .map(SymbolDependency::getPackageName)
+                .noneMatch(packageName::equals)) {
+                throw new CodegenException(
+                    """
+                    The import %s does not correspond to a registered dependency.
+                    TypeScriptWriter::addDependency() is required before ::addImport().
+                    """.formatted(from)
+                );
+            }
+        }
+
         getImportContainer().addImport(name, as, from);
         return this;
     }
 
     /**
      * Imports a type using an alias from a module only if necessary.
+     * Adds the dependency.
      *
      * @param name Type to import.
      * @param as Alias to refer to the type as.
@@ -127,6 +147,9 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @return Returns the writer.
      */
     public TypeScriptWriter addImport(String name, String as, PackageContainer from) {
+        if (from instanceof Dependency) {
+            addDependency((Dependency) from);
+        }
         return this.addImport(name, as, from.getPackageName());
     }
 

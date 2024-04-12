@@ -21,15 +21,17 @@ public class TypeScriptWriterTest {
     public void doesNotAddNewlineBetweenManagedAndExplicitImports() {
         TypeScriptWriter writer = new TypeScriptWriter("foo");
         writer.write("import { Foo } from \"baz\";");
-        writer.addImport("Baz", "Baz", "hello");
+        writer.addImport("Baz", "Baz", "./hello");
         writer.addImport("Bar", "__Bar", TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport("Qux", "__Qux", Paths.get("./qux"));
         String result = writer.toString();
 
-        assertThat(result, equalTo(CODEGEN_INDICATOR + "import { Qux as __Qux } from \"./qux\";\n"
-                + "import { Bar as __Bar } from \"@smithy/types\";\n"
-                + "import { Baz } from \"hello\";\n"
-                + "import { Foo } from \"baz\";\n"));
+        assertThat(result, equalTo("""
+            %simport { Baz } from "./hello";
+            import { Qux as __Qux } from "./qux";
+            import { Bar as __Bar } from "@smithy/types";
+            import { Foo } from "baz";
+            """.formatted(CODEGEN_INDICATOR)));
     }
 
     @Test
