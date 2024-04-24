@@ -8,6 +8,7 @@ export interface ImdsCredentials {
   SecretAccessKey: string;
   Token: string;
   Expiration: string;
+  AccountId?: string;
 }
 
 /**
@@ -29,4 +30,5 @@ export const fromImdsCredentials = (creds: ImdsCredentials): AwsCredentialIdenti
   secretAccessKey: creds.SecretAccessKey,
   sessionToken: creds.Token,
   expiration: new Date(creds.Expiration),
+  accountId: creds.AccountId,
 });

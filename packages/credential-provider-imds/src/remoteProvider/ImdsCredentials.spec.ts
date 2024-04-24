@@ -7,6 +7,7 @@ const creds: ImdsCredentials = Object.freeze({
   SecretAccessKey: "bar",
   Token: "baz",
   Expiration: new Date().toISOString(),
+  AccountId: "123456789012",
 });
 
 describe("isImdsCredentials", () => {
@@ -44,5 +45,22 @@ describe("fromImdsCredentials", () => {
     expect(converted.secretAccessKey).toEqual(creds.SecretAccessKey);
     expect(converted.sessionToken).toEqual(creds.Token);
     expect(converted.expiration).toEqual(new Date(creds.Expiration));
+    expect(converted.accountId).toEqual(creds.AccountId);
+  });
+
+  it("should convert IMDS credentials to a credentials object without accountId when it's not provided", () => {
+    const credsWithoutAccountId: ImdsCredentials = {
+      AccessKeyId: "foo",
+      SecretAccessKey: "bar",
+      Token: "baz",
+      Expiration: new Date().toISOString(),
+      // AccountId is omitted
+    };
+    const converted: AwsCredentialIdentity = fromImdsCredentials(credsWithoutAccountId);
+    expect(converted.accessKeyId).toEqual(credsWithoutAccountId.AccessKeyId);
+    expect(converted.secretAccessKey).toEqual(credsWithoutAccountId.SecretAccessKey);
+    expect(converted.sessionToken).toEqual(credsWithoutAccountId.Token);
+    expect(converted.expiration).toEqual(new Date(credsWithoutAccountId.Expiration));
+    expect(converted).not.toHaveProperty('accountId'); // Verify accountId is not included
   });
 });
