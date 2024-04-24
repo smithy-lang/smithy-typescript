@@ -13,6 +13,8 @@ const creds: ImdsCredentials = Object.freeze({
 describe("isImdsCredentials", () => {
   it("should accept valid ImdsCredentials objects", () => {
     expect(isImdsCredentials(creds)).toBe(true);
+    const { AccountId, ...credsWithoutAccountId } = creds;
+    expect(isImdsCredentials(credsWithoutAccountId)).toBe(true);
   });
 
   it("should reject credentials without an AccessKeyId", () => {
@@ -61,6 +63,6 @@ describe("fromImdsCredentials", () => {
     expect(converted.secretAccessKey).toEqual(credsWithoutAccountId.SecretAccessKey);
     expect(converted.sessionToken).toEqual(credsWithoutAccountId.Token);
     expect(converted.expiration).toEqual(new Date(credsWithoutAccountId.Expiration));
-    expect(converted).not.toHaveProperty('accountId'); // Verify accountId is not included
+    expect(converted).not.toHaveProperty("accountId"); // Verify accountId is not included
   });
 });
