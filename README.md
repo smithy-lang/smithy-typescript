@@ -6,7 +6,7 @@
 
 For Client SDK code generation, the `typescript-client-codegen` plugin provides a framework for generating extensible TypeScript clients that can support multiple JavaScript platforms, including Node.js, Browser, and React-Native. See [the section on generating a client to see how to get started](#generating-a-client), or [the `typescript-client-codegen` documentation](#client-sdk-code-generation-typescript-client-codegen-plugin).
 
-> Note: Node.js support includes versions >= 14, and is subject to change.
+> Note: Node.js support includes versions >= 16, and is subject to change.
 
 For Server SDK code generation, the `typescript-server-codegen` plugin provides a framework for generating server scaffolding at a higher level of abstraction and with type safety. More documentation can be found at in [the `typescript-server-codegen` documentation](#server-sdk-code-generation-typescript-server-codegen-plugin), or [smithy.io](https://smithy.io/2.0/ts-ssdk/index.html).
 
