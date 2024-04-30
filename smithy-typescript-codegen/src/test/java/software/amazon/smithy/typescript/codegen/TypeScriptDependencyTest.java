@@ -26,7 +26,7 @@ public class TypeScriptDependencyTest {
     @Test
     public void getsUnconditionalDependencies() {
         assertThat(TypeScriptDependency.getUnconditionalDependencies(),
-                   hasItem(TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.dependency));
+                   hasItem(TypeScriptDependency.SMITHY_TYPES.dependency));
     }
 
     @Test

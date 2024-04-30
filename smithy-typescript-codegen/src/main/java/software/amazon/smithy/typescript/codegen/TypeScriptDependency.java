@@ -39,7 +39,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public enum TypeScriptDependency implements Dependency {
 
     SMITHY_CORE("dependencies", "@smithy/core", false),
-    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", true),
+    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
     SMITHY_TYPES("dependencies", "@smithy/types", true),
     AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", true),

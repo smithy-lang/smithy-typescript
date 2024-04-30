@@ -77,6 +77,14 @@ final class PackageJsonGenerator {
                 node = node.withMember("devDependencies", devDeps);
             }
 
+            // Add @smithy/service-client-documentation-generator to the "devDependencies" if not present
+            if (devDeps.getMember(TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.packageName).isEmpty()) {
+                devDeps = devDeps.withMember(
+                    TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.packageName,
+                    TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.version);
+                node = node.withMember("devDependencies", devDeps);
+            }
+
             // Add build:docs script
             ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
             scripts = scripts.withMember("build:docs", "typedoc");
