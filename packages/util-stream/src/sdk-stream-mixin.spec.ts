@@ -1,6 +1,7 @@
 import { SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
+
 import util from "util";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
@@ -28,7 +29,7 @@ describe(sdkStreamMixin.name, () => {
     for (const method of transformMethods) {
       try {
         await sdkStream[method]();
-        fail(new Error("expect subsequent tranform to fail"));
+        fail(new Error("expect subsequent transform to fail"));
       } catch (error) {
         expect(error.message).toContain("The stream has already been transformed");
       }
@@ -38,6 +39,14 @@ describe(sdkStreamMixin.name, () => {
   beforeEach(() => {
     passThrough = new PassThrough();
   });
+
+  (typeof ReadableStream !== "undefined" ? it : it.skip)(
+    "should attempt to use the ReadableStream version if the input is not a Readable",
+    async () => {
+      // node: ReadableStream is global only as of Node.js 18.
+      sdkStreamMixin(new ReadableStream());
+    }
+  );
 
   it("should throw if unexpected stream implementation is supplied", () => {
     try {
@@ -58,7 +67,7 @@ describe(sdkStreamMixin.name, () => {
       expect(await sdkStream.transformToByteArray()).toEqual(expected);
     });
 
-    it("should fail any subsequent tranform calls", async () => {
+    it("should fail any subsequent transform calls", async () => {
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("abc")]);
       expect(await sdkStream.transformToByteArray()).toEqual(byteArrayFromBuffer(Buffer.from("abc")));
@@ -108,7 +117,7 @@ describe(sdkStreamMixin.name, () => {
       }
     );
 
-    it("should fail any subsequent tranform calls", async () => {
+    it("should fail any subsequent transform calls", async () => {
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("foo")]);
       await sdkStream.transformToString();
@@ -164,14 +173,14 @@ describe(sdkStreamMixin.name, () => {
         Readable.toWeb = originalToWebImpl;
       });
 
-      it("should tranform Node stream to web stream", async () => {
+      it("should transform Node stream to web stream", async () => {
         const sdkStream = sdkStreamMixin(passThrough);
         sdkStream.transformToWebStream();
         // @ts-expect-error
         expect(Readable.toWeb).toBeCalled();
       });
 
-      it("should fail any subsequent tranform calls", async () => {
+      it("should fail any subsequent transform calls", async () => {
         const sdkStream = sdkStreamMixin(passThrough);
         await writeDataToStream(passThrough, [Buffer.from("foo")]);
         await sdkStream.transformToWebStream();
