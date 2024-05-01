@@ -3,8 +3,12 @@ import { Readable } from "stream";
 
 import { Collector } from "./collector";
 
-export const streamCollector: StreamCollector = (stream: Readable): Promise<Uint8Array> =>
-  new Promise((resolve, reject) => {
+export const streamCollector: StreamCollector = (stream: Readable | ReadableStream): Promise<Uint8Array> => {
+  if (isReadableStreamInstance(stream)) {
+    // web stream in Node.js indicates user has overridden requestHandler with FetchHttpHandler.
+    return collectReadableStream(stream);
+  }
+  return new Promise((resolve, reject) => {
     const collector = new Collector();
     stream.pipe(collector);
     stream.on("error", (err) => {
@@ -18,3 +22,24 @@ export const streamCollector: StreamCollector = (stream: Readable): Promise<Uint
       resolve(bytes);
     });
   });
+};
+
+const isReadableStreamInstance = (stream: unknown): stream is ReadableStream =>
+  typeof ReadableStream === "function" && stream instanceof ReadableStream;
+
+async function collectReadableStream(stream: ReadableStream): Promise<Uint8Array> {
+  let res = new Uint8Array(0);
+  const reader = stream.getReader();
+  let isDone = false;
+  while (!isDone) {
+    const { done, value } = await reader.read();
+    if (value) {
+      const prior = res;
+      res = new Uint8Array(prior.length + value.length);
+      res.set(prior);
+      res.set(value, prior.length);
+    }
+    isDone = done;
+  }
+  return res;
+}
