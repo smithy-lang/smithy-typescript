@@ -44,7 +44,15 @@ describe(sdkStreamMixin.name, () => {
     "should attempt to use the ReadableStream version if the input is not a Readable",
     async () => {
       // node: ReadableStream is global only as of Node.js 18.
-      sdkStreamMixin(new ReadableStream());
+      const sdkStream = sdkStreamMixin(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(Buffer.from("abcd"));
+            controller.close();
+          },
+        })
+      );
+      expect(await sdkStream.transformToByteArray()).toEqual(new Uint8Array([97, 98, 99, 100]));
     }
   );
 
