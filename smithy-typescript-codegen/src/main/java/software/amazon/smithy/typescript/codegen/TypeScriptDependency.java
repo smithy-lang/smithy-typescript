@@ -45,7 +45,7 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", true),
-    TYPES_NODE("devDependencies", "@types/node", "^14.14.31", true),
+    TYPES_NODE("devDependencies", "@types/node", "^16.18.96", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", true),
     MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", true),
