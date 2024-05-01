@@ -1,7 +1,6 @@
 import { SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
-
 import util from "util";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";

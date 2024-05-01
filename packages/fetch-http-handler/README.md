@@ -5,7 +5,7 @@
 
 This is the default `requestHandler` used for browser applications.
 Although some versions of Node.js support the web streams API, this implementation has
-not been extensively tested in Node.js. 
+not been extensively tested in Node.js.
 
 For the Node.js default `requestHandler` implementation, see instead
-[`@smithy/node-http-handler`](https://www.npmjs.com/package/@smithy/node-http-handler). 
+[`@smithy/node-http-handler`](https://www.npmjs.com/package/@smithy/node-http-handler).
