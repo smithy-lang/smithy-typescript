@@ -1,11 +1,12 @@
 import { StreamCollector } from "@smithy/types";
 import { Readable } from "stream";
+import type { ReadableStream as IReadableStream } from "stream/web";
 
 import { Collector } from "./collector";
 
-export const streamCollector: StreamCollector = (stream: Readable | ReadableStream): Promise<Uint8Array> => {
+export const streamCollector: StreamCollector = (stream: Readable | IReadableStream): Promise<Uint8Array> => {
   if (isReadableStreamInstance(stream)) {
-    // web stream in Node.js indicates user has overridden requestHandler with FetchHttpHandler.
+    // Web stream API in Node.js
     return collectReadableStream(stream);
   }
   return new Promise((resolve, reject) => {
@@ -24,10 +25,16 @@ export const streamCollector: StreamCollector = (stream: Readable | ReadableStre
   });
 };
 
-const isReadableStreamInstance = (stream: unknown): stream is ReadableStream =>
+/**
+ * Note: the global.ReadableStream object is marked experimental, and was added in v18.0.0 of Node.js.
+ * The importable version was added in v16.5.0. We only test for the global version so as not to
+ * enforce an import on a Node.js version that may not have it, and import
+ * only the type from stream/web.
+ */
+const isReadableStreamInstance = (stream: unknown): stream is IReadableStream =>
   typeof ReadableStream === "function" && stream instanceof ReadableStream;
 
-async function collectReadableStream(stream: ReadableStream): Promise<Uint8Array> {
+async function collectReadableStream(stream: IReadableStream): Promise<Uint8Array> {
   let res = new Uint8Array(0);
   const reader = stream.getReader();
   let isDone = false;
