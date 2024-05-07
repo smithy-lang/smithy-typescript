@@ -22,14 +22,13 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@tsconfig/recommended": "1.0.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "typesVersions": {
     "<4.0": {

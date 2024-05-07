@@ -33,7 +33,7 @@
     "tslib": "^2.6.2"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "typesVersions": {
     "<4.0": {
@@ -52,7 +52,7 @@
     "directory": "packages/core"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "1.0.1",
+    "@types/node": "^16.18.96",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "rimraf": "3.0.2",
