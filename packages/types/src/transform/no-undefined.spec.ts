@@ -49,6 +49,11 @@ type A = {
     putObject(args: MyInput, options?: HttpHandlerOptions): Promise<MyOutput>;
     putObject(args: MyInput, cb: (err: any, data?: MyOutput) => void): void;
     putObject(args: MyInput, options: HttpHandlerOptions, cb: (err: any, data?: MyOutput) => void): void;
+
+    listObjects(): Promise<MyOutput>;
+    listObjects(args: MyInput, options?: HttpHandlerOptions): Promise<MyOutput>;
+    listObjects(args: MyInput, cb: (err: any, data?: MyOutput) => void): void;
+    listObjects(args: MyInput, options: HttpHandlerOptions, cb: (err: any, data?: MyOutput) => void): void;
   }
 
   {
@@ -91,5 +96,21 @@ type A = {
     const assert4: Exact<typeof output.r.a, string> = true as const;
     const assert5: Exact<typeof output.r.b, number> = true as const;
     const assert6: Exact<typeof output.r.c, string | number> = true as const;
+  }
+
+  {
+    // Handles methods with optionally zero args.
+    const c = (null as unknown) as AssertiveClient<MyClient>;
+    const list = c.listObjects();
+    const output = (null as unknown) as Awaited<typeof list>;
+
+    const assert1: Exact<typeof output.a, string | undefined> = true as const;
+    const assert2: Exact<typeof output.b, number | undefined> = true as const;
+    const assert3: Exact<typeof output.c, string | number | undefined> = true as const;
+    if (output.r) {
+      const assert4: Exact<typeof output.r.a, string | undefined> = true as const;
+      const assert5: Exact<typeof output.r.b, number | undefined> = true as const;
+      const assert6: Exact<typeof output.r.c, string | number | undefined> = true as const;
+    }
   }
 }
