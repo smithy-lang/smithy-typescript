@@ -1,8 +1,6 @@
 import { AbortController } from "./AbortController";
 import { AbortSignal } from "./AbortSignal";
 
-jest.useFakeTimers();
-
 describe("AbortController", () => {
   it("should communicate cancellation via its signal", () => {
     const source = new AbortController();

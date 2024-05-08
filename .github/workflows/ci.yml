@@ -44,12 +44,16 @@ jobs:
 
   test-typescript:
     runs-on: smithy-typescript_ubuntu-latest_8-core
-    name: TypeScript Test
+    name: TypeScript Test ${{ matrix.node }}
+    strategy:
+      matrix:
+        node: [16, 18, 20, 22]
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: ${{ matrix.node }}
           cache: "yarn"
       - uses: gradle/wrapper-validation-action@v2
       - name: Set up JDK 17
