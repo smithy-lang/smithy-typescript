@@ -25,7 +25,7 @@ describe(sdkStreamMixin.name, () => {
     for (const method of transformMethods) {
       try {
         await sdkStream[method]();
-        fail(new Error("expect subsequent tranform to fail"));
+        fail(new Error("expect subsequent transform to fail"));
       } catch (error) {
         expect(error.message).toContain("The stream has already been transformed");
       }
@@ -64,7 +64,7 @@ describe(sdkStreamMixin.name, () => {
       sdkStreamMixin({});
       fail("expect unexpected stream to fail");
     } catch (e) {
-      expect(e.message).toContain("nexpected stream implementation");
+      expect(e.message).toContain("unexpected stream implementation");
       global.Blob = originalBlobCtr;
     }
   });
@@ -77,7 +77,7 @@ describe(sdkStreamMixin.name, () => {
       expect(byteArray).toEqual(mockStreamCollectorReturn);
     });
 
-    it("should fail any subsequent tranform calls", async () => {
+    it("should fail any subsequent transform calls", async () => {
       const sdkStream = sdkStreamMixin(payloadStream);
       await sdkStream.transformToByteArray();
       await expectAllTransformsToFail(sdkStream);
@@ -137,7 +137,7 @@ describe(sdkStreamMixin.name, () => {
       }
     });
 
-    it("should fail any subsequent tranform calls", async () => {
+    it("should fail any subsequent transform calls", async () => {
       const sdkStream = sdkStreamMixin(payloadStream);
       await sdkStream.transformToString();
       await expectAllTransformsToFail(sdkStream);
@@ -152,7 +152,7 @@ describe(sdkStreamMixin.name, () => {
       expect(transformed).toBe(payloadStream);
     });
 
-    it("should fail any subsequent tranform calls", async () => {
+    it("should fail any subsequent transform calls", async () => {
       const payloadStream = new ReadableStream();
       const sdkStream = sdkStreamMixin(payloadStream as any);
       sdkStream.transformToWebStream();
@@ -212,7 +212,7 @@ describe(sdkStreamMixin.name, () => {
       }
     });
 
-    it("should fail any subsequent tranform calls", async () => {
+    it("should fail any subsequent transform calls", async () => {
       const payloadStream = new Blob();
       const sdkStream = sdkStreamMixin(payloadStream as any);
       sdkStream.transformToWebStream();
