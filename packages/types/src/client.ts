@@ -54,6 +54,19 @@ export interface InvokeMethod<InputType extends object, OutputType extends Metad
 }
 
 /**
+ * @public
+ *
+ * Signature that appears on aggregated clients' methods when argument is optional.
+ */
+export interface InvokeMethodOptionalArgs<InputType extends object, OutputType extends MetadataBearer> {
+  (): Promise<OutputType>;
+  (input: InputType, options?: any): Promise<OutputType>;
+  (input: InputType, cb: (err: any, data?: OutputType) => void): void;
+  (input: InputType, options: any, cb: (err: any, data?: OutputType) => void): void;
+  (input: InputType, options?: any, cb?: (err: any, data?: OutputType) => void): Promise<OutputType> | void;
+}
+
+/**
  * A general interface for service clients, idempotent to browser or node clients
  * This type corresponds to SmithyClient(https://github.com/aws/aws-sdk-js-v3/blob/main/packages/smithy-client/src/client.ts).
  * It's provided for using without importing the SmithyClient class.
