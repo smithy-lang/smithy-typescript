@@ -14,6 +14,12 @@ jest.mock("@smithy/util-utf8");
 
 const mockStreamCollectorReturn = Uint8Array.from([117, 112, 113]);
 (streamCollector as jest.Mock).mockReturnValue(mockStreamCollectorReturn);
+Object.defineProperty(global, "Blob", {
+  writable: true,
+});
+Object.defineProperty(global, "ReadableStream", {
+  writable: true,
+});
 
 describe(sdkStreamMixin.name, () => {
   const expectAllTransformsToFail = async (sdkStream: SdkStreamMixin) => {

@@ -69,9 +69,9 @@ describe("convertRequest", () => {
     expect(convertedReq.path).toEqual("/");
     expect(convertedReq.protocol).toEqual("http:");
     expect(convertedReq.query).toEqual({});
-    expect(convertedReq.headers).toEqual({
-      connection: "close",
+    expect(convertedReq.headers).toMatchObject({
       host: "example.com",
+      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("");
   });
@@ -92,10 +92,10 @@ describe("convertRequest", () => {
       q: "hello",
       a: "world",
     });
-    expect(convertedReq.headers).toEqual({
-      connection: "close",
+    expect(convertedReq.headers).toMatchObject({
       host: "example.com",
       "content-length": "5",
+      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("hello");
   });
@@ -116,12 +116,12 @@ describe("convertRequest", () => {
     expect(convertedReq.path).toEqual("/some/resource");
     expect(convertedReq.protocol).toEqual("http:");
     expect(convertedReq.query).toEqual({});
-    expect(convertedReq.headers).toEqual({
+    expect(convertedReq.headers).toMatchObject({
       "access-control-request-headers": "origin, x-requested-with",
       "access-control-request-method": "DELETE",
       origin: "https://example.com",
-      connection: "close",
       host: "example.com",
+      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("");
   });
