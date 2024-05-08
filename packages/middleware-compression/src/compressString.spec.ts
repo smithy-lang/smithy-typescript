@@ -38,7 +38,7 @@ describe(compressString.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    (gzip as unknown as jest.Mock).mockImplementationOnce(() => {
+    ((gzip as unknown) as jest.Mock).mockImplementationOnce(() => {
       throw compressionError;
     });
 
