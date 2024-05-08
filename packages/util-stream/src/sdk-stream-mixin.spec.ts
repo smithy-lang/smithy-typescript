@@ -39,10 +39,9 @@ describe(sdkStreamMixin.name, () => {
     passThrough = new PassThrough();
   });
 
-  (typeof ReadableStream !== "undefined" ? it : it.skip)(
-    "should attempt to use the ReadableStream version if the input is not a Readable",
-    async () => {
-      // node: ReadableStream is global only as of Node.js 18.
+  it("should attempt to use the ReadableStream version if the input is not a Readable", async () => {
+    if (typeof ReadableStream !== "undefined") {
+      // ReadableStream is global only as of Node.js 18.
       const sdkStream = sdkStreamMixin(
         new ReadableStream({
           start(controller) {
@@ -53,7 +52,7 @@ describe(sdkStreamMixin.name, () => {
       );
       expect(await sdkStream.transformToByteArray()).toEqual(new Uint8Array([97, 98, 99, 100]));
     }
-  );
+  });
 
   it("should throw if unexpected stream implementation is supplied", () => {
     try {

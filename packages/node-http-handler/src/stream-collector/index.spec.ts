@@ -12,9 +12,8 @@ describe("streamCollector", () => {
     expect(collectedData).toEqual(expected);
   });
 
-  (typeof ReadableStream === "function" ? it : it.skip)(
-    "accepts ReadableStream if the global web stream implementation exists in Node.js",
-    async () => {
+  it("accepts ReadableStream if the global web stream implementation exists in Node.js", async () => {
+    if (typeof ReadableStream === "function") {
       const data = await streamCollector(
         new ReadableStream({
           start(controller) {
@@ -25,7 +24,7 @@ describe("streamCollector", () => {
       );
       expect(Buffer.from(data)).toEqual(Buffer.from("abcd"));
     }
-  );
+  });
 
   it("will propagate errors from the stream", async () => {
     // stream should emit an error right away
