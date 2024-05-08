@@ -13,7 +13,7 @@ export interface NarrowedInvokeFunction<
   HttpHandlerOptions,
   InputTypes extends object,
   OutputTypes extends MetadataBearer,
-  ResolvedClientConfiguration
+  ResolvedClientConfiguration,
 > {
   <InputType extends InputTypes, OutputType extends OutputTypes>(
     command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
@@ -44,11 +44,12 @@ export interface NarrowedInvokeMethod<
   NarrowType,
   HttpHandlerOptions,
   InputType extends object,
-  OutputType extends MetadataBearer
+  OutputType extends MetadataBearer,
 > {
-  (input: InputType, options?: HttpHandlerOptions): Promise<
-    Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>
-  >;
+  (
+    input: InputType,
+    options?: HttpHandlerOptions
+  ): Promise<Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>>;
   (
     input: InputType,
     cb: (err: unknown, data?: Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>) => void
@@ -58,7 +59,9 @@ export interface NarrowedInvokeMethod<
     options: HttpHandlerOptions,
     cb: (err: unknown, data?: Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>) => void
   ): void;
-  (input: InputType, options?: HttpHandlerOptions, cb?: (err: unknown, data?: OutputType) => void): Promise<
-    Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>
-  > | void;
+  (
+    input: InputType,
+    options?: HttpHandlerOptions,
+    cb?: (err: unknown, data?: OutputType) => void
+  ): Promise<Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>> | void;
 }

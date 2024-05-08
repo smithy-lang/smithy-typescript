@@ -16,5 +16,5 @@ export const getResolvedHostname = (
   regionHostname
     ? regionHostname
     : partitionHostname
-    ? partitionHostname.replace("{region}", resolvedRegion)
-    : undefined;
+      ? partitionHostname.replace("{region}", resolvedRegion)
+      : undefined;

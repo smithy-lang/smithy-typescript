@@ -173,9 +173,13 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
       // If the request is taking a long time, check socket usage and potentially warn.
       // This warning will be cancelled if the request resolves.
-      socketCheckTimeoutId = setTimeout(() => {
-        this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent, this.socketWarningTimestamp);
-      }, this.config.socketAcquisitionWarningTimeout ?? (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000));
+      socketCheckTimeoutId = setTimeout(
+        () => {
+          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent, this.socketWarningTimestamp);
+        },
+        this.config.socketAcquisitionWarningTimeout ??
+          (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000)
+      );
 
       const queryString = buildQueryString(request.query || {});
       let auth = undefined;

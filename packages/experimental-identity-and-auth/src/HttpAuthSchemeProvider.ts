@@ -23,7 +23,7 @@ export interface HttpAuthSchemeParametersProvider<
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
-  TInput extends object
+  TInput extends object,
 > {
   (config: TConfig, context: TContext, input: TInput): Promise<TParameters>;
 }

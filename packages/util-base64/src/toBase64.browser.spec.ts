@@ -25,6 +25,6 @@ describe(toBase64.name, () => {
     expect(() => (toBase64 as Encoder)([])).not.toThrow();
 
     const helloUtf8Array = fromBase64("aGVsbG8=");
-    expect(toBase64(([...helloUtf8Array] as unknown) as Uint8Array)).toEqual("aGVsbG8=");
+    expect(toBase64([...helloUtf8Array] as unknown as Uint8Array)).toEqual("aGVsbG8=");
   });
 });

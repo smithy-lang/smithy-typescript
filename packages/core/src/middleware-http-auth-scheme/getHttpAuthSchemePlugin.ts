@@ -30,7 +30,7 @@ interface HttpAuthSchemePluginOptions<
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
-  TInput extends object
+  TInput extends object,
 > {
   httpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<TConfig, TContext, TParameters, TInput>;
   identityProviderConfigProvider: (config: TConfig) => Promise<IdentityProviderConfig>;
@@ -43,7 +43,7 @@ export const getHttpAuthSchemePlugin = <
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
-  TInput extends object
+  TInput extends object,
 >(
   config: TConfig & PreviouslyResolved<TParameters>,
   {

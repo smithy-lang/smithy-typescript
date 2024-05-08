@@ -9,7 +9,7 @@ export interface Command<
   InputType extends ClientInput,
   ClientOutput extends MetadataBearer,
   OutputType extends ClientOutput,
-  ResolvedConfiguration
+  ResolvedConfiguration,
 > {
   readonly input: InputType;
   readonly middlewareStack: MiddlewareStack<InputType, OutputType>;

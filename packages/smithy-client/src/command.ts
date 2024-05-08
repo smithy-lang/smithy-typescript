@@ -26,8 +26,9 @@ export abstract class Command<
   Output extends ClientOutput,
   ResolvedClientConfiguration,
   ClientInput extends object = any,
-  ClientOutput extends MetadataBearer = any
-> implements ICommand<ClientInput, Input, ClientOutput, Output, ResolvedClientConfiguration> {
+  ClientOutput extends MetadataBearer = any,
+> implements ICommand<ClientInput, Input, ClientOutput, Output, ResolvedClientConfiguration>
+{
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
 
@@ -40,7 +41,7 @@ export abstract class Command<
     O extends SO,
     C extends { logger: Logger; requestHandler: RequestHandler<any, any, any> },
     SI extends object = any,
-    SO extends MetadataBearer = any
+    SO extends MetadataBearer = any,
   >() {
     return new ClassBuilder<I, O, C, SI, SO>();
   }
@@ -115,16 +116,12 @@ class ClassBuilder<
   O extends SO,
   C extends { logger: Logger; requestHandler: RequestHandler<any, any, any> },
   SI extends object = any,
-  SO extends MetadataBearer = any
+  SO extends MetadataBearer = any,
 > {
   private _init: (_: Command<I, O, C, SI, SO>) => void = () => {};
   private _ep: EndpointParameterInstructions = {};
-  private _middlewareFn: (
-    CommandCtor: any,
-    clientStack: any,
-    config: any,
-    options: any
-  ) => Pluggable<any, any>[] = () => [];
+  private _middlewareFn: (CommandCtor: any, clientStack: any, config: any, options: any) => Pluggable<any, any>[] =
+    () => [];
   private _commandName = "";
   private _clientName = "";
   private _additionalContext = {} as HandlerExecutionContext;
@@ -241,7 +238,7 @@ class ClassBuilder<
        */
       public constructor(...[input]: OptionalParameter<I>) {
         super();
-        this.input = input ?? (({} as unknown) as I);
+        this.input = input ?? ({} as unknown as I);
         closure._init(this);
       }
 
@@ -285,7 +282,7 @@ export interface CommandImpl<
   O extends SO,
   C extends { logger: Logger; requestHandler: RequestHandler<any, any, any> },
   SI extends object = any,
-  SO extends MetadataBearer = any
+  SO extends MetadataBearer = any,
 > extends Command<I, O, C, SI, SO> {
   readonly input: I;
   resolveMiddleware(stack: IMiddlewareStack<SI, SO>, configuration: C, options: any): Handler<I, O>;

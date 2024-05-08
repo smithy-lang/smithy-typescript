@@ -20,7 +20,7 @@ const makePagedClientRequest = async <ClientType extends Client<any, any, any>, 
 export function createPaginator<
   PaginationConfigType extends PaginationConfiguration,
   InputType extends object,
-  OutputType extends object
+  OutputType extends object,
 >(
   ClientCtor: any,
   CommandCtor: any,

@@ -24,11 +24,11 @@ type TransformExact<T, FromType, ToType> = [T] extends [FromType] ? ([FromType] 
 type RecursiveTransformExact<T, FromType, ToType> = T extends Function
   ? T
   : T extends object
-  ? {
-      [key in keyof T]: [T[key]] extends [FromType]
-        ? [FromType] extends [T[key]]
-          ? ToType
-          : RecursiveTransformExact<T[key], FromType, ToType>
-        : RecursiveTransformExact<T[key], FromType, ToType>;
-    }
-  : TransformExact<T, FromType, ToType>;
+    ? {
+        [key in keyof T]: [T[key]] extends [FromType]
+          ? [FromType] extends [T[key]]
+            ? ToType
+            : RecursiveTransformExact<T[key], FromType, ToType>
+          : RecursiveTransformExact<T[key], FromType, ToType>;
+      }
+    : TransformExact<T, FromType, ToType>;

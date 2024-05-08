@@ -59,14 +59,14 @@ type A = {
   {
     // AssertiveClient should enforce union of undefined on inputs
     // but preserve undefined outputs.
-    const c = (null as unknown) as AssertiveClient<MyClient>;
+    const c = null as unknown as AssertiveClient<MyClient>;
     const input = {
       a: "",
       b: 0,
       c: 0,
     };
     const get = c.getObject(input);
-    const output = (null as unknown) as Awaited<typeof get>;
+    const output = null as unknown as Awaited<typeof get>;
 
     const assert1: Exact<typeof output.a, string | undefined> = true as const;
     const assert2: Exact<typeof output.b, number | undefined> = true as const;
@@ -81,14 +81,14 @@ type A = {
   {
     // UncheckedClient both removes union-undefined from inputs
     // and the nullability of outputs.
-    const c = (null as unknown) as UncheckedClient<MyClient>;
+    const c = null as unknown as UncheckedClient<MyClient>;
     const input = {
       a: "",
       b: 0,
       c: 0,
     };
     const get = c.getObject(input);
-    const output = (null as unknown) as Awaited<typeof get>;
+    const output = null as unknown as Awaited<typeof get>;
 
     const assert1: Exact<typeof output.a, string> = true as const;
     const assert2: Exact<typeof output.b, number> = true as const;
@@ -100,9 +100,9 @@ type A = {
 
   {
     // Handles methods with optionally zero args.
-    const c = (null as unknown) as AssertiveClient<MyClient>;
+    const c = null as unknown as AssertiveClient<MyClient>;
     const list = c.listObjects();
-    const output = (null as unknown) as Awaited<typeof list>;
+    const output = null as unknown as Awaited<typeof list>;
 
     const assert1: Exact<typeof output.a, string | undefined> = true as const;
     const assert2: Exact<typeof output.b, number | undefined> = true as const;
