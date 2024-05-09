@@ -2374,7 +2374,6 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     karma: 6.4.3
-    karma-chai: 0.1.0
     karma-chrome-launcher: 3.2.0
     karma-coverage: 2.2.1
     karma-env-preprocessor: 0.1.1
@@ -2407,7 +2406,6 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     karma: 6.4.3
-    karma-chai: 0.1.0
     karma-chrome-launcher: 3.2.0
     karma-coverage: 2.2.1
     karma-env-preprocessor: 0.1.1
@@ -3020,7 +3018,6 @@ __metadata:
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
     karma: 6.4.3
-    karma-chai: 0.1.0
     karma-chrome-launcher: 3.2.0
     karma-coverage: 2.2.1
     karma-env-preprocessor: 0.1.1
@@ -8043,16 +8040,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"karma-chai@npm:0.1.0":
-  version: 0.1.0
-  resolution: "karma-chai@npm:0.1.0"
-  peerDependencies:
-    chai: "*"
-    karma: ">=0.10.9"
-  checksum: 7fae0b4acea35121218c5284e49c7a0e4ad5806abca50ee1451e314e63b4e7b72aaccda90a78d0099cc3a02eb07ebea92cc8877b74cfd62db52fe7bb0907a287
-  languageName: node
-  linkType: hard
-
 "karma-chrome-launcher@npm:3.2.0":
   version: 3.2.0
   resolution: "karma-chrome-launcher@npm:3.2.0"
@@ -10268,7 +10255,6 @@ __metadata:
     jest: 29.7.0
     jest-environment-jsdom: 29.7.0
     karma: 6.4.3
-    karma-chai: 0.1.0
     karma-chrome-launcher: 3.2.0
     karma-coverage: 2.2.1
     karma-env-preprocessor: 0.1.1

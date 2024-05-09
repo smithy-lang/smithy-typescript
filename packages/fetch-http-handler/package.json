@@ -38,7 +38,6 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "karma": "6.4.3",
-    "karma-chai": "0.1.0",
     "karma-chrome-launcher": "3.2.0",
     "karma-coverage": "2.2.1",
     "karma-env-preprocessor": "0.1.1",
