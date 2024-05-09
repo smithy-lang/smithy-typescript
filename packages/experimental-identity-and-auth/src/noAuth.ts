@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpRequest, Identity } from "@smithy/types";
 
 import { HttpSigner } from "./HttpSigner";
