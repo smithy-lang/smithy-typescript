@@ -1,5 +1,5 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { Client, HttpHandlerOptions, RequestHandler, RequestHandlerOutput } from "@smithy/types";
+import { Client, RequestHandler, RequestHandlerOutput } from "@smithy/types";
 
 /**
  * Instructs {@link TestHttpHandler} how to match the handled request and the expected request.
@@ -99,10 +99,7 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
    * @throws TestHttpHandlerSuccess to indicate success (only way to control it).
    * @throws Error any other exception to indicate failure.
    */
-  public async handle(
-    request: HttpRequest,
-    handlerOptions?: HttpHandlerOptions
-  ): Promise<RequestHandlerOutput<HttpResponse>> {
+  public async handle(request: HttpRequest): Promise<RequestHandlerOutput<HttpResponse>> {
     const m = this.matcher;
 
     if (m.log) {
@@ -131,6 +128,7 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
     (this.client as any).send = this.originalSend as any;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateHttpClientConfig(key: keyof TestHttpHandlerConfig, value: TestHttpHandlerConfig[typeof key]): void {}
 
   httpHandlerConfigs(): TestHttpHandlerConfig {
