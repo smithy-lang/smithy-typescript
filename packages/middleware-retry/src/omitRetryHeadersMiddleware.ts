@@ -29,6 +29,7 @@ export const omitRetryHeadersMiddlewareOptions: RelativeMiddlewareOptions = {
   override: true,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getOmitRetryHeadersPlugin = (options: unknown): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
     clientStack.addRelativeTo(omitRetryHeadersMiddleware(), omitRetryHeadersMiddlewareOptions);
