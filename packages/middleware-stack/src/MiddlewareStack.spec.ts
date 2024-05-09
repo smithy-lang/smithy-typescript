@@ -582,7 +582,7 @@ describe("MiddlewareStack", () => {
 
     delete (oldStack as any).identifyOnResolve;
     oldStack.clone = () => oldStack;
-    oldStack.concat = <S>(stack: S) => oldStack as S;
+    oldStack.concat = <S>() => oldStack as S;
     oldStack.applyToStack = () => void 0;
 
     expect(oldStack.identifyOnResolve).toBeUndefined();
