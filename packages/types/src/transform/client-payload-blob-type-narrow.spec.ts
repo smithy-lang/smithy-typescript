@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { IncomingMessage } from "node:http";
 
 import type { Client } from "../client";

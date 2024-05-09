@@ -3,7 +3,6 @@ import {
   DeserializeHandlerArguments,
   DeserializeHandlerOutput,
   DeserializeMiddleware,
-  HandlerExecutionContext,
   ResponseDeserializer,
   SerdeContext,
   SerdeFunctions,
@@ -17,7 +16,7 @@ export const deserializerMiddleware =
     options: SerdeFunctions,
     deserializer: ResponseDeserializer<any, any, CommandSerdeContext>
   ): DeserializeMiddleware<Input, Output> =>
-  (next: DeserializeHandler<Input, Output>, context: HandlerExecutionContext): DeserializeHandler<Input, Output> =>
+  (next: DeserializeHandler<Input, Output>): DeserializeHandler<Input, Output> =>
   async (args: DeserializeHandlerArguments<Input>): Promise<DeserializeHandlerOutput<Output>> => {
     const { response } = await next(args);
     try {

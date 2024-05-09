@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Exact, OptionalParameter } from "./util";
 
 type Assignable<LHS, RHS> = [RHS] extends [LHS] ? true : false;

@@ -118,7 +118,7 @@ describe(retryMiddleware.name, () => {
 
     it("calls acquireInitialRetryToken and records success when next succeeds", async () => {
       const next = jest.fn().mockResolvedValueOnce(mockSuccess);
-      const { response, output } = await retryMiddleware({
+      const { output } = await retryMiddleware({
         maxAttempts: () => Promise.resolve(maxAttempts),
         retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
       })(
@@ -176,7 +176,7 @@ describe(retryMiddleware.name, () => {
           error: mockError,
           errorType: "THROTTLING",
         };
-        const { response, output } = await retryMiddleware({
+        const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
           retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
@@ -198,7 +198,7 @@ describe(retryMiddleware.name, () => {
           error: mockError,
           errorType: "TRANSIENT",
         };
-        const { response, output } = await retryMiddleware({
+        const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
           retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
@@ -221,7 +221,7 @@ describe(retryMiddleware.name, () => {
           error: mockError,
           errorType: "SERVER_ERROR",
         };
-        const { response, output } = await retryMiddleware({
+        const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
           retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
@@ -244,7 +244,7 @@ describe(retryMiddleware.name, () => {
           error: mockError,
           errorType: "CLIENT_ERROR",
         };
-        const { response, output } = await retryMiddleware({
+        const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
           retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
@@ -273,7 +273,7 @@ describe(retryMiddleware.name, () => {
             error: mockError,
             errorType: "CLIENT_ERROR",
           };
-          const { response, output } = await retryMiddleware({
+          const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
             retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
@@ -302,7 +302,7 @@ describe(retryMiddleware.name, () => {
         it("parses retry-after from date string", async () => {
           const error = getErrorWithValues(retryAfterDate.toISOString());
           const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
-          const { response, output } = await retryMiddleware({
+          const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
             retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
@@ -319,7 +319,7 @@ describe(retryMiddleware.name, () => {
         it("parses retry-after from seconds", async () => {
           const error = getErrorWithValues(retryAfterDate.getTime() / 1000);
           const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
-          const { response, output } = await retryMiddleware({
+          const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
             retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
@@ -336,7 +336,7 @@ describe(retryMiddleware.name, () => {
         it("parses retry-after from Retry-After header name", async () => {
           const error = getErrorWithValues(retryAfterDate.toISOString(), "Retry-After");
           const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
-          const { response, output } = await retryMiddleware({
+          const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
             retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(

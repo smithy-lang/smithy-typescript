@@ -44,8 +44,6 @@ describe("util-stream", () => {
   });
 
   describe("blob helper integration", () => {
-    const FunctionName = "echo";
-
     const client = new Weather({ endpoint: "https://foo.bar" });
 
     requireRequestsFrom(client).toMatch({
@@ -68,7 +66,7 @@ describe("util-stream", () => {
           }),
         };
       }
-      updateHttpClientConfig(key: string, value: any) {}
+      updateHttpClientConfig() {}
       httpHandlerConfigs(): Record<string, any> {
         return {};
       }

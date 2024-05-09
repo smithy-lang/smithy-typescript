@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Client } from "../client";
 import type { HttpHandlerOptions } from "../http";
 import type { MetadataBearer } from "../response";
