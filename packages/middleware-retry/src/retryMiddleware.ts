@@ -24,71 +24,73 @@ import { RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
 import { asSdkError } from "./util";
 
-export const retryMiddleware = (options: RetryResolvedConfig) => <Output extends MetadataBearer = MetadataBearer>(
-  next: FinalizeHandler<any, Output>,
-  context: HandlerExecutionContext
-): FinalizeHandler<any, Output> => async (
-  args: FinalizeHandlerArguments<any>
-): Promise<FinalizeHandlerOutput<Output>> => {
-  let retryStrategy = await options.retryStrategy();
-  const maxAttempts = await options.maxAttempts();
+export const retryMiddleware =
+  (options: RetryResolvedConfig) =>
+  <Output extends MetadataBearer = MetadataBearer>(
+    next: FinalizeHandler<any, Output>,
+    context: HandlerExecutionContext
+  ): FinalizeHandler<any, Output> =>
+  async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
+    let retryStrategy = await options.retryStrategy();
+    const maxAttempts = await options.maxAttempts();
 
-  if (isRetryStrategyV2(retryStrategy)) {
-    retryStrategy = retryStrategy as RetryStrategyV2;
-    let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(context["partition_id"]);
-    let lastError: SdkError = new Error();
-    let attempts = 0;
-    let totalRetryDelay = 0;
-    const { request } = args;
-    const isRequest = HttpRequest.isInstance(request);
+    if (isRetryStrategyV2(retryStrategy)) {
+      retryStrategy = retryStrategy as RetryStrategyV2;
+      let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(context["partition_id"]);
+      let lastError: SdkError = new Error();
+      let attempts = 0;
+      let totalRetryDelay = 0;
+      const { request } = args;
+      const isRequest = HttpRequest.isInstance(request);
 
-    if (isRequest) {
-      request.headers[INVOCATION_ID_HEADER] = v4();
-    }
-    while (true) {
-      try {
-        if (isRequest) {
-          request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
-        }
-        const { response, output } = await next(args);
-        retryStrategy.recordSuccess(retryToken);
-        output.$metadata.attempts = attempts + 1;
-        output.$metadata.totalRetryDelay = totalRetryDelay;
-        return { response, output };
-      } catch (e: any) {
-        const retryErrorInfo = getRetryErrorInfo(e);
-        lastError = asSdkError(e);
-
-        if (isRequest && isStreamingPayload(request)) {
-          (context.logger instanceof NoOpLogger ? console : context.logger)?.warn(
-            "An error was encountered in a non-retryable streaming request."
-          );
-          throw lastError;
-        }
-
-        try {
-          retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
-        } catch (refreshError) {
-          if (!lastError.$metadata) {
-            lastError.$metadata = {};
-          }
-          lastError.$metadata.attempts = attempts + 1;
-          lastError.$metadata.totalRetryDelay = totalRetryDelay;
-          throw lastError;
-        }
-        attempts = retryToken.getRetryCount();
-        const delay = retryToken.getRetryDelay();
-        totalRetryDelay += delay;
-        await new Promise((resolve) => setTimeout(resolve, delay));
+      if (isRequest) {
+        request.headers[INVOCATION_ID_HEADER] = v4();
       }
-    }
-  } else {
-    retryStrategy = retryStrategy as RetryStrategy;
-    if (retryStrategy?.mode) context.userAgent = [...(context.userAgent || []), ["cfg/retry-mode", retryStrategy.mode]];
+      while (true) {
+        try {
+          if (isRequest) {
+            request.headers[REQUEST_HEADER] = `attempt=${attempts + 1}; max=${maxAttempts}`;
+          }
+          const { response, output } = await next(args);
+          retryStrategy.recordSuccess(retryToken);
+          output.$metadata.attempts = attempts + 1;
+          output.$metadata.totalRetryDelay = totalRetryDelay;
+          return { response, output };
+        } catch (e: any) {
+          const retryErrorInfo = getRetryErrorInfo(e);
+          lastError = asSdkError(e);
 
-    return retryStrategy.retry(next, args);
-  }
-};
+          if (isRequest && isStreamingPayload(request)) {
+            (context.logger instanceof NoOpLogger ? console : context.logger)?.warn(
+              "An error was encountered in a non-retryable streaming request."
+            );
+            throw lastError;
+          }
+
+          try {
+            retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
+          } catch (refreshError) {
+            if (!lastError.$metadata) {
+              lastError.$metadata = {};
+            }
+            lastError.$metadata.attempts = attempts + 1;
+            lastError.$metadata.totalRetryDelay = totalRetryDelay;
+            throw lastError;
+          }
+          attempts = retryToken.getRetryCount();
+          const delay = retryToken.getRetryDelay();
+          totalRetryDelay += delay;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    } else {
+      retryStrategy = retryStrategy as RetryStrategy;
+      if (retryStrategy?.mode)
+        context.userAgent = [...(context.userAgent || []), ["cfg/retry-mode", retryStrategy.mode]];
+
+      return retryStrategy.retry(next, args);
+    }
+  };
 
 const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&

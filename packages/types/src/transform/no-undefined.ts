@@ -34,10 +34,10 @@ export type UncheckedClient<Client extends object> = UncheckedClientOutputTypes<
 export type NoUndefined<T> = T extends Function
   ? T
   : [T] extends [object]
-  ? {
-      [key in keyof T]: NoUndefined<T[key]>;
-    }
-  : Exclude<T, undefined>;
+    ? {
+        [key in keyof T]: NoUndefined<T[key]>;
+      }
+    : Exclude<T, undefined>;
 
 /**
  * @internal
@@ -47,10 +47,10 @@ export type NoUndefined<T> = T extends Function
 export type RecursiveRequired<T> = T extends Function
   ? T
   : [T] extends [object]
-  ? {
-      [key in keyof T]-?: RecursiveRequired<T[key]>;
-    }
-  : Exclude<T, undefined>;
+    ? {
+        [key in keyof T]-?: RecursiveRequired<T[key]>;
+      }
+    : Exclude<T, undefined>;
 
 /**
  * @internal
@@ -59,14 +59,14 @@ export type RecursiveRequired<T> = T extends Function
  */
 type NarrowClientIOTypes<ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
-    InvokeMethodOptionalArgs<infer FunctionInputTypes, infer FunctionOutputTypes>
+    InvokeMethodOptionalArgs<infer FunctionInputTypes, infer FunctionOutputTypes>,
   ]
     ? InvokeMethodOptionalArgs<NoUndefined<FunctionInputTypes>, NoUndefined<FunctionOutputTypes>>
     : [ClientType[key]] extends [InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>]
-    ? InvokeFunction<NoUndefined<InputTypes>, NoUndefined<OutputTypes>, ConfigType>
-    : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
-    ? InvokeMethod<NoUndefined<FunctionInputTypes>, NoUndefined<FunctionOutputTypes>>
-    : ClientType[key];
+      ? InvokeFunction<NoUndefined<InputTypes>, NoUndefined<OutputTypes>, ConfigType>
+      : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
+        ? InvokeMethod<NoUndefined<FunctionInputTypes>, NoUndefined<FunctionOutputTypes>>
+        : ClientType[key];
 };
 
 /**
@@ -76,12 +76,12 @@ type NarrowClientIOTypes<ClientType extends object> = {
  */
 type UncheckedClientOutputTypes<ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
-    InvokeMethodOptionalArgs<infer FunctionInputTypes, infer FunctionOutputTypes>
+    InvokeMethodOptionalArgs<infer FunctionInputTypes, infer FunctionOutputTypes>,
   ]
     ? InvokeMethodOptionalArgs<NoUndefined<FunctionInputTypes>, RecursiveRequired<FunctionOutputTypes>>
     : [ClientType[key]] extends [InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>]
-    ? InvokeFunction<NoUndefined<InputTypes>, RecursiveRequired<OutputTypes>, ConfigType>
-    : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
-    ? InvokeMethod<NoUndefined<FunctionInputTypes>, RecursiveRequired<FunctionOutputTypes>>
-    : ClientType[key];
+      ? InvokeFunction<NoUndefined<InputTypes>, RecursiveRequired<OutputTypes>, ConfigType>
+      : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
+        ? InvokeMethod<NoUndefined<FunctionInputTypes>, RecursiveRequired<FunctionOutputTypes>>
+        : ClientType[key];
 };

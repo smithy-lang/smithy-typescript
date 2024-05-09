@@ -9,18 +9,17 @@ import {
 } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 
-export const omitRetryHeadersMiddleware = () => <Output extends MetadataBearer = MetadataBearer>(
-  next: FinalizeHandler<any, Output>
-): FinalizeHandler<any, Output> => async (
-  args: FinalizeHandlerArguments<any>
-): Promise<FinalizeHandlerOutput<Output>> => {
-  const { request } = args;
-  if (HttpRequest.isInstance(request)) {
-    delete request.headers[INVOCATION_ID_HEADER];
-    delete request.headers[REQUEST_HEADER];
-  }
-  return next(args);
-};
+export const omitRetryHeadersMiddleware =
+  () =>
+  <Output extends MetadataBearer = MetadataBearer>(next: FinalizeHandler<any, Output>): FinalizeHandler<any, Output> =>
+  async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
+    const { request } = args;
+    if (HttpRequest.isInstance(request)) {
+      delete request.headers[INVOCATION_ID_HEADER];
+      delete request.headers[REQUEST_HEADER];
+    }
+    return next(args);
+  };
 
 export const omitRetryHeadersMiddlewareOptions: RelativeMiddlewareOptions = {
   name: "omitRetryHeadersMiddleware",

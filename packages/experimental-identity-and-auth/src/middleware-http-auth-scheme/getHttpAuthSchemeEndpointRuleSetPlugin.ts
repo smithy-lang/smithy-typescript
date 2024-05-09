@@ -24,7 +24,7 @@ interface HttpAuthSchemeEndpointRuleSetPluginOptions<
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
-  TInput extends object
+  TInput extends object,
 > {
   httpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<TConfig, TContext, TParameters, TInput>;
   identityProviderConfigProvider: (config: TConfig) => Promise<IdentityProviderConfig>;
@@ -37,7 +37,7 @@ export const getHttpAuthSchemeEndpointRuleSetPlugin = <
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters,
-  TInput extends object
+  TInput extends object,
 >(
   config: TConfig & PreviouslyResolved<TParameters>,
   {

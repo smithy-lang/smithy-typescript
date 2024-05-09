@@ -6,7 +6,10 @@ import { Writable, WritableOptions } from "stream";
  * @internal
  */
 export class HashCalculator extends Writable {
-  constructor(public readonly hash: Checksum | Hash, options?: WritableOptions) {
+  constructor(
+    public readonly hash: Checksum | Hash,
+    options?: WritableOptions
+  ) {
     super(options);
   }
 

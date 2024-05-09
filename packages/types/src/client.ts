@@ -19,7 +19,7 @@ export type CheckOptionalClientConfig<T> = OptionalParameter<T>;
 export interface InvokeFunction<
   InputTypes extends object,
   OutputTypes extends MetadataBearer,
-  ResolvedClientConfiguration
+  ResolvedClientConfiguration,
 > {
   <InputType extends InputTypes, OutputType extends OutputTypes>(
     command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,

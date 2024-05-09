@@ -89,7 +89,7 @@ describe("staticStabilityProvider", () => {
 
   it("should allow custom logger to print warning messages", async () => {
     const provider = jest.fn().mockResolvedValueOnce(mockCreds).mockRejectedValue("Error");
-    const logger = ({ warn: jest.fn() } as unknown) as Logger;
+    const logger = { warn: jest.fn() } as unknown as Logger;
     const stableProvider = staticStabilityProvider(provider, { logger });
     expect(await stableProvider()).toEqual(mockCreds); // load initial creds
     await stableProvider();

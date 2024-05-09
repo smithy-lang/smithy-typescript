@@ -123,7 +123,7 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(slowConfigProvider);
 
         const promises = Promise.all(
-          Array.from({ length: 20 }).map(() => nodeHttpHandler.handle(({} as unknown) as HttpRequest))
+          Array.from({ length: 20 }).map(() => nodeHttpHandler.handle({} as unknown as HttpRequest))
         );
 
         expect(providerInvokedCount).toBe(1);
