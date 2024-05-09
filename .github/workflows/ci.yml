@@ -45,7 +45,9 @@ jobs:
   test-typescript:
     runs-on: smithy-typescript_ubuntu-latest_8-core
     name: TypeScript Test ${{ matrix.node }}
+    needs: ['ensure-typescript-packages-have-changesets', 'lint-typescript', 'ensure-typescript-formatted']
     strategy:
+      fail-fast: false
       matrix:
         node: [16, 18, 20, 22]
 
