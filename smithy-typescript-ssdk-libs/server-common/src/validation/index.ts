@@ -53,7 +53,7 @@ export interface RangeValidationFailure extends StandardValidationFailure<number
 
 export class RequiredValidationFailure {
   path: string;
-  constraintType: "required" = "required";
+  constraintType = "required";
 
   constructor(path: string) {
     this.path = path;
