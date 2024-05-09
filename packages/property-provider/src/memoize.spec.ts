@@ -19,8 +19,7 @@ describe("memoize", () => {
 
       const memoized = memoize(provider);
       expect(provider).toHaveBeenCalledTimes(0);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for (const _ in [...Array(repeatTimes).keys()]) {
+      for (let i = 0; i < repeatTimes; i++) {
         expect(await memoized()).toStrictEqual(mockReturn);
         expect(provider).toHaveBeenCalledTimes(1);
       }
@@ -133,7 +132,7 @@ describe("memoize", () => {
       it("should reinvoke the underlying provider even if isExpired returns false", async () => {
         const memoized = memoize(provider, isExpired, requiresRefresh);
         isExpired.mockReturnValue(false);
-        for (const _ in [...Array(repeatTimes).keys()]) {
+        for (let i = 0; i < repeatTimes; i++) {
           expect(await memoized({ forceRefresh: true })).toEqual(mockReturn);
         }
         expect(provider).toHaveBeenCalledTimes(repeatTimes);
@@ -142,7 +141,7 @@ describe("memoize", () => {
       it("should reinvoke the underlying provider even if requiresRefresh returns false", async () => {
         const memoized = memoize(provider, isExpired, requiresRefresh);
         requiresRefresh.mockReturnValue(false);
-        for (const _ in [...Array(repeatTimes).keys()]) {
+        for (let i = 0; i < repeatTimes; i++) {
           expect(await memoized({ forceRefresh: true })).toEqual(mockReturn);
         }
         expect(provider).toHaveBeenCalledTimes(repeatTimes);
@@ -175,7 +174,7 @@ describe("memoize", () => {
 
       it("should re-evaluate `requiresRefresh` after force refresh", async () => {
         const memoized = memoize(provider, isExpired, requiresRefresh);
-        for (const _ in [...Array(repeatTimes).keys()]) {
+        for (let i = 0; i < repeatTimes; i++) {
           expect(await memoized({ forceRefresh: true })).toStrictEqual(mockReturn);
         }
         expect(requiresRefresh).toBeCalledTimes(repeatTimes);
