@@ -13,7 +13,7 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "extract:docs": "api-extractor run --local",
-    "test": "yarn g:jest --coverage --forceExit && karma start karma.conf.js"
+    "test": "yarn g:jest --coverage --forceExit && yarn g:karma start karma.conf.js"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
@@ -32,18 +32,10 @@
   },
   "devDependencies": {
     "@smithy/abort-controller": "workspace:^",
-    "@types/chai-as-promised": "^7.1.2",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
-    "karma": "6.4.3",
-    "karma-chrome-launcher": "3.2.0",
-    "karma-firefox-launcher": "2.1.3",
-    "karma-jasmine": "5.1.0",
-    "karma-typescript": "5.5.4",
-    "karma-webpack": "5.0.1",
     "rimraf": "3.0.2",
-    "typedoc": "0.23.23",
-    "webpack": "5.91.0"
+    "typedoc": "0.23.23"
   },
   "typesVersions": {
     "<4.0": {
