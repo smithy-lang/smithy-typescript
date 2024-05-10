@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- c1105634: improves the debug message in util-endpoints
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/node-config-provider@3.0.0
+
 ## 1.2.0
 
 ### Minor Changes

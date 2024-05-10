@@ -1,5 +1,22 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [3500f341]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/util-stream@3.0.0
+  - @smithy/middleware-endpoint@3.0.0
+  - @smithy/middleware-stack@3.0.0
+  - @smithy/protocol-http@4.0.0
+
 ## 2.5.1
 
 ### Patch Changes

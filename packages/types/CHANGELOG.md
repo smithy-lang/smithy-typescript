@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Minor Changes
+
+- 7a7c84d3: fix type transforms for method signatures with no arguments
+
 ## 2.12.0
 
 ### Minor Changes

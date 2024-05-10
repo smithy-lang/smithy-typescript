@@ -1,5 +1,23 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/node-config-provider@3.0.0
+  - @smithy/util-config-provider@3.0.0
+  - @smithy/is-array-buffer@3.0.0
+  - @smithy/util-middleware@3.0.0
+  - @smithy/protocol-http@4.0.0
+  - @smithy/util-utf8@3.0.0
+
 ## 2.2.0
 
 ### Minor Changes

@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+
 ## 3.3.0
 
 ### Minor Changes

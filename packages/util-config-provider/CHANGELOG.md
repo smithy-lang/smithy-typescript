@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
 ## 2.3.0
 
 ### Minor Changes

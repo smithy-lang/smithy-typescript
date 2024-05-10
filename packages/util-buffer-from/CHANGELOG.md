@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- Updated dependencies [671aa704]
+  - @smithy/is-array-buffer@3.0.0
+
 ## 2.2.0
 
 ### Minor Changes

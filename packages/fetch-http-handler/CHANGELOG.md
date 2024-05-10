@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- e76e736b: improve stream collection speed
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/querystring-builder@3.0.0
+  - @smithy/protocol-http@4.0.0
+  - @smithy/util-base64@3.0.0
+
 ## 2.5.0
 
 ### Minor Changes

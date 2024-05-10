@@ -1,5 +1,23 @@
 # Change Log
 
+## 0.3.0
+
+### Minor Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/middleware-endpoint@3.0.0
+  - @smithy/middleware-retry@3.0.0
+  - @smithy/middleware-serde@3.0.0
+  - @smithy/util-middleware@3.0.0
+  - @smithy/protocol-http@4.0.0
+  - @smithy/signature-v4@3.0.0
+
 ## 0.2.3
 
 ### Patch Changes

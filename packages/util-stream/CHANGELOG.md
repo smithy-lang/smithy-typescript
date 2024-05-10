@@ -1,5 +1,29 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Minor Changes
+
+- 3500f341: handle web streams in streamCollector and sdkStreamMixin
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [e76e736b]
+- Updated dependencies [3500f341]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/fetch-http-handler@3.0.0
+  - @smithy/node-http-handler@3.0.0
+  - @smithy/util-hex-encoding@3.0.0
+  - @smithy/util-buffer-from@3.0.0
+  - @smithy/util-base64@3.0.0
+  - @smithy/util-utf8@3.0.0
+
 ## 2.2.0
 
 ### Minor Changes

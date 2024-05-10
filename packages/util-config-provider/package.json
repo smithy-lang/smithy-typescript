@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-config-provider",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "Utilities package for configuration providers",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",

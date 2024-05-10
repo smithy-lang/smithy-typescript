@@ -1,5 +1,22 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/credential-provider-imds@3.0.0
+  - @smithy/node-config-provider@3.0.0
+  - @smithy/property-provider@3.0.0
+  - @smithy/config-resolver@3.0.0
+  - @smithy/smithy-client@3.0.0
+
 ## 2.3.1
 
 ### Patch Changes

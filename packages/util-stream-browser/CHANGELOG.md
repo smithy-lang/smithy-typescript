@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies [7a7c84d3]
+- Updated dependencies [e76e736b]
+- Updated dependencies [671aa704]
+  - @smithy/types@3.0.0
+  - @smithy/fetch-http-handler@3.0.0
+  - @smithy/util-hex-encoding@3.0.0
+  - @smithy/util-base64@3.0.0
+  - @smithy/util-utf8@3.0.0
+
 ## 2.2.0
 
 ### Minor Changes
