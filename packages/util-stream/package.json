@@ -37,8 +37,6 @@
     "@smithy/util-test": "workspace:^",
     "@types/chai-as-promised": "^7.1.2",
     "@types/node": "^16.18.96",
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "karma": "6.4.3",
