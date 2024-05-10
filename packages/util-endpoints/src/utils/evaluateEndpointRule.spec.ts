@@ -75,7 +75,10 @@ describe(evaluateEndpointRule.name, () => {
       });
       expect(getEndpointHeaders).not.toHaveBeenCalled();
       expect(getEndpointProperties).not.toHaveBeenCalled();
-      expect(mockLogger.debug).nthCalledWith(1, `${debugId} Resolving endpoint from template: ${toDebugString(mockEndpointRule.endpoint)}`)
+      expect(mockLogger.debug).nthCalledWith(
+        1,
+        `${debugId} Resolving endpoint from template: ${toDebugString(mockEndpointRule.endpoint)}`
+      );
     });
 
     it("with headers and properties", () => {
@@ -91,7 +94,7 @@ describe(evaluateEndpointRule.name, () => {
         ...mockEndpoint,
         headers: mockInputHeaders,
         properties: mockInputProperties,
-      }
+      };
       const result = evaluateEndpointRule(
         {
           ...mockEndpointRule,
@@ -107,7 +110,10 @@ describe(evaluateEndpointRule.name, () => {
       });
       expect(getEndpointHeaders).toHaveBeenCalledWith(mockInputHeaders, mockUpdatedOptions);
       expect(getEndpointProperties).toHaveBeenCalledWith(mockInputProperties, mockUpdatedOptions);
-      expect(mockLogger.debug).nthCalledWith(1, `${debugId} Resolving endpoint from template: ${toDebugString(headerEndpoint)}`)
+      expect(mockLogger.debug).nthCalledWith(
+        1,
+        `${debugId} Resolving endpoint from template: ${toDebugString(headerEndpoint)}`
+      );
     });
   });
 });

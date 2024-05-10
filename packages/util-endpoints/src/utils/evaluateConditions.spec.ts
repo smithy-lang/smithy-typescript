@@ -56,9 +56,8 @@ describe(evaluateConditions.name, () => {
       result: true,
       toAssign: { name: mockCn2.assign, value: value2 },
     });
-    
 
-    const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], {...mockOptions, });
+    const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], { ...mockOptions });
     expect(result).toBe(true);
     expect(referenceRecord).toEqual({
       [mockCn1.assign!]: value1,
@@ -69,8 +68,7 @@ describe(evaluateConditions.name, () => {
       ...mockOptions,
       referenceRecord: { [mockCn1.assign!]: value1 },
     });
-    expect(mockLogger.debug).nthCalledWith(1, `${debugId} assign: ${mockCn1.assign} := ${toDebugString(value1)}`)
-    expect(mockLogger.debug).nthCalledWith(2, `${debugId} assign: ${mockCn2.assign} := ${toDebugString(value2)}`)
-    
+    expect(mockLogger.debug).nthCalledWith(1, `${debugId} assign: ${mockCn1.assign} := ${toDebugString(value1)}`);
+    expect(mockLogger.debug).nthCalledWith(2, `${debugId} assign: ${mockCn2.assign} := ${toDebugString(value2)}`);
   });
 });

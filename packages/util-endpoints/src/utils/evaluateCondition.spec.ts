@@ -39,10 +39,13 @@ describe(evaluateCondition.name, () => {
           error: jest.fn(),
         };
         (callFunction as jest.Mock).mockReturnValue(mockReturn);
-        const { result, toAssign } = evaluateCondition(mockFnArgs, {...mockOptions, logger:mockLogger});
+        const { result, toAssign } = evaluateCondition(mockFnArgs, { ...mockOptions, logger: mockLogger });
         expect(result).toBe(result);
         expect(toAssign).toBeUndefined();
-        expect(mockLogger.debug).nthCalledWith(1, `${debugId} evaluateCondition: ${toDebugString(mockFnArgs)} = ${mockReturn}`)
+        expect(mockLogger.debug).nthCalledWith(
+          1,
+          `${debugId} evaluateCondition: ${toDebugString(mockFnArgs)} = ${mockReturn}`
+        );
       });
     });
   });
@@ -56,9 +59,15 @@ describe(evaluateCondition.name, () => {
       error: jest.fn(),
     };
     (callFunction as jest.Mock).mockReturnValue(mockAssignedValue);
-    const { result, toAssign } = evaluateCondition({ assign: mockAssign, ...mockFnArgs }, {...mockOptions, logger:mockLogger});
+    const { result, toAssign } = evaluateCondition(
+      { assign: mockAssign, ...mockFnArgs },
+      { ...mockOptions, logger: mockLogger }
+    );
     expect(result).toBe(true);
     expect(toAssign).toEqual({ name: mockAssign, value: mockAssignedValue });
-    expect(mockLogger.debug).nthCalledWith(1, `${debugId} evaluateCondition: ${toDebugString(mockFnArgs)} = ${mockAssignedValue}`)
+    expect(mockLogger.debug).nthCalledWith(
+      1,
+      `${debugId} evaluateCondition: ${toDebugString(mockFnArgs)} = ${mockAssignedValue}`
+    );
   });
 });
