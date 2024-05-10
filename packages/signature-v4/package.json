@@ -16,7 +16,7 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
     "extract:docs": "api-extractor run --local",
-    "test": "yarn g:vitest --coverage"
+    "test": "yarn g:vitest"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
