@@ -17,20 +17,28 @@ async function collectBlob(blob: Blob): Promise<Uint8Array> {
 }
 
 async function collectStream(stream: ReadableStream): Promise<Uint8Array> {
-  let res = new Uint8Array(0);
+  const chunks = [];
   const reader = stream.getReader();
   let isDone = false;
+  let length = 0;
+
   while (!isDone) {
     const { done, value } = await reader.read();
     if (value) {
-      const prior = res;
-      res = new Uint8Array(prior.length + value.length);
-      res.set(prior);
-      res.set(value, prior.length);
+      chunks.push(value);
+      length += value.length;
     }
     isDone = done;
   }
-  return res;
+
+  const collected = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    collected.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  return collected;
 }
 
 function readToBase64(blob: Blob): Promise<string> {
