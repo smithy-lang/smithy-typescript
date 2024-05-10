@@ -1,3 +1,4 @@
+import { debugId, toDebugString } from "../debug";
 import { ConditionObject, EvaluateOptions } from "../types";
 import { evaluateCondition } from "./evaluateCondition";
 import { evaluateConditions } from "./evaluateConditions";
@@ -5,9 +6,16 @@ import { evaluateConditions } from "./evaluateConditions";
 jest.mock("./evaluateCondition");
 
 describe(evaluateConditions.name, () => {
+  const mockLogger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
   const mockOptions: EvaluateOptions = {
     endpointParams: {},
     referenceRecord: {},
+    logger: mockLogger,
   };
   const mockCn1: ConditionObject = { fn: "fn1", argv: ["arg1"], assign: "assign1" };
   const mockCn2: ConditionObject = { fn: "fn2", argv: ["arg2"], assign: "assign2" };
@@ -49,7 +57,7 @@ describe(evaluateConditions.name, () => {
       toAssign: { name: mockCn2.assign, value: value2 },
     });
 
-    const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], mockOptions);
+    const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], { ...mockOptions });
     expect(result).toBe(true);
     expect(referenceRecord).toEqual({
       [mockCn1.assign!]: value1,
@@ -60,5 +68,7 @@ describe(evaluateConditions.name, () => {
       ...mockOptions,
       referenceRecord: { [mockCn1.assign!]: value1 },
     });
+    expect(mockLogger.debug).nthCalledWith(1, `${debugId} assign: ${mockCn1.assign} := ${toDebugString(value1)}`);
+    expect(mockLogger.debug).nthCalledWith(2, `${debugId} assign: ${mockCn2.assign} := ${toDebugString(value2)}`);
   });
 });

@@ -1,3 +1,4 @@
+import { debugId, toDebugString } from "../debug";
 import { EndpointError, EvaluateOptions } from "../types";
 import { callFunction } from "./callFunction";
 import { evaluateCondition } from "./evaluateCondition";
@@ -31,19 +32,42 @@ describe(evaluateCondition.name, () => {
       [false, [false, 0, -0, null, undefined, NaN]],
     ])("returns %s for", (result, testCases) => {
       it.each(testCases)(`value: '%s'`, (mockReturn) => {
+        const mockLogger = {
+          debug: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+          error: jest.fn(),
+        };
         (callFunction as jest.Mock).mockReturnValue(mockReturn);
-        const { result, toAssign } = evaluateCondition(mockFnArgs, mockOptions);
+        const { result, toAssign } = evaluateCondition(mockFnArgs, { ...mockOptions, logger: mockLogger });
         expect(result).toBe(result);
         expect(toAssign).toBeUndefined();
+        expect(mockLogger.debug).nthCalledWith(
+          1,
+          `${debugId} evaluateCondition: ${toDebugString(mockFnArgs)} = ${mockReturn}`
+        );
       });
     });
   });
 
   it("returns assigned value if defined", () => {
     const mockAssignedValue = "mockAssignedValue";
+    const mockLogger = {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    };
     (callFunction as jest.Mock).mockReturnValue(mockAssignedValue);
-    const { result, toAssign } = evaluateCondition({ assign: mockAssign, ...mockFnArgs }, mockOptions);
+    const { result, toAssign } = evaluateCondition(
+      { assign: mockAssign, ...mockFnArgs },
+      { ...mockOptions, logger: mockLogger }
+    );
     expect(result).toBe(true);
     expect(toAssign).toEqual({ name: mockAssign, value: mockAssignedValue });
+    expect(mockLogger.debug).nthCalledWith(
+      1,
+      `${debugId} evaluateCondition: ${toDebugString(mockFnArgs)} = ${mockAssignedValue}`
+    );
   });
 });

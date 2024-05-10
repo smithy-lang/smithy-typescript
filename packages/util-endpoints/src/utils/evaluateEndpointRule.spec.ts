@@ -1,3 +1,6 @@
+import { EvaluateOptions } from "@smithy/types";
+
+import { debugId, toDebugString } from "../debug";
 import { ConditionObject, EndpointRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
@@ -11,9 +14,16 @@ jest.mock("./getEndpointHeaders");
 jest.mock("./getEndpointProperties");
 
 describe(evaluateEndpointRule.name, () => {
-  const mockOptions = {
+  const mockLogger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const mockOptions: EvaluateOptions = {
     endpointParams: {},
     referenceRecord: {},
+    logger: mockLogger,
   };
   const mockConditions: ConditionObject[] = [
     { fn: "fn1", argv: ["arg1"] },
@@ -65,6 +75,10 @@ describe(evaluateEndpointRule.name, () => {
       });
       expect(getEndpointHeaders).not.toHaveBeenCalled();
       expect(getEndpointProperties).not.toHaveBeenCalled();
+      expect(mockLogger.debug).nthCalledWith(
+        1,
+        `${debugId} Resolving endpoint from template: ${toDebugString(mockEndpointRule.endpoint)}`
+      );
     });
 
     it("with headers and properties", () => {
@@ -76,15 +90,15 @@ describe(evaluateEndpointRule.name, () => {
 
       (getEndpointHeaders as jest.Mock).mockReturnValue(mockOutputHeaders);
       (getEndpointProperties as jest.Mock).mockReturnValue(mockOutputProperties);
-
+      const headerEndpoint = {
+        ...mockEndpoint,
+        headers: mockInputHeaders,
+        properties: mockInputProperties,
+      };
       const result = evaluateEndpointRule(
         {
           ...mockEndpointRule,
-          endpoint: {
-            ...mockEndpoint,
-            headers: mockInputHeaders,
-            properties: mockInputProperties,
-          },
+          endpoint: headerEndpoint,
         },
         mockOptions
       );
@@ -96,6 +110,10 @@ describe(evaluateEndpointRule.name, () => {
       });
       expect(getEndpointHeaders).toHaveBeenCalledWith(mockInputHeaders, mockUpdatedOptions);
       expect(getEndpointProperties).toHaveBeenCalledWith(mockInputProperties, mockUpdatedOptions);
+      expect(mockLogger.debug).nthCalledWith(
+        1,
+        `${debugId} Resolving endpoint from template: ${toDebugString(headerEndpoint)}`
+      );
     });
   });
 });
