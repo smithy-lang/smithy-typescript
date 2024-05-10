@@ -14,7 +14,7 @@
     "build:types": "tsc -p tsconfig.types.json",
     "postbuild": "rimraf dist/types/ts3.4 && downlevel-dts dist/types dist/types/ts3.4",
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
-    "test": "jest",
+    "test": "yarn g:vitest",
     "clean": "rimraf dist",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\""
