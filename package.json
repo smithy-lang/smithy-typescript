@@ -58,6 +58,7 @@
     "ts-jest": "29.1.2",
     "turbo": "latest",
     "typescript": "~4.9.5",
+    "vitest": "^1.6.0",
     "webpack": "5.91.0",
     "yarn": "1.22.22"
   },
