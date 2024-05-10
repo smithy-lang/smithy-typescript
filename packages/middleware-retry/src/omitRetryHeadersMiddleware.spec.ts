@@ -10,8 +10,8 @@ import {
 
 describe("getOmitRetryHeadersPlugin", () => {
   const mockClientStack = {
-    add: jest.fn(),
-    addRelativeTo: jest.fn(),
+    add: vi.fn(),
+    addRelativeTo: vi.fn(),
   };
 
   afterEach(() => {
@@ -31,7 +31,7 @@ describe("omitRetryHeadersMiddleware", () => {
   });
 
   it("remove retry headers", async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     const args = {
       request: new HttpRequest({
         headers: {

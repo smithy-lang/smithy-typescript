@@ -31,7 +31,7 @@ describe.skip("emitWarningIfUnsupportedVersion", () => {
         [getPreviousMajorVersion(major), 0, 0],
       ].map((arr) => `v${arr.join(".")}`)
     )(`%s`, async (unsupportedVersion) => {
-      process.emitWarning = jest.fn();
+      process.emitWarning = vi.fn();
       emitWarningIfUnsupportedVersion(unsupportedVersion);
 
       // Verify that the warning was emitted.
@@ -54,7 +54,7 @@ describe.skip("emitWarningIfUnsupportedVersion", () => {
         [major + 1, 0, 0],
       ].map((arr) => `v${arr.join(".")}`)
     )(`%s`, async (unsupportedVersion) => {
-      process.emitWarning = jest.fn();
+      process.emitWarning = vi.fn();
       emitWarningIfUnsupportedVersion(unsupportedVersion);
       expect(process.emitWarning).not.toHaveBeenCalled();
     });

@@ -82,7 +82,7 @@ describe(sdkStreamMixin.name, () => {
   });
 
   describe("transformToString", () => {
-    const toStringMock = jest.fn();
+    const toStringMock = vi.fn();
     beforeAll(() => {
       jest.resetAllMocks();
     });
@@ -112,7 +112,7 @@ describe(sdkStreamMixin.name, () => {
         jest.spyOn(util, "TextDecoder").mockImplementation(
           () =>
             ({
-              decode: jest.fn(),
+              decode: vi.fn(),
             }) as any
         );
         (fromArrayBuffer as jest.Mock).mockReturnValue({ toString: toStringMock });
@@ -171,7 +171,7 @@ describe(sdkStreamMixin.name, () => {
       const originalToWebImpl = Readable.toWeb;
       beforeAll(() => {
         // @ts-expect-error
-        Readable.toWeb = jest.fn().mockReturnValue("A web stream");
+        Readable.toWeb = vi.fn().mockReturnValue("A web stream");
       });
 
       afterAll(() => {

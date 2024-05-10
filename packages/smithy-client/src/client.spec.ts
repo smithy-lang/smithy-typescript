@@ -2,9 +2,9 @@ import { Client } from "./client";
 
 describe("SmithyClient", () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const mockHandler = jest.fn((args: any) => Promise.resolve({ output: "foo" }));
+  const mockHandler = vi.fn((args: any) => Promise.resolve({ output: "foo" }));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const mockResolveMiddleware = jest.fn((args) => mockHandler);
+  const mockResolveMiddleware = vi.fn((args) => mockHandler);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getCommandWithOutput = (output: string) => ({
     resolveMiddleware: mockResolveMiddleware,
@@ -31,7 +31,7 @@ describe("SmithyClient", () => {
   });
 
   it("should apply callback when command and callback is supplied", (done) => {
-    const callback = jest.fn((err, response) => {
+    const callback = vi.fn((err, response) => {
       expect(response).toEqual("foo");
       done();
     });
@@ -39,7 +39,7 @@ describe("SmithyClient", () => {
   });
 
   it("should apply callback when command, options and callback is supplied", (done) => {
-    const callback = jest.fn((err, response) => {
+    const callback = vi.fn((err, response) => {
       expect(response).toEqual("foo");
       expect(mockResolveMiddleware.mock.calls.length).toEqual(1);
       expect(mockResolveMiddleware.mock.calls[0][2 as any]).toEqual(options);

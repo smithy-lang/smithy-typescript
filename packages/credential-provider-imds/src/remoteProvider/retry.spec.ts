@@ -4,7 +4,7 @@ describe("retry", () => {
   const successMsg = "Success";
   const errorMsg = "Expected failure";
   const retries = 10;
-  const retryable = jest.fn().mockRejectedValue(errorMsg);
+  const retryable = vi.fn().mockRejectedValue(errorMsg);
 
   afterEach(() => {
     jest.clearAllMocks();

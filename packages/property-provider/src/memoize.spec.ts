@@ -6,7 +6,7 @@ describe("memoize", () => {
   const repeatTimes = 10;
 
   beforeEach(() => {
-    provider = jest.fn().mockResolvedValue(mockReturn);
+    provider = vi.fn().mockResolvedValue(mockReturn);
   });
 
   afterEach(() => {
@@ -72,8 +72,8 @@ describe("memoize", () => {
     let requiresRefresh: jest.Mock;
 
     beforeEach(() => {
-      isExpired = jest.fn().mockReturnValue(true);
-      requiresRefresh = jest.fn().mockReturnValue(false);
+      isExpired = vi.fn().mockReturnValue(true);
+      requiresRefresh = vi.fn().mockReturnValue(false);
     });
 
     describe("should not reinvoke the underlying provider while isExpired returns `false`", () => {

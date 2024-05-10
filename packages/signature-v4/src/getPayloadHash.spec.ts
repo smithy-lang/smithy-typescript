@@ -28,7 +28,7 @@ describe("getPayloadHash", () => {
             [SHA256_HEADER]: "foo",
           },
         }),
-        jest.fn(() => {
+        vi.fn(() => {
           throw new Error("I should not have been invoked!");
         })
       )

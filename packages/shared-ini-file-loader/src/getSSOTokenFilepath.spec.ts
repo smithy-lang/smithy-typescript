@@ -9,8 +9,8 @@ jest.mock("./getHomeDir");
 
 describe(getSSOTokenFilepath.name, () => {
   const mockCacheName = "mockCacheName";
-  const mockDigest = jest.fn().mockReturnValue(mockCacheName);
-  const mockUpdate = jest.fn().mockReturnValue({ digest: mockDigest });
+  const mockDigest = vi.fn().mockReturnValue(mockCacheName);
+  const mockUpdate = vi.fn().mockReturnValue({ digest: mockDigest });
   const mockHomeDir = "/home/dir";
   const mockSsoStartUrl = "mock_sso_start_url";
 

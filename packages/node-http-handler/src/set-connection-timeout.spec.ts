@@ -1,10 +1,10 @@
 import { setConnectionTimeout } from "./set-connection-timeout";
 
 describe("setConnectionTimeout", () => {
-  const reject = jest.fn();
+  const reject = vi.fn();
   const clientRequest: any = {
-    on: jest.fn(),
-    destroy: jest.fn(),
+    on: vi.fn(),
+    destroy: vi.fn(),
   };
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe("setConnectionTimeout", () => {
     const timeoutInMs = 100;
     const mockSocket = {
       connecting: true,
-      on: jest.fn(),
+      on: vi.fn(),
     };
 
     beforeEach(() => {

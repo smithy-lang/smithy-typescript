@@ -10,11 +10,11 @@ jest.mock("./StandardRetryStrategy");
 jest.mock("./DefaultRateLimiter");
 
 describe(AdaptiveRetryStrategy.name, () => {
-  const maxAttemptsProvider = jest.fn();
+  const maxAttemptsProvider = vi.fn();
   const retryTokenScope = "scope";
   const mockDefaultRateLimiter = {
-    getSendToken: jest.fn(),
-    updateClientSendingRate: jest.fn(),
+    getSendToken: vi.fn(),
+    updateClientSendingRate: vi.fn(),
   };
   const mockRetryToken: StandardRetryToken = {
     getRetryCost: () => 1,

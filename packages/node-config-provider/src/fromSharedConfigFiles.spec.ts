@@ -5,8 +5,8 @@ import { ParsedIniData, Profile } from "@smithy/types";
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 
 jest.mock("@smithy/shared-ini-file-loader", () => ({
-  getProfileName: jest.fn(),
-  loadSharedConfigFiles: jest.fn(),
+  getProfileName: vi.fn(),
+  loadSharedConfigFiles: vi.fn(),
 }));
 
 describe("fromSharedConfigFiles", () => {

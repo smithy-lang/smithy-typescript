@@ -1,9 +1,9 @@
 import { chain } from "./chain";
 import { ProviderError } from "./ProviderError";
 
-const resolveStatic = (staticValue: unknown) => jest.fn().mockResolvedValue(staticValue);
-const rejectWithError = (errorMsg: string) => jest.fn().mockRejectedValue(new Error(errorMsg));
-const rejectWithProviderError = (errorMsg: string) => jest.fn().mockRejectedValue(new ProviderError(errorMsg));
+const resolveStatic = (staticValue: unknown) => vi.fn().mockResolvedValue(staticValue);
+const rejectWithError = (errorMsg: string) => vi.fn().mockRejectedValue(new Error(errorMsg));
+const rejectWithProviderError = (errorMsg: string) => vi.fn().mockRejectedValue(new ProviderError(errorMsg));
 
 describe("chain", () => {
   it("should distill many credential providers into one", async () => {
@@ -90,7 +90,7 @@ describe("chain", () => {
     const expectedError = new ProviderError("ProviderError with tryNextLink set to false", false);
     const providers = [
       rejectWithProviderError("Move along"),
-      jest.fn().mockRejectedValue(expectedError),
+      vi.fn().mockRejectedValue(expectedError),
       resolveStatic("foo"),
     ];
 

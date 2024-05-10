@@ -3,7 +3,7 @@ import { fromStatic as convertToProvider } from "@smithy/property-provider";
 import { fromStatic } from "./fromStatic";
 
 jest.mock("@smithy/property-provider", () => ({
-  fromStatic: jest.fn(),
+  fromStatic: vi.fn(),
 }));
 
 describe("fromStatic", () => {
@@ -15,14 +15,14 @@ describe("fromStatic", () => {
   });
 
   it("should call the getter function", async () => {
-    const getter = jest.fn().mockReturnValue(value);
+    const getter = vi.fn().mockReturnValue(value);
     const config = fromStatic(getter);
     expect(await config()).toBe(value);
     expect(getter).toHaveBeenCalled();
   });
 
   it("should call the async provider function", async () => {
-    const getter = jest.fn().mockResolvedValue(value);
+    const getter = vi.fn().mockResolvedValue(value);
     const config = fromStatic(getter);
     expect(await config()).toBe(value);
     expect(getter).toHaveBeenCalled();

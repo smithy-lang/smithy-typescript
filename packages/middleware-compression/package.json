@@ -10,7 +10,7 @@
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
-    "test": "yarn g:jest"
+    "test": "yarn g:vitest"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

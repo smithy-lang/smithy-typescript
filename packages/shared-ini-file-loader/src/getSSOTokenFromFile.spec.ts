@@ -4,7 +4,7 @@ import { promises } from "fs";
 import { getSSOTokenFilepath } from "./getSSOTokenFilepath";
 import { getSSOTokenFromFile } from "./getSSOTokenFromFile";
 
-jest.mock("fs", () => ({ promises: { readFile: jest.fn() } }));
+jest.mock("fs", () => ({ promises: { readFile: vi.fn() } }));
 jest.mock("./getSSOTokenFilepath");
 
 describe(getSSOTokenFromFile.name, () => {

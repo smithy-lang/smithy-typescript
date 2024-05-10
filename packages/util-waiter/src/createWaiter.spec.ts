@@ -2,7 +2,7 @@ import { AbortController } from "@smithy/abort-controller";
 
 import { WaiterOptions, WaiterState } from "./waiter";
 
-const mockValidate = jest.fn();
+const mockValidate = vi.fn();
 jest.mock("./utils/validate", () => ({
   validateWaiterOptions: mockValidate,
 }));
@@ -41,7 +41,7 @@ describe("createWaiter", () => {
 
   it("should abort when abortController is signalled", async () => {
     const abortController = new AbortController();
-    const mockAcceptorChecks = jest.fn().mockResolvedValue(retryState);
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     const statusPromise = createWaiter(
       {
         ...minimalWaiterConfig,
@@ -57,7 +57,7 @@ describe("createWaiter", () => {
   });
 
   it("should success when acceptor checker returns seccess", async () => {
-    const mockAcceptorChecks = jest.fn().mockResolvedValue(successState);
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(successState);
     const statusPromise = createWaiter(
       {
         ...minimalWaiterConfig,
@@ -71,7 +71,7 @@ describe("createWaiter", () => {
   });
 
   it("should fail when acceptor checker returns failure", async () => {
-    const mockAcceptorChecks = jest.fn().mockResolvedValue(failureState);
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(failureState);
     const statusPromise = createWaiter(
       {
         ...minimalWaiterConfig,

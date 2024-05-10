@@ -33,7 +33,7 @@ describe(sdkStreamMixin.name, () => {
   };
 
   let originalReadableStreamCtr = global.ReadableStream;
-  const mockReadableStream = jest.fn();
+  const mockReadableStream = vi.fn();
   class ReadableStream {
     constructor() {
       mockReadableStream();
@@ -86,8 +86,8 @@ describe(sdkStreamMixin.name, () => {
 
   describe("transformToString", () => {
     let originalTextDecoder = global.TextDecoder;
-    const mockDecode = jest.fn();
-    global.TextDecoder = jest.fn().mockImplementation(function () {
+    const mockDecode = vi.fn();
+    global.TextDecoder = vi.fn().mockImplementation(function () {
       return { decode: mockDecode };
     });
 
@@ -162,8 +162,8 @@ describe(sdkStreamMixin.name, () => {
 
   describe("transformToWebStream with Blob payload", () => {
     let originalBlobCtr = global.Blob;
-    const mockBlob = jest.fn();
-    const mockBlobStream = jest.fn();
+    const mockBlob = vi.fn();
+    const mockBlobStream = vi.fn();
     class Blob {
       constructor() {
         mockBlob();

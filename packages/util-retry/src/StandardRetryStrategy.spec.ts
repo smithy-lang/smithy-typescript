@@ -53,8 +53,8 @@ describe(StandardRetryStrategy.name, () => {
 
   describe("refreshRetryTokenForRetry", () => {
     it("refreshes the token", async () => {
-      const getRetryCount = jest.fn().mockReturnValue(0);
-      const hasRetryTokens = jest.fn().mockReturnValue(true);
+      const getRetryCount = vi.fn().mockReturnValue(0);
+      const hasRetryTokens = vi.fn().mockReturnValue(true);
       const mockRetryToken = {
         getRetryCount,
         hasRetryTokens,

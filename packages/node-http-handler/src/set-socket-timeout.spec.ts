@@ -2,8 +2,8 @@ import { setSocketTimeout } from "./set-socket-timeout";
 
 describe("setSocketTimeout", () => {
   const clientRequest: any = {
-    destroy: jest.fn(),
-    setTimeout: jest.fn(),
+    destroy: vi.fn(),
+    setTimeout: vi.fn(),
   };
 
   beforeEach(() => {
@@ -11,21 +11,21 @@ describe("setSocketTimeout", () => {
   });
 
   it(`sets the request's timeout if provided`, () => {
-    setSocketTimeout(clientRequest, jest.fn(), 100);
+    setSocketTimeout(clientRequest, vi.fn(), 100);
 
     expect(clientRequest.setTimeout).toHaveBeenCalledTimes(1);
     expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(100, expect.any(Function));
   });
 
   it(`sets the request's timeout to 0 if not provided`, () => {
-    setSocketTimeout(clientRequest, jest.fn());
+    setSocketTimeout(clientRequest, vi.fn());
 
     expect(clientRequest.setTimeout).toHaveBeenCalledTimes(1);
     expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(0, expect.any(Function));
   });
 
   it(`destroys the request on timeout`, () => {
-    setSocketTimeout(clientRequest, jest.fn());
+    setSocketTimeout(clientRequest, vi.fn());
     expect(clientRequest.destroy).not.toHaveBeenCalled();
 
     // call setTimeout callback
@@ -34,7 +34,7 @@ describe("setSocketTimeout", () => {
   });
 
   it(`rejects on timeout with a TimeoutError`, () => {
-    const reject = jest.fn();
+    const reject = vi.fn();
     const timeoutInMs = 100;
 
     setSocketTimeout(clientRequest, reject, timeoutInMs);

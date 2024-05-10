@@ -7,9 +7,9 @@ const compressionSuffix = "compressed";
 const compressionSeparator = ".";
 
 jest.mock("@smithy/util-utf8");
-jest.mock("util", () => ({ promisify: jest.fn().mockImplementation((fn) => fn) }));
+jest.mock("util", () => ({ promisify: vi.fn().mockImplementation((fn) => fn) }));
 jest.mock("zlib", () => ({
-  gzip: jest.fn().mockImplementation((data) => [data, compressionSuffix].join(compressionSeparator)),
+  gzip: vi.fn().mockImplementation((data) => [data, compressionSuffix].join(compressionSeparator)),
 }));
 
 describe(compressString.name, () => {
@@ -38,7 +38,7 @@ describe(compressString.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    ((gzip as unknown) as jest.Mock).mockImplementationOnce(() => {
+    (gzip as unknown as jest.Mock).mockImplementationOnce(() => {
       throw compressionError;
     });
 

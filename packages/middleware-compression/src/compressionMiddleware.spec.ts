@@ -14,7 +14,7 @@ jest.mock("./isStreaming");
 describe(compressionMiddleware.name, () => {
   const mockBody = "body";
   const mockConfig = {
-    bodyLengthChecker: jest.fn().mockReturnValue(mockBody.length),
+    bodyLengthChecker: vi.fn().mockReturnValue(mockBody.length),
     disableRequestCompression: async () => false,
     requestMinCompressionSizeBytes: async () => 0,
   };
@@ -22,7 +22,7 @@ describe(compressionMiddleware.name, () => {
     encodings: [CompressionAlgorithm.GZIP],
   };
 
-  const mockNext = jest.fn();
+  const mockNext = vi.fn();
   const mockContext = {};
   const mockArgs = { request: { headers: {}, body: mockBody } };
 

@@ -7,14 +7,14 @@ import { readableStreamHasher } from "./readableStreamHasher";
 jest.mock("./HashCalculator");
 
 describe(readableStreamHasher.name, () => {
-  const mockDigest = jest.fn();
-  const mockHashCtor = jest.fn().mockImplementation(() => ({
-    update: jest.fn(),
+  const mockDigest = vi.fn();
+  const mockHashCtor = vi.fn().mockImplementation(() => ({
+    update: vi.fn(),
     digest: mockDigest,
   }));
 
-  const mockHashCalculatorWrite = jest.fn();
-  const mockHashCalculatorEnd = jest.fn();
+  const mockHashCalculatorWrite = vi.fn();
+  const mockHashCalculatorEnd = vi.fn();
 
   const mockHash = new Uint8Array(Buffer.from("mockHash"));
 

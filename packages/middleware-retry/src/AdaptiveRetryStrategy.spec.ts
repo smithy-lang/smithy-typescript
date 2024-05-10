@@ -8,10 +8,10 @@ jest.mock("./StandardRetryStrategy");
 jest.mock("@smithy/util-retry");
 
 describe(AdaptiveRetryStrategy.name, () => {
-  const maxAttemptsProvider = jest.fn();
+  const maxAttemptsProvider = vi.fn();
   const mockDefaultRateLimiter = {
-    getSendToken: jest.fn(),
-    updateClientSendingRate: jest.fn(),
+    getSendToken: vi.fn(),
+    updateClientSendingRate: vi.fn(),
   };
 
   beforeEach(() => {
@@ -24,8 +24,8 @@ describe(AdaptiveRetryStrategy.name, () => {
 
   describe("constructor", () => {
     it("calls super constructor", () => {
-      const retryDecider = jest.fn();
-      const delayDecider = jest.fn();
+      const retryDecider = vi.fn();
+      const delayDecider = vi.fn();
       const retryQuota = {} as RetryQuota;
       const rateLimiter = {} as RateLimiter;
 
@@ -72,7 +72,7 @@ describe(AdaptiveRetryStrategy.name, () => {
     const mockedSuperRetry = jest.spyOn(StandardRetryStrategy.prototype, "retry");
 
     beforeEach(async () => {
-      const next = jest.fn();
+      const next = vi.fn();
       const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider);
       await retryStrategy.retry(next, { request: { headers: {} } } as any);
       expect(mockedSuperRetry).toHaveBeenCalledTimes(1);
