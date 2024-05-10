@@ -5,7 +5,7 @@ import { createPaginator } from "./createPaginator";
 describe(createPaginator.name, () => {
   class Client {
     private pages = 5;
-    async send(command: CommandObjectToken | CommandStringToken) {
+    async send() {
       if (--this.pages > 0) {
         return {
           outToken: {

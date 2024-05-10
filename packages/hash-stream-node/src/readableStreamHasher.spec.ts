@@ -19,7 +19,11 @@ describe(readableStreamHasher.name, () => {
   const mockHash = new Uint8Array(Buffer.from("mockHash"));
 
   class MockHashCalculator extends Writable {
-    constructor(public readonly hash: Hash, public readonly mockWrite, public readonly mockEnd) {
+    constructor(
+      public readonly hash: Hash,
+      public readonly mockWrite,
+      public readonly mockEnd
+    ) {
       super();
     }
 
@@ -35,7 +39,7 @@ describe(readableStreamHasher.name, () => {
   }
 
   beforeEach(() => {
-    ((HashCalculator as unknown) as jest.Mock).mockImplementation(
+    (HashCalculator as unknown as jest.Mock).mockImplementation(
       (hash) => new MockHashCalculator(hash, mockHashCalculatorWrite, mockHashCalculatorEnd)
     );
     mockDigest.mockResolvedValue(mockHash);
@@ -46,7 +50,7 @@ describe(readableStreamHasher.name, () => {
   });
 
   it("computes hash for a readable stream", async () => {
-    const readableStream = new Readable({ read: (size) => {} });
+    const readableStream = new Readable({ read: () => {} });
     const hashPromise = readableStreamHasher(mockHashCtor, readableStream);
 
     // @ts-ignore Property '_readableState' does not exist on type 'Readable'.
@@ -69,7 +73,7 @@ describe(readableStreamHasher.name, () => {
   });
 
   it("throws if readable stream has started reading", async () => {
-    const readableStream = new Readable({ read: (size) => {} });
+    const readableStream = new Readable({ read: () => {} });
     // Simulate readableFlowing to true.
     readableStream.resume();
 
@@ -84,7 +88,7 @@ describe(readableStreamHasher.name, () => {
 
   it("throws error if readable stream throws error", async () => {
     const readableStream = new Readable({
-      read: (size) => {},
+      read: () => {},
     });
     const hashPromise = readableStreamHasher(mockHashCtor, readableStream);
 
@@ -108,10 +112,10 @@ describe(readableStreamHasher.name, () => {
       mockHashCalculatorWrite,
       mockHashCalculatorEnd
     );
-    ((HashCalculator as unknown) as jest.Mock).mockImplementation((hash) => mockHashCalculator);
+    (HashCalculator as unknown as jest.Mock).mockImplementation(() => mockHashCalculator);
 
     const readableStream = new Readable({
-      read: (size) => {},
+      read: () => {},
     });
     const hashPromise = readableStreamHasher(mockHashCtor, readableStream);
 
@@ -130,7 +134,7 @@ describe(readableStreamHasher.name, () => {
 
   it("throws error if hash.digest() throws error", async () => {
     const readableStream = new Readable({
-      read: (size) => {},
+      read: () => {},
     });
     const hashPromise = readableStreamHasher(mockHashCtor, readableStream);
 

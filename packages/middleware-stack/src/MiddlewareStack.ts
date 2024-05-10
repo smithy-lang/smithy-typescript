@@ -174,11 +174,14 @@ export const constructStack = <Input extends object, Output extends object>(): M
 
     const mainChain = sort(normalizedAbsoluteEntries)
       .map(expandRelativeMiddlewareList)
-      .reduce((wholeList, expandedMiddlewareList) => {
-        // TODO: Replace it with Array.flat();
-        wholeList.push(...expandedMiddlewareList);
-        return wholeList;
-      }, [] as MiddlewareEntry<Input, Output>[]);
+      .reduce(
+        (wholeList, expandedMiddlewareList) => {
+          // TODO: Replace it with Array.flat();
+          wholeList.push(...expandedMiddlewareList);
+          return wholeList;
+        },
+        [] as MiddlewareEntry<Input, Output>[]
+      );
     return mainChain;
   };
 
@@ -304,9 +307,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
       return getMiddlewareList(true).map((mw: MiddlewareEntry<Input, Output>) => {
         const step =
           mw.step ??
-          ((mw as unknown) as RelativeMiddlewareOptions).relation +
+          (mw as unknown as RelativeMiddlewareOptions).relation +
             " " +
-            ((mw as unknown) as RelativeMiddlewareOptions).toMiddleware;
+            (mw as unknown as RelativeMiddlewareOptions).toMiddleware;
         return getMiddlewareNameWithAliases(mw.name, mw.aliases) + " - " + step;
       });
     },

@@ -238,8 +238,8 @@ export class LengthValidator implements SingleConstraintValidator<LengthCheckabl
           this.min === undefined
             ? [undefined, this.max!]
             : this.max === undefined
-            ? [this.min!, undefined]
-            : [this.min!, this.max!],
+              ? [this.min!, undefined]
+              : [this.min!, this.max!],
         path: path,
         failureValue: length,
       };
@@ -277,8 +277,8 @@ export class RangeValidator implements SingleConstraintValidator<number, RangeVa
           this.min === undefined
             ? [undefined, this.max!]
             : this.max === undefined
-            ? [this.min!, undefined]
-            : [this.min!, this.max!],
+              ? [this.min!, undefined]
+              : [this.min!, this.max!],
         path: path,
         failureValue: input,
       };

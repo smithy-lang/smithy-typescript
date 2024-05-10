@@ -23,7 +23,10 @@ export class RequestBuilder {
 
   private resolvePathStack: Array<(path: string) => void> = [];
 
-  public constructor(private input: any, private context: SerdeContext) {}
+  public constructor(
+    private input: any,
+    private context: SerdeContext
+  ) {}
 
   public async build() {
     const { hostname, protocol = "https", port, path: basePath } = await this.context.endpoint();

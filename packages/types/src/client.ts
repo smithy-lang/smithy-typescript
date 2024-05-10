@@ -19,7 +19,7 @@ export type CheckOptionalClientConfig<T> = OptionalParameter<T>;
 export interface InvokeFunction<
   InputTypes extends object,
   OutputTypes extends MetadataBearer,
-  ResolvedClientConfiguration
+  ResolvedClientConfiguration,
 > {
   <InputType extends InputTypes, OutputType extends OutputTypes>(
     command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
@@ -47,6 +47,19 @@ export interface InvokeFunction<
  * Signature that appears on aggregated clients' methods.
  */
 export interface InvokeMethod<InputType extends object, OutputType extends MetadataBearer> {
+  (input: InputType, options?: any): Promise<OutputType>;
+  (input: InputType, cb: (err: any, data?: OutputType) => void): void;
+  (input: InputType, options: any, cb: (err: any, data?: OutputType) => void): void;
+  (input: InputType, options?: any, cb?: (err: any, data?: OutputType) => void): Promise<OutputType> | void;
+}
+
+/**
+ * @public
+ *
+ * Signature that appears on aggregated clients' methods when argument is optional.
+ */
+export interface InvokeMethodOptionalArgs<InputType extends object, OutputType extends MetadataBearer> {
+  (): Promise<OutputType>;
   (input: InputType, options?: any): Promise<OutputType>;
   (input: InputType, cb: (err: any, data?: OutputType) => void): void;
   (input: InputType, options: any, cb: (err: any, data?: OutputType) => void): void;

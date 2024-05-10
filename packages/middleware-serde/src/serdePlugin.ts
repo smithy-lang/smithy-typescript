@@ -47,7 +47,7 @@ export type V1OrV2Endpoint = {
 export function getSerdePlugin<
   InputType extends object = any,
   CommandSerdeContext extends SerdeContext = any,
-  OutputType extends MetadataBearer = any
+  OutputType extends MetadataBearer = any,
 >(
   config: V1OrV2Endpoint & SerdeFunctions,
   serializer: RequestSerializer<any, CommandSerdeContext>,

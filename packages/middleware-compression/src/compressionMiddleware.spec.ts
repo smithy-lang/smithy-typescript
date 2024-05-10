@@ -32,7 +32,7 @@ describe(compressionMiddleware.name, () => {
 
   it("skips compression if it's not an HttpRequest", async () => {
     const { isInstance } = HttpRequest;
-    ((isInstance as unknown) as jest.Mock).mockReturnValue(false);
+    (isInstance as unknown as jest.Mock).mockReturnValue(false);
     await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
     expect(mockNext).toHaveBeenCalledWith(mockArgs);
   });
@@ -40,7 +40,7 @@ describe(compressionMiddleware.name, () => {
   describe("HttpRequest", () => {
     beforeEach(() => {
       const { isInstance } = HttpRequest;
-      ((isInstance as unknown) as jest.Mock).mockReturnValue(true);
+      (isInstance as unknown as jest.Mock).mockReturnValue(true);
       (isStreaming as jest.Mock).mockReturnValue(false);
     });
 

@@ -22,7 +22,7 @@ describe("getExtendedInstanceMetadataCredentials()", () => {
   });
 
   it("should extend the expiration random time(5~10 mins) from now", () => {
-    const anyDate: Date = ("any date" as unknown) as Date;
+    const anyDate: Date = "any date" as unknown as Date;
     (Math.random as jest.Mock).mockReturnValue(0.5);
     expect(getExtendedInstanceMetadataCredentials({ ...staticSecret, expiration: anyDate }, logger)).toEqual({
       ...staticSecret,
@@ -33,7 +33,7 @@ describe("getExtendedInstanceMetadataCredentials()", () => {
   });
 
   it("should print warning message when extending the credentials", () => {
-    const anyDate: Date = ("any date" as unknown) as Date;
+    const anyDate: Date = "any date" as unknown as Date;
     getExtendedInstanceMetadataCredentials({ ...staticSecret, expiration: anyDate }, logger);
     expect(logger.warn).toBeCalledWith(expect.stringContaining("Attempting credential expiration extension"));
   });

@@ -31,7 +31,7 @@ export type EndpointParameterInstructionsSupplier = Partial<{
 export const getEndpointFromInstructions = async <
   T extends EndpointParameters,
   CommandInput extends Record<string, unknown>,
-  Config extends Record<string, unknown>
+  Config extends Record<string, unknown>,
 >(
   commandInput: CommandInput,
   instructionsSupplier: EndpointParameterInstructionsSupplier,
@@ -61,7 +61,7 @@ export const getEndpointFromInstructions = async <
 export const resolveParams = async <
   T extends EndpointParameters,
   CommandInput extends Record<string, unknown>,
-  Config extends Record<string, unknown>
+  Config extends Record<string, unknown>,
 >(
   commandInput: CommandInput,
   instructionsSupplier: EndpointParameterInstructionsSupplier,

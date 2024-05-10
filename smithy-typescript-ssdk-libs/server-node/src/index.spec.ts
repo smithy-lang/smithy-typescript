@@ -30,7 +30,7 @@ beforeAll(async () => {
 let resToEnd: ServerResponse;
 
 function getRequest(options: RequestOptions & { body?: String }): Promise<[IncomingMessage, ServerResponse]> {
-  return new Promise((resolve, _) => {
+  return new Promise((resolve) => {
     promiseResolve = resolve;
     request({
       socketPath,
@@ -58,7 +58,7 @@ describe("convertRequest", () => {
     resToEnd?.end();
   });
   it("converts a simple GET / correctly", async () => {
-    const [req, _] = await getRequest({
+    const [req] = await getRequest({
       host: "example.com",
       path: "/",
     });
@@ -69,14 +69,14 @@ describe("convertRequest", () => {
     expect(convertedReq.path).toEqual("/");
     expect(convertedReq.protocol).toEqual("http:");
     expect(convertedReq.query).toEqual({});
-    expect(convertedReq.headers).toEqual({
-      connection: "close",
+    expect(convertedReq.headers).toMatchObject({
       host: "example.com",
+      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("");
   });
   it("converts a POST with query string correctly", async () => {
-    const [req, _] = await getRequest({
+    const [req] = await getRequest({
       method: "POST",
       host: "example.com",
       path: "/some/endpoint?q=hello&a=world",
@@ -92,15 +92,15 @@ describe("convertRequest", () => {
       q: "hello",
       a: "world",
     });
-    expect(convertedReq.headers).toEqual({
-      connection: "close",
+    expect(convertedReq.headers).toMatchObject({
       host: "example.com",
       "content-length": "5",
+      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("hello");
   });
   it("converts OPTIONS CORS requests", async () => {
-    const [req, _] = await getRequest({
+    const [req] = await getRequest({
       method: "OPTIONS",
       host: "example.com",
       path: "/some/resource",
@@ -116,12 +116,12 @@ describe("convertRequest", () => {
     expect(convertedReq.path).toEqual("/some/resource");
     expect(convertedReq.protocol).toEqual("http:");
     expect(convertedReq.query).toEqual({});
-    expect(convertedReq.headers).toEqual({
+    expect(convertedReq.headers).toMatchObject({
       "access-control-request-headers": "origin, x-requested-with",
       "access-control-request-method": "DELETE",
       origin: "https://example.com",
-      connection: "close",
       host: "example.com",
+      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("");
   });

@@ -98,7 +98,7 @@ describe(sdkStreamMixin.name, () => {
           () =>
             ({
               decode: jest.fn(),
-            } as any)
+            }) as any
         );
         (fromArrayBuffer as jest.Mock).mockReturnValue({ toString: toStringMock });
         const sdkStream = sdkStreamMixin(passThrough);

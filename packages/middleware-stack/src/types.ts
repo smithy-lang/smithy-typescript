@@ -18,7 +18,7 @@ export interface RelativeMiddlewareEntry<Input extends object, Output extends ob
 export type Normalized<
   T extends MiddlewareEntry<Input, Output>,
   Input extends object = {},
-  Output extends object = {}
+  Output extends object = {},
 > = T & {
   after: Normalized<RelativeMiddlewareEntry<Input, Output>, Input, Output>[];
   before: Normalized<RelativeMiddlewareEntry<Input, Output>, Input, Output>[];

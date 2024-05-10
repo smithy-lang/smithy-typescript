@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Transform as DownlevelTransform } from "../downlevel-ts3.4/transform/type-transform";
 import type { Exact } from "./exact";
 import type { Transform } from "./type-transform";

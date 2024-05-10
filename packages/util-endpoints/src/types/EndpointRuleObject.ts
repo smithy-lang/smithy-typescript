@@ -2,7 +2,6 @@ import {
   EndpointObject as __EndpointObject,
   EndpointObjectHeaders as __EndpointObjectHeaders,
   EndpointObjectProperties as __EndpointObjectProperties,
-  EndpointObjectProperty,
   EndpointRuleObject as __EndpointRuleObject,
 } from "@smithy/types";
 

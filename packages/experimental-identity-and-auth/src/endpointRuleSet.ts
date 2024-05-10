@@ -14,7 +14,7 @@ import {
  */
 export interface EndpointRuleSetHttpAuthSchemeProvider<
   EndpointParametersT extends EndpointParameters,
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters
+  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters,
 > extends HttpAuthSchemeProvider<EndpointParametersT & HttpAuthSchemeParametersT> {}
 
 /**
@@ -29,7 +29,7 @@ export interface DefaultEndpointResolver<EndpointParametersT extends EndpointPar
  */
 export const createEndpointRuleSetHttpAuthSchemeProvider = <
   EndpointParametersT extends EndpointParameters,
-  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters
+  HttpAuthSchemeParametersT extends HttpAuthSchemeParameters,
 >(
   defaultEndpointResolver: DefaultEndpointResolver<EndpointParametersT>,
   defaultHttpAuthSchemeResolver: HttpAuthSchemeProvider<HttpAuthSchemeParametersT>
@@ -88,45 +88,47 @@ export interface EndpointRuleSetHttpAuthSchemeParametersProvider<
   TConfig extends object,
   TContext extends HandlerExecutionContext,
   TParameters extends HttpAuthSchemeParameters & EndpointParameters,
-  TInput extends object
+  TInput extends object,
 > extends HttpAuthSchemeParametersProvider<TConfig, TContext, TParameters, TInput> {}
 
 /**
  * @internal
  */
-export const createEndpointRuleSetHttpAuthSchemeParametersProvider = <
-  TConfig extends object,
-  TContext extends HandlerExecutionContext,
-  THttpAuthSchemeParameters extends HttpAuthSchemeParameters,
-  TEndpointParameters extends EndpointParameters,
-  TParameters extends THttpAuthSchemeParameters & TEndpointParameters,
-  TInput extends object
->(
-  defaultHttpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<
+export const createEndpointRuleSetHttpAuthSchemeParametersProvider =
+  <
+    TConfig extends object,
+    TContext extends HandlerExecutionContext,
+    THttpAuthSchemeParameters extends HttpAuthSchemeParameters,
+    TEndpointParameters extends EndpointParameters,
+    TParameters extends THttpAuthSchemeParameters & TEndpointParameters,
+    TInput extends object,
+  >(
+    defaultHttpAuthSchemeParametersProvider: HttpAuthSchemeParametersProvider<
+      TConfig,
+      TContext,
+      THttpAuthSchemeParameters,
+      TInput
+    >
+  ): EndpointRuleSetHttpAuthSchemeParametersProvider<
     TConfig,
     TContext,
-    THttpAuthSchemeParameters,
+    THttpAuthSchemeParameters & TEndpointParameters,
     TInput
-  >
-): EndpointRuleSetHttpAuthSchemeParametersProvider<
-  TConfig,
-  TContext,
-  THttpAuthSchemeParameters & TEndpointParameters,
-  TInput
-> => async (config: TConfig, context: TContext, input: TInput): Promise<TParameters> => {
-  if (!input) {
-    throw new Error(`Could not find \`input\` for \`defaultEndpointRuleSetHttpAuthSchemeParametersProvider\``);
-  }
-  const defaultParameters = await defaultHttpAuthSchemeParametersProvider(config, context, input);
-  const instructionsFn = (getSmithyContext(context) as EndpointRuleSetSmithyContext)?.endpointRuleSet
-    ?.getEndpointParameterInstructions;
-  if (!instructionsFn) {
-    throw new Error(`getEndpointParameterInstructions() is not defined on \`${context.commandName!}\``);
-  }
-  const endpointParameters = await resolveParams(
-    input as Record<string, unknown>,
-    { getEndpointParameterInstructions: instructionsFn! },
-    config as Record<string, unknown>
-  );
-  return Object.assign(defaultParameters, endpointParameters) as TParameters;
-};
+  > =>
+  async (config: TConfig, context: TContext, input: TInput): Promise<TParameters> => {
+    if (!input) {
+      throw new Error(`Could not find \`input\` for \`defaultEndpointRuleSetHttpAuthSchemeParametersProvider\``);
+    }
+    const defaultParameters = await defaultHttpAuthSchemeParametersProvider(config, context, input);
+    const instructionsFn = (getSmithyContext(context) as EndpointRuleSetSmithyContext)?.endpointRuleSet
+      ?.getEndpointParameterInstructions;
+    if (!instructionsFn) {
+      throw new Error(`getEndpointParameterInstructions() is not defined on \`${context.commandName!}\``);
+    }
+    const endpointParameters = await resolveParams(
+      input as Record<string, unknown>,
+      { getEndpointParameterInstructions: instructionsFn! },
+      config as Record<string, unknown>
+    );
+    return Object.assign(defaultParameters, endpointParameters) as TParameters;
+  };

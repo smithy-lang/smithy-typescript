@@ -11,7 +11,10 @@
  */
 export class ProviderError extends Error {
   name = "ProviderError";
-  constructor(message: string, public readonly tryNextLink: boolean = true) {
+  constructor(
+    message: string,
+    public readonly tryNextLink: boolean = true
+  ) {
     super(message);
     // Remove once we stop targetting ES5.
     Object.setPrototypeOf(this, ProviderError.prototype);

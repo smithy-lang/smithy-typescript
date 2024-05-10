@@ -9,7 +9,10 @@ import { CredentialsProviderError } from "@smithy/property-provider";
 export class InstanceMetadataV1FallbackError extends CredentialsProviderError {
   public name = "InstanceMetadataV1FallbackError";
 
-  constructor(message: string, public readonly tryNextLink: boolean = true) {
+  constructor(
+    message: string,
+    public readonly tryNextLink: boolean = true
+  ) {
     super(message, tryNextLink);
     Object.setPrototypeOf(this, InstanceMetadataV1FallbackError.prototype);
   }

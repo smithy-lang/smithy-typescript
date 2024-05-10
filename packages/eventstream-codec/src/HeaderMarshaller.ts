@@ -7,7 +7,10 @@ import { Int64 } from "./Int64";
  * @internal
  */
 export class HeaderMarshaller {
-  constructor(private readonly toUtf8: Encoder, private readonly fromUtf8: Decoder) {}
+  constructor(
+    private readonly toUtf8: Encoder,
+    private readonly fromUtf8: Decoder
+  ) {}
 
   format(headers: MessageHeaders): Uint8Array {
     const chunks: Array<Uint8Array> = [];

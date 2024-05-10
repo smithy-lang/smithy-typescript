@@ -80,12 +80,12 @@ export type BrowserXhrClient<ClientType extends object> = NarrowPayloadBlobTypes
  */
 export type NarrowPayloadBlobOutputType<T, ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
-    InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>
+    InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>,
   ]
     ? NarrowedInvokeFunction<T, HttpHandlerOptions, InputTypes, OutputTypes, ConfigType>
     : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
-    ? NarrowedInvokeMethod<T, HttpHandlerOptions, FunctionInputTypes, FunctionOutputTypes>
-    : ClientType[key];
+      ? NarrowedInvokeMethod<T, HttpHandlerOptions, FunctionInputTypes, FunctionOutputTypes>
+      : ClientType[key];
 };
 
 /**
@@ -95,7 +95,7 @@ export type NarrowPayloadBlobOutputType<T, ClientType extends object> = {
  */
 export type NarrowPayloadBlobTypes<I, O, ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
-    InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>
+    InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>,
   ]
     ? NarrowedInvokeFunction<
         O,
@@ -105,11 +105,11 @@ export type NarrowPayloadBlobTypes<I, O, ClientType extends object> = {
         ConfigType
       >
     : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
-    ? NarrowedInvokeMethod<
-        O,
-        HttpHandlerOptions,
-        Transform<FunctionInputTypes, StreamingBlobPayloadInputTypes | undefined, I>,
-        FunctionOutputTypes
-      >
-    : ClientType[key];
+      ? NarrowedInvokeMethod<
+          O,
+          HttpHandlerOptions,
+          Transform<FunctionInputTypes, StreamingBlobPayloadInputTypes | undefined, I>,
+          FunctionOutputTypes
+        >
+      : ClientType[key];
 };

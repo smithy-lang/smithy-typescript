@@ -34,75 +34,76 @@ export interface CompressionMiddlewareConfig {
 /**
  * @internal
  */
-export const compressionMiddleware = (
-  config: CompressionResolvedConfig & CompressionPreviouslyResolved,
-  middlewareConfig: CompressionMiddlewareConfig
-): BuildMiddleware<any, any> => <Output extends MetadataBearer>(
-  next: BuildHandler<any, Output>
-): BuildHandler<any, Output> => async (args: BuildHandlerArguments<any>): Promise<BuildHandlerOutput<Output>> => {
-  if (!HttpRequest.isInstance(args.request)) {
-    return next(args);
-  }
+export const compressionMiddleware =
+  (
+    config: CompressionResolvedConfig & CompressionPreviouslyResolved,
+    middlewareConfig: CompressionMiddlewareConfig
+  ): BuildMiddleware<any, any> =>
+  <Output extends MetadataBearer>(next: BuildHandler<any, Output>): BuildHandler<any, Output> =>
+  async (args: BuildHandlerArguments<any>): Promise<BuildHandlerOutput<Output>> => {
+    if (!HttpRequest.isInstance(args.request)) {
+      return next(args);
+    }
 
-  const disableRequestCompression = await config.disableRequestCompression();
-  if (disableRequestCompression) {
-    return next(args);
-  }
+    const disableRequestCompression = await config.disableRequestCompression();
+    if (disableRequestCompression) {
+      return next(args);
+    }
 
-  const { request } = args;
-  const { body, headers } = request;
-  const { encodings, streamRequiresLength } = middlewareConfig;
+    const { request } = args;
+    const { body, headers } = request;
+    const { encodings, streamRequiresLength } = middlewareConfig;
 
-  let updatedBody = body;
-  let updatedHeaders = headers;
+    let updatedBody = body;
+    let updatedHeaders = headers;
 
-  for (const algorithm of encodings) {
-    if (CLIENT_SUPPORTED_ALGORITHMS.includes(algorithm as CompressionAlgorithm)) {
-      let isRequestCompressed = false;
-      if (isStreaming(body)) {
-        if (!streamRequiresLength) {
-          updatedBody = await compressStream(body);
-          isRequestCompressed = true;
+    for (const algorithm of encodings) {
+      if (CLIENT_SUPPORTED_ALGORITHMS.includes(algorithm as CompressionAlgorithm)) {
+        let isRequestCompressed = false;
+        if (isStreaming(body)) {
+          if (!streamRequiresLength) {
+            updatedBody = await compressStream(body);
+            isRequestCompressed = true;
+          } else {
+            // Invalid case. We should never get here.
+            throw new Error("Compression is not supported for streaming blobs that require a length.");
+          }
         } else {
-          // Invalid case. We should never get here.
-          throw new Error("Compression is not supported for streaming blobs that require a length.");
-        }
-      } else {
-        const bodyLength = config.bodyLengthChecker(body);
-        const requestMinCompressionSizeBytes = await config.requestMinCompressionSizeBytes();
-        if (bodyLength && bodyLength >= requestMinCompressionSizeBytes) {
-          updatedBody = await compressString(body);
-          isRequestCompressed = true;
-        }
-      }
-
-      if (isRequestCompressed) {
-        // Either append to the header if it already exists, else set it
-        if (headers["Content-Encoding"]) {
-          updatedHeaders = {
-            ...headers,
-            "Content-Encoding": `${headers["Content-Encoding"]},${algorithm}`,
-          };
-        } else {
-          updatedHeaders = { ...headers, "Content-Encoding": algorithm };
+          const bodyLength = config.bodyLengthChecker(body);
+          const requestMinCompressionSizeBytes = await config.requestMinCompressionSizeBytes();
+          if (bodyLength && bodyLength >= requestMinCompressionSizeBytes) {
+            updatedBody = await compressString(body);
+            isRequestCompressed = true;
+          }
         }
 
-        // We've matched on one supported algorithm in the
-        // priority-ordered list, so we're finished.
-        break;
+        if (isRequestCompressed) {
+          // Either append to the header if it already exists, else set it
+          if (headers["Content-Encoding"]) {
+            updatedHeaders = {
+              ...headers,
+              "Content-Encoding": `${headers["Content-Encoding"]},${algorithm}`,
+            };
+          } else {
+            updatedHeaders = { ...headers, "Content-Encoding": algorithm };
+          }
+
+          // We've matched on one supported algorithm in the
+          // priority-ordered list, so we're finished.
+          break;
+        }
       }
     }
-  }
 
-  return next({
-    ...args,
-    request: {
-      ...request,
-      body: updatedBody,
-      headers: updatedHeaders,
-    },
-  });
-};
+    return next({
+      ...args,
+      request: {
+        ...request,
+        body: updatedBody,
+        headers: updatedHeaders,
+      },
+    });
+  };
 
 export const compressionMiddlewareOptions: BuildHandlerOptions & AbsoluteLocation = {
   name: "compressionMiddleware",

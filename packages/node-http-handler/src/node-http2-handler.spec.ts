@@ -353,7 +353,7 @@ describe(NodeHttp2Handler.name, () => {
       it("will close request on session when aborted", async () => {
         const abortController = new AbortController();
         mockH2Server.removeAllListeners("request");
-        mockH2Server.on("request", (request: any, response: any) => {
+        mockH2Server.on("request", () => {
           abortController.abort();
           return createResponseFunction(mockResponse);
         });

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { resolveEndpoint } from "./resolveEndpoint";
 import { EndpointError, EndpointParams, ParameterObject, RuleSetObject } from "./types";
 import { evaluateRules } from "./utils";

@@ -27,10 +27,8 @@ import {
 
 describe("sensitive validation", () => {
   function sensitize<T, V>(validator: SingleConstraintValidator<T, V>, input: T): V {
-    const failure = new SensitiveConstraintValidator(
-      new CompositeValidator<T>([validator])
-    ).validate(input, "")[0];
-    return (failure as unknown) as V;
+    const failure = new SensitiveConstraintValidator(new CompositeValidator<T>([validator])).validate(input, "")[0];
+    return failure as unknown as V;
   }
 
   describe("strips the failure value from the resultant validation failure", () => {

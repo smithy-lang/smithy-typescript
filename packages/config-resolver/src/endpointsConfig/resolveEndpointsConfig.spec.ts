@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { normalizeProvider } from "@smithy/util-middleware";
 
 import { resolveEndpointsConfig } from "./resolveEndpointsConfig";

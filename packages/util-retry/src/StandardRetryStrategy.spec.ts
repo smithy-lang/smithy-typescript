@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { RetryErrorInfo, RetryErrorType } from "@smithy/types";
 
 import { RETRY_MODES } from "./config";
-import { DEFAULT_RETRY_DELAY_BASE, INITIAL_RETRY_TOKENS } from "./constants";
+import { DEFAULT_RETRY_DELAY_BASE } from "./constants";
 import { createDefaultRetryToken } from "./defaultRetryToken";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 

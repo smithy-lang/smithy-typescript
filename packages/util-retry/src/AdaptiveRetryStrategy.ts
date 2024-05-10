@@ -32,7 +32,10 @@ export class AdaptiveRetryStrategy implements RetryStrategyV2 {
   private standardRetryStrategy: StandardRetryStrategy;
   public readonly mode: string = RETRY_MODES.ADAPTIVE;
 
-  constructor(private readonly maxAttemptsProvider: Provider<number>, options?: AdaptiveRetryStrategyOptions) {
+  constructor(
+    private readonly maxAttemptsProvider: Provider<number>,
+    options?: AdaptiveRetryStrategyOptions
+  ) {
     const { rateLimiter } = options ?? {};
     this.rateLimiter = rateLimiter ?? new DefaultRateLimiter();
     this.standardRetryStrategy = new StandardRetryStrategy(maxAttemptsProvider);

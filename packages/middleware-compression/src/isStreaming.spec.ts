@@ -6,7 +6,7 @@ jest.mock("@smithy/is-array-buffer");
 
 describe(isStreaming.name, () => {
   beforeEach(() => {
-    (isArrayBuffer as unknown as jest.Mock).mockReturnValue(true);
+    ((isArrayBuffer as unknown) as jest.Mock).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -14,7 +14,7 @@ describe(isStreaming.name, () => {
   });
 
   it("returns true when body is a stream", () => {
-    (isArrayBuffer as unknown as jest.Mock).mockReturnValue(false);
+    ((isArrayBuffer as unknown) as jest.Mock).mockReturnValue(false);
     // Mocking {} as a stream
     const mockStream = {};
     expect(isStreaming(mockStream)).toBe(true);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { strictParseByte, strictParseDouble, strictParseFloat32, strictParseShort } from "./parse-utils";
 
 // Build indexes outside so we allocate them once.

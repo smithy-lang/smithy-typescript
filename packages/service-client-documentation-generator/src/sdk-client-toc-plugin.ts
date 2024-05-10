@@ -32,7 +32,11 @@ export class SdkClientTocPlugin {
   @BindOption("defaultCategory")
   readonly defaultCategory: string;
 
-  constructor(public readonly options: Options, public readonly logger: Logger, private readonly renderer: Renderer) {
+  constructor(
+    public readonly options: Options,
+    public readonly logger: Logger,
+    private readonly renderer: Renderer
+  ) {
     this.renderer.application.converter.on(Converter.EVENT_END, this.changeLinksToLowerCase);
     this.renderer.application.converter.on(Converter.EVENT_RESOLVE_END, this.onEndResolve);
   }

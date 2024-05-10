@@ -22,33 +22,27 @@ const setResponseBody = (response: ServerResponse, body: string | NodeJsRuntimeB
   }
 };
 
-export const createResponseFunction = (httpResp: HttpResponse) => (
-  request: IncomingMessage,
-  response: ServerResponse
-) => {
-  response.statusCode = httpResp.statusCode;
-  setResponseHeaders(response, httpResp.headers);
-  setResponseBody(response, httpResp.body);
-};
+export const createResponseFunction =
+  (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
+    response.statusCode = httpResp.statusCode;
+    setResponseHeaders(response, httpResp.headers);
+    setResponseBody(response, httpResp.body);
+  };
 
-export const createResponseFunctionWithDelay = (httpResp: HttpResponse, delay: number) => (
-  request: IncomingMessage,
-  response: ServerResponse
-) => {
-  response.statusCode = httpResp.statusCode;
-  setResponseHeaders(response, httpResp.headers);
-  setTimeout(() => setResponseBody(response, httpResp.body), delay);
-};
+export const createResponseFunctionWithDelay =
+  (httpResp: HttpResponse, delay: number) => (request: IncomingMessage, response: ServerResponse) => {
+    response.statusCode = httpResp.statusCode;
+    setResponseHeaders(response, httpResp.headers);
+    setTimeout(() => setResponseBody(response, httpResp.body), delay);
+  };
 
-export const createContinueResponseFunction = (httpResp: HttpResponse) => (
-  request: IncomingMessage,
-  response: ServerResponse
-) => {
-  response.writeContinue();
-  setTimeout(() => {
-    createResponseFunction(httpResp)(request, response);
-  }, 100);
-};
+export const createContinueResponseFunction =
+  (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
+    response.writeContinue();
+    setTimeout(() => {
+      createResponseFunction(httpResp)(request, response);
+    }, 100);
+  };
 
 export const createMockHttpsServer = (): HttpsServer => {
   const server = createHttpsServer({
@@ -68,25 +62,23 @@ export const createMockHttp2Server = (): Http2Server => {
   return server;
 };
 
-export const createMirrorResponseFunction = (httpResp: HttpResponse) => (
-  request: IncomingMessage,
-  response: ServerResponse
-) => {
-  const bufs: Buffer[] = [];
-  request.on("data", (chunk) => {
-    bufs.push(chunk);
-  });
-  request.on("end", () => {
-    response.statusCode = httpResp.statusCode;
-    setResponseHeaders(response, httpResp.headers);
-    setResponseBody(response, Buffer.concat(bufs));
-  });
-  request.on("error", (err) => {
-    response.statusCode = 500;
-    setResponseHeaders(response, httpResp.headers);
-    setResponseBody(response, err.message);
-  });
-};
+export const createMirrorResponseFunction =
+  (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
+    const bufs: Buffer[] = [];
+    request.on("data", (chunk) => {
+      bufs.push(chunk);
+    });
+    request.on("end", () => {
+      response.statusCode = httpResp.statusCode;
+      setResponseHeaders(response, httpResp.headers);
+      setResponseBody(response, Buffer.concat(bufs));
+    });
+    request.on("error", (err) => {
+      response.statusCode = 500;
+      setResponseHeaders(response, httpResp.headers);
+      setResponseBody(response, err.message);
+    });
+  };
 
 export const getResponseBody = (response: HttpResponse) => {
   return new Promise<string>((resolve, reject) => {

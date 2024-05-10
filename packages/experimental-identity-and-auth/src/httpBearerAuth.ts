@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpRequest } from "@smithy/protocol-http";
 import { HttpRequest as IHttpRequest } from "@smithy/types";
 

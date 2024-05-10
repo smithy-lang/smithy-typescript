@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { IncomingMessage } from "node:http";
 
 import type { Client } from "../client";
@@ -45,7 +46,7 @@ interface MyClient extends Client<MyInput, MyOutput, MyConfig> {
 
 {
   interface NodeJsMyClient extends NodeJsClient<MyClient> {}
-  const mockClient = (null as unknown) as NodeJsMyClient;
+  const mockClient = null as unknown as NodeJsMyClient;
   type Input = Parameters<typeof mockClient.getObject>[0];
 
   const assert1: Exact<
@@ -58,7 +59,7 @@ interface MyClient extends Client<MyInput, MyOutput, MyConfig> {
 
 {
   interface NodeJsMyClient extends NodeJsClient<MyClient> {}
-  const mockClient = (null as unknown) as NodeJsMyClient;
+  const mockClient = null as unknown as NodeJsMyClient;
   const getObjectCall = () => mockClient.getObject({});
 
   type A = Awaited<ReturnType<typeof getObjectCall>>;
@@ -69,7 +70,7 @@ interface MyClient extends Client<MyInput, MyOutput, MyConfig> {
 
 {
   interface NodeJsMyClient extends BrowserClient<MyClient> {}
-  const mockClient = (null as unknown) as NodeJsMyClient;
+  const mockClient = null as unknown as NodeJsMyClient;
   const putObjectCall = () =>
     new Promise<B>((resolve) => {
       mockClient.putObject({}, (err: unknown, data) => {
@@ -85,7 +86,7 @@ interface MyClient extends Client<MyInput, MyOutput, MyConfig> {
 
 {
   interface NodeJsMyClient extends NodeJsClient<MyClient> {}
-  const mockClient = (null as unknown) as NodeJsMyClient;
+  const mockClient = null as unknown as NodeJsMyClient;
   const sendCall = () => mockClient.send(null as any, { abortSignal: null as any });
 
   type A = Awaited<ReturnType<typeof sendCall>>;

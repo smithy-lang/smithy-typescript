@@ -27,6 +27,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     this.maxAttemptsProvider = typeof maxAttempts === "function" ? maxAttempts : async () => maxAttempts;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async acquireInitialRetryToken(retryTokenScope: string): Promise<StandardRetryToken> {
     return createDefaultRetryToken({
       retryDelay: DEFAULT_RETRY_DELAY_BASE,

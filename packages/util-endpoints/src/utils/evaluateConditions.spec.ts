@@ -1,5 +1,5 @@
 import { debugId, toDebugString } from "../debug";
-import { ConditionObject, EvaluateOptions, FunctionReturn } from "../types";
+import { ConditionObject, EvaluateOptions } from "../types";
 import { evaluateCondition } from "./evaluateCondition";
 import { evaluateConditions } from "./evaluateConditions";
 
