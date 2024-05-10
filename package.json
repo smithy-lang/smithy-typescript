@@ -19,7 +19,7 @@
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",
     "release": "yarn changeset publish",
     "build-test-packages": "./gradlew clean build && node ./scripts/build-generated-test-packages",
-    "g:jest": "cd $INIT_CWD && jest",
+    "g:vitest": "cd $INIT_CWD && vitest",
     "g:karma": "cd $INIT_CWD && karma",
     "g:tsc": "cd $INIT_CWD && tsc"
   },
