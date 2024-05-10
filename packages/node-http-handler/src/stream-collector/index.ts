@@ -35,15 +35,26 @@ const isReadableStreamInstance = (stream: unknown): stream is IReadableStream =>
   typeof ReadableStream === "function" && stream instanceof ReadableStream;
 
 async function collectReadableStream(stream: IReadableStream): Promise<Uint8Array> {
-  const buffer = [];
+  const chunks = [];
   const reader = stream.getReader();
   let isDone = false;
+  let length = 0;
+
   while (!isDone) {
     const { done, value } = await reader.read();
     if (value) {
-      buffer.push(...value);
+      chunks.push(value);
+      length += value.length;
     }
     isDone = done;
   }
-  return new Uint8Array(buffer);
+
+  const collected = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    collected.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  return collected;
 }
