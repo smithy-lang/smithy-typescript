@@ -32,7 +32,7 @@ describe(callFunction.name, () => {
     "subsgtring",
     "urlEncode",
   ])("calls built-in endpoint function %s", (builtIn) => {
-    endpointFunctions[builtIn] = jest.fn().mockReturnValue(mockReturn);
+    endpointFunctions[builtIn] = vi.fn().mockReturnValue(mockReturn);
     const mockArg = "mockArg";
     const mockFn = { fn: builtIn, argv: [mockArg] };
 
@@ -67,7 +67,7 @@ describe(callFunction.name, () => {
   );
 
   it("calls custom endpoint functions", () => {
-    const mockCustomFunction = jest.fn().mockReturnValue(mockReturn);
+    const mockCustomFunction = vi.fn().mockReturnValue(mockReturn);
     customEndpointFunctions["ns"] = {
       mockCustomFunction,
     };

@@ -33,10 +33,10 @@ describe(evaluateCondition.name, () => {
     ])("returns %s for", (result, testCases) => {
       it.each(testCases)(`value: '%s'`, (mockReturn) => {
         const mockLogger = {
-          debug: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
+          debug: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
+          error: vi.fn(),
         };
         (callFunction as jest.Mock).mockReturnValue(mockReturn);
         const { result, toAssign } = evaluateCondition(mockFnArgs, { ...mockOptions, logger: mockLogger });
@@ -53,10 +53,10 @@ describe(evaluateCondition.name, () => {
   it("returns assigned value if defined", () => {
     const mockAssignedValue = "mockAssignedValue";
     const mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     };
     (callFunction as jest.Mock).mockReturnValue(mockAssignedValue);
     const { result, toAssign } = evaluateCondition(

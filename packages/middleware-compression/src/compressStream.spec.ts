@@ -14,12 +14,12 @@ describe(compressStream.name, () => {
     };
 
   const testInputStream = Readable.from(getGenerator(["input"])());
-  const mockGzipFn = jest.fn();
+  const mockGzipFn = vi.fn();
   const testOutputStream = Readable.from(getGenerator(["input", "gzipped"])());
 
   beforeEach(() => {
     (createGzip as jest.Mock).mockReturnValue(mockGzipFn);
-    testInputStream.pipe = jest.fn().mockReturnValue(testOutputStream);
+    testInputStream.pipe = vi.fn().mockReturnValue(testOutputStream);
   });
 
   afterEach(() => {

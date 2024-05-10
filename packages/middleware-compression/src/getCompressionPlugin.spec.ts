@@ -5,7 +5,7 @@ jest.mock("./compressionMiddleware");
 
 describe(getCompressionPlugin.name, () => {
   const config = {
-    bodyLengthChecker: jest.fn(),
+    bodyLengthChecker: vi.fn(),
     disableRequestCompression: async () => false,
     requestMinCompressionSizeBytes: async () => 0,
   };
@@ -16,7 +16,7 @@ describe(getCompressionPlugin.name, () => {
     (compressionMiddleware as jest.Mock).mockReturnValueOnce(middlewareReturn);
 
     const plugin = getCompressionPlugin(config, middlewareConfig);
-    const commandStack = { add: jest.fn() };
+    const commandStack = { add: vi.fn() };
 
     // @ts-ignore
     plugin.applyToStack(commandStack);

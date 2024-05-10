@@ -30,7 +30,7 @@ describe("fromEnv", () => {
     it("return complex value from the getter", () => {
       type Value = { Foo: string };
       const value: Value = { Foo: "bar" };
-      const getter: (env: any) => Value = jest.fn().mockReturnValue(value);
+      const getter: (env: any) => Value = vi.fn().mockReturnValue(value);
       // Validate the generic type works
       return expect(fromEnv(getter)()).resolves.toEqual(value);
     });
@@ -42,7 +42,7 @@ describe("fromEnv", () => {
 
     it("throws when the getter function throws", () => {
       const exception = new Error("Exception when getting the config");
-      const getter: (env: any) => any = jest.fn().mockRejectedValue(exception);
+      const getter: (env: any) => any = vi.fn().mockRejectedValue(exception);
       return expect(fromEnv(getter)()).rejects.toEqual(exception);
     });
   });

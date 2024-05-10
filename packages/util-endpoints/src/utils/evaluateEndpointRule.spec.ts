@@ -15,10 +15,10 @@ jest.mock("./getEndpointProperties");
 
 describe(evaluateEndpointRule.name, () => {
   const mockLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   };
   const mockOptions: EvaluateOptions = {
     endpointParams: {},

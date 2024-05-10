@@ -3,8 +3,8 @@ import { EndpointBearer, SerdeFunctions } from "@smithy/types";
 import { serializerMiddleware } from "./serializerMiddleware";
 
 describe("serializerMiddleware", () => {
-  const mockNext = jest.fn();
-  const mockSerializer = jest.fn();
+  const mockNext = vi.fn();
+  const mockSerializer = vi.fn();
 
   const mockOptions = {
     endpoint: () =>

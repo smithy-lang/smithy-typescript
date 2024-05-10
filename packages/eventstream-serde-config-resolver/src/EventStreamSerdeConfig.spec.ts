@@ -1,7 +1,7 @@
 import { resolveEventStreamSerdeConfig } from "./EventStreamSerdeConfig";
 
 describe("resolveEventStreamSerdeConfig", () => {
-  const eventStreamSerdeProvider = jest.fn();
+  const eventStreamSerdeProvider = vi.fn();
 
   afterEach(() => {
     jest.clearAllMocks();

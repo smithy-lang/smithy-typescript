@@ -727,7 +727,7 @@ describe("NodeHttpHandler", () => {
 
   describe("checkSocketUsage", () => {
     beforeEach(() => {
-      jest.spyOn(console, "warn").mockImplementation(jest.fn());
+      jest.spyOn(console, "warn").mockImplementation(vi.fn());
     });
 
     afterEach(() => {

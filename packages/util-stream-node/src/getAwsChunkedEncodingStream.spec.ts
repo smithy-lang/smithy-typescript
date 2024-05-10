@@ -3,11 +3,11 @@ import { Readable } from "stream";
 import { getAwsChunkedEncodingStream } from "./getAwsChunkedEncodingStream";
 
 describe(getAwsChunkedEncodingStream.name, () => {
-  const mockBase64Encoder = jest.fn();
-  const mockBodyLengthChecker = jest.fn();
-  const mockChecksumAlgorithmFn = jest.fn();
+  const mockBase64Encoder = vi.fn();
+  const mockBodyLengthChecker = vi.fn();
+  const mockChecksumAlgorithmFn = vi.fn();
   const mockChecksumLocationName = "mockChecksumLocationName";
-  const mockStreamHasher = jest.fn();
+  const mockStreamHasher = vi.fn();
 
   const mockOptions = {
     base64Encoder: mockBase64Encoder,

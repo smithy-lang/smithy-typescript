@@ -14,7 +14,7 @@ describe("SmithyMessageEncoderStream", () => {
       body: new Uint8Array(2),
     };
 
-    const serializer = jest.fn().mockReturnValueOnce(message1).mockReturnValueOnce(message2);
+    const serializer = vi.fn().mockReturnValueOnce(message1).mockReturnValueOnce(message2);
 
     const inputStream = async function* () {
       yield "first";

@@ -16,7 +16,7 @@ describe(resolveEndpointsConfig.name, () => {
 
   const mockInput = {
     endpoint: mockEndpoint,
-    urlParser: jest.fn(() => mockEndpoint),
+    urlParser: vi.fn(() => mockEndpoint),
     useDualstackEndpoint: () => Promise.resolve(false),
     useFipsEndpoint: () => Promise.resolve(false),
   } as any;

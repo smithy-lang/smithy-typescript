@@ -10,8 +10,8 @@ describe(compressStream.name, () => {
   const compressionSuffix = "compressed";
   const compressionSeparator = ".";
   const asyncGzip = {
-    ondata: jest.fn(),
-    push: jest.fn().mockImplementation((chunk, final) => {
+    ondata: vi.fn(),
+    push: vi.fn().mockImplementation((chunk, final) => {
       const data = typeof chunk === "string" ? [chunk, compressionSuffix].join(compressionSeparator) : null;
       asyncGzip.ondata(undefined, data, final);
     }),

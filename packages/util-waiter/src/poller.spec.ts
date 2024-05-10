@@ -50,7 +50,7 @@ describe(runPolling.name, () => {
   });
 
   it("should returns state and reason in case of failure", async () => {
-    mockAcceptorChecks = jest.fn().mockResolvedValueOnce(failureState);
+    mockAcceptorChecks = vi.fn().mockResolvedValueOnce(failureState);
     await expect(runPolling(config, input, mockAcceptorChecks)).resolves.toStrictEqual(failureState);
 
     expect(mockAcceptorChecks).toHaveBeenCalled();
@@ -60,7 +60,7 @@ describe(runPolling.name, () => {
   });
 
   it("returns state and reason in case of success", async () => {
-    mockAcceptorChecks = jest.fn().mockResolvedValueOnce(successState);
+    mockAcceptorChecks = vi.fn().mockResolvedValueOnce(successState);
     await expect(runPolling(config, input, mockAcceptorChecks)).resolves.toStrictEqual(successState);
     expect(mockAcceptorChecks).toHaveBeenCalled();
     expect(mockAcceptorChecks).toHaveBeenCalledTimes(1);
@@ -112,7 +112,7 @@ describe(runPolling.name, () => {
       maxWaitTime: 5,
     };
 
-    mockAcceptorChecks = jest.fn().mockResolvedValue(retryState);
+    mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toStrictEqual(timeoutState);
     expect(sleep).toHaveBeenCalled();
     expect(sleep).toHaveBeenCalledTimes(2);
@@ -126,7 +126,7 @@ describe(runPolling.name, () => {
       abortController,
     };
 
-    mockAcceptorChecks = jest.fn().mockResolvedValue(retryState);
+    mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     abortController.abort();
     await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toStrictEqual(abortedState);
     expect(sleep).not.toHaveBeenCalled();

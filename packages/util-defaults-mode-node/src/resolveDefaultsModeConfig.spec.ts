@@ -40,7 +40,7 @@ describe("resolveDefaultsModeConfig", () => {
   });
 
   it("should memoize the response", async () => {
-    const providerMock = jest.fn().mockResolvedValue("legacy");
+    const providerMock = vi.fn().mockResolvedValue("legacy");
     const defaultsMode = resolveDefaultsModeConfig({ defaultsMode: providerMock });
     await defaultsMode();
     const mockInvokeCount = providerMock.mock.calls.length;

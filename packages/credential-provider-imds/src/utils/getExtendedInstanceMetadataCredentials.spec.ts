@@ -9,7 +9,7 @@ describe("getExtendedInstanceMetadataCredentials()", () => {
     secretAccessKey: "secret",
   };
   const logger: Logger = {
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as any;
 
   beforeEach(() => {

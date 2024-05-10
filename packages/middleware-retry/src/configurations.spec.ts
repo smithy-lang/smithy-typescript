@@ -12,7 +12,7 @@ jest.mock("@smithy/util-middleware");
 jest.mock("@smithy/util-retry");
 
 describe(resolveRetryConfig.name, () => {
-  const retryMode = jest.fn() as any;
+  const retryMode = vi.fn() as any;
 
   beforeEach(() => {
     (normalizeProvider as jest.Mock).mockImplementation((input) =>
@@ -39,7 +39,7 @@ describe(resolveRetryConfig.name, () => {
   describe("retryStrategy", () => {
     it("passes retryStrategy if present", () => {
       const mockRetryStrategy = {
-        retry: jest.fn(),
+        retry: vi.fn(),
       };
       const { retryStrategy } = resolveRetryConfig({
         retryMode,

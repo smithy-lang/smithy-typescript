@@ -49,8 +49,8 @@ describe("RegionConfig", () => {
     let mockUseFipsEndpoint;
 
     beforeEach(() => {
-      mockRegionProvider = jest.fn().mockResolvedValueOnce(Promise.resolve(mockRegion));
-      mockUseFipsEndpoint = jest.fn().mockResolvedValueOnce(Promise.resolve(false));
+      mockRegionProvider = vi.fn().mockResolvedValueOnce(Promise.resolve(mockRegion));
+      mockUseFipsEndpoint = vi.fn().mockResolvedValueOnce(Promise.resolve(false));
     });
 
     afterEach(() => {

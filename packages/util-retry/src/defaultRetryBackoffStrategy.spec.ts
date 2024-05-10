@@ -5,7 +5,7 @@ describe("defaultRetryBackoffStrategy", () => {
   const mathDotRandom = Math.random;
 
   beforeEach(() => {
-    Math.random = jest.fn().mockReturnValue(1);
+    Math.random = vi.fn().mockReturnValue(1);
   });
 
   afterEach(() => {
@@ -59,7 +59,7 @@ describe("defaultRetryBackoffStrategy", () => {
       const expectedDelay = Math.floor(mockRandomValue * 2 ** attempts * delayBase);
       retryBackoffStrategy.setDelayBase(delayBase);
       it(`(${delayBase}, ${attempts}) with mock Math.random=${mockRandomValue} returns ${expectedDelay}`, () => {
-        Math.random = jest.fn().mockReturnValue(mockRandomValue);
+        Math.random = vi.fn().mockReturnValue(mockRandomValue);
         expect(retryBackoffStrategy.computeNextBackoffDelay(attempts)).toBe(expectedDelay);
       });
     });

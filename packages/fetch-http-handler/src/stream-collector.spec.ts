@@ -19,7 +19,7 @@ describe("streamCollector", () => {
   it("returns a Uint8Array when blob is empty and when FileReader data is null(in IE)", (done) => {
     (global as any).FileReader = function FileReader() {
       this.result = null; //In IE, FileReader.result is null after reading empty blob
-      this.readAsDataURL = jest.fn().mockImplementation(() => {
+      this.readAsDataURL = vi.fn().mockImplementation(() => {
         if (this.onloadend) {
           this.readyState = 2;
           this.onloadend();

@@ -1,7 +1,7 @@
 // ToDo: Change to "fs/promises" when supporting nodejs>=14
 import { promises } from "fs";
 
-jest.mock("fs", () => ({ promises: { readFile: jest.fn() } }));
+jest.mock("fs", () => ({ promises: { readFile: vi.fn() } }));
 
 describe("slurpFile", () => {
   const UTF8 = "utf8";
