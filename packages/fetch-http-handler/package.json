@@ -45,8 +45,7 @@
     "karma-webpack": "5.0.1",
     "rimraf": "3.0.2",
     "typedoc": "0.23.23",
-    "webpack": "5.91.0",
-    "webpack-cli": "4.10.0"
+    "webpack": "5.91.0"
   },
   "typesVersions": {
     "<4.0": {
