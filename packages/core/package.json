@@ -33,6 +33,36 @@
       "import": "./dist-es/submodules/cbor/index.js",
       "require": "./dist-cjs/submodules/cbor/index.js",
       "types": "./dist-types/submodules/cbor/index.d.ts"
+    },
+    "./middleware-http-auth-scheme": {
+      "node": "./dist-cjs/submodules/middleware-http-auth-scheme/index.js",
+      "import": "./dist-es/submodules/middleware-http-auth-scheme/index.js",
+      "require": "./dist-cjs/submodules/middleware-http-auth-scheme/index.js",
+      "types": "./dist-types/submodules/middleware-http-auth-scheme/index.d.ts"
+    },
+    "./middleware-http-signing": {
+      "node": "./dist-cjs/submodules/middleware-http-signing/index.js",
+      "import": "./dist-es/submodules/middleware-http-signing/index.js",
+      "require": "./dist-cjs/submodules/middleware-http-signing/index.js",
+      "types": "./dist-types/submodules/middleware-http-signing/index.d.ts"
+    },
+    "./pagination": {
+      "node": "./dist-cjs/submodules/pagination/index.js",
+      "import": "./dist-es/submodules/pagination/index.js",
+      "require": "./dist-cjs/submodules/pagination/index.js",
+      "types": "./dist-types/submodules/pagination/index.d.ts"
+    },
+    "./protocols": {
+      "node": "./dist-cjs/submodules/protocols/index.js",
+      "import": "./dist-es/submodules/protocols/index.js",
+      "require": "./dist-cjs/submodules/protocols/index.js",
+      "types": "./dist-types/submodules/protocols/index.d.ts"
+    },
+    "./util-identity-and-auth": {
+      "node": "./dist-cjs/submodules/util-identity-and-auth/index.js",
+      "import": "./dist-es/submodules/util-identity-and-auth/index.js",
+      "require": "./dist-cjs/submodules/util-identity-and-auth/index.js",
+      "types": "./dist-types/submodules/util-identity-and-auth/index.d.ts"
     }
   },
   "author": {
@@ -63,7 +93,12 @@
   },
   "files": [
     "dist-*/**",
-    "./cbor.js"
+    "./cbor.js",
+    "./middleware-http-auth-scheme.js",
+    "./middleware-http-signing.js",
+    "./pagination.js",
+    "./protocols.js",
+    "./util-identity-and-auth.js"
   ],
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/core",
   "repository": {
