@@ -24,6 +24,8 @@ export const keepAliveSupport = {
  */
 type AdditionalRequestParameters = {
   // This is required in Node.js when Request has a body, and does nothing in the browser.
+  // Duplex: half means the request is fully transmitted before attempting to process the response.
+  // As of writing this is the only accepted value in https://fetch.spec.whatwg.org/.
   duplex?: "half";
 };
 
