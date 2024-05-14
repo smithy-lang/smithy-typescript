@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.1
+
+### Patch Changes
+
+- cc9fa00e: set duplex on fetch options
+
 ## 3.0.0
 
 ### Major Changes
