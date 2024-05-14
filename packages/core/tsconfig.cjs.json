@@ -2,8 +2,15 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist-cjs",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@smithy/core/cbor": [
+        "./src/submodules/cbor/index.ts"
+      ]
+    }
   },
   "extends": "../../tsconfig.cjs.json",
-  "include": ["src/"]
+  "include": [
+    "src/"
+  ]
 }

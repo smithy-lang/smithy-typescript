@@ -2,8 +2,15 @@
   "compilerOptions": {
     "baseUrl": ".",
     "declarationDir": "dist-types",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@smithy/core/cbor": [
+        "./src/submodules/cbor/index.ts"
+      ]
+    }
   },
   "extends": "../../tsconfig.types.json",
-  "include": ["src/"]
+  "include": [
+    "src/"
+  ]
 }

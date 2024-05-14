@@ -1,10 +1,19 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["dom"],
+    "lib": [
+      "dom"
+    ],
     "outDir": "dist-es",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@smithy/core/cbor": [
+        "./src/submodules/cbor/index.ts"
+      ]
+    }
   },
   "extends": "../../tsconfig.es.json",
-  "include": ["src/"]
+  "include": [
+    "src/"
+  ]
 }

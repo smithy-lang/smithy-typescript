@@ -34,10 +34,10 @@ for (const submodule of submodules) {
     }
     // tsconfig metadata.
     for (const [kind, tsconfig] of Object.entries(tsconfigs)) {
-      if (!tsconfig.compilerOptions.paths?.[`@aws-sdk/core/${submodule}`]) {
+      if (!tsconfig.compilerOptions.paths?.[`@smithy/core/${submodule}`]) {
         errors.push(`${submodule} submodule is missing paths entry in tsconfig.${kind}.json`);
 
-        tsconfig.compilerOptions.paths[`@aws-sdk/core/${submodule}`] = [`./src/submodules/${submodule}/index.ts`];
+        tsconfig.compilerOptions.paths[`@smithy/core/${submodule}`] = [`./src/submodules/${submodule}/index.ts`];
         fs.writeFileSync(path.join(root, `tsconfig.${kind}.json`), JSON.stringify(tsconfig, null, 2) + "\n");
       }
     }
