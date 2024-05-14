@@ -20,6 +20,14 @@ export const keepAliveSupport = {
 };
 
 /**
+ * @internal
+ */
+type AdditionalRequestParameters = {
+  // This is required in Node.js when Request has a body, and does nothing in the browser.
+  duplex?: "half";
+};
+
+/**
  * @public
  *
  * HttpHandler implementation using browsers' `fetch` global function.
@@ -91,16 +99,23 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     // Request constructor doesn't allow GET/HEAD request with body
     // ref: https://github.com/whatwg/fetch/issues/551
     const body = method === "GET" || method === "HEAD" ? undefined : request.body;
-    const requestOptions: RequestInit = { body, headers: new Headers(request.headers), method: method };
+    const requestOptions: RequestInit & AdditionalRequestParameters = {
+      body,
+      headers: new Headers(request.headers),
+      method: method,
+    };
+    if (body) {
+      requestOptions.duplex = "half";
+    }
 
     // some browsers support abort signal
     if (typeof AbortController !== "undefined") {
-      (requestOptions as any)["signal"] = abortSignal;
+      requestOptions.signal = abortSignal as AbortSignal;
     }
 
     // some browsers support keepalive
     if (keepAliveSupport.supported) {
-      (requestOptions as any)["keepalive"] = keepAlive;
+      requestOptions.keepalive = keepAlive;
     }
 
     const fetchRequest = new Request(url, requestOptions);
