@@ -1,6 +1,6 @@
 # Smithy Typescript Codegen Changelog
 
-## 0.21.0 2024-05-22
+## 0.21.0 (2024-05-22)
 
 ### Breaking Changes
 
