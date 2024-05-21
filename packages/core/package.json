@@ -56,13 +56,7 @@
     }
   },
   "files": [
-    "dist-*/**",
-    "./cbor.js",
-    "./middleware-http-auth-scheme.js",
-    "./middleware-http-signing.js",
-    "./pagination.js",
-    "./protocols.js",
-    "./util-identity-and-auth.js"
+    "dist-*/**"
   ],
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/core",
   "repository": {
