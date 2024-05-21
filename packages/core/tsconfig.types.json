@@ -3,9 +3,7 @@
     "baseUrl": ".",
     "declarationDir": "dist-types",
     "rootDir": "src",
-    "paths": {
-
-    }
+    "paths": {}
   },
   "extends": "../../tsconfig.types.json",
   "include": ["src/"]

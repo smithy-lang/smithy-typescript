@@ -3,9 +3,7 @@
     "baseUrl": ".",
     "outDir": "dist-cjs",
     "rootDir": "src",
-    "paths": {
-
-    }
+    "paths": {}
   },
   "extends": "../../tsconfig.cjs.json",
   "include": ["src/"]
