@@ -4,12 +4,7 @@
     "declarationDir": "dist-types",
     "rootDir": "src",
     "paths": {
-      "@smithy/core/cbor": ["./src/submodules/cbor/index.ts"],
-      "@smithy/core/middleware-http-auth-scheme": ["./src/submodules/middleware-http-auth-scheme/index.ts"],
-      "@smithy/core/middleware-http-signing": ["./src/submodules/middleware-http-signing/index.ts"],
-      "@smithy/core/pagination": ["./src/submodules/pagination/index.ts"],
-      "@smithy/core/protocols": ["./src/submodules/protocols/index.ts"],
-      "@smithy/core/util-identity-and-auth": ["./src/submodules/util-identity-and-auth/index.ts"]
+
     }
   },
   "extends": "../../tsconfig.types.json",
