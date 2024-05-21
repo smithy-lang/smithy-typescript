@@ -168,9 +168,7 @@ module.exports = class Inliner {
       external: ["@smithy/*", "@aws-sdk/*", "node_modules/*", ...this.variantExternalsForEsBuild],
     };
 
-    if (!this.isCore) {
-      await esbuild.build(buildOptions);
-    }
+    await esbuild.build(buildOptions);
 
     if (this.isCore) {
       const submodules = fs.readdirSync(path.join(root, this.subfolder, this.package, "src", "submodules"));
@@ -200,12 +198,16 @@ module.exports = class Inliner {
    * These now become re-exports of the index to preserve deep-import behavior.
    */
   async rewriteStubs() {
-    if (this.bailout || this.isCore) {
+    if (this.bailout) {
       return this;
     }
 
     for await (const file of walk(path.join(this.packageDirectory, "dist-cjs"))) {
       const relativePath = file.replace(path.join(this.packageDirectory, "dist-cjs"), "").slice(1);
+
+      if (relativePath.includes("submodules")) {
+        continue;
+      }
 
       if (!file.endsWith(".js")) {
         console.log("Skipping", path.basename(file), "file extension is not .js.");
