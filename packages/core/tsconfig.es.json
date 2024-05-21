@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "lib": ["dom"],
     "outDir": "dist-es",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {}
   },
   "extends": "../../tsconfig.es.json",
   "include": ["src/"]
