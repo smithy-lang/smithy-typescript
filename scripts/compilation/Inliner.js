@@ -179,6 +179,11 @@ module.exports = class Inliner {
           recursive: true,
           force: true,
         });
+        if (
+          !fs.lstatSync(path.join(root, this.subfolder, this.package, "src", "submodules", submodule)).isDirectory()
+        ) {
+          continue;
+        }
         await esbuild.build({
           ...buildOptions,
           entryPoints: [path.join(root, this.subfolder, this.package, "src", "submodules", submodule, "index.ts")],
