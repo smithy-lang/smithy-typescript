@@ -1,5 +1,26 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.21.0 2024-05-22
+
+### Breaking Changes
+
+- Update Engines to Node.js 16, Node.js 14 is not officialy supported anymore  ([#1258](https://github.com/smithy-lang/smithy-typescript/pull/1258))
+
+### Features
+
+- Bumped TypeScript to ~5.2.x in smithy JS packages ([#1275](https://github.com/smithy-lang/smithy-typescript/pull/1275))
+- `@smithy/fetch-http-handler`, `@smithy/node-http-handler`: Improveed stream collection performance ([#1272](https://github.com/smithy-lang/smithy-typescript/pull/1272))
+- Improved support for fetch and web-streams in Node.js ([#1256](https://github.com/smithy-lang/smithy-typescript/pull/1256))
+- `@smithy/node-http-handler`, `"@smithy/util-stream`: Handle web streams in streamCollector and sdkStreamMixin
+- Added service client doc generator only when typedoc is selected ([#1253](https://github.com/smithy-lang/smithy-typescript/pull/1253))
+
+### Bug Fixes
+
+- `@smithy/types`: Fixed type transforms account for no-args operation methods ([#1262](https://github.com/smithy-lang/smithy-typescript/pull/1262))
+- Check dependencies when adding imports ([#1239](https://github.com/smithy-lang/smithy-typescript/pull/1239))
+- Fixed typo in `HttpResponse` docs ([#958](https://github.com/smithy-lang/smithy-typescript/pull/958))
+- Fixed URI escape path ([#1224](https://github.com/smithy-lang/smithy-typescript/pull/1224)) ([#1226](https://github.com/smithy-lang/smithy-typescript/pull/1226))
+
 ## 0.20.1 (2024-04-05)
 
 ### Features
