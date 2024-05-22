@@ -19,6 +19,8 @@ module.exports = class Inliner {
     this.isPackage = fs.existsSync(path.join(root, "packages", pkg));
     this.isLib = fs.existsSync(path.join(root, "lib", pkg));
     this.isClient = !this.isPackage && !this.isLib;
+    this.isCore = pkg === "core";
+    this.reExportStubs = true;
     this.subfolder = this.isPackage ? "packages" : this.isLib ? "lib" : "clients";
 
     this.packageDirectory = path.join(root, this.subfolder, pkg);
@@ -149,7 +151,7 @@ module.exports = class Inliner {
       (variant) => "*/" + path.basename(variant).replace(/.js$/, "")
     );
 
-    await esbuild.build({
+    const buildOptions = {
       platform: this.platform,
       target: ["node16"],
       bundle: true,
@@ -164,7 +166,30 @@ module.exports = class Inliner {
       keepNames: true,
       packages: "external",
       external: ["@smithy/*", "@aws-sdk/*", "node_modules/*", ...this.variantExternalsForEsBuild],
-    });
+    };
+
+    await esbuild.build(buildOptions);
+
+    if (this.isCore) {
+      const submodules = fs.readdirSync(path.join(root, this.subfolder, this.package, "src", "submodules"));
+      for (const submodule of submodules) {
+        fs.rmSync(path.join(path.join(root, this.subfolder, this.package, "dist-cjs", "submodules", submodule)), {
+          recursive: true,
+          force: true,
+        });
+        if (
+          !fs.lstatSync(path.join(root, this.subfolder, this.package, "src", "submodules", submodule)).isDirectory()
+        ) {
+          continue;
+        }
+        await esbuild.build({
+          ...buildOptions,
+          entryPoints: [path.join(root, this.subfolder, this.package, "src", "submodules", submodule, "index.ts")],
+          outfile: path.join(root, this.subfolder, this.package, "dist-cjs", "submodules", submodule, "index.js"),
+        });
+      }
+    }
+
     return this;
   }
 
@@ -179,6 +204,10 @@ module.exports = class Inliner {
 
     for await (const file of walk(path.join(this.packageDirectory, "dist-cjs"))) {
       const relativePath = file.replace(path.join(this.packageDirectory, "dist-cjs"), "").slice(1);
+
+      if (relativePath.includes("submodules")) {
+        continue;
+      }
 
       if (!file.endsWith(".js")) {
         console.log("Skipping", path.basename(file), "file extension is not .js.");
@@ -195,8 +224,6 @@ module.exports = class Inliner {
         continue;
       }
 
-      console.log("Rewriting", relativePath, "as index re-export stub.");
-
       const depth = relativePath.split("/").length - 1;
       const indexRelativePath =
         (depth === 0
@@ -205,7 +232,15 @@ module.exports = class Inliner {
               .map(() => "..")
               .join("/")) + "/index.js";
 
-      fs.writeFileSync(file, `module.exports = require("${indexRelativePath}");`);
+      if (!this.reExportStubs) {
+        fs.rmSync(file);
+        const files = fs.readdirSync(path.dirname(file));
+        if (files.length === 0) {
+          fs.rmdirSync(path.dirname(file));
+        }
+      } else {
+        fs.writeFileSync(file, `module.exports = require("${indexRelativePath}");`);
+      }
     }
 
     return this;
@@ -252,23 +287,24 @@ module.exports = class Inliner {
       const packageName = requireStatement[3].replace("/", "\\/");
 
       const original = this.indexContents.match(
-        new RegExp(`var import_${variableSuffix} = require\\(\"${packageName}\"\\);`)
+        new RegExp(`var (import_${variableSuffix}(\d+)?) = require\\(\"${packageName}\"\\);`)
       );
+
       if (original) {
         let redundancyIndex = 0;
         let misses = 0;
+        const originalVariable = original[1];
 
         // perform an incremental replacement instead of a global (\d+) replacement
         // to be safe.
         while (true) {
           const redundantRequire = `var import_${variableSuffix}${redundancyIndex} = require\\("${packageName}"\\);`;
-          const redundantVariable = `import_${variableSuffix}${redundancyIndex}`;
+          const redundantVariable = `import_${variableSuffix}${redundancyIndex}(\\.)`;
 
           if (this.indexContents.match(new RegExp(redundantRequire))) {
-            console.log("Replacing var", redundantVariable);
             this.indexContents = this.indexContents
               .replace(new RegExp(redundantRequire, "g"), "")
-              .replace(new RegExp(redundantVariable, "g"), `import_${variableSuffix}`);
+              .replace(new RegExp(redundantVariable, "g"), `${originalVariable}$1`);
           } else if (misses++ > 10) {
             break;
           }
