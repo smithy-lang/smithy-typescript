@@ -20,3 +20,16 @@ export const serializeFloat = (value: number): string | number => {
       return value;
   }
 };
+
+/**
+ * @param date - to be serialized
+ * @returns https://smithy.io/1.0/spec/core/protocol-traits.html#timestampformat-trait date-time format.
+ */
+export const serializeDateTime = (date: Date): string => {
+  const iso = date.toISOString();
+  const [prefix, milliseconds] = iso.split(".");
+  if (milliseconds === "000Z") {
+    return prefix + "Z";
+  }
+  return iso;
+};
