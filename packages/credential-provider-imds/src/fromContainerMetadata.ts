@@ -59,6 +59,9 @@ const CMDS_IP = "169.254.170.2";
 const GREENGRASS_HOSTS = {
   localhost: true,
   "127.0.0.1": true,
+  "169.254.170.2": true, // IPv4 address for ECS
+  "169.254.170.23": true, // IPv4 address for EKS
+  "fd00:ec2::23": true, // IPv6 address for EKS
 };
 const GREENGRASS_PROTOCOLS = {
   "http:": true,
