@@ -79,12 +79,20 @@ public final class HttpProtocolGeneratorUtils {
     ) {
         switch (format) {
             case DATE_TIME:
-                return dataSource + ".toISOString()";
+                context.getWriter().addImport(
+                    "serializeDateTime",
+                    "__serializeDateTime",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT
+                );
+                return "__serializeDateTime(" + dataSource + ")";
             case EPOCH_SECONDS:
                 return "(" + dataSource + ".getTime() / 1_000)";
             case HTTP_DATE:
-                context.getWriter().addImport("dateToUtcString", "__dateToUtcString",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT);
+                context.getWriter().addImport(
+                    "dateToUtcString",
+                    "__dateToUtcString",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT
+                );
                 return "__dateToUtcString(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format + "` on " + shape);
