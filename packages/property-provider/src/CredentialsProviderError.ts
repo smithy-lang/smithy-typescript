@@ -12,13 +12,18 @@ import { ProviderError } from "./ProviderError";
  * ensures the chain will stop if an entirely unexpected error is encountered.
  */
 export class CredentialsProviderError extends ProviderError {
-  name = "CredentialsProviderError";
-  constructor(
+  public static log: string[] = [];
+  public static logLimit = 100;
+  public name = "CredentialsProviderError";
+  public constructor(
     message: string,
     public readonly tryNextLink: boolean = true
   ) {
     super(message, tryNextLink);
-    // Remove once we stop targetting ES5.
     Object.setPrototypeOf(this, CredentialsProviderError.prototype);
+    CredentialsProviderError.log.push(`${new Date().toISOString()} ${tryNextLink ? "->" : "(!)"} ${message}`);
+    while (CredentialsProviderError.log.length > CredentialsProviderError.logLimit) {
+      CredentialsProviderError.log.shift();
+    }
   }
 }
