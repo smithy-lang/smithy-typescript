@@ -25,6 +25,4 @@ export const serializeFloat = (value: number): string | number => {
  * @param date - to be serialized.
  * @returns https://smithy.io/1.0/spec/core/protocol-traits.html#timestampformat-trait date-time format.
  */
-export const serializeDateTime = (date: Date): string => {
-  return date.toISOString();
-};
+export const serializeDateTime = (date: Date): string => date.toISOString();
