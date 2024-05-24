@@ -1,4 +1,14 @@
+import { Logger } from "@smithy/types";
+
 import { ProviderError } from "./ProviderError";
+
+/**
+ * @public
+ */
+export type CredentialsProviderErrorOptionsType = {
+  tryNextLink?: boolean | undefined;
+  logger?: Logger;
+};
 
 /**
  * @public
@@ -12,18 +22,35 @@ import { ProviderError } from "./ProviderError";
  * ensures the chain will stop if an entirely unexpected error is encountered.
  */
 export class CredentialsProviderError extends ProviderError {
-  public static log: string[] = [];
-  public static logLimit = 100;
   public name = "CredentialsProviderError";
-  public constructor(
-    message: string,
-    public readonly tryNextLink: boolean = true
-  ) {
-    super(message, tryNextLink);
-    Object.setPrototypeOf(this, CredentialsProviderError.prototype);
-    CredentialsProviderError.log.push(`${new Date().toISOString()} ${tryNextLink ? "->" : "(!)"} ${message}`);
-    while (CredentialsProviderError.log.length > CredentialsProviderError.logLimit) {
-      CredentialsProviderError.log.shift();
+  public readonly tryNextLink: boolean = true;
+
+  /**
+   * @deprecated constructor should be given a logger.
+   */
+  public constructor(message: string);
+  /**
+   * @deprecated constructor should be given a logger.
+   */
+  public constructor(message: string, tryNextLink?: boolean | undefined);
+  /**
+   * This signature is preferred for logging capability.
+   */
+  public constructor(message: string, options: CredentialsProviderErrorOptionsType);
+  public constructor(message: string, options: boolean | CredentialsProviderErrorOptionsType = true) {
+    let logger: Logger | undefined;
+    let tryNextLink: boolean = true;
+
+    if (typeof options === "boolean") {
+      logger = undefined;
+      tryNextLink = options;
+    } else if (options != null && typeof options === "object") {
+      logger = options.logger;
+      tryNextLink = options.tryNextLink ?? true;
     }
+    super(message, tryNextLink);
+
+    Object.setPrototypeOf(this, CredentialsProviderError.prototype);
+    logger?.trace?.(`${new Date().toISOString()} ${tryNextLink ? "->" : "(!)"} ${message}`);
   }
 }

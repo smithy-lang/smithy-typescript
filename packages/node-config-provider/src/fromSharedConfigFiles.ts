@@ -43,7 +43,8 @@ export const fromSharedConfigFiles =
       return configValue;
     } catch (e) {
       throw new CredentialsProviderError(
-        e.message || `Not found in config files w/ profile [${profile}]: ${getSelectorName(configSelector.toString())}`
+        e.message || `Not found in config files w/ profile [${profile}]: ${getSelectorName(configSelector.toString())}`,
+        { logger: init.logger }
       );
     }
   };

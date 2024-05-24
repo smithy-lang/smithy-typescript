@@ -47,7 +47,8 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
             fallbackBlockedFromProcessEnv = !!envValue && envValue !== "false";
             if (envValue === undefined) {
               throw new CredentialsProviderError(
-                `${AWS_EC2_METADATA_V1_DISABLED} not set in env, checking config file next.`
+                `${AWS_EC2_METADATA_V1_DISABLED} not set in env, checking config file next.`,
+                { logger: init.logger }
               );
             }
             return fallbackBlockedFromProcessEnv;
@@ -98,7 +99,7 @@ const getInstanceImdsProvider = (init: RemoteProviderInit) => {
     return retry(async () => {
       let creds: AwsCredentialIdentity;
       try {
-        creds = await getCredentialsFromProfile(imdsProfile, options);
+        creds = await getCredentialsFromProfile(imdsProfile, options, init);
       } catch (err) {
         if (err.statusCode === 401) {
           disableFetchToken = false;
@@ -152,7 +153,7 @@ const getMetadataToken = async (options: RequestOptions) =>
 
 const getProfile = async (options: RequestOptions) => (await httpRequest({ ...options, path: IMDS_PATH })).toString();
 
-const getCredentialsFromProfile = async (profile: string, options: RequestOptions) => {
+const getCredentialsFromProfile = async (profile: string, options: RequestOptions, init: RemoteProviderInit) => {
   const credsResponse = JSON.parse(
     (
       await httpRequest({
@@ -163,7 +164,9 @@ const getCredentialsFromProfile = async (profile: string, options: RequestOption
   );
 
   if (!isImdsCredentials(credsResponse)) {
-    throw new CredentialsProviderError("Invalid response received from instance metadata service.");
+    throw new CredentialsProviderError("Invalid response received from instance metadata service.", {
+      logger: init.logger,
+    });
   }
 
   return fromImdsCredentials(credsResponse);

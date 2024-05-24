@@ -2,22 +2,22 @@ import { CredentialsProviderError } from "./CredentialsProviderError";
 import { ProviderError } from "./ProviderError";
 
 describe(CredentialsProviderError.name, () => {
-  afterAll(() => {
-    CredentialsProviderError.logLimit = 100;
-  });
-
   it("should be named as CredentialsProviderError", () => {
     expect(new CredentialsProviderError("PANIC").name).toBe("CredentialsProviderError");
   });
 
-  it("should log up to its logLimit", () => {
-    CredentialsProviderError.logLimit = 5;
+  it("should use logger.trace if provided", () => {
+    const logger = {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+    };
+    new CredentialsProviderError("PANIC", { logger });
 
-    Array.from({ length: CredentialsProviderError.logLimit + 2 }).forEach(() => {
-      new CredentialsProviderError("PANIC");
-    });
-
-    expect(CredentialsProviderError.log.length).toEqual(CredentialsProviderError.logLimit);
+    expect(logger.debug).not.toHaveBeenCalled();
+    expect(logger.trace).toHaveBeenCalled();
   });
 
   describe.each([Error, ProviderError, CredentialsProviderError])("should be instanceof %p", (classConstructor) => {
