@@ -49,7 +49,7 @@ export class ProviderError extends Error {
     super(message);
     this.tryNextLink = tryNextLink;
     Object.setPrototypeOf(this, ProviderError.prototype);
-    logger?.debug?.(`${this.constructor?.name} ${tryNextLink ? "->" : "(!)"} ${message}`);
+    logger?.debug?.(`@smithy/property-provider ${tryNextLink ? "->" : "(!)"} ${message}`);
   }
 
   /**
