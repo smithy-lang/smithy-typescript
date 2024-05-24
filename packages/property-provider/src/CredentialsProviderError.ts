@@ -1,14 +1,6 @@
 import { Logger } from "@smithy/types";
 
-import { ProviderError } from "./ProviderError";
-
-/**
- * @public
- */
-export type CredentialsProviderErrorOptionsType = {
-  tryNextLink?: boolean | undefined;
-  logger?: Logger;
-};
+import { ProviderError, ProviderErrorOptionsType } from "./ProviderError";
 
 /**
  * @public
@@ -22,8 +14,7 @@ export type CredentialsProviderErrorOptionsType = {
  * ensures the chain will stop if an entirely unexpected error is encountered.
  */
 export class CredentialsProviderError extends ProviderError {
-  public name = "CredentialsProviderError";
-  public readonly tryNextLink: boolean = true;
+  name = "CredentialsProviderError";
 
   /**
    * @deprecated constructor should be given a logger.
@@ -32,25 +23,13 @@ export class CredentialsProviderError extends ProviderError {
   /**
    * @deprecated constructor should be given a logger.
    */
-  public constructor(message: string, tryNextLink?: boolean | undefined);
+  public constructor(message: string, tryNextLink: boolean | undefined);
   /**
    * This signature is preferred for logging capability.
    */
-  public constructor(message: string, options: CredentialsProviderErrorOptionsType);
-  public constructor(message: string, options: boolean | CredentialsProviderErrorOptionsType = true) {
-    let logger: Logger | undefined;
-    let tryNextLink: boolean = true;
-
-    if (typeof options === "boolean") {
-      logger = undefined;
-      tryNextLink = options;
-    } else if (options != null && typeof options === "object") {
-      logger = options.logger;
-      tryNextLink = options.tryNextLink ?? true;
-    }
-    super(message, tryNextLink);
-
+  public constructor(message: string, options: ProviderErrorOptionsType);
+  public constructor(message: string, options: boolean | ProviderErrorOptionsType = true) {
+    super(message, options as ProviderErrorOptionsType);
     Object.setPrototypeOf(this, CredentialsProviderError.prototype);
-    logger?.trace?.(`${new Date().toISOString()} ${tryNextLink ? "->" : "(!)"} ${message}`);
   }
 }
