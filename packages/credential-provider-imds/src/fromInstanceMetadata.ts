@@ -25,9 +25,12 @@ const X_AWS_EC2_METADATA_TOKEN = "x-aws-ec2-metadata-token";
  * Instance Metadata Service
  */
 export const fromInstanceMetadata = (init: RemoteProviderInit = {}): Provider<InstanceMetadataCredentials> =>
-  staticStabilityProvider(getInstanceImdsProvider(init), { logger: init.logger });
+  staticStabilityProvider(getInstanceMetadataProvider(init), { logger: init.logger });
 
-const getInstanceImdsProvider = (init: RemoteProviderInit) => {
+/**
+ * @internal
+ */
+const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
   // when set to true, metadata service will not fetch token
   let disableFetchToken = false;
   const { logger, profile } = init;
@@ -154,7 +157,7 @@ const getMetadataToken = async (options: RequestOptions) =>
 const getProfile = async (options: RequestOptions) => (await httpRequest({ ...options, path: IMDS_PATH })).toString();
 
 const getCredentialsFromProfile = async (profile: string, options: RequestOptions, init: RemoteProviderInit) => {
-  const credsResponse = JSON.parse(
+  const credentialsResponse = JSON.parse(
     (
       await httpRequest({
         ...options,
@@ -163,11 +166,11 @@ const getCredentialsFromProfile = async (profile: string, options: RequestOption
     ).toString()
   );
 
-  if (!isImdsCredentials(credsResponse)) {
+  if (!isImdsCredentials(credentialsResponse)) {
     throw new CredentialsProviderError("Invalid response received from instance metadata service.", {
       logger: init.logger,
     });
   }
 
-  return fromImdsCredentials(credsResponse);
+  return fromImdsCredentials(credentialsResponse);
 };
