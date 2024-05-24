@@ -15,8 +15,8 @@ repositories {
 dependencies {
     val smithyVersion: String by project
 
-    smithyBuild("software.amazon.smithy.typescript:smithy-typescript-codegen:0.+")
-    smithyBuild("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.+")
+    smithyBuild("software.amazon.smithy.typescript:smithy-typescript-codegen:0.20.1!!")
+    smithyBuild("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.20.1!!")
     smithyBuild(project(":smithy-typescript-codegen-test:example-weather-customizations"))
 
     // Explicitly configure for CLI version
