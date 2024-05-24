@@ -115,7 +115,10 @@ final class IndexGenerator {
 
         // Export Runtime Extension and Client ExtensionConfiguration interfaces
         writer.write("export type { RuntimeExtension } from \"./runtimeExtensions\";");
-        writer.write("export type { $LExtensionConfiguration } from \"./extensionConfiguration\";", normalizedClientName);
+        writer.write(
+            "export type { $LExtensionConfiguration } from \"./extensionConfiguration\";",
+            normalizedClientName
+        );
 
         // Write export statement for commands.
         writer.write("export * from \"./commands\";");
