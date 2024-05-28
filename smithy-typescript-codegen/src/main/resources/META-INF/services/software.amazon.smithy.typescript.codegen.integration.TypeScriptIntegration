@@ -14,3 +14,4 @@ software.amazon.smithy.typescript.codegen.integration.AddBaseServiceExceptionCla
 software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency
 software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator
 software.amazon.smithy.typescript.codegen.integration.AddCompressionDependency
+software.amazon.smithy.typescript.codegen.protocols.AddProtocols
