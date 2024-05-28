@@ -26,7 +26,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/sha256-js@npm:5.2.0":
+"@aws-crypto/sha256-browser@npm:5.2.0":
+  version: 5.2.0
+  resolution: "@aws-crypto/sha256-browser@npm:5.2.0"
+  dependencies:
+    "@aws-crypto/sha256-js": ^5.2.0
+    "@aws-crypto/supports-web-crypto": ^5.2.0
+    "@aws-crypto/util": ^5.2.0
+    "@aws-sdk/types": ^3.222.0
+    "@aws-sdk/util-locate-window": ^3.0.0
+    "@smithy/util-utf8": ^2.0.0
+    tslib: ^2.6.2
+  checksum: 773f12f2026d82a6bb4a23a8f491894a6d32525bd9b8bfbc12896526cf11882a7607a671c478c45f9cd7d6ba1caaed48a62b67c6f725244bd83a1275108f46c7
+  languageName: node
+  linkType: hard
+
+"@aws-crypto/sha256-js@npm:5.2.0, @aws-crypto/sha256-js@npm:^5.2.0":
   version: 5.2.0
   resolution: "@aws-crypto/sha256-js@npm:5.2.0"
   dependencies:
@@ -34,6 +49,15 @@ __metadata:
     "@aws-sdk/types": ^3.222.0
     tslib: ^2.6.2
   checksum: 007fbe0436d714d0d0d282e2b61c90e45adcb9ad75eac9ac7ba03d32b56624afd09b2a9ceb4d659661cf17c51d74d1900ab6b00eacafc002da1101664955ca53
+  languageName: node
+  linkType: hard
+
+"@aws-crypto/supports-web-crypto@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "@aws-crypto/supports-web-crypto@npm:5.2.0"
+  dependencies:
+    tslib: ^2.6.2
+  checksum: 6ffc21de48b2b2c3e918193101d7e8fe949d47b37688892e1c39eaedaa938be80c0f404fe1c874c30cce16781026777a53bf47d5d90143ca91d0feb7c4a6f830
   languageName: node
   linkType: hard
 
@@ -54,6 +78,25 @@ __metadata:
   dependencies:
     tslib: ^2.5.0
   checksum: 799b053d3651f1754e2925b671fe890047d0ff1af69d22b6826d8e74edefcd558c7c7a911d48eaf5930032bcf291dbdbb6dd2d2f0c596bbe52100941aa349221
+  languageName: node
+  linkType: hard
+
+"@aws-sdk/types@npm:latest":
+  version: 3.598.0
+  resolution: "@aws-sdk/types@npm:3.598.0"
+  dependencies:
+    "@smithy/types": ^3.1.0
+    tslib: ^2.6.2
+  checksum: 9b2bd50d6935422dd1046e6eaa48c4c774d06aa1374bf4600a3af2c7a52432b5e25ec111cf49976b07b03d7cb5f4fa6fd44b7ce8a67dd0b3a4cee4abaf9e6fa5
+  languageName: node
+  linkType: hard
+
+"@aws-sdk/util-locate-window@npm:^3.0.0":
+  version: 3.568.0
+  resolution: "@aws-sdk/util-locate-window@npm:3.568.0"
+  dependencies:
+    tslib: ^2.6.2
+  checksum: 354db5187beee4203c7ec6583556ab14ecde9644c06aaa51fa2528131836d3fc73035a3b080c904e108c49defce20d5562893113b93d819b70497f47989bb578
   languageName: node
   linkType: hard
 
@@ -2207,7 +2250,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/config-resolver@workspace:^, @smithy/config-resolver@workspace:packages/config-resolver":
+"@smithy/config-resolver@^3.0.5, @smithy/config-resolver@workspace:^, @smithy/config-resolver@workspace:packages/config-resolver":
   version: 0.0.0-use.local
   resolution: "@smithy/config-resolver@workspace:packages/config-resolver"
   dependencies:
@@ -2223,7 +2266,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/core@workspace:packages/core":
+"@smithy/core@^2.3.2, @smithy/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
@@ -2233,10 +2276,13 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
+    "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
+    json-bigint: ^1.0.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2356,7 +2402,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
+"@smithy/fetch-http-handler@^3.2.4, @smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
   dependencies:
@@ -2389,7 +2435,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/hash-node@workspace:packages/hash-node":
+"@smithy/hash-node@^3.0.3, @smithy/hash-node@workspace:packages/hash-node":
   version: 0.0.0-use.local
   resolution: "@smithy/hash-node@workspace:packages/hash-node"
   dependencies:
@@ -2423,7 +2469,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/invalid-dependency@workspace:packages/invalid-dependency":
+"@smithy/invalid-dependency@^3.0.3, @smithy/invalid-dependency@workspace:packages/invalid-dependency":
   version: 0.0.0-use.local
   resolution: "@smithy/invalid-dependency@workspace:packages/invalid-dependency"
   dependencies:
@@ -2511,7 +2557,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-content-length@workspace:packages/middleware-content-length":
+"@smithy/middleware-content-length@^3.0.5, @smithy/middleware-content-length@workspace:packages/middleware-content-length":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-content-length@workspace:packages/middleware-content-length"
   dependencies:
@@ -2544,7 +2590,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-retry@workspace:^, @smithy/middleware-retry@workspace:packages/middleware-retry":
+"@smithy/middleware-retry@^3.0.14, @smithy/middleware-retry@workspace:^, @smithy/middleware-retry@workspace:packages/middleware-retry":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-retry@workspace:packages/middleware-retry"
   dependencies:
@@ -2566,7 +2612,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-serde@workspace:^, @smithy/middleware-serde@workspace:packages/middleware-serde":
+"@smithy/middleware-serde@^3.0.3, @smithy/middleware-serde@workspace:^, @smithy/middleware-serde@workspace:packages/middleware-serde":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
   dependencies:
@@ -2580,7 +2626,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-stack@workspace:^, @smithy/middleware-stack@workspace:packages/middleware-stack":
+"@smithy/middleware-stack@^3.0.3, @smithy/middleware-stack@workspace:^, @smithy/middleware-stack@workspace:packages/middleware-stack":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-stack@workspace:packages/middleware-stack"
   dependencies:
@@ -2593,7 +2639,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/node-config-provider@workspace:^, @smithy/node-config-provider@workspace:packages/node-config-provider":
+"@smithy/node-config-provider@^3.1.4, @smithy/node-config-provider@workspace:^, @smithy/node-config-provider@workspace:packages/node-config-provider":
   version: 0.0.0-use.local
   resolution: "@smithy/node-config-provider@workspace:packages/node-config-provider"
   dependencies:
@@ -2609,7 +2655,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/node-http-handler@workspace:^, @smithy/node-http-handler@workspace:packages/node-http-handler":
+"@smithy/node-http-handler@^3.1.4, @smithy/node-http-handler@workspace:^, @smithy/node-http-handler@workspace:packages/node-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/node-http-handler@workspace:packages/node-http-handler"
   dependencies:
@@ -2639,7 +2685,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/protocol-http@workspace:^, @smithy/protocol-http@workspace:packages/protocol-http":
+"@smithy/protocol-http@^4.1.0, @smithy/protocol-http@workspace:^, @smithy/protocol-http@workspace:packages/protocol-http":
   version: 0.0.0-use.local
   resolution: "@smithy/protocol-http@workspace:packages/protocol-http"
   dependencies:
@@ -2738,7 +2784,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
+"@smithy/smithy-client@^3.1.12, @smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-client@workspace:packages/smithy-client"
   dependencies:
@@ -2756,7 +2802,47 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/types@workspace:^, @smithy/types@workspace:packages/types":
+"@smithy/smithy-rpcv2-cbor@workspace:private/smithy-rpcv2-cbor":
+  version: 0.0.0-use.local
+  resolution: "@smithy/smithy-rpcv2-cbor@workspace:private/smithy-rpcv2-cbor"
+  dependencies:
+    "@aws-crypto/sha256-browser": 5.2.0
+    "@aws-crypto/sha256-js": 5.2.0
+    "@aws-sdk/types": latest
+    "@smithy/config-resolver": ^3.0.5
+    "@smithy/core": ^2.3.2
+    "@smithy/fetch-http-handler": ^3.2.4
+    "@smithy/hash-node": ^3.0.3
+    "@smithy/invalid-dependency": ^3.0.3
+    "@smithy/middleware-content-length": ^3.0.5
+    "@smithy/middleware-retry": ^3.0.14
+    "@smithy/middleware-serde": ^3.0.3
+    "@smithy/middleware-stack": ^3.0.3
+    "@smithy/node-config-provider": ^3.1.4
+    "@smithy/node-http-handler": ^3.1.4
+    "@smithy/protocol-http": ^4.1.0
+    "@smithy/smithy-client": ^3.1.12
+    "@smithy/types": ^3.3.0
+    "@smithy/url-parser": ^3.0.3
+    "@smithy/util-base64": ^3.0.0
+    "@smithy/util-body-length-browser": ^3.0.0
+    "@smithy/util-body-length-node": ^3.0.0
+    "@smithy/util-defaults-mode-browser": ^3.0.14
+    "@smithy/util-defaults-mode-node": ^3.0.14
+    "@smithy/util-middleware": ^3.0.3
+    "@smithy/util-retry": ^3.0.3
+    "@smithy/util-utf8": ^3.0.0
+    "@tsconfig/node16": 16.1.3
+    "@types/node": ^16.18.96
+    concurrently: 7.0.0
+    downlevel-dts: 0.10.1
+    rimraf: ^3.0.0
+    tslib: ^2.6.2
+    typescript: ~4.9.5
+  languageName: unknown
+  linkType: soft
+
+"@smithy/types@^3.1.0, @smithy/types@^3.3.0, @smithy/types@workspace:^, @smithy/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
@@ -2768,7 +2854,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/url-parser@workspace:^, @smithy/url-parser@workspace:packages/url-parser":
+"@smithy/url-parser@^3.0.3, @smithy/url-parser@workspace:^, @smithy/url-parser@workspace:packages/url-parser":
   version: 0.0.0-use.local
   resolution: "@smithy/url-parser@workspace:packages/url-parser"
   dependencies:
@@ -2782,7 +2868,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-base64@workspace:^, @smithy/util-base64@workspace:packages/util-base64":
+"@smithy/util-base64@^3.0.0, @smithy/util-base64@workspace:^, @smithy/util-base64@workspace:packages/util-base64":
   version: 0.0.0-use.local
   resolution: "@smithy/util-base64@workspace:packages/util-base64"
   dependencies:
@@ -2797,7 +2883,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
+"@smithy/util-body-length-browser@^3.0.0, @smithy/util-body-length-browser@workspace:^, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/util-body-length-browser@workspace:packages/util-body-length-browser"
   dependencies:
@@ -2809,7 +2895,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-body-length-node@workspace:packages/util-body-length-node":
+"@smithy/util-body-length-node@^3.0.0, @smithy/util-body-length-node@workspace:packages/util-body-length-node":
   version: 0.0.0-use.local
   resolution: "@smithy/util-body-length-node@workspace:packages/util-body-length-node"
   dependencies:
@@ -2859,7 +2945,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser":
+"@smithy/util-defaults-mode-browser@^3.0.14, @smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser"
   dependencies:
@@ -2876,7 +2962,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node":
+"@smithy/util-defaults-mode-node@^3.0.14, @smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node":
   version: 0.0.0-use.local
   resolution: "@smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node"
   dependencies:
@@ -2922,7 +3008,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-middleware@workspace:^, @smithy/util-middleware@workspace:packages/util-middleware":
+"@smithy/util-middleware@^3.0.3, @smithy/util-middleware@workspace:^, @smithy/util-middleware@workspace:packages/util-middleware":
   version: 0.0.0-use.local
   resolution: "@smithy/util-middleware@workspace:packages/util-middleware"
   dependencies:
@@ -2936,7 +3022,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-retry@workspace:^, @smithy/util-retry@workspace:packages/util-retry":
+"@smithy/util-retry@^3.0.3, @smithy/util-retry@workspace:^, @smithy/util-retry@workspace:packages/util-retry":
   version: 0.0.0-use.local
   resolution: "@smithy/util-retry@workspace:packages/util-retry"
   dependencies:
@@ -3032,17 +3118,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-utf8@npm:^2.0.0":
-  version: 2.3.0
-  resolution: "@smithy/util-utf8@npm:2.3.0"
-  dependencies:
-    "@smithy/util-buffer-from": ^2.2.0
-    tslib: ^2.6.2
-  checksum: 00e55d4b4e37d48be0eef3599082402b933c52a1407fed7e8e8ad76d94d81a0b30b8bfaf2047c59d9c3af31e5f20e7a8c959cb7ae270f894255e05a2229964f0
-  languageName: node
-  linkType: hard
-
-"@smithy/util-utf8@workspace:^, @smithy/util-utf8@workspace:packages/util-utf8":
+"@smithy/util-utf8@^3.0.0, @smithy/util-utf8@workspace:^, @smithy/util-utf8@workspace:packages/util-utf8":
   version: 0.0.0-use.local
   resolution: "@smithy/util-utf8@workspace:packages/util-utf8"
   dependencies:
@@ -3054,6 +3130,16 @@ __metadata:
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
+
+"@smithy/util-utf8@npm:^2.0.0":
+  version: 2.3.0
+  resolution: "@smithy/util-utf8@npm:2.3.0"
+  dependencies:
+    "@smithy/util-buffer-from": ^2.2.0
+    tslib: ^2.6.2
+  checksum: 00e55d4b4e37d48be0eef3599082402b933c52a1407fed7e8e8ad76d94d81a0b30b8bfaf2047c59d9c3af31e5f20e7a8c959cb7ae270f894255e05a2229964f0
+  languageName: node
+  linkType: hard
 
 "@smithy/util-waiter@workspace:packages/util-waiter":
   version: 0.0.0-use.local
@@ -3080,6 +3166,13 @@ __metadata:
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
   checksum: ad87447820dd3f24825d2d947ebc03072b20a42bfc96cbafec16bff8bbda6c1a81fcb0be56d5b21968560c5359a0af4038a68ba150c3e1694fe4c109a063bed8
+  languageName: node
+  linkType: hard
+
+"@tsconfig/node16@npm:16.1.3":
+  version: 16.1.3
+  resolution: "@tsconfig/node16@npm:16.1.3"
+  checksum: 097f33cb7fe9577cc3c4b7a8d26c7e8b6c45c868d3bda1e2cd120111693b98f88a5138e643e7a6f79d53d94717c3624dc33398804647bf6e0e8782604bbfad53
   languageName: node
   linkType: hard
 
@@ -4098,6 +4191,13 @@ __metadata:
   dependencies:
     is-windows: ^1.0.0
   checksum: 5392dbe04e7fe68b944eb37961d9dfa147aaac3ee9ee3f6e13d42e2c9fbe949e68d16e896c14ee9016fa5f8e6e53ec7fd8b5f01b50a32067a7d94ac9cfb9a050
+  languageName: node
+  linkType: hard
+
+"bignumber.js@npm:^9.0.0":
+  version: 9.1.2
+  resolution: "bignumber.js@npm:9.1.2"
+  checksum: 582c03af77ec9cb0ebd682a373ee6c66475db94a4325f92299621d544aa4bd45cb45fd60001610e94aef8ae98a0905fa538241d9638d4422d57abbeeac6fadaf
   languageName: node
   linkType: hard
 
@@ -7985,6 +8085,15 @@ __metadata:
   bin:
     jsesc: bin/jsesc
   checksum: 4dc190771129e12023f729ce20e1e0bfceac84d73a85bc3119f7f938843fe25a4aeccb54b6494dce26fcf263d815f5f31acdefac7cc9329efb8422a4f4d9fa9d
+  languageName: node
+  linkType: hard
+
+"json-bigint@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "json-bigint@npm:1.0.0"
+  dependencies:
+    bignumber.js: ^9.0.0
+  checksum: c67bb93ccb3c291e60eb4b62931403e378906aab113ec1c2a8dd0f9a7f065ad6fd9713d627b732abefae2e244ac9ce1721c7a3142b2979532f12b258634ce6f6
   languageName: node
   linkType: hard
 

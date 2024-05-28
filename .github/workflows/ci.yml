@@ -28,6 +28,37 @@ jobs:
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
 
+  protocol-tests:
+    runs-on: ${{ matrix.os }}
+    name: Protocol Tests
+    strategy:
+      matrix:
+        java: [17]
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 16
+          cache: "yarn"
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'corretto'
+
+      - name: clean and build
+        run: ./gradlew clean build -Plog-tests
+      - name: Install dependencies
+        run: yarn
+      - name: Build packages
+        run: yarn build
+      - name: Run protocol tests
+        run: yarn test:protocols
+
   lint-typescript:
     runs-on: ubuntu-latest
     name: TypeScript Lint

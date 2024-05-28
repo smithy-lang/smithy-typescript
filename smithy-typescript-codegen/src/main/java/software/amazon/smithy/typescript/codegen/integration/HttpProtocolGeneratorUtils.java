@@ -48,12 +48,14 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
  * Utility methods for generating HTTP protocols.
  */
 @SmithyUnstableApi
+@SmithyInternalApi
 public final class HttpProtocolGeneratorUtils {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBindingProtocolGenerator.class.getName());
@@ -167,7 +169,7 @@ public final class HttpProtocolGeneratorUtils {
      *   ({@code input.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the input string.
      */
-    static String getStringInputParam(GenerationContext context, Shape shape, String dataSource) {
+    public static String getStringInputParam(GenerationContext context, Shape shape, String dataSource) {
         // Handle media type generation, defaulting to the dataSource.
         Optional<MediaTypeTrait> mediaTypeTrait = shape.getTrait(MediaTypeTrait.class);
         if (mediaTypeTrait.isPresent()) {
@@ -198,7 +200,10 @@ public final class HttpProtocolGeneratorUtils {
      *   only be false if the value is guaranteed to be a string already.
      * @return Returns a value or expression of the output string.
      */
-    static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource, boolean useExpect) {
+    public static String getStringOutputParam(GenerationContext context,
+                                              Shape shape,
+                                              String dataSource,
+                                              boolean useExpect) {
         // Handle media type generation, defaulting to a standard String.
         Optional<MediaTypeTrait> mediaTypeTrait = shape.getTrait(MediaTypeTrait.class);
         if (mediaTypeTrait.isPresent()) {
@@ -231,7 +236,7 @@ public final class HttpProtocolGeneratorUtils {
      *   ({@code output.foo}, {@code entry}, etc.)
      * @return Returns a value or expression of the output string.
      */
-    static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource) {
+    public static String getStringOutputParam(GenerationContext context, Shape shape, String dataSource) {
         return getStringOutputParam(context, shape, dataSource, true);
     }
 
@@ -242,7 +247,7 @@ public final class HttpProtocolGeneratorUtils {
      * @param context The generation context.
      * @param responseType The response type for the HTTP protocol.
      */
-    static void generateMetadataDeserializer(GenerationContext context, SymbolReference responseType) {
+    public static void generateMetadataDeserializer(GenerationContext context, SymbolReference responseType) {
         TypeScriptWriter writer = context.getWriter();
 
         writer.addImport("ResponseMetadata", "__ResponseMetadata", TypeScriptDependency.SMITHY_TYPES);
@@ -264,7 +269,7 @@ public final class HttpProtocolGeneratorUtils {
      *
      * @param context The generation context
      */
-    static void generateCollectBodyString(GenerationContext context) {
+    public static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
         writer.addImport("collectBody", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
@@ -317,7 +322,7 @@ public final class HttpProtocolGeneratorUtils {
      * @param operationErrorsToShapes A map of error names to their {@link ShapeId}.
      * @return A set of all error structure shapes for the operation that were dispatched to.
      */
-    static Set<StructureShape> generateUnifiedErrorDispatcher(
+    public static Set<StructureShape> generateUnifiedErrorDispatcher(
         GenerationContext context,
         List<OperationShape> operations,
         SymbolReference responseType,
@@ -416,7 +421,7 @@ public final class HttpProtocolGeneratorUtils {
      * @param context The generation context.
      * @param operation The operation to generate for.
      */
-    static void writeHostPrefix(GenerationContext context, OperationShape operation) {
+    public static void writeHostPrefix(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         EndpointTrait trait = operation.getTrait(EndpointTrait.class).get();
