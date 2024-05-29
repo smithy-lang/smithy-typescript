@@ -1,5 +1,5 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { AwsCredentialIdentityProvider } from "@smithy/types";
+import { AwsCredentialIdentityProvider, Logger } from "@smithy/types";
 import { RequestOptions } from "http";
 import { parse } from "url";
 
@@ -31,10 +31,12 @@ export const fromContainerMetadata = (init: RemoteProviderInit = {}): AwsCredent
   const { timeout, maxRetries } = providerConfigFromInit(init);
   return () =>
     retry(async () => {
-      const requestOptions = await getCmdsUri();
+      const requestOptions = await getCmdsUri({ logger: init.logger });
       const credsResponse = JSON.parse(await requestFromEcsImds(timeout, requestOptions));
       if (!isImdsCredentials(credsResponse)) {
-        throw new CredentialsProviderError("Invalid response received from instance metadata service.");
+        throw new CredentialsProviderError("Invalid response received from instance metadata service.", {
+          logger: init.logger,
+        });
       }
       return fromImdsCredentials(credsResponse);
     }, maxRetries);
@@ -65,7 +67,7 @@ const GREENGRASS_PROTOCOLS = {
   "https:": true,
 };
 
-const getCmdsUri = async (): Promise<RequestOptions> => {
+const getCmdsUri = async ({ logger }: { logger?: Logger }): Promise<RequestOptions> => {
   if (process.env[ENV_CMDS_RELATIVE_URI]) {
     return {
       hostname: CMDS_IP,
@@ -76,17 +78,17 @@ const getCmdsUri = async (): Promise<RequestOptions> => {
   if (process.env[ENV_CMDS_FULL_URI]) {
     const parsed = parse(process.env[ENV_CMDS_FULL_URI]!);
     if (!parsed.hostname || !(parsed.hostname in GREENGRASS_HOSTS)) {
-      throw new CredentialsProviderError(
-        `${parsed.hostname} is not a valid container metadata service hostname`,
-        false
-      );
+      throw new CredentialsProviderError(`${parsed.hostname} is not a valid container metadata service hostname`, {
+        tryNextLink: false,
+        logger,
+      });
     }
 
     if (!parsed.protocol || !(parsed.protocol in GREENGRASS_PROTOCOLS)) {
-      throw new CredentialsProviderError(
-        `${parsed.protocol} is not a valid container metadata service protocol`,
-        false
-      );
+      throw new CredentialsProviderError(`${parsed.protocol} is not a valid container metadata service protocol`, {
+        tryNextLink: false,
+        logger,
+      });
     }
 
     return {
@@ -99,6 +101,9 @@ const getCmdsUri = async (): Promise<RequestOptions> => {
     "The container metadata credential provider cannot be used unless" +
       ` the ${ENV_CMDS_RELATIVE_URI} or ${ENV_CMDS_FULL_URI} environment` +
       " variable is set",
-    false
+    {
+      tryNextLink: false,
+      logger,
+    }
   );
 };

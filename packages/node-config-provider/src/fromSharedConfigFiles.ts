@@ -2,6 +2,8 @@ import { CredentialsProviderError } from "@smithy/property-provider";
 import { getProfileName, loadSharedConfigFiles, SourceProfileInit } from "@smithy/shared-ini-file-loader";
 import { ParsedIniData, Profile, Provider } from "@smithy/types";
 
+import { getSelectorName } from "./getSelectorName";
+
 export interface SharedConfigInit extends SourceProfileInit {
   /**
    * The preferred shared ini file to load the config. "config" option refers to
@@ -41,8 +43,8 @@ export const fromSharedConfigFiles =
       return configValue;
     } catch (e) {
       throw new CredentialsProviderError(
-        e.message ||
-          `Cannot load config for profile ${profile} in SDK configuration files with getter: ${configSelector}`
+        e.message || `Not found in config files w/ profile [${profile}]: ${getSelectorName(configSelector.toString())}`,
+        { logger: init.logger }
       );
     }
   };

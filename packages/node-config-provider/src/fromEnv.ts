@@ -1,5 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { Provider } from "@smithy/types";
+import { Logger, Provider } from "@smithy/types";
+
+import { getSelectorName } from "./getSelectorName";
 
 // Using Record<string, string | undefined> instead of NodeJS.ProcessEnv, in order to not get type errors in non node environments
 export type GetterFromEnv<T> = (env: Record<string, string | undefined>) => T | undefined;
@@ -9,7 +11,7 @@ export type GetterFromEnv<T> = (env: Record<string, string | undefined>) => T | 
  * environment variable.
  */
 export const fromEnv =
-  <T = string>(envVarSelector: GetterFromEnv<T>): Provider<T> =>
+  <T = string>(envVarSelector: GetterFromEnv<T>, logger?: Logger): Provider<T> =>
   async () => {
     try {
       const config = envVarSelector(process.env);
@@ -19,7 +21,8 @@ export const fromEnv =
       return config as T;
     } catch (e) {
       throw new CredentialsProviderError(
-        e.message || `Cannot load config from environment variables with getter: ${envVarSelector}`
+        e.message || `Not found in ENV: ${getSelectorName(envVarSelector.toString())}`,
+        { logger }
       );
     }
   };
