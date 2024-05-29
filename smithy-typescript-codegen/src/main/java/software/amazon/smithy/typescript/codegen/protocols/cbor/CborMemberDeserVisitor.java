@@ -6,6 +6,7 @@
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberDeserVisitor;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
@@ -24,5 +25,7 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
                                   String dataSource,
                                   TimestampFormatTrait.Format defaultTimestampFormat) {
         super(context, dataSource, defaultTimestampFormat);
+        context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        this.serdeElisionEnabled = !context.getSettings().generateServerSdk();
     }
 }

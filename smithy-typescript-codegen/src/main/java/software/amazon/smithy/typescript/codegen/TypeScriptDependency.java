@@ -147,38 +147,54 @@ public enum TypeScriptDependency implements Dependency {
     public final String packageName;
     public final String version;
     public final SymbolDependency dependency;
+    private String importName;
 
-    TypeScriptDependency(String type, String name, boolean unconditional) {
+    TypeScriptDependency(String type, String packageName, boolean unconditional) {
         String version;
-        if (name.startsWith("@aws-sdk/")) {
-            version = SdkVersion.getVersion(name);
+        if (packageName.startsWith("@aws-sdk/")) {
+            version = SdkVersion.getVersion(packageName);
         } else {
-            version = DependencyVersion.getVersion(name);
+            version = DependencyVersion.getVersion(packageName);
         }
 
-        if (name.startsWith("@smithy/")) {
+        if (packageName.startsWith("@smithy/")) {
             version = "^" + version;
         }
         this.dependency = SymbolDependency.builder()
                 .dependencyType(type)
-                .packageName(name)
+                .packageName(packageName)
                 .version(version)
                 .putProperty("unconditional", unconditional)
                 .build();
-        this.packageName = name;
+        this.packageName = packageName;
         this.version = version;
-
+        this.importName = packageName;
     }
 
-    TypeScriptDependency(String type, String name, String version, boolean unconditional) {
+    TypeScriptDependency(String type, String packageName, String version, boolean unconditional) {
         this.dependency = SymbolDependency.builder()
                 .dependencyType(type)
-                .packageName(name)
+                .packageName(packageName)
                 .version(version)
                 .putProperty("unconditional", unconditional)
                 .build();
-        this.packageName = name;
+        this.packageName = packageName;
         this.version = version;
+        this.importName = packageName;
+    }
+
+    TypeScriptDependency(String type,  String packageName, boolean unconditional, String importName) {
+        this(type, packageName, unconditional);
+        this.importName = importName;
+    }
+
+    TypeScriptDependency(String type,
+                         String packageName,
+                         String version,
+                         boolean unconditional,
+                         String importName) {
+        this(type, packageName, version, unconditional);
+        this.importName = importName;
     }
 
     /**
@@ -211,6 +227,10 @@ public enum TypeScriptDependency implements Dependency {
     @Override
     public String getPackageName() {
         return this.packageName;
+    }
+
+    public String getImportName() {
+        return this.importName;
     }
 
     /**

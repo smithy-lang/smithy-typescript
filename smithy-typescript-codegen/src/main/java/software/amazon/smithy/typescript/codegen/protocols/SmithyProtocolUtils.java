@@ -14,6 +14,7 @@ import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
+
 /**
  * Utility methods for generating Smithy protocols.
  */

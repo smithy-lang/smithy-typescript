@@ -153,6 +153,13 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return this.addImport(name, as, from.getPackageName());
     }
 
+    public TypeScriptWriter addSubPathImport(String name, String as, PackageContainer from, String subPath) {
+        if (from instanceof Dependency) {
+            addDependency((Dependency) from);
+        }
+        return this.addImport(name, as, from.getPackageName() + subPath);
+    }
+
     /**
      * Imports a type using an alias from a relative Path.
      *

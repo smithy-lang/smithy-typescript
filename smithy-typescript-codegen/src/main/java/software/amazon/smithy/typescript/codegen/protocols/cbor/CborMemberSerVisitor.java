@@ -24,5 +24,6 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
                                 String dataSource,
                                 TimestampFormatTrait.Format defaultTimestampFormat) {
         super(context, dataSource, defaultTimestampFormat);
+        this.serdeElisionEnabled = true;
     }
 }
