@@ -84,17 +84,17 @@ const TWO = {
 /**
  * @internal
  */
-const demote = (bigInteger: bigint): number => {
+function demote(bigInteger: bigint): number {
   const num = Number(bigInteger);
   if (num < Number.MIN_SAFE_INTEGER || Number.MAX_SAFE_INTEGER < num) {
     console.warn(new Error(`@smithy/core/cbor - truncating bigInt(${bigInteger}) to ${num} with loss of precision.`));
   }
   return Number(bigInteger);
-};
+}
 
 // decode
 
-const float16ToUint32 = (float: Float16Binary): Uint32 => {
+function float16ToUint32(float: Float16Binary): Uint32 {
   const n = [
     // sign: 2 ** 23 - 1
     (float & 0b0111_1111_1111_1111_1111_1111) << 16,
@@ -123,15 +123,15 @@ const float16ToUint32 = (float: Float16Binary): Uint32 => {
   }
 
   return sign | ((exponent + 127 - 15) << 23) | mantissa;
-};
+}
 
-const uint32ToFloat32 = (unsignedInt32: Uint32): Float32Binary => {
+function uint32ToFloat32(unsignedInt32: Uint32): Float32Binary {
   const dv = new DataView(new ArrayBuffer(4));
   dv.setInt32(0, unsignedInt32);
   return dv.getFloat32(0);
-};
+}
 
-const join = (...byteArrays: Uint8Array[]): Uint8Array => {
+function join(...byteArrays: Uint8Array[]): Uint8Array {
   const length = byteArrays.reduce((acc, cur) => acc + cur.length, 0);
   let offset = 0;
   const joined = new Uint8Array(length);
@@ -140,16 +140,20 @@ const join = (...byteArrays: Uint8Array[]): Uint8Array => {
     offset += arr.length;
   }
   return joined;
-};
+}
 
 const offsetDataView = (payload: Uint8Array): DataView =>
   new DataView(payload.buffer, payload.buffer.byteLength - payload.length);
 
-const peekMajor = (payload: Uint8Array): Uint8 => (payload[0] & 0b1110_0000) >> 5;
+function peekMajor(payload: Uint8Array): Uint8 {
+  return (payload[0] & 0b1110_0000) >> 5;
+}
 
-const peekMinor = (payload: Uint8Array): Uint8 => payload[0] & 0b0001_1111;
+function peekMinor(payload: Uint8Array): Uint8 {
+  return payload[0] & 0b0001_1111;
+}
 
-const decodeArgument = (payload: Uint8Array): [Uint64, CborArgumentLengthOffset] => {
+function decodeArgument(payload: Uint8Array): [Uint64, CborArgumentLengthOffset] {
   const minor = peekMinor(payload);
   if (minor < 24) {
     return [BigInt(minor), BigInt(1) as CborArgumentLengthOffset];
@@ -169,42 +173,44 @@ const decodeArgument = (payload: Uint8Array): [Uint64, CborArgumentLengthOffset]
     default:
       throw new Error(`unexpected minor value ${minor}.`);
   }
-};
+}
 
-const minorValueToArgumentLength = (minor: number): CborArgumentLength => {
+function minorValueToArgumentLength(minor: number): CborArgumentLength {
   if (minor === specialOneByte) return 1;
   if (minor === specialFloat16) return 2;
   if (minor === specialFloat32) return 4;
   return 8;
-};
+}
 
-const readArgument = (payload: Uint8Array, byteLength: number): Uint64 => {
+function readArgument(payload: Uint8Array, byteLength: number): Uint64 {
   if (byteLength === 1) return BigInt(payload[0]);
   if (byteLength === 2) return BigInt(offsetDataView(payload).getUint16(0));
   if (byteLength === 4) return BigInt(offsetDataView(payload).getUint32(0));
 
   return offsetDataView(payload).getBigUint64(0);
-};
+}
 
-const decodeUnsignedInt = (payload: Uint8Array): [Uint64, CborArgumentLengthOffset] => decodeArgument(payload);
+function decodeUnsignedInt(payload: Uint8Array): [Uint64, CborArgumentLengthOffset] {
+  return decodeArgument(payload);
+}
 
-const decodeNegativeInt = (payload: Uint8Array): [Int64, CborArgumentLengthOffset] => {
+function decodeNegativeInt(payload: Uint8Array): [Int64, CborArgumentLengthOffset] {
   const [i, offset] = decodeArgument(payload);
   return [-BigInt(1) - i, offset];
-};
+}
 
-const decodeUnstructuredByteString = (payload: Uint8Array): [CborUnstructuredByteStringType, CborOffset] => {
+function decodeUnstructuredByteString(payload: Uint8Array): [CborUnstructuredByteStringType, CborOffset] {
   return decodeString(payload, majorUnstructuredByteString);
-};
+}
 
-const decodeUtf8String = (payload: Uint8Array): [string, CborOffset] => {
+function decodeUtf8String(payload: Uint8Array): [string, CborOffset] {
   return decodeString(payload, majorUtf8String);
-};
+}
 
-const decodeString = <M extends typeof majorUtf8String | typeof majorUnstructuredByteString>(
+function decodeString<M extends typeof majorUtf8String | typeof majorUnstructuredByteString>(
   payload: Uint8Array,
   inner: M
-): [M extends typeof majorUtf8String ? string : CborUnstructuredByteStringType, CborOffset] => {
+): [M extends typeof majorUtf8String ? string : CborUnstructuredByteStringType, CborOffset] {
   const minor = peekMinor(payload);
 
   if (minor === minorIndefinite) {
@@ -226,12 +232,12 @@ const decodeString = <M extends typeof majorUtf8String | typeof majorUnstructure
       ? payload.subarray(0, demote(length))
       : toUtf8(payload.subarray(0, demote(length)));
   return [value as M extends typeof majorUtf8String ? string : CborUnstructuredByteStringType, offset + length];
-};
+}
 
-const decodeStringIndefinite = <I extends typeof majorUtf8String | typeof majorUnstructuredByteString>(
+function decodeStringIndefinite<I extends typeof majorUtf8String | typeof majorUnstructuredByteString>(
   payload: Uint8Array,
   inner: I
-): [CborUnstructuredByteStringType, CborOffset] => {
+): [CborUnstructuredByteStringType, CborOffset] {
   payload = payload.subarray(1);
 
   const buffer = [];
@@ -265,9 +271,9 @@ const decodeStringIndefinite = <I extends typeof majorUtf8String | typeof majorU
     }
   }
   throw new Error("expected break marker.");
-};
+}
 
-const decodeList = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborListType, CborOffset] => {
+function decodeList(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborListType, CborOffset] {
   const minor = peekMinor(payload);
   if (minor === minorIndefinite) {
     return decodeListIndefinite(payload, bigIntBehavior);
@@ -288,9 +294,9 @@ const decodeList = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborL
   }
 
   return [list, offset];
-};
+}
 
-const decodeListIndefinite = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborListType, CborOffset] => {
+function decodeListIndefinite(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborListType, CborOffset] {
   payload = payload.subarray(1);
 
   const l = [] as CborListType;
@@ -306,9 +312,9 @@ const decodeListIndefinite = (payload: Uint8Array, bigIntBehavior: BigIntBehavio
     offset += demote(n);
   }
   throw new Error("expected break marker.");
-};
+}
 
-const decodeMap = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborMapType, CborOffset] => {
+function decodeMap(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborMapType, CborOffset] {
   const minor = peekMinor(payload);
   if (minor === minorIndefinite) {
     return decodeMapIndefinite(payload, bigIntBehavior);
@@ -342,9 +348,9 @@ const decodeMap = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborMa
   }
 
   return [mp, offset];
-};
+}
 
-const decodeMapIndefinite = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborMapType, CborOffset] => {
+function decodeMapIndefinite(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborMapType, CborOffset] {
   payload = payload.subarray(1);
 
   const map = {} as CborMapType;
@@ -372,18 +378,18 @@ const decodeMapIndefinite = (payload: Uint8Array, bigIntBehavior: BigIntBehavior
     offset += kn + vn;
   }
   throw new Error("expected break marker.");
-};
+}
 
-const decodeTag = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborTagType, CborOffset] => {
+function decodeTag(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborTagType, CborOffset] {
   const [tag, off] = decodeArgument(payload);
   payload = payload.subarray(demote(off));
 
   const [value, n] = decode(payload, bigIntBehavior);
 
   return [{ tag: castBigInt(tag, bigIntBehavior), value }, off + n];
-};
+}
 
-const decodeSpecial = (payload: Uint8Array): [CborValueType, CborOffset] => {
+function decodeSpecial(payload: Uint8Array): [CborValueType, CborOffset] {
   const minor = peekMinor(payload);
   switch (minor) {
     case specialTrue:
@@ -414,7 +420,7 @@ const decodeSpecial = (payload: Uint8Array): [CborValueType, CborOffset] => {
     default:
       throw new Error(`unexpected minor value ${minor}.`);
   }
-};
+}
 
 function castBigInt(bigInt: bigint, bigIntBehavior: "castSafe"): number | bigint;
 function castBigInt(bigInt: bigint, bigIntBehavior: "castNone"): bigint;
@@ -435,7 +441,7 @@ function castBigInt(bigInt: bigint, bigIntBehavior: BigIntBehavior): number | bi
   }
 }
 
-const decode = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborValueType, Uint64] => {
+function decode(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborValueType, Uint64] {
   if (payload.length === 0) {
     throw new Error("unexpected end of (decode) payload.");
   }
@@ -460,13 +466,13 @@ const decode = (payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborValue
     default:
       return decodeSpecial(payload);
   }
-};
+}
 
 // encode
 
 const float64EncodeLength = BigInt(9);
 
-const getEncodeLength = (value: CborValueType, referenceTracker = new Set()): CborOffset => {
+function getEncodeLength(value: CborValueType, referenceTracker = new Set()): CborOffset {
   if (referenceTracker.has(value)) {
     throw new Error("reference cycle.");
   }
@@ -501,7 +507,7 @@ const getEncodeLength = (value: CborValueType, referenceTracker = new Set()): Cb
     const entries = Object.entries(value);
     const length =
       getHeaderLength(BigInt(entries.length)) +
-      Object.entries(value).reduce(
+      entries.reduce(
         (accumulatedLength: bigint, [key, mapMember]) =>
           accumulatedLength + getEncodeLength(key) + getEncodeLength(mapMember, referenceTracker),
         BigInt(0)
@@ -511,9 +517,9 @@ const getEncodeLength = (value: CborValueType, referenceTracker = new Set()): Cb
   }
 
   throw new Error(`unhandled value type ${value?.constructor?.name ?? typeof value} in getEncodeLength().`);
-};
+}
 
-const getHeaderLength = (value: Uint64): CborArgumentLengthOffset => {
+function getHeaderLength(value: Uint64): CborArgumentLengthOffset {
   if (value < 24) {
     return BigInt(1) as CborArgumentLengthOffset;
   } else if (value < TWO.EIGHT) {
@@ -524,9 +530,9 @@ const getHeaderLength = (value: Uint64): CborArgumentLengthOffset => {
     return BigInt(5) as CborArgumentLengthOffset;
   }
   return BigInt(9) as CborArgumentLengthOffset;
-};
+}
 
-const encodeHeader = (major: CborMajorType, value: Uint64, buffer: Uint8Array): CborArgumentLengthOffset => {
+function encodeHeader(major: CborMajorType, value: Uint64, buffer: Uint8Array): CborArgumentLengthOffset {
   if (value < 24) {
     buffer[0] = (major << 5) | demote(value);
     return BigInt(1) as CborArgumentLengthOffset;
@@ -546,15 +552,17 @@ const encodeHeader = (major: CborMajorType, value: Uint64, buffer: Uint8Array): 
   buffer[0] = (major << 5) | specialFloat64;
   offsetDataView(buffer.subarray(1)).setBigUint64(0, BigInt(value));
   return BigInt(9) as CborArgumentLengthOffset;
-};
+}
 
-const compose = (major: CborMajorType, minor: Uint8): Uint8 => (major << 5) | minor;
+function compose(major: CborMajorType, minor: Uint8): Uint8 {
+  return (major << 5) | minor;
+}
 
 /**
  * @param input - JS data object.
  * @param buffer - mutated, not returned.
  */
-const encode = (input: any, buffer: Uint8Array): CborOffset => {
+function encode(input: any, buffer: Uint8Array): CborOffset {
   if (input === null) {
     buffer[0] = compose(majorSpecial, specialNull);
     return BigInt(1);
@@ -608,7 +616,7 @@ const encode = (input: any, buffer: Uint8Array): CborOffset => {
     return offset;
   }
   throw new Error(`data type ${input?.constructor?.name ?? typeof input} not compatible for encoding.`);
-};
+}
 
 /**
  * @public
@@ -619,8 +627,10 @@ const encode = (input: any, buffer: Uint8Array): CborOffset => {
 export type BigIntBehavior = "castNone" | "castSafe" | "castAllUnsafe";
 
 export const cbor = {
-  deserialize: (payload: Uint8Array, bigIntBehavior: BigIntBehavior = "castSafe") => decode(payload, bigIntBehavior)[0],
-  serialize: (input: any) => {
+  deserialize(payload: Uint8Array, bigIntBehavior: BigIntBehavior = "castSafe") {
+    return decode(payload, bigIntBehavior)[0];
+  },
+  serialize(input: any) {
     const buffer = new Uint8Array(demote(getEncodeLength(input)));
     encode(input, buffer);
     return buffer;
