@@ -14,10 +14,10 @@ describe("serializeFloat", () => {
 });
 
 describe("serializeDateTime", () => {
-  it("should not truncate at the top of the second", () => {
+  it("should truncate at the top of the second", () => {
     const date = new Date(1716476757761);
     date.setMilliseconds(0);
-    expect(serializeDateTime(date)).toEqual("2024-05-23T15:05:57.000Z");
+    expect(serializeDateTime(date)).toEqual("2024-05-23T15:05:57Z");
   });
 
   it("should not truncate in general", () => {
