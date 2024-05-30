@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 1cdd3be0: new logging-compatible signature for CredentialsProviderError
+
 ## 3.0.0
 
 ### Major Changes

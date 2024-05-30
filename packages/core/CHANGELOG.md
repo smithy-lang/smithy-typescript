@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- ab3a90fa: enable package.json exports in core
+
+### Patch Changes
+
+- Updated dependencies [764047eb]
+  - @smithy/smithy-client@3.1.0
+  - @smithy/middleware-endpoint@3.0.1
+  - @smithy/middleware-retry@3.0.2
+
 ## 2.0.1
 
 ### Patch Changes

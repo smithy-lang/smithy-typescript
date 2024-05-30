@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 764047eb: add dateTime serializer function
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.1
+
 ## 3.0.1
 
 ### Patch Changes
