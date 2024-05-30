@@ -383,6 +383,7 @@ module.exports = class Inliner {
               console.log("Inline index confirmed require() for variant external:", external);
             }
             externalsToCheck.delete(external);
+            continue;
           }
         }
       }
