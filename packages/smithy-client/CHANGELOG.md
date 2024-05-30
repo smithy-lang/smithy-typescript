@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.1
+
+### Patch Changes
+
+- 3689c949: truncate timestamp ending in 000 milliseconds
+
 ## 3.1.0
 
 ### Minor Changes
