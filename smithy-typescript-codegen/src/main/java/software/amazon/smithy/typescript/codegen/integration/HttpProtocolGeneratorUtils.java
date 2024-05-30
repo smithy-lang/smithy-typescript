@@ -79,16 +79,23 @@ public final class HttpProtocolGeneratorUtils {
     ) {
         switch (format) {
             case DATE_TIME:
-                // Use the split to not serialize milliseconds.
-                return "(" + dataSource + ".toISOString().split('.')[0]+\"Z\")";
+                context.getWriter().addImport(
+                    "serializeDateTime",
+                    "__serializeDateTime",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT
+                );
+                return "__serializeDateTime(" + dataSource + ")";
             case EPOCH_SECONDS:
-                return "Math.round(" + dataSource + ".getTime() / 1000)";
+                return "(" + dataSource + ".getTime() / 1_000)";
             case HTTP_DATE:
-                context.getWriter().addImport("dateToUtcString", "__dateToUtcString",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT);
+                context.getWriter().addImport(
+                    "dateToUtcString",
+                    "__dateToUtcString",
+                    TypeScriptDependency.AWS_SMITHY_CLIENT
+                );
                 return "__dateToUtcString(" + dataSource + ")";
             default:
-                throw new CodegenException("Unexpected timestamp format `" + format.toString() + "` on " + shape);
+                throw new CodegenException("Unexpected timestamp format `" + format + "` on " + shape);
         }
     }
 

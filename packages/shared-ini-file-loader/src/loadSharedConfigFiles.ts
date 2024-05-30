@@ -1,4 +1,4 @@
-import { SharedConfigFiles } from "@smithy/types";
+import { Logger, SharedConfigFiles } from "@smithy/types";
 
 import { getConfigData } from "./getConfigData";
 import { getConfigFilepath } from "./getConfigFilepath";
@@ -26,6 +26,11 @@ export interface SharedConfigInit {
    * property is set, the provider will always reload any configuration files loaded before.
    */
   ignoreCache?: boolean;
+
+  /**
+   * For credential resolution trace logging.
+   */
+  logger?: Logger;
 }
 
 const swallowError = () => ({});

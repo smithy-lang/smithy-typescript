@@ -1,4 +1,4 @@
-import { ProviderError } from "./ProviderError";
+import { ProviderError, ProviderErrorOptionsType } from "./ProviderError";
 
 /**
  * @public
@@ -13,12 +13,27 @@ import { ProviderError } from "./ProviderError";
  */
 export class CredentialsProviderError extends ProviderError {
   name = "CredentialsProviderError";
-  constructor(
-    message: string,
-    public readonly tryNextLink: boolean = true
-  ) {
-    super(message, tryNextLink);
-    // Remove once we stop targetting ES5.
+
+  /**
+   * @override
+   * @deprecated constructor should be given a logger.
+   */
+  public constructor(message: string);
+  /**
+   * @override
+   * @deprecated constructor should be given a logger.
+   */
+  public constructor(message: string, tryNextLink: boolean | undefined);
+  /**
+   * @override
+   * This signature is preferred for logging capability.
+   */
+  public constructor(message: string, options: ProviderErrorOptionsType);
+  /**
+   * @override
+   */
+  public constructor(message: string, options: boolean | ProviderErrorOptionsType = true) {
+    super(message, options as ProviderErrorOptionsType);
     Object.setPrototypeOf(this, CredentialsProviderError.prototype);
   }
 }
