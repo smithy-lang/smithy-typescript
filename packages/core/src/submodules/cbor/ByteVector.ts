@@ -1,59 +1,26 @@
 export class ByteVector {
-  private segments: Uint8Array[] = [];
-  private cursor: number = 0;
+  public data: Uint8Array = new Uint8Array(100_000);
+  public cursor: number = 0;
 
-  public constructor(private readonly segmentSize: number = 100_000) {
-    this.alloc();
-  }
-
-  public writeSeries(data: Uint8Array) {
-    for (let i = 0; i < data.length; i += this.segmentSize) {
-      const part = data.subarray(i, Math.min(i + this.segmentSize, data.length));
-
-      const remainder = this.segmentSize - this.cursor;
-      if (remainder < part.length) {
-        const [a, b] = [part.subarray(0, remainder), part.subarray(remainder, part.length)];
-        this.getWriteBuffer().set(a, this.cursor);
-        this.alloc().set(b, 0);
-        this.cursor += b.length;
-      } else {
-        this.getWriteBuffer().set(part, this.cursor);
-        this.cursor += part.length;
-      }
+  public write(byte: number) {
+    if (this.data.length - this.cursor < 1) {
+      this.resize(this.data.length + 1_000_000);
     }
+    this.data[this.cursor++] = byte;
   }
 
-  public write(...bytes: number[]) {
-    let buffer = this.getWriteBuffer();
-    for (const byte of bytes) {
-      const remaining = this.segmentSize - this.cursor;
-      if (remaining === 0) {
-        buffer = this.alloc();
-      }
-      buffer[this.cursor++] = byte;
+  public writeSeries(bytes: Uint8Array) {
+    while ((this.data.length - this.cursor) * 1.1 < bytes.length) {
+      this.resize(this.data.length + 1_000_000);
     }
+    this.data.set(bytes, this.cursor);
+    this.cursor += bytes.length;
   }
 
-  public toUint8Array(): Uint8Array {
-    this.segments[this.segments.length - 1] = this.getWriteBuffer().subarray(0, this.cursor);
-    const joined = join(this.segments);
-    this.segments = [];
-    this.cursor = 0;
-    return joined;
-  }
-
-  private getWriteBuffer() {
-    return this.segments[this.segments.length - 1];
-  }
-
-  private alloc() {
-    if (typeof Buffer !== "undefined") {
-      this.segments.push(Buffer.allocUnsafe(this.segmentSize));
-    } else {
-      this.segments.push(new Uint8Array(this.segmentSize));
-    }
-    this.cursor = 0;
-    return this.getWriteBuffer();
+  public resize(size: number) {
+    const old = this.data.subarray(0, this.cursor);
+    this.data = new Uint8Array(size);
+    this.data.set(old, 0);
   }
 }
 

@@ -84,21 +84,6 @@ const TWO = {
 };
 
 /**
- * Powers of 256.
- */
-const TWO_FIFTY_SIX = {
-  [0]: 1,
-  [1]: 256,
-  [2]: 256 ** 2,
-  [3]: 256 ** 3,
-  [4]: 256 ** 4,
-  [5]: 256 ** 5,
-  [6]: 256 ** 6,
-  [7]: BigInt("72057594037927936"),
-  [8]: BigInt("18446744073709551616"),
-};
-
-/**
  * @internal
  */
 function demote(bigInteger: bigint): number {
@@ -114,33 +99,16 @@ function demote(bigInteger: bigint): number {
  * Write unsigned int into uint8 array.
  */
 export function setUnsignedInt(bitSize: 16 | 32 | 64, value: number | bigint, byteArray: Uint8Array): Uint8Array {
-  let i = 0;
   switch (bitSize) {
     case 16:
-      i = 1;
+      offsetDataView(byteArray).setUint16(0, Number(value) as number);
       break;
     case 32:
-      i = 3;
+      offsetDataView(byteArray).setUint32(0, Number(value) as number);
       break;
     case 64:
-      i = 7;
+      offsetDataView(byteArray).setBigUint64(0, BigInt(value) as bigint);
       break;
-  }
-  for (let position = i; position >= 0; --position) {
-    const digit = i - position; // counts up from 0.
-
-    if (typeof value === "bigint" || typeof TWO_FIFTY_SIX[digit] === "bigint") {
-      const modulo = BigInt(256);
-      const divisor = BigInt(TWO_FIFTY_SIX[digit]);
-      const bigValue = BigInt(value);
-      const convertedValue = (bigValue / divisor) % modulo;
-      byteArray[position] = Number(convertedValue);
-    } else {
-      const modulo = 256;
-      const divisor = TWO_FIFTY_SIX[digit] as number;
-      const convertedValue = (value / divisor) % modulo | 0;
-      byteArray[position] = convertedValue;
-    }
   }
   return byteArray;
 }
@@ -512,26 +480,32 @@ function decode(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborValue
 
 // encode
 
-function encodeHeader(major: CborMajorType, value: Uint64 | number): Uint8Array {
+function encodeHeader(major: CborMajorType, value: Uint64 | number, byteVector: ByteVector): void {
   if (value < 24) {
-    return new Uint8Array([(major << 5) | (value as number)]);
+    byteVector.write((major << 5) | (value as number));
+    return;
   } else if (value < TWO.EIGHT) {
-    return new Uint8Array([(major << 5) | 24, value as number]);
+    byteVector.write((major << 5) | 24);
+    byteVector.write(value as number);
+    return;
   } else if (value < TWO.SIXTEEN) {
     const float16Container = new Uint8Array(3);
     float16Container[0] = (major << 5) | specialFloat16;
     setUnsignedInt(16, value, float16Container.subarray(1));
-    return float16Container;
+    byteVector.writeSeries(float16Container);
+    return;
   } else if (value < TWO.THIRTY_TWO) {
     const float32Container = new Uint8Array(5);
     float32Container[0] = (major << 5) | specialFloat32;
     setUnsignedInt(32, value, float32Container.subarray(1));
-    return float32Container;
+    byteVector.writeSeries(float32Container);
+    return;
   }
   const float64Container = new Uint8Array(9);
   float64Container[0] = (major << 5) | specialFloat64;
   setUnsignedInt(64, value, float64Container.subarray(1));
-  return float64Container;
+  byteVector.writeSeries(float64Container);
+  return;
 }
 
 function compose(major: CborMajorType, minor: Uint8): Uint8 {
@@ -560,42 +534,41 @@ function encode(input: any, byteVector: ByteVector): void {
       return;
     case "number":
       if (Number.isInteger(input)) {
-        byteVector.writeSeries(
-          input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, Math.abs(input) - 1)
-        );
+        input >= 0
+          ? encodeHeader(majorUint64, input, byteVector)
+          : encodeHeader(majorNegativeInt64, Math.abs(input) - 1, byteVector);
         return;
       }
-      const float64Container = new Uint8Array(8);
-      offsetDataView(float64Container).setFloat64(0, input);
-      byteVector.write(compose(majorSpecial, specialFloat64));
+      const float64Container = new Uint8Array(9);
+      float64Container[0] = compose(majorSpecial, specialFloat64);
+      offsetDataView(float64Container).setFloat64(1, input);
       byteVector.writeSeries(float64Container);
       return;
     case "bigint":
-      byteVector.writeSeries(
-        input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, -input - BigInt(1))
-      );
+      input >= 0
+        ? encodeHeader(majorUint64, input, byteVector)
+        : encodeHeader(majorNegativeInt64, -input - BigInt(1), byteVector);
       return;
     case "string":
-      byteVector.writeSeries(encodeHeader(majorUtf8String, input.length));
+      encodeHeader(majorUtf8String, input.length, byteVector);
       byteVector.writeSeries(fromUtf8(input));
       return;
   }
 
   if (Array.isArray(input)) {
     const _input = input.filter(notUndef);
-    byteVector.writeSeries(encodeHeader(majorList, _input.length));
+    encodeHeader(majorList, _input.length, byteVector);
     for (const vv of _input) {
       encode(vv, byteVector);
     }
     return;
   } else if (typeof input.byteLength === "number") {
-    // serialize as UnstructuredByteString
-    byteVector.writeSeries(encodeHeader(majorUnstructuredByteString, input.length));
+    encodeHeader(majorUnstructuredByteString, input.length, byteVector);
     byteVector.writeSeries(input);
     return;
   } else if (typeof input === "object") {
     const entries = Object.entries(input).filter(valueNotUndef);
-    byteVector.writeSeries(encodeHeader(majorMap, entries.length));
+    encodeHeader(majorMap, entries.length, byteVector);
     for (const [key, value] of entries) {
       encode(key, byteVector);
       encode(value, byteVector);
@@ -624,6 +597,6 @@ export const cbor = {
   serialize(input: any) {
     const byteVector = new ByteVector();
     encode(input, byteVector);
-    return byteVector.toUint8Array();
+    return byteVector.data.subarray(0, byteVector.cursor);
   },
 };
