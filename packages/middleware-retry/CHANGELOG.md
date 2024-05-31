@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [3689c949]
+  - @smithy/smithy-client@3.1.1
+
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [1cdd3be0]
+- Updated dependencies [764047eb]
+  - @smithy/node-config-provider@3.1.0
+  - @smithy/smithy-client@3.1.0
+
 ## 3.0.1
 
 ### Patch Changes
