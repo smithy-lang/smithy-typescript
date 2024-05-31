@@ -87,9 +87,9 @@ const TWO = {
 function demote(bigInteger: bigint): number {
   const num = Number(bigInteger);
   if (num < Number.MIN_SAFE_INTEGER || Number.MAX_SAFE_INTEGER < num) {
-    console.warn(new Error(`@smithy/core/cbor - truncating bigInt(${bigInteger}) to ${num} with loss of precision.`));
+    console.warn(new Error(`@smithy/core/cbor - truncating BigInt(${bigInteger}) to ${num} with loss of precision.`));
   }
-  return Number(bigInteger);
+  return num;
 }
 
 // decode
@@ -472,11 +472,7 @@ function decode(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborValue
 
 const float64EncodeLength = BigInt(9);
 
-function getEncodeLength(value: CborValueType, referenceTracker = new Set()): CborOffset {
-  if (referenceTracker.has(value)) {
-    throw new Error("reference cycle.");
-  }
-
+function getEncodeLength(value: CborValueType): CborOffset {
   if (value === null) {
     return BigInt(1);
   } else if (value === undefined) {
@@ -493,26 +489,22 @@ function getEncodeLength(value: CborValueType, referenceTracker = new Set()): Cb
   } else if (typeof value === "string") {
     return getHeaderLength(BigInt(value.length)) + BigInt(value.length);
   } else if (Array.isArray(value)) {
-    referenceTracker.add(value);
     const length =
       getHeaderLength(BigInt(value.length)) +
       value.reduce(
-        (accumulatedLength: bigint, listMember) => accumulatedLength + getEncodeLength(listMember, referenceTracker),
+        (accumulatedLength: bigint, listMember) => accumulatedLength + getEncodeLength(listMember),
         BigInt(0)
       );
-    referenceTracker.delete(value);
     return length;
   } else if (typeof value === "object") {
-    referenceTracker.add(value);
     const entries = Object.entries(value);
     const length =
       getHeaderLength(BigInt(entries.length)) +
       entries.reduce(
         (accumulatedLength: bigint, [key, mapMember]) =>
-          accumulatedLength + getEncodeLength(key) + getEncodeLength(mapMember, referenceTracker),
+          accumulatedLength + getEncodeLength(key) + getEncodeLength(mapMember),
         BigInt(0)
       );
-    referenceTracker.delete(value);
     return length;
   }
 
@@ -543,6 +535,7 @@ function encodeHeader(major: CborMajorType, value: Uint64, buffer: Uint8Array): 
   } else if (value < TWO.SIXTEEN) {
     buffer[0] = (major << 5) | specialFloat16;
     offsetDataView(buffer.subarray(1)).setUint16(0, demote(value));
+    // @ts-ignore
     return BigInt(3) as CborArgumentLengthOffset;
   } else if (value < TWO.THIRTY_TWO) {
     buffer[0] = (major << 5) | specialFloat32;
@@ -572,7 +565,9 @@ function encode(input: any, buffer: Uint8Array): CborOffset {
     throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
     // buffer[0] = compose(majorSpecial, specialUndefined);
     // return 1;
-  } else if (typeof input === "boolean") {
+  }
+
+  if (typeof input === "boolean") {
     buffer[0] = compose(majorSpecial, input ? specialTrue : specialFalse);
     return BigInt(1);
   } else if (typeof input === "number") {
@@ -593,21 +588,19 @@ function encode(input: any, buffer: Uint8Array): CborOffset {
     buffer.subarray(demote(offset)).set(fromUtf8(input));
     return offset + BigInt(input.length);
   } else if (Array.isArray(input)) {
-    const _input = input.filter((_) => _ !== undefined);
+    const _input = input.filter(notUndef);
     let offset = encodeHeader(majorList, BigInt(_input.length), buffer);
     for (const vv of _input) {
       offset += encode(vv, buffer.subarray(demote(offset)));
     }
     return offset;
-  } else if (input instanceof Uint8Array) {
+  } else if (typeof input.byteLength === "number") {
     // serialize as UnstructuredByteString
     const offset = encodeHeader(majorUnstructuredByteString, BigInt(input.length), buffer);
     buffer.subarray(demote(offset)).set(input);
     return offset + BigInt(input.length);
   } else if (typeof input === "object") {
-    const entries = Object.entries(input).filter(([, v]) => {
-      return v !== undefined;
-    });
+    const entries = Object.entries(input).filter(valueNotUndef);
     let offset = encodeHeader(majorMap, BigInt(entries.length), buffer);
     for (const [key, value] of entries) {
       offset += encode(key, buffer.subarray(demote(offset)));
@@ -615,8 +608,12 @@ function encode(input: any, buffer: Uint8Array): CborOffset {
     }
     return offset;
   }
+
   throw new Error(`data type ${input?.constructor?.name ?? typeof input} not compatible for encoding.`);
 }
+
+const notUndef = <T>(_: T) => _ !== undefined;
+const valueNotUndef = <T>([, v]: [unknown, T]) => v !== undefined;
 
 /**
  * @public
