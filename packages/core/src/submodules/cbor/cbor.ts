@@ -1,6 +1,6 @@
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
-import { ByteVector, join } from "./ByteVector";
+import { byteVector, join } from "./ByteVector";
 
 /**
  * This cbor serde implementation is derived from AWS SDK for Go's implementation.
@@ -44,7 +44,7 @@ type Int64 = bigint;
 type Float16Binary = number;
 type Float32Binary = number;
 
-type CborMajorType =
+export type CborMajorType =
   | typeof majorUint64
   | typeof majorNegativeInt64
   | typeof majorUnstructuredByteString
@@ -92,25 +92,6 @@ function demote(bigInteger: bigint): number {
     console.warn(new Error(`@smithy/core/cbor - truncating BigInt(${bigInteger}) to ${num} with loss of precision.`));
   }
   return num;
-}
-
-/**
- * @internal
- * Write unsigned int into uint8 array.
- */
-export function setUnsignedInt(bitSize: 16 | 32 | 64, value: number | bigint, byteArray: Uint8Array): Uint8Array {
-  switch (bitSize) {
-    case 16:
-      offsetDataView(byteArray).setUint16(0, Number(value) as number);
-      break;
-    case 32:
-      offsetDataView(byteArray).setUint32(0, Number(value) as number);
-      break;
-    case 64:
-      offsetDataView(byteArray).setBigUint64(0, BigInt(value) as bigint);
-      break;
-  }
-  return byteArray;
 }
 
 // decode
@@ -480,7 +461,7 @@ function decode(payload: Uint8Array, bigIntBehavior: BigIntBehavior): [CborValue
 
 // encode
 
-function encodeHeader(major: CborMajorType, value: Uint64 | number, byteVector: ByteVector): void {
+function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
   if (value < 24) {
     byteVector.write((major << 5) | (value as number));
     return;
@@ -489,22 +470,13 @@ function encodeHeader(major: CborMajorType, value: Uint64 | number, byteVector: 
     byteVector.write(value as number);
     return;
   } else if (value < TWO.SIXTEEN) {
-    const float16Container = new Uint8Array(3);
-    float16Container[0] = (major << 5) | specialFloat16;
-    setUnsignedInt(16, value, float16Container.subarray(1));
-    byteVector.writeSeries(float16Container);
+    byteVector.writeUnsignedInt(major, 16, value);
     return;
   } else if (value < TWO.THIRTY_TWO) {
-    const float32Container = new Uint8Array(5);
-    float32Container[0] = (major << 5) | specialFloat32;
-    setUnsignedInt(32, value, float32Container.subarray(1));
-    byteVector.writeSeries(float32Container);
+    byteVector.writeUnsignedInt(major, 32, value);
     return;
   }
-  const float64Container = new Uint8Array(9);
-  float64Container[0] = (major << 5) | specialFloat64;
-  setUnsignedInt(64, value, float64Container.subarray(1));
-  byteVector.writeSeries(float64Container);
+  byteVector.writeUnsignedInt(major, 64, value);
   return;
 }
 
@@ -516,7 +488,7 @@ function compose(major: CborMajorType, minor: Uint8): Uint8 {
  * @param input - JS data object.
  * @param byteVector - mutated, not returned.
  */
-function encode(input: any, byteVector: ByteVector): void {
+function encode(input: any): void {
   if (input === null) {
     byteVector.write(compose(majorSpecial, specialNull));
     return;
@@ -534,9 +506,7 @@ function encode(input: any, byteVector: ByteVector): void {
       return;
     case "number":
       if (Number.isInteger(input)) {
-        input >= 0
-          ? encodeHeader(majorUint64, input, byteVector)
-          : encodeHeader(majorNegativeInt64, Math.abs(input) - 1, byteVector);
+        input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, Math.abs(input) - 1);
         return;
       }
       const float64Container = new Uint8Array(9);
@@ -545,33 +515,31 @@ function encode(input: any, byteVector: ByteVector): void {
       byteVector.writeSeries(float64Container);
       return;
     case "bigint":
-      input >= 0
-        ? encodeHeader(majorUint64, input, byteVector)
-        : encodeHeader(majorNegativeInt64, -input - BigInt(1), byteVector);
+      input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, -input - BigInt(1));
       return;
     case "string":
-      encodeHeader(majorUtf8String, input.length, byteVector);
+      encodeHeader(majorUtf8String, input.length);
       byteVector.writeSeries(fromUtf8(input));
       return;
   }
 
   if (Array.isArray(input)) {
     const _input = input.filter(notUndef);
-    encodeHeader(majorList, _input.length, byteVector);
+    encodeHeader(majorList, _input.length);
     for (const vv of _input) {
-      encode(vv, byteVector);
+      encode(vv);
     }
     return;
   } else if (typeof input.byteLength === "number") {
-    encodeHeader(majorUnstructuredByteString, input.length, byteVector);
+    encodeHeader(majorUnstructuredByteString, input.length);
     byteVector.writeSeries(input);
     return;
   } else if (typeof input === "object") {
     const entries = Object.entries(input).filter(valueNotUndef);
-    encodeHeader(majorMap, entries.length, byteVector);
+    encodeHeader(majorMap, entries.length);
     for (const [key, value] of entries) {
-      encode(key, byteVector);
-      encode(value, byteVector);
+      encode(key);
+      encode(value);
     }
     return;
   }
@@ -595,8 +563,7 @@ export const cbor = {
     return decode(payload, bigIntBehavior)[0];
   },
   serialize(input: any) {
-    const byteVector = new ByteVector();
-    encode(input, byteVector);
-    return byteVector.data.subarray(0, byteVector.cursor);
+    encode(input);
+    return byteVector.toUint8Array();
   },
 };

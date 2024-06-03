@@ -2,7 +2,7 @@ import * as fs from "fs";
 import JSONbig from "json-bigint";
 import * as path from "path";
 
-import { cbor, setUnsignedInt } from "./cbor";
+import { cbor } from "./cbor";
 
 // syntax is ESM but the test target is CJS.
 const here = __dirname;
@@ -13,34 +13,6 @@ const errorTests = JSONbig({ useNativeBigInt: true, alwaysParseAsBig: false }).p
 const successTests = JSONbig({ useNativeBigInt: true, alwaysParseAsBig: false }).parse(
   fs.readFileSync(path.join(here, "test-data", "success-tests.json"))
 );
-
-describe("setUnsignedInt", () => {
-  for (const [value, bitSize] of [
-    [1, 16],
-    [258, 16],
-    [256256, 16],
-    [5, 32],
-    [258, 32],
-    [125432, 32],
-    [5, 64],
-    [258, 64],
-    [BigInt(42462464262), 64],
-  ] as [number | bigint, number][]) {
-    it(`should functionally match DataView int${bitSize} value of ${value}`, () => {
-      expect(setUnsignedInt(bitSize as 16 | 32 | 64, value, new Uint8Array(8))).toEqual(
-        (() => {
-          const u = new Uint8Array(8);
-          if (bitSize < 64) {
-            new DataView(u.buffer, u.buffer.byteLength - u.length)["setUint" + bitSize](0, value);
-          } else {
-            new DataView(u.buffer, u.buffer.byteLength - u.length).setBigUint64(0, BigInt(value));
-          }
-          return u;
-        })()
-      );
-    });
-  }
-});
 
 describe("cbor", () => {
   const examples = [
