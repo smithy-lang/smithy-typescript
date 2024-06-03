@@ -18,12 +18,14 @@
   "types": "./dist-types/index.d.ts",
   "exports": {
     ".": {
+      "module": "./dist-es/index.js",
       "node": "./dist-cjs/index.js",
       "import": "./dist-es/index.js",
       "require": "./dist-cjs/index.js",
       "types": "./dist-types/index.d.ts"
     },
     "./package.json": {
+      "module": "./package.json",
       "node": "./package.json",
       "import": "./package.json",
       "require": "./package.json"
