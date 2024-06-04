@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- f9c50081: adds a module exports field in core
+
 ## 2.1.1
 
 ### Patch Changes
