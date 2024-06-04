@@ -15,84 +15,93 @@ const successTests = JSONbig({ useNativeBigInt: true, alwaysParseAsBig: false })
 );
 
 describe("cbor", () => {
+  const allocByteArray = (dataOrSize: ArrayBuffer | ArrayLike<number> | number, offset?: number, length?: number) => {
+    if (typeof offset === "number" && typeof length === "number") {
+      typeof Buffer !== "undefined"
+        ? Buffer.from(dataOrSize as ArrayBuffer, offset, length)
+        : new Uint8Array(dataOrSize as ArrayBuffer, offset, length);
+    }
+    return typeof Buffer !== "undefined" ? Buffer.from(dataOrSize as any) : new Uint8Array(dataOrSize as any);
+  };
+
   const examples = [
     {
       name: "false",
       data: false,
       // special major 7 = 0b111 plus false(20) = 0b10100
-      cbor: new Uint8Array([0b111_10100]),
+      cbor: allocByteArray([0b111_10100]),
     },
     {
       name: "true",
       data: true,
       // increment from false
-      cbor: new Uint8Array([0b111_10101]),
+      cbor: allocByteArray([0b111_10101]),
     },
     {
       name: "null",
       data: null,
       // increment from true
-      cbor: new Uint8Array([0b111_10110]),
+      cbor: allocByteArray([0b111_10110]),
     },
     {
       name: "an unsigned zero integer",
       data: 0,
       // unsigned int major (0) plus 00's.
-      cbor: new Uint8Array([0b000_00000]),
+      cbor: allocByteArray([0b000_00000]),
     },
     {
       name: "negative 1",
       data: -1,
       // negative major (1) plus 00's, since -1 is the first negative number.
-      cbor: new Uint8Array([0b001_00000]),
+      cbor: allocByteArray([0b001_00000]),
     },
     {
       name: "Number.MIN_SAFE_INTEGER",
       data: -9007199254740991,
-      cbor: new Uint8Array([0b001_11011, 0, 31, 255, 255, 255, 255, 255, 254]),
+      cbor: allocByteArray([0b001_11011, 0, 31, 255, 255, 255, 255, 255, 254]),
     },
     {
       name: "Number.MAX_SAFE_INTEGER",
       data: 9007199254740991,
-      cbor: new Uint8Array([0b000_11011, 0, 31, 255, 255, 255, 255, 255, 255]),
+      cbor: allocByteArray([0b000_11011, 0, 31, 255, 255, 255, 255, 255, 255]),
     },
     {
       name: "int64 min",
       data: BigInt("-18446744073709551616"),
-      cbor: new Uint8Array([0b001_11011, 255, 255, 255, 255, 255, 255, 255, 255]),
+      cbor: allocByteArray([0b001_11011, 255, 255, 255, 255, 255, 255, 255, 255]),
     },
     {
       name: "int64 max",
       data: BigInt("18446744073709551615"),
-      cbor: new Uint8Array([0b000_11011, 255, 255, 255, 255, 255, 255, 255, 255]),
+      cbor: allocByteArray([0b000_11011, 255, 255, 255, 255, 255, 255, 255, 255]),
     },
     {
       name: "negative float",
       data: -3015135.135135135,
-      cbor: new Uint8Array([0b111_11011, +193, +71, +0, +239, +145, +76, +27, +173]),
+      cbor: allocByteArray([0b111_11011, +193, +71, +0, +239, +145, +76, +27, +173]),
     },
     {
       name: "positive float",
       data: 3015135.135135135,
-      cbor: new Uint8Array([0b111_11011, +65, +71, +0, +239, +145, +76, +27, +173]),
+      cbor: allocByteArray([0b111_11011, +65, +71, +0, +239, +145, +76, +27, +173]),
     },
     {
       name: "an empty string",
       data: "",
       // string major plus 00's
-      cbor: new Uint8Array([0b011_00000]),
+      cbor: allocByteArray([0b011_00000]),
     },
     {
       name: "a short string",
       data: "hello, world",
-      cbor: new Uint8Array([108, 104, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]),
+      cbor: allocByteArray([108, 104, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100]),
     },
     {
       name: "simple object",
       data: {
         message: "hello, world",
       },
-      cbor: new Uint8Array([
+      cbor: allocByteArray([
         161, 103, 109, 101, 115, 115, 97, 103, 101, 108, 104, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100,
       ]),
     },
@@ -108,7 +117,7 @@ describe("cbor", () => {
           items: [0, -1, true, false, null, "", "test", ["nested item A", "nested item B"]],
         },
       },
-      cbor: new Uint8Array([
+      cbor: allocByteArray([
         164, 102, 110, 117, 109, 98, 101, 114, 27, 0, 0, 122, 204, 161, 196, 74, 227, 103, 109, 101, 115, 115, 97, 103,
         101, 108, 104, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 100, 108, 105, 115, 116, 131, 0, 244, 161,
         97, 97, 97, 98, 99, 109, 97, 112, 163, 97, 97, 97, 97, 97, 98, 97, 98, 101, 105, 116, 101, 109, 115, 136, 0, 32,
@@ -124,14 +133,16 @@ describe("cbor", () => {
       bytes.push(parseInt(substr, 16));
       return substr;
     });
-    return new Uint8Array(bytes);
+    return allocByteArray(bytes);
   };
 
   describe("locally curated scenarios", () => {
     for (const { name, data, cbor: cbor_representation } of examples) {
       it(`should encode for ${name}`, async () => {
         const serialized = cbor.serialize(data);
-        expect(serialized).toEqual(cbor_representation);
+        expect(allocByteArray(serialized.buffer, serialized.byteOffset, serialized.length)).toEqual(
+          cbor_representation
+        );
       });
 
       it(`should decode for ${name}`, async () => {
@@ -193,7 +204,7 @@ describe("cbor", () => {
         case "float64":
           return binaryToFloat64(value);
         case "bytestring":
-          return new Uint8Array(value.map(Number));
+          return allocByteArray(value.map(Number));
         case "list":
           return value.map(translateTestData);
         case "map":
@@ -220,6 +231,7 @@ describe("cbor", () => {
       it(`serialization for ${description}`, () => {
         const serialized = cbor.serialize(jsObject);
         const redeserialized = cbor.deserialize(serialized);
+
         /**
          * We cannot assert that serialized == bytes,
          * because there are multiple serializations

@@ -1,13 +1,15 @@
 import { toUtf8 } from "@smithy/util-utf8";
 
+import { alloc } from "./cbor-types";
+
 const USE_TEXT_DECODER = typeof TextDecoder !== "undefined";
 
 /**
  * Data container for synchronous decoding.
  */
 export class DecodeView {
-  public payload = new Uint8Array();
-  public dataView = new DataView(this.payload.buffer, 0, this.payload.length);
+  public payload = alloc(0);
+  public dataView = new DataView(this.payload.buffer, this.payload.byteOffset, this.payload.byteLength);
   private textDecoder = USE_TEXT_DECODER ? new TextDecoder() : null;
 
   public constructor(payload: Uint8Array) {
@@ -16,7 +18,7 @@ export class DecodeView {
 
   public set(payload: Uint8Array) {
     this.payload = payload;
-    this.dataView = new DataView(this.payload.buffer, 0, this.payload.length);
+    this.dataView = new DataView(this.payload.buffer, this.payload.byteOffset, this.payload.byteLength);
   }
 
   public toUtf8(bytes: Uint8Array, at: number, to: number): string {
@@ -27,4 +29,4 @@ export class DecodeView {
   }
 }
 
-export const decodeView = new DecodeView(new Uint8Array());
+export const decodeView = new DecodeView(alloc(0));

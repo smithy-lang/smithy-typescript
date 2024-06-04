@@ -1,53 +1,36 @@
 import { byteVector } from "./ByteVector";
 import {
   CborMajorType,
+  extendedFloat16,
+  extendedFloat32,
+  extendedFloat64,
   majorList,
   majorMap,
   majorNegativeInt64,
   majorSpecial,
+  majorTag,
   majorUint64,
   majorUnstructuredByteString,
   majorUtf8String,
   specialFalse,
-  specialFloat16,
-  specialFloat32,
-  specialFloat64,
   specialNull,
   specialTrue,
-  Uint8,
   Uint64,
-} from "./cbor";
-
-/**
- * Powers of 2.
- */
-export const TWO = {
-  EIGHT: 1 << 8,
-  SIXTEEN: 1 << 16,
-  THIRTY_TWO: 2 ** 32,
-};
+} from "./cbor-types";
 
 function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
   if (value < 24) {
     byteVector.write((major << 5) | (value as number));
-    return;
-  } else if (value < TWO.EIGHT) {
+  } else if (value < 1 << 8) {
     byteVector.write((major << 5) | 24);
     byteVector.write(value as number);
-    return;
-  } else if (value < TWO.SIXTEEN) {
-    byteVector.writeUnsignedInt((major << 5) | specialFloat16, 16, value);
-    return;
-  } else if (value < TWO.THIRTY_TWO) {
-    byteVector.writeUnsignedInt((major << 5) | specialFloat32, 32, value);
-    return;
+  } else if (value < 1 << 16) {
+    byteVector.writeUint16((major << 5) | extendedFloat16, value as number);
+  } else if (value < 2 ** 32) {
+    byteVector.writeUint32((major << 5) | extendedFloat32, value as number);
+  } else {
+    byteVector.writeUint64((major << 5) | extendedFloat64, value);
   }
-  byteVector.writeUnsignedInt((major << 5) | specialFloat64, 64, value);
-  return;
-}
-
-function compose(major: CborMajorType, minor: Uint8): Uint8 {
-  return (major << 5) | minor;
 }
 
 /**
@@ -55,7 +38,7 @@ function compose(major: CborMajorType, minor: Uint8): Uint8 {
  */
 export function encode(input: any): void {
   if (input === null) {
-    byteVector.write(compose(majorSpecial, specialNull));
+    byteVector.write((majorSpecial << 5) | specialNull);
     return;
   }
 
@@ -67,14 +50,14 @@ export function encode(input: any): void {
       // return 1;
       throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
     case "boolean":
-      byteVector.write(compose(majorSpecial, input ? specialTrue : specialFalse));
+      byteVector.write((majorSpecial << 5) | (input ? specialTrue : specialFalse));
       return;
     case "number":
       if (Number.isInteger(input)) {
         input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, Math.abs(input) - 1);
         return;
       }
-      byteVector.writeFloat64(compose(majorSpecial, specialFloat64), input);
+      byteVector.writeFloat64((majorSpecial << 5) | extendedFloat64, input);
       return;
     case "bigint":
       input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, -input - BigInt(1));
@@ -88,20 +71,29 @@ export function encode(input: any): void {
   if (Array.isArray(input)) {
     const _input = input.filter(notUndef);
     encodeHeader(majorList, _input.length);
-    for (const vv of _input) {
-      encode(vv);
+    for (let i = 0; i < _input.length; ++i) {
+      encode(_input[i]);
     }
     return;
   } else if (typeof input.byteLength === "number") {
     encodeHeader(majorUnstructuredByteString, input.length);
     byteVector.writeBytes(input);
     return;
+  } else if (typeof input === "object" && "tag" in input && "value" in input && Object.keys(input).length === 2) {
+    encodeHeader(majorTag, input.tag);
+    encode(input.value);
+    return;
   } else if (typeof input === "object") {
-    const entries = Object.entries(input).filter(valueNotUndef);
+    const entries = [];
+    for (const key in input) {
+      if (input[key] !== undefined) {
+        entries.push([key, input[key]]);
+      }
+    }
     encodeHeader(majorMap, entries.length);
-    for (const [key, value] of entries) {
-      encode(key);
-      encode(value);
+    for (let i = 0; i < entries.length; i++) {
+      encode(entries[i][0]);
+      encode(entries[i][1]);
     }
     return;
   }
@@ -110,4 +102,3 @@ export function encode(input: any): void {
 }
 
 const notUndef = <T>(_: T) => _ !== undefined;
-const valueNotUndef = <T>([, v]: [unknown, T]) => v !== undefined;

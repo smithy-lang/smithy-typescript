@@ -1,6 +1,5 @@
 import { ByteVector } from "./ByteVector";
 import {
-  BigIntBehavior,
   CborArgumentLength,
   CborArgumentLengthOffset,
   CborListType,
@@ -9,6 +8,10 @@ import {
   CborTagType,
   CborUnstructuredByteStringType,
   CborValueType,
+  extendedFloat16,
+  extendedFloat32,
+  extendedFloat64,
+  extendedOneByte,
   Float16Binary,
   Float32Binary,
   Int64,
@@ -21,17 +24,13 @@ import {
   majorUtf8String,
   minorIndefinite,
   specialFalse,
-  specialFloat16,
-  specialFloat32,
-  specialFloat64,
   specialNull,
-  specialOneByte,
   specialTrue,
   specialUndefined,
   Uint8,
   Uint32,
   Uint64,
-} from "./cbor";
+} from "./cbor-types";
 import { decodeView } from "./DecodeView";
 
 /**
@@ -44,6 +43,13 @@ export function demote(bigInteger: bigint): number {
   }
   return num;
 }
+
+const minorValueToArgumentLength = {
+  [extendedOneByte]: 1,
+  [extendedFloat16]: 2,
+  [extendedFloat32]: 4,
+  [extendedFloat64]: 8,
+} as const;
 
 function float16ToUint32(float: Float16Binary): Uint32 {
   const n = [
@@ -90,50 +96,77 @@ function peekMinor(payload: Uint8Array, at: Uint32): Uint8 {
   return payload[at] & 0b0001_1111;
 }
 
-function decodeArgument(payload: Uint8Array, at: Uint32, to: Uint32): [Uint64, CborArgumentLengthOffset] {
+function decodeCount(payload: Uint8Array, at: Uint32, to: Uint32): [number, CborArgumentLengthOffset] {
+  const minor = peekMinor(payload, at);
+
+  if (minor < 24) {
+    return [minor, 1 as CborArgumentLengthOffset];
+  }
+
+  if (
+    minor === extendedOneByte ||
+    minor === extendedFloat16 ||
+    minor === extendedFloat32 ||
+    minor === extendedFloat64
+  ) {
+    const countLength: CborArgumentLength = minorValueToArgumentLength[minor];
+    const countOffset = (countLength + 1) as CborArgumentLengthOffset;
+    if (to - at < countOffset) {
+      throw new Error(`countLength ${countLength} greater than remaining buf len.`);
+    }
+    const countIndex = at + 1;
+    if (countLength === 1) {
+      return [payload[countIndex], countOffset as CborArgumentLengthOffset];
+    } else if (countLength === 2) {
+      return [decodeView.dataView.getUint16(countIndex), countOffset as CborArgumentLengthOffset];
+    } else if (countLength === 4) {
+      return [decodeView.dataView.getUint32(countIndex), countOffset as CborArgumentLengthOffset];
+    }
+    return [demote(decodeView.dataView.getBigUint64(countIndex)), countOffset as CborArgumentLengthOffset];
+  }
+
+  throw new Error(`unexpected minor value ${minor}.`);
+}
+
+function decodeCountBigInt(payload: Uint8Array, at: Uint32, to: Uint32): [Uint64 | number, CborArgumentLengthOffset] {
   const minor = peekMinor(payload, at);
   if (minor < 24) {
-    return [BigInt(minor), BigInt(1) as CborArgumentLengthOffset];
+    return [minor, 1 as CborArgumentLengthOffset];
   }
 
-  switch (minor) {
-    case specialOneByte:
-    case specialFloat16:
-    case specialFloat32:
-    case specialFloat64:
-      const argLen: CborArgumentLength = minorValueToArgumentLength(minor);
-      if (to - at < argLen + 1) {
-        throw new Error(`arg len ${argLen} greater than remaining buf len.`);
-      }
-
-      return [readArgument(payload, at + 1, argLen), BigInt(argLen + 1) as CborArgumentLengthOffset];
-    default:
-      throw new Error(`unexpected minor value ${minor}.`);
+  if (
+    minor === extendedOneByte ||
+    minor === extendedFloat16 ||
+    minor === extendedFloat32 ||
+    minor === extendedFloat64
+  ) {
+    const countLength: CborArgumentLength = minorValueToArgumentLength[minor];
+    const countOffset = (countLength + 1) as CborArgumentLengthOffset;
+    if (to - at < countOffset) {
+      throw new Error(`countLength ${countLength} greater than remaining buf len.`);
+    }
+    const countIndex = at + 1;
+    if (countLength === 1) {
+      return [payload[countIndex], countOffset as CborArgumentLengthOffset];
+    } else if (countLength === 2) {
+      return [decodeView.dataView.getUint16(countIndex), countOffset as CborArgumentLengthOffset];
+    } else if (countLength === 4) {
+      return [decodeView.dataView.getUint32(countIndex), countOffset as CborArgumentLengthOffset];
+    }
+    return [decodeView.dataView.getBigUint64(countIndex), countOffset as CborArgumentLengthOffset];
   }
+
+  throw new Error(`unexpected minor value ${minor}.`);
 }
 
-function minorValueToArgumentLength(minor: number): CborArgumentLength {
-  if (minor === specialOneByte) return 1;
-  if (minor === specialFloat16) return 2;
-  if (minor === specialFloat32) return 4;
-  return 8;
-}
+const decodeUnsignedInt = decodeCountBigInt;
 
-function readArgument(payload: Uint8Array, at: Uint32, byteLength: number): Uint64 {
-  if (byteLength === 1) return BigInt(payload[at]);
-  if (byteLength === 2) return BigInt(decodeView.dataView.getUint16(at));
-  if (byteLength === 4) return BigInt(decodeView.dataView.getUint32(at));
-
-  return decodeView.dataView.getBigUint64(at);
-}
-
-function decodeUnsignedInt(payload: Uint8Array, at: Uint32, to: Uint32): [Uint64, CborArgumentLengthOffset] {
-  return decodeArgument(payload, at, to);
-}
-
-function decodeNegativeInt(payload: Uint8Array, at: Uint32, to: Uint32): [Int64, CborArgumentLengthOffset] {
-  const [i, offset] = decodeArgument(payload, at, to);
-  return [-BigInt(1) - i, offset];
+function decodeNegativeInt(payload: Uint8Array, at: Uint32, to: Uint32): [Int64 | number, CborArgumentLengthOffset] {
+  const [value, offset] = decodeCountBigInt(payload, at, to);
+  if (typeof value === "bigint") {
+    return [BigInt(-1) - value, offset];
+  }
+  return [-1 - value, offset];
 }
 
 function decodeUtf8String(payload: Uint8Array, at: Uint32, to: Uint32): [string, CborOffset] {
@@ -144,13 +177,13 @@ function decodeUtf8String(payload: Uint8Array, at: Uint32, to: Uint32): [string,
     return [decodeView.toUtf8(decoded, 0, decoded.length), offset];
   }
 
-  const [length, offset] = decodeArgument(payload, at, to);
-  at += demote(offset);
+  const [length, offset] = decodeCount(payload, at, to);
+  at += offset;
   if (to - at < length) {
     throw new Error(`unstructured byte string len ${length} greater than remaining buf len.`);
   }
 
-  const value = decodeView.toUtf8(payload, at, at + demote(length));
+  const value = decodeView.toUtf8(payload, at, at + length);
   return [value, offset + length];
 }
 
@@ -164,7 +197,7 @@ function decodeUtf8StringIndefinite(
 
   for (const base = at; at < to; ) {
     if (payload[at] === 0b1111_1111) {
-      return [vector.toUint8Array(), BigInt(at - base + 2)];
+      return [vector.toUint8Array(), at - base + 2];
     }
 
     const major = peekMajor(payload, at);
@@ -176,8 +209,7 @@ function decodeUtf8StringIndefinite(
       throw new Error("nested indefinite string.");
     }
 
-    const [str, _length] = decodeUtf8String(payload, at, to);
-    const length = demote(_length);
+    const [str, length] = decodeUtf8String(payload, at, to);
     at += length;
     vector.writeString(str);
   }
@@ -195,13 +227,13 @@ function decodeUnstructuredByteString(
     return decodeUnstructuredByteStringIndefinite(payload, at, to);
   }
 
-  const [length, offset] = decodeArgument(payload, at, to);
-  at += demote(offset);
+  const [length, offset] = decodeCount(payload, at, to);
+  at += offset;
   if (to - at < length) {
     throw new Error(`unstructured byte string len ${length} greater than remaining buf len.`);
   }
 
-  const value = payload.subarray(at, at + demote(length));
+  const value = payload.subarray(at, at + length);
   return [value, offset + length];
 }
 
@@ -215,7 +247,7 @@ function decodeUnstructuredByteStringIndefinite(
 
   for (const base = at; at < to; ) {
     if (payload[at] === 0b1111_1111) {
-      return [vector.toUint8Array(), BigInt(at - base + 2)];
+      return [vector.toUint8Array(), at - base + 2];
     }
 
     const major = peekMajor(payload, at);
@@ -227,77 +259,61 @@ function decodeUnstructuredByteStringIndefinite(
       throw new Error("nested indefinite string.");
     }
 
-    const [byteString, _length] = decodeUnstructuredByteString(payload, at, to);
-    const length = demote(_length);
+    const [byteString, length] = decodeUnstructuredByteString(payload, at, to);
     at += length;
     vector.writeBytes(byteString);
   }
   throw new Error("expected break marker.");
 }
 
-function decodeList(
-  payload: Uint8Array,
-  at: Uint32,
-  to: Uint32,
-  bigIntBehavior: BigIntBehavior
-): [CborListType, CborOffset] {
+function decodeList(payload: Uint8Array, at: Uint32, to: Uint32): [CborListType, CborOffset] {
   const minor = peekMinor(payload, at);
   if (minor === minorIndefinite) {
-    return decodeListIndefinite(payload, at, to, bigIntBehavior);
+    return decodeListIndefinite(payload, at, to);
   }
 
-  const [argumentLength, offset] = decodeArgument(payload, at, to);
+  const [listDataLength, offset] = decodeCount(payload, at, to);
 
-  at += demote(offset);
+  at += offset;
   const base = at;
 
   const list = [];
-  for (let i = 0; i < argumentLength; ++i) {
-    const [item, itemOffset] = decode(payload, at, to, bigIntBehavior);
+  for (let i = 0; i < listDataLength; ++i) {
+    const [item, itemOffset] = decode(payload, at, to);
 
     list.push(item);
 
-    at += demote(itemOffset);
+    at += itemOffset;
   }
 
-  return [list, offset + BigInt(at - base)];
+  return [list, offset + (at - base)];
 }
 
-function decodeListIndefinite(
-  payload: Uint8Array,
-  at: Uint32,
-  to: Uint32,
-  bigIntBehavior: BigIntBehavior
-): [CborListType, CborOffset] {
+function decodeListIndefinite(payload: Uint8Array, at: Uint32, to: Uint32): [CborListType, CborOffset] {
   at += 1;
 
   const l = [] as CborListType;
   for (const base = at; at < to; ) {
     if (payload[at] === 255) {
-      return [l, BigInt(at - base + 2)];
+      return [l, at - base + 2];
     }
 
-    const [item, n] = decode(payload, at, to, bigIntBehavior);
-    at += demote(n);
+    const [item, n] = decode(payload, at, to);
+    at += n;
 
     l.push(item);
   }
   throw new Error("expected break marker.");
 }
 
-function decodeMap(
-  payload: Uint8Array,
-  at: Uint32,
-  to: Uint32,
-  bigIntBehavior: BigIntBehavior
-): [CborMapType, CborOffset] {
+function decodeMap(payload: Uint8Array, at: Uint32, to: Uint32): [CborMapType, CborOffset] {
   const minor = peekMinor(payload, at);
   if (minor === minorIndefinite) {
-    return decodeMapIndefinite(payload, at, to, bigIntBehavior);
+    return decodeMapIndefinite(payload, at, to);
   }
 
-  const [mapDataLength, offset] = decodeArgument(payload, at, to);
-  at += demote(offset);
+  const [mapDataLength, offset] = decodeCount(payload, at, to);
+  at += offset;
 
   const base = at;
 
@@ -313,23 +329,23 @@ function decodeMap(
     }
 
     const [key, kn] = decodeUtf8String(payload, at, to);
-    at += demote(kn);
+    at += kn;
 
-    const [value, vn] = decode(payload, at, to, bigIntBehavior);
-    at += demote(vn);
+    const [value, vn] = decode(payload, at, to);
+    at += vn;
 
     mp[key] = value;
+
+    if (isNaN(at)) {
+      console.log("wth", at, offset, kn, value, vn);
+      throw new Error();
+    }
   }
 
-  return [mp, offset + BigInt(at - base)];
+  return [mp, offset + (at - base)];
 }
 
-function decodeMapIndefinite(
-  payload: Uint8Array,
-  at: Uint32,
-  to: Uint32,
-  bigIntBehavior: BigIntBehavior
-): [CborMapType, CborOffset] {
+function decodeMapIndefinite(payload: Uint8Array, at: Uint32, to: Uint32): [CborMapType, CborOffset] {
   at += 1;
   const base = at;
 
@@ -340,7 +356,7 @@ function decodeMapIndefinite(
     }
 
     if (payload[at] === 0b1111_1111) {
-      return [map, BigInt(at - base + 2)];
+      return [map, at - base + 2];
     }
 
     const major = peekMajor(payload, at);
@@ -349,28 +365,23 @@ function decodeMapIndefinite(
     }
 
     const [key, kn] = decodeUtf8String(payload, at, to);
-    at += demote(kn);
+    at += kn;
 
-    const [value, vn] = decode(payload, at, to, bigIntBehavior);
-    at += demote(vn);
+    const [value, vn] = decode(payload, at, to);
+    at += vn;
 
     map[key] = value;
   }
   throw new Error("expected break marker.");
 }
 
-function decodeTag(
-  payload: Uint8Array,
-  at: Uint32,
-  to: Uint32,
-  bigIntBehavior: BigIntBehavior
-): [CborTagType, CborOffset] {
-  const [tag, offset] = decodeArgument(payload, at, to);
-  at += demote(offset);
+function decodeTag(payload: Uint8Array, at: Uint32, to: Uint32): [CborTagType, CborOffset] {
+  const [tag, offset] = decodeCountBigInt(payload, at, to);
+  at += offset;
 
-  const [value, valueOffset] = decode(payload, at, to, bigIntBehavior);
+  const [value, valueOffset] = decode(payload, at, to);
 
-  return [{ tag: castBigInt(tag, bigIntBehavior), value }, offset + valueOffset];
+  return [{ tag: castBigInt(tag), value: value } as any, offset + valueOffset];
 }
 
 function decodeSpecial(payload: Uint8Array, at: Uint32, to: Uint32): [CborValueType, CborOffset] {
@@ -378,59 +389,46 @@ function decodeSpecial(payload: Uint8Array, at: Uint32, to: Uint32): [CborValueT
   switch (minor) {
     case specialTrue:
     case specialFalse:
-      return [minor === specialTrue, BigInt(1)];
+      return [minor === specialTrue, 1];
     case specialNull:
-      return [null, BigInt(1)];
+      return [null, 1];
     case specialUndefined:
       // Note: the Smithy spec requires that undefined is
       // instead deserialized to null.
-      return [null, BigInt(1)];
-    case specialFloat16:
+      return [null, 1];
+    case extendedFloat16:
       if (to - at < 3) {
         throw new Error("incomplete float16 at end of buf.");
       }
       const u16 = decodeView.dataView.getUint16(at + 1);
-      return [uint32ToFloat32(float16ToUint32(u16)), BigInt(3)];
-    case specialFloat32:
+      return [uint32ToFloat32(float16ToUint32(u16)), 3];
+    case extendedFloat32:
       if (to - at < 5) {
         throw new Error("incomplete float32 at end of buf.");
       }
-      return [decodeView.dataView.getFloat32(at + 1), BigInt(5)];
-    case specialFloat64:
+      return [decodeView.dataView.getFloat32(at + 1), 5];
+    case extendedFloat64:
       if (to - at < 9) {
         throw new Error("incomplete float64 at end of buf.");
       }
-      return [decodeView.dataView.getFloat64(at + 1), BigInt(9)];
+      return [decodeView.dataView.getFloat64(at + 1), 9];
     default:
       throw new Error(`unexpected minor value ${minor}.`);
   }
 }
 
-function castBigInt(bigInt: bigint, bigIntBehavior: "castSafe"): number | bigint;
-function castBigInt(bigInt: bigint, bigIntBehavior: "castNone"): bigint;
-function castBigInt(bigInt: bigint, bigIntBehavior: "castAllUnsafe"): number;
-function castBigInt(bigInt: bigint, bigIntBehavior: BigIntBehavior): number | bigint;
-function castBigInt(bigInt: bigint, bigIntBehavior: BigIntBehavior): number | bigint {
-  switch (bigIntBehavior) {
-    case "castNone":
-      return bigInt;
-    case "castAllUnsafe":
-      return Number(bigInt);
-    case "castSafe":
-      const num = Number(bigInt);
-      if (Number.MIN_SAFE_INTEGER <= num && num <= Number.MAX_SAFE_INTEGER) {
-        return Number(bigInt);
-      }
-      return bigInt;
+function castBigInt(bigInt: bigint | number): number | bigint {
+  if (typeof bigInt === "number") {
+    return bigInt;
   }
+  const num = Number(bigInt);
+  if (Number.MIN_SAFE_INTEGER <= num && num <= Number.MAX_SAFE_INTEGER) {
+    return num;
+  }
+  return bigInt;
 }
 
-export function decode(
-  payload: Uint8Array,
-  at: Uint32,
-  to: Uint32,
-  bigIntBehavior: BigIntBehavior
-): [CborValueType, Uint64] {
+export function decode(payload: Uint8Array, at: Uint32, to: Uint32): [CborValueType, CborOffset] {
   if (at >= to) {
     throw new Error("unexpected end of (decode) payload.");
   }
@@ -438,20 +436,20 @@ export function decode(
   switch (peekMajor(payload, at)) {
     case majorUint64:
       const [unsignedInt, offset1] = decodeUnsignedInt(payload, at, to);
-      return [castBigInt(unsignedInt, bigIntBehavior), offset1];
+      return [castBigInt(unsignedInt), offset1];
     case majorNegativeInt64:
       const [negativeInt, offset2] = decodeNegativeInt(payload, at, to);
-      return [castBigInt(negativeInt, bigIntBehavior), offset2];
+      return [castBigInt(negativeInt), offset2];
     case majorUnstructuredByteString:
       return decodeUnstructuredByteString(payload, at, to);
     case majorUtf8String:
       return decodeUtf8String(payload, at, to);
     case majorList:
-      return decodeList(payload, at, to, bigIntBehavior);
+      return decodeList(payload, at, to);
     case majorMap:
-      return decodeMap(payload, at, to, bigIntBehavior);
+      return decodeMap(payload, at, to);
     case majorTag:
-      return decodeTag(payload, at, to, bigIntBehavior);
+      return decodeTag(payload, at, to);
     default:
       return decodeSpecial(payload, at, to);
   }
