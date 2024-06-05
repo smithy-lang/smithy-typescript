@@ -1,6 +1,6 @@
 {
   "name": "@smithy/core",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "scripts": {
     "build": "yarn lint && concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline core",
@@ -18,12 +18,14 @@
   "types": "./dist-types/index.d.ts",
   "exports": {
     ".": {
+      "module": "./dist-es/index.js",
       "node": "./dist-cjs/index.js",
       "import": "./dist-es/index.js",
       "require": "./dist-cjs/index.js",
       "types": "./dist-types/index.d.ts"
     },
     "./package.json": {
+      "module": "./package.json",
       "node": "./package.json",
       "import": "./package.json",
       "require": "./package.json"
