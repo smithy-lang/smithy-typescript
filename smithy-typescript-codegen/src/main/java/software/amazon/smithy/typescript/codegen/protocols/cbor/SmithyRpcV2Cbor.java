@@ -145,7 +145,9 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
 
     @Override
     public void generateProtocolTests(GenerationContext generationContext) {
-
+        SmithyProtocolUtils.generateProtocolTests(
+            this, generationContext
+        );
     }
 
     @Override

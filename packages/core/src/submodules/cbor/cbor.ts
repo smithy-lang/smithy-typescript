@@ -1,7 +1,5 @@
-import { byteVector } from "./ByteVector";
-import { decode } from "./cbor-decode";
-import { encode } from "./cbor-encode";
-import { decodeView } from "./DecodeView";
+import { decode, setPayload } from "./cbor-decode";
+import { encode, toUint8Array } from "./cbor-encode";
 
 /**
  * This implementation is synchronous and only implements the parts of CBOR
@@ -15,11 +13,11 @@ import { decodeView } from "./DecodeView";
  */
 export const cbor = {
   deserialize(payload: Uint8Array) {
-    decodeView.set(payload);
-    return decode(payload, 0, payload.length)[0];
+    setPayload(payload);
+    return decode(0, payload.length)[0];
   },
   serialize(input: any) {
     encode(input);
-    return byteVector.toUint8Array();
+    return toUint8Array();
   },
 };

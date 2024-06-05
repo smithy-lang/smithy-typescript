@@ -5,12 +5,20 @@
 
 package software.amazon.smithy.typescript.codegen.protocols;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
 import software.amazon.smithy.model.neighbor.Walker;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
+import software.amazon.smithy.protocoltests.traits.HttpMalformedRequestTestCase;
+import software.amazon.smithy.protocoltests.traits.HttpMessageTestCase;
+import software.amazon.smithy.typescript.codegen.HttpProtocolTestGenerator;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -44,5 +52,104 @@ public final class SmithyProtocolUtils {
         Set<Shape> shapesToGenerate = new TreeSet<>(shapes);
         shapes.forEach(shape -> shapesToGenerate.addAll(shapeWalker.walkShapes(shape)));
         shapesToGenerate.forEach(shape -> shape.accept(visitor));
+    }
+
+    public static void generateProtocolTests(ProtocolGenerator generator, ProtocolGenerator.GenerationContext context) {
+        new HttpProtocolTestGenerator(context,
+            generator,
+            SmithyProtocolUtils::filterProtocolTests,
+            SmithyProtocolUtils::filterMalformedRequestTests).run();
+    }
+
+    private static boolean filterProtocolTests(
+        ServiceShape service,
+        OperationShape operation,
+        HttpMessageTestCase testCase,
+        TypeScriptSettings settings
+    ) {
+        // TODO: Remove when requestCompression has been implemented.
+        if (testCase.getId().startsWith("SDKAppliedContentEncoding_")
+            || testCase.getId().startsWith("SDKAppendsGzipAndIgnoresHttpProvidedEncoding_")
+            || testCase.getId().startsWith("SDKAppendedGzipAfterProvidedEncoding_")) {
+            return true;
+        }
+
+        if (testCase.getTags().contains("defaults")) {
+            return true;
+        }
+
+        // TODO: remove when there's a decision on separator to use
+        // https://github.com/awslabs/smithy/issues/1014
+        if (testCase.getId().equals("RestJsonInputAndOutputWithQuotedStringHeaders")) {
+            return true;
+        }
+
+        // TODO: implementation change pending.
+        List<String> extraUnionKey = Arrays.asList(
+            "RestXmlHttpPayloadWithUnsetUnion",
+            "RestJsonHttpPayloadWithUnsetUnion"
+        );
+        if (extraUnionKey.contains(testCase.getId())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean filterMalformedRequestTests(
+        ServiceShape service,
+        OperationShape operation,
+        HttpMalformedRequestTestCase testCase,
+        TypeScriptSettings settings
+    ) {
+        // Handling overflow/underflow of longs in JS is extraordinarily tricky.
+        // Numbers are actually all 62-bit floats, and so any integral number is
+        // limited to 53 bits. In typical JS fashion, a value outside of this
+        // range just kinda silently bumbles on in some third state between valid
+        // and invalid. Infuriatingly, there doesn't seem to be a consistent way
+        // to detect this. We could *try* to do bounds checking, but the constants
+        // we use wouldn't necessarily work, so it could work in some environments
+        // but not others.
+        if (operation.getId().getName().equals("MalformedLong") && testCase.hasTag("underflow/overflow")) {
+            return true;
+        }
+
+        //TODO: we don't validate map values
+        if (testCase.getId().equals("RestJsonBodyMalformedMapNullValue")) {
+            return true;
+        }
+
+        // TODO: fix in https://github.com/aws/aws-sdk-js-v3/issues/5545
+        if (testCase.getId().equals("RestJsonMalformedUnionUnknownMember")) {
+            return true;
+        }
+
+        //TODO: reenable when the SSDK uses RE2 and not built-in regex for pattern constraints
+        if (testCase.getId().equals("RestJsonMalformedPatternReDOSString")) {
+            return true;
+        }
+
+        // skipped to allow unambiguous type conversions to unblock minor type inconsistencies
+        List<String> typeCoercionCases = Arrays.asList(
+            "RestJsonBodyTimestampDefaultRejectsStringifiedEpochSeconds_case1",
+            "RestJsonBodyTimestampDefaultRejectsStringifiedEpochSeconds_case0",
+            "RestJsonBodyTimestampDefaultRejectsDateTime_case2",
+            "RestJsonBodyTimestampDefaultRejectsDateTime_case1",
+            "RestJsonBodyTimestampDefaultRejectsDateTime_case0",
+            "RestJsonBodyBooleanBadLiteral_case18",
+            "RestJsonBodyBooleanBadLiteral_case7",
+            "RestJsonBodyBooleanStringCoercion_case14",
+            "RestJsonBodyBooleanStringCoercion_case13",
+            "RestJsonBodyBooleanStringCoercion_case12",
+            "RestJsonBodyBooleanStringCoercion_case2",
+            "RestJsonBodyBooleanStringCoercion_case1",
+            "RestJsonBodyBooleanStringCoercion_case0"
+        );
+
+        if (typeCoercionCases.contains(testCase.getId())) {
+            return true;
+        }
+
+        return false;
     }
 }

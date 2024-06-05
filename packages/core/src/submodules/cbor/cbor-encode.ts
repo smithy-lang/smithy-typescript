@@ -1,4 +1,5 @@
-import { byteVector } from "./ByteVector";
+import { fromUtf8 } from "@smithy/util-utf8";
+
 import {
   CborMajorType,
   extendedFloat16,
@@ -17,19 +18,75 @@ import {
   specialTrue,
   Uint64,
 } from "./cbor-types";
+import { alloc } from "./cbor-types";
+
+const USE_BUFFER = typeof Buffer !== "undefined";
+const USE_TEXT_ENCODER = typeof TextEncoder !== "undefined";
+
+type BufferWithUtf8Write = Buffer & {
+  utf8Write(str: string, index: number): number;
+};
+
+const initialSize = 10_000_000;
+let data: Uint8Array = alloc(initialSize);
+let dataView: DataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+let cursor: number = 0;
+const textEncoder: TextEncoder | null = USE_TEXT_ENCODER ? new TextEncoder() : null;
+
+// TODO(cbor): decide when to resize.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ensureSpace(bytes: number) {
+  if (data.byteLength - cursor < bytes) {
+    if (cursor < 16_000_000) {
+      resize(data.byteLength * 2);
+    } else {
+      resize(data.byteLength + 16_000_000);
+    }
+  }
+}
+
+export function toUint8Array(): Uint8Array {
+  const out = alloc(cursor);
+  out.set(data.subarray(0, cursor), 0);
+  cursor = 0;
+  if (data.length > initialSize) {
+    data = alloc(initialSize);
+    dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  }
+  return out;
+}
+
+function resize(size: number) {
+  const old = data;
+  data = alloc(size);
+  if (old) {
+    if ((old as Buffer).copy) {
+      (old as Buffer).copy(data, 0, 0, old.byteLength);
+    } else {
+      data.set(old, 0);
+    }
+  }
+  dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+}
 
 function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
   if (value < 24) {
-    byteVector.write((major << 5) | (value as number));
+    data[cursor++] = (major << 5) | (value as number);
   } else if (value < 1 << 8) {
-    byteVector.write((major << 5) | 24);
-    byteVector.write(value as number);
+    data[cursor++] = (major << 5) | 24;
+    data[cursor++] = value as number;
   } else if (value < 1 << 16) {
-    byteVector.writeUint16((major << 5) | extendedFloat16, value as number);
+    data[cursor++] = (major << 5) | extendedFloat16;
+    dataView.setUint16(cursor, value as number);
+    cursor += 2;
   } else if (value < 2 ** 32) {
-    byteVector.writeUint32((major << 5) | extendedFloat32, value as number);
+    data[cursor++] = (major << 5) | extendedFloat32;
+    dataView.setUint32(cursor, value as number);
+    cursor += 4;
   } else {
-    byteVector.writeUint64((major << 5) | extendedFloat64, value);
+    data[cursor++] = (major << 5) | extendedFloat64;
+    dataView.setBigUint64(cursor, typeof value === "bigint" ? value : BigInt(value));
+    cursor += 8;
   }
 }
 
@@ -37,59 +94,128 @@ function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
  * @param input - JS data object.
  */
 export function encode(input: any): void {
-  if (input === null) {
-    byteVector.write((majorSpecial << 5) | specialNull);
-    return;
-  }
-
-  switch (typeof input) {
-    case "undefined":
-      // Note: Smithy spec requires that undefined not be serialized
-      // though the CBOR spec includes it.
-      // buffer[0] = compose(majorSpecial, specialUndefined);
-      // return 1;
-      throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
-    case "boolean":
-      byteVector.write((majorSpecial << 5) | (input ? specialTrue : specialFalse));
-      return;
-    case "number":
-      if (Number.isInteger(input)) {
-        input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, Math.abs(input) - 1);
-        return;
+  if (typeof input === "number") {
+    if (Number.isInteger(input)) {
+      // this section is inlined duplicate for performance.
+      const major = input >= 0 ? majorUint64 : majorNegativeInt64;
+      const value = input >= 0 ? input : -input - 1;
+      if (value < 24) {
+        data[cursor++] = (major << 5) | value;
+      } else if (value < 256 /* 2 ** 8 */) {
+        data[cursor++] = (major << 5) | 24;
+        data[cursor++] = value;
+      } else if (value < 65536 /* 2 ** 16 */) {
+        data[cursor++] = (major << 5) | extendedFloat16;
+        data[cursor++] = (value as number) >> 8;
+        data[cursor++] = value as number & 0b1111_1111;
+      } else if (value < 4294967296 /* 2 ** 32 */) {
+        data[cursor++] = (major << 5) | extendedFloat32;
+        dataView.setUint32(cursor, value);
+        cursor += 4;
+      } else {
+        data[cursor++] = (major << 5) | extendedFloat64;
+        dataView.setBigUint64(cursor, BigInt(value));
+        cursor += 8;
       }
-      byteVector.writeFloat64((majorSpecial << 5) | extendedFloat64, input);
       return;
-    case "bigint":
-      input >= 0 ? encodeHeader(majorUint64, input) : encodeHeader(majorNegativeInt64, -input - BigInt(1));
-      return;
-    case "string":
-      encodeHeader(majorUtf8String, input.length);
-      byteVector.writeString(input);
-      return;
-  }
+    }
+    data[cursor++] = (majorSpecial << 5) | extendedFloat64;
+    dataView.setFloat64(cursor, input);
+    cursor += 8;
+    return;
+  } else if (typeof input === "bigint") {
+    const major = input >= 0 ? majorUint64 : majorNegativeInt64;
+    const value = input >= 0 ? input : -input - BigInt(1);
+    const n = Number(value);
+    // this section is inlined duplicate for performance.
+    if (n < 24) {
+      data[cursor++] = (major << 5) | n;
+    } else if (n < 256 /* 2 ** 8 */) {
+      data[cursor++] = (major << 5) | 24;
+      data[cursor++] = n;
+    } else if (n < 65536 /* 2 ** 16 */) {
+      data[cursor++] = (major << 5) | extendedFloat16;
+      data[cursor++] = n >> 8;
+      data[cursor++] = n & 0b1111_1111;
+    } else if (n < 4294967296 /* 2 ** 32 */) {
+      data[cursor++] = (major << 5) | extendedFloat32;
+      dataView.setUint32(cursor, n);
+      cursor += 4;
+    } else {
+      data[cursor++] = (major << 5) | extendedFloat64;
+      dataView.setBigUint64(cursor, value);
+      cursor += 8;
+    }
+    return;
+  } else if (typeof input === "string") {
+    encodeHeader(majorUtf8String, input.length);
+    if (USE_BUFFER && (data as BufferWithUtf8Write).utf8Write) {
+      cursor += (data as BufferWithUtf8Write).utf8Write(input, cursor);
+    } else if (input.length < 200) {
+      for (let i = 0; i < input.length; ++i) {
+        const c = input.charCodeAt(i);
+        const trailer = 0b1000_0000;
 
-  if (Array.isArray(input)) {
-    const _input = input.filter(notUndef);
-    encodeHeader(majorList, _input.length);
-    for (let i = 0; i < _input.length; ++i) {
-      encode(_input[i]);
+        if (c < 128 /* byte */) {
+          data[cursor++] = c;
+        } else if (c < 2048 /* 12 bits */) {
+          // left 6 bits
+          data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
+          // right 6 bits
+          data[cursor++] = (c & 0b00_111111) | trailer;
+        } else if (c < 65536 /* 17 bits*/) {
+          data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
+          data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+          data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+        } else {
+          // surrogate pair
+          i++;
+          // 1st
+          data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
+          data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
+
+          // 2nd
+          data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+          data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+        }
+      }
+    } else if (USE_TEXT_ENCODER && textEncoder?.encodeInto) {
+      cursor += textEncoder.encodeInto(input, data.subarray(cursor)).written;
+    } else {
+      const bytes = fromUtf8(input);
+      data.set(bytes, cursor);
+      cursor += bytes.byteLength;
+    }
+    return;
+  } else if (input === null) {
+    data[cursor++] = (majorSpecial << 5) | specialNull;
+    return;
+  } else if (typeof input === "boolean") {
+    data[cursor++] = (majorSpecial << 5) | (input ? specialTrue : specialFalse);
+    return;
+  } else if (typeof input === "undefined") {
+    // Note: Smithy spec requires that undefined not be serialized
+    // though the CBOR spec includes it.
+    // buffer[0] = compose(majorSpecial, specialUndefined);
+    // return 1;
+    throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
+  } else if (Array.isArray(input)) {
+    encodeHeader(majorList, input.length);
+    for (let i = 0; i < input.length; ++i) {
+      encode(input[i]);
     }
     return;
   } else if (typeof input.byteLength === "number") {
     encodeHeader(majorUnstructuredByteString, input.length);
-    byteVector.writeBytes(input);
+    data.set(input, cursor);
+    cursor += input.byteLength;
     return;
   } else if (typeof input === "object" && "tag" in input && "value" in input && Object.keys(input).length === 2) {
     encodeHeader(majorTag, input.tag);
     encode(input.value);
     return;
   } else if (typeof input === "object") {
-    const entries = [];
-    for (const key in input) {
-      if (input[key] !== undefined) {
-        entries.push([key, input[key]]);
-      }
-    }
+    const entries = Object.entries(input);
     encodeHeader(majorMap, entries.length);
     for (let i = 0; i < entries.length; i++) {
       encode(entries[i][0]);
@@ -100,5 +226,3 @@ export function encode(input: any): void {
 
   throw new Error(`data type ${input?.constructor?.name ?? typeof input} not compatible for encoding.`);
 }
-
-const notUndef = <T>(_: T) => _ !== undefined;

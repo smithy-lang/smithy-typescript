@@ -86,6 +86,73 @@ describe("cbor", () => {
       cbor: allocByteArray([0b111_11011, +65, +71, +0, +239, +145, +76, +27, +173]),
     },
     {
+      name: "various numbers",
+      data: [
+        BigInt("18446744073709551615"),
+        4294967295,
+        65535,
+        257,
+        256,
+        255,
+        254,
+        129,
+        128,
+        127,
+        65,
+        64,
+        63,
+        33,
+        32,
+        31,
+        17,
+        16,
+        15,
+        9,
+        8,
+        7,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0,
+        -1,
+        -2,
+        -3,
+        -4,
+        -5,
+        -7,
+        -8,
+        -9,
+        -15,
+        -16,
+        -17,
+        -31,
+        -32,
+        -33,
+        -63,
+        -64,
+        -65,
+        -127,
+        -128,
+        -129,
+        -254,
+        -255,
+        -256,
+        -257,
+        -65535,
+        -4294967295,
+        -BigInt("18446744073709551616"),
+      ],
+      cbor: allocByteArray([
+        152, 55, 27, 255, 255, 255, 255, 255, 255, 255, 255, 26, 255, 255, 255, 255, 25, 255, 255, 25, 1, 1, 25, 1, 0,
+        24, 255, 24, 254, 24, 129, 24, 128, 24, 127, 24, 65, 24, 64, 24, 63, 24, 33, 24, 32, 24, 31, 17, 16, 15, 9, 8,
+        7, 5, 4, 3, 2, 1, 0, 32, 33, 34, 35, 36, 38, 39, 40, 46, 47, 48, 56, 30, 56, 31, 56, 32, 56, 62, 56, 63, 56, 64,
+        56, 126, 56, 127, 56, 128, 56, 253, 56, 254, 56, 255, 57, 1, 0, 57, 255, 254, 58, 255, 255, 255, 254, 59, 255,
+        255, 255, 255, 255, 255, 255, 255,
+      ]),
+    },
+    {
       name: "an empty string",
       data: "",
       // string major plus 00's
@@ -140,7 +207,7 @@ describe("cbor", () => {
     for (const { name, data, cbor: cbor_representation } of examples) {
       it(`should encode for ${name}`, async () => {
         const serialized = cbor.serialize(data);
-        expect(allocByteArray(serialized.buffer, serialized.byteOffset, serialized.length)).toEqual(
+        expect(allocByteArray(serialized.buffer, serialized.byteOffset, serialized.byteLength)).toEqual(
           cbor_representation
         );
       });
@@ -229,7 +296,7 @@ describe("cbor", () => {
       const jsObject = translateTestData(_expect);
 
       it(`serialization for ${description}`, () => {
-        const serialized = cbor.serialize(jsObject);
+        const serialized = allocByteArray(cbor.serialize(jsObject));
         const redeserialized = cbor.deserialize(serialized);
 
         /**
