@@ -1,5 +1,17 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.21.1 (2024-06-05)
+
+### Features
+
+- Added logging for `CredentialsProviderError` ([#1290](https://github.com/smithy-lang/smithy-typescript/pull/1290))
+
+### Bug Fixes
+
+- Fixed issues with serializing millisecond precision timestamps for certain formats ([#1289](https://github.com/smithy-lang/smithy-typescript/pull/1289),
+  [#1295](https://github.com/smithy-lang/smithy-typescript/pull/1295))
+- Fixed issue where `export` was used instead of the clearer `export type` ([#1284](https://github.com/smithy-lang/smithy-typescript/pull/1284))
+
 ## 0.21.0 (2024-05-22)
 
 ### Breaking Changes
