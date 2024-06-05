@@ -22,8 +22,8 @@ plugins {
     signing
     checkstyle
     jacoco
-    id("com.github.spotbugs") version "6.0.8"
-    id("org.jreleaser") version "1.9.0"
+    id("com.github.spotbugs") version "6.0.15"
+    id("org.jreleaser") version "1.12.0"
 }
 
 allprojects {
