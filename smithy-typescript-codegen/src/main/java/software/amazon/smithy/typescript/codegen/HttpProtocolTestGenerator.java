@@ -448,6 +448,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         writeHttpHeaderAssertions(testCase);
         writeHttpQueryAssertions(testCase);
+        writeHttpHostAssertion(testCase);
         testCase.getBody().ifPresent(body -> {
             writeHttpBodyAssertions(body, testCase.getBodyMediaType().orElse("UNKNOWN"), true);
         });
@@ -519,6 +520,14 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.write("expect(r.headers[$S]).toBe($S);", header, value);
         });
         writer.write("");
+    }
+
+    private void writeHttpHostAssertion(HttpRequestTestCase testCase) {
+        testCase.getResolvedHost().ifPresent(resolvedHost -> {
+            writer.write("expect(r.headers[\"host\"]).toBeDefined();");
+            writer.write("expect(r.headers[\"host\"]).toBe($S);", resolvedHost);
+            writer.write("");
+        });
     }
 
     private void writeHttpBodyAssertions(String body, String mediaType, boolean isClientTest) {
