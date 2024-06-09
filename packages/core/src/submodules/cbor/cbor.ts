@@ -14,7 +14,7 @@ import { encode, toUint8Array } from "./cbor-encode";
 export const cbor = {
   deserialize(payload: Uint8Array) {
     setPayload(payload);
-    return decode(0, payload.length)[0];
+    return decode(0, payload.length);
   },
   serialize(input: any) {
     encode(input);

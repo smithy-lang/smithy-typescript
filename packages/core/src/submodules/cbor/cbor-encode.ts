@@ -27,7 +27,7 @@ type BufferWithUtf8Write = Buffer & {
   utf8Write(str: string, index: number): number;
 };
 
-const initialSize = 10_000_000;
+const initialSize = 12_000_000;
 let data: Uint8Array = alloc(initialSize);
 let dataView: DataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
 let cursor: number = 0;
