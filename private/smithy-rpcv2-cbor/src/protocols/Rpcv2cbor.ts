@@ -1203,6 +1203,9 @@ const buildHttpRpcRequest = async (
       contents.headers["content-length"] = String(calculateBodyLength(body));
     } catch (e) {}
   }
+  if (basePath.includes("SparseNulls")) {
+    console.log("wtffff", headers);
+  }
   return new __HttpRequest(contents);
 };
 const SHARED_HEADERS: __HeaderBag = {

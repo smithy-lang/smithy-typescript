@@ -187,7 +187,6 @@ export interface ClientDefaults extends Partial<__SmithyConfiguration<__HttpHand
  * @public
  */
 export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>> & ClientDefaults;
-
 /**
  * @public
  *
@@ -201,7 +200,6 @@ export interface RpcV2ProtocolClientConfig extends RpcV2ProtocolClientConfigType
 export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions> &
   Required<ClientDefaults> &
   RuntimeExtensionsConfig;
-
 /**
  * @public
  *
@@ -224,6 +222,13 @@ export class RpcV2ProtocolClient extends __Client<
   readonly config: RpcV2ProtocolClientResolvedConfig;
 
   constructor(...[configuration]: __CheckOptionalClientConfig<RpcV2ProtocolClientConfig>) {
+    (configuration as any).endpoint = async () => {
+      const url = new URL("https://www.amazon.com/");
+      return {
+        path: url.pathname,
+        ...url,
+      };
+    };
     let _config_0 = __getRuntimeConfig(configuration || {});
     let _config_1 = resolveRuntimeExtensions(_config_0, configuration?.extensions || []);
     super(_config_1);

@@ -11,14 +11,12 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
  */
 export type { __MetadataBearer };
 export { $Command };
-
 /**
  * @public
  *
  * The input for {@link SparseNullsOperationCommand}.
  */
 export interface SparseNullsOperationCommandInput extends SparseNullsOperationInputOutput {}
-
 /**
  * @public
  *

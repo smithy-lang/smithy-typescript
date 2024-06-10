@@ -261,17 +261,29 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
     @Override
     protected void writeRequestHeaders(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
-        writer.write("const headers: __HeaderBag = SHARED_HEADERS;");
-        if (EventStreamGenerator.hasEventStreamOutput(context, operation)) {
+
+        boolean hasEventStreamOutput = EventStreamGenerator.hasEventStreamOutput(context, operation);
+        boolean hasEventStreamInput = EventStreamGenerator.hasEventStreamInput(context, operation);
+        boolean inputIsEmpty = operation.getInput().isEmpty();
+
+        boolean mutatesDefaultHeader = hasEventStreamOutput | hasEventStreamInput | inputIsEmpty;
+
+        if (mutatesDefaultHeader) {
+            writer.write("const headers: __HeaderBag = { ...SHARED_HEADERS };");
+        } else {
+            writer.write("const headers: __HeaderBag = SHARED_HEADERS;");
+        }
+
+        if (hasEventStreamOutput) {
             writer.write("""
                 headers.accept = "application/vnd.amazon.eventstream";
                 """);
         }
-        if (EventStreamGenerator.hasEventStreamInput(context, operation)) {
+        if (hasEventStreamInput) {
             writer.write("""
                 headers["content-type"] = "application/vnd.amazon.eventstream";
                 """);
-        } else if (operation.getInput().isEmpty()) {
+        } else if (inputIsEmpty) {
             writer.write("""
                 delete headers["content-type"];
                 """);

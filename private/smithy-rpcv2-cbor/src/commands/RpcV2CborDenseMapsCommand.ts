@@ -11,14 +11,12 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
  */
 export type { __MetadataBearer };
 export { $Command };
-
 /**
  * @public
  *
  * The input for {@link RpcV2CborDenseMapsCommand}.
  */
 export interface RpcV2CborDenseMapsCommandInput extends RpcV2CborDenseMapsInputOutput {}
-
 /**
  * @public
  *

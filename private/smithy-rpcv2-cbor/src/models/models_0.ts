@@ -73,7 +73,6 @@ export class ComplexError extends __BaseException {
   readonly $fault: "client" = "client";
   TopLevel?: string;
   Nested?: ComplexNestedErrorData;
-
   /**
    * @internal
    */
@@ -171,7 +170,6 @@ export class InvalidGreeting extends __BaseException {
   readonly name: "InvalidGreeting" = "InvalidGreeting";
   readonly $fault: "client" = "client";
   Message?: string;
-
   /**
    * @internal
    */
