@@ -123,29 +123,33 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
         _offset = offset + valueOffset;
         return { tag: castBigInt(unsignedInt), value };
       }
+    case majorUtf8String:
+    case majorMap:
+    case majorList:
     case majorUnstructuredByteString:
       if (minor === minorIndefinite) {
-        return decodeUnstructuredByteStringIndefinite(at, to);
+        switch (major) {
+          case majorUtf8String:
+            return decodeUtf8StringIndefinite(at, to);
+          case majorMap:
+            return decodeMapIndefinite(at, to);
+          case majorList:
+            return decodeListIndefinite(at, to);
+          case majorUnstructuredByteString:
+            return decodeUnstructuredByteStringIndefinite(at, to);
+        }
+      } else {
+        switch (major) {
+          case majorUtf8String:
+            return decodeUtf8String(at, to);
+          case majorMap:
+            return decodeMap(at, to);
+          case majorList:
+            return decodeList(at, to);
+          case majorUnstructuredByteString:
+            return decodeUnstructuredByteString(at, to);
+        }
       }
-      return decodeUnstructuredByteString(at, to);
-    case majorUtf8String: {
-      if (minor === minorIndefinite) {
-        return decodeUtf8StringIndefinite(at, to);
-      }
-      return decodeUtf8String(at, to);
-    }
-    case majorList: {
-      if (minor === minorIndefinite) {
-        return decodeListIndefinite(at, to);
-      }
-      return decodeList(at, to);
-    }
-    case majorMap: {
-      if (minor === minorIndefinite) {
-        return decodeMapIndefinite(at, to);
-      }
-      return decodeMap(at, to);
-    }
     default:
       return decodeSpecial(at, to);
   }
