@@ -5,8 +5,6 @@
 
 package software.amazon.smithy.typescript.codegen.protocols;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
@@ -67,32 +65,6 @@ public final class SmithyProtocolUtils {
         HttpMessageTestCase testCase,
         TypeScriptSettings settings
     ) {
-        // TODO: Remove when requestCompression has been implemented.
-        if (testCase.getId().startsWith("SDKAppliedContentEncoding_")
-            || testCase.getId().startsWith("SDKAppendsGzipAndIgnoresHttpProvidedEncoding_")
-            || testCase.getId().startsWith("SDKAppendedGzipAfterProvidedEncoding_")) {
-            return true;
-        }
-
-        if (testCase.getTags().contains("defaults")) {
-            return true;
-        }
-
-        // TODO: remove when there's a decision on separator to use
-        // https://github.com/awslabs/smithy/issues/1014
-        if (testCase.getId().equals("RestJsonInputAndOutputWithQuotedStringHeaders")) {
-            return true;
-        }
-
-        // TODO: implementation change pending.
-        List<String> extraUnionKey = Arrays.asList(
-            "RestXmlHttpPayloadWithUnsetUnion",
-            "RestJsonHttpPayloadWithUnsetUnion"
-        );
-        if (extraUnionKey.contains(testCase.getId())) {
-            return true;
-        }
-
         return false;
     }
 
@@ -126,27 +98,6 @@ public final class SmithyProtocolUtils {
 
         //TODO: reenable when the SSDK uses RE2 and not built-in regex for pattern constraints
         if (testCase.getId().equals("RestJsonMalformedPatternReDOSString")) {
-            return true;
-        }
-
-        // skipped to allow unambiguous type conversions to unblock minor type inconsistencies
-        List<String> typeCoercionCases = Arrays.asList(
-            "RestJsonBodyTimestampDefaultRejectsStringifiedEpochSeconds_case1",
-            "RestJsonBodyTimestampDefaultRejectsStringifiedEpochSeconds_case0",
-            "RestJsonBodyTimestampDefaultRejectsDateTime_case2",
-            "RestJsonBodyTimestampDefaultRejectsDateTime_case1",
-            "RestJsonBodyTimestampDefaultRejectsDateTime_case0",
-            "RestJsonBodyBooleanBadLiteral_case18",
-            "RestJsonBodyBooleanBadLiteral_case7",
-            "RestJsonBodyBooleanStringCoercion_case14",
-            "RestJsonBodyBooleanStringCoercion_case13",
-            "RestJsonBodyBooleanStringCoercion_case12",
-            "RestJsonBodyBooleanStringCoercion_case2",
-            "RestJsonBodyBooleanStringCoercion_case1",
-            "RestJsonBodyBooleanStringCoercion_case0"
-        );
-
-        if (typeCoercionCases.contains(testCase.getId())) {
             return true;
         }
 

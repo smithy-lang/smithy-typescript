@@ -1,10 +1,7 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClientResolvedConfig,
-  ServiceInputTypes,
-  ServiceOutputTypes,
-} from "../RpcV2ProtocolClient";
+import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { RpcV2CborDenseMapsInputOutput } from "../models/models_0";
+import { de_RpcV2CborDenseMapsCommand, se_RpcV2CborDenseMapsCommand } from "../protocols/Rpcv2cbor";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -12,13 +9,16 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 /**
  * @public
  */
-export { __MetadataBearer, $Command };
+export type { __MetadataBearer };
+export { $Command };
+
 /**
  * @public
  *
  * The input for {@link RpcV2CborDenseMapsCommand}.
  */
 export interface RpcV2CborDenseMapsCommandInput extends RpcV2CborDenseMapsInputOutput {}
+
 /**
  * @public
  *
@@ -97,19 +97,20 @@ export interface RpcV2CborDenseMapsCommandOutput extends RpcV2CborDenseMapsInput
  *
  * @public
  */
-export class RpcV2CborDenseMapsCommand extends $Command.classBuilder<RpcV2CborDenseMapsCommandInput, RpcV2CborDenseMapsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
-      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-          return [
-
-  getSerdePlugin(config, this.serialize, this.deserialize),
-      ];
+export class RpcV2CborDenseMapsCommand extends $Command
+  .classBuilder<
+    RpcV2CborDenseMapsCommandInput,
+    RpcV2CborDenseMapsCommandOutput,
+    RpcV2ProtocolClientResolvedConfig,
+    ServiceInputTypes,
+    ServiceOutputTypes
+  >()
+  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+    return [getSerdePlugin(config, this.serialize, this.deserialize)];
   })
-  .s("RpcV2Protocol", "RpcV2CborDenseMaps", {
-
-  })
+  .s("RpcV2Protocol", "RpcV2CborDenseMaps", {})
   .n("RpcV2ProtocolClient", "RpcV2CborDenseMapsCommand")
   .f(void 0, void 0)
-  .ser(() => { throw new Error("No supported protocol was found"); })
-  .de(() => { throw new Error("No supported protocol was found"); })
-.build() {
-}
+  .ser(se_RpcV2CborDenseMapsCommand)
+  .de(de_RpcV2CborDenseMapsCommand)
+  .build() {}

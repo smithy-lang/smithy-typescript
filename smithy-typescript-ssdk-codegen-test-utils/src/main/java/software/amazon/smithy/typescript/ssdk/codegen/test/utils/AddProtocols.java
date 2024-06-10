@@ -3,7 +3,6 @@
  import java.util.List;
  import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
  import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
- import software.amazon.smithy.typescript.codegen.protocols.cbor.SmithyRpcV2Cbor;
  import software.amazon.smithy.utils.ListUtils;
  import software.amazon.smithy.utils.SmithyInternalApi;
  
@@ -16,8 +15,7 @@
      @Override
      public List<ProtocolGenerator> getProtocolGenerators() {
          return ListUtils.of(
-             new TestProtocolGenerator(),
-             new SmithyRpcV2Cbor()
+             new TestProtocolGenerator()
          );
      }
  }

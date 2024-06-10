@@ -34,7 +34,7 @@ export class ValidationException extends __BaseException {
    * A member can appear in this list more than once if it failed to satisfy multiple constraints.
    * @public
    */
-  fieldList?: (ValidationExceptionField)[];
+  fieldList?: ValidationExceptionField[];
 
   /**
    * @internal
@@ -43,7 +43,7 @@ export class ValidationException extends __BaseException {
     super({
       name: "ValidationException",
       $fault: "client",
-      ...opts
+      ...opts,
     });
     Object.setPrototypeOf(this, ValidationException.prototype);
     this.fieldList = opts.fieldList;
@@ -73,6 +73,7 @@ export class ComplexError extends __BaseException {
   readonly $fault: "client" = "client";
   TopLevel?: string;
   Nested?: ComplexNestedErrorData;
+
   /**
    * @internal
    */
@@ -80,7 +81,7 @@ export class ComplexError extends __BaseException {
     super({
       name: "ComplexError",
       $fault: "client",
-      ...opts
+      ...opts,
     });
     Object.setPrototypeOf(this, ComplexError.prototype);
     this.TopLevel = opts.TopLevel;
@@ -96,11 +97,11 @@ export const TestEnum = {
   BAR: "BAR",
   BAZ: "BAZ",
   FOO: "FOO",
-} as const
+} as const;
 /**
  * @public
  */
-export type TestEnum = typeof TestEnum[keyof typeof TestEnum]
+export type TestEnum = (typeof TestEnum)[keyof typeof TestEnum];
 
 export enum TestIntEnum {
   ONE = 1,
@@ -113,7 +114,7 @@ export enum TestIntEnum {
 export interface Defaults {
   defaultString?: string;
   defaultBoolean?: boolean;
-  defaultList?: (string)[];
+  defaultList?: string[];
   defaultTimestamp?: Date;
   defaultBlob?: Uint8Array;
   defaultByte?: number;
@@ -146,8 +147,7 @@ export interface GreetingStruct {
 /**
  * @public
  */
-export interface EmptyStructure {
-}
+export interface EmptyStructure {}
 
 /**
  * @public
@@ -171,6 +171,7 @@ export class InvalidGreeting extends __BaseException {
   readonly name: "InvalidGreeting" = "InvalidGreeting";
   readonly $fault: "client" = "client";
   Message?: string;
+
   /**
    * @internal
    */
@@ -178,7 +179,7 @@ export class InvalidGreeting extends __BaseException {
     super({
       name: "InvalidGreeting",
       $fault: "client",
-      ...opts
+      ...opts,
     });
     Object.setPrototypeOf(this, InvalidGreeting.prototype);
     this.Message = opts.Message;
@@ -201,7 +202,7 @@ export interface OperationWithDefaultsInput {
 export interface OperationWithDefaultsOutput {
   defaultString?: string;
   defaultBoolean?: boolean;
-  defaultList?: (string)[];
+  defaultList?: string[];
   defaultTimestamp?: Date;
   defaultBlob?: Uint8Array;
   defaultByte?: number;
@@ -239,7 +240,7 @@ export interface RpcV2CborDenseMapsInputOutput {
   denseNumberMap?: Record<string, number>;
   denseBooleanMap?: Record<string, boolean>;
   denseStringMap?: Record<string, string>;
-  denseSetMap?: Record<string, (string)[]>;
+  denseSetMap?: Record<string, string[]>;
 }
 
 /**
@@ -252,11 +253,11 @@ export const FooEnum = {
   FOO: "Foo",
   ONE: "1",
   ZERO: "0",
-} as const
+} as const;
 /**
  * @public
  */
-export type FooEnum = typeof FooEnum[keyof typeof FooEnum]
+export type FooEnum = (typeof FooEnum)[keyof typeof FooEnum];
 
 export enum IntegerEnum {
   A = 1,
@@ -276,21 +277,21 @@ export interface StructureListMember {
  * @public
  */
 export interface RpcV2CborListInputOutput {
-  stringList?: (string)[];
-  stringSet?: (string)[];
-  integerList?: (number)[];
-  booleanList?: (boolean)[];
-  timestampList?: (Date)[];
-  enumList?: (FooEnum)[];
-  intEnumList?: (IntegerEnum)[];
+  stringList?: string[];
+  stringSet?: string[];
+  integerList?: number[];
+  booleanList?: boolean[];
+  timestampList?: Date[];
+  enumList?: FooEnum[];
+  intEnumList?: IntegerEnum[];
   /**
    * A list of lists of strings.
    * @public
    */
-  nestedStringList?: ((string)[])[];
+  nestedStringList?: string[][];
 
-  structureList?: (StructureListMember)[];
-  blobList?: (Uint8Array)[];
+  structureList?: StructureListMember[];
+  blobList?: Uint8Array[];
 }
 
 /**
@@ -301,7 +302,7 @@ export interface RpcV2CborSparseMapsInputOutput {
   sparseNumberMap?: Record<string, number>;
   sparseBooleanMap?: Record<string, boolean>;
   sparseStringMap?: Record<string, string>;
-  sparseSetMap?: Record<string, (string)[]>;
+  sparseSetMap?: Record<string, string[]>;
 }
 
 /**
@@ -324,7 +325,7 @@ export interface SimpleScalarStructure {
  * @public
  */
 export interface SparseNullsOperationInputOutput {
-  sparseStringList?: (string)[];
+  sparseStringList?: string[];
   sparseStringMap?: Record<string, string>;
 }
 

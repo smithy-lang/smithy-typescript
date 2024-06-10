@@ -1,8 +1,5 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClient,
-  RpcV2ProtocolClientConfig,
-} from "./RpcV2ProtocolClient";
+import { RpcV2ProtocolClient, RpcV2ProtocolClientConfig } from "./RpcV2ProtocolClient";
 import {
   EmptyInputOutputCommand,
   EmptyInputOutputCommandInput,
@@ -79,21 +76,24 @@ const commands = {
   RpcV2CborSparseMapsCommand,
   SimpleScalarPropertiesCommand,
   SparseNullsOperationCommand,
-}
+};
 
 export interface RpcV2Protocol {
   /**
    * @see {@link EmptyInputOutputCommand}
    */
   emptyInputOutput(): Promise<EmptyInputOutputCommandOutput>;
+
   emptyInputOutput(
     args: EmptyInputOutputCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<EmptyInputOutputCommandOutput>;
+
   emptyInputOutput(
     args: EmptyInputOutputCommandInput,
     cb: (err: any, data?: EmptyInputOutputCommandOutput) => void
   ): void;
+
   emptyInputOutput(
     args: EmptyInputOutputCommandInput,
     options: __HttpHandlerOptions,
@@ -104,14 +104,17 @@ export interface RpcV2Protocol {
    * @see {@link FractionalSecondsCommand}
    */
   fractionalSeconds(): Promise<FractionalSecondsCommandOutput>;
+
   fractionalSeconds(
     args: FractionalSecondsCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<FractionalSecondsCommandOutput>;
+
   fractionalSeconds(
     args: FractionalSecondsCommandInput,
     cb: (err: any, data?: FractionalSecondsCommandOutput) => void
   ): void;
+
   fractionalSeconds(
     args: FractionalSecondsCommandInput,
     options: __HttpHandlerOptions,
@@ -122,14 +125,17 @@ export interface RpcV2Protocol {
    * @see {@link GreetingWithErrorsCommand}
    */
   greetingWithErrors(): Promise<GreetingWithErrorsCommandOutput>;
+
   greetingWithErrors(
     args: GreetingWithErrorsCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<GreetingWithErrorsCommandOutput>;
+
   greetingWithErrors(
     args: GreetingWithErrorsCommandInput,
     cb: (err: any, data?: GreetingWithErrorsCommandOutput) => void
   ): void;
+
   greetingWithErrors(
     args: GreetingWithErrorsCommandInput,
     options: __HttpHandlerOptions,
@@ -140,14 +146,11 @@ export interface RpcV2Protocol {
    * @see {@link NoInputOutputCommand}
    */
   noInputOutput(): Promise<NoInputOutputCommandOutput>;
-  noInputOutput(
-    args: NoInputOutputCommandInput,
-    options?: __HttpHandlerOptions,
-  ): Promise<NoInputOutputCommandOutput>;
-  noInputOutput(
-    args: NoInputOutputCommandInput,
-    cb: (err: any, data?: NoInputOutputCommandOutput) => void
-  ): void;
+
+  noInputOutput(args: NoInputOutputCommandInput, options?: __HttpHandlerOptions): Promise<NoInputOutputCommandOutput>;
+
+  noInputOutput(args: NoInputOutputCommandInput, cb: (err: any, data?: NoInputOutputCommandOutput) => void): void;
+
   noInputOutput(
     args: NoInputOutputCommandInput,
     options: __HttpHandlerOptions,
@@ -158,14 +161,17 @@ export interface RpcV2Protocol {
    * @see {@link OperationWithDefaultsCommand}
    */
   operationWithDefaults(): Promise<OperationWithDefaultsCommandOutput>;
+
   operationWithDefaults(
     args: OperationWithDefaultsCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<OperationWithDefaultsCommandOutput>;
+
   operationWithDefaults(
     args: OperationWithDefaultsCommandInput,
     cb: (err: any, data?: OperationWithDefaultsCommandOutput) => void
   ): void;
+
   operationWithDefaults(
     args: OperationWithDefaultsCommandInput,
     options: __HttpHandlerOptions,
@@ -176,14 +182,17 @@ export interface RpcV2Protocol {
    * @see {@link OptionalInputOutputCommand}
    */
   optionalInputOutput(): Promise<OptionalInputOutputCommandOutput>;
+
   optionalInputOutput(
     args: OptionalInputOutputCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<OptionalInputOutputCommandOutput>;
+
   optionalInputOutput(
     args: OptionalInputOutputCommandInput,
     cb: (err: any, data?: OptionalInputOutputCommandOutput) => void
   ): void;
+
   optionalInputOutput(
     args: OptionalInputOutputCommandInput,
     options: __HttpHandlerOptions,
@@ -194,14 +203,14 @@ export interface RpcV2Protocol {
    * @see {@link RecursiveShapesCommand}
    */
   recursiveShapes(): Promise<RecursiveShapesCommandOutput>;
+
   recursiveShapes(
     args: RecursiveShapesCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<RecursiveShapesCommandOutput>;
-  recursiveShapes(
-    args: RecursiveShapesCommandInput,
-    cb: (err: any, data?: RecursiveShapesCommandOutput) => void
-  ): void;
+
+  recursiveShapes(args: RecursiveShapesCommandInput, cb: (err: any, data?: RecursiveShapesCommandOutput) => void): void;
+
   recursiveShapes(
     args: RecursiveShapesCommandInput,
     options: __HttpHandlerOptions,
@@ -212,14 +221,17 @@ export interface RpcV2Protocol {
    * @see {@link RpcV2CborDenseMapsCommand}
    */
   rpcV2CborDenseMaps(): Promise<RpcV2CborDenseMapsCommandOutput>;
+
   rpcV2CborDenseMaps(
     args: RpcV2CborDenseMapsCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<RpcV2CborDenseMapsCommandOutput>;
+
   rpcV2CborDenseMaps(
     args: RpcV2CborDenseMapsCommandInput,
     cb: (err: any, data?: RpcV2CborDenseMapsCommandOutput) => void
   ): void;
+
   rpcV2CborDenseMaps(
     args: RpcV2CborDenseMapsCommandInput,
     options: __HttpHandlerOptions,
@@ -230,14 +242,14 @@ export interface RpcV2Protocol {
    * @see {@link RpcV2CborListsCommand}
    */
   rpcV2CborLists(): Promise<RpcV2CborListsCommandOutput>;
+
   rpcV2CborLists(
     args: RpcV2CborListsCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<RpcV2CborListsCommandOutput>;
-  rpcV2CborLists(
-    args: RpcV2CborListsCommandInput,
-    cb: (err: any, data?: RpcV2CborListsCommandOutput) => void
-  ): void;
+
+  rpcV2CborLists(args: RpcV2CborListsCommandInput, cb: (err: any, data?: RpcV2CborListsCommandOutput) => void): void;
+
   rpcV2CborLists(
     args: RpcV2CborListsCommandInput,
     options: __HttpHandlerOptions,
@@ -248,14 +260,17 @@ export interface RpcV2Protocol {
    * @see {@link RpcV2CborSparseMapsCommand}
    */
   rpcV2CborSparseMaps(): Promise<RpcV2CborSparseMapsCommandOutput>;
+
   rpcV2CborSparseMaps(
     args: RpcV2CborSparseMapsCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<RpcV2CborSparseMapsCommandOutput>;
+
   rpcV2CborSparseMaps(
     args: RpcV2CborSparseMapsCommandInput,
     cb: (err: any, data?: RpcV2CborSparseMapsCommandOutput) => void
   ): void;
+
   rpcV2CborSparseMaps(
     args: RpcV2CborSparseMapsCommandInput,
     options: __HttpHandlerOptions,
@@ -266,14 +281,17 @@ export interface RpcV2Protocol {
    * @see {@link SimpleScalarPropertiesCommand}
    */
   simpleScalarProperties(): Promise<SimpleScalarPropertiesCommandOutput>;
+
   simpleScalarProperties(
     args: SimpleScalarPropertiesCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<SimpleScalarPropertiesCommandOutput>;
+
   simpleScalarProperties(
     args: SimpleScalarPropertiesCommandInput,
     cb: (err: any, data?: SimpleScalarPropertiesCommandOutput) => void
   ): void;
+
   simpleScalarProperties(
     args: SimpleScalarPropertiesCommandInput,
     options: __HttpHandlerOptions,
@@ -284,24 +302,27 @@ export interface RpcV2Protocol {
    * @see {@link SparseNullsOperationCommand}
    */
   sparseNullsOperation(): Promise<SparseNullsOperationCommandOutput>;
+
   sparseNullsOperation(
     args: SparseNullsOperationCommandInput,
-    options?: __HttpHandlerOptions,
+    options?: __HttpHandlerOptions
   ): Promise<SparseNullsOperationCommandOutput>;
+
   sparseNullsOperation(
     args: SparseNullsOperationCommandInput,
     cb: (err: any, data?: SparseNullsOperationCommandOutput) => void
   ): void;
+
   sparseNullsOperation(
     args: SparseNullsOperationCommandInput,
     options: __HttpHandlerOptions,
     cb: (err: any, data?: SparseNullsOperationCommandOutput) => void
   ): void;
-
 }
 
 /**
  * @public
  */
 export class RpcV2Protocol extends RpcV2ProtocolClient implements RpcV2Protocol {}
+
 createAggregatedClient(commands, RpcV2Protocol);

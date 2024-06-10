@@ -1,10 +1,7 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClientResolvedConfig,
-  ServiceInputTypes,
-  ServiceOutputTypes,
-} from "../RpcV2ProtocolClient";
+import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { SparseNullsOperationInputOutput } from "../models/models_0";
+import { de_SparseNullsOperationCommand, se_SparseNullsOperationCommand } from "../protocols/Rpcv2cbor";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -12,13 +9,16 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 /**
  * @public
  */
-export { __MetadataBearer, $Command };
+export type { __MetadataBearer };
+export { $Command };
+
 /**
  * @public
  *
  * The input for {@link SparseNullsOperationCommand}.
  */
 export interface SparseNullsOperationCommandInput extends SparseNullsOperationInputOutput {}
+
 /**
  * @public
  *
@@ -66,19 +66,20 @@ export interface SparseNullsOperationCommandOutput extends SparseNullsOperationI
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
  */
-export class SparseNullsOperationCommand extends $Command.classBuilder<SparseNullsOperationCommandInput, SparseNullsOperationCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
-      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-          return [
-
-  getSerdePlugin(config, this.serialize, this.deserialize),
-      ];
+export class SparseNullsOperationCommand extends $Command
+  .classBuilder<
+    SparseNullsOperationCommandInput,
+    SparseNullsOperationCommandOutput,
+    RpcV2ProtocolClientResolvedConfig,
+    ServiceInputTypes,
+    ServiceOutputTypes
+  >()
+  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+    return [getSerdePlugin(config, this.serialize, this.deserialize)];
   })
-  .s("RpcV2Protocol", "SparseNullsOperation", {
-
-  })
+  .s("RpcV2Protocol", "SparseNullsOperation", {})
   .n("RpcV2ProtocolClient", "SparseNullsOperationCommand")
   .f(void 0, void 0)
-  .ser(() => { throw new Error("No supported protocol was found"); })
-  .de(() => { throw new Error("No supported protocol was found"); })
-.build() {
-}
+  .ser(se_SparseNullsOperationCommand)
+  .de(de_SparseNullsOperationCommand)
+  .build() {}

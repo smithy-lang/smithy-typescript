@@ -1,26 +1,8 @@
 // smithy-typescript generated code
-import {
-  HttpAuthSchemeInputConfig,
-  HttpAuthSchemeResolvedConfig,
-  defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
-  resolveHttpAuthSchemeConfig,
-} from "./auth/httpAuthSchemeProvider";
-import {
-  EmptyInputOutputCommandInput,
-  EmptyInputOutputCommandOutput,
-} from "./commands/EmptyInputOutputCommand";
-import {
-  FractionalSecondsCommandInput,
-  FractionalSecondsCommandOutput,
-} from "./commands/FractionalSecondsCommand";
-import {
-  GreetingWithErrorsCommandInput,
-  GreetingWithErrorsCommandOutput,
-} from "./commands/GreetingWithErrorsCommand";
-import {
-  NoInputOutputCommandInput,
-  NoInputOutputCommandOutput,
-} from "./commands/NoInputOutputCommand";
+import { EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput } from "./commands/EmptyInputOutputCommand";
+import { FractionalSecondsCommandInput, FractionalSecondsCommandOutput } from "./commands/FractionalSecondsCommand";
+import { GreetingWithErrorsCommandInput, GreetingWithErrorsCommandOutput } from "./commands/GreetingWithErrorsCommand";
+import { NoInputOutputCommandInput, NoInputOutputCommandOutput } from "./commands/NoInputOutputCommand";
 import {
   OperationWithDefaultsCommandInput,
   OperationWithDefaultsCommandOutput,
@@ -29,18 +11,9 @@ import {
   OptionalInputOutputCommandInput,
   OptionalInputOutputCommandOutput,
 } from "./commands/OptionalInputOutputCommand";
-import {
-  RecursiveShapesCommandInput,
-  RecursiveShapesCommandOutput,
-} from "./commands/RecursiveShapesCommand";
-import {
-  RpcV2CborDenseMapsCommandInput,
-  RpcV2CborDenseMapsCommandOutput,
-} from "./commands/RpcV2CborDenseMapsCommand";
-import {
-  RpcV2CborListsCommandInput,
-  RpcV2CborListsCommandOutput,
-} from "./commands/RpcV2CborListsCommand";
+import { RecursiveShapesCommandInput, RecursiveShapesCommandOutput } from "./commands/RecursiveShapesCommand";
+import { RpcV2CborDenseMapsCommandInput, RpcV2CborDenseMapsCommandOutput } from "./commands/RpcV2CborDenseMapsCommand";
+import { RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput } from "./commands/RpcV2CborListsCommand";
 import {
   RpcV2CborSparseMapsCommandInput,
   RpcV2CborSparseMapsCommandOutput,
@@ -54,16 +27,7 @@ import {
   SparseNullsOperationCommandOutput,
 } from "./commands/SparseNullsOperationCommand";
 import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
-import {
-  RuntimeExtension,
-  RuntimeExtensionsConfig,
-  resolveRuntimeExtensions,
-} from "./runtimeExtensions";
-import {
-  DefaultIdentityProviderConfig,
-  getHttpAuthSchemePlugin,
-  getHttpSigningPlugin,
-} from "@smithy/core";
+import { RuntimeExtension, RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
 import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
   Client as __Client,
@@ -85,7 +49,7 @@ import {
   UrlParser as __UrlParser,
 } from "@smithy/types";
 
-export { __Client }
+export { __Client };
 
 /**
  * @public
@@ -124,8 +88,7 @@ export type ServiceOutputTypes =
 /**
  * @public
  */
-export interface ClientDefaults
-  extends Partial<__SmithyConfiguration<__HttpHandlerOptions>> {
+export interface ClientDefaults extends Partial<__SmithyConfiguration<__HttpHandlerOptions>> {
   /**
    * The HTTP handler to use or its constructor options. Fetch in browser and Https in Nodejs.
    */
@@ -218,15 +181,13 @@ export interface ClientDefaults
    * The {@link @smithy/smithy-client#DefaultsMode} that will be used to determine how certain default configuration options are resolved in the SDK.
    */
   defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;
-
 }
 
 /**
  * @public
  */
-export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>>
-  & ClientDefaults
-  & HttpAuthSchemeInputConfig
+export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>> & ClientDefaults;
+
 /**
  * @public
  *
@@ -237,10 +198,10 @@ export interface RpcV2ProtocolClientConfig extends RpcV2ProtocolClientConfigType
 /**
  * @public
  */
-export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions>
-  & Required<ClientDefaults>
-  & RuntimeExtensionsConfig
-  & HttpAuthSchemeResolvedConfig
+export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions> &
+  Required<ClientDefaults> &
+  RuntimeExtensionsConfig;
+
 /**
  * @public
  *
@@ -264,12 +225,9 @@ export class RpcV2ProtocolClient extends __Client<
 
   constructor(...[configuration]: __CheckOptionalClientConfig<RpcV2ProtocolClientConfig>) {
     let _config_0 = __getRuntimeConfig(configuration || {});
-    let _config_1 = resolveHttpAuthSchemeConfig(_config_0);
-    let _config_2 = resolveRuntimeExtensions(_config_1, configuration?.extensions || []);
-    super(_config_2);
-    this.config = _config_2;
-    this.middlewareStack.use(getHttpAuthSchemePlugin(this.config, { httpAuthSchemeParametersProvider: this.getDefaultHttpAuthSchemeParametersProvider(), identityProviderConfigProvider: this.getIdentityProviderConfigProvider() }));
-    this.middlewareStack.use(getHttpSigningPlugin(this.config));
+    let _config_1 = resolveRuntimeExtensions(_config_0, configuration?.extensions || []);
+    super(_config_1);
+    this.config = _config_1;
   }
 
   /**
@@ -279,12 +237,5 @@ export class RpcV2ProtocolClient extends __Client<
    */
   destroy(): void {
     super.destroy();
-  }
-  private getDefaultHttpAuthSchemeParametersProvider() {
-    return defaultRpcV2ProtocolHttpAuthSchemeParametersProvider;
-  }
-  private getIdentityProviderConfigProvider() {
-    return async (config: RpcV2ProtocolClientResolvedConfig) => new DefaultIdentityProviderConfig({
-    });
   }
 }

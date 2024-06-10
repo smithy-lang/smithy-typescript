@@ -16,13 +16,13 @@
           "packageVersion": "1.0.0-alpha.1",
           "packageJson": {
             "author": {
-              "name": "AWS SDK for JavaScript Team",
-              "url": "https://aws.amazon.com/javascript/"
+              "name": "Smithy team",
+              "url": "https://smithy.io/"
             },
             "license": "Apache-2.0"
           },
           "private": true,
-          "experimentalIdentityAndAuth": true
+          "experimentalIdentityAndAuth": false
         }
       }
     }

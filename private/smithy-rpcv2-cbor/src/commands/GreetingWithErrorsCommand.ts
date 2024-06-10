@@ -1,10 +1,7 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClientResolvedConfig,
-  ServiceInputTypes,
-  ServiceOutputTypes,
-} from "../RpcV2ProtocolClient";
+import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { GreetingWithErrorsOutput } from "../models/models_0";
+import { de_GreetingWithErrorsCommand, se_GreetingWithErrorsCommand } from "../protocols/Rpcv2cbor";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -12,13 +9,16 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 /**
  * @public
  */
-export { __MetadataBearer, $Command };
+export type { __MetadataBearer };
+export { $Command };
+
 /**
  * @public
  *
  * The input for {@link GreetingWithErrorsCommand}.
  */
 export interface GreetingWithErrorsCommandInput {}
+
 /**
  * @public
  *
@@ -67,19 +67,20 @@ export interface GreetingWithErrorsCommandOutput extends GreetingWithErrorsOutpu
  *
  * @public
  */
-export class GreetingWithErrorsCommand extends $Command.classBuilder<GreetingWithErrorsCommandInput, GreetingWithErrorsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
-      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-          return [
-
-  getSerdePlugin(config, this.serialize, this.deserialize),
-      ];
+export class GreetingWithErrorsCommand extends $Command
+  .classBuilder<
+    GreetingWithErrorsCommandInput,
+    GreetingWithErrorsCommandOutput,
+    RpcV2ProtocolClientResolvedConfig,
+    ServiceInputTypes,
+    ServiceOutputTypes
+  >()
+  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+    return [getSerdePlugin(config, this.serialize, this.deserialize)];
   })
-  .s("RpcV2Protocol", "GreetingWithErrors", {
-
-  })
+  .s("RpcV2Protocol", "GreetingWithErrors", {})
   .n("RpcV2ProtocolClient", "GreetingWithErrorsCommand")
   .f(void 0, void 0)
-  .ser(() => { throw new Error("No supported protocol was found"); })
-  .de(() => { throw new Error("No supported protocol was found"); })
-.build() {
-}
+  .ser(se_GreetingWithErrorsCommand)
+  .de(de_GreetingWithErrorsCommand)
+  .build() {}

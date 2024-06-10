@@ -1,10 +1,7 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClientResolvedConfig,
-  ServiceInputTypes,
-  ServiceOutputTypes,
-} from "../RpcV2ProtocolClient";
+import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { SimpleScalarStructure } from "../models/models_0";
+import { de_SimpleScalarPropertiesCommand, se_SimpleScalarPropertiesCommand } from "../protocols/Rpcv2cbor";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -12,13 +9,16 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 /**
  * @public
  */
-export { __MetadataBearer, $Command };
+export type { __MetadataBearer };
+export { $Command };
+
 /**
  * @public
  *
  * The input for {@link SimpleScalarPropertiesCommand}.
  */
 export interface SimpleScalarPropertiesCommandInput extends SimpleScalarStructure {}
+
 /**
  * @public
  *
@@ -74,19 +74,20 @@ export interface SimpleScalarPropertiesCommandOutput extends SimpleScalarStructu
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
  */
-export class SimpleScalarPropertiesCommand extends $Command.classBuilder<SimpleScalarPropertiesCommandInput, SimpleScalarPropertiesCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
-      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-          return [
-
-  getSerdePlugin(config, this.serialize, this.deserialize),
-      ];
+export class SimpleScalarPropertiesCommand extends $Command
+  .classBuilder<
+    SimpleScalarPropertiesCommandInput,
+    SimpleScalarPropertiesCommandOutput,
+    RpcV2ProtocolClientResolvedConfig,
+    ServiceInputTypes,
+    ServiceOutputTypes
+  >()
+  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+    return [getSerdePlugin(config, this.serialize, this.deserialize)];
   })
-  .s("RpcV2Protocol", "SimpleScalarProperties", {
-
-  })
+  .s("RpcV2Protocol", "SimpleScalarProperties", {})
   .n("RpcV2ProtocolClient", "SimpleScalarPropertiesCommand")
   .f(void 0, void 0)
-  .ser(() => { throw new Error("No supported protocol was found"); })
-  .de(() => { throw new Error("No supported protocol was found"); })
-.build() {
-}
+  .ser(se_SimpleScalarPropertiesCommand)
+  .de(de_SimpleScalarPropertiesCommand)
+  .build() {}

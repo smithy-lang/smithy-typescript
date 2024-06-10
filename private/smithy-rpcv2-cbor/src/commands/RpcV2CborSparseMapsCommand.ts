@@ -1,10 +1,7 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClientResolvedConfig,
-  ServiceInputTypes,
-  ServiceOutputTypes,
-} from "../RpcV2ProtocolClient";
+import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { RpcV2CborSparseMapsInputOutput } from "../models/models_0";
+import { de_RpcV2CborSparseMapsCommand, se_RpcV2CborSparseMapsCommand } from "../protocols/Rpcv2cbor";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -12,13 +9,16 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 /**
  * @public
  */
-export { __MetadataBearer, $Command };
+export type { __MetadataBearer };
+export { $Command };
+
 /**
  * @public
  *
  * The input for {@link RpcV2CborSparseMapsCommand}.
  */
 export interface RpcV2CborSparseMapsCommandInput extends RpcV2CborSparseMapsInputOutput {}
+
 /**
  * @public
  *
@@ -97,19 +97,20 @@ export interface RpcV2CborSparseMapsCommandOutput extends RpcV2CborSparseMapsInp
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
  */
-export class RpcV2CborSparseMapsCommand extends $Command.classBuilder<RpcV2CborSparseMapsCommandInput, RpcV2CborSparseMapsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
-      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-          return [
-
-  getSerdePlugin(config, this.serialize, this.deserialize),
-      ];
+export class RpcV2CborSparseMapsCommand extends $Command
+  .classBuilder<
+    RpcV2CborSparseMapsCommandInput,
+    RpcV2CborSparseMapsCommandOutput,
+    RpcV2ProtocolClientResolvedConfig,
+    ServiceInputTypes,
+    ServiceOutputTypes
+  >()
+  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+    return [getSerdePlugin(config, this.serialize, this.deserialize)];
   })
-  .s("RpcV2Protocol", "RpcV2CborSparseMaps", {
-
-  })
+  .s("RpcV2Protocol", "RpcV2CborSparseMaps", {})
   .n("RpcV2ProtocolClient", "RpcV2CborSparseMapsCommand")
   .f(void 0, void 0)
-  .ser(() => { throw new Error("No supported protocol was found"); })
-  .de(() => { throw new Error("No supported protocol was found"); })
-.build() {
-}
+  .ser(se_RpcV2CborSparseMapsCommand)
+  .de(de_RpcV2CborSparseMapsCommand)
+  .build() {}

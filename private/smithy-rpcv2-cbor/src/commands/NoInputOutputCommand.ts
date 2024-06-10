@@ -1,9 +1,6 @@
 // smithy-typescript generated code
-import {
-  RpcV2ProtocolClientResolvedConfig,
-  ServiceInputTypes,
-  ServiceOutputTypes,
-} from "../RpcV2ProtocolClient";
+import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import { de_NoInputOutputCommand, se_NoInputOutputCommand } from "../protocols/Rpcv2cbor";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -11,13 +8,16 @@ import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 /**
  * @public
  */
-export { __MetadataBearer, $Command };
+export type { __MetadataBearer };
+export { $Command };
+
 /**
  * @public
  *
  * The input for {@link NoInputOutputCommand}.
  */
 export interface NoInputOutputCommandInput {}
+
 /**
  * @public
  *
@@ -51,19 +51,20 @@ export interface NoInputOutputCommandOutput extends __MetadataBearer {}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
  */
-export class NoInputOutputCommand extends $Command.classBuilder<NoInputOutputCommandInput, NoInputOutputCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
-      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-          return [
-
-  getSerdePlugin(config, this.serialize, this.deserialize),
-      ];
+export class NoInputOutputCommand extends $Command
+  .classBuilder<
+    NoInputOutputCommandInput,
+    NoInputOutputCommandOutput,
+    RpcV2ProtocolClientResolvedConfig,
+    ServiceInputTypes,
+    ServiceOutputTypes
+  >()
+  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+    return [getSerdePlugin(config, this.serialize, this.deserialize)];
   })
-  .s("RpcV2Protocol", "NoInputOutput", {
-
-  })
+  .s("RpcV2Protocol", "NoInputOutput", {})
   .n("RpcV2ProtocolClient", "NoInputOutputCommand")
   .f(void 0, void 0)
-  .ser(() => { throw new Error("No supported protocol was found"); })
-  .de(() => { throw new Error("No supported protocol was found"); })
-.build() {
-}
+  .ser(se_NoInputOutputCommand)
+  .de(de_NoInputOutputCommand)
+  .build() {}
