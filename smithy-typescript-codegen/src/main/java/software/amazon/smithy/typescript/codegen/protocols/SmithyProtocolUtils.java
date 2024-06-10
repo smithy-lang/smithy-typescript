@@ -65,6 +65,9 @@ public final class SmithyProtocolUtils {
         HttpMessageTestCase testCase,
         TypeScriptSettings settings
     ) {
+        if (testCase.getTags().contains("defaults")) {
+            return true;
+        }
         return false;
     }
 

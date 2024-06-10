@@ -105,7 +105,7 @@ export const se_FractionalSecondsCommand = async (
   input: FractionalSecondsCommandInput,
   context: __SerdeContext
 ): Promise<__HttpRequest> => {
-  const headers: __HeaderBag = SHARED_HEADERS;
+  const headers: __HeaderBag = { ...SHARED_HEADERS };
   delete headers["content-type"];
 
   return buildHttpRpcRequest(
@@ -124,7 +124,7 @@ export const se_GreetingWithErrorsCommand = async (
   input: GreetingWithErrorsCommandInput,
   context: __SerdeContext
 ): Promise<__HttpRequest> => {
-  const headers: __HeaderBag = SHARED_HEADERS;
+  const headers: __HeaderBag = { ...SHARED_HEADERS };
   delete headers["content-type"];
 
   return buildHttpRpcRequest(
@@ -143,7 +143,7 @@ export const se_NoInputOutputCommand = async (
   input: NoInputOutputCommandInput,
   context: __SerdeContext
 ): Promise<__HttpRequest> => {
-  const headers: __HeaderBag = SHARED_HEADERS;
+  const headers: __HeaderBag = { ...SHARED_HEADERS };
   delete headers["content-type"];
 
   return buildHttpRpcRequest(context, headers, "/service/RpcV2Protocol/operation/NoInputOutput", undefined, undefined);
@@ -1202,9 +1202,6 @@ const buildHttpRpcRequest = async (
     try {
       contents.headers["content-length"] = String(calculateBodyLength(body));
     } catch (e) {}
-  }
-  if (basePath.includes("SparseNulls")) {
-    console.log("wtffff", headers);
   }
   return new __HttpRequest(contents);
 };

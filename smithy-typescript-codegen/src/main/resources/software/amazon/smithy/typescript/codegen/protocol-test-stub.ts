@@ -112,6 +112,10 @@ const equivalentContents = (expected: any, generated: any): boolean => {
     return true;
   }
 
+  if (typeof expected !== "object") {
+    return expected === generated;
+  }
+
   // If a test fails with an issue in the below 6 lines, it's likely
   // due to an issue in the nestedness or existence of the property
   // being compared.
