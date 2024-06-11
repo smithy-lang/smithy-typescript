@@ -70,7 +70,6 @@ import {
   limitedParseDouble as __limitedParseDouble,
   limitedParseFloat32 as __limitedParseFloat32,
   parseEpochTimestamp as __parseEpochTimestamp,
-  parseRfc3339DateTimeWithOffset as __parseRfc3339DateTimeWithOffset,
   _json,
   collectBody,
   take,
@@ -595,7 +594,10 @@ const se_Defaults = (input: Defaults, context: __SerdeContext): any => {
     defaultMap: _json,
     defaultShort: [],
     defaultString: [],
-    defaultTimestamp: (_) => _.getTime() / 1_000,
+    defaultTimestamp: (_) => ({
+      tag: 1,
+      value: _.getTime() / 1_000,
+    }),
     emptyBlob: [],
     emptyString: [],
     falseBoolean: [],
@@ -850,7 +852,10 @@ const se_TimestampList = (input: Date[], context: __SerdeContext): any => {
   return input
     .filter((e: any) => e != null)
     .map((entry) => {
-      return entry.getTime() / 1_000;
+      return {
+        tag: 1,
+        value: entry.getTime() / 1_000,
+      };
     });
 };
 
@@ -881,7 +886,7 @@ const se_TimestampList = (input: Date[], context: __SerdeContext): any => {
  */
 const de_FractionalSecondsOutput = (output: any, context: __SerdeContext): FractionalSecondsOutput => {
   return take(output, {
-    datetime: (_: any) => __expectNonNull(__parseRfc3339DateTimeWithOffset(_)),
+    datetime: (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
   }) as any;
 };
 

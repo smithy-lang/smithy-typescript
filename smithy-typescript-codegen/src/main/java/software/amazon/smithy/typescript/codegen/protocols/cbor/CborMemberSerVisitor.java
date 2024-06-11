@@ -8,13 +8,17 @@ package software.amazon.smithy.typescript.codegen.protocols.cbor;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
+import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberSerVisitor;
+import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
 public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
 
     private final String dataSource;
+    private final ProtocolGenerator.GenerationContext context;
+    private final TimestampFormatTrait.Format defaultTimestampFormat;
 
     /**
      * Constructor.
@@ -29,6 +33,8 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
                                 String dataSource,
                                 TimestampFormatTrait.Format defaultTimestampFormat) {
         super(context, dataSource, defaultTimestampFormat);
+        this.context = context;
+        this.defaultTimestampFormat = defaultTimestampFormat;
         this.serdeElisionEnabled = true;
         this.dataSource = dataSource;
     }
@@ -59,5 +65,21 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
     @Override
     public String doubleShape(DoubleShape shape) {
         return dataSource;
+    }
+
+    /**
+     * CBOR serialization needs a JS object identifiable as a tag.
+     */
+    @Override
+    public String timestampShape(TimestampShape shape) {
+        final String timestamp = HttpProtocolGeneratorUtils.getTimestampInputParam(
+            context, dataSource, shape, defaultTimestampFormat
+        );
+        return """
+            ({
+              tag: 1,
+              value: %s
+            })
+            """.formatted(timestamp);
     }
 }

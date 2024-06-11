@@ -5,14 +5,19 @@
 
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
+import software.amazon.smithy.model.knowledge.HttpBinding;
 import software.amazon.smithy.model.shapes.BlobShape;
+import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberDeserVisitor;
+import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
 public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
     private final String dataSource;
+    private final ProtocolGenerator.GenerationContext context;
+    private final TimestampFormatTrait.Format defaultTimestampFormat;
 
     /**
      * Constructor.
@@ -27,6 +32,8 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
                                   String dataSource,
                                   TimestampFormatTrait.Format defaultTimestampFormat) {
         super(context, dataSource, defaultTimestampFormat);
+        this.context = context;
+        this.defaultTimestampFormat = defaultTimestampFormat;
         context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         this.serdeElisionEnabled = !context.getSettings().generateServerSdk();
         this.dataSource = dataSource;
@@ -40,5 +47,22 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
     @Override
     public String blobShape(BlobShape shape) {
         return dataSource;
+    }
+
+    /**
+     * Smithy RPCv2 CBOR only allows the epoch-seconds format, ignoring the model's
+     * timestamp trait.
+     */
+    @Override
+    public String timestampShape(TimestampShape shape) {
+        return HttpProtocolGeneratorUtils.getTimestampOutputParam(
+            context.getWriter(),
+            dataSource,
+            HttpBinding.Location.DOCUMENT,
+            shape,
+            defaultTimestampFormat,
+            requiresNumericEpochSecondsInPayload(),
+            context.getSettings().generateClient()
+        );
     }
 }
