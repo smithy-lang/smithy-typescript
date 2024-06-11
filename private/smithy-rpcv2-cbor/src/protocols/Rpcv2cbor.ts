@@ -52,6 +52,7 @@ import {
   ValidationException,
 } from "../models/models_0";
 import {
+  dateToTag as __dateToTag,
   cbor,
   loadSmithyRpcV2CborErrorCode,
   parseCborBody as parseBody,
@@ -594,10 +595,7 @@ const se_Defaults = (input: Defaults, context: __SerdeContext): any => {
     defaultMap: _json,
     defaultShort: [],
     defaultString: [],
-    defaultTimestamp: (_) => ({
-      tag: 1,
-      value: _.getTime() / 1_000,
-    }),
+    defaultTimestamp: __dateToTag,
     emptyBlob: [],
     emptyString: [],
     falseBoolean: [],
@@ -852,10 +850,7 @@ const se_TimestampList = (input: Date[], context: __SerdeContext): any => {
   return input
     .filter((e: any) => e != null)
     .map((entry) => {
-      return {
-        tag: 1,
-        value: entry.getTime() / 1_000,
-      };
+      return __dateToTag(entry);
     });
 };
 

@@ -3,6 +3,9 @@ import type { HttpResponse, SerdeContext } from "@smithy/types";
 
 import { cbor } from "./cbor";
 
+/**
+ * @internal
+ */
 export const parseCborBody = (streamBody: any, context: SerdeContext): any => {
   return collectBody(streamBody, context).then(async (bytes) => {
     if (bytes.length) {
@@ -19,12 +22,28 @@ export const parseCborBody = (streamBody: any, context: SerdeContext): any => {
   });
 };
 
+/**
+ * @internal
+ */
+export const dateToTag = (date: Date): { tag: 1; value: number } => {
+  return {
+    tag: 1,
+    value: date.getTime() / 1000,
+  };
+};
+
+/**
+ * @internal
+ */
 export const parseCborErrorBody = async (errorBody: any, context: SerdeContext) => {
   const value = await parseCborBody(errorBody, context);
   value.message = value.message ?? value.Message;
   return value;
 };
 
+/**
+ * @internal
+ */
 export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): string | undefined => {
   const sanitizeErrorCode = (rawValue: string | number): string => {
     let cleanValue = rawValue;

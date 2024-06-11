@@ -10,15 +10,15 @@ import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
+import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberSerVisitor;
-import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
 public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
 
     private final String dataSource;
     private final ProtocolGenerator.GenerationContext context;
-    private final TimestampFormatTrait.Format defaultTimestampFormat;
 
     /**
      * Constructor.
@@ -34,7 +34,6 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
                                 TimestampFormatTrait.Format defaultTimestampFormat) {
         super(context, dataSource, defaultTimestampFormat);
         this.context = context;
-        this.defaultTimestampFormat = defaultTimestampFormat;
         this.serdeElisionEnabled = true;
         this.dataSource = dataSource;
     }
@@ -72,14 +71,12 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      */
     @Override
     public String timestampShape(TimestampShape shape) {
-        final String timestamp = HttpProtocolGeneratorUtils.getTimestampInputParam(
-            context, dataSource, shape, defaultTimestampFormat
+        context.getWriter().addSubPathImport(
+            "dateToTag",
+            "__dateToTag",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.CBOR
         );
-        return """
-            ({
-              tag: 1,
-              value: %s
-            })
-            """.formatted(timestamp);
+        return "__dateToTag(" + dataSource + ")";
     }
 }
