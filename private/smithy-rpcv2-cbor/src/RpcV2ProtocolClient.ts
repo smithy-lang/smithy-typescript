@@ -222,13 +222,6 @@ export class RpcV2ProtocolClient extends __Client<
   readonly config: RpcV2ProtocolClientResolvedConfig;
 
   constructor(...[configuration]: __CheckOptionalClientConfig<RpcV2ProtocolClientConfig>) {
-    (configuration as any).endpoint = async () => {
-      const url = new URL("https://www.amazon.com/");
-      return {
-        path: url.pathname,
-        ...url,
-      };
-    };
     let _config_0 = __getRuntimeConfig(configuration || {});
     let _config_1 = resolveRuntimeExtensions(_config_0, configuration?.extensions || []);
     super(_config_1);

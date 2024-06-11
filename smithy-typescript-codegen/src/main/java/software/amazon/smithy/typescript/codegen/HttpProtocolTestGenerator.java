@@ -547,11 +547,13 @@ public final class HttpProtocolTestGenerator implements Runnable {
         // because a request case for servers would be comparing parsed objects. We
         // need to know which is which here to be able to grab the utf8Encoder from
         // the right place.
-        if (isClientTest) {
-            writer.write("const utf8Encoder = client.config.utf8Encoder;");
-        } else {
-            writer.addImport("toUtf8", "__utf8Encoder", TypeScriptDependency.AWS_SDK_UTIL_UTF8);
-            writer.write("const utf8Encoder = __utf8Encoder;");
+        if (!mediaType.equals("application/cbor")) {
+            if (isClientTest) {
+                writer.write("const utf8Encoder = client.config.utf8Encoder;");
+            } else {
+                writer.addImport("toUtf8", "__utf8Encoder", TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+                writer.write("const utf8Encoder = __utf8Encoder;");
+            }
         }
 
         // Handle escaping strings with quotes inside them.
@@ -596,6 +598,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
             case "text/plain":
                 additionalStubs.add("protocol-test-text-stub.ts");
                 return "compareEquivalentTextBodies(bodyString, r.body)";
+            case "application/cbor":
+                writer.addSubPathImport("cbor", null,
+                    TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
+                additionalStubs.add("protocol-test-cbor-stub.ts");
+                return "compareEquivalentCborBodies(bodyString, r.body)";
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
                         + "`, defaulting to direct comparison.");

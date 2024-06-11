@@ -1,14 +1,14 @@
 import { HttpHandlerOptions, HeaderBag } from "@smithy/types";
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { Readable } from 'stream';
+import { Readable } from "stream";
 
 /**
  * Throws an expected exception that contains the serialized request.
  */
 class EXPECTED_REQUEST_SERIALIZATION_ERROR extends Error {
-    constructor(readonly request: HttpRequest) {
-      super();
-    }
+  constructor(readonly request: HttpRequest) {
+    super();
+  }
 }
 
 /**
@@ -16,62 +16,61 @@ class EXPECTED_REQUEST_SERIALIZATION_ERROR extends Error {
  * request. The thrown exception contains the serialized request.
  */
 class RequestSerializationTestHandler implements HttpHandler {
-    handle(
-        request: HttpRequest,
-        options?: HttpHandlerOptions
-    ): Promise<{ response: HttpResponse }> {
-        return Promise.reject(new EXPECTED_REQUEST_SERIALIZATION_ERROR(request));
-    }
-    updateHttpClientConfig(key: never, value: never): void {}
-    httpHandlerConfigs() { return {}; }
+  handle(request: HttpRequest, options?: HttpHandlerOptions): Promise<{ response: HttpResponse }> {
+    return Promise.reject(new EXPECTED_REQUEST_SERIALIZATION_ERROR(request));
+  }
+
+  updateHttpClientConfig(key: never, value: never): void {}
+
+  httpHandlerConfigs() {
+    return {};
+  }
 }
 
 /**
  * Returns a resolved Promise of the specified response contents.
  */
 class ResponseDeserializationTestHandler implements HttpHandler {
-    isSuccess: boolean;
-    code: number;
-    headers: HeaderBag;
-    body: String;
+  isSuccess: boolean;
+  code: number;
+  headers: HeaderBag;
+  body: string | Uint8Array;
+  isBase64Body: boolean;
 
-    constructor(
-        isSuccess: boolean,
-        code: number,
-        headers?: HeaderBag,
-        body?: String
-    ) {
-        this.isSuccess = isSuccess;
-        this.code = code;
-        if (headers === undefined) {
-            this.headers = {};
-        } else {
-            this.headers = headers;
-        }
-        if (body === undefined) {
-            body = "";
-        }
-        this.body = body;
+  constructor(isSuccess: boolean, code: number, headers?: HeaderBag, body?: string) {
+    this.isSuccess = isSuccess;
+    this.code = code;
+    if (headers === undefined) {
+      this.headers = {};
+    } else {
+      this.headers = headers;
     }
+    if (body === undefined) {
+      body = "";
+    }
+    this.body = body;
+    this.isBase64Body = Buffer.from(String(body), "base64").toString("base64") === body;
+  }
 
-    handle(
-        request: HttpRequest,
-        options?: HttpHandlerOptions
-    ): Promise<{ response: HttpResponse }> {
-        return Promise.resolve({
-            response: new HttpResponse({
-                statusCode: this.code,
-                headers: this.headers,
-                body: Readable.from([this.body])
-            })
-        });
-    }
-    updateHttpClientConfig(key: never, value: never): void {}
-    httpHandlerConfigs() { return {}; }
+  handle(request: HttpRequest, options?: HttpHandlerOptions): Promise<{ response: HttpResponse }> {
+    return Promise.resolve({
+      response: new HttpResponse({
+        statusCode: this.code,
+        headers: this.headers,
+        body: this.isBase64Body ? toBytes(this.body as string) : Readable.from([this.body]),
+      }),
+    });
+  }
+
+  updateHttpClientConfig(key: never, value: never): void {}
+
+  httpHandlerConfigs() {
+    return {};
+  }
 }
 
 interface comparableParts {
-  [ key: string ]: string
+  [key: string]: string;
 }
 
 /**
@@ -79,7 +78,7 @@ interface comparableParts {
  */
 const compareParts = (expectedParts: comparableParts, generatedParts: comparableParts) => {
   const unequalParts: any = {};
-  Object.keys(expectedParts).forEach(key => {
+  Object.keys(expectedParts).forEach((key) => {
     if (generatedParts[key] === undefined) {
       unequalParts[key] = { exp: expectedParts[key], gen: undefined };
     } else if (!equivalentContents(expectedParts[key], generatedParts[key])) {
@@ -87,7 +86,7 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
     }
   });
 
-  Object.keys(generatedParts).forEach(key => {
+  Object.keys(generatedParts).forEach((key) => {
     if (expectedParts[key] === undefined) {
       unequalParts[key] = { exp: undefined, gen: generatedParts[key] };
     }
@@ -105,6 +104,11 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
  * properties that have defined values.
  */
 const equivalentContents = (expected: any, generated: any): boolean => {
+  if (typeof (global as any).expect === "function") {
+    expect(normalizeByteArrayType(generated)).toEqual(normalizeByteArrayType(expected));
+    return true;
+  }
+
   let localExpected = expected;
 
   // Short circuit on equality.
@@ -119,10 +123,10 @@ const equivalentContents = (expected: any, generated: any): boolean => {
   // If a test fails with an issue in the below 6 lines, it's likely
   // due to an issue in the nestedness or existence of the property
   // being compared.
-  delete localExpected['$$metadata'];
-  delete generated['$$metadata'];
-  Object.keys(localExpected).forEach(key => localExpected[key] === undefined && delete localExpected[key])
-  Object.keys(generated).forEach(key => generated[key] === undefined && delete generated[key])
+  delete localExpected["$$metadata"];
+  delete generated["$$metadata"];
+  Object.keys(localExpected).forEach((key) => localExpected[key] === undefined && delete localExpected[key]);
+  Object.keys(generated).forEach((key) => generated[key] === undefined && delete generated[key]);
 
   const expectedProperties = Object.getOwnPropertyNames(localExpected);
   const generatedProperties = Object.getOwnPropertyNames(generated);
@@ -141,17 +145,47 @@ const equivalentContents = (expected: any, generated: any): boolean => {
   }
 
   return true;
-}
+};
 
 const clientParams = {
   region: "us-west-2",
-  credentials: { accessKeyId: "key", secretAccessKey: "secret" }
-}
+  credentials: { accessKeyId: "key", secretAccessKey: "secret" },
+  endpoint: () => {
+    const url = new URL("https://www.amazon.com/");
+    return Promise.resolve({
+      path: url.pathname,
+      ...url,
+    });
+  },
+};
 
 /**
  * A wrapper function that shadows `fail` from jest-jasmine2
  * (jasmine2 was replaced with circus in > v27 as the default test runner)
  */
 const fail = (error?: any): never => {
-    throw new Error(error);
+  throw new Error(error);
+};
+
+/**
+ * Hexadecimal to byteArray.
+ */
+const toBytes = (hex: string) => {
+  return Buffer.from(hex, "base64");
+};
+
+function normalizeByteArrayType(data: any) {
+  if (!data || typeof data !== "object") {
+    return data;
+  }
+  for (const key of Object.getOwnPropertyNames(data)) {
+    if (data[key] instanceof Uint8Array) {
+      data[key] = Uint8Array.from(data[key]);
+    } else {
+      try {
+        data[key] = normalizeByteArrayType(data[key]);
+      } catch (e: unknown) {}
+    }
+  }
+  return data;
 }

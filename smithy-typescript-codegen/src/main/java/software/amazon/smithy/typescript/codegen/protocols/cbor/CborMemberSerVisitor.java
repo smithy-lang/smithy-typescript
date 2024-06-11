@@ -5,11 +5,14 @@
 
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
+import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberSerVisitor;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
 public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
+
+    private final String dataSource;
 
     /**
      * Constructor.
@@ -25,5 +28,16 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
                                 TimestampFormatTrait.Format defaultTimestampFormat) {
         super(context, dataSource, defaultTimestampFormat);
         this.serdeElisionEnabled = true;
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * This differs from the base method in that CBOR does not need to wrap
+     * the blob value in `context.base64Encoder(...)`. The CBOR format serializer
+     * already does this whereas e.g. JSON.stringify does not.
+     */
+    @Override
+    public String blobShape(BlobShape shape) {
+        return dataSource;
     }
 }

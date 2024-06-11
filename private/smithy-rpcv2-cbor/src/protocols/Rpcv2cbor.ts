@@ -481,6 +481,13 @@ export const de_SimpleScalarPropertiesCommand = async (
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_SimpleScalarStructure(data, context);
+
+  console.log("deser", {
+    outputbody: output.body,
+    parseBody: data,
+    contents,
+  });
+
   const response: SimpleScalarPropertiesCommandOutput = {
     $metadata: deserializeMetadata(output),
     ...contents,
@@ -583,7 +590,7 @@ const de_InvalidGreetingRes = async (parsedOutput: any, context: __SerdeContext)
  */
 const se_Defaults = (input: Defaults, context: __SerdeContext): any => {
   return take(input, {
-    defaultBlob: context.base64Encoder,
+    defaultBlob: [],
     defaultBoolean: [],
     defaultByte: [],
     defaultDouble: __serializeFloat,
@@ -597,7 +604,7 @@ const se_Defaults = (input: Defaults, context: __SerdeContext): any => {
     defaultShort: [],
     defaultString: [],
     defaultTimestamp: (_) => _.getTime() / 1_000,
-    emptyBlob: context.base64Encoder,
+    emptyBlob: [],
     emptyString: [],
     falseBoolean: [],
     zeroByte: [],
@@ -706,7 +713,7 @@ const se_RpcV2CborSparseMapsInputOutput = (input: RpcV2CborSparseMapsInputOutput
  */
 const se_SimpleScalarStructure = (input: SimpleScalarStructure, context: __SerdeContext): any => {
   return take(input, {
-    blobValue: context.base64Encoder,
+    blobValue: [],
     byteValue: [],
     doubleValue: __serializeFloat,
     falseBooleanValue: [],
@@ -803,11 +810,7 @@ const se_SparseStructMap = (input: Record<string, GreetingStruct>, context: __Se
  * serializeRpcv2cborBlobList
  */
 const se_BlobList = (input: Uint8Array[], context: __SerdeContext): any => {
-  return input
-    .filter((e: any) => e != null)
-    .map((entry) => {
-      return context.base64Encoder(entry);
-    });
+  return input.filter((e: any) => e != null);
 };
 
 // se_BooleanList omitted.
@@ -899,7 +902,7 @@ const de_FractionalSecondsOutput = (output: any, context: __SerdeContext): Fract
  */
 const de_OperationWithDefaultsOutput = (output: any, context: __SerdeContext): OperationWithDefaultsOutput => {
   return take(output, {
-    defaultBlob: context.base64Decoder,
+    defaultBlob: [],
     defaultBoolean: __expectBoolean,
     defaultByte: __expectByte,
     defaultDouble: __limitedParseDouble,
@@ -913,7 +916,7 @@ const de_OperationWithDefaultsOutput = (output: any, context: __SerdeContext): O
     defaultShort: __expectShort,
     defaultString: __expectString,
     defaultTimestamp: (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
-    emptyBlob: context.base64Decoder,
+    emptyBlob: [],
     emptyString: __expectString,
     falseBoolean: __expectBoolean,
     zeroByte: __expectByte,
@@ -998,7 +1001,7 @@ const de_RpcV2CborSparseMapsInputOutput = (output: any, context: __SerdeContext)
  */
 const de_SimpleScalarStructure = (output: any, context: __SerdeContext): SimpleScalarStructure => {
   return take(output, {
-    blobValue: context.base64Decoder,
+    blobValue: [],
     byteValue: __expectByte,
     doubleValue: __limitedParseDouble,
     falseBooleanValue: __expectBoolean,
@@ -1103,11 +1106,7 @@ const de_SparseStructMap = (output: any, context: __SerdeContext): Record<string
  * deserializeRpcv2cborBlobList
  */
 const de_BlobList = (output: any, context: __SerdeContext): Uint8Array[] => {
-  const collection = (output || [])
-    .filter((e: any) => e != null)
-    .map((entry: any) => {
-      return context.base64Decoder(entry);
-    });
+  const collection = (output || []).filter((e: any) => e != null);
   return collection;
 };
 
