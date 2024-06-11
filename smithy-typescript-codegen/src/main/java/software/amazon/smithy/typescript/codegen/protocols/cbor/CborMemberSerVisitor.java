@@ -6,6 +6,8 @@
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import software.amazon.smithy.model.shapes.BlobShape;
+import software.amazon.smithy.model.shapes.DoubleShape;
+import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberSerVisitor;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -38,6 +40,24 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      */
     @Override
     public String blobShape(BlobShape shape) {
+        return dataSource;
+    }
+
+    /**
+     * +/- Infinity and NaN have byte representations. No need to
+     * serialize those values with serializeFloat().
+     */
+    @Override
+    public String floatShape(FloatShape shape) {
+        return dataSource;
+    }
+
+    /**
+     * +/- Infinity and NaN have byte representations. No need to
+     * serialize those values with serializeFloat().
+     */
+    @Override
+    public String doubleShape(DoubleShape shape) {
         return dataSource;
     }
 }
