@@ -817,7 +817,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
         // trick TS in to letting us send this command through.
         writer.write("const params: any = {};");
         writer.write("const command = new $T(params);\n", operationSymbol);
-
     }
 
     // Ensure that the serialized response matches the expected response.
@@ -994,7 +993,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             String closeElement = "]";
 
             // Write the value out directly.
-            writer.openBlock("$L\n", closeElement + ",\n", openElement, () -> {
+            writer.openBlock("$L", closeElement + ",", openElement, () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getElements().forEach(element -> {
                     // Swap the working shape to the member of the collection.
@@ -1002,7 +1001,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     if (wrapperShape instanceof CollectionShape) {
                         this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
                     }
-                    writer.call(() -> element.accept(this)).write("\n");
+                    writer.call(() -> element.accept(this));
                 });
                 this.workingShape = wrapperShape;
             });
@@ -1052,7 +1051,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 suffix += ";";
                 appendSemicolon = false;
             } else {
-                suffix += ",\n";
+                suffix += ",";
             }
 
             writer.openBlock("{", suffix, () -> {
@@ -1084,7 +1083,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         this.workingShape = model.expectShape(memberShape.getTarget());
                         writer.call(() -> valueNode.accept(this));
                     }
-                    writer.write("\n");
                 });
                 // Check for setting a potentially unspecified member value for the
                 // idempotency token.
@@ -1215,7 +1213,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             String closeElement = "]";
 
             // Write the value out directly.
-            writer.openBlock("$L\n", closeElement + ",\n", openElement, () -> {
+            writer.openBlock("$L", closeElement + ",", openElement, () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getElements().forEach(element -> {
                     // Swap the working shape to the member of the collection.
@@ -1223,7 +1221,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     if (wrapperShape instanceof CollectionShape) {
                         this.workingShape = model.expectShape(((CollectionShape) wrapperShape).getMember().getTarget());
                     }
-                    writer.call(() -> element.accept(this)).write("\n");
+                    writer.call(() -> element.accept(this));
                 });
                 this.workingShape = wrapperShape;
             });
@@ -1266,7 +1264,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Both objects and maps can use a majority of the same logic.
             // Use "as any" to have TS complain less about undefined entries.
-            writer.openBlock("{", "},\n", () -> {
+            writer.openBlock("{", "},", () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getMembers().forEach((keyNode, valueNode) -> {
                     // Grab the correct member related to the node member we have.
@@ -1296,7 +1294,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
                             ? downcaseNodeKeys(valueNode.expectObjectNode())
                             : valueNode;
                     writer.call(() -> renderNode.accept(this));
-                    writer.write("\n");
                 });
                 this.workingShape = wrapperShape;
             });

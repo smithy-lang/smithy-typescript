@@ -425,7 +425,6 @@ it("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
     const paramsToValidate: any = [
       {
         TopLevel: "Top level",
-
         Nested: {
           Foo: "bar",
         },
@@ -681,51 +680,29 @@ it.skip("RpcV2CborClientUsesExplicitlyProvidedMemberValuesOverDefaults:Request",
   const command = new OperationWithDefaultsCommand({
     defaults: {
       defaultString: "bye",
-
       defaultBoolean: true,
-
       defaultList: ["a"],
-
       defaultTimestamp: new Date(1000),
-
       defaultBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
-
       defaultByte: 2,
-
       defaultShort: 2,
-
       defaultInteger: 20,
-
       defaultLong: 200,
-
       defaultFloat: 2.0,
-
       defaultDouble: 2.0,
-
       defaultMap: {
         name: "Jack",
       } as any,
-
       defaultEnum: "BAR",
-
       defaultIntEnum: 2,
-
       emptyString: "foo",
-
       falseBoolean: true,
-
       emptyBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
-
       zeroByte: 1,
-
       zeroShort: 1,
-
       zeroInteger: 1,
-
       zeroLong: 1,
-
       zeroFloat: 1.0,
-
       zeroDouble: 1.0,
     } as any,
   } as any);
@@ -766,7 +743,6 @@ it.skip("RpcV2CborClientUsesExplicitlyProvidedValuesInTopLevel:Request", async (
 
   const command = new OperationWithDefaultsCommand({
     topLevelDefault: "hi",
-
     otherTopLevelDefault: 0,
   } as any);
   try {
@@ -864,49 +840,27 @@ it.skip("RpcV2CborClientPopulatesDefaultsValuesWhenMissingInResponse:Response", 
   const paramsToValidate: any = [
     {
       defaultString: "hi",
-
       defaultBoolean: true,
-
       defaultList: [],
-
       defaultTimestamp: new Date(0 * 1000),
-
       defaultBlob: Uint8Array.from("abc", (c) => c.charCodeAt(0)),
-
       defaultByte: 1,
-
       defaultShort: 1,
-
       defaultInteger: 10,
-
       defaultLong: 100,
-
       defaultFloat: 1.0,
-
       defaultDouble: 1.0,
-
       defaultMap: {},
-
       defaultEnum: "FOO",
-
       defaultIntEnum: 1,
-
       emptyString: "",
-
       falseBoolean: false,
-
       emptyBlob: Uint8Array.from("", (c) => c.charCodeAt(0)),
-
       zeroByte: 0,
-
       zeroShort: 0,
-
       zeroInteger: 0,
-
       zeroLong: 0,
-
       zeroFloat: 0.0,
-
       zeroDouble: 0.0,
     },
   ][0];
@@ -947,51 +901,29 @@ it.skip("RpcV2CborClientIgnoresDefaultValuesIfMemberValuesArePresentInResponse:R
   const paramsToValidate: any = [
     {
       defaultString: "bye",
-
       defaultBoolean: false,
-
       defaultList: ["a"],
-
       defaultTimestamp: new Date(2 * 1000),
-
       defaultBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
-
       defaultByte: 2,
-
       defaultShort: 2,
-
       defaultInteger: 20,
-
       defaultLong: 200,
-
       defaultFloat: 2.0,
-
       defaultDouble: 2.0,
-
       defaultMap: {
         name: "Jack",
       },
-
       defaultEnum: "BAR",
-
       defaultIntEnum: 2,
-
       emptyString: "foo",
-
       falseBoolean: true,
-
       emptyBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
-
       zeroByte: 1,
-
       zeroShort: 1,
-
       zeroInteger: 1,
-
       zeroLong: 1,
-
       zeroFloat: 1.0,
-
       zeroDouble: 1.0,
     },
   ][0];
@@ -1080,13 +1012,10 @@ it("RpcV2CborRecursiveShapes:Request", async () => {
   const command = new RecursiveShapesCommand({
     nested: {
       foo: "Foo1",
-
       nested: {
         bar: "Bar1",
-
         recursiveMember: {
           foo: "Foo2",
-
           nested: {
             bar: "Bar2",
           } as any,
@@ -1152,13 +1081,10 @@ it("RpcV2CborRecursiveShapes:Response", async () => {
     {
       nested: {
         foo: "Foo1",
-
         nested: {
           bar: "Bar1",
-
           recursiveMember: {
             foo: "Foo2",
-
             nested: {
               bar: "Bar2",
             },
@@ -1205,13 +1131,10 @@ it("RpcV2CborRecursiveShapesUsingDefiniteLength:Response", async () => {
     {
       nested: {
         foo: "Foo1",
-
         nested: {
           bar: "Bar1",
-
           recursiveMember: {
             foo: "Foo2",
-
             nested: {
               bar: "Bar2",
             },
@@ -1240,7 +1163,6 @@ it("RpcV2CborMaps:Request", async () => {
       foo: {
         hi: "there",
       } as any,
-
       baz: {
         hi: "bye",
       } as any,
@@ -1285,7 +1207,6 @@ it("RpcV2CborSerializesZeroValuesInMaps:Request", async () => {
     denseNumberMap: {
       x: 0,
     } as any,
-
     denseBooleanMap: {
       x: false,
     } as any,
@@ -1328,7 +1249,6 @@ it("RpcV2CborSerializesDenseSetMap:Request", async () => {
   const command = new RpcV2CborDenseMapsCommand({
     denseSetMap: {
       x: [],
-
       y: ["a", "b"],
     } as any,
   } as any);
@@ -1392,7 +1312,6 @@ it("RpcV2CborMaps:Response", async () => {
         foo: {
           hi: "there",
         },
-
         baz: {
           hi: "bye",
         },
@@ -1438,7 +1357,6 @@ it("RpcV2CborDeserializesZeroValuesInMaps:Response", async () => {
       denseNumberMap: {
         x: 0,
       },
-
       denseBooleanMap: {
         x: false,
       },
@@ -1482,7 +1400,6 @@ it("RpcV2CborDeserializesDenseSetMap:Response", async () => {
     {
       denseSetMap: {
         x: [],
-
         y: ["a", "b"],
       },
     },
@@ -1526,9 +1443,7 @@ it("RpcV2CborDeserializesDenseSetMapAndSkipsNull:Response", async () => {
     {
       denseSetMap: {
         x: [],
-
         y: ["a", "b"],
-
         z: null,
       },
     },
@@ -1550,47 +1465,26 @@ it("RpcV2CborLists:Request", async () => {
 
   const command = new RpcV2CborListsCommand({
     stringList: ["foo", "bar"],
-
     stringSet: ["foo", "bar"],
-
-    integerList: [
-      1,
-
-      2,
-    ],
-
+    integerList: [1, 2],
     booleanList: [true, false],
-
     timestampList: [new Date(1398796238000), new Date(1398796238000)],
-
     enumList: ["Foo", "0"],
-
-    intEnumList: [
-      1,
-
-      2,
-    ],
-
+    intEnumList: [1, 2],
     nestedStringList: [
       ["foo", "bar"],
-
       ["baz", "qux"],
     ],
-
     structureList: [
       {
         a: "1",
-
         b: "2",
       } as any,
-
       {
         a: "3",
-
         b: "4",
       } as any,
     ],
-
     blobList: [Uint8Array.from("foo", (c) => c.charCodeAt(0)), Uint8Array.from("bar", (c) => c.charCodeAt(0))],
   } as any);
   try {
@@ -1726,47 +1620,26 @@ it("RpcV2CborLists:Response", async () => {
   const paramsToValidate: any = [
     {
       stringList: ["foo", "bar"],
-
       stringSet: ["foo", "bar"],
-
-      integerList: [
-        1,
-
-        2,
-      ],
-
+      integerList: [1, 2],
       booleanList: [true, false],
-
       timestampList: [new Date(1398796238 * 1000), new Date(1398796238 * 1000)],
-
       enumList: ["Foo", "0"],
-
-      intEnumList: [
-        1,
-
-        2,
-      ],
-
+      intEnumList: [1, 2],
       nestedStringList: [
         ["foo", "bar"],
-
         ["baz", "qux"],
       ],
-
       structureList: [
         {
           a: "1",
-
           b: "2",
         },
-
         {
           a: "3",
-
           b: "4",
         },
       ],
-
       blobList: [Uint8Array.from("foo", (c) => c.charCodeAt(0)), Uint8Array.from("bar", (c) => c.charCodeAt(0))],
     },
   ][0];
@@ -1847,9 +1720,7 @@ it("RpcV2CborIndefiniteStringInsideIndefiniteListCanDeserialize:Response", async
     {
       stringList: [
         "An example indefinite string, which will be chunked, on each comma",
-
         "Another example indefinite string with only one chunk",
-
         "This is a plain string",
       ],
     },
@@ -1892,9 +1763,7 @@ it("RpcV2CborIndefiniteStringInsideDefiniteListCanDeserialize:Response", async (
     {
       stringList: [
         "An example indefinite string, which will be chunked, on each comma",
-
         "Another example indefinite string with only one chunk",
-
         "This is a plain string",
       ],
     },
@@ -1919,7 +1788,6 @@ it("RpcV2CborSparseMaps:Request", async () => {
       foo: {
         hi: "there",
       } as any,
-
       baz: {
         hi: "bye",
       } as any,
@@ -1964,15 +1832,12 @@ it("RpcV2CborSerializesNullMapValues:Request", async () => {
     sparseBooleanMap: {
       x: null,
     } as any,
-
     sparseNumberMap: {
       x: null,
     } as any,
-
     sparseStringMap: {
       x: null,
     } as any,
-
     sparseStructMap: {
       x: null,
     } as any,
@@ -2015,7 +1880,6 @@ it("RpcV2CborSerializesSparseSetMap:Request", async () => {
   const command = new RpcV2CborSparseMapsCommand({
     sparseSetMap: {
       x: [],
-
       y: ["a", "b"],
     } as any,
   } as any);
@@ -2057,9 +1921,7 @@ it("RpcV2CborSerializesSparseSetMapAndRetainsNull:Request", async () => {
   const command = new RpcV2CborSparseMapsCommand({
     sparseSetMap: {
       x: [],
-
       y: ["a", "b"],
-
       z: null,
     } as any,
   } as any);
@@ -2102,7 +1964,6 @@ it("RpcV2CborSerializesZeroValuesInSparseMaps:Request", async () => {
     sparseNumberMap: {
       x: 0,
     } as any,
-
     sparseBooleanMap: {
       x: false,
     } as any,
@@ -2167,7 +2028,6 @@ it("RpcV2CborSparseJsonMaps:Response", async () => {
         foo: {
           hi: "there",
         },
-
         baz: {
           hi: "bye",
         },
@@ -2213,15 +2073,12 @@ it("RpcV2CborDeserializesNullMapValues:Response", async () => {
       sparseBooleanMap: {
         x: null,
       },
-
       sparseNumberMap: {
         x: null,
       },
-
       sparseStringMap: {
         x: null,
       },
-
       sparseStructMap: {
         x: null,
       },
@@ -2265,7 +2122,6 @@ it("RpcV2CborDeserializesSparseSetMap:Response", async () => {
     {
       sparseSetMap: {
         x: [],
-
         y: ["a", "b"],
       },
     },
@@ -2308,9 +2164,7 @@ it("RpcV2CborDeserializesSparseSetMapAndRetainsNull:Response", async () => {
     {
       sparseSetMap: {
         x: [],
-
         y: ["a", "b"],
-
         z: null,
       },
     },
@@ -2354,7 +2208,6 @@ it("RpcV2CborDeserializesZeroValuesInSparseMaps:Response", async () => {
       sparseNumberMap: {
         x: 0,
       },
-
       sparseBooleanMap: {
         x: false,
       },
@@ -2377,23 +2230,14 @@ it("RpcV2CborSimpleScalarProperties:Request", async () => {
 
   const command = new SimpleScalarPropertiesCommand({
     byteValue: 5,
-
     doubleValue: 1.889,
-
     falseBooleanValue: false,
-
     floatValue: 7.624,
-
     integerValue: 256,
-
     longValue: 9873,
-
     shortValue: 9898,
-
     stringValue: "simple",
-
     trueBooleanValue: true,
-
     blobValue: Uint8Array.from("foo", (c) => c.charCodeAt(0)),
   } as any);
   try {
@@ -2471,7 +2315,6 @@ it("RpcV2CborSupportsNaNFloatInputs:Request", async () => {
 
   const command = new SimpleScalarPropertiesCommand({
     doubleValue: NaN,
-
     floatValue: NaN,
   } as any);
   try {
@@ -2511,7 +2354,6 @@ it("RpcV2CborSupportsInfinityFloatInputs:Request", async () => {
 
   const command = new SimpleScalarPropertiesCommand({
     doubleValue: Infinity,
-
     floatValue: Infinity,
   } as any);
   try {
@@ -2551,7 +2393,6 @@ it("RpcV2CborSupportsNegativeInfinityFloatInputs:Request", async () => {
 
   const command = new SimpleScalarPropertiesCommand({
     doubleValue: -Infinity,
-
     floatValue: -Infinity,
   } as any);
   try {
@@ -2611,21 +2452,13 @@ it("RpcV2CborSimpleScalarProperties:Response", async () => {
   const paramsToValidate: any = [
     {
       trueBooleanValue: true,
-
       falseBooleanValue: false,
-
       byteValue: 5,
-
       doubleValue: 1.889,
-
       floatValue: 7.624,
-
       integerValue: 256,
-
       shortValue: 9898,
-
       stringValue: "simple",
-
       blobValue: Uint8Array.from("foo", (c) => c.charCodeAt(0)),
     },
   ][0];
@@ -2666,21 +2499,13 @@ it("RpcV2CborSimpleScalarPropertiesUsingDefiniteLength:Response", async () => {
   const paramsToValidate: any = [
     {
       trueBooleanValue: true,
-
       falseBooleanValue: false,
-
       byteValue: 5,
-
       doubleValue: 1.889,
-
       floatValue: 7.624,
-
       integerValue: 256,
-
       shortValue: 9898,
-
       stringValue: "simple",
-
       blobValue: Uint8Array.from("foo", (c) => c.charCodeAt(0)),
     },
   ][0];
@@ -2751,7 +2576,6 @@ it("RpcV2CborSupportsNaNFloatOutputs:Response", async () => {
   const paramsToValidate: any = [
     {
       doubleValue: NaN,
-
       floatValue: NaN,
     },
   ][0];
@@ -2792,7 +2616,6 @@ it("RpcV2CborSupportsInfinityFloatOutputs:Response", async () => {
   const paramsToValidate: any = [
     {
       doubleValue: Infinity,
-
       floatValue: Infinity,
     },
   ][0];
@@ -2833,7 +2656,6 @@ it("RpcV2CborSupportsNegativeInfinityFloatOutputs:Response", async () => {
   const paramsToValidate: any = [
     {
       doubleValue: -Infinity,
-
       floatValue: -Infinity,
     },
   ][0];
@@ -2874,13 +2696,9 @@ it("RpcV2CborSupportsUpcastingDataOnDeserialize:Response", async () => {
   const paramsToValidate: any = [
     {
       doubleValue: 1.5,
-
       floatValue: 7.625,
-
       integerValue: 56,
-
       longValue: 256,
-
       shortValue: 10,
     },
   ][0];
@@ -2923,23 +2741,14 @@ it("RpcV2CborExtraFieldsInTheBodyShouldBeSkippedByClients:Response", async () =>
   const paramsToValidate: any = [
     {
       byteValue: 5,
-
       doubleValue: 1.889,
-
       falseBooleanValue: false,
-
       floatValue: 7.624,
-
       integerValue: 256,
-
       longValue: 9873,
-
       shortValue: 9898,
-
       stringValue: "simple",
-
       trueBooleanValue: true,
-
       blobValue: Uint8Array.from("foo", (c) => c.charCodeAt(0)),
     },
   ][0];
