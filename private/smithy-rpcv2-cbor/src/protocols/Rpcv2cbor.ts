@@ -481,13 +481,6 @@ export const de_SimpleScalarPropertiesCommand = async (
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_SimpleScalarStructure(data, context);
-
-  console.log("deser", {
-    outputbody: output.body,
-    parseBody: data,
-    contents,
-  });
-
   const response: SimpleScalarPropertiesCommandOutput = {
     $metadata: deserializeMetadata(output),
     ...contents,

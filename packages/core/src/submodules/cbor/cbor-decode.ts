@@ -13,8 +13,7 @@ import {
   extendedFloat32,
   extendedFloat64,
   extendedOneByte,
-  Float16Binary,
-  Float32Binary,
+  Float32,
   majorList,
   majorMap,
   majorNegativeInt64,
@@ -27,6 +26,7 @@ import {
   specialNull,
   specialTrue,
   specialUndefined,
+  Uint8,
   Uint32,
   Uint64,
 } from "./cbor-types";
@@ -177,42 +177,54 @@ const minorValueToArgumentLength = {
   [extendedFloat64]: 8,
 } as const;
 
-function float16ToUint32(float: Float16Binary): Uint32 {
-  const n = [
-    // sign: 2 ** 23 - 1
-    (float & 0b0111_1111_1111_1111_1111_1111) << 16,
-    // exponent
-    (float & 0b0000_0000_0111_1100_0000_0000) >> 10,
-    // mantissa: 1023
-    (float & 0b0000_0000_0000_0011_1111_1111) << 13,
-  ];
-  const sign = n[0];
-  let [exponent, mantissa] = [n[1], n[2]];
+/**
+ * @internal
+ */
+export function bytesToFloat16(a: Uint8, b: Uint8): Float32 {
+  const sign = a >> 7;
+  const exponent = (a & 0b0111_1100) >> 2;
+  const fraction = ((a & 0b0000_0011) << 8) | b;
 
-  if (exponent === 31) {
-    return sign | (0b1111_1111 << 23) | mantissa;
-  }
+  const scalar = sign === 0 ? 1 : -1;
 
-  if (exponent === 0) {
-    if (mantissa === 0) return sign;
+  let exponentComponent: number;
+  let summation: number;
 
-    exponent = -14 + 127;
-    while ((mantissa & (1 << 23)) === 0) {
-      mantissa <<= 1;
-      --exponent;
+  if (exponent === 0b00000) {
+    if (fraction === 0b00000_00000) {
+      return 0;
+    } else {
+      exponentComponent = Math.pow(2, 1 - 15);
+      summation = 0;
     }
-    mantissa &= (1 << 23) - 1;
-    return sign | (exponent << 23) | mantissa;
+  } else if (exponent === 0b11111) {
+    if (fraction === 0b00000_00000) {
+      return scalar * Infinity;
+    } else {
+      return NaN;
+    }
+  } else {
+    exponentComponent = Math.pow(2, exponent - 15);
+    summation = 1;
   }
 
-  return sign | ((exponent + 127 - 15) << 23) | mantissa;
+  summation += fraction / 1024;
+  return scalar * (exponentComponent * summation);
 }
 
-function uint32ToFloat32(unsignedInt32: Uint32): Float32Binary {
-  const dv = new DataView(new ArrayBuffer(4));
-  dv.setInt32(0, unsignedInt32);
-  return dv.getFloat32(0);
-}
+// function bytesToFloat32(a: Uint8, b: Uint8, c: Uint8, d: Uint8): Float32 {
+//   const sign = a >> 7;
+//   const exponent = ((a & 0b0111_1111) << 1) | ((b & 0b1000_0000) >> 7);
+//   const fraction = ((b & 0b0111_1111) << 16) | (c << 8) | d;
+//
+//   const scalar = sign === 0 ? 1 : -1;
+//   const exponentComponent = Math.pow(2, exponent - 127);
+//   let summation = 1;
+//   for (let i = 1; i <= 23; ++i) {
+//     summation += ((fraction >> (23 - i)) & 1) * Math.pow(2, -i);
+//   }
+//   return scalar * exponentComponent * summation;
+// }
 
 function decodeCount(at: Uint32, to: Uint32): number {
   const minor = payload[at] & 0b0001_1111;
@@ -430,9 +442,8 @@ function decodeSpecial(at: Uint32, to: Uint32): CborValueType {
       if (to - at < 3) {
         throw new Error("incomplete float16 at end of buf.");
       }
-      const u16 = dataView.getUint16(at + 1);
       _offset = 3;
-      return uint32ToFloat32(float16ToUint32(u16));
+      return bytesToFloat16(payload[at + 1], payload[at + 2]);
     case extendedFloat32:
       if (to - at < 5) {
         throw new Error("incomplete float32 at end of buf.");

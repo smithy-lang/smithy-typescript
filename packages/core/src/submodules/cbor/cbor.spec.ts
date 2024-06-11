@@ -3,6 +3,7 @@ import JSONbig from "json-bigint";
 import * as path from "path";
 
 import { cbor } from "./cbor";
+import { bytesToFloat16 } from "./cbor-decode";
 
 // syntax is ESM but the test target is CJS.
 const here = __dirname;
@@ -54,6 +55,11 @@ describe("cbor", () => {
       data: -1,
       // negative major (1) plus 00's, since -1 is the first negative number.
       cbor: allocByteArray([0b001_00000]),
+    },
+    {
+      name: "a tricky float",
+      data: [7.624000072479248, 7.624],
+      cbor: allocByteArray([130, 251, 64, 30, 126, 249, 224, 0, 0, 0, 251, 64, 30, 126, 249, 219, 34, 208, 229]),
     },
     {
       name: "Number.MIN_SAFE_INTEGER",
@@ -311,5 +317,26 @@ describe("cbor", () => {
         expect(deserialized).toEqual(jsObject);
       });
     }
+  });
+});
+
+describe("bytesToFloat16", () => {
+  it("should convert two bytes to float16", () => {
+    expect(bytesToFloat16(0b0_10100_00, 0b0101_0000)).toEqual(34.5);
+
+    expect(bytesToFloat16(0b0_00000_00, 0b0000_0000)).toEqual(0.0);
+    expect(bytesToFloat16(0b0_00000_00, 0b0000_0001)).toEqual(5.960464477539063e-8);
+    expect(bytesToFloat16(0b0_00001_00, 0b0000_0000)).toEqual(0.00006103515625);
+
+    expect(bytesToFloat16(0b0_01101_01, 0b0101_0101)).toEqual(0.333251953125);
+    expect(bytesToFloat16(0b0_01110_11, 0b1111_1111)).toEqual(0.99951171875);
+    expect(bytesToFloat16(0b0_01111_00, 0b0000_0000)).toEqual(1.0);
+    expect(bytesToFloat16(0b0_01111_00, 0b0000_0001)).toEqual(1.0009765625);
+    expect(bytesToFloat16(0b0_11110_11, 0b1111_1111)).toEqual(65504.0);
+
+    expect(bytesToFloat16(0b0_11111_00, 0b0000_0000)).toEqual(Infinity);
+    // expect(bytesToFloat16(0b1_00000_00, 0b0000_0000)).toEqual(-0);
+    expect(bytesToFloat16(0b1_10000_00, 0b0000_0000)).toEqual(-2);
+    expect(bytesToFloat16(0b1_11111_00, 0b0000_0000)).toEqual(-Infinity);
   });
 });

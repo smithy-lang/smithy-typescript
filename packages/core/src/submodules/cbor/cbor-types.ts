@@ -25,6 +25,7 @@ export type CborOffset = number;
 export type Uint8 = number;
 export type Uint32 = number;
 export type Uint64 = bigint;
+export type Float32 = number;
 
 export type Int64 = bigint;
 

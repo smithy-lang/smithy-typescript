@@ -919,12 +919,14 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.write("expect(r[param]).toBeDefined();");
             if (hasStreamingPayloadBlob) {
                 writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
-                        writer.write("expect(equivalentContents(comparableBlob, "
-                                + "paramsToValidate[param])).toBe(true);"));
+                        writer.write("""
+                            expect(equivalentContents(paramsToValidate[param], \
+                            comparableBlob)).toBe(true);
+                            """));
                 writer.indent();
             }
 
-            writer.write("expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);");
+            writer.write("expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);");
 
             if (hasStreamingPayloadBlob) {
                 writer.dedent();

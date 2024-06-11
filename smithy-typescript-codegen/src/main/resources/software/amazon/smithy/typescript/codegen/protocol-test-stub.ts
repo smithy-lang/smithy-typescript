@@ -175,17 +175,23 @@ const toBytes = (hex: string) => {
 };
 
 function normalizeByteArrayType(data: any) {
+  // normalize float32 errors
+  if (typeof data === "number") {
+    const u = new Uint8Array(4);
+    const dv = new DataView(u.buffer, u.byteOffset, u.byteLength);
+    dv.setFloat32(0, data);
+    return dv.getFloat32(0);
+  }
   if (!data || typeof data !== "object") {
     return data;
   }
+  const output = {} as any;
   for (const key of Object.getOwnPropertyNames(data)) {
     if (data[key] instanceof Uint8Array) {
-      data[key] = Uint8Array.from(data[key]);
+      output[key] = Uint8Array.from(data[key]);
     } else {
-      try {
-        data[key] = normalizeByteArrayType(data[key]);
-      } catch (e: unknown) {}
+      output[key] = normalizeByteArrayType(data[key]);
     }
   }
-  return data;
+  return output;
 }

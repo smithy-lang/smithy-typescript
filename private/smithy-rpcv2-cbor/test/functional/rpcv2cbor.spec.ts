@@ -72,7 +72,7 @@ class ResponseDeserializationTestHandler implements HttpHandler {
       response: new HttpResponse({
         statusCode: this.code,
         headers: this.headers,
-        body: this.isBase64Body ? Uint8Array.from(toBytes(this.body as string)) : Readable.from([this.body]),
+        body: this.isBase64Body ? toBytes(this.body as string) : Readable.from([this.body]),
       }),
     });
   }
@@ -120,7 +120,7 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
  */
 const equivalentContents = (expected: any, generated: any): boolean => {
   if (typeof (global as any).expect === "function") {
-    expect(normalizeByteArrayType(generated)).toEqual(normalizeByteArrayType(generated));
+    expect(normalizeByteArrayType(generated)).toEqual(normalizeByteArrayType(expected));
     return true;
   }
 
@@ -165,12 +165,12 @@ const equivalentContents = (expected: any, generated: any): boolean => {
 const clientParams = {
   region: "us-west-2",
   credentials: { accessKeyId: "key", secretAccessKey: "secret" },
-  endpoint: async () => {
+  endpoint: () => {
     const url = new URL("https://www.amazon.com/");
-    return {
+    return Promise.resolve({
       path: url.pathname,
       ...url,
-    };
+    });
   },
 };
 
@@ -186,11 +186,30 @@ const fail = (error?: any): never => {
  * Hexadecimal to byteArray.
  */
 const toBytes = (hex: string) => {
-  if (typeof hex !== "string") {
-    throw new Error(`Expected type string, received ${typeof hex}.`);
-  }
   return Buffer.from(hex, "base64");
 };
+
+function normalizeByteArrayType(data: any) {
+  // normalize float32 errors
+  if (typeof data === "number") {
+    const u = new Uint8Array(4);
+    const dv = new DataView(u.buffer, u.byteOffset, u.byteLength);
+    dv.setFloat32(0, data);
+    return dv.getFloat32(0);
+  }
+  if (!data || typeof data !== "object") {
+    return data;
+  }
+  const output = {} as any;
+  for (const key of Object.getOwnPropertyNames(data)) {
+    if (data[key] instanceof Uint8Array) {
+      output[key] = Uint8Array.from(data[key]);
+    } else {
+      output[key] = normalizeByteArrayType(data[key]);
+    }
+  }
+  return output;
+}
 
 /**
  * When Input structure is empty we write CBOR equivalent of {}
@@ -325,7 +344,7 @@ it("RpcV2CborDateTimeWithFractionalSeconds:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -366,7 +385,7 @@ it("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
     ][0];
     Object.keys(paramsToValidate).forEach((param) => {
       expect(r[param]).toBeDefined();
-      expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+      expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
     });
     return;
   }
@@ -414,7 +433,7 @@ it("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
     ][0];
     Object.keys(paramsToValidate).forEach((param) => {
       expect(r[param]).toBeDefined();
-      expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+      expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
     });
     return;
   }
@@ -893,7 +912,7 @@ it.skip("RpcV2CborClientPopulatesDefaultsValuesWhenMissingInResponse:Response", 
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -978,7 +997,7 @@ it.skip("RpcV2CborClientIgnoresDefaultValuesIfMemberValuesArePresentInResponse:R
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1150,7 +1169,7 @@ it("RpcV2CborRecursiveShapes:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1203,7 +1222,7 @@ it("RpcV2CborRecursiveShapesUsingDefiniteLength:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1382,7 +1401,7 @@ it("RpcV2CborMaps:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1427,7 +1446,7 @@ it("RpcV2CborDeserializesZeroValuesInMaps:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1470,7 +1489,7 @@ it("RpcV2CborDeserializesDenseSetMap:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1516,7 +1535,7 @@ it("RpcV2CborDeserializesDenseSetMapAndSkipsNull:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1753,7 +1772,7 @@ it("RpcV2CborLists:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1792,7 +1811,7 @@ it("RpcV2CborListsEmpty:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1837,7 +1856,7 @@ it("RpcV2CborIndefiniteStringInsideIndefiniteListCanDeserialize:Response", async
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -1882,7 +1901,7 @@ it("RpcV2CborIndefiniteStringInsideDefiniteListCanDeserialize:Response", async (
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2157,7 +2176,7 @@ it("RpcV2CborSparseJsonMaps:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2210,7 +2229,7 @@ it("RpcV2CborDeserializesNullMapValues:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2253,7 +2272,7 @@ it("RpcV2CborDeserializesSparseSetMap:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2298,7 +2317,7 @@ it("RpcV2CborDeserializesSparseSetMapAndRetainsNull:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2343,7 +2362,7 @@ it("RpcV2CborDeserializesZeroValuesInSparseMaps:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2612,7 +2631,7 @@ it("RpcV2CborSimpleScalarProperties:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2667,7 +2686,7 @@ it("RpcV2CborSimpleScalarPropertiesUsingDefiniteLength:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2738,7 +2757,7 @@ it("RpcV2CborSupportsNaNFloatOutputs:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2779,7 +2798,7 @@ it("RpcV2CborSupportsInfinityFloatOutputs:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2820,7 +2839,7 @@ it("RpcV2CborSupportsNegativeInfinityFloatOutputs:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2867,7 +2886,7 @@ it("RpcV2CborSupportsUpcastingDataOnDeserialize:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -2926,7 +2945,7 @@ it("RpcV2CborExtraFieldsInTheBodyShouldBeSkippedByClients:Response", async () =>
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -3045,7 +3064,7 @@ it("RpcV2CborSparseMapsDeserializeNullValues:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
@@ -3084,27 +3103,13 @@ it("RpcV2CborSparseListsDeserializeNull:Response", async () => {
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
     expect(r[param]).toBeDefined();
-    expect(equivalentContents(r[param], paramsToValidate[param])).toBe(true);
+    expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
   });
 });
 
 const compareEquivalentCborBodies = (expectedBody: string, generatedBody: string | Uint8Array): undefined => {
   expect(
     normalizeByteArrayType(cbor.deserialize(typeof generatedBody === "string" ? toBytes(generatedBody) : generatedBody))
-  ).toEqual(normalizeByteArrayType(toBytes(expectedBody)));
+  ).toEqual(normalizeByteArrayType(cbor.deserialize(toBytes(expectedBody))));
   return undefined;
 };
-
-function normalizeByteArrayType(data: any) {
-  if (!data || typeof data !== "object") {
-    return data;
-  }
-  for (const key in data) {
-    if (data[key] instanceof Uint8Array) {
-      data[key] = Uint8Array.from(data[key]);
-    } else {
-      data[key] = normalizeByteArrayType(data[key]);
-    }
-  }
-  return data;
-}
