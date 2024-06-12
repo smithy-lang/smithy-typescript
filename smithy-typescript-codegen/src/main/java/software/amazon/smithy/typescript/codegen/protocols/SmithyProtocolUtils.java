@@ -95,21 +95,6 @@ public final class SmithyProtocolUtils {
             return true;
         }
 
-        //TODO: we don't validate map values
-        if (testCase.getId().equals("RestJsonBodyMalformedMapNullValue")) {
-            return true;
-        }
-
-        // TODO: fix in https://github.com/aws/aws-sdk-js-v3/issues/5545
-        if (testCase.getId().equals("RestJsonMalformedUnionUnknownMember")) {
-            return true;
-        }
-
-        //TODO: reenable when the SSDK uses RE2 and not built-in regex for pattern constraints
-        if (testCase.getId().equals("RestJsonMalformedPatternReDOSString")) {
-            return true;
-        }
-
         return false;
     }
 }

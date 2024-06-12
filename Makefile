@@ -13,6 +13,7 @@ generate-protocol-tests:
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-cbor/typescript-codegen ./private/smithy-rpcv2-cbor
 	cp ./packages/core/jest.config.js ./private/smithy-rpcv2-cbor
 	npx prettier --write ./private/smithy-rpcv2-cbor
+	yarn
 
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx jest)
