@@ -5,6 +5,7 @@
 
 package software.amazon.smithy.typescript.codegen.documentation;
 
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.BooleanNode;
@@ -49,6 +50,7 @@ public final class DocumentationExampleGenerator {
                 String membersJoined = objectNode.getMembers()
                     .entrySet()
                     .stream()
+                    .sorted(Comparator.comparing(entry -> entry.getKey().getValue()))
                     .map(entry -> indentation
                         + "  "
                         + entry.getKey().getValue()
