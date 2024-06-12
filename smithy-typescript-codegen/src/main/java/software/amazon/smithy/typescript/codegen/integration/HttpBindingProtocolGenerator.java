@@ -1096,7 +1096,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             optionalContentType = bindingIndex.determineResponseContentType(operationOrError, getDocumentContentType());
         }
         // If we need to write a default body then it needs a content type.
-        if (!optionalContentType.isPresent() && shouldWriteDefaultBody(context, operationOrError, isInput)) {
+        if (optionalContentType.isEmpty() && shouldWriteDefaultBody(context, operationOrError, isInput)) {
             optionalContentType = Optional.of(getDocumentContentType());
         }
         optionalContentType.ifPresent(contentType -> {
@@ -1143,8 +1143,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     /**
-     * Given a context and operation, should a default input body be written. By default no body will be written
-     * if there are no members bound to the input.
+     * Given a context and operation, should a default input body be written. By default, a body
+     * will be written if and only if there are payload members bound to the input.
      *
      * @param context The generation context.
      * @param operation The operation whose input is being serialized.
@@ -1152,7 +1152,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
      * @return True if a default body should be generated.
      */
     protected boolean shouldWriteDefaultInputBody(GenerationContext context, OperationShape operation) {
-        return HttpBindingIndex.of(context.getModel()).getRequestBindings(operation).isEmpty();
+        return HttpBindingIndex.of(context.getModel()).hasRequestBody(operation);
     }
 
     /**
