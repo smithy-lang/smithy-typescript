@@ -6,7 +6,6 @@
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 /**
  * Manages a collection of endpoint parameter names to be omitted from a specific interface. 
