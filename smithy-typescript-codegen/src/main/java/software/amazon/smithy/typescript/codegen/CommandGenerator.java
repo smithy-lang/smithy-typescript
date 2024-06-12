@@ -297,7 +297,7 @@ final class CommandGenerator implements Runnable {
                     .append("\n")
                     .append(String.format("@example %s%n", example.getTitle()))
                     .append("```javascript\n")
-                    .append(String.format("/* %s */%n", example.getDocumentation().orElse("")))
+                    .append(String.format("// %s%n", example.getDocumentation().orElse("")))
                     .append("""
                     const input = %s;
                     const command = new %s(input);
