@@ -2,6 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.util.Collections;
 import java.util.HashSet;
