@@ -22,7 +22,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@aws-crypto/crc32": "3.0.0",
+    "@aws-crypto/crc32": "5.2.0",
     "@smithy/types": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",
     "tslib": "^2.6.2"

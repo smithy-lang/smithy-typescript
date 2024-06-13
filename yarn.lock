@@ -15,36 +15,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/crc32@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@aws-crypto/crc32@npm:3.0.0"
+"@aws-crypto/crc32@npm:5.2.0":
+  version: 5.2.0
+  resolution: "@aws-crypto/crc32@npm:5.2.0"
   dependencies:
-    "@aws-crypto/util": ^3.0.0
+    "@aws-crypto/util": ^5.2.0
     "@aws-sdk/types": ^3.222.0
-    tslib: ^1.11.1
-  checksum: 9fdb3e837fc54119b017ea34fd0a6d71d2c88075d99e1e818a5158e0ad30ced67ddbcc423a11ceeef6cc465ab5ffd91830acab516470b48237ca7abd51be9642
+    tslib: ^2.6.2
+  checksum: 1ddf7ec3fccf106205ff2476d90ae1d6625eabd47752f689c761b71e41fe451962b7a1c9ed25fe54e17dd747a62fbf4de06030fe56fe625f95285f6f70b96c57
   languageName: node
   linkType: hard
 
-"@aws-crypto/sha256-js@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@aws-crypto/sha256-js@npm:3.0.0"
+"@aws-crypto/sha256-js@npm:5.2.0":
+  version: 5.2.0
+  resolution: "@aws-crypto/sha256-js@npm:5.2.0"
   dependencies:
-    "@aws-crypto/util": ^3.0.0
+    "@aws-crypto/util": ^5.2.0
     "@aws-sdk/types": ^3.222.0
-    tslib: ^1.11.1
-  checksum: 644ded32ea310237811afae873d3c7320739cb6f6cc39dced9c94801379e68e5ee2cca0c34f0384793fa9e750a7e0a5e2468f95754bd08e6fd72ab833c8fe23c
+    tslib: ^2.6.2
+  checksum: 007fbe0436d714d0d0d282e2b61c90e45adcb9ad75eac9ac7ba03d32b56624afd09b2a9ceb4d659661cf17c51d74d1900ab6b00eacafc002da1101664955ca53
   languageName: node
   linkType: hard
 
-"@aws-crypto/util@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@aws-crypto/util@npm:3.0.0"
+"@aws-crypto/util@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "@aws-crypto/util@npm:5.2.0"
   dependencies:
     "@aws-sdk/types": ^3.222.0
-    "@aws-sdk/util-utf8-browser": ^3.0.0
-    tslib: ^1.11.1
-  checksum: d29d5545048721aae3d60b236708535059733019a105f8a64b4e4a8eab7cf8dde1546dc56bff7de20d36140a4d1f0f4693e639c5732a7059273a7b1e56354776
+    "@smithy/util-utf8": ^2.0.0
+    tslib: ^2.6.2
+  checksum: f0f81d9d2771c59946cfec48b86cb23d39f78a966c4a1f89d4753abdc3cb38de06f907d1e6450059b121d48ac65d612ab88bdb70014553a077fc3dabddfbf8d6
   languageName: node
   linkType: hard
 
@@ -54,15 +54,6 @@ __metadata:
   dependencies:
     tslib: ^2.5.0
   checksum: 799b053d3651f1754e2925b671fe890047d0ff1af69d22b6826d8e74edefcd558c7c7a911d48eaf5930032bcf291dbdbb6dd2d2f0c596bbe52100941aa349221
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/util-utf8-browser@npm:^3.0.0":
-  version: 3.259.0
-  resolution: "@aws-sdk/util-utf8-browser@npm:3.259.0"
-  dependencies:
-    tslib: ^2.3.1
-  checksum: b6a1e580da1c9b62c749814182a7649a748ca4253edb4063aa521df97d25b76eae3359eb1680b86f71aac668e05cc05c514379bca39ebf4ba998ae4348412da8
   languageName: node
   linkType: hard
 
@@ -2261,7 +2252,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-codec@workspace:packages/eventstream-codec"
   dependencies:
-    "@aws-crypto/crc32": 3.0.0
+    "@aws-crypto/crc32": 5.2.0
     "@smithy/types": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
@@ -2373,7 +2364,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/hash-blob-browser@workspace:packages/hash-blob-browser"
   dependencies:
-    "@aws-crypto/sha256-js": 3.0.0
+    "@aws-crypto/sha256-js": 5.2.0
     "@smithy/chunked-blob-reader": "workspace:^"
     "@smithy/chunked-blob-reader-native": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -2407,7 +2398,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/hash-stream-node@workspace:packages/hash-stream-node"
   dependencies:
-    "@aws-crypto/sha256-js": 3.0.0
+    "@aws-crypto/sha256-js": 5.2.0
     "@smithy/types": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
@@ -2432,6 +2423,15 @@ __metadata:
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
+
+"@smithy/is-array-buffer@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@smithy/is-array-buffer@npm:2.2.0"
+  dependencies:
+    tslib: ^2.6.2
+  checksum: cd12c2e27884fec89ca8966d33c9dc34d3234efe89b33a9b309c61ebcde463e6f15f6a02d31d4fddbfd6e5904743524ca5b95021b517b98fe10957c2da0cd5fc
+  languageName: node
+  linkType: hard
 
 "@smithy/is-array-buffer@workspace:^, @smithy/is-array-buffer@workspace:packages/is-array-buffer":
   version: 0.0.0-use.local
@@ -2710,7 +2710,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
-    "@aws-crypto/sha256-js": 3.0.0
+    "@aws-crypto/sha256-js": 5.2.0
     "@smithy/is-array-buffer": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -2809,6 +2809,16 @@ __metadata:
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
+
+"@smithy/util-buffer-from@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@smithy/util-buffer-from@npm:2.2.0"
+  dependencies:
+    "@smithy/is-array-buffer": ^2.2.0
+    tslib: ^2.6.2
+  checksum: 424c5b7368ae5880a8f2732e298d17879a19ca925f24ca45e1c6c005f717bb15b76eb28174d308d81631ad457ea0088aab0fd3255dd42f45a535c81944ad64d3
+  languageName: node
+  linkType: hard
 
 "@smithy/util-buffer-from@workspace:^, @smithy/util-buffer-from@workspace:packages/util-buffer-from":
   version: 0.0.0-use.local
@@ -3009,6 +3019,16 @@ __metadata:
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
+
+"@smithy/util-utf8@npm:^2.0.0":
+  version: 2.3.0
+  resolution: "@smithy/util-utf8@npm:2.3.0"
+  dependencies:
+    "@smithy/util-buffer-from": ^2.2.0
+    tslib: ^2.6.2
+  checksum: 00e55d4b4e37d48be0eef3599082402b933c52a1407fed7e8e8ad76d94d81a0b30b8bfaf2047c59d9c3af31e5f20e7a8c959cb7ae270f894255e05a2229964f0
+  languageName: node
+  linkType: hard
 
 "@smithy/util-utf8@workspace:^, @smithy/util-utf8@workspace:packages/util-utf8":
   version: 0.0.0-use.local
@@ -10617,17 +10637,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.11.1, tslib@npm:^1.8.0, tslib@npm:^1.9.0":
+"tslib@npm:^1.8.0, tslib@npm:^1.9.0":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.3.1":
-  version: 2.5.3
-  resolution: "tslib@npm:2.5.3"
-  checksum: 88902b309afaf83259131c1e13da1dceb0ad1682a213143a1346a649143924d78cf3760c448b84d796938fd76127183894f8d85cbb3bf9c4fddbfcc140c0003c
   languageName: node
   linkType: hard
 
