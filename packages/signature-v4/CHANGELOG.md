@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 3c23a83b: update versions of @aws-crypto/\* packages
+
 ## 3.0.1
 
 ### Patch Changes

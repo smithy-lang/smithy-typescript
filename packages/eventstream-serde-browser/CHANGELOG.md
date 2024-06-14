@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.2
+
+### Patch Changes
+
+- @smithy/eventstream-serde-universal@3.0.2
+
 ## 3.0.1
 
 ### Patch Changes
