@@ -30,7 +30,7 @@
   "author": "AWS Smithy Team",
   "license": "UNLICENSED",
   "dependencies": {
-    "@changesets/cli": "^2.26.1",
+    "@changesets/cli": "^2.27.5",
     "glob": "^7.1.6",
     "rimraf": "^3.0.2"
   },
