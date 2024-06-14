@@ -1,4 +1,3 @@
-import { AbortSignal } from "./abort";
 import { URI } from "./uri";
 
 /**

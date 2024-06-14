@@ -1,12 +1,15 @@
-import { AbortSignal } from "@smithy/types";
-
 import { runPolling } from "./poller";
 import { validateWaiterOptions } from "./utils";
 import { WaiterOptions, WaiterResult, waiterServiceDefaults, WaiterState } from "./waiter";
 
 const abortTimeout = async (abortSignal: AbortSignal): Promise<WaiterResult> => {
   return new Promise((resolve) => {
-    abortSignal.onabort = () => resolve({ state: WaiterState.ABORTED });
+    const onAbort = () => resolve({ state: WaiterState.ABORTED });
+    if (typeof abortSignal.addEventListener === "function") {
+      abortSignal.addEventListener("abort", onAbort);
+    } else {
+      abortSignal.onabort = onAbort;
+    }
   });
 };
 

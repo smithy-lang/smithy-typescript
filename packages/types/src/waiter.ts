@@ -1,5 +1,3 @@
-import { AbortController } from "./abort";
-
 /**
  * @public
  */

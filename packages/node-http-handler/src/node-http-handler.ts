@@ -232,13 +232,18 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
       // wire-up abort logic
       if (abortSignal) {
-        abortSignal.onabort = () => {
+        const onAbort = () => {
           // ensure request is destroyed
-          req.abort();
+          req.destroy();
           const abortError = new Error("Request aborted");
           abortError.name = "AbortError";
           reject(abortError);
         };
+        if (typeof abortSignal.addEventListener === "function") {
+          abortSignal.addEventListener("abort", onAbort);
+        } else {
+          abortSignal.onabort = onAbort;
+        }
       }
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
