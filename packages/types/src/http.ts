@@ -1,3 +1,4 @@
+import { AbortSignal as DeprecatedAbortSignal } from "./abort";
 import { URI } from "./uri";
 
 /**
@@ -105,7 +106,7 @@ export interface HttpMessage {
  * Represents the options that may be passed to an Http Handler.
  */
 export interface HttpHandlerOptions {
-  abortSignal?: AbortSignal;
+  abortSignal?: AbortSignal | DeprecatedAbortSignal;
 
   /**
    * The maximum time in milliseconds that the connection phase of a request

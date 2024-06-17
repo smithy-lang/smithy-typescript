@@ -1,4 +1,4 @@
-import { AbortController as IAbortController } from "./abort";
+import { AbortController as DeprecatedAbortController } from "./abort";
 
 /**
  * @public
@@ -18,12 +18,12 @@ export interface WaiterConfiguration<Client> {
    * @deprecated Use abortSignal
    * Abort controller. Used for ending the waiter early.
    */
-  abortController?: AbortController | IAbortController;
+  abortController?: AbortController | DeprecatedAbortController;
 
   /**
    * Abort Signal. Used for ending the waiter early.
    */
-  abortSignal?: AbortController["signal"] | IAbortController["signal"];
+  abortSignal?: AbortController["signal"] | DeprecatedAbortController["signal"];
 
   /**
    * The minimum amount of time to delay between retries in seconds. This is the

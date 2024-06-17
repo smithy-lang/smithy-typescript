@@ -1,8 +1,8 @@
-import type { AbortSignal as CustomAbortSignal } from "./abort";
+import type { AbortSignal as DeprecatedAbortSignal } from "./abort";
 
 /**
  * @public
  */
 export interface AbortHandler {
-  (this: AbortSignal | CustomAbortSignal, ev: any): any;
+  (this: AbortSignal | DeprecatedAbortSignal, ev: any): any;
 }

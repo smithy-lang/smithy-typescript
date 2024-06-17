@@ -1,12 +1,14 @@
+import { AbortSignal as DeprecatedAbortSignal } from "@smithy/types";
+
 import { runPolling } from "./poller";
 import { validateWaiterOptions } from "./utils";
 import { WaiterOptions, WaiterResult, waiterServiceDefaults, WaiterState } from "./waiter";
 
-const abortTimeout = async (abortSignal: AbortSignal): Promise<WaiterResult> => {
+const abortTimeout = async (abortSignal: AbortSignal | DeprecatedAbortSignal): Promise<WaiterResult> => {
   return new Promise((resolve) => {
     const onAbort = () => resolve({ state: WaiterState.ABORTED });
-    if (typeof abortSignal.addEventListener === "function") {
-      abortSignal.addEventListener("abort", onAbort);
+    if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+      (abortSignal as AbortSignal).addEventListener("abort", onAbort);
     } else {
       abortSignal.onabort = onAbort;
     }

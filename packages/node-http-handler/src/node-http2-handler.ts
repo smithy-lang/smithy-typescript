@@ -187,8 +187,8 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           abortError.name = "AbortError";
           rejectWithDestroy(abortError);
         };
-        if (typeof abortSignal.addEventListener === "function") {
-          abortSignal.addEventListener("abort", onAbort);
+        if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+          (abortSignal as AbortSignal).addEventListener("abort", onAbort);
         } else {
           abortSignal.onabort = onAbort;
         }
