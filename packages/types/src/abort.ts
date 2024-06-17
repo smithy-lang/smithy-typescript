@@ -7,7 +7,7 @@ export { AbortHandler };
 
 /**
  * @public
- * @deprecated use platform (global) type for AbortController | AbortSignal.
+ * @deprecated use platform (global) type for AbortSignal.
  *
  * Holders of an AbortSignal object may query if the associated operation has
  * been aborted and register an onabort handler.
