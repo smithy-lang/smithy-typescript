@@ -29,7 +29,7 @@ export interface AbortSignal {
 
 /**
  * @public
- * @deprecated use platform (global) type for AbortController | AbortSignal.
+ * @deprecated use platform (global) type for AbortController.
  *
  * The AWS SDK uses a Controller/Signal model to allow for cooperative
  * cancellation of asynchronous operations. When initiating such an operation,
