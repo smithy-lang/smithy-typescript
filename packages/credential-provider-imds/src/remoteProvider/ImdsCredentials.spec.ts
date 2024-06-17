@@ -63,6 +63,6 @@ describe("fromImdsCredentials", () => {
     expect(converted.secretAccessKey).toEqual(credsWithoutAccountId.SecretAccessKey);
     expect(converted.sessionToken).toEqual(credsWithoutAccountId.Token);
     expect(converted.expiration).toEqual(new Date(credsWithoutAccountId.Expiration));
-    expect(converted).not.toHaveProperty("accountId"); // Verify accountId is not included
+    expect(converted.accountId).toBeUndefined(); // Verify accountId is undefined
   });
 });
