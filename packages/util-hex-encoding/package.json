@@ -7,7 +7,7 @@
     "build:cjs": "node ../../scripts/inline util-hex-encoding",
     "build:es": "yarn g:tsc -p tsconfig.es.json",
     "build:types": "yarn g:tsc -p tsconfig.types.json",
-    "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "build:types:downlevel": "rimraf dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
