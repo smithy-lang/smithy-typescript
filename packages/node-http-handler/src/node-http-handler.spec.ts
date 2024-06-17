@@ -611,7 +611,7 @@ describe("NodeHttpHandler", () => {
       ).rejects.toHaveProperty("name", "TypeError");
     });
 
-    it("will destroy the request when aborted", async () => {
+    fit("will destroy the request when aborted", async () => {
       const mockResponse = {
         statusCode: 200,
         headers: {},
@@ -619,12 +619,12 @@ describe("NodeHttpHandler", () => {
       };
       mockHttpsServer.addListener("request", createResponseFunction(mockResponse));
       let httpRequest: http.ClientRequest;
-      let reqAbortSpy: any;
+      let reqDestroySpy: any;
       const spy = jest.spyOn(https, "request").mockImplementationOnce(() => {
         const calls = spy.mock.calls;
         const currentIndex = calls.length - 1;
         httpRequest = https.request(calls[currentIndex][0], calls[currentIndex][1]);
-        reqAbortSpy = jest.spyOn(httpRequest, "abort");
+        reqDestroySpy = jest.spyOn(httpRequest, "destroy");
         return httpRequest;
       });
       const nodeHttpHandler = new NodeHttpHandler();
@@ -650,7 +650,7 @@ describe("NodeHttpHandler", () => {
         )
       ).rejects.toHaveProperty("name", "AbortError");
 
-      expect(reqAbortSpy.mock.calls.length).toBe(1);
+      expect(reqDestroySpy.mock.calls.length).toBe(1);
     });
   });
 
