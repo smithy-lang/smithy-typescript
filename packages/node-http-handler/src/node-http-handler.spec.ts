@@ -759,10 +759,9 @@ describe("NodeHttpHandler", () => {
 
       expect(warningTimestamp).toBeGreaterThan(lastTimestamp);
       expect(console.warn).toHaveBeenCalledWith(
-        "@smithy/node-http-handler:WARN",
-        "socket usage at capacity=2 and 4 additional requests are enqueued.",
-        "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html",
-        "or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config."
+        `@smithy/node-http-handler:WARN - socket usage at capacity=2 and 4 additional requests are enqueued.
+See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html
+or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config.`
       );
     });
   });
