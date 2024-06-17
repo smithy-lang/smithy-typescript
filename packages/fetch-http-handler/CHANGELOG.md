@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.3
+
+### Patch Changes
+
+- fedce37: move keepAliveSupport check to FetchHttpHandler constructor
+
 ## 3.0.2
 
 ### Patch Changes
