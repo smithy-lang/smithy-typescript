@@ -1,6 +1,8 @@
 import type { Agent as hAgent, AgentOptions as hAgentOptions } from "http";
 import type { Agent as hsAgent, AgentOptions as hsAgentOptions } from "https";
 
+import { Logger } from "../logger";
+
 /**
  *
  * This type represents an alternate client constructor option for the entry
@@ -60,6 +62,11 @@ export interface NodeHttpHandlerOptions {
    * You can pass https.Agent or its constructor options.
    */
   httpsAgent?: hsAgent | hsAgentOptions;
+
+  /**
+   * Optional logger.
+   */
+  logger?: Logger;
 }
 
 /**

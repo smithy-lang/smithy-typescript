@@ -1,6 +1,6 @@
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
-import type { NodeHttpHandlerOptions } from "@smithy/types";
+import type { Logger, NodeHttpHandlerOptions } from "@smithy/types";
 import { HttpHandlerOptions, Provider } from "@smithy/types";
 import { Agent as hAgent, request as hRequest } from "http";
 import { Agent as hsAgent, request as hsRequest, RequestOptions } from "https";
@@ -48,9 +48,15 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
    * @internal
    *
    * @param agent - http(s) agent in use by the NodeHttpHandler instance.
+   * @param socketWarningTimestamp - last socket usage check timestamp.
+   * @param logger - channel for the warning.
    * @returns timestamp of last emitted warning.
    */
-  public static checkSocketUsage(agent: hAgent | hsAgent, socketWarningTimestamp: number): number {
+  public static checkSocketUsage(
+    agent: hAgent | hsAgent,
+    socketWarningTimestamp: number,
+    logger: Logger = console
+  ): number {
     // note, maxSockets is per origin.
     const { sockets, requests, maxSockets } = agent;
 
@@ -79,11 +85,10 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
          * lockout.
          */
         if (socketsInUse >= maxSockets && requestsEnqueued >= 2 * maxSockets) {
-          console.warn(
-            "@smithy/node-http-handler:WARN",
-            `socket usage at capacity=${socketsInUse} and ${requestsEnqueued} additional requests are enqueued.`,
-            "See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html",
-            "or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config."
+          logger?.warn?.(
+            `@smithy/node-http-handler:WARN - socket usage at capacity=${socketsInUse} and ${requestsEnqueued} additional requests are enqueued.
+See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html
+or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config.`
           );
           return Date.now();
         }
@@ -127,6 +132,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
         }
         return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
+      logger: console,
     };
   }
 
@@ -152,6 +158,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
       };
       const reject = async (arg: unknown) => {
         await writeRequestBodyPromise;
+        clearTimeout(socketCheckTimeoutId);
         _reject(arg);
       };
 
@@ -175,7 +182,11 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
       // This warning will be cancelled if the request resolves.
       socketCheckTimeoutId = setTimeout(
         () => {
-          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent, this.socketWarningTimestamp);
+          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
+            agent,
+            this.socketWarningTimestamp,
+            this.config!.logger
+          );
         },
         this.config.socketAcquisitionWarningTimeout ??
           (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000)
@@ -252,7 +263,10 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
         });
       }
 
-      writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch(_reject);
+      writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch((e) => {
+        clearTimeout(socketCheckTimeoutId);
+        return _reject(e);
+      });
     });
   }
 
