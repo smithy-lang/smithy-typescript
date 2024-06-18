@@ -1,11 +1,14 @@
-import { AbortHandler, AbortSignal as IAbortSignal } from "@smithy/types";
-
-export { AbortHandler, IAbortSignal };
+import { AbortHandler, AbortSignal as DeprecatedAbortSignal } from "@smithy/types";
 
 /**
  * @public
  */
-export class AbortSignal implements IAbortSignal {
+export { AbortHandler, DeprecatedAbortSignal as IAbortSignal };
+
+/**
+ * @public
+ */
+export class AbortSignal implements DeprecatedAbortSignal {
   public onabort: AbortHandler | null = null;
   private _aborted = false;
 

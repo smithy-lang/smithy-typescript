@@ -2,7 +2,10 @@ import { AbortController as DeprecatedAbortController } from "@smithy/types";
 
 import { AbortSignal } from "./AbortSignal";
 
-export { DeprecatedAbortController };
+/**
+ * @public
+ */
+export { DeprecatedAbortController as IAbortController };
 
 /**
  * @deprecated This implementation was added as Node.js didn't support AbortController prior to 15.x
