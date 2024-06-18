@@ -14,6 +14,7 @@ describe("isImdsCredentials", () => {
   it("should accept valid ImdsCredentials objects", () => {
     expect(isImdsCredentials(creds)).toBe(true);
     const { AccountId, ...credsWithoutAccountId } = creds;
+    expect(AccountId).toBe("123456789012");
     expect(isImdsCredentials(credsWithoutAccountId)).toBe(true);
   });
 
