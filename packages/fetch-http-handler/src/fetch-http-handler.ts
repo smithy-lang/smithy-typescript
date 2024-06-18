@@ -165,8 +165,10 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
             reject(abortError);
           };
           if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+            // preferred.
             (abortSignal as AbortSignal).addEventListener("abort", onAbort);
           } else {
+            // backwards compatibility
             abortSignal.onabort = onAbort;
           }
         })

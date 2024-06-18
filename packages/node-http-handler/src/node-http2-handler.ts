@@ -188,8 +188,10 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           rejectWithDestroy(abortError);
         };
         if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+          // preferred.
           (abortSignal as AbortSignal).addEventListener("abort", onAbort);
         } else {
+          // backwards compatibility
           abortSignal.onabort = onAbort;
         }
       }

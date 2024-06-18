@@ -8,8 +8,10 @@ const abortTimeout = async (abortSignal: AbortSignal | DeprecatedAbortSignal): P
   return new Promise((resolve) => {
     const onAbort = () => resolve({ state: WaiterState.ABORTED });
     if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+      // preferred.
       (abortSignal as AbortSignal).addEventListener("abort", onAbort);
     } else {
+      // backwards compatibility
       abortSignal.onabort = onAbort;
     }
   });
