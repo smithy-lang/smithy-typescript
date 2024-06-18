@@ -13,7 +13,7 @@ import { RpcV2CborSparseMapsCommand } from "../../src/commands/RpcV2CborSparseMa
 import { SimpleScalarPropertiesCommand } from "../../src/commands/SimpleScalarPropertiesCommand";
 import { SparseNullsOperationCommand } from "../../src/commands/SparseNullsOperationCommand";
 import { cbor } from "@smithy/core/cbor";
-import { HttpHandlerOptions, HeaderBag } from "@smithy/types";
+import { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
 import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { Readable } from "stream";
 
@@ -168,9 +168,10 @@ const clientParams = {
   endpoint: () => {
     const url = new URL("https://www.amazon.com/");
     return Promise.resolve({
-      path: url.pathname,
       ...url,
-    });
+      path: url.pathname,
+      ...(url.port ? { port: Number(url.port) } : {}),
+    }) as Promise<Endpoint>;
   },
 };
 
