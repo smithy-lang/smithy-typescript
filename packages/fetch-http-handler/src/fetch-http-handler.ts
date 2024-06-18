@@ -164,11 +164,18 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     if (abortSignal) {
       raceOfPromises.push(
         new Promise<never>((resolve, reject) => {
-          abortSignal.onabort = () => {
+          const onAbort = () => {
             const abortError = new Error("Request aborted");
             abortError.name = "AbortError";
             reject(abortError);
           };
+          if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+            // preferred.
+            (abortSignal as AbortSignal).addEventListener("abort", onAbort);
+          } else {
+            // backwards compatibility
+            abortSignal.onabort = onAbort;
+          }
         })
       );
     }

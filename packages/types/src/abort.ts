@@ -1,12 +1,13 @@
-/**
- * @public
- */
-export interface AbortHandler {
-  (this: AbortSignal, ev: any): any;
-}
+import type { AbortHandler } from "./abort-handler";
 
 /**
  * @public
+ */
+export { AbortHandler };
+
+/**
+ * @public
+ * @deprecated use platform (global) type for AbortSignal.
  *
  * Holders of an AbortSignal object may query if the associated operation has
  * been aborted and register an onabort handler.
@@ -28,6 +29,7 @@ export interface AbortSignal {
 
 /**
  * @public
+ * @deprecated use platform (global) type for AbortController.
  *
  * The AWS SDK uses a Controller/Signal model to allow for cooperative
  * cancellation of asynchronous operations. When initiating such an operation,

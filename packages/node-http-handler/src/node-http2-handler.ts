@@ -181,12 +181,19 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       }
 
       if (abortSignal) {
-        abortSignal.onabort = () => {
+        const onAbort = () => {
           req.close();
           const abortError = new Error("Request aborted");
           abortError.name = "AbortError";
           rejectWithDestroy(abortError);
         };
+        if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+          // preferred.
+          (abortSignal as AbortSignal).addEventListener("abort", onAbort);
+        } else {
+          // backwards compatibility
+          abortSignal.onabort = onAbort;
+        }
       }
 
       // Set up handlers for errors

@@ -243,13 +243,20 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // wire-up abort logic
       if (abortSignal) {
-        abortSignal.onabort = () => {
+        const onAbort = () => {
           // ensure request is destroyed
-          req.abort();
+          req.destroy();
           const abortError = new Error("Request aborted");
           abortError.name = "AbortError";
           reject(abortError);
         };
+        if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+          // preferred.
+          (abortSignal as AbortSignal).addEventListener("abort", onAbort);
+        } else {
+          // backwards compatibility
+          abortSignal.onabort = onAbort;
+        }
       }
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
