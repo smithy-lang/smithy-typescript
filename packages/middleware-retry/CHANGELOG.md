@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [c16e014]
+- Updated dependencies [c2a5595]
+  - @smithy/types@3.2.0
+  - @smithy/node-config-provider@3.1.2
+  - @smithy/protocol-http@4.0.2
+  - @smithy/service-error-classification@3.0.2
+  - @smithy/smithy-client@3.1.4
+  - @smithy/util-middleware@3.0.2
+  - @smithy/util-retry@3.0.2
+
 ## 3.0.5
 
 ### Patch Changes

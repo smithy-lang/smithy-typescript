@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- c2a5595: use platform AbortController|AbortSignal implementations
+
+### Patch Changes
+
+- c16e014: add logger option to node-http-handler parameters, clear socket usage check timeout on error
+
 ## 3.1.0
 
 ### Minor Changes

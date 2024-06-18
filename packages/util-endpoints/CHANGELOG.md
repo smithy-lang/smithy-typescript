@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [c16e014]
+- Updated dependencies [c2a5595]
+  - @smithy/types@3.2.0
+  - @smithy/node-config-provider@3.1.2
+
 ## 2.0.2
 
 ### Patch Changes

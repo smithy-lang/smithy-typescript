@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- c2a5595: use platform AbortController|AbortSignal implementations
+
+### Patch Changes
+
+- Updated dependencies [c16e014]
+- Updated dependencies [c2a5595]
+  - @smithy/types@3.2.0
+  - @smithy/protocol-http@4.0.2
+  - @smithy/querystring-builder@3.0.2
+
 ## 3.0.3
 
 ### Patch Changes

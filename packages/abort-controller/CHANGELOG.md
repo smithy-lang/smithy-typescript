@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- c2a5595: use platform AbortController|AbortSignal implementations
+
+### Patch Changes
+
+- Updated dependencies [c16e014]
+- Updated dependencies [c2a5595]
+  - @smithy/types@3.2.0
+
 ## 3.0.1
 
 ### Patch Changes
