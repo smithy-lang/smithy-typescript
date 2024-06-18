@@ -1,8 +1,8 @@
-import { AbortController as IAbortController } from "@smithy/types";
+import { AbortController as DeprecatedAbortController } from "@smithy/types";
 
 import { AbortSignal } from "./AbortSignal";
 
-export { IAbortController };
+export { DeprecatedAbortController };
 
 /**
  * @deprecated This implementation was added as Node.js didn't support AbortController prior to 15.x
@@ -10,7 +10,7 @@ export { IAbortController };
  *
  * @public
  */
-export class AbortController implements IAbortController {
+export class AbortController implements DeprecatedAbortController {
   public readonly signal: AbortSignal = new AbortSignal();
 
   abort(): void {
