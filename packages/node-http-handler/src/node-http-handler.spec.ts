@@ -611,7 +611,7 @@ describe("NodeHttpHandler", () => {
       ).rejects.toHaveProperty("name", "TypeError");
     });
 
-    fit("will destroy the request when aborted", async () => {
+    it("will destroy the request when aborted", async () => {
       const mockResponse = {
         statusCode: 200,
         headers: {},
