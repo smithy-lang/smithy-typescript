@@ -69,7 +69,8 @@ public final class SmithyProtocolUtils {
             return true;
         }
 
-        // TODO(cbor): verify the test is declared correctly.
+        // TODO(cbor): enable this test when upgrading to a Smithy version
+        // TODO(cbor): in which it is fixed.
         if (testCase.getId().equals("RpcV2CborDeserializesDenseSetMapAndSkipsNull")) {
             return true;
         }
