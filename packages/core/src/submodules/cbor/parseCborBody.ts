@@ -70,3 +70,9 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
     return sanitizeErrorCode(data.code);
   }
 };
+
+export const checkCborResponse = (response: HttpResponse): void => {
+  if (response.headers["smithy-protocol"] !== "rpc-v2-cbor") {
+    throw new Error("Malformed RPCv2 CBOR response, status: " + response.statusCode);
+  }
+};

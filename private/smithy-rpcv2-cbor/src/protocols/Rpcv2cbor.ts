@@ -54,6 +54,7 @@ import {
 import {
   dateToTag as __dateToTag,
   cbor,
+  checkCborResponse as cr,
   loadSmithyRpcV2CborErrorCode,
   parseCborBody as parseBody,
   parseCborErrorBody as parseErrorBody,
@@ -277,9 +278,11 @@ export const de_EmptyInputOutputCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<EmptyInputOutputCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = _json(data);
@@ -297,9 +300,11 @@ export const de_FractionalSecondsCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<FractionalSecondsCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_FractionalSecondsOutput(data, context);
@@ -317,9 +322,11 @@ export const de_GreetingWithErrorsCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<GreetingWithErrorsCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = _json(data);
@@ -337,9 +344,11 @@ export const de_NoInputOutputCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<NoInputOutputCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   await collectBody(output.body, context);
   const response: NoInputOutputCommandOutput = {
     $metadata: deserializeMetadata(output),
@@ -354,9 +363,11 @@ export const de_OperationWithDefaultsCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<OperationWithDefaultsCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_OperationWithDefaultsOutput(data, context);
@@ -374,9 +385,11 @@ export const de_OptionalInputOutputCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<OptionalInputOutputCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = _json(data);
@@ -394,9 +407,11 @@ export const de_RecursiveShapesCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<RecursiveShapesCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_RecursiveShapesInputOutput(data, context);
@@ -414,9 +429,11 @@ export const de_RpcV2CborDenseMapsCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<RpcV2CborDenseMapsCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = _json(data);
@@ -434,9 +451,11 @@ export const de_RpcV2CborListsCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<RpcV2CborListsCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_RpcV2CborListInputOutput(data, context);
@@ -454,9 +473,11 @@ export const de_RpcV2CborSparseMapsCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<RpcV2CborSparseMapsCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_RpcV2CborSparseMapsInputOutput(data, context);
@@ -474,9 +495,11 @@ export const de_SimpleScalarPropertiesCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<SimpleScalarPropertiesCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_SimpleScalarStructure(data, context);
@@ -494,9 +517,11 @@ export const de_SparseNullsOperationCommand = async (
   output: __HttpResponse,
   context: __SerdeContext
 ): Promise<SparseNullsOperationCommandOutput> => {
+  cr(output);
   if (output.statusCode >= 300) {
     return de_CommandError(output, context);
   }
+
   const data: any = await parseBody(output.body, context);
   let contents: any = {};
   contents = de_SparseNullsOperationInputOutput(data, context);

@@ -7,6 +7,8 @@ package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import java.util.Set;
 import java.util.TreeSet;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -16,6 +18,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.protocol.traits.Rpcv2CborTrait;
+import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -23,6 +26,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.EventStreamGenerator;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
 import software.amazon.smithy.typescript.codegen.integration.HttpRpcProtocolGenerator;
+import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.typescript.codegen.protocols.SmithyProtocolUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -175,6 +179,60 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
                 generationContext
             )
         );
+    }
+
+    @Override
+    protected void generateOperationDeserializer(GenerationContext context, OperationShape operation) {
+        SymbolProvider symbolProvider = context.getSymbolProvider();
+        Symbol symbol = symbolProvider.toSymbol(operation);
+        SymbolReference responseType = getApplicationProtocol().getResponseType();
+        TypeScriptWriter writer = context.getWriter();
+
+        writer.addUseImports(responseType);
+        String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
+        String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
+        String errorMethodName = "de_CommandError";
+        String serdeContextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
+            context.getModel(), operation);
+        Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
+
+        writer.writeDocs(methodLongName);
+        writer.openBlock("""
+            export const $L = async(
+              output: $T,
+              context: $L
+            ): Promise<$T> => {""", "}",
+            methodName, responseType, serdeContextType, outputType,
+            () -> {
+                writer.addSubPathImport(
+                    "checkCborResponse", "cr",
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.CBOR
+                );
+                writer.write("cr(output);");
+
+                writer.write("""
+                    if (output.statusCode >= 300) {
+                      return $L(output, context);
+                    }
+                    """,
+                    errorMethodName
+                );
+
+                readResponseBody(context, operation);
+
+                writer.write("""
+                    const response: $T = {
+                        $$metadata: deserializeMetadata(output), $L
+                    };
+                    return response;
+                    """,
+                    outputType,
+                    operation.getOutput().map((o) -> "...contents,").orElse("")
+                );
+            }
+        );
+        writer.write("");
     }
 
     @Override

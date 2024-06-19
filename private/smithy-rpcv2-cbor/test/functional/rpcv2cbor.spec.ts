@@ -64,7 +64,7 @@ class ResponseDeserializationTestHandler implements HttpHandler {
       body = "";
     }
     this.body = body;
-    this.isBase64Body = Buffer.from(String(body), "base64").toString("base64") === body;
+    this.isBase64Body = String(body).length > 0 && Buffer.from(String(body), "base64").toString("base64") === body;
   }
 
   handle(request: HttpRequest, options?: HttpHandlerOptions): Promise<{ response: HttpResponse }> {
@@ -201,13 +201,15 @@ function normalizeByteArrayType(data: any) {
   if (!data || typeof data !== "object") {
     return data;
   }
+  if (data instanceof Uint8Array) {
+    return Uint8Array.from(data);
+  }
+  if (data instanceof String || data instanceof Boolean || data instanceof Number) {
+    return data.valueOf();
+  }
   const output = {} as any;
   for (const key of Object.getOwnPropertyNames(data)) {
-    if (data[key] instanceof Uint8Array) {
-      output[key] = Uint8Array.from(data[key]);
-    } else {
-      output[key] = normalizeByteArrayType(data[key]);
-    }
+    output[key] = normalizeByteArrayType(data[key]);
   }
   return output;
 }
