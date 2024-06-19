@@ -31,6 +31,7 @@
       "require": "./package.json"
     },
     "./cbor": {
+      "module": "./dist-es/submodules/cbor/index.js",
       "node": "./dist-cjs/submodules/cbor/index.js",
       "import": "./dist-es/submodules/cbor/index.js",
       "require": "./dist-cjs/submodules/cbor/index.js",
