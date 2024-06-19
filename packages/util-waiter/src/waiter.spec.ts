@@ -23,7 +23,7 @@ describe(checkExceptions.name, () => {
     const result = { state: WaiterState.RETRY, reason };
     expect(() => checkExceptions(result)).toThrow({
       name: "Error",
-      message: JSON.stringify({ result }),
+      message: JSON.stringify(result),
     });
   });
 
@@ -31,7 +31,7 @@ describe(checkExceptions.name, () => {
     const result = { state: WaiterState.FAILURE, reason };
     expect(() => checkExceptions(result)).toThrow({
       name: "Error",
-      message: JSON.stringify({ result }),
+      message: JSON.stringify(result),
     });
   });
 
