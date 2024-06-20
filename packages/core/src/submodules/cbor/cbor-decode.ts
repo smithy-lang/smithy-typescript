@@ -32,6 +32,7 @@ import {
 } from "./cbor-types";
 
 const USE_TEXT_DECODER = typeof TextDecoder !== "undefined";
+const USE_BUFFER = typeof Buffer !== "undefined";
 
 let payload = alloc(0);
 let dataView = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
@@ -156,8 +157,11 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
 }
 
 function bytesToUtf8(bytes: Uint8Array, at: number, to: number): string {
+  if (USE_BUFFER && bytes.constructor?.name === "Buffer") {
+    return (bytes as Buffer).toString("utf-8", at, to);
+  }
   if (textDecoder) {
-    return textDecoder.decode(bytes.subarray(at, to));
+    return textDecoder!.decode(bytes.subarray(at, to));
   }
   return toUtf8(bytes.subarray(at, to));
 }
