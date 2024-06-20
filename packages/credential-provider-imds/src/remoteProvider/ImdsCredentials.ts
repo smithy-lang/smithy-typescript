@@ -30,5 +30,5 @@ export const fromImdsCredentials = (creds: ImdsCredentials): AwsCredentialIdenti
   secretAccessKey: creds.SecretAccessKey,
   sessionToken: creds.Token,
   expiration: new Date(creds.Expiration),
-  accountId: creds.AccountId,
+  ...(creds.AccountId && { accountId: creds.AccountId }),
 });
