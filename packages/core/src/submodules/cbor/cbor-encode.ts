@@ -21,7 +21,6 @@ import {
 import { alloc } from "./cbor-types";
 
 const USE_BUFFER = typeof Buffer !== "undefined";
-const USE_TEXT_ENCODER = typeof TextEncoder !== "undefined";
 
 type BufferWithUtf8Write = Buffer & {
   utf8Write(str: string, index: number): number;
@@ -31,7 +30,6 @@ const initialSize = 2048;
 let data: Uint8Array = alloc(initialSize);
 let dataView: DataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
 let cursor: number = 0;
-const textEncoder: TextEncoder | null = USE_TEXT_ENCODER ? new TextEncoder() : null;
 
 function ensureSpace(bytes: number) {
   const remaining = data.byteLength - cursor;
@@ -190,46 +188,45 @@ export function encode(input: any): void {
 
 function encodeString(input: string) {
   ensureSpace(input.length * 4);
-  encodeHeader(majorUtf8String, Buffer.byteLength(input));
+
   if (USE_BUFFER) {
+    encodeHeader(majorUtf8String, Buffer.byteLength(input));
     if ((data as BufferWithUtf8Write).utf8Write) {
       cursor += (data as BufferWithUtf8Write).write(input, cursor);
     } else {
       cursor += (data as Buffer).write(input, cursor);
     }
-  } else if (input.length < 200) {
-    for (let i = 0; i < input.length; ++i) {
-      const c = input.charCodeAt(i);
-      const trailer = 0b1000_0000;
-
-      if (c < 128 /* byte */) {
-        data[cursor++] = c;
-      } else if (c < 2048 /* 12 bits */) {
-        // left 6 bits
-        data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
-        // right 6 bits
-        data[cursor++] = (c & 0b00_111111) | trailer;
-      } else if (c < 65536 /* 17 bits*/) {
-        data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
-        data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
-        data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
-      } else {
-        // surrogate pair
-        i++;
-        // 1st
-        data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
-        data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
-
-        // 2nd
-        data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
-        data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
-      }
-    }
-  } else if (USE_TEXT_ENCODER && textEncoder?.encodeInto) {
-    cursor += textEncoder.encodeInto(input, data.subarray(cursor)).written;
   } else {
     const bytes = fromUtf8(input);
+    encodeHeader(majorUtf8String, bytes.byteLength);
     data.set(bytes, cursor);
     cursor += bytes.byteLength;
   }
+  // for (let i = 0; i < input.length; ++i) {
+  //   const c = input.charCodeAt(i);
+  //   const trailer = 0b1000_0000;
+  //
+  //   if (c < 128 /* byte */) {
+  //     data[cursor++] = c;
+  //   } else if (c < 2048 /* 12 bits */) {
+  //     // left 6 bits
+  //     data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
+  //     // right 6 bits
+  //     data[cursor++] = (c & 0b00_111111) | trailer;
+  //   } else if (c < 65536 /* 17 bits*/) {
+  //     data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
+  //     data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+  //     data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+  //   } else {
+  //     // surrogate pair
+  //     i++;
+  //     // 1st
+  //     data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
+  //     data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
+  //
+  //     // 2nd
+  //     data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+  //     data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+  //   }
+  // }
 }
