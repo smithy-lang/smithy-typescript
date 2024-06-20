@@ -177,9 +177,10 @@ export function encode(input: any): void {
   } else if (typeof input === "object") {
     const keys = Object.keys(input);
     encodeHeader(majorMap, keys.length);
-    for (let i = 0; i < keys.length; i++) {
-      encodeString(keys[i]);
-      encode(input[keys[i]]);
+    for (let i = 0; i < keys.length; ++i) {
+      const key = keys[i];
+      encodeString(key);
+      encode(input[key]);
     }
     return;
   }
@@ -188,10 +189,14 @@ export function encode(input: any): void {
 }
 
 function encodeString(input: string) {
-  ensureSpace(input.length * 8);
-  encodeHeader(majorUtf8String, input.length);
-  if (USE_BUFFER && (data as BufferWithUtf8Write).utf8Write) {
-    cursor += (data as BufferWithUtf8Write).utf8Write(input, cursor);
+  ensureSpace(input.length * 4);
+  encodeHeader(majorUtf8String, Buffer.byteLength(input));
+  if (USE_BUFFER) {
+    if ((data as BufferWithUtf8Write).utf8Write) {
+      cursor += (data as BufferWithUtf8Write).write(input, cursor);
+    } else {
+      cursor += (data as Buffer).write(input, cursor);
+    }
   } else if (input.length < 200) {
     for (let i = 0; i < input.length; ++i) {
       const c = input.charCodeAt(i);
