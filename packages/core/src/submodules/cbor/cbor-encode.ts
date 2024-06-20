@@ -52,7 +52,6 @@ export function toUint8Array(): Uint8Array {
 }
 
 export function resize(size: number) {
-  console.log("resized to", size);
   const old = data;
   data = alloc(size);
   if (old) {
@@ -91,7 +90,10 @@ function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
  */
 export function encode(input: any): void {
   ensureSpace(64);
-  if (typeof input === "number") {
+  if (typeof input === "string") {
+    encodeString(input);
+    return;
+  } else if (typeof input === "number") {
     if (Number.isInteger(input)) {
       // this section is inlined duplicate for performance.
       const major = input >= 0 ? majorUint64 : majorNegativeInt64;
@@ -144,47 +146,6 @@ export function encode(input: any): void {
       cursor += 8;
     }
     return;
-  } else if (typeof input === "string") {
-    ensureSpace(input.length * 8);
-    encodeHeader(majorUtf8String, input.length);
-    if (USE_BUFFER && (data as BufferWithUtf8Write).utf8Write) {
-      cursor += (data as BufferWithUtf8Write).utf8Write(input, cursor);
-    } else if (input.length < 200) {
-      for (let i = 0; i < input.length; ++i) {
-        const c = input.charCodeAt(i);
-        const trailer = 0b1000_0000;
-
-        if (c < 128 /* byte */) {
-          data[cursor++] = c;
-        } else if (c < 2048 /* 12 bits */) {
-          // left 6 bits
-          data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
-          // right 6 bits
-          data[cursor++] = (c & 0b00_111111) | trailer;
-        } else if (c < 65536 /* 17 bits*/) {
-          data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
-          data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
-          data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
-        } else {
-          // surrogate pair
-          i++;
-          // 1st
-          data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
-          data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
-
-          // 2nd
-          data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
-          data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
-        }
-      }
-    } else if (USE_TEXT_ENCODER && textEncoder?.encodeInto) {
-      cursor += textEncoder.encodeInto(input, data.subarray(cursor)).written;
-    } else {
-      const bytes = fromUtf8(input);
-      data.set(bytes, cursor);
-      cursor += bytes.byteLength;
-    }
-    return;
   } else if (input === null) {
     data[cursor++] = (majorSpecial << 5) | specialNull;
     return;
@@ -214,14 +175,56 @@ export function encode(input: any): void {
     encode(input.value);
     return;
   } else if (typeof input === "object") {
-    const entries = Object.entries(input);
-    encodeHeader(majorMap, entries.length);
-    for (let i = 0; i < entries.length; i++) {
-      encode(entries[i][0]);
-      encode(entries[i][1]);
+    const keys = Object.keys(input);
+    encodeHeader(majorMap, keys.length);
+    for (let i = 0; i < keys.length; i++) {
+      encodeString(keys[i]);
+      encode(input[keys[i]]);
     }
     return;
   }
 
   throw new Error(`data type ${input?.constructor?.name ?? typeof input} not compatible for encoding.`);
+}
+
+function encodeString(input: string) {
+  ensureSpace(input.length * 8);
+  encodeHeader(majorUtf8String, input.length);
+  if (USE_BUFFER && (data as BufferWithUtf8Write).utf8Write) {
+    cursor += (data as BufferWithUtf8Write).utf8Write(input, cursor);
+  } else if (input.length < 200) {
+    for (let i = 0; i < input.length; ++i) {
+      const c = input.charCodeAt(i);
+      const trailer = 0b1000_0000;
+
+      if (c < 128 /* byte */) {
+        data[cursor++] = c;
+      } else if (c < 2048 /* 12 bits */) {
+        // left 6 bits
+        data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
+        // right 6 bits
+        data[cursor++] = (c & 0b00_111111) | trailer;
+      } else if (c < 65536 /* 17 bits*/) {
+        data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
+        data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+        data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+      } else {
+        // surrogate pair
+        i++;
+        // 1st
+        data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
+        data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
+
+        // 2nd
+        data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+        data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+      }
+    }
+  } else if (USE_TEXT_ENCODER && textEncoder?.encodeInto) {
+    cursor += textEncoder.encodeInto(input, data.subarray(cursor)).written;
+  } else {
+    const bytes = fromUtf8(input);
+    data.set(bytes, cursor);
+    cursor += bytes.byteLength;
+  }
 }
