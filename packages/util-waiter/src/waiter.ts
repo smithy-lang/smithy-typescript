@@ -68,7 +68,7 @@ export const checkExceptions = (result: WaiterResult): WaiterResult => {
     timeoutError.name = "TimeoutError";
     throw timeoutError;
   } else if (result.state !== WaiterState.SUCCESS) {
-    throw new Error(`${JSON.stringify({ result })}`);
+    throw new Error(`${JSON.stringify(result)}`);
   }
   return result;
 };
