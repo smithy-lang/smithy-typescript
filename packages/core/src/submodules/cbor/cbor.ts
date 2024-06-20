@@ -1,5 +1,5 @@
 import { decode, setPayload } from "./cbor-decode";
-import { encode, toUint8Array } from "./cbor-encode";
+import { encode, resize, toUint8Array } from "./cbor-encode";
 
 /**
  * This implementation is synchronous and only implements the parts of CBOR
@@ -19,5 +19,19 @@ export const cbor = {
   serialize(input: any) {
     encode(input);
     return toUint8Array();
+  },
+  /**
+   * @public
+   * @param size - byte length to allocate.
+   *
+   * This may be used to garbage collect the CBOR
+   * shared encoding buffer space,
+   * e.g. resizeEncodingBuffer(0);
+   *
+   * This may also be used to pre-allocate more space for
+   * CBOR encoding, e.g. resizeEncodingBuffer(100_000_000);
+   */
+  resizeEncodingBuffer(size: number) {
+    resize(size);
   },
 };

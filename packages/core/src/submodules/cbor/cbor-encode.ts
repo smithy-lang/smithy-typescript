@@ -27,20 +27,19 @@ type BufferWithUtf8Write = Buffer & {
   utf8Write(str: string, index: number): number;
 };
 
-const initialSize = 12_000_000;
+const initialSize = 2048;
 let data: Uint8Array = alloc(initialSize);
 let dataView: DataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
 let cursor: number = 0;
 const textEncoder: TextEncoder | null = USE_TEXT_ENCODER ? new TextEncoder() : null;
 
-// TODO(cbor): decide when to resize.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ensureSpace(bytes: number) {
-  if (data.byteLength - cursor < bytes) {
+  const remaining = data.byteLength - cursor;
+  if (remaining < bytes) {
     if (cursor < 16_000_000) {
-      resize(data.byteLength * 2);
+      resize(Math.max(data.byteLength * 4, data.byteLength + bytes));
     } else {
-      resize(data.byteLength + 16_000_000);
+      resize(data.byteLength + bytes + 16_000_000);
     }
   }
 }
@@ -49,14 +48,11 @@ export function toUint8Array(): Uint8Array {
   const out = alloc(cursor);
   out.set(data.subarray(0, cursor), 0);
   cursor = 0;
-  if (data.length > initialSize) {
-    data = alloc(initialSize);
-    dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  }
   return out;
 }
 
-function resize(size: number) {
+export function resize(size: number) {
+  console.log("resized to", size);
   const old = data;
   data = alloc(size);
   if (old) {
@@ -94,6 +90,7 @@ function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
  * @param input - JS data object.
  */
 export function encode(input: any): void {
+  ensureSpace(64);
   if (typeof input === "number") {
     if (Number.isInteger(input)) {
       // this section is inlined duplicate for performance.
@@ -148,6 +145,7 @@ export function encode(input: any): void {
     }
     return;
   } else if (typeof input === "string") {
+    ensureSpace(input.length * 8);
     encodeHeader(majorUtf8String, input.length);
     if (USE_BUFFER && (data as BufferWithUtf8Write).utf8Write) {
       cursor += (data as BufferWithUtf8Write).utf8Write(input, cursor);
@@ -206,6 +204,7 @@ export function encode(input: any): void {
     }
     return;
   } else if (typeof input.byteLength === "number") {
+    ensureSpace(input.length * 2);
     encodeHeader(majorUnstructuredByteString, input.length);
     data.set(input, cursor);
     cursor += input.byteLength;
