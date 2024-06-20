@@ -84,149 +84,154 @@ function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
 }
 
 /**
- * @param input - JS data object.
+ * @param _input - JS data object.
  */
-export function encode(input: any): void {
-  ensureSpace(64);
-  if (typeof input === "string") {
-    encodeString(input);
-    return;
-  } else if (typeof input === "number") {
-    if (Number.isInteger(input)) {
-      // this section is inlined duplicate for performance.
+export function encode(_input: any): void {
+  const encodeQueue = [_input];
+
+  while (encodeQueue.length) {
+    const input = encodeQueue.shift();
+    ensureSpace(typeof input === "string" ? input.length * 4 : 64);
+
+    if (typeof input === "string") {
+      if (USE_BUFFER) {
+        encodeHeader(majorUtf8String, Buffer.byteLength(input));
+        if ((data as BufferWithUtf8Write).utf8Write) {
+          cursor += (data as BufferWithUtf8Write).write(input, cursor);
+        } else {
+          cursor += (data as Buffer).write(input, cursor);
+        }
+      } else {
+        const bytes = fromUtf8(input);
+        encodeHeader(majorUtf8String, bytes.byteLength);
+        data.set(bytes, cursor);
+        cursor += bytes.byteLength;
+      }
+      continue;
+    } else if (typeof input === "number") {
+      if (Number.isInteger(input)) {
+        // this section is inlined duplicate for performance.
+        const major = input >= 0 ? majorUint64 : majorNegativeInt64;
+        const value = input >= 0 ? input : -input - 1;
+        if (value < 24) {
+          data[cursor++] = (major << 5) | value;
+        } else if (value < 256 /* 2 ** 8 */) {
+          data[cursor++] = (major << 5) | 24;
+          data[cursor++] = value;
+        } else if (value < 65536 /* 2 ** 16 */) {
+          data[cursor++] = (major << 5) | extendedFloat16;
+          data[cursor++] = (value as number) >> 8;
+          data[cursor++] = value as number & 0b1111_1111;
+        } else if (value < 4294967296 /* 2 ** 32 */) {
+          data[cursor++] = (major << 5) | extendedFloat32;
+          dataView.setUint32(cursor, value);
+          cursor += 4;
+        } else {
+          data[cursor++] = (major << 5) | extendedFloat64;
+          dataView.setBigUint64(cursor, BigInt(value));
+          cursor += 8;
+        }
+        continue;
+      }
+      data[cursor++] = (majorSpecial << 5) | extendedFloat64;
+      dataView.setFloat64(cursor, input);
+      cursor += 8;
+      continue;
+    } else if (typeof input === "bigint") {
       const major = input >= 0 ? majorUint64 : majorNegativeInt64;
-      const value = input >= 0 ? input : -input - 1;
-      if (value < 24) {
-        data[cursor++] = (major << 5) | value;
-      } else if (value < 256 /* 2 ** 8 */) {
+      const value = input >= 0 ? input : -input - BigInt(1);
+      const n = Number(value);
+      // this section is inlined duplicate for performance.
+      if (n < 24) {
+        data[cursor++] = (major << 5) | n;
+      } else if (n < 256 /* 2 ** 8 */) {
         data[cursor++] = (major << 5) | 24;
-        data[cursor++] = value;
-      } else if (value < 65536 /* 2 ** 16 */) {
+        data[cursor++] = n;
+      } else if (n < 65536 /* 2 ** 16 */) {
         data[cursor++] = (major << 5) | extendedFloat16;
-        data[cursor++] = (value as number) >> 8;
-        data[cursor++] = value as number & 0b1111_1111;
-      } else if (value < 4294967296 /* 2 ** 32 */) {
+        data[cursor++] = n >> 8;
+        data[cursor++] = n & 0b1111_1111;
+      } else if (n < 4294967296 /* 2 ** 32 */) {
         data[cursor++] = (major << 5) | extendedFloat32;
-        dataView.setUint32(cursor, value);
+        dataView.setUint32(cursor, n);
         cursor += 4;
       } else {
         data[cursor++] = (major << 5) | extendedFloat64;
-        dataView.setBigUint64(cursor, BigInt(value));
+        dataView.setBigUint64(cursor, value);
         cursor += 8;
       }
-      return;
+      continue;
+    } else if (input === null) {
+      data[cursor++] = (majorSpecial << 5) | specialNull;
+      continue;
+    } else if (typeof input === "boolean") {
+      data[cursor++] = (majorSpecial << 5) | (input ? specialTrue : specialFalse);
+      continue;
+    } else if (typeof input === "undefined") {
+      // Note: Smithy spec requires that undefined not be serialized
+      // though the CBOR spec includes it.
+      throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
+    } else if (Array.isArray(input)) {
+      encodeHeader(majorList, input.length);
+      for (let i = 0; i < input.length; ++i) {
+        // encode(input[i]);
+        encodeQueue.push(input[i]);
+      }
+      continue;
+    } else if (typeof input.byteLength === "number") {
+      ensureSpace(input.length * 2);
+      encodeHeader(majorUnstructuredByteString, input.length);
+      data.set(input, cursor);
+      cursor += input.byteLength;
+      continue;
+    } else if (typeof input === "object" && "tag" in input && "value" in input && Object.keys(input).length === 2) {
+      encodeHeader(majorTag, input.tag);
+      // encode(input.value);
+      encodeQueue.push(input.value);
+      continue;
+    } else if (typeof input === "object") {
+      const keys = Object.keys(input);
+      encodeHeader(majorMap, keys.length);
+      for (let i = 0; i < keys.length; ++i) {
+        const key = keys[i];
+        // encode(key);
+        // encode(input[key]);
+        encodeQueue.push(key);
+        encodeQueue.push(input[key]);
+      }
+      continue;
     }
-    data[cursor++] = (majorSpecial << 5) | extendedFloat64;
-    dataView.setFloat64(cursor, input);
-    cursor += 8;
-    return;
-  } else if (typeof input === "bigint") {
-    const major = input >= 0 ? majorUint64 : majorNegativeInt64;
-    const value = input >= 0 ? input : -input - BigInt(1);
-    const n = Number(value);
-    // this section is inlined duplicate for performance.
-    if (n < 24) {
-      data[cursor++] = (major << 5) | n;
-    } else if (n < 256 /* 2 ** 8 */) {
-      data[cursor++] = (major << 5) | 24;
-      data[cursor++] = n;
-    } else if (n < 65536 /* 2 ** 16 */) {
-      data[cursor++] = (major << 5) | extendedFloat16;
-      data[cursor++] = n >> 8;
-      data[cursor++] = n & 0b1111_1111;
-    } else if (n < 4294967296 /* 2 ** 32 */) {
-      data[cursor++] = (major << 5) | extendedFloat32;
-      dataView.setUint32(cursor, n);
-      cursor += 4;
-    } else {
-      data[cursor++] = (major << 5) | extendedFloat64;
-      dataView.setBigUint64(cursor, value);
-      cursor += 8;
-    }
-    return;
-  } else if (input === null) {
-    data[cursor++] = (majorSpecial << 5) | specialNull;
-    return;
-  } else if (typeof input === "boolean") {
-    data[cursor++] = (majorSpecial << 5) | (input ? specialTrue : specialFalse);
-    return;
-  } else if (typeof input === "undefined") {
-    // Note: Smithy spec requires that undefined not be serialized
-    // though the CBOR spec includes it.
-    // buffer[0] = compose(majorSpecial, specialUndefined);
-    // return 1;
-    throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
-  } else if (Array.isArray(input)) {
-    encodeHeader(majorList, input.length);
-    for (let i = 0; i < input.length; ++i) {
-      encode(input[i]);
-    }
-    return;
-  } else if (typeof input.byteLength === "number") {
-    ensureSpace(input.length * 2);
-    encodeHeader(majorUnstructuredByteString, input.length);
-    data.set(input, cursor);
-    cursor += input.byteLength;
-    return;
-  } else if (typeof input === "object" && "tag" in input && "value" in input && Object.keys(input).length === 2) {
-    encodeHeader(majorTag, input.tag);
-    encode(input.value);
-    return;
-  } else if (typeof input === "object") {
-    const keys = Object.keys(input);
-    encodeHeader(majorMap, keys.length);
-    for (let i = 0; i < keys.length; ++i) {
-      const key = keys[i];
-      encodeString(key);
-      encode(input[key]);
-    }
-    return;
-  }
 
-  throw new Error(`data type ${input?.constructor?.name ?? typeof input} not compatible for encoding.`);
+    throw new Error(`data type ${input?.constructor?.name ?? typeof input} not compatible for encoding.`);
+  }
 }
 
-function encodeString(input: string) {
-  ensureSpace(input.length * 4);
-
-  if (USE_BUFFER) {
-    encodeHeader(majorUtf8String, Buffer.byteLength(input));
-    if ((data as BufferWithUtf8Write).utf8Write) {
-      cursor += (data as BufferWithUtf8Write).write(input, cursor);
-    } else {
-      cursor += (data as Buffer).write(input, cursor);
-    }
-  } else {
-    const bytes = fromUtf8(input);
-    encodeHeader(majorUtf8String, bytes.byteLength);
-    data.set(bytes, cursor);
-    cursor += bytes.byteLength;
-  }
-  // for (let i = 0; i < input.length; ++i) {
-  //   const c = input.charCodeAt(i);
-  //   const trailer = 0b1000_0000;
-  //
-  //   if (c < 128 /* byte */) {
-  //     data[cursor++] = c;
-  //   } else if (c < 2048 /* 12 bits */) {
-  //     // left 6 bits
-  //     data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
-  //     // right 6 bits
-  //     data[cursor++] = (c & 0b00_111111) | trailer;
-  //   } else if (c < 65536 /* 17 bits*/) {
-  //     data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
-  //     data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
-  //     data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
-  //   } else {
-  //     // surrogate pair
-  //     i++;
-  //     // 1st
-  //     data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
-  //     data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
-  //
-  //     // 2nd
-  //     data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
-  //     data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
-  //   }
-  // }
-}
+// function encodeString(input: string) {
+// for (let i = 0; i < input.length; ++i) {
+//   const c = input.charCodeAt(i);
+//   const trailer = 0b1000_0000;
+//
+//   if (c < 128 /* byte */) {
+//     data[cursor++] = c;
+//   } else if (c < 2048 /* 12 bits */) {
+//     // left 6 bits
+//     data[cursor++] = (c >> 6) | 0b1100_00000; // 11 leading.
+//     // right 6 bits
+//     data[cursor++] = (c & 0b00_111111) | trailer;
+//   } else if (c < 65536 /* 17 bits*/) {
+//     data[cursor++] = ((c >> 12) & 0b0011_1111) | 0b1110_0000; // 111 leading.
+//     data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+//     data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+//   } else {
+//     // surrogate pair
+//     i++;
+//     // 1st
+//     data[cursor++] = ((c >> 18) & 0b0011_1111) | 0b1111_0000; // 1111 leading.
+//     data[cursor++] = ((c >> 12) & 0b0011_1111) | trailer;
+//
+//     // 2nd
+//     data[cursor++] = ((c >> 6) & 0b0011_1111) | trailer;
+//     data[cursor++] = ((c >> 0) & 0b0011_1111) | trailer;
+//   }
+// }
+// }
