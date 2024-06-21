@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.1
+
+### Patch Changes
+
+- 1d11480: Return stringified result object in case of failure
+
 ## 3.1.0
 
 ### Minor Changes
