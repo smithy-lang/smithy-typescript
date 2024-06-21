@@ -83,14 +83,21 @@ function encodeHeader(major: CborMajorType, value: Uint64 | number): void {
   }
 }
 
+const headerEncode: Symbol = Symbol("headerEncodeCbor");
+
 /**
  * @param _input - JS data object.
  */
 export function encode(_input: any): void {
-  const encodeQueue = [_input];
+  const encodeStack = [_input];
 
-  while (encodeQueue.length) {
-    const input = encodeQueue.shift();
+  while (encodeStack.length) {
+    const input = encodeStack.pop();
+    if (input?.headerEncode === headerEncode) {
+      encodeHeader(input.major, input.count);
+      continue;
+    }
+
     ensureSpace(typeof input === "string" ? input.length * 4 : 64);
 
     if (typeof input === "string") {
@@ -172,11 +179,14 @@ export function encode(_input: any): void {
       // though the CBOR spec includes it.
       throw new Error("@smithy/core/cbor: client may not serialize undefined value.");
     } else if (Array.isArray(input)) {
-      encodeHeader(majorList, input.length);
-      for (let i = 0; i < input.length; ++i) {
-        // encode(input[i]);
-        encodeQueue.push(input[i]);
+      for (let i = input.length - 1; i >= 0; --i) {
+        encodeStack.push(input[i]);
       }
+      encodeStack.push({
+        headerEncode,
+        major: majorList,
+        count: input.length,
+      });
       continue;
     } else if (typeof input.byteLength === "number") {
       ensureSpace(input.length * 2);
@@ -185,20 +195,25 @@ export function encode(_input: any): void {
       cursor += input.byteLength;
       continue;
     } else if (typeof input === "object" && "tag" in input && "value" in input && Object.keys(input).length === 2) {
-      encodeHeader(majorTag, input.tag);
-      // encode(input.value);
-      encodeQueue.push(input.value);
+      encodeStack.push(input.value);
+      encodeStack.push({
+        headerEncode,
+        major: majorTag,
+        count: input.tag,
+      });
       continue;
     } else if (typeof input === "object") {
       const keys = Object.keys(input);
-      encodeHeader(majorMap, keys.length);
-      for (let i = 0; i < keys.length; ++i) {
+      for (let i = keys.length - 1; i >= 0; --i) {
         const key = keys[i];
-        // encode(key);
-        // encode(input[key]);
-        encodeQueue.push(key);
-        encodeQueue.push(input[key]);
+        encodeStack.push(input[key]);
+        encodeStack.push(key);
       }
+      encodeStack.push({
+        headerEncode,
+        major: majorMap,
+        count: keys.length,
+      });
       continue;
     }
 
