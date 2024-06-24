@@ -117,7 +117,6 @@ export function encode(_input: any): void {
       continue;
     } else if (typeof input === "number") {
       if (Number.isInteger(input)) {
-        // this section is inlined duplicate for performance.
         const major = input >= 0 ? majorUint64 : majorNegativeInt64;
         const value = input >= 0 ? input : -input - 1;
         if (value < 24) {
@@ -148,7 +147,6 @@ export function encode(_input: any): void {
       const major = input >= 0 ? majorUint64 : majorNegativeInt64;
       const value = input >= 0 ? input : -input - BigInt(1);
       const n = Number(value);
-      // this section is inlined duplicate for performance.
       if (n < 24) {
         data[cursor++] = (major << 5) | n;
       } else if (n < 256 /* 2 ** 8 */) {
