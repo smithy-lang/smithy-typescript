@@ -153,11 +153,15 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return this.addImport(name, as, from.getPackageName());
     }
 
-    public TypeScriptWriter addSubPathImport(String name, String as, PackageContainer from, String subPath) {
+    /**
+     * Same as {@link #addImport(String, String, PackageContainer)} but appends a
+     * submodule path, for example "@smithy/core/cbor".
+     */
+    public TypeScriptWriter addImportSubmodule(String name, String as, PackageContainer from, String submodule) {
         if (from instanceof Dependency) {
             addDependency((Dependency) from);
         }
-        return this.addImport(name, as, from.getPackageName() + subPath);
+        return this.addImport(name, as, from.getPackageName() + submodule);
     }
 
     /**

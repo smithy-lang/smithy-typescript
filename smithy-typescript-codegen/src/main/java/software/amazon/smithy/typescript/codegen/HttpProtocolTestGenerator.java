@@ -599,7 +599,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 additionalStubs.add("protocol-test-text-stub.ts");
                 return "compareEquivalentTextBodies(bodyString, r.body)";
             case "application/cbor":
-                writer.addSubPathImport("cbor", null,
+                writer.addImportSubmodule("cbor", null,
                     TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
                 additionalStubs.add("protocol-test-cbor-stub.ts");
                 return "compareEquivalentCborBodies(bodyString, r.body)";

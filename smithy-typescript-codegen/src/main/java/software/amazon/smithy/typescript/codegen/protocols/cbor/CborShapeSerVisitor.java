@@ -161,6 +161,6 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
     }
 
     private DocumentMemberSerVisitor getMemberVisitor(String dataSource) {
-        return new CborMemberSerVisitor(getContext(), dataSource, TIMESTAMP_FORMAT);
+        return new CborMemberSerVisitor(getContext(), dataSource);
     }
 }

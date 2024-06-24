@@ -18,7 +18,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.SparseTrait;
-import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.DocumentShapeDeserVisitor;
@@ -200,7 +199,7 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
 
     private CborMemberDeserVisitor getMemberVisitor(String dataSource) {
         return new CborMemberDeserVisitor(
-            getContext(), dataSource, TimestampFormatTrait.Format.EPOCH_SECONDS
+            getContext(), dataSource
         );
     }
 

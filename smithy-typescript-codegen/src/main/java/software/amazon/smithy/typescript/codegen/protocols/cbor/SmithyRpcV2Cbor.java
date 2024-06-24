@@ -17,7 +17,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.protocol.traits.Rpcv2CborTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
@@ -52,12 +51,15 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
     public void generateSharedComponents(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
 
-        writer.addSubPathImport("parseCborBody", "parseBody",
-            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
-        writer.addSubPathImport("parseCborErrorBody", "parseErrorBody",
-            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
-        writer.addSubPathImport("loadSmithyRpcV2CborErrorCode", null,
-            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
+        writer.addImportSubmodule("parseCborBody", "parseBody",
+                TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            )
+            .addImportSubmodule("parseCborErrorBody", "parseErrorBody",
+                TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            )
+            .addImportSubmodule("loadSmithyRpcV2CborErrorCode", null,
+                TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            );
 
         ServiceShape service = context.getService();
         deserializingErrorShapes.forEach(error -> generateErrorDeserializer(context, error));
@@ -219,7 +221,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
             ): Promise<$T> => {""", "}",
             methodName, responseType, serdeContextType, outputType,
             () -> {
-                writer.addSubPathImport(
+                writer.addImportSubmodule(
                     "checkCborResponse", "cr",
                     TypeScriptDependency.SMITHY_CORE,
                     SmithyCoreSubmodules.CBOR
@@ -268,12 +270,12 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
                                           StructureShape inputStructure) {
         TypeScriptWriter writer = generationContext.getWriter();
 
-        writer.addSubPathImport(
+        writer.addImportSubmodule(
             "cbor", null,
             TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
         );
         writer.write("body = cbor.serialize($L);", inputStructure.accept(
-            new CborMemberSerVisitor(generationContext, "input", getDocumentTimestampFormat()))
+            new CborMemberSerVisitor(generationContext, "input"))
         );
     }
 
@@ -289,7 +291,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
             writer.write("populateBodyWithQueryCompatibility(parsedOutput, output.headers);");
         }
 
-        writer.addSubPathImport(
+        writer.addImportSubmodule(
             "loadSmithyRpcV2CborErrorCode", null,
             TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
         );
@@ -305,8 +307,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         writer.write("contents = $L;", outputStructure.accept(
             new CborMemberDeserVisitor(
                 generationContext,
-                "data",
-                getDocumentTimestampFormat()
+                "data"
             )
         ));
     }
@@ -321,10 +322,6 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
                 "smithy-protocol": "rpc-v2-cbor"
                 """);
         });
-    }
-
-    protected TimestampFormatTrait.Format getDocumentTimestampFormat() {
-        return TimestampFormatTrait.Format.EPOCH_SECONDS;
     }
 
     @Override

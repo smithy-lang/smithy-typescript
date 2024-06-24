@@ -26,13 +26,10 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      * @param context                The generation context.
      * @param dataSource             The in-code location of the data to provide an input of
      *                               ({@code input.foo}, {@code entry}, etc.)
-     * @param defaultTimestampFormat The default timestamp format used in absence
-     *                               of a TimestampFormat trait.
      */
     public CborMemberSerVisitor(ProtocolGenerator.GenerationContext context,
-                                String dataSource,
-                                TimestampFormatTrait.Format defaultTimestampFormat) {
-        super(context, dataSource, defaultTimestampFormat);
+                                String dataSource) {
+        super(context, dataSource, TimestampFormatTrait.Format.EPOCH_SECONDS);
         this.context = context;
         this.serdeElisionEnabled = true;
         this.dataSource = dataSource;
@@ -71,7 +68,7 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      */
     @Override
     public String timestampShape(TimestampShape shape) {
-        context.getWriter().addSubPathImport(
+        context.getWriter().addImportSubmodule(
             "dateToTag",
             "__dateToTag",
             TypeScriptDependency.SMITHY_CORE,
