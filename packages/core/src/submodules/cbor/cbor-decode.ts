@@ -167,6 +167,8 @@ function bytesToUtf8(bytes: Uint8Array, at: number, to: number): string {
 }
 
 function demote(bigInteger: bigint): number {
+  // cast is safe for string and array lengths, which do not
+  // exceed safe integer range.
   const num = Number(bigInteger);
   if (num < Number.MIN_SAFE_INTEGER || Number.MAX_SAFE_INTEGER < num) {
     console.warn(new Error(`@smithy/core/cbor - truncating BigInt(${bigInteger}) to ${num} with loss of precision.`));
@@ -297,7 +299,9 @@ function decodeUtf8StringIndefinite(at: Uint32, to: Uint32): string {
     const bytes = decodeUnstructuredByteString(at, to);
     const length = _offset;
     at += length;
-    vector.push(...bytes);
+    for (let i = 0; i < bytes.length; ++i) {
+      vector.push(bytes[i]);
+    }
   }
   throw new Error("expected break marker.");
 }
@@ -340,7 +344,9 @@ function decodeUnstructuredByteStringIndefinite(at: Uint32, to: Uint32): CborUns
     const bytes = decodeUnstructuredByteString(at, to);
     const length = _offset;
     at += length;
-    vector.push(...bytes);
+    for (let i = 0; i < bytes.length; ++i) {
+      vector.push(bytes[i]);
+    }
   }
   throw new Error("expected break marker.");
 }

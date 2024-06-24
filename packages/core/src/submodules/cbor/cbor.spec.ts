@@ -18,7 +18,7 @@ const successTests = JSONbig({ useNativeBigInt: true, alwaysParseAsBig: false })
 describe("cbor", () => {
   const allocByteArray = (dataOrSize: ArrayBuffer | ArrayLike<number> | number, offset?: number, length?: number) => {
     if (typeof offset === "number" && typeof length === "number") {
-      typeof Buffer !== "undefined"
+      return typeof Buffer !== "undefined"
         ? Buffer.from(dataOrSize as ArrayBuffer, offset, length)
         : new Uint8Array(dataOrSize as ArrayBuffer, offset, length);
     }

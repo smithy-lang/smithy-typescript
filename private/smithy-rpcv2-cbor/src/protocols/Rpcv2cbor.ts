@@ -53,6 +53,7 @@ import {
 } from "../models/models_0";
 import {
   dateToTag as __dateToTag,
+  buildHttpRpcRequest,
   cbor,
   checkCborResponse as cr,
   loadSmithyRpcV2CborErrorCode,
@@ -83,7 +84,6 @@ import {
   ResponseMetadata as __ResponseMetadata,
   SerdeContext as __SerdeContext,
 } from "@smithy/types";
-import { calculateBodyLength } from "@smithy/util-body-length-browser";
 
 /**
  * serializeRpcv2cborEmptyInputOutputCommand
@@ -1194,33 +1194,6 @@ const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
 });
 
 const throwDefaultError = withBaseException(__BaseException);
-const buildHttpRpcRequest = async (
-  context: __SerdeContext,
-  headers: __HeaderBag,
-  path: string,
-  resolvedHostname: string | undefined,
-  body: any
-): Promise<__HttpRequest> => {
-  const { hostname, protocol = "https", port, path: basePath } = await context.endpoint();
-  const contents: any = {
-    protocol,
-    hostname,
-    port,
-    method: "POST",
-    path: basePath.endsWith("/") ? basePath.slice(0, -1) + path : basePath + path,
-    headers,
-  };
-  if (resolvedHostname !== undefined) {
-    contents.hostname = resolvedHostname;
-  }
-  if (body !== undefined) {
-    contents.body = body;
-    try {
-      contents.headers["content-length"] = String(calculateBodyLength(body));
-    } catch (e) {}
-  }
-  return new __HttpRequest(contents);
-};
 const SHARED_HEADERS: __HeaderBag = {
   "content-type": "application/cbor",
   "smithy-protocol": "rpc-v2-cbor",

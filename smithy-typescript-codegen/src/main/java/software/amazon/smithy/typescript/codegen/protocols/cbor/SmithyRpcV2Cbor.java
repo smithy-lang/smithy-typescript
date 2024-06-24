@@ -103,39 +103,9 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         writer.addUseImports(requestType);
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
-        writer.openBlock("""
-            const buildHttpRpcRequest = async (
-              context: __SerdeContext,
-              headers: __HeaderBag,
-              path: string,
-              resolvedHostname: string | undefined,
-              body: any,
-            ): Promise<$T> => {""", "};", requestType, () -> {
-                writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
-                writer.write("""
-                    const { hostname, protocol = "https", port, path: basePath } = await context.endpoint();
-                    const contents: any = {
-                      protocol,
-                      hostname,
-                      port,
-                      method: "POST",
-                      path: basePath.endsWith("/") ? basePath.slice(0, -1) + path : basePath + path,
-                      headers,
-                    };
-                    if (resolvedHostname !== undefined) {
-                      contents.hostname = resolvedHostname;
-                    }
-                    if (body !== undefined) {
-                      contents.body = body;
-                      try {
-                        contents.headers["content-length"] = String(calculateBodyLength(body));
-                      } catch (e) {}
-                    }
-                    return new $T(contents);
-                    """,
-                    requestType
-                );
-            }
+        writer.addImportSubmodule(
+            "buildHttpRpcRequest", null,
+            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
         );
         writeSharedRequestHeaders(context);
         writer.write("");

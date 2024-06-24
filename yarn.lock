@@ -2276,6 +2276,7 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
@@ -2881,7 +2882,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-body-length-browser@^3.0.0, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
+"@smithy/util-body-length-browser@^3.0.0, @smithy/util-body-length-browser@workspace:^, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/util-body-length-browser@workspace:packages/util-body-length-browser"
   dependencies:

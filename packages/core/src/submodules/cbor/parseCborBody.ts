@@ -1,5 +1,7 @@
+import { HttpRequest as __HttpRequest } from "@smithy/protocol-http";
 import { collectBody } from "@smithy/smithy-client";
-import type { HttpResponse, SerdeContext } from "@smithy/types";
+import { HeaderBag as __HeaderBag, HttpResponse, SerdeContext as __SerdeContext, SerdeContext } from "@smithy/types";
+import { calculateBodyLength } from "@smithy/util-body-length-browser";
 
 import { cbor } from "./cbor";
 
@@ -71,8 +73,42 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
   }
 };
 
+/**
+ * @internal
+ */
 export const checkCborResponse = (response: HttpResponse): void => {
-  if (response.headers["smithy-protocol"] !== "rpc-v2-cbor") {
+  if (String(response.headers["smithy-protocol"]).toLowerCase() !== "rpc-v2-cbor") {
     throw new Error("Malformed RPCv2 CBOR response, status: " + response.statusCode);
   }
+};
+
+/**
+ * @internal
+ */
+export const buildHttpRpcRequest = async (
+  context: __SerdeContext,
+  headers: __HeaderBag,
+  path: string,
+  resolvedHostname: string | undefined,
+  body: any
+): Promise<__HttpRequest> => {
+  const { hostname, protocol = "https", port, path: basePath } = await context.endpoint();
+  const contents: any = {
+    protocol,
+    hostname,
+    port,
+    method: "POST",
+    path: basePath.endsWith("/") ? basePath.slice(0, -1) + path : basePath + path,
+    headers,
+  };
+  if (resolvedHostname !== undefined) {
+    contents.hostname = resolvedHostname;
+  }
+  if (body !== undefined) {
+    contents.body = body;
+    try {
+      contents.headers["content-length"] = String(calculateBodyLength(body));
+    } catch (e) {}
+  }
+  return new __HttpRequest(contents);
 };
