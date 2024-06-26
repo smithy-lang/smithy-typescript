@@ -91,8 +91,8 @@ export interface FetchHttpHandlerOptions {
    */
   keepAlive?: boolean;
 
-    /** 
-     * A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials.
-     */
-  credentials?: RequestCredentials;
+  /** 
+   * A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials.
+   */
+  credentials?: "include" | "omit" | "same-origin" | undefined | string;
 }

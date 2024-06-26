@@ -77,7 +77,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     }
     const requestTimeoutInMs = this.config!.requestTimeout;
     const keepAlive = this.config!.keepAlive === true;
-    const credentials = this.config!.credentials;
+    const credentials = this.config!.credentials as RequestCredentials;
 
     // if the request was already aborted, prevent doing extra work
     if (abortSignal?.aborted) {
