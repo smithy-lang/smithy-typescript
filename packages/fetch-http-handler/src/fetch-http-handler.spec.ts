@@ -353,6 +353,33 @@ describe(FetchHttpHandler.name, () => {
     expect(await blobToText(response.body)).toBe("FOO");
   });
 
+  it.each(["include", "omit", "same-origin"])
+  ("will pass credentials mode '%s' from a provider to a request", async (credentialsMode) => {
+    const mockResponse = {
+      headers: { entries: jest.fn().mockReturnValue([]) },
+      blob: jest.fn().mockResolvedValue(new Blob()),
+    };
+    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+
+    (global as any).fetch = mockFetch;
+
+    const httpRequest = new HttpRequest({
+      headers: {},
+      hostname: "foo.amazonaws.com",
+      method: "GET",
+      path: "/",
+      body: "will be omitted",
+    });
+    const fetchHttpHandler = new FetchHttpHandler();
+    fetchHttpHandler.updateHttpClientConfig("credentials", credentialsMode as RequestCredentials);
+
+    await fetchHttpHandler.handle(httpRequest, {});
+
+    expect(mockFetch.mock.calls.length).toBe(1);
+    const requestCall = mockRequest.mock.calls[0];
+    expect(requestCall[1].credentials).toBe(credentialsMode);
+  });
+
   describe("#destroy", () => {
     it("should be callable and return nothing", () => {
       const httpHandler = new FetchHttpHandler();
