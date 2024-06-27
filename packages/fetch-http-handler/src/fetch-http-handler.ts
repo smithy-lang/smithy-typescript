@@ -77,7 +77,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     }
     const requestTimeoutInMs = this.config!.requestTimeout;
     const keepAlive = this.config!.keepAlive === true;
-    const credentials = this.config!.credentials as RequestCredentials;
+    const credentials = this.config!.credentials as RequestInit["credentials"];
 
     // if the request was already aborted, prevent doing extra work
     if (abortSignal?.aborted) {
@@ -111,7 +111,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       body,
       headers: new Headers(request.headers),
       method: method,
-      credentials
+      credentials,
     };
     if (body) {
       requestOptions.duplex = "half";

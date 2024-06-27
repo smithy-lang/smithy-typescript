@@ -91,8 +91,10 @@ export interface FetchHttpHandlerOptions {
    */
   keepAlive?: boolean;
 
-  /** 
-   * A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials.
+  /**
+   * A string indicating whether credentials will be sent with the request always, never, or
+   * only when sent to a same-origin URL.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
    */
   credentials?: "include" | "omit" | "same-origin" | undefined | string;
 }
