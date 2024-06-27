@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0
+
+### Minor Changes
+
+- 4784fb9: Adding support for setting the fetch API credentials mode
+
 ## 3.2.0
 
 ### Minor Changes

@@ -1,5 +1,18 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 4784fb9: Adding support for setting the fetch API credentials mode
+
+### Patch Changes
+
+- Updated dependencies [4784fb9]
+  - @smithy/types@3.3.0
+  - @smithy/protocol-http@4.0.3
+  - @smithy/querystring-builder@3.0.3
+
 ## 3.1.0
 
 ### Minor Changes

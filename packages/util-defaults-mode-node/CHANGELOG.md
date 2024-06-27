@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [4784fb9]
+  - @smithy/types@3.3.0
+  - @smithy/config-resolver@3.0.4
+  - @smithy/credential-provider-imds@3.1.3
+  - @smithy/node-config-provider@3.1.3
+  - @smithy/property-provider@3.1.3
+  - @smithy/smithy-client@3.1.5
+
 ## 3.0.6
 
 ### Patch Changes

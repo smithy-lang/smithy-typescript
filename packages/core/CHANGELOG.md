@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.2.4
+
+### Patch Changes
+
+- Updated dependencies [4784fb9]
+  - @smithy/types@3.3.0
+  - @smithy/middleware-endpoint@3.0.4
+  - @smithy/middleware-retry@3.0.7
+  - @smithy/middleware-serde@3.0.3
+  - @smithy/protocol-http@4.0.3
+  - @smithy/smithy-client@3.1.5
+  - @smithy/util-middleware@3.0.3
+
 ## 2.2.3
 
 ### Patch Changes
