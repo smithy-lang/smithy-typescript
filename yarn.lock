@@ -2730,10 +2730,8 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-uri-escape": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@types/elliptic": 6.4.18
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
-    elliptic: 6.5.5
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
