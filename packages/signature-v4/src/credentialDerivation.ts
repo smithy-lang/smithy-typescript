@@ -206,7 +206,7 @@ export const isBiggerThanNMinus2 = (value: Uint8Array): boolean => {
  */
 export const addOneToArray = (value: Uint8Array): Uint8Array => {
   // Value is in Big-Endian format, significant digit first. This is why we go the opposite way when calculating
-  let output = new Uint8Array(32);
+  const output = new Uint8Array(32);
 
   // We are adding one, we can simply add this to carry
   let carry = 1;

@@ -33,6 +33,7 @@ import {
   TOKEN_HEADER,
   TOKEN_QUERY_PARAM,
 } from "./constants";
+import { createSigV4Scope, getSigV4SigningKey } from "./credentialDerivation";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";
 import { getPayloadHash } from "./getPayloadHash";
 import { HeaderFormatter } from "./HeaderFormatter";
@@ -40,7 +41,6 @@ import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
 import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
-import { createSigV4Scope, getSigV4SigningKey } from "./credentialDerivation";
 
 export class SignatureV4
   extends SignatureV4Base

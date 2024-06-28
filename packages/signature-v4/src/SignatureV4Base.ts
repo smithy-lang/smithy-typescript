@@ -11,6 +11,7 @@ import { toHex } from "@smithy/util-hex-encoding";
 import { normalizeProvider } from "@smithy/util-middleware";
 import { escapeUri } from "@smithy/util-uri-escape";
 import { toUint8Array } from "@smithy/util-utf8";
+
 import { getCanonicalQuery } from "./getCanonicalQuery";
 import { iso8601 } from "./utilDate";
 

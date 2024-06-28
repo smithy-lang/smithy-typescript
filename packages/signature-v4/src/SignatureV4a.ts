@@ -1,5 +1,8 @@
-import { toHex } from "@smithy/util-hex-encoding";
 import { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
+import { toHex } from "@smithy/util-hex-encoding";
+import { toUint8Array } from "@smithy/util-utf8";
+import * as elliptic from "elliptic";
+
 import {
   ALGORITHM_IDENTIFIER_V4A,
   AMZ_DATE_HEADER,
@@ -8,14 +11,12 @@ import {
   SHA256_HEADER,
   TOKEN_HEADER,
 } from "./constants";
-import * as elliptic from "elliptic";
-import { hasHeader } from "./headerUtil";
-import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
-import { toUint8Array } from "@smithy/util-utf8";
-import { prepareRequest } from "./prepareRequest";
 import { createSigV4aScope, getSigV4aSigningKey } from "./credentialDerivation";
-import { getPayloadHash } from "./getPayloadHash";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";
+import { getPayloadHash } from "./getPayloadHash";
+import { hasHeader } from "./headerUtil";
+import { prepareRequest } from "./prepareRequest";
+import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
 
 export class SignatureV4a extends SignatureV4Base implements RequestSigner {
   /**
