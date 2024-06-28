@@ -14,7 +14,6 @@ export const GENERATED_HEADERS = [AUTH_HEADER, AMZ_DATE_HEADER, DATE_HEADER];
 export const SIGNATURE_HEADER = SIGNATURE_QUERY_PARAM.toLowerCase();
 export const SHA256_HEADER = "x-amz-content-sha256";
 export const TOKEN_HEADER = TOKEN_QUERY_PARAM.toLowerCase();
-export const REGION_HEADER = REGION_SET_PARAM.toLowerCase();
 export const HOST_HEADER = "host";
 
 export const ALWAYS_UNSIGNABLE_HEADERS = {
@@ -52,11 +51,3 @@ export const MAX_CACHE_SIZE = 50;
 export const KEY_TYPE_IDENTIFIER = "aws4_request";
 
 export const MAX_PRESIGNED_TTL = 60 * 60 * 24 * 7;
-
-// AWS SigV4a private signing key constants
-export const ONE_AS_4_BYTES = [0x00, 0x00, 0x00, 0x01];
-export const TWOFIFTYSIX_AS_4_BYTES = [0x00, 0x00, 0x01, 0x00];
-export const N_MINUS_TWO = [
-  0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xbc, 0xe6, 0xfa,
-  0xad, 0xa7, 0x17, 0x9e, 0x84, 0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x4f,
-];

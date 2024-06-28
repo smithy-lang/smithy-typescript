@@ -2740,6 +2740,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/signature-v4a@workspace:packages/signature-v4a":
+  version: 0.0.0-use.local
+  resolution: "@smithy/signature-v4a@workspace:packages/signature-v4a"
+  dependencies:
+    "@aws-crypto/sha256-js": 5.2.0
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/signature-v4": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@smithy/util-hex-encoding": "workspace:^"
+    "@smithy/util-utf8": "workspace:^"
+    "@types/elliptic": 6.4.18
+    concurrently: 7.0.0
+    downlevel-dts: 0.10.1
+    elliptic: 6.5.5
+    rimraf: 3.0.2
+    tslib: ^2.6.2
+    typedoc: 0.23.23
+  languageName: unknown
+  linkType: soft
+
 "@smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-client@workspace:packages/smithy-client"

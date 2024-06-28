@@ -1,22 +1,23 @@
-import { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
-import { toHex } from "@smithy/util-hex-encoding";
-import { toUint8Array } from "@smithy/util-utf8";
-import * as elliptic from "elliptic";
-
 import {
   ALGORITHM_IDENTIFIER_V4A,
   AMZ_DATE_HEADER,
   AUTH_HEADER,
-  REGION_HEADER,
   SHA256_HEADER,
   TOKEN_HEADER,
-} from "./constants";
+} from "@smithy/signature-v4";
+import { getCanonicalHeaders } from "@smithy/signature-v4";
+import { getPayloadHash } from "@smithy/signature-v4";
+import { hasHeader } from "@smithy/signature-v4";
+import { prepareRequest } from "@smithy/signature-v4";
+import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "@smithy/signature-v4";
+import { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
+import { toHex } from "@smithy/util-hex-encoding";
+import { toUint8Array } from "@smithy/util-utf8";
+
+import { REGION_HEADER } from "./constants";
 import { createSigV4aScope, getSigV4aSigningKey } from "./credentialDerivation";
-import { getCanonicalHeaders } from "./getCanonicalHeaders";
-import { getPayloadHash } from "./getPayloadHash";
-import { hasHeader } from "./headerUtil";
-import { prepareRequest } from "./prepareRequest";
-import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
+// @ts-ignore
+import { Ec } from "./elliptic/Ec";
 
 /**
  * @public
@@ -121,7 +122,7 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
    */
   private async GetSignature(privateKey: Uint8Array, stringToSign: string): Promise<string> {
     // Create ECDSA and get key pair
-    const ecdsa = new elliptic.ec("p256");
+    const ecdsa = new Ec("p256");
     const key = ecdsa.keyFromPrivate(privateKey);
 
     // Format request using SHA256

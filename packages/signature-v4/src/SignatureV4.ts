@@ -33,7 +33,7 @@ import {
   TOKEN_HEADER,
   TOKEN_QUERY_PARAM,
 } from "./constants";
-import { createSigV4Scope, getSigV4SigningKey } from "./credentialDerivation";
+import { createScope, getSigningKey } from "./credentialDerivation";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";
 import { getPayloadHash } from "./getPayloadHash";
 import { HeaderFormatter } from "./HeaderFormatter";
@@ -87,7 +87,7 @@ export class SignatureV4
       );
     }
 
-    const scope = createSigV4Scope(shortDate, region, signingService ?? this.service);
+    const scope = createScope(shortDate, region, signingService ?? this.service);
     const request = moveHeadersToQuery(prepareRequest(originalRequest), { unhoistableHeaders });
 
     if (credentials.sessionToken) {
@@ -133,7 +133,7 @@ export class SignatureV4
   ): Promise<string> {
     const region = signingRegion ?? (await this.regionProvider());
     const { shortDate, longDate } = this.formatDate(signingDate);
-    const scope = createSigV4Scope(shortDate, region, signingService ?? this.service);
+    const scope = createScope(shortDate, region, signingService ?? this.service);
     const hashedPayload = await getPayloadHash({ headers: {}, body: payload } as any, this.sha256);
     const hash = new this.sha256();
     hash.update(headers);
@@ -200,7 +200,7 @@ export class SignatureV4
     const region = signingRegion ?? (await this.regionProvider());
     const request = prepareRequest(requestToSign);
     const { longDate, shortDate } = this.formatDate(signingDate);
-    const scope = createSigV4Scope(shortDate, region, signingService ?? this.service);
+    const scope = createScope(shortDate, region, signingService ?? this.service);
 
     request.headers[AMZ_DATE_HEADER] = longDate;
     if (credentials.sessionToken) {
@@ -253,6 +253,6 @@ export class SignatureV4
     shortDate: string,
     service?: string
   ): Promise<Uint8Array> {
-    return getSigV4SigningKey(this.sha256, credentials, shortDate, region, service || this.service);
+    return getSigningKey(this.sha256, credentials, shortDate, region, service || this.service);
   }
 }

@@ -80,7 +80,7 @@ export abstract class SignatureV4Base {
   private readonly uriEscapePath: boolean;
   protected readonly applyChecksum: boolean;
 
-  constructor({
+  protected constructor({
     applyChecksum,
     credentials,
     region,
