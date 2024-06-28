@@ -24,9 +24,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../../../node_modules/elliptic/package.json
+// ../../node_modules/elliptic/package.json
 var require_package = __commonJS({
-  "../../../node_modules/elliptic/package.json"(exports, module) {
+  "../../node_modules/elliptic/package.json"(exports, module) {
     module.exports = {
       name: "elliptic",
       version: "6.5.5",
@@ -86,15 +86,15 @@ var require_package = __commonJS({
   }
 });
 
-// (disabled):../../../node_modules/buffer/index.js
+// (disabled):../../node_modules/buffer/index.js
 var require_buffer = __commonJS({
-  "(disabled):../../../node_modules/buffer/index.js"() {
+  "(disabled):../../node_modules/buffer/index.js"() {
   }
 });
 
-// ../../../node_modules/bn.js/lib/bn.js
+// ../../node_modules/bn.js/lib/bn.js
 var require_bn = __commonJS({
-  "../../../node_modules/bn.js/lib/bn.js"(exports, module) {
+  "../../node_modules/bn.js/lib/bn.js"(exports, module) {
     (function(module2, exports2) {
       "use strict";
       function assert(val, msg) {
@@ -2945,9 +2945,9 @@ var require_bn = __commonJS({
   }
 });
 
-// ../../../node_modules/minimalistic-assert/index.js
+// ../../node_modules/minimalistic-assert/index.js
 var require_minimalistic_assert = __commonJS({
-  "../../../node_modules/minimalistic-assert/index.js"(exports, module) {
+  "../../node_modules/minimalistic-assert/index.js"(exports, module) {
     module.exports = assert;
     function assert(val, msg) {
       if (!val)
@@ -2960,9 +2960,9 @@ var require_minimalistic_assert = __commonJS({
   }
 });
 
-// ../../../node_modules/minimalistic-crypto-utils/lib/utils.js
+// ../../node_modules/minimalistic-crypto-utils/lib/utils.js
 var require_utils = __commonJS({
-  "../../../node_modules/minimalistic-crypto-utils/lib/utils.js"(exports) {
+  "../../node_modules/minimalistic-crypto-utils/lib/utils.js"(exports) {
     "use strict";
     var utils = exports;
     function toArray(msg, enc) {
@@ -3019,9 +3019,9 @@ var require_utils = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/utils.js
+// ../../node_modules/elliptic/lib/elliptic/utils.js
 var require_utils2 = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/utils.js"(exports) {
+  "../../node_modules/elliptic/lib/elliptic/utils.js"(exports) {
     "use strict";
     var utils = exports;
     var BN = require_bn();
@@ -3131,9 +3131,9 @@ var require_crypto = __commonJS({
   }
 });
 
-// ../../../node_modules/brorand/index.js
+// ../../node_modules/brorand/index.js
 var require_brorand = __commonJS({
-  "../../../node_modules/brorand/index.js"(exports, module) {
+  "../../node_modules/brorand/index.js"(exports, module) {
     var r;
     module.exports = function rand(len) {
       if (!r)
@@ -3188,9 +3188,9 @@ var require_brorand = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/curve/base.js
+// ../../node_modules/elliptic/lib/elliptic/curve/base.js
 var require_base = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/curve/base.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/curve/base.js"(exports, module) {
     "use strict";
     var BN = require_bn();
     var utils = require_utils2();
@@ -3510,9 +3510,9 @@ var require_base = __commonJS({
   }
 });
 
-// ../../../node_modules/has-symbols/shams.js
+// ../../node_modules/has-symbols/shams.js
 var require_shams = __commonJS({
-  "../../../node_modules/has-symbols/shams.js"(exports, module) {
+  "../../node_modules/has-symbols/shams.js"(exports, module) {
     "use strict";
     module.exports = function hasSymbols() {
       if (typeof Symbol !== "function" || typeof Object.getOwnPropertySymbols !== "function") {
@@ -3562,9 +3562,9 @@ var require_shams = __commonJS({
   }
 });
 
-// ../../../node_modules/has-tostringtag/shams.js
+// ../../node_modules/has-tostringtag/shams.js
 var require_shams2 = __commonJS({
-  "../../../node_modules/has-tostringtag/shams.js"(exports, module) {
+  "../../node_modules/has-tostringtag/shams.js"(exports, module) {
     "use strict";
     var hasSymbols = require_shams();
     module.exports = function hasToStringTagShams() {
@@ -3573,9 +3573,9 @@ var require_shams2 = __commonJS({
   }
 });
 
-// ../../../node_modules/has-symbols/index.js
+// ../../node_modules/has-symbols/index.js
 var require_has_symbols = __commonJS({
-  "../../../node_modules/has-symbols/index.js"(exports, module) {
+  "../../node_modules/has-symbols/index.js"(exports, module) {
     "use strict";
     var origSymbol = typeof Symbol !== "undefined" && Symbol;
     var hasSymbolSham = require_shams();
@@ -3597,9 +3597,9 @@ var require_has_symbols = __commonJS({
   }
 });
 
-// ../../../node_modules/is-arguments/node_modules/function-bind/implementation.js
+// ../../node_modules/is-arguments/node_modules/function-bind/implementation.js
 var require_implementation = __commonJS({
-  "../../../node_modules/is-arguments/node_modules/function-bind/implementation.js"(exports, module) {
+  "../../node_modules/is-arguments/node_modules/function-bind/implementation.js"(exports, module) {
     "use strict";
     var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
     var slice = Array.prototype.slice;
@@ -3647,18 +3647,18 @@ var require_implementation = __commonJS({
   }
 });
 
-// ../../../node_modules/is-arguments/node_modules/function-bind/index.js
+// ../../node_modules/is-arguments/node_modules/function-bind/index.js
 var require_function_bind = __commonJS({
-  "../../../node_modules/is-arguments/node_modules/function-bind/index.js"(exports, module) {
+  "../../node_modules/is-arguments/node_modules/function-bind/index.js"(exports, module) {
     "use strict";
     var implementation = require_implementation();
     module.exports = Function.prototype.bind || implementation;
   }
 });
 
-// ../../../node_modules/has/node_modules/function-bind/implementation.js
+// ../../node_modules/has/node_modules/function-bind/implementation.js
 var require_implementation2 = __commonJS({
-  "../../../node_modules/has/node_modules/function-bind/implementation.js"(exports, module) {
+  "../../node_modules/has/node_modules/function-bind/implementation.js"(exports, module) {
     "use strict";
     var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
     var slice = Array.prototype.slice;
@@ -3706,27 +3706,27 @@ var require_implementation2 = __commonJS({
   }
 });
 
-// ../../../node_modules/has/node_modules/function-bind/index.js
+// ../../node_modules/has/node_modules/function-bind/index.js
 var require_function_bind2 = __commonJS({
-  "../../../node_modules/has/node_modules/function-bind/index.js"(exports, module) {
+  "../../node_modules/has/node_modules/function-bind/index.js"(exports, module) {
     "use strict";
     var implementation = require_implementation2();
     module.exports = Function.prototype.bind || implementation;
   }
 });
 
-// ../../../node_modules/has/src/index.js
+// ../../node_modules/has/src/index.js
 var require_src = __commonJS({
-  "../../../node_modules/has/src/index.js"(exports, module) {
+  "../../node_modules/has/src/index.js"(exports, module) {
     "use strict";
     var bind = require_function_bind2();
     module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
   }
 });
 
-// ../../../node_modules/is-arguments/node_modules/get-intrinsic/index.js
+// ../../node_modules/is-arguments/node_modules/get-intrinsic/index.js
 var require_get_intrinsic = __commonJS({
-  "../../../node_modules/is-arguments/node_modules/get-intrinsic/index.js"(exports, module) {
+  "../../node_modules/is-arguments/node_modules/get-intrinsic/index.js"(exports, module) {
     "use strict";
     var undefined2;
     var $SyntaxError = SyntaxError;
@@ -4028,9 +4028,9 @@ var require_get_intrinsic = __commonJS({
   }
 });
 
-// ../../../node_modules/is-arguments/node_modules/call-bind/index.js
+// ../../node_modules/is-arguments/node_modules/call-bind/index.js
 var require_call_bind = __commonJS({
-  "../../../node_modules/is-arguments/node_modules/call-bind/index.js"(exports, module) {
+  "../../node_modules/is-arguments/node_modules/call-bind/index.js"(exports, module) {
     "use strict";
     var bind = require_function_bind();
     var GetIntrinsic = require_get_intrinsic();
@@ -4072,9 +4072,9 @@ var require_call_bind = __commonJS({
   }
 });
 
-// ../../../node_modules/is-arguments/node_modules/call-bind/callBound.js
+// ../../node_modules/is-arguments/node_modules/call-bind/callBound.js
 var require_callBound = __commonJS({
-  "../../../node_modules/is-arguments/node_modules/call-bind/callBound.js"(exports, module) {
+  "../../node_modules/is-arguments/node_modules/call-bind/callBound.js"(exports, module) {
     "use strict";
     var GetIntrinsic = require_get_intrinsic();
     var callBind = require_call_bind();
@@ -4089,9 +4089,9 @@ var require_callBound = __commonJS({
   }
 });
 
-// ../../../node_modules/is-arguments/index.js
+// ../../node_modules/is-arguments/index.js
 var require_is_arguments = __commonJS({
-  "../../../node_modules/is-arguments/index.js"(exports, module) {
+  "../../node_modules/is-arguments/index.js"(exports, module) {
     "use strict";
     var hasToStringTag = require_shams2()();
     var callBound = require_callBound();
@@ -4116,9 +4116,9 @@ var require_is_arguments = __commonJS({
   }
 });
 
-// ../../../node_modules/is-generator-function/index.js
+// ../../node_modules/is-generator-function/index.js
 var require_is_generator_function = __commonJS({
-  "../../../node_modules/is-generator-function/index.js"(exports, module) {
+  "../../node_modules/is-generator-function/index.js"(exports, module) {
     "use strict";
     var toStr = Object.prototype.toString;
     var fnToStr = Function.prototype.toString;
@@ -4158,9 +4158,9 @@ var require_is_generator_function = __commonJS({
   }
 });
 
-// ../../../node_modules/is-callable/index.js
+// ../../node_modules/is-callable/index.js
 var require_is_callable = __commonJS({
-  "../../../node_modules/is-callable/index.js"(exports, module) {
+  "../../node_modules/is-callable/index.js"(exports, module) {
     "use strict";
     var fnToStr = Function.prototype.toString;
     var reflectApply = typeof Reflect === "object" && Reflect !== null && Reflect.apply;
@@ -4276,9 +4276,9 @@ var require_is_callable = __commonJS({
   }
 });
 
-// ../../../node_modules/for-each/index.js
+// ../../node_modules/for-each/index.js
 var require_for_each = __commonJS({
-  "../../../node_modules/for-each/index.js"(exports, module) {
+  "../../node_modules/for-each/index.js"(exports, module) {
     "use strict";
     var isCallable = require_is_callable();
     var toStr = Object.prototype.toString;
@@ -4334,9 +4334,9 @@ var require_for_each = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/available-typed-arrays/index.js
+// ../../node_modules/util/node_modules/available-typed-arrays/index.js
 var require_available_typed_arrays = __commonJS({
-  "../../../node_modules/util/node_modules/available-typed-arrays/index.js"(exports, module) {
+  "../../node_modules/util/node_modules/available-typed-arrays/index.js"(exports, module) {
     "use strict";
     var possibleNames = [
       "BigInt64Array",
@@ -4364,9 +4364,9 @@ var require_available_typed_arrays = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/function-bind/implementation.js
+// ../../node_modules/util/node_modules/function-bind/implementation.js
 var require_implementation3 = __commonJS({
-  "../../../node_modules/util/node_modules/function-bind/implementation.js"(exports, module) {
+  "../../node_modules/util/node_modules/function-bind/implementation.js"(exports, module) {
     "use strict";
     var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
     var slice = Array.prototype.slice;
@@ -4414,18 +4414,18 @@ var require_implementation3 = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/function-bind/index.js
+// ../../node_modules/util/node_modules/function-bind/index.js
 var require_function_bind3 = __commonJS({
-  "../../../node_modules/util/node_modules/function-bind/index.js"(exports, module) {
+  "../../node_modules/util/node_modules/function-bind/index.js"(exports, module) {
     "use strict";
     var implementation = require_implementation3();
     module.exports = Function.prototype.bind || implementation;
   }
 });
 
-// ../../../node_modules/util/node_modules/get-intrinsic/index.js
+// ../../node_modules/util/node_modules/get-intrinsic/index.js
 var require_get_intrinsic2 = __commonJS({
-  "../../../node_modules/util/node_modules/get-intrinsic/index.js"(exports, module) {
+  "../../node_modules/util/node_modules/get-intrinsic/index.js"(exports, module) {
     "use strict";
     var undefined2;
     var $SyntaxError = SyntaxError;
@@ -4727,9 +4727,9 @@ var require_get_intrinsic2 = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/call-bind/index.js
+// ../../node_modules/util/node_modules/call-bind/index.js
 var require_call_bind2 = __commonJS({
-  "../../../node_modules/util/node_modules/call-bind/index.js"(exports, module) {
+  "../../node_modules/util/node_modules/call-bind/index.js"(exports, module) {
     "use strict";
     var bind = require_function_bind3();
     var GetIntrinsic = require_get_intrinsic2();
@@ -4771,9 +4771,9 @@ var require_call_bind2 = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/call-bind/callBound.js
+// ../../node_modules/util/node_modules/call-bind/callBound.js
 var require_callBound2 = __commonJS({
-  "../../../node_modules/util/node_modules/call-bind/callBound.js"(exports, module) {
+  "../../node_modules/util/node_modules/call-bind/callBound.js"(exports, module) {
     "use strict";
     var GetIntrinsic = require_get_intrinsic2();
     var callBind = require_call_bind2();
@@ -4788,9 +4788,9 @@ var require_callBound2 = __commonJS({
   }
 });
 
-// ../../../node_modules/gopd/node_modules/function-bind/implementation.js
+// ../../node_modules/gopd/node_modules/function-bind/implementation.js
 var require_implementation4 = __commonJS({
-  "../../../node_modules/gopd/node_modules/function-bind/implementation.js"(exports, module) {
+  "../../node_modules/gopd/node_modules/function-bind/implementation.js"(exports, module) {
     "use strict";
     var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
     var slice = Array.prototype.slice;
@@ -4838,18 +4838,18 @@ var require_implementation4 = __commonJS({
   }
 });
 
-// ../../../node_modules/gopd/node_modules/function-bind/index.js
+// ../../node_modules/gopd/node_modules/function-bind/index.js
 var require_function_bind4 = __commonJS({
-  "../../../node_modules/gopd/node_modules/function-bind/index.js"(exports, module) {
+  "../../node_modules/gopd/node_modules/function-bind/index.js"(exports, module) {
     "use strict";
     var implementation = require_implementation4();
     module.exports = Function.prototype.bind || implementation;
   }
 });
 
-// ../../../node_modules/gopd/node_modules/get-intrinsic/index.js
+// ../../node_modules/gopd/node_modules/get-intrinsic/index.js
 var require_get_intrinsic3 = __commonJS({
-  "../../../node_modules/gopd/node_modules/get-intrinsic/index.js"(exports, module) {
+  "../../node_modules/gopd/node_modules/get-intrinsic/index.js"(exports, module) {
     "use strict";
     var undefined2;
     var $SyntaxError = SyntaxError;
@@ -5151,9 +5151,9 @@ var require_get_intrinsic3 = __commonJS({
   }
 });
 
-// ../../../node_modules/gopd/index.js
+// ../../node_modules/gopd/index.js
 var require_gopd = __commonJS({
-  "../../../node_modules/gopd/index.js"(exports, module) {
+  "../../node_modules/gopd/index.js"(exports, module) {
     "use strict";
     var GetIntrinsic = require_get_intrinsic3();
     var $gOPD = GetIntrinsic("%Object.getOwnPropertyDescriptor%", true);
@@ -5168,9 +5168,9 @@ var require_gopd = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/is-typed-array/index.js
+// ../../node_modules/util/node_modules/is-typed-array/index.js
 var require_is_typed_array = __commonJS({
-  "../../../node_modules/util/node_modules/is-typed-array/index.js"(exports, module) {
+  "../../node_modules/util/node_modules/is-typed-array/index.js"(exports, module) {
     "use strict";
     var forEach = require_for_each();
     var availableTypedArrays = require_available_typed_arrays();
@@ -5233,9 +5233,9 @@ var require_is_typed_array = __commonJS({
   }
 });
 
-// ../../../node_modules/util/node_modules/which-typed-array/index.js
+// ../../node_modules/util/node_modules/which-typed-array/index.js
 var require_which_typed_array = __commonJS({
-  "../../../node_modules/util/node_modules/which-typed-array/index.js"(exports, module) {
+  "../../node_modules/util/node_modules/which-typed-array/index.js"(exports, module) {
     "use strict";
     var forEach = require_for_each();
     var availableTypedArrays = require_available_typed_arrays();
@@ -5292,9 +5292,9 @@ var require_which_typed_array = __commonJS({
   }
 });
 
-// ../../../node_modules/util/support/types.js
+// ../../node_modules/util/support/types.js
 var require_types = __commonJS({
-  "../../../node_modules/util/support/types.js"(exports) {
+  "../../node_modules/util/support/types.js"(exports) {
     "use strict";
     var isArgumentsObject = require_is_arguments();
     var isGeneratorFunction = require_is_generator_function();
@@ -5522,18 +5522,18 @@ var require_types = __commonJS({
   }
 });
 
-// ../../../node_modules/util/support/isBufferBrowser.js
+// ../../node_modules/util/support/isBufferBrowser.js
 var require_isBufferBrowser = __commonJS({
-  "../../../node_modules/util/support/isBufferBrowser.js"(exports, module) {
+  "../../node_modules/util/support/isBufferBrowser.js"(exports, module) {
     module.exports = function isBuffer(arg) {
       return arg && typeof arg === "object" && typeof arg.copy === "function" && typeof arg.fill === "function" && typeof arg.readUInt8 === "function";
     };
   }
 });
 
-// ../../../node_modules/util/util.js
+// ../../node_modules/util/util.js
 var require_util = __commonJS({
-  "../../../node_modules/util/util.js"(exports) {
+  "../../node_modules/util/util.js"(exports) {
     var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors || function getOwnPropertyDescriptors2(obj) {
       var keys = Object.keys(obj);
       var descriptors = {};
@@ -6102,9 +6102,9 @@ var require_util = __commonJS({
   }
 });
 
-// ../../../node_modules/inherits/inherits_browser.js
+// ../../node_modules/inherits/inherits_browser.js
 var require_inherits_browser = __commonJS({
-  "../../../node_modules/inherits/inherits_browser.js"(exports, module) {
+  "../../node_modules/inherits/inherits_browser.js"(exports, module) {
     if (typeof Object.create === "function") {
       module.exports = function inherits(ctor, superCtor) {
         if (superCtor) {
@@ -6134,9 +6134,9 @@ var require_inherits_browser = __commonJS({
   }
 });
 
-// ../../../node_modules/inherits/inherits.js
+// ../../node_modules/inherits/inherits.js
 var require_inherits = __commonJS({
-  "../../../node_modules/inherits/inherits.js"(exports, module) {
+  "../../node_modules/inherits/inherits.js"(exports, module) {
     try {
       util = require_util();
       if (typeof util.inherits !== "function")
@@ -6149,9 +6149,9 @@ var require_inherits = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/curve/short.js
+// ../../node_modules/elliptic/lib/elliptic/curve/short.js
 var require_short = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/curve/short.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/curve/short.js"(exports, module) {
     "use strict";
     var utils = require_utils2();
     var BN = require_bn();
@@ -6847,9 +6847,9 @@ var require_short = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/curve/mont.js
+// ../../node_modules/elliptic/lib/elliptic/curve/mont.js
 var require_mont = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/curve/mont.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/curve/mont.js"(exports, module) {
     "use strict";
     var BN = require_bn();
     var inherits = require_inherits();
@@ -6975,9 +6975,9 @@ var require_mont = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/curve/edwards.js
+// ../../node_modules/elliptic/lib/elliptic/curve/edwards.js
 var require_edwards = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/curve/edwards.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/curve/edwards.js"(exports, module) {
     "use strict";
     var utils = require_utils2();
     var BN = require_bn();
@@ -7276,9 +7276,9 @@ var require_edwards = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/curve/index.js
+// ../../node_modules/elliptic/lib/elliptic/curve/index.js
 var require_curve = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/curve/index.js"(exports) {
+  "../../node_modules/elliptic/lib/elliptic/curve/index.js"(exports) {
     "use strict";
     var curve = exports;
     curve.base = require_base();
@@ -7288,9 +7288,9 @@ var require_curve = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/utils.js
+// ../../node_modules/hash.js/lib/hash/utils.js
 var require_utils3 = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/utils.js"(exports) {
+  "../../node_modules/hash.js/lib/hash/utils.js"(exports) {
     "use strict";
     var assert = require_minimalistic_assert();
     var inherits = require_inherits();
@@ -7533,9 +7533,9 @@ var require_utils3 = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/common.js
+// ../../node_modules/hash.js/lib/hash/common.js
 var require_common = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/common.js"(exports) {
+  "../../node_modules/hash.js/lib/hash/common.js"(exports) {
     "use strict";
     var utils = require_utils3();
     var assert = require_minimalistic_assert();
@@ -7612,9 +7612,9 @@ var require_common = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha/common.js
+// ../../node_modules/hash.js/lib/hash/sha/common.js
 var require_common2 = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha/common.js"(exports) {
+  "../../node_modules/hash.js/lib/hash/sha/common.js"(exports) {
     "use strict";
     var utils = require_utils3();
     var rotr32 = utils.rotr32;
@@ -7658,9 +7658,9 @@ var require_common2 = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha/1.js
+// ../../node_modules/hash.js/lib/hash/sha/1.js
 var require__ = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha/1.js"(exports, module) {
+  "../../node_modules/hash.js/lib/hash/sha/1.js"(exports, module) {
     "use strict";
     var utils = require_utils3();
     var common = require_common();
@@ -7730,9 +7730,9 @@ var require__ = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha/256.js
+// ../../node_modules/hash.js/lib/hash/sha/256.js
 var require__2 = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha/256.js"(exports, module) {
+  "../../node_modules/hash.js/lib/hash/sha/256.js"(exports, module) {
     "use strict";
     var utils = require_utils3();
     var common = require_common();
@@ -7882,9 +7882,9 @@ var require__2 = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha/224.js
+// ../../node_modules/hash.js/lib/hash/sha/224.js
 var require__3 = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha/224.js"(exports, module) {
+  "../../node_modules/hash.js/lib/hash/sha/224.js"(exports, module) {
     "use strict";
     var utils = require_utils3();
     var SHA256 = require__2();
@@ -7918,9 +7918,9 @@ var require__3 = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha/512.js
+// ../../node_modules/hash.js/lib/hash/sha/512.js
 var require__4 = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha/512.js"(exports, module) {
+  "../../node_modules/hash.js/lib/hash/sha/512.js"(exports, module) {
     "use strict";
     var utils = require_utils3();
     var common = require_common();
@@ -8357,9 +8357,9 @@ var require__4 = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha/384.js
+// ../../node_modules/hash.js/lib/hash/sha/384.js
 var require__5 = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha/384.js"(exports, module) {
+  "../../node_modules/hash.js/lib/hash/sha/384.js"(exports, module) {
     "use strict";
     var utils = require_utils3();
     var SHA512 = require__4();
@@ -8401,9 +8401,9 @@ var require__5 = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/sha.js
+// ../../node_modules/hash.js/lib/hash/sha.js
 var require_sha = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/sha.js"(exports) {
+  "../../node_modules/hash.js/lib/hash/sha.js"(exports) {
     "use strict";
     exports.sha1 = require__();
     exports.sha224 = require__3();
@@ -8413,9 +8413,9 @@ var require_sha = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/ripemd.js
+// ../../node_modules/hash.js/lib/hash/ripemd.js
 var require_ripemd = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/ripemd.js"(exports) {
+  "../../node_modules/hash.js/lib/hash/ripemd.js"(exports) {
     "use strict";
     var utils = require_utils3();
     var common = require_common();
@@ -8854,9 +8854,9 @@ var require_ripemd = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash/hmac.js
+// ../../node_modules/hash.js/lib/hash/hmac.js
 var require_hmac = __commonJS({
-  "../../../node_modules/hash.js/lib/hash/hmac.js"(exports, module) {
+  "../../node_modules/hash.js/lib/hash/hmac.js"(exports, module) {
     "use strict";
     var utils = require_utils3();
     var assert = require_minimalistic_assert();
@@ -8895,9 +8895,9 @@ var require_hmac = __commonJS({
   }
 });
 
-// ../../../node_modules/hash.js/lib/hash.js
+// ../../node_modules/hash.js/lib/hash.js
 var require_hash = __commonJS({
-  "../../../node_modules/hash.js/lib/hash.js"(exports) {
+  "../../node_modules/hash.js/lib/hash.js"(exports) {
     var hash = exports;
     hash.utils = require_utils3();
     hash.common = require_common();
@@ -8913,9 +8913,9 @@ var require_hash = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/precomputed/secp256k1.js
+// ../../node_modules/elliptic/lib/elliptic/precomputed/secp256k1.js
 var require_secp256k1 = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/precomputed/secp256k1.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/precomputed/secp256k1.js"(exports, module) {
     module.exports = {
       doubles: {
         step: 4,
@@ -9699,9 +9699,9 @@ var require_secp256k1 = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/curves.js
+// ../../node_modules/elliptic/lib/elliptic/curves.js
 var require_curves = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/curves.js"(exports) {
+  "../../node_modules/elliptic/lib/elliptic/curves.js"(exports) {
     "use strict";
     var curves = exports;
     var hash = require_hash();
@@ -9875,9 +9875,9 @@ var require_curves = __commonJS({
   }
 });
 
-// ../../../node_modules/hmac-drbg/lib/hmac-drbg.js
+// ../../node_modules/hmac-drbg/lib/hmac-drbg.js
 var require_hmac_drbg = __commonJS({
-  "../../../node_modules/hmac-drbg/lib/hmac-drbg.js"(exports, module) {
+  "../../node_modules/hmac-drbg/lib/hmac-drbg.js"(exports, module) {
     "use strict";
     var hash = require_hash();
     var utils = require_utils();
@@ -9969,9 +9969,9 @@ var require_hmac_drbg = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/ec/key.js
+// ../../node_modules/elliptic/lib/elliptic/ec/key.js
 var require_key = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/ec/key.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/ec/key.js"(exports, module) {
     "use strict";
     var BN = require_bn();
     var utils = require_utils2();
@@ -10063,9 +10063,9 @@ var require_key = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/ec/signature.js
+// ../../node_modules/elliptic/lib/elliptic/ec/signature.js
 var require_signature = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/ec/signature.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/ec/signature.js"(exports, module) {
     "use strict";
     var BN = require_bn();
     var utils = require_utils2();
@@ -10209,9 +10209,9 @@ var require_signature = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/ec/index.js
+// ../../node_modules/elliptic/lib/elliptic/ec/index.js
 var require_ec = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/ec/index.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/ec/index.js"(exports, module) {
     "use strict";
     var BN = require_bn();
     var HmacDRBG = require_hmac_drbg();
@@ -10389,9 +10389,9 @@ var require_ec = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/eddsa/key.js
+// ../../node_modules/elliptic/lib/elliptic/eddsa/key.js
 var require_key2 = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/eddsa/key.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/eddsa/key.js"(exports, module) {
     "use strict";
     var utils = require_utils2();
     var assert = utils.assert;
@@ -10463,9 +10463,9 @@ var require_key2 = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/eddsa/signature.js
+// ../../node_modules/elliptic/lib/elliptic/eddsa/signature.js
 var require_signature2 = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/eddsa/signature.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/eddsa/signature.js"(exports, module) {
     "use strict";
     var BN = require_bn();
     var utils = require_utils2();
@@ -10512,9 +10512,9 @@ var require_signature2 = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic/eddsa/index.js
+// ../../node_modules/elliptic/lib/elliptic/eddsa/index.js
 var require_eddsa = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic/eddsa/index.js"(exports, module) {
+  "../../node_modules/elliptic/lib/elliptic/eddsa/index.js"(exports, module) {
     "use strict";
     var hash = require_hash();
     var curves = require_curves();
@@ -10597,9 +10597,9 @@ var require_eddsa = __commonJS({
   }
 });
 
-// ../../../node_modules/elliptic/lib/elliptic.js
+// ../../node_modules/elliptic/lib/elliptic.js
 var require_elliptic = __commonJS({
-  "../../../node_modules/elliptic/lib/elliptic.js"(exports) {
+  "../../node_modules/elliptic/lib/elliptic.js"(exports) {
     "use strict";
     var elliptic = exports;
     elliptic.version = require_package().version;
@@ -10612,7 +10612,7 @@ var require_elliptic = __commonJS({
   }
 });
 
-// Ec.js
+// scripts/Ec.js
 var import_elliptic = __toESM(require_elliptic());
 var export_Ec = import_elliptic.ec;
 export {

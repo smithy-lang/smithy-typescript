@@ -11,6 +11,7 @@
     "build:es": "yarn g:tsc -p tsconfig.es.json",
     "build:types": "yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "rimraf dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
+    "build:elliptic": "node ./scripts/esbuild.mjs",
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
