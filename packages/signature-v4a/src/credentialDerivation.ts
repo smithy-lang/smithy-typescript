@@ -1,7 +1,7 @@
+import { ALGORITHM_IDENTIFIER_V4A, KEY_TYPE_IDENTIFIER } from "@smithy/signature-v4";
 import { ChecksumConstructor, HashConstructor } from "@smithy/types";
 import { toUint8Array } from "@smithy/util-utf8";
 
-import { ALGORITHM_IDENTIFIER_V4A, KEY_TYPE_IDENTIFIER } from "@smithy/signature-v4";
 import { N_MINUS_TWO, ONE_AS_4_BYTES, TWOFIFTYSIX_AS_4_BYTES } from "./constants";
 
 const signingKeyCache: Record<string, Uint8Array> = {};
