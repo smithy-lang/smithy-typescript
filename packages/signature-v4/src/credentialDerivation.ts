@@ -5,9 +5,10 @@ import { toUint8Array } from "@smithy/util-utf8";
 import {
   ALGORITHM_IDENTIFIER_V4A,
   KEY_TYPE_IDENTIFIER,
-  MAX_CACHE_SIZE, N_MINUS_TWO,
+  MAX_CACHE_SIZE,
+  N_MINUS_TWO,
   ONE_AS_4_BYTES,
-  TWOFIFTYSIX_AS_4_BYTES
+  TWOFIFTYSIX_AS_4_BYTES,
 } from "./constants";
 
 const signingKeyCache: Record<string, Uint8Array> = {};
@@ -30,7 +31,6 @@ export const createSigV4Scope = (shortDate: string, region: string, service: str
  */
 export const createSigV4aScope = (shortDate: string, service: string): string =>
   `${shortDate}/${service}/${KEY_TYPE_IDENTIFIER}`;
-
 
 /**
  * Derive a signing key from its composite parts
@@ -92,8 +92,8 @@ const hmac = (
 export const getSigV4aSigningKey = async (
   sha256: ChecksumConstructor | HashConstructor,
   accessKey: string,
-  secretKey: string): Promise<Uint8Array> =>
-{
+  secretKey: string
+): Promise<Uint8Array> => {
   let outputBufferWriter = "";
   /*
    * The maximum number of iterations we will attempt to derive a valid ecc key for.  The probability that this counter
@@ -110,21 +110,20 @@ export const getSigV4aSigningKey = async (
   const inputKeyBuf = inputKeyLength <= 64 ? new Uint8Array(64) : new Uint8Array(inputKeyLength);
 
   // Input AWS4A and secret into array
-  const aws4aArray = "AWS4A".split('');
+  const aws4aArray = "AWS4A".split("");
 
   for (let index = 0; index < aws4aArray.length; index++) {
     inputKeyBuf[index] = aws4aArray[index].charCodeAt(0);
   }
 
-  const secretKeyArray = secretKey.split('');
+  const secretKeyArray = secretKey.split("");
 
   for (let index = 0; index < secretKeyArray.length; index++) {
     inputKeyBuf[aws4aArray.length + index] = secretKeyArray[index].charCodeAt(0);
   }
 
   let trial = 1;
-  while (trial < maxTrials)
-  {
+  while (trial < maxTrials) {
     outputBufferWriter = buildFixedInputBuffer(outputBufferWriter, accessKey, trial);
 
     const secretKey = inputKeyBuf.subarray(0, inputKeyLength);
@@ -135,8 +134,7 @@ export const getSigV4aSigningKey = async (
 
     const hashedOutput = await hash.digest();
 
-    if (isBiggerThanNMinus2(hashedOutput))
-    {
+    if (isBiggerThanNMinus2(hashedOutput)) {
       trial++;
       continue;
     }
@@ -145,7 +143,7 @@ export const getSigV4aSigningKey = async (
   }
 
   throw new Error("Cannot derive signing key: number of maximum trials exceeded.");
-}
+};
 
 /**
  * Build the signing key request. Implementation copied from .NET implementation
@@ -165,7 +163,7 @@ export const buildFixedInputBuffer = (bufferInput: string, accessKey: string, co
 
   let outputBuffer = bufferInput;
 
-  outputBuffer += ONE_AS_4_BYTES.map(value => String.fromCharCode(value)).join('');
+  outputBuffer += ONE_AS_4_BYTES.map((value) => String.fromCharCode(value)).join("");
 
   outputBuffer += ALGORITHM_IDENTIFIER_V4A;
 
@@ -175,10 +173,10 @@ export const buildFixedInputBuffer = (bufferInput: string, accessKey: string, co
 
   outputBuffer += String.fromCharCode(counter);
 
-  outputBuffer += TWOFIFTYSIX_AS_4_BYTES.map(value => String.fromCharCode(value)).join('');
+  outputBuffer += TWOFIFTYSIX_AS_4_BYTES.map((value) => String.fromCharCode(value)).join("");
 
   return outputBuffer;
-}
+};
 
 /**
  * Check if calculated value is larger than NMinus2 constant
@@ -192,8 +190,7 @@ export const isBiggerThanNMinus2 = (value: Uint8Array): boolean => {
     if (value[index] > N_MINUS_TWO[index]) {
       // Value is greater than const
       return true;
-    }
-    else if (value[index] < N_MINUS_TWO[index]) {
+    } else if (value[index] < N_MINUS_TWO[index]) {
       // Const is greater
       return false;
     }
@@ -220,8 +217,7 @@ export const addOneToArray = (value: Uint8Array): Uint8Array => {
     // If the new value is less than the old, we must have eclipsed 255. We need to carry a digit
     if (newValueAtIndex < value[index]) {
       carry = 1;
-    }
-    else {
+    } else {
       carry = 0;
     }
 
@@ -229,8 +225,8 @@ export const addOneToArray = (value: Uint8Array): Uint8Array => {
   }
 
   if (carry !== 0) {
-    return new Uint8Array([carry, ...output])
+    return new Uint8Array([carry, ...output]);
   }
 
   return output;
-}
+};

@@ -30,8 +30,9 @@
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-uri-escape": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
-    "tslib": "^2.6.2",
-    "elliptic": "^6.5.5"
+    "@types/elliptic": "6.4.18",
+    "elliptic": "6.5.5",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@aws-crypto/sha256-js": "5.2.0",

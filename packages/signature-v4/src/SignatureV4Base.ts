@@ -71,13 +71,13 @@ export abstract class SignatureV4Base {
   protected readonly applyChecksum: boolean;
 
   constructor({
-                applyChecksum,
-                credentials,
-                region,
-                service,
-                sha256,
-                uriEscapePath = true,
-              }: SignatureV4Init & SignatureV4CryptoInit) {
+    applyChecksum,
+    credentials,
+    region,
+    service,
+    sha256,
+    uriEscapePath = true,
+  }: SignatureV4Init & SignatureV4CryptoInit) {
     this.service = service;
     this.sha256 = sha256;
     this.uriEscapePath = uriEscapePath;

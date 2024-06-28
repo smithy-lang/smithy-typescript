@@ -1,24 +1,21 @@
-import {toHex} from "@smithy/util-hex-encoding";
-import {
-  HttpRequest,
-  RequestSigner, RequestSigningArguments
-} from "@smithy/types";
+import { toHex } from "@smithy/util-hex-encoding";
+import { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
 import {
   ALGORITHM_IDENTIFIER_V4A,
   AMZ_DATE_HEADER,
   AUTH_HEADER,
   REGION_HEADER,
   SHA256_HEADER,
-  TOKEN_HEADER
+  TOKEN_HEADER,
 } from "./constants";
-import * as elliptic from "elliptic"
-import {hasHeader} from "./headerUtil";
-import {SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init} from "./SignatureV4Base";
-import {toUint8Array} from "@smithy/util-utf8";
-import {prepareRequest} from "./prepareRequest";
-import {createSigV4aScope, getSigV4aSigningKey} from "./credentialDerivation";
-import {getPayloadHash} from "./getPayloadHash";
-import {getCanonicalHeaders} from "./getCanonicalHeaders";
+import * as elliptic from "elliptic";
+import { hasHeader } from "./headerUtil";
+import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
+import { toUint8Array } from "@smithy/util-utf8";
+import { prepareRequest } from "./prepareRequest";
+import { createSigV4aScope, getSigV4aSigningKey } from "./credentialDerivation";
+import { getPayloadHash } from "./getPayloadHash";
+import { getCanonicalHeaders } from "./getCanonicalHeaders";
 
 export class SignatureV4a extends SignatureV4Base implements RequestSigner {
   /**
@@ -30,20 +27,20 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
    * @param uriEscapePath Defaults to true. Used for non s3 services.
    */
   constructor({
-                applyChecksum,
-                credentials,
-                region,
-                service,
-                sha256,
-                uriEscapePath = true,
-              }: SignatureV4Init & SignatureV4CryptoInit) {
-    super ({
+    applyChecksum,
+    credentials,
+    region,
+    service,
+    sha256,
+    uriEscapePath = true,
+  }: SignatureV4Init & SignatureV4CryptoInit) {
+    super({
       applyChecksum: applyChecksum,
       credentials: credentials,
       region: region,
       service: service,
       sha256: sha256,
-      uriEscapePath: uriEscapePath
+      uriEscapePath: uriEscapePath,
     });
   }
 
@@ -120,7 +117,7 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
    */
   private async GetSignature(privateKey: Uint8Array, stringToSign: string): Promise<string> {
     // Create ECDSA and get key pair
-    const ecdsa = new elliptic.ec('p256')
+    const ecdsa = new elliptic.ec("p256");
     const key = ecdsa.keyFromPrivate(privateKey);
 
     // Format request using SHA256
@@ -129,7 +126,7 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
     const hashResult = await hash.digest();
 
     // Finally sign using ECDSA keypair.
-    const signature = key.sign(hashResult, );
+    const signature = key.sign(hashResult);
 
     // Convert signature to DER format (ASN.1's normal singing format)
     return toHex(new Uint8Array(signature.toDER()));

@@ -2730,8 +2730,10 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-uri-escape": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
+    "@types/elliptic": 6.4.18
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
+    elliptic: 6.5.5
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -3145,6 +3147,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bn.js@npm:*":
+  version: 5.1.5
+  resolution: "@types/bn.js@npm:5.1.5"
+  dependencies:
+    "@types/node": "*"
+  checksum: c87b28c4af74545624f8a3dae5294b16aa190c222626e8d4b2e327b33b1a3f1eeb43e7a24d914a9774bca43d8cd6e1cb0325c1f4b3a244af6693a024e1d918e6
+  languageName: node
+  linkType: hard
+
 "@types/cookie@npm:^0.4.1":
   version: 0.4.1
   resolution: "@types/cookie@npm:0.4.1"
@@ -3158,6 +3169,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 7ef197ea19d2e5bf1313b8416baa6f3fd6dd887fd70191da1f804f557395357dafd8bc8bed0ac60686923406489262a7c8a525b55748f7b2b8afa686700de907
+  languageName: node
+  linkType: hard
+
+"@types/elliptic@npm:6.4.18":
+  version: 6.4.18
+  resolution: "@types/elliptic@npm:6.4.18"
+  dependencies:
+    "@types/bn.js": "*"
+  checksum: c27613c530fb95441e5e6b456c8c9bc26568ca14c546aae6d7c1d8d46869f79a2272feaef266ac00bdb68b2671e6351ed01b91b82266eac30ca9092720825d16
   languageName: node
   linkType: hard
 
@@ -5400,6 +5420,21 @@ __metadata:
   version: 1.4.761
   resolution: "electron-to-chromium@npm:1.4.761"
   checksum: c69d459966682a68e3505ca2d6a72d02612ce3fe0e27b6cf33fa5e8205307504263b930b2d8e6f38b2abb01327c2657d29b63b6bfa296d8ca19d173208115d20
+  languageName: node
+  linkType: hard
+
+"elliptic@npm:6.5.5":
+  version: 6.5.5
+  resolution: "elliptic@npm:6.5.5"
+  dependencies:
+    bn.js: ^4.11.9
+    brorand: ^1.1.0
+    hash.js: ^1.0.0
+    hmac-drbg: ^1.0.1
+    inherits: ^2.0.4
+    minimalistic-assert: ^1.0.1
+    minimalistic-crypto-utils: ^1.0.1
+  checksum: ec9105e4469eb3b32b0ee2579756c888ddf3f99d259aa0d65fccb906ee877768aaf8880caae73e3e669c9a4adeb3eb1945703aa974ec5000d2d33a239f4567eb
   languageName: node
   linkType: hard
 

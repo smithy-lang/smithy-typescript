@@ -39,27 +39,30 @@ import { HeaderFormatter } from "./HeaderFormatter";
 import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
-import {SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init} from "./SignatureV4Base";
-import {createSigV4Scope, getSigV4SigningKey} from "./credentialDerivation";
+import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
+import { createSigV4Scope, getSigV4SigningKey } from "./credentialDerivation";
 
-export class SignatureV4 extends SignatureV4Base implements RequestPresigner, RequestSigner, StringSigner, EventSigner, MessageSigner {
+export class SignatureV4
+  extends SignatureV4Base
+  implements RequestPresigner, RequestSigner, StringSigner, EventSigner, MessageSigner
+{
   private readonly headerFormatter = new HeaderFormatter();
 
   constructor({
-                applyChecksum,
-                credentials,
-                region,
-                service,
-                sha256,
-                uriEscapePath = true,
-              }: SignatureV4Init & SignatureV4CryptoInit) {
+    applyChecksum,
+    credentials,
+    region,
+    service,
+    sha256,
+    uriEscapePath = true,
+  }: SignatureV4Init & SignatureV4CryptoInit) {
     super({
       applyChecksum: applyChecksum,
       credentials: credentials,
       region: region,
       service: service,
       sha256: sha256,
-      uriEscapePath: uriEscapePath
+      uriEscapePath: uriEscapePath,
     });
   }
 
@@ -232,7 +235,12 @@ export class SignatureV4 extends SignatureV4Base implements RequestPresigner, Re
     keyPromise: Promise<Uint8Array>,
     canonicalRequest: string
   ): Promise<string> {
-    const stringToSign = await this.createStringToSign(longDate, credentialScope, canonicalRequest, ALGORITHM_IDENTIFIER);
+    const stringToSign = await this.createStringToSign(
+      longDate,
+      credentialScope,
+      canonicalRequest,
+      ALGORITHM_IDENTIFIER
+    );
 
     const hash = new this.sha256(await keyPromise);
     hash.update(toUint8Array(stringToSign));
