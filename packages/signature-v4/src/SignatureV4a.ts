@@ -18,6 +18,9 @@ import { hasHeader } from "./headerUtil";
 import { prepareRequest } from "./prepareRequest";
 import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
 
+/**
+ * @public
+ */
 export class SignatureV4a extends SignatureV4Base implements RequestSigner {
   /**
    * Creates a SigV4a signer
@@ -36,12 +39,12 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
     uriEscapePath = true,
   }: SignatureV4Init & SignatureV4CryptoInit) {
     super({
-      applyChecksum: applyChecksum,
-      credentials: credentials,
-      region: region,
-      service: service,
-      sha256: sha256,
-      uriEscapePath: uriEscapePath,
+      applyChecksum,
+      credentials,
+      region,
+      service,
+      sha256,
+      uriEscapePath,
     });
   }
 

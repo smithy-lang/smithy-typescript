@@ -57,12 +57,12 @@ export class SignatureV4
     uriEscapePath = true,
   }: SignatureV4Init & SignatureV4CryptoInit) {
     super({
-      applyChecksum: applyChecksum,
-      credentials: credentials,
-      region: region,
-      service: service,
-      sha256: sha256,
-      uriEscapePath: uriEscapePath,
+      applyChecksum,
+      credentials,
+      region,
+      service,
+      sha256,
+      uriEscapePath,
     });
   }
 

@@ -15,6 +15,9 @@ import { toUint8Array } from "@smithy/util-utf8";
 import { getCanonicalQuery } from "./getCanonicalQuery";
 import { iso8601 } from "./utilDate";
 
+/**
+ * @public
+ */
 export interface SignatureV4Init {
   /**
    * The service signing name.
@@ -59,10 +62,16 @@ export interface SignatureV4Init {
   applyChecksum?: boolean;
 }
 
+/**
+ * @public
+ */
 export interface SignatureV4CryptoInit {
   sha256: ChecksumConstructor | HashConstructor;
 }
 
+/**
+ * @internal
+ */
 export abstract class SignatureV4Base {
   protected readonly service: string;
   protected readonly regionProvider: Provider<string>;
