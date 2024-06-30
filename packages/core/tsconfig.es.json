@@ -4,7 +4,9 @@
     "lib": ["dom"],
     "outDir": "dist-es",
     "rootDir": "src",
-    "paths": {}
+    "paths": {
+      "@smithy/core/cbor": ["./src/submodules/cbor/index.ts"]
+    }
   },
   "extends": "../../tsconfig.es.json",
   "include": ["src/"]

@@ -191,6 +191,7 @@ module.exports = class Inliner {
         }
         await esbuild.build({
           ...buildOptions,
+          keepNames: false,
           entryPoints: [path.join(root, this.subfolder, this.package, "src", "submodules", submodule, "index.ts")],
           outfile: path.join(root, this.subfolder, this.package, "dist-cjs", "submodules", submodule, "index.js"),
         });
@@ -383,6 +384,7 @@ module.exports = class Inliner {
               console.log("Inline index confirmed require() for variant external:", external);
             }
             externalsToCheck.delete(external);
+            continue;
           }
         }
       }

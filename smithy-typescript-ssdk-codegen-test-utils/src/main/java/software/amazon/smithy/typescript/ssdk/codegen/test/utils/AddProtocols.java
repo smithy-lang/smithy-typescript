@@ -14,7 +14,9 @@
  
      @Override
      public List<ProtocolGenerator> getProtocolGenerators() {
-         return ListUtils.of(new TestProtocolGenerator());
+         return ListUtils.of(
+             new TestProtocolGenerator()
+         );
      }
  }
  
