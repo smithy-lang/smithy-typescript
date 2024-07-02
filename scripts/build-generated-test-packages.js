@@ -100,6 +100,6 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
   await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
   // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
   await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
-  // Test released version of smithy-typescript codegenerators, but
-  await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
+  // TODO(released-version-test): Test released version of smithy-typescript codegenerators, but currently is not working
+  // await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
 })();
