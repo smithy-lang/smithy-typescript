@@ -34,7 +34,7 @@ service Weather {
         GetCurrentTime
         // util-stream.integ.spec.ts
         Invoke
-        // experimentalIdentityAndAuth
+        // Identity and Auth
         OnlyHttpApiKeyAuth
         OnlyHttpApiKeyAuthOptional
         OnlyHttpBearerAuth

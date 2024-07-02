@@ -37,10 +37,10 @@ const releasedClientDir = path.join(
     "typescript-codegen"
 );
 
-// TODO(experimentalIdentityAndAuth): build generic client for integration tests
-const weatherExperimentalIdentityAndAuthClientDir = path.join(
+// Build generic legacy auth client for integration tests
+const weatherLegacyAuthClientDir = path.join(
     codegenTestDir,
-    "client-experimental-identity-and-auth",
+    "client-legacy-auth",
     "typescript-client-codegen"
 );
 
@@ -50,14 +50,14 @@ const weatherSsdkDir = path.join(
     "typescript-server-codegen"
 )
 
-// TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
+// Build `@httpApiKeyAuth` client for integration tests
 const httpApiKeyAuthClientDir = path.join(
     codegenTestDir,
     "identity-and-auth-http-api-key-auth",
     "typescript-client-codegen"
 );
 
-// TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
+// Build `@httpBearerAuth` client for integration tests
 const httpBearerAuthClientDir = path.join(
     codegenTestDir,
     "identity-and-auth-http-bearer-auth",
@@ -94,11 +94,8 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
 (async () => {
   await buildAndCopyToNodeModules("weather", weatherClientDir, nodeModulesDir);
   await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
-  // TODO(experimentalIdentityAndAuth): build generic client for integration tests
-  await buildAndCopyToNodeModules("@smithy/weather-experimental-identity-and-auth", weatherExperimentalIdentityAndAuthClientDir, nodeModulesDir);
-  // TODO(experimentalIdentityAndAuth): add `@httpApiKeyAuth` client for integration tests
+  await buildAndCopyToNodeModules("@smithy/weather-legacy-auth", weatherLegacyAuthClientDir, nodeModulesDir);
   await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
-  // TODO(experimentalIdentityAndAuth): add `@httpBearerAuth` client for integration tests
   await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
   // Test released version of smithy-typescript codegenerators, but
   await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
