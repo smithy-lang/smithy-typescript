@@ -65,6 +65,13 @@ public interface TypeScriptIntegration
     }
 
     /**
+     * Mutates in place the loaded list of plugins to apply to the generated client.
+     */
+    default void mutateClientPlugins(List<RuntimeClientPlugin> plugins) {
+        // defaults to no mutation
+    }
+
+    /**
      * Gets a list of protocol generators to register.
      *
      * @return Returns the list of protocol generators to register.
