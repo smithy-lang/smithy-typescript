@@ -14,15 +14,13 @@ import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegrati
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * Java SPI for customizing TypeScript code generation for `experimentalIdentityAndAuth`.
- *
- * This should NOT be used as it is highly susceptible to breaking changes.
+ * Java SPI for customizing TypeScript code generation for Identity and Authentication.
  */
 @SmithyInternalApi
 public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
     /**
-     * feat(experimentalIdentityAndAuth): Register an {@link HttpAuthScheme} that is used to generate the
-     * {@code HttpAuthSchemeProvider} and corresponding config field and runtime config values.
+     * Register an {@link HttpAuthScheme} that is used to generate the {@code HttpAuthSchemeProvider}
+     * and corresponding config field and runtime config values.
      * @return an empty optional.
      */
     default Optional<HttpAuthScheme> getHttpAuthScheme() {
@@ -30,8 +28,8 @@ public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
     }
 
     /**
-     * feat(experimentalIdentityAndAuth): Mutate an {@link SupportedHttpAuthSchemesIndex} to mutate registered
-     * {@link HttpAuthScheme}s, e.g. default {@code IdentityProvider}s and {@code HttpSigner}s.
+     * Mutate an {@link SupportedHttpAuthSchemesIndex} to mutate registered {@link HttpAuthScheme}s,
+     * e.g. default {@code IdentityProvider}s and {@code HttpSigner}s.
      * @param supportedHttpAuthSchemesIndex index to mutate.
      * @param model model
      * @param settings settings

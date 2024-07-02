@@ -43,11 +43,11 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegration {
     /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
+     * Integration should be skipped if the `useLegacyAuth` flag is true.
      */
     @Override
     public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
+        return !settings.useLegacyAuth();
     }
 
     @Override
@@ -106,7 +106,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     ) {
         return List.of(CodeInterceptor.appender(ClientBodyExtraCodeSection.class, (w, s) -> {
             if (!s.getSettings().generateClient()
-                || !s.getSettings().getExperimentalIdentityAndAuth()
+                || s.getSettings().useLegacyAuth()
                 || !s.getApplicationProtocol().isHttpProtocol()) {
                 return;
             }
@@ -167,7 +167,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     @Override
     public void customize(TypeScriptCodegenContext codegenContext) {
         if (!codegenContext.settings().generateClient()
-            || !codegenContext.settings().getExperimentalIdentityAndAuth()
+            || codegenContext.settings().useLegacyAuth()
             || !codegenContext.applicationProtocol().isHttpProtocol()) {
             return;
         }
@@ -260,14 +260,14 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.addDependency(TypeScriptDependency.SMITHY_TYPES);
         w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
+            Configuration of HttpAuthSchemes for a client which provides \
             default identity providers and signers per auth scheme.
             @internal""");
         w.write("httpAuthSchemes?: HttpAuthScheme[];\n");
 
         String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
         w.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
+            Configuration of an HttpAuthSchemeProvider for a client which \
             resolves which HttpAuthScheme to use.
             @internal""");
         w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
@@ -326,14 +326,14 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.addDependency(TypeScriptDependency.SMITHY_TYPES);
         w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides \
+            Configuration of HttpAuthSchemes for a client which provides \
             default identity providers and signers per auth scheme.
             @internal""");
         w.write("readonly httpAuthSchemes: HttpAuthScheme[];\n");
 
         String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
         w.writeDocs("""
-            experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which \
+            Configuration of an HttpAuthSchemeProvider for a client which \
             resolves which HttpAuthScheme to use.
             @internal""");
         w.write("readonly httpAuthSchemeProvider: $L;\n", httpAuthSchemeProviderName);

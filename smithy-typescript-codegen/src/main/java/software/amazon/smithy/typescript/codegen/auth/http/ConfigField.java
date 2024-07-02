@@ -19,7 +19,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 /**
  * Definition of a Config field.
  *
- * Currently used to populate the ClientDefaults interface in `experimentalIdentityAndAuth`.
+ * Currently used to populate the ClientDefaults interface.
  *
  * @param name name of the config field
  * @param type whether the config field is main or auxiliary

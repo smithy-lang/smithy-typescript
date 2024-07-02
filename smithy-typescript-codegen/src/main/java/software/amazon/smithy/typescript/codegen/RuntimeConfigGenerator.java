@@ -195,10 +195,9 @@ final class RuntimeConfigGenerator {
                         integration.getRuntimeConfigWriters(settings, model, symbolProvider, target)
                     );
                 }
-                // feat(experimentalIdentityAndAuth): add config writers for httpAuthScheme and httpAuthSchemes
                 // Needs a separate integration point since not all the information is accessible in
                 // {@link TypeScriptIntegration#getRuntimeConfigWriters()}
-                if (applicationProtocol.isHttpProtocol() && settings.getExperimentalIdentityAndAuth()) {
+                if (applicationProtocol.isHttpProtocol() && !settings.useLegacyAuth()) {
                     generateHttpAuthSchemeConfig(configs, writer, target);
                 }
                 int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
@@ -229,7 +228,6 @@ final class RuntimeConfigGenerator {
     ) {
         SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
 
-        // feat(experimentalIdentityAndAuth): write the default imported HttpAuthSchemeProvider
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
                 w.write("$T", Symbol.builder()
@@ -241,7 +239,6 @@ final class RuntimeConfigGenerator {
             });
         }
 
-        // feat(experimentalIdentityAndAuth): gather HttpAuthSchemes to generate
         ServiceIndex serviceIndex = ServiceIndex.of(model);
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Map<ShapeId, HttpAuthScheme> allEffectiveHttpAuthSchemes =
@@ -268,7 +265,6 @@ final class RuntimeConfigGenerator {
             return;
         }
 
-        // feat(experimentalIdentityAndAuth): write the default httpAuthSchemes
         configs.put("httpAuthSchemes", w -> {
             w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.addImport("IdentityProviderConfig", null, TypeScriptDependency.SMITHY_TYPES);

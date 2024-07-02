@@ -197,7 +197,7 @@ By default, the Smithy TypeScript code generators provide the code generation fr
 |`private`|No|Whether the package is `private` in `package.json`. The default value is `false`.|
 |`requiredMemberMode`|No|**NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.|
 |`createDefaultReadme`|No|Whether to generate a default `README.md` for the package. The default value is `false`.|
-|`experimentalIdentityAndAuth`|No|Experimental feature that standardizes identity and auth integrations to match the Smithy specification (see [Authentication Traits](https://smithy.io/2.0/spec/authentication-traits.html)). See [the experimental features section for more details](CONTRIBUTING.md#experimental-features).|
+|`useLegacyAuth`|No|**NOT RECOMMENDED, AVAILABLE ONLY FOR BACKWARD COMPATIBILITY CONCERNS.** Flag that enables using legacy auth. When in doubt, use the default identity and auth behavior (not configuring `useLegacyAuth`) as the golden path.|
 
 #### `typescript-client-codegen` plugin artifacts
 
