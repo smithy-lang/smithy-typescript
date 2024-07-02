@@ -102,6 +102,11 @@ final class DirectedTypeScriptCodegen
             });
         });
 
+        directive.integrations().forEach(integration -> {
+            LOGGER.info(() -> "Mutating plugins from TypeScriptIntegration: " + integration.getClass().getName());
+            integration.mutateClientPlugins(runtimePlugins);
+        });
+
         ProtocolGenerator protocolGenerator = resolveProtocolGenerator(
                 directive.integrations(),
                 directive.model(),
