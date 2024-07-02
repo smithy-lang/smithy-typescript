@@ -73,6 +73,27 @@ describe("applyMd5BodyChecksumMiddleware", () => {
       expect(mockHashDigest.mock.calls.length).toBe(0);
       expect(mockEncoder.mock.calls.length).toBe(0);
     });
+
+    it("should clone the request when applying the checksum", async () => {
+      const handler = applyMd5BodyChecksumMiddleware({
+        md5: MockHash,
+        base64Encoder: mockEncoder,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        streamHasher: async (stream: ExoticStream) => new Uint8Array(5),
+      })(next, {} as any);
+
+      await handler({
+        input: {},
+        request: new HttpRequest({
+          body: body,
+        }),
+      });
+
+      expect(next.mock.calls.length).toBe(1);
+      const { request } = next.mock.calls[0][0];
+      // Assert that non-enumerable properties like the method `clone()` are preserved.
+      expect(request.clone).toBeDefined();
+    });
   }
 
   it("should use the supplied stream hasher to calculate the hash of a streaming body", async () => {

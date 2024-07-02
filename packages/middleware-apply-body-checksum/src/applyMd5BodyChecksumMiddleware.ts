@@ -30,13 +30,12 @@ export const applyMd5BodyChecksumMiddleware =
           digest = options.streamHasher(options.md5, body);
         }
 
-        request = {
-          ...request,
-          headers: {
-            ...headers,
-            "content-md5": options.base64Encoder(await digest),
-          },
+        const cloned = request.clone();
+        cloned.headers = {
+          ...headers,
+          "content-md5": options.base64Encoder(await digest),
         };
+        request = cloned;
       }
     }
     return next({
