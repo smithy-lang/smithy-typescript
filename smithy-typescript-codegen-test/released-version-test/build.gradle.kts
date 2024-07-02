@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO(released-version-test): Test released version of smithy-typescript codegenerators, but currently is extremely flaky
+/*
 plugins {
     java
     id("software.amazon.smithy.gradle.smithy-base")
@@ -27,3 +29,4 @@ dependencies {
 }
 
 tasks["jar"].enabled = false
+*/

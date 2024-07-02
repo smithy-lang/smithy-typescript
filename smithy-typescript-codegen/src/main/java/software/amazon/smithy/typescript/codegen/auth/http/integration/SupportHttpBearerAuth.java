@@ -21,8 +21,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Support for @httpBearerAuth.
- *
- * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public final class SupportHttpBearerAuth implements HttpAuthTypeScriptIntegration {
@@ -44,11 +42,11 @@ public final class SupportHttpBearerAuth implements HttpAuthTypeScriptIntegratio
         .build();
 
     /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
+     * Integration should be skipped if the `useLegacyAuth` flag is true.
      */
     @Override
     public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
+        return !settings.useLegacyAuth();
     }
 
     @Override

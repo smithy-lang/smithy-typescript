@@ -41,7 +41,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
- * feat(experimentalIdentityAndAuth): Generator for {@code HttpAuthSchemeProvider} and corresponding interfaces.
+ * Generator for {@code HttpAuthSchemeProvider} and corresponding interfaces.
  *
  * Code generated includes:
  *

@@ -7,7 +7,7 @@ import {
 import { requireRequestsFrom } from "@smithy/util-test";
 
 describe("@httpApiKeyAuth integration tests", () => {
-  // TODO(experimentalIdentityAndAuth): should match `HttpApiKeyAuthService` `@httpApiKeyAuth` trait
+  // Match `HttpApiKeyAuthService` `@httpApiKeyAuth` trait
   const MOCK_API_KEY_NAME = "Authorization";
   const MOCK_API_KEY_SCHEME = "ApiKey";
   const MOCK_API_KEY = "APIKEY_123";
