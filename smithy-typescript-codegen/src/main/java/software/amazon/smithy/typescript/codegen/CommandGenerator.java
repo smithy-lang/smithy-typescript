@@ -56,6 +56,7 @@ import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.PreCommandClassCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -154,6 +155,17 @@ final class CommandGenerator implements Runnable {
             );
         }
 
+        // Section of items like TypeScript @ts-ignore
+        writer.injectSection(PreCommandClassCodeSection.builder()
+            .settings(settings)
+            .model(model)
+            .service(service)
+            .operation(operation)
+            .symbolProvider(symbolProvider)
+            .runtimeClientPlugins(runtimePlugins)
+            .protocolGenerator(protocolGenerator)
+            .applicationProtocol(applicationProtocol)
+            .build());
         writer.openBlock(
             "export class $L extends $$Command.classBuilder<$T, $T, $L, ServiceInputTypes, ServiceOutputTypes>()",
             ".build() {", // class open bracket.
