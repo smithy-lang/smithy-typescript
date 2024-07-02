@@ -93,6 +93,7 @@ public class AddHttpApiKeyAuthPluginTest {
                         .withMember("service", Node.from("smithy.example#Example"))
                         .withMember("package", Node.from("example"))
                         .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("useLegacyAuth", Node.from(true))
                         .build())
                 .build();
 

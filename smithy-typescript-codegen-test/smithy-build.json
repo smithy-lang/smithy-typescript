@@ -29,29 +29,7 @@
                 }
             }
         },
-        "client-experimental-identity-and-auth": {
-            "transforms": [
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["example.weather#Weather"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-client-codegen": {
-                    "service": "example.weather#Weather",
-                    "package": "@smithy/weather-experimental-identity-and-auth",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    },
-                    "experimentalIdentityAndAuth": true
-                }
-            }
-        },
-        "control-experimental-identity-and-auth": {
+        "client-identity-and-auth": {
             "transforms": [
                 {
                     "name": "includeServices",
@@ -72,6 +50,28 @@
                 }
             }
         },
+        "client-legacy-auth": {
+            "transforms": [
+                {
+                    "name": "includeServices",
+                    "args": {
+                        "services": ["example.weather#Weather"]
+                    }
+                }
+            ],
+            "plugins": {
+                "typescript-client-codegen": {
+                    "service": "example.weather#Weather",
+                    "package": "@smithy/weather-legacy-auth",
+                    "packageVersion": "0.0.1",
+                    "packageJson": {
+                        "license": "Apache-2.0",
+                        "private": true
+                    },
+                    "useLegacyAuth": true
+                }
+            }
+        },
         "identity-and-auth-http-api-key-auth": {
             "transforms": [
                 {
@@ -89,8 +89,7 @@
                     "packageJson": {
                         "license": "Apache-2.0",
                         "private": true
-                    },
-                    "experimentalIdentityAndAuth": true
+                    }
                 }
             }
         },
@@ -111,8 +110,7 @@
                     "packageJson": {
                         "license": "Apache-2.0",
                         "private": true
-                    },
-                    "experimentalIdentityAndAuth": true
+                    }
                 }
             }
         }
