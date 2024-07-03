@@ -1010,30 +1010,53 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             binding.getMember(),
             target
         );
+        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
+        if (isIdempotencyToken) {
+            context.getWriter()
+                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
+        }
+
+        boolean headerAssertion = headerValue.endsWith("!");
+        String headerBaseValue = (headerAssertion
+            ? headerValue.substring(0, headerValue.length() - 1)
+            : headerValue);
 
         if (!Objects.equals(memberLocation + "!", headerValue)) {
             String defaultValue = "";
             if (headerBuffer.containsKey(headerKey)) {
                 String s = headerBuffer.get(headerKey);
                 defaultValue = " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
+            } else if (isIdempotencyToken) {
+                defaultValue = " ?? generateIdempotencyToken()";
             }
+
+            String headerValueExpression = headerAssertion && !defaultValue.isEmpty()
+                ? headerBaseValue + defaultValue
+                : headerValue + defaultValue;
+
             // evaluated value has a function or method call attached
             headerBuffer.put(headerKey, String.format(
                 "[%s]: [() => isSerializableHeaderValue(%s), () => %s],",
                 context.getStringStore().var(headerKey),
                 memberLocation + defaultValue,
-                headerValue + defaultValue
+                headerValueExpression
             ));
         } else {
-            String value = headerValue;
+            String constructedHeaderValue = (headerAssertion
+                ? headerBaseValue
+                : headerValue);
             if (headerBuffer.containsKey(headerKey)) {
                 String s = headerBuffer.get(headerKey);
-                value = headerValue + " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
+                constructedHeaderValue += " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
+            } else if (isIdempotencyToken) {
+                constructedHeaderValue += " ?? generateIdempotencyToken()";
+            } else {
+                constructedHeaderValue = headerValue;
             }
             headerBuffer.put(headerKey, String.format(
                 "[%s]: %s,",
                 context.getStringStore().var(headerKey),
-                value
+                constructedHeaderValue
             ));
         }
     }
