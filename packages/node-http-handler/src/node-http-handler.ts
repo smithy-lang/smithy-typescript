@@ -252,7 +252,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         };
         if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
           // preferred.
-          (abortSignal as AbortSignal).addEventListener("abort", onAbort);
+          const signal = abortSignal as AbortSignal;
+          signal.addEventListener("abort", onAbort, { once: true });
+          req.once("close", () => signal.removeEventListener("abort", onAbort));
         } else {
           // backwards compatibility
           abortSignal.onabort = onAbort;
