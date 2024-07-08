@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.2
+
+### Patch Changes
+
+- f31cc5f: remove abort signal event listeners after request completion
+
 ## 3.1.1
 
 ### Patch Changes
