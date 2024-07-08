@@ -127,7 +127,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       requestOptions.keepalive = keepAlive;
     }
 
-    let cleanupFunction = null as null | (() => void);
+    let removeSignalEventListener = null as null | (() => void);
 
     const fetchRequest = new Request(url, requestOptions);
     const raceOfPromises = [
@@ -177,7 +177,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
             // preferred.
             const signal = abortSignal as AbortSignal;
             signal.addEventListener("abort", onAbort, { once: true });
-            cleanupFunction = () => signal.removeEventListener("abort", onAbort);
+            removeSignalEventListener = () => signal.removeEventListener("abort", onAbort);
           } else {
             // backwards compatibility
             abortSignal.onabort = onAbort;
@@ -185,7 +185,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
         })
       );
     }
-    return Promise.race(raceOfPromises).finally(() => cleanupFunction && cleanupFunction());
+    return Promise.race(raceOfPromises).finally(removeSignalEventListener);
   }
 
   updateHttpClientConfig(key: keyof FetchHttpHandlerConfig, value: FetchHttpHandlerConfig[typeof key]): void {
