@@ -1,8 +1,10 @@
 import { Logger, SharedConfigFiles } from "@smithy/types";
+import { join } from "path";
 
 import { getConfigData } from "./getConfigData";
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getCredentialsFilepath } from "./getCredentialsFilepath";
+import { getHomeDir } from "./getHomeDir";
 import { parseIni } from "./parseIni";
 import { slurpFile } from "./slurpFile";
 
@@ -39,15 +41,27 @@ export const CONFIG_PREFIX_SEPARATOR = ".";
 
 export const loadSharedConfigFiles = async (init: SharedConfigInit = {}): Promise<SharedConfigFiles> => {
   const { filepath = getCredentialsFilepath(), configFilepath = getConfigFilepath() } = init;
+  const homeDir = getHomeDir();
+  const relativeHomeDirPrefix = "~/";
+
+  let resolvedFilepath = filepath;
+  if (filepath.startsWith(relativeHomeDirPrefix)) {
+    resolvedFilepath = join(homeDir, filepath.slice(2));
+  }
+
+  let resolvedConfigFilepath = configFilepath;
+  if (configFilepath.startsWith(relativeHomeDirPrefix)) {
+    resolvedConfigFilepath = join(homeDir, configFilepath.slice(2));
+  }
 
   const parsedFiles = await Promise.all([
-    slurpFile(configFilepath, {
+    slurpFile(resolvedConfigFilepath, {
       ignoreCache: init.ignoreCache,
     })
       .then(parseIni)
       .then(getConfigData)
       .catch(swallowError),
-    slurpFile(filepath, {
+    slurpFile(resolvedFilepath, {
       ignoreCache: init.ignoreCache,
     })
       .then(parseIni)
