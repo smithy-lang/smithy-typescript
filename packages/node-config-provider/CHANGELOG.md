@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [d88521e]
+  - @smithy/shared-ini-file-loader@3.1.4
+
 ## 3.1.3
 
 ### Patch Changes

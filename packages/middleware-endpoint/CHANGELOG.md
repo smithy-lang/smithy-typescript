@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [d88521e]
+  - @smithy/shared-ini-file-loader@3.1.4
+  - @smithy/node-config-provider@3.1.4
+
 ## 3.0.4
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.3.10
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+- @smithy/middleware-retry@3.0.9
+
 ## 0.3.9
 
 ### Patch Changes

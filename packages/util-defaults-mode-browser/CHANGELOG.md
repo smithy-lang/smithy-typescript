@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.9
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.7
+
 ## 3.0.8
 
 ### Patch Changes

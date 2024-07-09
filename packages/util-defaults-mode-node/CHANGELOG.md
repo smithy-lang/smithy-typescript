@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.0.9
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+- @smithy/smithy-client@3.1.7
+- @smithy/config-resolver@3.0.5
+- @smithy/credential-provider-imds@3.1.4
+
 ## 3.0.8
 
 ### Patch Changes

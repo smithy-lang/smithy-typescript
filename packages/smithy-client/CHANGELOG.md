@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.7
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+
 ## 3.1.6
 
 ### Patch Changes
