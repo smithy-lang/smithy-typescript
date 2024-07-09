@@ -25,7 +25,7 @@
     "@smithy/chunked-blob-reader": "workspace:^",
     "@smithy/chunked-blob-reader-native": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.3"
   },
   "devDependencies": {
     "@smithy/util-hex-encoding": "workspace:^",
