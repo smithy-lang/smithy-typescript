@@ -2,4 +2,4 @@
 "@smithy/util-stream": minor
 ---
 
-add stream splitting to sdkStreamMixin
+add splitStream and headStream utilities

@@ -4,6 +4,8 @@ import { toBase64 } from "@smithy/util-base64";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUtf8 } from "@smithy/util-utf8";
 
+import { isReadableStreamInstance } from "./isReadableStream";
+
 const ERR_MSG_STREAM_HAS_BEEN_TRANSFORMED = "The stream has already been transformed.";
 
 /**
@@ -74,6 +76,3 @@ export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob
 };
 
 const isBlobInstance = (stream: unknown): stream is Blob => typeof Blob === "function" && stream instanceof Blob;
-
-const isReadableStreamInstance = (stream: unknown): stream is ReadableStream =>
-  typeof ReadableStream === "function" && stream instanceof ReadableStream;

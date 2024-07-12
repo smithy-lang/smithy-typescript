@@ -1,6 +1,7 @@
 import { Readable, Writable } from "stream";
 
 import { headStream as headWebStream } from "./headStream.browser";
+import { isReadableStreamInstance } from "./isReadableStream";
 
 /**
  * @internal
@@ -11,7 +12,6 @@ import { headStream as headWebStream } from "./headStream.browser";
  */
 export const headStream = (stream: Readable | ReadableStream, bytes: number): Promise<Uint8Array> => {
   if (isReadableStreamInstance(stream)) {
-    // Web stream API in Node.js
     return headWebStream(stream, bytes);
   }
   return new Promise((resolve, reject) => {
@@ -47,6 +47,3 @@ class Collector extends Writable {
     callback();
   }
 }
-
-const isReadableStreamInstance = (stream: unknown): stream is ReadableStream =>
-  typeof ReadableStream === "function" && stream instanceof ReadableStream;
