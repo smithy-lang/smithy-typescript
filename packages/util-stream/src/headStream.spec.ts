@@ -54,21 +54,21 @@ describe("splitStream and headStream integration", () => {
     const [d, _4] = await splitStream(_3);
     const [e, f] = await splitStream(_4);
 
-    const buffer1 = await headStream(a, Infinity);
-    const buffer2 = await headStream(b, 16_000);
-    const buffer3 = await headStream(c, 8 * CHUNK_SIZE);
-    const buffer4 = await headStream(d, 4 * CHUNK_SIZE);
-    const buffer5 = await headStream(e, 2 * CHUNK_SIZE);
-    const buffer6 = await headStream(f, CHUNK_SIZE);
+    const byteArr1 = await headStream(a, Infinity);
+    const byteArr2 = await headStream(b, 16_000);
+    const byteArr3 = await headStream(c, 8 * CHUNK_SIZE);
+    const byteArr4 = await headStream(d, 4 * CHUNK_SIZE);
+    const byteArr5 = await headStream(e, 2 * CHUNK_SIZE);
+    const byteArr6 = await headStream(f, CHUNK_SIZE);
 
     await Promise.all([a, b, c, d, e, f].map((stream) => stream.destroy()));
 
-    expect(Buffer.from(buffer1).toString()).toEqual(a32);
-    expect(Buffer.from(buffer2).toString()).toEqual(a16);
-    expect(Buffer.from(buffer3).toString()).toEqual(a8);
-    expect(Buffer.from(buffer4).toString()).toEqual(a4);
-    expect(Buffer.from(buffer5).toString()).toEqual(a2);
-    expect(Buffer.from(buffer6).toString()).toEqual(a1);
+    expect(Buffer.from(byteArr1).toString()).toEqual(a32);
+    expect(Buffer.from(byteArr2).toString()).toEqual(a16);
+    expect(Buffer.from(byteArr3).toString()).toEqual(a8);
+    expect(Buffer.from(byteArr4).toString()).toEqual(a4);
+    expect(Buffer.from(byteArr5).toString()).toEqual(a2);
+    expect(Buffer.from(byteArr6).toString()).toEqual(a1);
   });
 
   it("should split and head streams for web streams API", async () => {
@@ -90,19 +90,19 @@ describe("splitStream and headStream integration", () => {
       const [c, _3] = await splitWebStream(_2);
       const [d, e] = await splitWebStream(_3);
 
-      const buffer1 = await headWebStream(a, Infinity);
-      const buffer2 = await headWebStream(b, 8 * CHUNK_SIZE);
-      const buffer3 = await headWebStream(c, 4 * CHUNK_SIZE);
-      const buffer4 = await headWebStream(d, 2 * CHUNK_SIZE);
-      const buffer5 = await headWebStream(e, CHUNK_SIZE);
+      const byteArr1 = await headWebStream(a, Infinity);
+      const byteArr2 = await headWebStream(b, 8 * CHUNK_SIZE);
+      const byteArr3 = await headWebStream(c, 4 * CHUNK_SIZE);
+      const byteArr4 = await headWebStream(d, 2 * CHUNK_SIZE);
+      const byteArr5 = await headWebStream(e, CHUNK_SIZE);
 
       await Promise.all([a, b, c, d, e].map((stream) => stream.cancel()));
 
-      expect(Buffer.from(buffer1).toString()).toEqual(a8);
-      expect(Buffer.from(buffer2).toString()).toEqual(a8);
-      expect(Buffer.from(buffer3).toString()).toEqual(a4);
-      expect(Buffer.from(buffer4).toString()).toEqual(a2);
-      expect(Buffer.from(buffer5).toString()).toEqual(a1);
+      expect(Buffer.from(byteArr1).toString()).toEqual(a8);
+      expect(Buffer.from(byteArr2).toString()).toEqual(a8);
+      expect(Buffer.from(byteArr3).toString()).toEqual(a4);
+      expect(Buffer.from(byteArr4).toString()).toEqual(a2);
+      expect(Buffer.from(byteArr5).toString()).toEqual(a1);
     }
   });
 });
