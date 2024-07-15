@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.3.11
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+- Updated dependencies [ae8bf5c]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/signature-v4@4.0.0
+  - @smithy/middleware-retry@3.0.10
+  - @smithy/middleware-serde@3.0.3
+
 ## 0.3.10
 
 ### Patch Changes

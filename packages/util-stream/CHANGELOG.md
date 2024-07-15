@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 7cd258f: add splitStream and headStream utilities
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.2
+- @smithy/node-http-handler@3.1.3
+
 ## 3.0.6
 
 ### Patch Changes

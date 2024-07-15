@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+- Updated dependencies [7cd258f]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/util-stream@3.1.0
+
 ## 3.1.7
 
 ### Patch Changes
