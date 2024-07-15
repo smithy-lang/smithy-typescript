@@ -1,7 +1,7 @@
 import { Readable, Writable } from "stream";
 
 import { headStream as headWebStream } from "./headStream.browser";
-import { isReadableStreamInstance } from "./isReadableStream";
+import { isReadableStream } from "./stream-type-check";
 
 /**
  * @internal
@@ -11,7 +11,7 @@ import { isReadableStreamInstance } from "./isReadableStream";
  * Caution: the input stream must be destroyed separately, this function does not do so.
  */
 export const headStream = (stream: Readable | ReadableStream, bytes: number): Promise<Uint8Array> => {
-  if (isReadableStreamInstance(stream)) {
+  if (isReadableStream(stream)) {
     return headWebStream(stream, bytes);
   }
   return new Promise((resolve, reject) => {

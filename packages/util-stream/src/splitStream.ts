@@ -1,7 +1,7 @@
 import type { Readable } from "stream";
 import { PassThrough } from "stream";
 
-import { isReadableStreamInstance } from "./isReadableStream";
+import { isReadableStream } from "./stream-type-check";
 import { splitStream as splitWebStream } from "./splitStream.browser";
 
 /**
@@ -13,7 +13,7 @@ export async function splitStream(stream: ReadableStream): Promise<[ReadableStre
 export async function splitStream(
   stream: Readable | ReadableStream
 ): Promise<[Readable | ReadableStream, Readable | ReadableStream]> {
-  if (isReadableStreamInstance(stream)) {
+  if (isReadableStream(stream)) {
     return splitWebStream(stream);
   }
   const stream1 = new PassThrough();
