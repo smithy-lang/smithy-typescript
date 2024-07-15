@@ -72,7 +72,7 @@ export interface SignatureV4Init {
    * A constructor function for a hash object that will calculate SHA-256 HMAC
    * checksums.
    */
-  sha256?: ChecksumConstructor | HashConstructor;
+  sha256: ChecksumConstructor | HashConstructor;
 
   /**
    * Whether to uri-escape the request URI path as part of computing the
