@@ -17,7 +17,7 @@ export const applyMd5BodyChecksumMiddleware =
   (options: Md5BodyChecksumResolvedConfig): BuildMiddleware<any, any> =>
   <Output extends MetadataBearer>(next: BuildHandler<any, Output>): BuildHandler<any, Output> =>
   async (args: BuildHandlerArguments<any>): Promise<BuildHandlerOutput<Output>> => {
-    let { request } = args;
+    const { request } = args;
     if (HttpRequest.isInstance(request)) {
       const { body, headers } = request;
       if (!hasHeader("content-md5", headers)) {
@@ -30,18 +30,18 @@ export const applyMd5BodyChecksumMiddleware =
           digest = options.streamHasher(options.md5, body);
         }
 
-        const cloned = request.clone();
+        const cloned = HttpRequest.clone(request);
         cloned.headers = {
           ...headers,
           "content-md5": options.base64Encoder(await digest),
         };
-        request = cloned;
+        return next({
+          ...args,
+          request: cloned,
+        });
       }
     }
-    return next({
-      ...args,
-      request,
-    });
+    return next(args);
   };
 
 export const applyMd5BodyChecksumMiddlewareOptions: BuildHandlerOptions = {
