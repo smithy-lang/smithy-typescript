@@ -1,8 +1,8 @@
 import type { Readable } from "stream";
 import { PassThrough } from "stream";
 
-import { isReadableStream } from "./stream-type-check";
 import { splitStream as splitWebStream } from "./splitStream.browser";
+import { isReadableStream } from "./stream-type-check";
 
 /**
  * @param stream
