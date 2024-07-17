@@ -68,5 +68,11 @@ export class EventStreamMarshaller {
   }
 }
 
+/**
+ * @internal
+ * Warning: do not export this without aliasing the reference to
+ * global ReadableStream.
+ * @see https://github.com/smithy-lang/smithy-typescript/issues/1341.
+ */
 const isReadableStream = (body: any): body is ReadableStream =>
   typeof ReadableStream === "function" && body instanceof ReadableStream;
