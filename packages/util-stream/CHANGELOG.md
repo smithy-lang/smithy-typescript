@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.1
+
+### Patch Changes
+
+- 1cfe243: avoid compilation of global ReadableStream with type parameter
+
 ## 3.1.0
 
 ### Minor Changes
