@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-stream",
-  "version": "3.0.6",
+  "version": "3.1.1",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline util-stream",
@@ -56,13 +56,19 @@
   ],
   "browser": {
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
-    "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser"
+    "./dist-es/headStream": "./dist-es/headStream.browser",
+    "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
+    "./dist-es/splitStream": "./dist-es/splitStream.browser"
   },
   "react-native": {
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
+    "./dist-es/headStream": "./dist-es/headStream.browser",
+    "./dist-es/splitStream": "./dist-es/splitStream.browser",
     "./dist-cjs/getAwsChunkedEncodingStream": "./dist-cjs/getAwsChunkedEncodingStream.browser",
-    "./dist-cjs/sdk-stream-mixin": "./dist-cjs/sdk-stream-mixin.browser"
+    "./dist-cjs/sdk-stream-mixin": "./dist-cjs/sdk-stream-mixin.browser",
+    "./dist-cjs/headStream": "./dist-cjs/headStream.browser",
+    "./dist-cjs/splitStream": "./dist-cjs/splitStream.browser"
   },
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-stream",
   "repository": {

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- ae8bf5c: Make sha256 required parameter for SigV4 constructor
+
 ## 3.1.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.8
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.2
+
 ## 2.2.7
 
 ### Patch Changes
