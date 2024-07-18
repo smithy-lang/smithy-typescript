@@ -296,10 +296,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("httpbinding", null, TypeScriptDependency.SERVER_COMMON);
 
         Symbol serviceSymbol = context.getSymbolProvider().toSymbol(context.getService());
+        Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
+        Symbol muxSymbol = serviceSymbol.expectProperty("mux", Symbol.class);
 
-        writer.openBlock("const mux = new httpbinding.HttpBindingMux<$S, keyof $T<Context>>([", "]);",
+        writer.openBlock("export const $T = new httpbinding.HttpBindingMux<$S, $T>([", "]);",
+                muxSymbol,
                 context.getService().getId().getName(),
-                serviceSymbol,
+                operationsSymbol,
                 () -> {
                     for (OperationShape operation : topDownIndex.getContainedOperations(context.getService())) {
                         OptionalUtils.ifPresentOrElse(
@@ -392,7 +395,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
+        Symbol muxSymbol = serviceSymbol.expectProperty("mux", Symbol.class);
         Symbol operationsSymbol = serviceSymbol.expectProperty("operations", Symbol.class);
+
+        generateServiceMux(context);
 
         if (context.getSettings().isDisableDefaultValidation()) {
             writer.write("export const get$L = <Context>(service: $T<Context>, "
@@ -406,7 +412,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
         writer.indent();
 
-        generateServiceMux(context);
         writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __ServiceException> = "
                        + "(op) => {", "};", operationsSymbol, serviceSymbol, () -> {
@@ -430,7 +435,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             );
         }
 
-        writer.write("return new $T(service, mux, serFn, serializeFrameworkException, customizer);", handlerSymbol);
+        writer.write("return new $T(service, $T, serFn, serializeFrameworkException, customizer);",
+            handlerSymbol, muxSymbol);
 
         writer.dedent().write("}");
     }
