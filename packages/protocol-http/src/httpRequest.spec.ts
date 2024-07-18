@@ -111,6 +111,6 @@ describe("cloneRequest", () => {
   });
 
   it("should handle requests without defined query objects", () => {
-    expect(cloneRequest({ ...request, query: void 0 }).query).not.toBeDefined();
+    expect(cloneRequest({ ...request, query: void 0 }).query).toEqual({});
   });
 });
