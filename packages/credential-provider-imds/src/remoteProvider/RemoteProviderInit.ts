@@ -22,9 +22,15 @@ export interface RemoteProviderConfig {
   timeout: number;
 
   /**
+   * @deprecated The configuration maxRetries was changed to maxAttempts in middleware-retry to be compliant with other SDKs and retry strategy [#1244](https://github.com/aws/aws-sdk-js-v3/pull/1244). Use maxAttempts instead.
    * The maximum number of times the HTTP connection should be retried
    */
-  maxRetries: number;
+  maxRetries?: number;
+
+  /**
+   * The maximum number of times the HTTP connection should be retried
+   */
+  maxAttempts?: number;
 }
 
 /**
@@ -47,5 +53,14 @@ export interface RemoteProviderInit extends Partial<RemoteProviderConfig> {
  */
 export const providerConfigFromInit = ({
   maxRetries = DEFAULT_MAX_RETRIES,
+  maxAttempts,
   timeout = DEFAULT_TIMEOUT,
-}: RemoteProviderInit): RemoteProviderConfig => ({ maxRetries, timeout });
+}: RemoteProviderInit): RemoteProviderConfig => {
+  const effectiveMaxAttempts = maxAttempts || maxRetries;
+
+  return { 
+    maxRetries: effectiveMaxAttempts, 
+    maxAttempts: effectiveMaxAttempts,
+    timeout
+  };
+}
