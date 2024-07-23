@@ -9,59 +9,39 @@ const { spawnProcess } = require("./utils/spawn-process");
 
 const root = path.join(__dirname, "..");
 
-const testProjectDir = path.join(
-    root,
-    "smithy-typescript-codegen-test",
-);
+const testProjectDir = path.join(root, "smithy-typescript-codegen-test");
 
-const codegenTestDir = path.join(
-    testProjectDir,
-    "build",
-    "smithyprojections",
-    "smithy-typescript-codegen-test",
-);
+const codegenTestDir = path.join(testProjectDir, "build", "smithyprojections", "smithy-typescript-codegen-test");
 
-const weatherClientDir = path.join(
-    codegenTestDir,
-    "source",
-    "typescript-client-codegen"
-);
+const weatherClientDir = path.join(codegenTestDir, "source", "typescript-client-codegen");
 
 const releasedClientDir = path.join(
-    testProjectDir,
-    "released-version-test",
-    "build",
-    "smithyprojections",
-    "released-version-test",
-    "source",
-    "typescript-codegen"
+  testProjectDir,
+  "released-version-test",
+  "build",
+  "smithyprojections",
+  "released-version-test",
+  "source",
+  "typescript-codegen"
 );
 
 // Build generic legacy auth client for integration tests
-const weatherLegacyAuthClientDir = path.join(
-    codegenTestDir,
-    "client-legacy-auth",
-    "typescript-client-codegen"
-);
+const weatherLegacyAuthClientDir = path.join(codegenTestDir, "client-legacy-auth", "typescript-client-codegen");
 
-const weatherSsdkDir = path.join(
-    codegenTestDir,
-    "ssdk-test",
-    "typescript-server-codegen"
-)
+const weatherSsdkDir = path.join(codegenTestDir, "ssdk-test", "typescript-server-codegen");
 
 // Build `@httpApiKeyAuth` client for integration tests
 const httpApiKeyAuthClientDir = path.join(
-    codegenTestDir,
-    "identity-and-auth-http-api-key-auth",
-    "typescript-client-codegen"
+  codegenTestDir,
+  "identity-and-auth-http-api-key-auth",
+  "typescript-client-codegen"
 );
 
 // Build `@httpBearerAuth` client for integration tests
 const httpBearerAuthClientDir = path.join(
-    codegenTestDir,
-    "identity-and-auth-http-bearer-auth",
-    "typescript-client-codegen"
+  codegenTestDir,
+  "identity-and-auth-http-bearer-auth",
+  "typescript-client-codegen"
 );
 
 const nodeModulesDir = path.join(root, "node_modules");
@@ -82,10 +62,14 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
       await spawnProcess("rm", ["-rf", packageName], { cwd: nodeModulesDir });
       await spawnProcess("mkdir", ["-p", packageName], { cwd: nodeModulesDir });
       const targetPackageDir = path.join(nodeModulesDir, packageName);
-      await spawnProcess("tar", ["-xf", "package.tgz", "-C", targetPackageDir, "--strip-components", "1"], { cwd: codegenDir });
+      await spawnProcess("tar", ["-xf", "package.tgz", "-C", targetPackageDir, "--strip-components", "1"], {
+        cwd: codegenDir,
+      });
     }
   } catch (e) {
-    console.log(`Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\` failed:`)
+    console.log(
+      `Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\` failed:`
+    );
     console.log(e);
     process.exit(1);
   }
@@ -95,8 +79,16 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
   await buildAndCopyToNodeModules("weather", weatherClientDir, nodeModulesDir);
   await buildAndCopyToNodeModules("weather-ssdk", weatherSsdkDir, nodeModulesDir);
   await buildAndCopyToNodeModules("@smithy/weather-legacy-auth", weatherLegacyAuthClientDir, nodeModulesDir);
-  await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-api-key-auth-service", httpApiKeyAuthClientDir, nodeModulesDir);
-  await buildAndCopyToNodeModules("@smithy/identity-and-auth-http-bearer-auth-service", httpBearerAuthClientDir, nodeModulesDir);
-  // Test released version of smithy-typescript codegenerators, but
-  await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
+  await buildAndCopyToNodeModules(
+    "@smithy/identity-and-auth-http-api-key-auth-service",
+    httpApiKeyAuthClientDir,
+    nodeModulesDir
+  );
+  await buildAndCopyToNodeModules(
+    "@smithy/identity-and-auth-http-bearer-auth-service",
+    httpBearerAuthClientDir,
+    nodeModulesDir
+  );
+  // TODO(released-version-test): Test released version of smithy-typescript codegenerators, but currently is not working
+  // await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
 })();
