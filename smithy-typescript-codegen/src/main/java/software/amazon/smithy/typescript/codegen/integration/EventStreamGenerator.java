@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -103,12 +104,15 @@ public class EventStreamGenerator {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         TreeSet<UnionShape> eventUnionsToSerialize = new TreeSet<>();
-        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall = new TreeSet<>();
+        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall = new TreeSet<>(
+            (a, b) -> Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo)
+        );
+
         for (OperationShape operation : operations) {
             if (hasEventStreamInput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamInputShape(context, operation);
                 eventUnionsToSerialize.add(eventsUnion);
-                eventsUnion.members().stream()
+                eventsUnion.members()
                     .forEach(member -> {
                         eventShapesToMarshall.add(Pair.of(
                             member.getMemberName(),
@@ -161,6 +165,7 @@ public class EventStreamGenerator {
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         TreeSet<UnionShape> eventUnionsToDeserialize = new TreeSet<>();
         TreeSet<StructureShape> eventShapesToUnmarshall = new TreeSet<>();
+
         for (OperationShape operation : operations) {
             if (hasEventStreamOutput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
