@@ -31,6 +31,15 @@ export const createConfigValueProvider = <Config extends Record<string, unknown>
       return configValue;
     };
   }
+
+  if (configKey === "accountId" || canonicalEndpointParamKey === "AccountId") {
+    return async () => {
+      const credentials = typeof config.credentials === "function" ? await config.credentials() : config.credentials;
+      const configValue: string = credentials?.accountId ?? credentials?.AccountId;
+      return configValue;
+    };
+  }
+
   if (configKey === "endpoint" || canonicalEndpointParamKey === "endpoint") {
     return async () => {
       const endpoint = await configProvider();
