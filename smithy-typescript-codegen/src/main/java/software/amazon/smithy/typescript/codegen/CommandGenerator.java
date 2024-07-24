@@ -467,6 +467,7 @@ final class CommandGenerator implements Runnable {
         // applied automatically when the Command's middleware stack is copied from
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
+            plugin.getWriterConsumer().accept(writer);
             plugin.getPluginFunction().ifPresent(pluginSymbol -> {
                 // Construct additional parameters string
                 Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
