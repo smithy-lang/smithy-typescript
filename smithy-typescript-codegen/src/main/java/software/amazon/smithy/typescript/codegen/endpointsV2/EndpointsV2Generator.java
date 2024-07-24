@@ -117,10 +117,7 @@ public final class EndpointsV2Generator implements Runnable {
                         RuleSetParameterFinder ruleSetParameterFinder = new RuleSetParameterFinder(service);
 
                         Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
-                        //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
-                        Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                        clientInputParams.putAll(builtInParams);
+                        clientInputParams.putAll(ruleSetParameterFinder.getBuiltInParams());
 
                         ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
