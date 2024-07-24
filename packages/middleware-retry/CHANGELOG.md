@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.12
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+  - @smithy/smithy-client@3.1.10
+
 ## 3.0.11
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.12
+
+### Patch Changes
+
+- Updated dependencies [3d72b04]
+  - @smithy/credential-provider-imds@3.2.0
+  - @smithy/smithy-client@3.1.10
+
 ## 3.0.11
 
 ### Patch Changes

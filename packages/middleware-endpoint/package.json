@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-endpoint",
-  "version": "3.0.5",
+  "version": "3.1.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline middleware-endpoint",

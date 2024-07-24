@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 86862ea: switch to static HttpRequest clone method
+
 ## 4.0.4
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 4a40961: add support for accountId in configValueProvider
+
+### Patch Changes
+
+- @smithy/middleware-serde@3.0.3
+
 ## 3.0.5
 
 ### Patch Changes

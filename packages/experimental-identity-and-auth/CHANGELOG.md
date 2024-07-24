@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.3.13
+
+### Patch Changes
+
+- 86862ea: switch to static HttpRequest clone method
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/signature-v4@4.1.0
+  - @smithy/middleware-retry@3.0.12
+  - @smithy/middleware-serde@3.0.3
+
 ## 0.3.12
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/protocol-http",
-  "version": "4.0.4",
+  "version": "4.1.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline protocol-http",

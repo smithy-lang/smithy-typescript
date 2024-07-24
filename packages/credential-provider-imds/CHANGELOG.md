@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 3d72b04: sources accountId from IMDS
+
 ## 3.1.4
 
 ### Patch Changes

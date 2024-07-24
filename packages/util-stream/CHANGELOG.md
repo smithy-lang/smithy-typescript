@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.1.2
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.3
+- @smithy/node-http-handler@3.1.4
+
 ## 3.1.1
 
 ### Patch Changes

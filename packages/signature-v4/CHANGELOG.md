@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 86862ea: switch to static HttpRequest clone method
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
 ## 4.0.0
 
 ### Major Changes
