@@ -20,7 +20,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -29,10 +33,12 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 import software.amazon.smithy.utils.ToSmithyBuilder;
+import software.amazon.smithy.utils.TriConsumer;
 
 /**
  * Represents a runtime plugin for a client that hooks into various aspects
@@ -56,6 +62,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final BiPredicate<Model, ServiceShape> servicePredicate;
     private final OperationPredicate operationPredicate;
     private final SettingsPredicate settingsPredicate;
+    private BiConsumer<TypeScriptWriter, BiConsumer<Model, ServiceShape>> clientWriterConsumer = (writer, consumer) -> {};
+    private BiConsumer<TypeScriptWriter, TriConsumer<Model, ServiceShape, OperationShape>> operationWriterConsumer = (writer, consumer) -> {};
 
     private RuntimeClientPlugin(Builder builder) {
         inputConfig = builder.inputConfig;
@@ -68,6 +76,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
         settingsPredicate = builder.settingsPredicate;
+        clientWriterConsumer = builder.clientWriterConsumer;
+        operationWriterConsumer = builder.operationWriterConsumer;
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -326,6 +336,18 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         return settingsPredicate.test(model, service, settings);
     }
 
+    /**
+     * @return the writer consumer for this RuntimeClientPlugin. May be used to add imports and dependencies
+     * used by this plugin.
+     */
+    public Consumer<TypeScriptWriter> getClientWriterConsumer() {
+        return this.clientWriterConsumer;
+    }
+
+    public Consumer<TypeScriptWriter> getClientWriterConsumer() {
+        return this.operationWriterConsumer;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -398,6 +420,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
         private OperationPredicate operationPredicate = (model, service, operation) -> false;
         private SettingsPredicate settingsPredicate = (model, service, settings) -> true;
+        private BiConsumer<TypeScriptWriter, BiConsumer<Model, ServiceShape>> clientWriterConsumer = (writer, consumer) -> {};
+        private BiConsumer<TypeScriptWriter, TriConsumer<Model, ServiceShape, OperationShape>> operationWriterConsumer = (writer, consumer) -> {};
 
         @Override
         public RuntimeClientPlugin build() {
@@ -743,6 +767,28 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         public Builder servicePredicate(BiPredicate<Model, ServiceShape> servicePredicate) {
             this.servicePredicate = Objects.requireNonNull(servicePredicate);
             operationPredicate = (model, service, operation) -> false;
+            return this;
+        }
+
+        /**
+         * Enables access to the writer for adding imports/dependencies.
+         */
+        public Builder withClientWriter(
+            BiConsumer<TypeScriptWriter,
+                BiConsumer<Model, ServiceShape>> clientWriterConsumer
+        ) {
+            this.clientWriterConsumer = clientWriterConsumer;
+            return this;
+        }
+
+        /**
+         * Enables access to the writer for adding imports/dependencies.
+         */
+        public Builder withOperationWriter(
+            BiConsumer<TypeScriptWriter,
+                TriConsumer<Model, ServiceShape, OperationShape>> operationWriterConsumer
+        ) {
+            this.operationWriterConsumer = operationWriterConsumer;
             return this;
         }
 

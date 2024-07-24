@@ -67,6 +67,12 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         .name("this.getIdentityProviderConfigProvider()")
                         .build()
                 ))
+                .withWriter(writer -> {
+                    String httpAuthSchemeParametersProviderName = "default"
+                        + CodegenUtils.getServiceName(s.getSettings(), s.getModel(), s.getSymbolProvider())
+                        + "HttpAuthSchemeParametersProvider";
+                    w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
+                })
                 .build(),
             RuntimeClientPlugin.builder()
                 .servicePredicate((m, s) -> !s.hasTrait(EndpointRuleSetTrait.ID))
@@ -215,6 +221,14 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 .resolveConfigFunctions(resolveConfigFunctions)
                 .build());
         });
+    }
+
+    private String inlineHttpAuthSchemeParametersProvider() {
+        return "";
+    }
+
+    private String inlineIdentityProviderConfigProvider() {
+        return "";
     }
 
     /*

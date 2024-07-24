@@ -387,6 +387,10 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     generateConfigVariable(configVariable - 1));
             }
 
+            for (RuntimeClientPlugin plugin : runtimePlugins) {
+                plugin.getWriterConsumer().accept(writer);
+            }
+
             // Add runtime plugin "resolve" method calls. These are invoked one
             // after the other until all of the runtime plugins have been called.
             // Only plugins that have configuration are called. Each time the
