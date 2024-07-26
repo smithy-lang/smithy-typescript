@@ -127,7 +127,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       requestOptions.keepalive = keepAlive;
     }
 
-    let removeSignalEventListener = null as null | (() => void);
+    let removeSignalEventListener = () => {};
 
     const fetchRequest = new Request(url, requestOptions);
     const raceOfPromises = [
