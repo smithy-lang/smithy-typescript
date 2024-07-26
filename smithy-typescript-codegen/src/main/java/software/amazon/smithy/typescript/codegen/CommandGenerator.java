@@ -58,6 +58,7 @@ import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCode
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.PreCommandClassCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
+import software.amazon.smithy.typescript.codegen.util.CommandWriterConsumer;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -467,15 +468,11 @@ final class CommandGenerator implements Runnable {
         // applied automatically when the Command's middleware stack is copied from
         // the service's middleware stack.
         for (RuntimeClientPlugin plugin : runtimePlugins) {
-            plugin.getWriterConsumer().accept(writer);
             plugin.getPluginFunction().ifPresent(pluginSymbol -> {
                 // Construct additional parameters string
                 Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
                         model, service, operation);
-                List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                String additionalParamsString = additionalParameters.isEmpty()
-                        ? ""
-                        : ", { " + String.join(", ", additionalParameters) + " }";
+
 
                 // Construct writer context
                 Map<String, Object> symbolMap = new HashMap<>();
@@ -487,7 +484,29 @@ final class CommandGenerator implements Runnable {
                 }
                 writer.pushState();
                 writer.putContext(symbolMap);
-                writer.write("$pluginFn:T(config" + additionalParamsString + "),");
+                writer.openBlock("$pluginFn:T(config", "),", () -> {
+                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+                    Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
+                        plugin.getOperationAddParamsWriterConsumers();
+                    if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
+                        return;
+                    }
+                    writer.writeInline(", { ");
+                    writer.writeInline(String.join(", ", additionalParameters));
+                    clientAddParamsWriterConsumers.forEach((key, consumer) -> {
+                        writer.writeInline(key).writeInline(": ");
+                        consumer.accept(writer, CommandConstructorCodeSection.builder()
+                            .settings(settings)
+                            .model(model)
+                            .service(service)
+                            .symbolProvider(symbolProvider)
+                            .runtimeClientPlugins(runtimePlugins)
+                            .applicationProtocol(applicationProtocol)
+                            .build());
+                        writer.writeInline(",");
+                    });
+                    writer.writeInline(" }");
+                });
                 writer.popState();
             });
         }

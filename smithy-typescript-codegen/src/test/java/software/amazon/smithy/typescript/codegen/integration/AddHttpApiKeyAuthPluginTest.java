@@ -61,7 +61,7 @@ public class AddHttpApiKeyAuthPluginTest {
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
                 containsString("from \"../middleware/HttpApiKeyAuth\""));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
-                containsString("getHttpApiKeyAuthPlugin(config" + extra + ")"));
+                containsString("getHttpApiKeyAuthPlugin(config\n    " + extra));
 
         // Ensure that the GetBar operation does not import the middleware or use it.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetBarCommand.ts").get(),

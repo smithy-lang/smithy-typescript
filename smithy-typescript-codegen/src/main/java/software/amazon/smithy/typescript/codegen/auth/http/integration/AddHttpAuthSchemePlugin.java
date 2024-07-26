@@ -32,9 +32,7 @@ import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpA
 import software.amazon.smithy.typescript.codegen.auth.http.sections.ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention;
-import software.amazon.smithy.typescript.codegen.sections.ClientBodyExtraCodeSection;
-import software.amazon.smithy.utils.CodeInterceptor;
-import software.amazon.smithy.utils.CodeSection;
+import software.amazon.smithy.typescript.codegen.util.ClientWriterConsumer;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -52,6 +50,51 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
 
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
+        Map<String, ClientWriterConsumer> httpAuthSchemeParametersProvider = Map.of(
+            "httpAuthSchemeParametersProvider", (w, clientBodySection) -> {
+                String httpAuthSchemeParametersProviderName = "default"
+                    + CodegenUtils.getServiceName(
+                        clientBodySection.getSettings(),
+                        clientBodySection.getModel(),
+                        clientBodySection.getSymbolProvider()
+                    )
+                    + "HttpAuthSchemeParametersProvider";
+                w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
+                w.writeInline(httpAuthSchemeParametersProviderName);
+            },
+            "identityProviderConfigProvider", (w, s) -> {
+                w.addDependency(TypeScriptDependency.SMITHY_CORE);
+                w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.SMITHY_CORE);
+                w.openBlock("""
+                        async (config: $LResolvedConfig) => \
+                        new DefaultIdentityProviderConfig({""", "})",
+                    s.getSymbolProvider().toSymbol(s.getService()).getName(),
+                    () -> {
+                        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
+                            s.getIntegrations(),
+                            s.getModel(),
+                            s.getSettings());
+                        ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
+                        TopDownIndex topDownIndex = TopDownIndex.of(s.getModel());
+                        Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
+                            s.getService(), serviceIndex, authIndex, topDownIndex);
+                        for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
+                            if (scheme == null) {
+                                continue;
+                            }
+                            for (ConfigField configField : scheme.getConfigFields()) {
+                                if (configField.type().equals(ConfigField.Type.MAIN)) {
+                                    w.writeInline(
+                                        "$S: config.$L,",
+                                        scheme.getSchemeId().toString(),
+                                        configField.name()
+                                    );
+                                }
+                            }
+                        }
+                    });
+            }
+        );
         return List.of(
             RuntimeClientPlugin.builder()
                 .servicePredicate((m, s) -> s.hasTrait(EndpointRuleSetTrait.ID))
@@ -59,20 +102,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                     TypeScriptDependency.SMITHY_CORE.dependency,
                     "HttpAuthSchemeEndpointRuleSet",
                     Convention.HAS_MIDDLEWARE)
-                .additionalPluginFunctionParamsSupplier((model, service, operation) -> Map.of(
-                    "httpAuthSchemeParametersProvider", Symbol.builder()
-                        .name("this.getDefaultHttpAuthSchemeParametersProvider()")
-                        .build(),
-                    "identityProviderConfigProvider", Symbol.builder()
-                        .name("this.getIdentityProviderConfigProvider()")
-                        .build()
-                ))
-                .withWriter(writer -> {
-                    String httpAuthSchemeParametersProviderName = "default"
-                        + CodegenUtils.getServiceName(s.getSettings(), s.getModel(), s.getSymbolProvider())
-                        + "HttpAuthSchemeParametersProvider";
-                    w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
-                })
+                .withAdditionalClientParams(httpAuthSchemeParametersProvider)
                 .build(),
             RuntimeClientPlugin.builder()
                 .servicePredicate((m, s) -> !s.hasTrait(EndpointRuleSetTrait.ID))
@@ -80,14 +110,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                     TypeScriptDependency.SMITHY_CORE.dependency,
                     "HttpAuthScheme",
                     Convention.HAS_MIDDLEWARE)
-                .additionalPluginFunctionParamsSupplier((model, service, operation) -> Map.of(
-                    "httpAuthSchemeParametersProvider", Symbol.builder()
-                        .name("this.getDefaultHttpAuthSchemeParametersProvider()")
-                        .build(),
-                    "identityProviderConfigProvider", Symbol.builder()
-                        .name("this.getIdentityProviderConfigProvider()")
-                        .build()
-                ))
+                .withAdditionalClientParams(httpAuthSchemeParametersProvider)
                 .build(),
             RuntimeClientPlugin.builder()
                 .inputConfig(Symbol.builder()
@@ -104,70 +127,6 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         .build())
                 .build()
         );
-    }
-
-    @Override
-    public List<? extends CodeInterceptor<? extends CodeSection, TypeScriptWriter>> interceptors(
-        TypeScriptCodegenContext codegenContext
-    ) {
-        return List.of(CodeInterceptor.appender(ClientBodyExtraCodeSection.class, (w, s) -> {
-            if (!s.getSettings().generateClient()
-                || s.getSettings().useLegacyAuth()
-                || !s.getApplicationProtocol().isHttpProtocol()) {
-                return;
-            }
-
-            /*
-            private getDefaultHttpAuthSchemeParametersProvider() {
-              return defaultWeatherHttpAuthSchemeParametersProvider;
-            }
-            */
-            w.openBlock("private getDefaultHttpAuthSchemeParametersProvider() {", "}", () -> {
-                String httpAuthSchemeParametersProviderName = "default"
-                    + CodegenUtils.getServiceName(s.getSettings(), s.getModel(), s.getSymbolProvider())
-                    + "HttpAuthSchemeParametersProvider";
-                w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
-                w.write("return " + httpAuthSchemeParametersProviderName + ";");
-            });
-
-            /*
-            private getIdentityProviderConfigProvider() {
-              return async (config: WeatherClientResolvedConfig) => new DefaultIdentityProviderConfig({
-                "aws.auth#sigv4": config.credentials,
-                "smithy.api#httpApiKeyAuth": config.apiKey,
-                "smithy.api#httpBearerAuth": config.token,
-              });
-            }
-            */
-            w.openBlock("private getIdentityProviderConfigProvider() {", "}", () -> {
-                w.addDependency(TypeScriptDependency.SMITHY_CORE);
-                w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.SMITHY_CORE);
-                w.openBlock("""
-                    return async (config: $LResolvedConfig) => \
-                    new DefaultIdentityProviderConfig({""", "});",
-                    s.getSymbolProvider().toSymbol(s.getService()).getName(),
-                    () -> {
-                    SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
-                        s.getIntegrations(),
-                        s.getModel(),
-                        s.getSettings());
-                    ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
-                    TopDownIndex topDownIndex = TopDownIndex.of(s.getModel());
-                    Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
-                        s.getService(), serviceIndex, authIndex, topDownIndex);
-                    for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
-                        if (scheme == null) {
-                            continue;
-                        }
-                        for (ConfigField configField : scheme.getConfigFields()) {
-                            if (configField.type().equals(ConfigField.Type.MAIN)) {
-                                w.write("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
-                            }
-                        }
-                    }
-                });
-            });
-        }));
     }
 
     @Override
@@ -221,14 +180,6 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 .resolveConfigFunctions(resolveConfigFunctions)
                 .build());
         });
-    }
-
-    private String inlineHttpAuthSchemeParametersProvider() {
-        return "";
-    }
-
-    private String inlineIdentityProviderConfigProvider() {
-        return "";
     }
 
     /*

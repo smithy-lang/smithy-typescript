@@ -45,6 +45,13 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public final class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override
+    public List<String> runAfter() {
+        return List.of(
+            AddBuiltinPlugins.class.getCanonicalName()
+        );
+    }
+
+    @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
                 RuntimeClientPlugin.builder()
