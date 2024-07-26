@@ -127,7 +127,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       requestOptions.keepalive = keepAlive;
     }
 
-    let removeSignalEventListener = null as null | (() => void);
+    let removeSignalEventListener = () => {};
 
     const fetchRequest = new Request(url, requestOptions);
     const raceOfPromises = [
@@ -185,11 +185,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
         })
       );
     }
-    return Promise.race(raceOfPromises).finally(() => {
-      if (typeof removeSignalEventListener === "function") {
-        removeSignalEventListener();
-      }
-    });
+    return Promise.race(raceOfPromises).finally(removeSignalEventListener);
   }
 
   updateHttpClientConfig(key: keyof FetchHttpHandlerConfig, value: FetchHttpHandlerConfig[typeof key]): void {
