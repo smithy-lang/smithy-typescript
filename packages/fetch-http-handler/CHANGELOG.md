@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.4
+
+### Patch Changes
+
+- 3ea4789: Initialize removeSignalEventListener as an empty function
+
 ## 3.2.3
 
 ### Patch Changes
