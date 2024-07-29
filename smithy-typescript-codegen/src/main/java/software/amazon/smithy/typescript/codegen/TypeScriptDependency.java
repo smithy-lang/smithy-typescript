@@ -113,7 +113,7 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@smithy/querystring-builder", false),
 
     // Conditionally added when XML parser needs to be used.
-    XML_PARSER("dependencies", "fast-xml-parser", "4.2.5", false),
+    XML_PARSER("dependencies", "fast-xml-parser", "4.4.1", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.
