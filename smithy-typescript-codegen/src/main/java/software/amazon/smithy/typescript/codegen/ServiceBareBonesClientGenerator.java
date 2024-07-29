@@ -459,27 +459,26 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                             return;
                         }
 
-                        writer.writeInline(", {");
-                        writer.writeInline(String.join(", ", additionalParameters));
-                        clientAddParamsWriterConsumers.forEach((key, consumer) -> {
-                            writer.writeInline(key).writeInline(": ");
-                            consumer.accept(writer, ClientBodyExtraCodeSection.builder()
-                                .settings(settings)
-                                .model(model)
-                                .service(service)
-                                .symbolProvider(symbolProvider)
-                                .integrations(integrations)
-                                .runtimeClientPlugins(runtimePlugins)
-                                .applicationProtocol(applicationProtocol)
-                                .build());
-                            writer.writeInline(",");
+                        writer.openBlock(", {", " }", () -> {
+                            writer.writeInline(String.join(", ", additionalParameters));
+                            clientAddParamsWriterConsumers.forEach((key, consumer) -> {
+                                writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
+                                    consumer.accept(w, ClientBodyExtraCodeSection.builder()
+                                        .settings(settings)
+                                        .model(model)
+                                        .service(service)
+                                        .symbolProvider(symbolProvider)
+                                        .integrations(integrations)
+                                        .runtimeClientPlugins(runtimePlugins)
+                                        .applicationProtocol(applicationProtocol)
+                                        .build());
+                                }));
+                            });
                         });
-                        writer.writeInline("}");
                     });
                     writer.popState();
                 });
             }
-
             writer.popState();
         });
     }

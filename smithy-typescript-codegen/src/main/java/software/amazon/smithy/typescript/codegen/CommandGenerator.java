@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -491,21 +492,21 @@ final class CommandGenerator implements Runnable {
                     if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
                         return;
                     }
-                    writer.writeInline(", { ");
-                    writer.writeInline(String.join(", ", additionalParameters));
-                    clientAddParamsWriterConsumers.forEach((key, consumer) -> {
-                        writer.writeInline(key).writeInline(": ");
-                        consumer.accept(writer, CommandConstructorCodeSection.builder()
-                            .settings(settings)
-                            .model(model)
-                            .service(service)
-                            .symbolProvider(symbolProvider)
-                            .runtimeClientPlugins(runtimePlugins)
-                            .applicationProtocol(applicationProtocol)
-                            .build());
-                        writer.writeInline(",");
+                    writer.openBlock(", { ", " }", () -> {
+                        writer.writeInline(String.join(", ", additionalParameters));
+                        clientAddParamsWriterConsumers.forEach((key, consumer) -> {
+                            writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
+                                consumer.accept(w, CommandConstructorCodeSection.builder()
+                                    .settings(settings)
+                                    .model(model)
+                                    .service(service)
+                                    .symbolProvider(symbolProvider)
+                                    .runtimeClientPlugins(runtimePlugins)
+                                    .applicationProtocol(applicationProtocol)
+                                    .build());
+                            }));
+                        });
                     });
-                    writer.writeInline(" }");
                 });
                 writer.popState();
             });

@@ -103,7 +103,7 @@ final class DirectedTypeScriptCodegen
         });
 
         directive.integrations().forEach(integration -> {
-            LOGGER.info(() -> "Mutating plugins from TypeScriptIntegration: " + integration.getClass().getName());
+            LOGGER.info(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
             integration.mutateClientPlugins(runtimePlugins);
         });
 
