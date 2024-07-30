@@ -47,7 +47,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
     @Override
     public List<String> runAfter() {
         return List.of(
-            AddBuiltinPlugins.class.getCanonicalName()
+            new AddBuiltinPlugins().name()
         );
     }
 

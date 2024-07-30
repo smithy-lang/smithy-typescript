@@ -493,7 +493,11 @@ final class CommandGenerator implements Runnable {
                         return;
                     }
                     writer.openBlock(", { ", " }", () -> {
-                        writer.writeInline(String.join(", ", additionalParameters));
+                        writer
+                            .pushState()
+                            .putContext("params", additionalParameters)
+                            .writeInline("${#params}${value:L}, ${/params}")
+                            .popState();
                         clientAddParamsWriterConsumers.forEach((key, consumer) -> {
                             writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
                                 consumer.accept(w, CommandConstructorCodeSection.builder()

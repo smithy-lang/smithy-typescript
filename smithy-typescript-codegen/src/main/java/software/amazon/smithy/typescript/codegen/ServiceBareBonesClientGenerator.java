@@ -460,7 +460,11 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                         }
 
                         writer.openBlock(", {", " }", () -> {
-                            writer.writeInline(String.join(", ", additionalParameters));
+                            writer
+                                .pushState()
+                                .putContext("params", additionalParameters)
+                                .writeInline("${#params}${value:L}, ${/params}")
+                                .popState();
                             clientAddParamsWriterConsumers.forEach((key, consumer) -> {
                                 writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
                                     consumer.accept(w, ClientBodyExtraCodeSection.builder()
