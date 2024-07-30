@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.3.15
+
+### Patch Changes
+
+- a40e1e9: set identity&auth SRA active by default
+
 ## 0.3.14
 
 ### Patch Changes
