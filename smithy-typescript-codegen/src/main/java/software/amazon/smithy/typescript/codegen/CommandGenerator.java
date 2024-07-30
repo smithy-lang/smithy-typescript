@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -56,7 +57,9 @@ import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.PreCommandClassCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
+import software.amazon.smithy.typescript.codegen.util.CommandWriterConsumer;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -154,6 +157,17 @@ final class CommandGenerator implements Runnable {
             );
         }
 
+        // Section of items like TypeScript @ts-ignore
+        writer.injectSection(PreCommandClassCodeSection.builder()
+            .settings(settings)
+            .model(model)
+            .service(service)
+            .operation(operation)
+            .symbolProvider(symbolProvider)
+            .runtimeClientPlugins(runtimePlugins)
+            .protocolGenerator(protocolGenerator)
+            .applicationProtocol(applicationProtocol)
+            .build());
         writer.openBlock(
             "export class $L extends $$Command.classBuilder<$T, $T, $L, ServiceInputTypes, ServiceOutputTypes>()",
             ".build() {", // class open bracket.
@@ -459,10 +473,7 @@ final class CommandGenerator implements Runnable {
                 // Construct additional parameters string
                 Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
                         model, service, operation);
-                List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                String additionalParamsString = additionalParameters.isEmpty()
-                        ? ""
-                        : ", { " + String.join(", ", additionalParameters) + " }";
+
 
                 // Construct writer context
                 Map<String, Object> symbolMap = new HashMap<>();
@@ -474,7 +485,33 @@ final class CommandGenerator implements Runnable {
                 }
                 writer.pushState();
                 writer.putContext(symbolMap);
-                writer.write("$pluginFn:T(config" + additionalParamsString + "),");
+                writer.openBlock("$pluginFn:T(config", "),", () -> {
+                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+                    Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
+                        plugin.getOperationAddParamsWriterConsumers();
+                    if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
+                        return;
+                    }
+                    writer.openBlock(", { ", " }", () -> {
+                        writer
+                            .pushState()
+                            .putContext("params", additionalParameters)
+                            .writeInline("${#params}${value:L}, ${/params}")
+                            .popState();
+                        clientAddParamsWriterConsumers.forEach((key, consumer) -> {
+                            writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
+                                consumer.accept(w, CommandConstructorCodeSection.builder()
+                                    .settings(settings)
+                                    .model(model)
+                                    .service(service)
+                                    .symbolProvider(symbolProvider)
+                                    .runtimeClientPlugins(runtimePlugins)
+                                    .applicationProtocol(applicationProtocol)
+                                    .build());
+                            }));
+                        });
+                    });
+                });
                 writer.popState();
             });
         }

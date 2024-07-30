@@ -20,9 +20,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  *
  * Integrations may mutate this index to customize {@link HttpAuthScheme}
  * implementations.
- *
- * This class is currently under the `experimentalIdentityAgitndAuth` experimental
- * flag, and is subject to breaking changes.
  */
 @SmithyInternalApi
 public final class SupportedHttpAuthSchemesIndex {

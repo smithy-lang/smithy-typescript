@@ -30,7 +30,7 @@ under development:
 
 Experimental Feature | Flag                          | Description
 ---------------------|-------------------------------|------------
-Identity & Auth      | `experimentalIdentityAndAuth` | Standardize identity and auth integrations to match the Smithy specification (see [Authentication Traits](https://smithy.io/2.0/spec/authentication-traits.html)). Newer capabilities include support for multiple auth schemes, `@optionalAuth`, and standardized identity interfaces for authentication schemes both in code generation and TypeScript packages. In `smithy-typescript`, `@httpApiKeyAuth` will be updated to use the new standardized interfaces. In `aws-sdk-js-v3` (`smithy-typescript`'s largest customer), this will affect `@aws.auth#sigv4` and `@httpBearerAuth` implementations, but is planned to be completely backwards-compatible.
+N/A                  | N/A                           | N/A
 
 ## Reporting Bugs/Feature Requests
 

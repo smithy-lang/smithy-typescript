@@ -28,18 +28,16 @@ import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Adds {@link HttpAuthExtensionConfigurationInterface} to a client.
- *
- * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegration {
 
     /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
+     * Integration should be skipped if the `useLegacyAuth` flag is true.
      */
     @Override
     public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
+        return !settings.useLegacyAuth();
     }
 
     @Override

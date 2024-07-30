@@ -16,17 +16,15 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Add middleware for {@code httpSigningMiddleware}.
- *
- * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public class AddHttpSigningPlugin implements TypeScriptIntegration {
     /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
+     * Integration should be skipped if the `useLegacyAuth` flag is true.
      */
     @Override
     public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.getExperimentalIdentityAndAuth();
+        return !settings.useLegacyAuth();
     }
 
     @Override
