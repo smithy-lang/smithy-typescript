@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
@@ -798,7 +799,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * Enables access to the writer for adding imports/dependencies.
          */
         public Builder withAdditionalClientParams(Map<String, ClientWriterConsumer> writeAdditionalClientParams) {
-            this.writeAdditionalClientParams = writeAdditionalClientParams;
+            // enforce consistent sorting during codegen.
+            this.writeAdditionalClientParams = new TreeMap<>(writeAdditionalClientParams);
             return this;
         }
 
@@ -808,7 +810,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         public Builder withAdditionalOperationParams(
             Map<String, CommandWriterConsumer> writeAdditionalOperationParams
         ) {
-            this.writeAdditionalOperationParams = writeAdditionalOperationParams;
+            // enforce consistent sorting during codegen.
+            this.writeAdditionalOperationParams = new TreeMap<>(writeAdditionalOperationParams);
             return this;
         }
 
