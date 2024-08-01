@@ -30,7 +30,9 @@ import software.amazon.smithy.rulesengine.traits.ClientContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.rulesengine.traits.StaticContextParamsTrait;
+import software.amazon.smithy.utils.SmithyInternalApi;
 
+@SmithyInternalApi
 public class RuleSetParameterFinder {
     private final ServiceShape service;
     private final EndpointRuleSetTrait ruleset;
