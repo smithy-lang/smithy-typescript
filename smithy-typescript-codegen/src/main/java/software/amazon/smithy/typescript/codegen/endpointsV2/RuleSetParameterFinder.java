@@ -74,31 +74,6 @@ public class RuleSetParameterFinder {
     }
 
     /**
-     * "The staticContextParams trait defines one or more context parameters that MUST
-     * be bound to the specified values. This trait MUST target an operation shape."
-     */
-    public Map<String, String> getStaticContextParams(Shape operationInput) {
-        Map<String, String> map = new HashMap<>();
-
-        if (operationInput.isStructureShape()) {
-            operationInput.getAllMembers().forEach((String memberName, MemberShape member) -> {
-                Optional<StaticContextParamsTrait> trait = member.getTrait(StaticContextParamsTrait.class);
-                if (trait.isPresent()) {
-                    StaticContextParamsTrait staticContextParamsTrait = trait.get();
-                    staticContextParamsTrait.getParameters().forEach((name, definition) -> {
-                        map.put(
-                            name,
-                            definition.getValue().getType().toString()
-                        );
-                    });
-                }
-            });
-        }
-
-        return map;
-    }
-
-    /**
      * Get map of params to actual values instead of the value type.
      */
     public Map<String, String> getStaticContextParamValues(OperationShape operation) {
