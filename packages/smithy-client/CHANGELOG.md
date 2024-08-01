@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.12
+
+### Patch Changes
+
+- 670553a: add command instance ref to smithy context
+
 ## 3.1.11
 
 ### Patch Changes
