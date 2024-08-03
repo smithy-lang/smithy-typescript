@@ -1,5 +1,55 @@
 # Change Log
 
+## 3.1.12
+
+### Patch Changes
+
+- 670553a: add command instance ref to smithy context
+
+## 3.1.11
+
+### Patch Changes
+
+- @smithy/util-stream@3.1.3
+
+## 3.1.10
+
+### Patch Changes
+
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/util-stream@3.1.2
+
+## 3.1.9
+
+### Patch Changes
+
+- Updated dependencies [1cfe243]
+  - @smithy/util-stream@3.1.1
+
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+- Updated dependencies [7cd258f]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/util-stream@3.1.0
+
+## 3.1.7
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+
+## 3.1.6
+
+### Patch Changes
+
+- @smithy/util-stream@3.0.6
+
 ## 3.1.5
 
 ### Patch Changes

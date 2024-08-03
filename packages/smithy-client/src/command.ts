@@ -82,6 +82,7 @@ export abstract class Command<
       inputFilterSensitiveLog,
       outputFilterSensitiveLog,
       [SMITHY_CONTEXT_KEY]: {
+        commandInstance: this,
         ...smithyContext,
       },
       ...additionalContext,

@@ -15,11 +15,13 @@
 
 package software.amazon.smithy.typescript.codegen.integration;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
@@ -29,6 +31,8 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
+import software.amazon.smithy.typescript.codegen.util.ClientWriterConsumer;
+import software.amazon.smithy.typescript.codegen.util.CommandWriterConsumer;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -56,6 +60,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     private final BiPredicate<Model, ServiceShape> servicePredicate;
     private final OperationPredicate operationPredicate;
     private final SettingsPredicate settingsPredicate;
+    private final Map<String, ClientWriterConsumer> writeAdditionalClientParams;
+    private final Map<String, CommandWriterConsumer> writeAdditionalOperationParams;
 
     private RuntimeClientPlugin(Builder builder) {
         inputConfig = builder.inputConfig;
@@ -68,6 +74,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         operationPredicate = builder.operationPredicate;
         servicePredicate = builder.servicePredicate;
         settingsPredicate = builder.settingsPredicate;
+        writeAdditionalClientParams = builder.writeAdditionalClientParams;
+        writeAdditionalOperationParams = builder.writeAdditionalOperationParams;
 
         boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
         boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
@@ -258,7 +266,30 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         if (additionalPluginFunctionParamsSupplier != null) {
             return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
         }
-        return new HashMap<String, Object>();
+        return new HashMap<>();
+    }
+
+    /**
+     * Gets a list of additional parameters to be supplied to the
+     * plugin function. These parameters are to be supplied to plugin
+     * function as second argument. The map is empty if there are
+     * no additional parameters.
+     *
+     * @param model Model the operation belongs to.
+     * @param service Service the operation belongs to.
+     * @param operation Operation to test against.
+     * @return Returns the optionally present map of parameters. The key is the key
+     * for a parameter, and value is the value for a parameter.
+     */
+    public Map<String, Object> getAdditionalPluginFunctionParameterWriterConsumers(
+        Model model,
+        ServiceShape service,
+        OperationShape operation
+    ) {
+        if (additionalPluginFunctionParamsSupplier != null) {
+            return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
+        }
+        return new HashMap<>();
     }
 
     /**
@@ -324,6 +355,22 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      */
     public boolean matchesSettings(Model model, ServiceShape service, TypeScriptSettings settings) {
         return settingsPredicate.test(model, service, settings);
+    }
+
+    /**
+     * @return the map of additional client level plugin params and their writer consumers used
+     * to populate the param values.
+     */
+    public Map<String, ClientWriterConsumer> getClientAddParamsWriterConsumers() {
+        return this.writeAdditionalClientParams;
+    }
+
+    /**
+     * @return the map of additional operation level plugin params and their writer consumers used
+     * to populate the param values.
+     */
+    public Map<String, CommandWriterConsumer> getOperationAddParamsWriterConsumers() {
+        return this.writeAdditionalOperationParams;
     }
 
     public static Builder builder() {
@@ -398,6 +445,8 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
         private OperationPredicate operationPredicate = (model, service, operation) -> false;
         private SettingsPredicate settingsPredicate = (model, service, settings) -> true;
+        private Map<String, ClientWriterConsumer> writeAdditionalClientParams = Collections.emptyMap();
+        private Map<String, CommandWriterConsumer> writeAdditionalOperationParams = Collections.emptyMap();
 
         @Override
         public RuntimeClientPlugin build() {
@@ -743,6 +792,26 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         public Builder servicePredicate(BiPredicate<Model, ServiceShape> servicePredicate) {
             this.servicePredicate = Objects.requireNonNull(servicePredicate);
             operationPredicate = (model, service, operation) -> false;
+            return this;
+        }
+
+        /**
+         * Enables access to the writer for adding imports/dependencies.
+         */
+        public Builder withAdditionalClientParams(Map<String, ClientWriterConsumer> writeAdditionalClientParams) {
+            // enforce consistent sorting during codegen.
+            this.writeAdditionalClientParams = new TreeMap<>(writeAdditionalClientParams);
+            return this;
+        }
+
+        /**
+         * Enables access to the writer for adding imports/dependencies.
+         */
+        public Builder withAdditionalOperationParams(
+            Map<String, CommandWriterConsumer> writeAdditionalOperationParams
+        ) {
+            // enforce consistent sorting during codegen.
+            this.writeAdditionalOperationParams = new TreeMap<>(writeAdditionalOperationParams);
             return this;
         }
 

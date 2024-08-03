@@ -410,7 +410,7 @@ describe("SignatureV4", () => {
     });
 
     it("should sign requests without host header", async () => {
-      const request = minimalRequest.clone();
+      const request = HttpRequest.clone(minimalRequest);
       delete request.headers[HOST_HEADER];
       const { headers } = await signer.sign(request, {
         signingDate: new Date("2000-01-01T00:00:00.000Z"),

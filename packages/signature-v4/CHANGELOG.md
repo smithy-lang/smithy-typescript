@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 86862ea: switch to static HttpRequest clone method
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 4.0.0
+
+### Major Changes
+
+- ae8bf5c: Make sha256 required parameter for SigV4 constructor
+
 ## 3.1.2
 
 ### Patch Changes

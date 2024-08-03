@@ -1,5 +1,68 @@
 # Change Log
 
+## 2.3.2
+
+### Patch Changes
+
+- Updated dependencies [670553a]
+  - @smithy/smithy-client@3.1.12
+  - @smithy/middleware-retry@3.0.14
+
+## 2.3.1
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.11
+- @smithy/middleware-retry@3.0.13
+
+## 2.3.0
+
+### Minor Changes
+
+- 86862ea: switch to static HttpRequest clone method
+
+### Patch Changes
+
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/smithy-client@3.1.10
+  - @smithy/middleware-retry@3.0.12
+  - @smithy/middleware-serde@3.0.3
+
+## 2.2.8
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.9
+- @smithy/middleware-retry@3.0.11
+
+## 2.2.7
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/middleware-retry@3.0.10
+  - @smithy/smithy-client@3.1.8
+  - @smithy/middleware-serde@3.0.3
+
+## 2.2.6
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+- @smithy/smithy-client@3.1.7
+- @smithy/middleware-retry@3.0.9
+
+## 2.2.5
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.6
+- @smithy/middleware-retry@3.0.8
+
 ## 2.2.4
 
 ### Patch Changes

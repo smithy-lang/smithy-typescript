@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.4
+
+### Patch Changes
+
+- d88521e: read config files from paths relative to homedir
+
 ## 3.1.3
 
 ### Patch Changes

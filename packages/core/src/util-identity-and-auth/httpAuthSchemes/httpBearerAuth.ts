@@ -11,7 +11,7 @@ export class HttpBearerAuthSigner implements HttpSigner {
     identity: TokenIdentity,
     signingProperties: Record<string, any>
   ): Promise<IHttpRequest> {
-    const clonedRequest = httpRequest.clone();
+    const clonedRequest = HttpRequest.clone(httpRequest);
     if (!identity.token) {
       throw new Error("request could not be signed with `token` since the `token` is not defined");
     }

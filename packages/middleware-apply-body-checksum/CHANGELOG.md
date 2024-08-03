@@ -1,5 +1,20 @@
 # Change Log
 
+## 3.0.5
+
+### Patch Changes
+
+- 9624938: Fix request copying with `HttpRequest.clone()`.
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+
 ## 3.0.3
 
 ### Patch Changes

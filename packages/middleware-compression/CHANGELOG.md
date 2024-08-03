@@ -1,5 +1,25 @@
 # Change Log
 
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+
+## 3.0.5
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+
 ## 3.0.4
 
 ### Patch Changes

@@ -1,5 +1,66 @@
 # Change Log
 
+## 0.3.16
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.14
+
+## 0.3.15
+
+### Patch Changes
+
+- a40e1e9: set identity&auth SRA active by default
+
+## 0.3.14
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.13
+
+## 0.3.13
+
+### Patch Changes
+
+- 86862ea: switch to static HttpRequest clone method
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/signature-v4@4.1.0
+  - @smithy/middleware-retry@3.0.12
+  - @smithy/middleware-serde@3.0.3
+
+## 0.3.12
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.11
+
+## 0.3.11
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+- Updated dependencies [ae8bf5c]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/signature-v4@4.0.0
+  - @smithy/middleware-retry@3.0.10
+  - @smithy/middleware-serde@3.0.3
+
+## 0.3.10
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+- @smithy/middleware-retry@3.0.9
+
+## 0.3.9
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.8
+
 ## 0.3.8
 
 ### Patch Changes

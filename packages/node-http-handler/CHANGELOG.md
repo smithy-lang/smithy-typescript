@@ -1,5 +1,25 @@
 # Change Log
 
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+
+## 3.1.2
+
+### Patch Changes
+
+- f31cc5f: remove abort signal event listeners after request completion
+
 ## 3.1.1
 
 ### Patch Changes

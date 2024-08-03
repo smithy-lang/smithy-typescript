@@ -1,6 +1,7 @@
 import { getConfigData } from "./getConfigData";
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getCredentialsFilepath } from "./getCredentialsFilepath";
+import { getHomeDir } from "./getHomeDir";
 import { loadSharedConfigFiles } from "./loadSharedConfigFiles";
 import { parseIni } from "./parseIni";
 import { slurpFile } from "./slurpFile";
@@ -10,6 +11,7 @@ jest.mock("./getConfigFilepath");
 jest.mock("./getCredentialsFilepath");
 jest.mock("./parseIni");
 jest.mock("./slurpFile");
+jest.mock("./getHomeDir");
 
 describe("loadSharedConfigFiles", () => {
   const mockConfigFilepath = "/mock/file/path/config";
@@ -18,6 +20,7 @@ describe("loadSharedConfigFiles", () => {
     configFile: mockConfigFilepath,
     credentialsFile: mockCredsFilepath,
   };
+  const mockHomeDir = "/users/alias";
 
   beforeEach(() => {
     (getConfigFilepath as jest.Mock).mockReturnValue(mockConfigFilepath);
@@ -25,6 +28,7 @@ describe("loadSharedConfigFiles", () => {
     (parseIni as jest.Mock).mockImplementation((args) => args);
     (getConfigData as jest.Mock).mockImplementation((args) => args);
     (slurpFile as jest.Mock).mockImplementation((path) => Promise.resolve(path));
+    (getHomeDir as jest.Mock).mockReturnValue(mockHomeDir);
   });
 
   afterEach(() => {
@@ -45,6 +49,20 @@ describe("loadSharedConfigFiles", () => {
       configFilepath: mockConfigFilepath,
     });
     expect(sharedConfigFiles).toStrictEqual(mockSharedConfigFiles);
+    expect(getConfigFilepath).not.toHaveBeenCalled();
+    expect(getCredentialsFilepath).not.toHaveBeenCalled();
+  });
+
+  it("expands homedir in configFile and credentialsFile from init if defined", async () => {
+    const sharedConfigFiles = await loadSharedConfigFiles({
+      filepath: "~/path/credentials",
+      configFilepath: "~/path/config",
+    });
+    expect(sharedConfigFiles).toStrictEqual({
+      configFile: "/users/alias/path/config",
+      credentialsFile: "/users/alias/path/credentials",
+    });
+    expect(getHomeDir).toHaveBeenCalled();
     expect(getConfigFilepath).not.toHaveBeenCalled();
     expect(getCredentialsFilepath).not.toHaveBeenCalled();
   });

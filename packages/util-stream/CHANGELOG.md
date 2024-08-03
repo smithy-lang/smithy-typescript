@@ -1,5 +1,44 @@
 # Change Log
 
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [3ea4789]
+  - @smithy/fetch-http-handler@3.2.4
+
+## 3.1.2
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.3
+- @smithy/node-http-handler@3.1.4
+
+## 3.1.1
+
+### Patch Changes
+
+- 1cfe243: avoid compilation of global ReadableStream with type parameter
+
+## 3.1.0
+
+### Minor Changes
+
+- 7cd258f: add splitStream and headStream utilities
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.2
+- @smithy/node-http-handler@3.1.3
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [f31cc5f]
+  - @smithy/fetch-http-handler@3.2.1
+  - @smithy/node-http-handler@3.1.2
+
 ## 3.0.5
 
 ### Patch Changes

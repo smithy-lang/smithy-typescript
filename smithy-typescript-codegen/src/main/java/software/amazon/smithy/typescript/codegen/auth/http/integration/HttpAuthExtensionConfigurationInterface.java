@@ -13,8 +13,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Adds the corresponding interface and functions for {@code HttpAuthExtensionConfiguration}.
- *
- * This is experimental for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
 public class HttpAuthExtensionConfigurationInterface implements ExtensionConfigurationInterface {

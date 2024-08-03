@@ -1,5 +1,31 @@
 # Change Log
 
+## 3.2.4
+
+### Patch Changes
+
+- 3ea4789: Initialize removeSignalEventListener as an empty function
+
+## 3.2.3
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 3.2.2
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+
+## 3.2.1
+
+### Patch Changes
+
+- f31cc5f: remove abort signal event listeners after request completion
+
 ## 3.2.0
 
 ### Minor Changes

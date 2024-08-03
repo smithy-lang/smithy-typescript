@@ -4,6 +4,8 @@ import { toBase64 } from "@smithy/util-base64";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUtf8 } from "@smithy/util-utf8";
 
+import { isReadableStream } from "./stream-type-check";
+
 const ERR_MSG_STREAM_HAS_BEEN_TRANSFORMED = "The stream has already been transformed.";
 
 /**
@@ -12,7 +14,7 @@ const ERR_MSG_STREAM_HAS_BEEN_TRANSFORMED = "The stream has already been transfo
  * @internal
  */
 export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob> => {
-  if (!isBlobInstance(stream) && !isReadableStreamInstance(stream)) {
+  if (!isBlobInstance(stream) && !isReadableStream(stream)) {
     //@ts-ignore
     const name = stream?.__proto__?.constructor?.name || stream;
     throw new Error(`Unexpected stream implementation, expect Blob or ReadableStream, got ${name}`);
@@ -64,7 +66,7 @@ export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob
       if (isBlobInstance(stream)) {
         // ReadableStream is undefined in React Native
         return blobToWebStream(stream);
-      } else if (isReadableStreamInstance(stream)) {
+      } else if (isReadableStream(stream)) {
         return stream;
       } else {
         throw new Error(`Cannot transform payload to web stream, got ${stream}`);
@@ -74,6 +76,3 @@ export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob
 };
 
 const isBlobInstance = (stream: unknown): stream is Blob => typeof Blob === "function" && stream instanceof Blob;
-
-const isReadableStreamInstance = (stream: unknown): stream is ReadableStream =>
-  typeof ReadableStream === "function" && stream instanceof ReadableStream;

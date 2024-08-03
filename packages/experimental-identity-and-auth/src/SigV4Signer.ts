@@ -13,7 +13,7 @@ export class SigV4Signer implements HttpSigner {
     identity: AwsCredentialIdentity,
     signingProperties: Record<string, any>
   ): Promise<IHttpRequest> {
-    const clonedRequest = httpRequest.clone();
+    const clonedRequest = HttpRequest.clone(httpRequest);
     const signer = new SignatureV4({
       applyChecksum: signingProperties.applyChecksum !== undefined ? signingProperties.applyChecksum : true,
       credentials: identity,

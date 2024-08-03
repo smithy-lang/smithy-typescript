@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 3d72b04: sources accountId from IMDS
+
+## 3.1.4
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+
 ## 3.1.3
 
 ### Patch Changes

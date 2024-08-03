@@ -29,8 +29,6 @@ describe("middleware-content-length", () => {
         },
       });
 
-      console.log(client.middlewareStack);
-
       await client.createCity({
         name: "MyCity",
         coordinates: {
