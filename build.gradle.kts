@@ -28,7 +28,7 @@ plugins {
 
 allprojects {
     group = "software.amazon.smithy.typescript"
-    version = "0.21.1"
+    version = "0.22.0"
 }
 
 // The root project doesn't produce a JAR.

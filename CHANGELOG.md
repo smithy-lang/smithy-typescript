@@ -1,5 +1,27 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.22.0 (2024-07-06)
+
+### Features
+
+- codegen: Enabled the new identity and auth behavior by default and add a legacy auth mode ([#1352](https://github.com/smithy-lang/smithy-typescript/pull/1352))
+
+- codegen: Added logic to skip the application of the `CustomEndpoints` plugin for models using Endpoints-2.0 ([#1337](https://github.com/smithy-lang/smithy-typescript/pull/1337))
+
+- codegen: Added automatic default idempotency tokens in headers for requests when a token is not explicitly provided ([#1327](https://github.com/smithy-lang/smithy-typescript/pull/1327))
+
+- codegen: Added a set of built-in integration plugins to code-generator ([#1321](https://github.com/smithy-lang/smithy-typescript/pull/1321))
+
+### Bug Fixes
+
+- codegen: Fixed inconsistent ordering issue when writing client params during code-generation ([#1355](https://github.com/smithy-lang/smithy-typescript/pull/1355))
+
+- codegen: Fixed incorrect usage of string templates when generating commands ([#1354](https://github.com/smithy-lang/smithy-typescript/pull/1354))
+
+- codegen: Fixed serialization of `:event-type` in event-streams where the member target-id was being used instead of the member name ([#1349](https://github.com/smithy-lang/smithy-typescript/pull/1349)) 
+
+- codegen: Fixed issue where content-type was being set when input body was empty ([#1304](https://github.com/smithy-lang/smithy-typescript/pull/1304))
+
 ## 0.21.1 (2024-06-05)
 
 ### Features
