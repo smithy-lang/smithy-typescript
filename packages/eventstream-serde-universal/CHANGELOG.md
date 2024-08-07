@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.5
+
+### Patch Changes
+
+- b352cc1: exclude test code from artifact
+
 ## 3.0.4
 
 ### Patch Changes

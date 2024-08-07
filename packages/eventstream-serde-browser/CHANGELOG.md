@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [b352cc1]
+  - @smithy/eventstream-serde-universal@3.0.5
+
 ## 3.0.5
 
 ### Patch Changes
