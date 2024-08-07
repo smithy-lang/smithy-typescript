@@ -24,7 +24,6 @@ wrapper/
 .attach_pid*
 
 # local scripting
-Makefile
 workspace
 
 # Visual Studio Code

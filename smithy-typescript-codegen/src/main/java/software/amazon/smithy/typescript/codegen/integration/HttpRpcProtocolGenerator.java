@@ -47,11 +47,12 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
     private static final ApplicationProtocol APPLICATION_PROTOCOL
             = ApplicationProtocol.createDefaultHttpApplicationProtocol();
 
-    private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
-    private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
-    private final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    protected final Set<Shape> serializingDocumentShapes = new TreeSet<>();
+    protected final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
+    protected final Set<StructureShape> deserializingErrorShapes = new TreeSet<>();
+    protected final EventStreamGenerator eventStreamGenerator = new EventStreamGenerator();
+
     private final boolean isErrorCodeInBody;
-    private final EventStreamGenerator eventStreamGenerator = new EventStreamGenerator();
 
     /**
      * Creates a Http RPC protocol generator.
@@ -238,7 +239,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         deserializingErrorShapes.addAll(errorShapes);
     }
 
-    private void generateOperationSerializer(GenerationContext context, OperationShape operation) {
+    protected void generateOperationSerializer(GenerationContext context, OperationShape operation) {
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol symbol = symbolProvider.toSymbol(operation);
         SymbolReference requestType = getApplicationProtocol().getRequestType();
@@ -348,7 +349,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         });
     }
 
-    private boolean writeRequestBody(GenerationContext context, OperationShape operation) {
+    protected boolean writeRequestBody(GenerationContext context, OperationShape operation) {
         if (operation.getInput().isPresent()) {
             // If there's an input present, we know it's a structure.
             StructureShape inputShape = context.getModel().expectShape(operation.getInput().get())
@@ -436,7 +437,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         return false;
     }
 
-    private void generateOperationDeserializer(GenerationContext context, OperationShape operation) {
+    protected void generateOperationDeserializer(GenerationContext context, OperationShape operation) {
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol symbol = symbolProvider.toSymbol(operation);
         SymbolReference responseType = getApplicationProtocol().getResponseType();
@@ -479,7 +480,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
     }
 
-    private void generateErrorDeserializer(GenerationContext context, StructureShape error) {
+    protected void generateErrorDeserializer(GenerationContext context, StructureShape error) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
         Symbol errorSymbol = symbolProvider.toSymbol(error);
@@ -530,7 +531,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write("");
     }
 
-    private void readResponseBody(GenerationContext context, OperationShape operation) {
+    protected void readResponseBody(GenerationContext context, OperationShape operation) {
         TypeScriptWriter writer = context.getWriter();
         OptionalUtils.ifPresentOrElse(
                 operation.getOutput(),
