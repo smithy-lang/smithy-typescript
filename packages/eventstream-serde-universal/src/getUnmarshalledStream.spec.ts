@@ -2,7 +2,7 @@ import { EventStreamCodec } from "@smithy/eventstream-codec";
 import { Message } from "@smithy/types";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
-import { endEventMessage, exception, recordEventMessage, statsEventMessage } from "./fixtures/event.fixture";
+import { endEventMessage, exception, recordEventMessage, statsEventMessage } from "./getChunkedStream.spec";
 import { getUnmarshalledStream } from "./getUnmarshalledStream";
 
 describe("getUnmarshalledStream", () => {
