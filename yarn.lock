@@ -66,7 +66,7 @@ __metadata:
     "@types/aws-lambda": ^8.10.72
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: ^0.7.0
+    downlevel-dts: ^0.11.0
     jest: 29.7.0
     rimraf: ^3.0.2
     tslib: ^1.8.0
@@ -82,7 +82,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: ^0.7.0
+    downlevel-dts: ^0.11.0
     jest: 29.7.0
     re2-wasm: ^1.0.2
     rimraf: ^3.0.2
@@ -99,7 +99,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: ^0.7.0
+    downlevel-dts: ^0.11.0
     jest: 29.7.0
     rimraf: ^3.0.2
     tslib: ^1.8.0
@@ -2175,7 +2175,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2188,7 +2188,7 @@ __metadata:
   dependencies:
     "@smithy/util-base64": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2200,7 +2200,7 @@ __metadata:
   resolution: "@smithy/chunked-blob-reader@workspace:packages/chunked-blob-reader"
   dependencies:
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2216,7 +2216,7 @@ __metadata:
     "@smithy/util-config-provider": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2236,7 +2236,7 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2253,7 +2253,7 @@ __metadata:
     "@smithy/url-parser": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     nock: ^13.0.2
     rimraf: 3.0.2
     tslib: ^2.6.2
@@ -2271,7 +2271,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2285,7 +2285,7 @@ __metadata:
     "@smithy/eventstream-serde-universal": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2298,7 +2298,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2313,7 +2313,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2329,7 +2329,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2349,7 +2349,7 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-test": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2366,7 +2366,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-base64": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2382,7 +2382,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2398,7 +2398,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     hash-test-vectors: ^1.3.2
     rimraf: 3.0.2
     tslib: ^2.6.2
@@ -2416,7 +2416,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2429,7 +2429,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2450,7 +2450,7 @@ __metadata:
   resolution: "@smithy/is-array-buffer@workspace:packages/is-array-buffer"
   dependencies:
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2467,7 +2467,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     hash-test-vectors: ^1.3.2
     rimraf: 3.0.2
     tslib: ^2.6.2
@@ -2484,7 +2484,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2503,7 +2503,7 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     fflate: 0.8.1
     rimraf: 3.0.2
     tslib: ^2.6.2
@@ -2519,7 +2519,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2537,7 +2537,7 @@ __metadata:
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2558,7 +2558,7 @@ __metadata:
     "@smithy/util-test": "workspace:^"
     "@types/uuid": ^8.3.0
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2573,7 +2573,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2586,7 +2586,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2602,7 +2602,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2619,7 +2619,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2632,7 +2632,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2645,7 +2645,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2659,7 +2659,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-uri-escape": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2672,7 +2672,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2685,7 +2685,7 @@ __metadata:
   dependencies:
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2698,7 +2698,7 @@ __metadata:
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     typedoc: 0.23.23
   languageName: unknown
@@ -2711,7 +2711,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2731,7 +2731,7 @@ __metadata:
     "@smithy/util-uri-escape": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2749,7 +2749,7 @@ __metadata:
     "@smithy/util-stream": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2761,7 +2761,7 @@ __metadata:
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2775,7 +2775,7 @@ __metadata:
     "@smithy/querystring-parser": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2790,7 +2790,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2802,7 +2802,7 @@ __metadata:
   resolution: "@smithy/util-body-length-browser@workspace:packages/util-body-length-browser"
   dependencies:
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2815,7 +2815,7 @@ __metadata:
   dependencies:
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2839,7 +2839,7 @@ __metadata:
     "@smithy/is-array-buffer": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2852,7 +2852,7 @@ __metadata:
   dependencies:
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2869,7 +2869,7 @@ __metadata:
     "@types/node": ^16.18.96
     bowser: ^2.11.0
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2888,7 +2888,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2903,7 +2903,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2915,7 +2915,7 @@ __metadata:
   resolution: "@smithy/util-hex-encoding@workspace:packages/util-hex-encoding"
   dependencies:
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2929,7 +2929,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2944,7 +2944,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2961,7 +2961,7 @@ __metadata:
     "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2977,7 +2977,7 @@ __metadata:
     "@smithy/util-buffer-from": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -2998,7 +2998,7 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -3012,7 +3012,7 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -3025,7 +3025,7 @@ __metadata:
   resolution: "@smithy/util-uri-escape@workspace:packages/util-uri-escape"
   dependencies:
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -3048,7 +3048,7 @@ __metadata:
   dependencies:
     "@smithy/util-buffer-from": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -3062,7 +3062,7 @@ __metadata:
     "@smithy/abort-controller": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: 7.0.0
-    downlevel-dts: 0.10.1
+    downlevel-dts: 0.11.0
     rimraf: 3.0.2
     tslib: ^2.6.2
     typedoc: 0.23.23
@@ -5356,29 +5356,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"downlevel-dts@npm:0.10.1":
-  version: 0.10.1
-  resolution: "downlevel-dts@npm:0.10.1"
+"downlevel-dts@npm:0.11.0, downlevel-dts@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "downlevel-dts@npm:0.11.0"
   dependencies:
     semver: ^7.3.2
     shelljs: ^0.8.3
     typescript: next
   bin:
     downlevel-dts: index.js
-  checksum: d66fe88fdd6e2309fbec1fe57f2697bb3d925db2d1a9e5ed2c8d58adf1bc6f9ead44e8bd5d484179d3ee84f110b9bfed8abda63867d8418515a61daedccbbee4
-  languageName: node
-  linkType: hard
-
-"downlevel-dts@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "downlevel-dts@npm:0.7.0"
-  dependencies:
-    semver: ^7.3.2
-    shelljs: ^0.8.3
-    typescript: ^4.1.0-dev.20201026
-  bin:
-    downlevel-dts: index.js
-  checksum: 2fbfe8213a7acca73df6dbb86d3696a63d80f4100015831c7d2680def337a920cd1a53724f354c55d98584a3e2485261f76e74a234b5a8b42d937f4c91112006
+  checksum: 846ad69da03795340b2fbd9432ff41605b885bf5a7d6636faa86342e91d9e4b27a49c2f68380a2f7ba26ddc28a11b3b02581a41c6b5c7034b8b0fb099c017307
   languageName: node
   linkType: hard
 
@@ -11186,7 +11173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.1.0-dev.20201026, typescript@npm:^4.9.5, typescript@npm:~4.9.5":
+"typescript@npm:^4.9.5, typescript@npm:~4.9.5":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -11226,7 +11213,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.1.0-dev.20201026#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@~4.9.5#~builtin<compat/typescript>":
+"typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@~4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
