@@ -291,11 +291,11 @@ final class CommandGenerator implements Runnable {
             });
 
             Shape operationInput = model.getShape(operation.getInputShape()).get();
-            parameterFinder.getContextParams(operationInput).forEach((name, type) -> {
+            parameterFinder.getContextParams(operationInput).forEach((name, memberName) -> {
                 if (!paramNames.contains(name)) {
                     writer.write(
                         "$L: { type: \"contextParams\", name: \"$L\" },",
-                        name, name);
+                        name, memberName);
                 }
                 paramNames.add(name);
             });

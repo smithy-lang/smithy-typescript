@@ -122,7 +122,7 @@ public class RuleSetParameterFinder {
                     String name = contextParamTrait.getName();
                     map.put(
                         name,
-                        "unknown"
+                        member.getMemberName()
                     );
                 }
             });
