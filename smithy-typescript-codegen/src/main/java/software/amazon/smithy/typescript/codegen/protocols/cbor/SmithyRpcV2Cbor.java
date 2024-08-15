@@ -7,7 +7,6 @@ package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import java.util.Set;
 import java.util.TreeSet;
-import software.amazon.smithy.aws.traits.protocols.AwsQueryCompatibleTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -109,20 +108,6 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         );
         writeSharedRequestHeaders(context);
         writer.write("");
-
-        if (context.getService().hasTrait(AwsQueryCompatibleTrait.class)) {
-            writer.addImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
-            writer.write("""
-                const populateBodyWithQueryCompatibility = (parsedOutput: any, headers: __HeaderBag) => {
-                  const queryErrorHeader = headers["x-amzn-query-error"];
-                  if (parsedOutput.body !== undefined && queryErrorHeader != null) {
-                    const codeAndType = queryErrorHeader.split(";");
-                    parsedOutput.body.Code = codeAndType[0];
-                    parsedOutput.body.Type = codeAndType[1];
-                  }
-                };
-                """);
-        }
 
         writer.write(
             context.getStringStore().flushVariableDeclarationCode()
@@ -252,14 +237,6 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
     @Override
     protected void writeErrorCodeParser(GenerationContext generationContext) {
         TypeScriptWriter writer = generationContext.getWriter();
-
-        if (generationContext.getService().hasTrait(AwsQueryCompatibleTrait.class)) {
-            // Populate parsedOutput.body with 'Code' and 'Type' fields
-            // "x-amzn-query-error" header is available when AwsQueryCompatibleTrait is applied to a service
-            // The header value contains query error Code and Type joined by ';'
-            // E.g. "MalformedInput;Sender" or "InternalFailure;Receiver"
-            writer.write("populateBodyWithQueryCompatibility(parsedOutput, output.headers);");
-        }
 
         writer.addImportSubmodule(
             "loadSmithyRpcV2CborErrorCode", null,
