@@ -15,6 +15,7 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriority;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -450,8 +452,13 @@ public final class TypeScriptSettings {
                     + "generate in smithy-build.json to generate this service.");
         }
 
-        return resolvedProtocols.stream()
-                .filter(supportedProtocols::contains)
+        List<ShapeId> protocolPriority = ProtocolPriority.getProtocolPriority(service.toShapeId());
+        List<ShapeId> protocolPriorityList = protocolPriority != null && !protocolPriority.isEmpty()
+            ? protocolPriority
+            : new ArrayList<>(supportedProtocols);
+
+        return protocolPriorityList.stream()
+                .filter(resolvedProtocols::contains)
                 .findFirst()
                 .orElseThrow(() -> new UnresolvableProtocolException(String.format(
                         "The %s service supports the following unsupported protocols %s. The following protocol "
