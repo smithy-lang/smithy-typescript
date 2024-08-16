@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.15
+
+### Patch Changes
+
+- Updated dependencies [5865b65]
+  - @smithy/smithy-client@3.2.0
+
 ## 3.0.14
 
 ### Patch Changes

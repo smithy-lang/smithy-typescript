@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.4.0
+
+### Minor Changes
+
+- 5865b65: cbor (de)serializer for JS
+
+### Patch Changes
+
+- Updated dependencies [5865b65]
+  - @smithy/smithy-client@3.2.0
+  - @smithy/middleware-retry@3.0.15
+
 ## 2.3.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 5865b65: handle timestamp cbor tag
+
 ## 3.1.12
 
 ### Patch Changes

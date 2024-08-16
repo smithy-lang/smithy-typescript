@@ -1,6 +1,6 @@
 {
   "name": "@smithy/core",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "scripts": {
     "build": "yarn lint && concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline core",
