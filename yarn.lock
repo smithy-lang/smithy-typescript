@@ -2266,7 +2266,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/core@^2.3.2, @smithy/core@workspace:packages/core":
+"@smithy/core@^2.4.0, @smithy/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
@@ -2590,7 +2590,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-retry@^3.0.14, @smithy/middleware-retry@workspace:^, @smithy/middleware-retry@workspace:packages/middleware-retry":
+"@smithy/middleware-retry@^3.0.15, @smithy/middleware-retry@workspace:^, @smithy/middleware-retry@workspace:packages/middleware-retry":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-retry@workspace:packages/middleware-retry"
   dependencies:
@@ -2784,7 +2784,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/smithy-client@^3.1.12, @smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
+"@smithy/smithy-client@^3.2.0, @smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-client@workspace:packages/smithy-client"
   dependencies:
@@ -2810,25 +2810,25 @@ __metadata:
     "@aws-crypto/sha256-js": 5.2.0
     "@aws-sdk/types": latest
     "@smithy/config-resolver": ^3.0.5
-    "@smithy/core": ^2.3.2
+    "@smithy/core": ^2.4.0
     "@smithy/fetch-http-handler": ^3.2.4
     "@smithy/hash-node": ^3.0.3
     "@smithy/invalid-dependency": ^3.0.3
     "@smithy/middleware-content-length": ^3.0.5
-    "@smithy/middleware-retry": ^3.0.14
+    "@smithy/middleware-retry": ^3.0.15
     "@smithy/middleware-serde": ^3.0.3
     "@smithy/middleware-stack": ^3.0.3
     "@smithy/node-config-provider": ^3.1.4
     "@smithy/node-http-handler": ^3.1.4
     "@smithy/protocol-http": ^4.1.0
-    "@smithy/smithy-client": ^3.1.12
+    "@smithy/smithy-client": ^3.2.0
     "@smithy/types": ^3.3.0
     "@smithy/url-parser": ^3.0.3
     "@smithy/util-base64": ^3.0.0
     "@smithy/util-body-length-browser": ^3.0.0
     "@smithy/util-body-length-node": ^3.0.0
-    "@smithy/util-defaults-mode-browser": ^3.0.14
-    "@smithy/util-defaults-mode-node": ^3.0.14
+    "@smithy/util-defaults-mode-browser": ^3.0.15
+    "@smithy/util-defaults-mode-node": ^3.0.15
     "@smithy/util-middleware": ^3.0.3
     "@smithy/util-retry": ^3.0.3
     "@smithy/util-utf8": ^3.0.0
@@ -2945,7 +2945,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-defaults-mode-browser@^3.0.14, @smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser":
+"@smithy/util-defaults-mode-browser@^3.0.15, @smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser"
   dependencies:
@@ -2962,7 +2962,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-defaults-mode-node@^3.0.14, @smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node":
+"@smithy/util-defaults-mode-node@^3.0.15, @smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node":
   version: 0.0.0-use.local
   resolution: "@smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node"
   dependencies:

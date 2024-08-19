@@ -18,7 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -136,7 +136,9 @@ final class DirectedTypeScriptCodegen
             TypeScriptSettings settings
     ) {
         // Collect all of the supported protocol generators.
-        Map<ShapeId, ProtocolGenerator> generators = new HashMap<>();
+        // Preserve insertion order as default priority order.
+        Map<ShapeId, ProtocolGenerator> generators = new LinkedHashMap<>();
+
         for (TypeScriptIntegration integration : integrations) {
             for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
                 generators.put(generator.getProtocol(), generator);
