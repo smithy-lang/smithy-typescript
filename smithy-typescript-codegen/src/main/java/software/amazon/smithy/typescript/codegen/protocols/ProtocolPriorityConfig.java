@@ -15,24 +15,22 @@ import software.amazon.smithy.model.shapes.ShapeId;
 /**
  * Allows customization of protocol selection for specific services or a global default ordering.
  */
-public final class ProtocolPriority {
-    private static final Map<ShapeId, List<ShapeId>> SERVICE_PROTOCOL_PRIORITY_CUSTOMIZATIONS = new HashMap<>();
-    private static List<ShapeId> customDefaultPriority = null;
-
-    private ProtocolPriority() {}
+public final class ProtocolPriorityConfig {
+    private final Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations = new HashMap<>();
+    private List<ShapeId> customDefaultPriority = null;
 
     /**
      * @param serviceShapeId - service scope.
      * @param protocolPriorityOrder - priority order of protocols.
      */
-    public static void setProtocolPriority(ShapeId serviceShapeId, List<ShapeId> protocolPriorityOrder) {
-        SERVICE_PROTOCOL_PRIORITY_CUSTOMIZATIONS.put(serviceShapeId, protocolPriorityOrder);
+    public void setProtocolPriority(ShapeId serviceShapeId, List<ShapeId> protocolPriorityOrder) {
+        serviceProtocolPriorityCustomizations.put(serviceShapeId, protocolPriorityOrder);
     }
 
     /**
      * @param defaultProtocolPriorityOrder - use for all services that don't have a more specific priority order.
      */
-    public static void setCustomDefaultProtocolPriority(List<ShapeId> defaultProtocolPriorityOrder) {
+    public void setCustomDefaultProtocolPriority(List<ShapeId> defaultProtocolPriorityOrder) {
         customDefaultPriority = new ArrayList<>(defaultProtocolPriorityOrder);
     }
 
@@ -40,8 +38,8 @@ public final class ProtocolPriority {
      * @param serviceShapeId - service scope.
      * @return priority order of protocols or null if no override exists.
      */
-    public static List<ShapeId> getProtocolPriority(ShapeId serviceShapeId) {
-        return SERVICE_PROTOCOL_PRIORITY_CUSTOMIZATIONS.getOrDefault(
+    public List<ShapeId> getProtocolPriority(ShapeId serviceShapeId) {
+        return serviceProtocolPriorityCustomizations.getOrDefault(
             serviceShapeId,
             customDefaultPriority != null ? new ArrayList<>(customDefaultPriority) : null
         );
@@ -50,14 +48,14 @@ public final class ProtocolPriority {
     /**
      * @param serviceShapeId - to unset.
      */
-    public static void deleteProtocolPriority(ShapeId serviceShapeId) {
-        SERVICE_PROTOCOL_PRIORITY_CUSTOMIZATIONS.remove(serviceShapeId);
+    public void deleteProtocolPriority(ShapeId serviceShapeId) {
+        serviceProtocolPriorityCustomizations.remove(serviceShapeId);
     }
 
     /**
      * Unset the custom default priority order.
      */
-    public static void deleteCustomDefaultProtocolPriority() {
+    public void deleteCustomDefaultProtocolPriority() {
         customDefaultPriority = null;
     }
 }

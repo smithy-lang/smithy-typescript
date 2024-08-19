@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
@@ -28,6 +29,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.BooleanNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -37,7 +39,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
-import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriority;
+import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriorityConfig;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -61,6 +63,8 @@ public final class TypeScriptSettings {
     private static final String CREATE_DEFAULT_README = "createDefaultReadme";
     private static final String USE_LEGACY_AUTH = "useLegacyAuth";
     private static final String GENERATE_TYPEDOC = "generateTypeDoc";
+    private static final String SERVICE_PROTOCOL_PRIORITY = "serviceProtocolPriority";
+    private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
 
     private String packageName;
     private String packageDescription = "";
@@ -79,6 +83,7 @@ public final class TypeScriptSettings {
     private boolean createDefaultReadme = false;
     private boolean useLegacyAuth = false;
     private boolean generateTypeDoc = false;
+    private final ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig();
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -130,6 +135,9 @@ public final class TypeScriptSettings {
                 .orElse(RequiredMemberMode.NULLABLE));
 
         settings.setPluginSettings(config);
+
+        settings.readProtocolPriorityConfiguration(config);
+
         return settings;
     }
 
@@ -452,7 +460,7 @@ public final class TypeScriptSettings {
                     + "generate in smithy-build.json to generate this service.");
         }
 
-        List<ShapeId> protocolPriority = ProtocolPriority.getProtocolPriority(service.toShapeId());
+        List<ShapeId> protocolPriority = this.protocolPriorityConfig.getProtocolPriority(service.toShapeId());
         List<ShapeId> protocolPriorityList = protocolPriority != null && !protocolPriority.isEmpty()
             ? protocolPriority
             : new ArrayList<>(supportedProtocols);
@@ -487,6 +495,13 @@ public final class TypeScriptSettings {
      */
     public String getDefaultSigningName() {
         return defaultSigningName;
+    }
+
+    /**
+     * @return config container for service and/or default protocol selection priority overrides.
+     */
+    public ProtocolPriorityConfig getProtocolPriority() {
+        return protocolPriorityConfig;
     }
 
     /**
@@ -591,6 +606,48 @@ public final class TypeScriptSettings {
                 return NPM;
             }
             throw new CodegenException(String.format("Unsupported package manager: %s", s));
+        }
+    }
+
+    /**
+     * Reads serviceProtocolPriority and defaultProtocolPriority configuration fields.
+     * {
+     *     serviceProtocolPriority: {
+     *         "namespace#Service": ["namespace#Protocol1", "namespace#Protocol2"]
+     *     },
+     *     defaultProtocolPriority: ["namespace#Protocol"]
+     * }
+     */
+    private void readProtocolPriorityConfiguration(ObjectNode config) {
+        try {
+            Optional<ObjectNode> protocolPriorityNode = config.getObjectMember(SERVICE_PROTOCOL_PRIORITY);
+            if (protocolPriorityNode.isPresent()) {
+                ObjectNode objectNode = protocolPriorityNode.get();
+                objectNode.getMembers().forEach((StringNode k, Node v) -> {
+                    ShapeId serviceShapeId = ShapeId.from(k.getValue());
+                    List<ShapeId> protocolList = v.asArrayNode().get().getElementsAs(
+                        e -> ShapeId.from(e.asStringNode().get().getValue())
+                    );
+                    protocolPriorityConfig.setProtocolPriority(
+                        serviceShapeId,
+                        protocolList
+                    );
+                });
+            }
+            Optional<ArrayNode> defaultProtocolPriorityOpt = config.getArrayMember(DEFAULT_PROTOCOL_PRIORITY);
+            if (defaultProtocolPriorityOpt.isPresent()) {
+                ArrayNode defaultProtocolPriorityStringArr = defaultProtocolPriorityOpt.get();
+                protocolPriorityConfig.setCustomDefaultProtocolPriority(
+                    defaultProtocolPriorityStringArr.getElementsAs(
+                        e -> ShapeId.from(e.asStringNode().get().getValue())
+                    )
+                );
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                "Error while parsing serviceProtocolPriority or defaultProtocolPriority configuration fields",
+                e
+            );
         }
     }
 }
