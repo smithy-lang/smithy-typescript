@@ -104,7 +104,7 @@ public class TypeScriptSettingsTest {
                                        @Mock ServiceIndex serviceIndex) {
         TypeScriptSettings subject = new TypeScriptSettings();
 
-        // note: these are mock protocol names.
+        // these are mock protocol names.
         ShapeId rpcv2Cbor = ShapeId.from("namespace#rpcv2Cbor");
         ShapeId json1_0 = ShapeId.from("namespace#json1_0");
         ShapeId json1_1 = ShapeId.from("namespace#json1_1");
@@ -130,7 +130,7 @@ public class TypeScriptSettingsTest {
                 json1_0, null
             ));
             ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
-            // Note: JS customization JSON higher default priority than CBOR.
+            // JS customization has JSON at higher default priority than CBOR.
             assertEquals(json1_0, protocol);
         }
 
@@ -151,7 +151,7 @@ public class TypeScriptSettingsTest {
                 query, null
             ));
             ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
-            // Note: JS customization JSON higher default priority than CBOR.
+            // JS customization has JSON at higher default priority than CBOR.
             assertEquals(json1_0, protocol);
         }
 
