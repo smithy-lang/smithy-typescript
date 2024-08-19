@@ -16,6 +16,7 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriorityConfig;
 import software.amazon.smithy.utils.MapUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -220,11 +221,16 @@ public class TypeScriptSettingsTest {
             query, null,
             serviceQuery, null
         ));
-        subject.getProtocolPriority().setProtocolPriority(serviceShapeId, List.of(
-            serviceQuery, rpcv2Cbor, json1_1, restJson1, restXml, query
+        subject.setProtocolPriority(new ProtocolPriorityConfig(
+            MapUtils.of(
+                serviceShapeId,
+                List.of(
+                    serviceQuery, rpcv2Cbor, json1_1, restJson1, restXml, query
+                )
+            ),
+            null
         ));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
-        subject.getProtocolPriority().deleteProtocolPriority(serviceShapeId);
         assertEquals(serviceQuery, protocol);
     }
 
@@ -247,11 +253,13 @@ public class TypeScriptSettingsTest {
             query, null,
             serviceQuery, null
         ));
-        subject.getProtocolPriority().setCustomDefaultProtocolPriority(List.of(
-            rpcv2Cbor, json1_1, restJson1, restXml, query
+        subject.setProtocolPriority(new ProtocolPriorityConfig(
+            null,
+            List.of(
+                rpcv2Cbor, json1_1, restJson1, restXml, query
+            )
         ));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
-        subject.getProtocolPriority().deleteCustomDefaultProtocolPriority();
         assertEquals(rpcv2Cbor, protocol);
     }
 

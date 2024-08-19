@@ -18,7 +18,10 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -83,7 +86,7 @@ public final class TypeScriptSettings {
     private boolean createDefaultReadme = false;
     private boolean useLegacyAuth = false;
     private boolean generateTypeDoc = false;
-    private final ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig();
+    private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -504,6 +507,10 @@ public final class TypeScriptSettings {
         return protocolPriorityConfig;
     }
 
+    public void setProtocolPriority(ProtocolPriorityConfig protocolPriorityConfig) {
+        this.protocolPriorityConfig = protocolPriorityConfig;
+    }
+
     /**
      * An enum indicating the type of artifact the code generator will produce.
      */
@@ -619,6 +626,8 @@ public final class TypeScriptSettings {
      * }
      */
     private void readProtocolPriorityConfiguration(ObjectNode config) {
+        Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations = new HashMap<>();
+        List<ShapeId> customDefaultPriority = new LinkedList<>();
         try {
             Optional<ObjectNode> protocolPriorityNode = config.getObjectMember(SERVICE_PROTOCOL_PRIORITY);
             if (protocolPriorityNode.isPresent()) {
@@ -628,7 +637,7 @@ public final class TypeScriptSettings {
                     List<ShapeId> protocolList = v.asArrayNode().get().getElementsAs(
                         e -> ShapeId.from(e.asStringNode().get().getValue())
                     );
-                    protocolPriorityConfig.setProtocolPriority(
+                    serviceProtocolPriorityCustomizations.put(
                         serviceShapeId,
                         protocolList
                     );
@@ -637,7 +646,7 @@ public final class TypeScriptSettings {
             Optional<ArrayNode> defaultProtocolPriorityOpt = config.getArrayMember(DEFAULT_PROTOCOL_PRIORITY);
             if (defaultProtocolPriorityOpt.isPresent()) {
                 ArrayNode defaultProtocolPriorityStringArr = defaultProtocolPriorityOpt.get();
-                protocolPriorityConfig.setCustomDefaultProtocolPriority(
+                customDefaultPriority.addAll(
                     defaultProtocolPriorityStringArr.getElementsAs(
                         e -> ShapeId.from(e.asStringNode().get().getValue())
                     )
@@ -649,5 +658,9 @@ public final class TypeScriptSettings {
                 e
             );
         }
+        protocolPriorityConfig = new ProtocolPriorityConfig(
+            serviceProtocolPriorityCustomizations,
+            customDefaultPriority.isEmpty() ? null : customDefaultPriority
+        );
     }
 }
