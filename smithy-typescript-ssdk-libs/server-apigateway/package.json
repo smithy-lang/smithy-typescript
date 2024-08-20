@@ -42,6 +42,7 @@
   },
   "files": [
     "dist/cjs/**/*.js",
+    "dist/es/**/*.js",
     "dist/types/**/*.d.ts",
     "!**/*.spec.*"
   ],
