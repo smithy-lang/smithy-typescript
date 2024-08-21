@@ -21,6 +21,7 @@ import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.typescript.codegen.util.MergeJsonNodes;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -43,9 +44,11 @@ final class PackageJsonGenerator {
     ) {
         // Write the package.json file.
         InputStream resource = PackageJsonGenerator.class.getResourceAsStream("base-package.json");
-        ObjectNode node = Node.parse(IoUtils.toUtf8String(resource))
-                        .expectObjectNode()
-                        .merge(settings.getPackageJson());
+        ObjectNode node = MergeJsonNodes.mergeWithScripts(
+            Node.parse(IoUtils.toUtf8String(resource))
+                .expectObjectNode(),
+            settings.getPackageJson()
+        );
 
         // Merge TypeScript dependencies into the package.json file.
         for (Map.Entry<String, Map<String, SymbolDependency>> depEntry : dependencies.entrySet()) {
