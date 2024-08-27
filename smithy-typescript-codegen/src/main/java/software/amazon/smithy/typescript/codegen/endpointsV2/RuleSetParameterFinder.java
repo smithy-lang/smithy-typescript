@@ -18,6 +18,8 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.NodeVisitor;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -26,6 +28,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.rulesengine.traits.ClientContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
@@ -66,10 +69,23 @@ public class RuleSetParameterFinder {
         if (trait.isPresent()) {
             ClientContextParamsTrait clientContextParamsTrait = trait.get();
             clientContextParamsTrait.getParameters().forEach((name, definition) -> {
-                map.put(
-                    name,
-                    definition.getType().toString().toLowerCase() // "boolean" and "string" are directly usable in TS.
-                );
+                ShapeType shapeType = definition.getType();
+                if (shapeType.isShapeType(ShapeType.STRING) || shapeType.isShapeType(ShapeType.BOOLEAN)) {
+                    map.put(
+                        name,
+                        // "boolean" and "string" are directly usable in TS.
+                        definition.getType().toString().toLowerCase()
+                    );
+                } else if (shapeType.isShapeType(ShapeType.LIST)) {
+                    map.put(
+                        name,
+                        "string[]" // Only string lists are supported.
+                    );
+                } else {
+                    throw new RuntimeException("unexpected type "
+                        + definition.getType().toString()
+                        + " received as clientContextParam.");
+                }
             });
         }
         return map;
@@ -90,6 +106,11 @@ public class RuleSetParameterFinder {
                     value = "`" + definition.getValue().expectStringNode().toString() + "`";
                 } else if (definition.getValue().isBooleanNode()) {
                     value = definition.getValue().expectBooleanNode().toString();
+                } else if (definition.getValue().isArrayNode()) {
+                    ArrayNode arrayNode = definition.getValue().expectArrayNode();
+                    value = arrayNode.getElements().stream()
+                      .map(element -> element.expectStringNode().getValue())
+                      .collect(Collectors.joining("`, `", "[`", "`]"));
                 } else {
                     throw new RuntimeException("unexpected type "
                         + definition.getValue().getType().toString()
