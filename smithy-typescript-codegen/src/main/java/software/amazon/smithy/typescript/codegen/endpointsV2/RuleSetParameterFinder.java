@@ -109,8 +109,8 @@ public class RuleSetParameterFinder {
                 } else if (definition.getValue().isArrayNode()) {
                     ArrayNode arrayNode = definition.getValue().expectArrayNode();
                     value = arrayNode.getElements().stream()
-                      .map(element -> "'" + element.expectStringNode().getValue() + "'")
-                      .collect(Collectors.joining(", ", "[", "]"));
+                      .map(element -> element.expectStringNode().getValue())
+                      .collect(Collectors.joining("`, `", "[`", "`]"));
                 } else {
                     throw new RuntimeException("unexpected type "
                         + definition.getValue().getType().toString()

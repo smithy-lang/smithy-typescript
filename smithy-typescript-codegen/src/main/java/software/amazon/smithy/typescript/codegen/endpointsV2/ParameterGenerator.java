@@ -108,8 +108,8 @@ public class ParameterGenerator {
                 break;
             case "stringArray":
                 buffer += paramNode.expectArrayMember("default").getElements().stream()
-                    .map(element -> "'" + element.expectStringNode().getValue() + "'")
-                    .collect(Collectors.joining(", ", "[", "]"));
+                    .map(element -> element.expectStringNode().getValue())
+                    .collect(Collectors.joining("`, `", "[`", "`]"));
                 break;
             default:
                 throw new RuntimeException("Unhandled endpoint param type: " + type.getValue());
