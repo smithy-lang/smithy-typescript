@@ -65,7 +65,6 @@ public class ParameterGenerator {
                 case "boolean":
                     tsParamType = "boolean";
                     break;
-                case "StringArray":
                 case "stringArray":
                     tsParamType = "string[]";
                     break;
@@ -107,7 +106,6 @@ public class ParameterGenerator {
             case "boolean":
                 buffer += paramNode.expectBooleanMember("default").getValue() ? "true" : "false";
                 break;
-            case "StringArray":
             case "stringArray":
                 buffer += paramNode.expectArrayMember("default").getElements().stream()
                     .map(element -> "'" + element.expectStringNode().getValue() + "'")
