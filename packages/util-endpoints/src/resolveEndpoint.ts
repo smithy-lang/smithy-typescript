@@ -36,18 +36,6 @@ export const resolveEndpoint = (ruleSetObject: RuleSetObject, options: EndpointR
 
   const endpoint = evaluateRules(rules, { endpointParams, logger, referenceRecord: {} });
 
-  if (options.endpointParams?.Endpoint) {
-    // take protocol and port from custom Endpoint if present.
-    try {
-      const givenEndpoint = new URL(options.endpointParams.Endpoint as string);
-      const { protocol, port } = givenEndpoint;
-      endpoint.url.protocol = protocol;
-      endpoint.url.port = port;
-    } catch (e) {
-      // ignored
-    }
-  }
-
   options.logger?.debug?.(`${debugId} Resolved endpoint: ${toDebugString(endpoint)}`);
 
   return endpoint;
