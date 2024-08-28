@@ -302,8 +302,10 @@ final class CommandGenerator implements Runnable {
 
             parameterFinder.getOperationContextParamValues(operationInput).forEach((name, jmesPathForInputInJs) -> {
                 writer.write(
-                   "$L: { type: \"operationContextParams\", name: $L },",
-                   name, jmesPathForInputInJs);
+                    """
+                    $L: { type: \"operationContextParams\", name: $L },
+                    """,
+                    name, jmesPathForInputInJs);
             });
         }
         writer.write("})")
