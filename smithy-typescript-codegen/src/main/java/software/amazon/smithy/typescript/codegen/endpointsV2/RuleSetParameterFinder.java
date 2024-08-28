@@ -32,6 +32,7 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.rulesengine.traits.ClientContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.rulesengine.traits.OperationContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.StaticContextParamsTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -146,6 +147,54 @@ public class RuleSetParameterFinder {
                         member.getMemberName()
                     );
                 }
+            });
+        }
+
+        return map;
+    }
+
+    /**
+     * Get map of params to JavaScript equivalent of provided JMESPath expressions.
+     */
+    public Map<String, String> getOperationContextParamValues(Shape operationInput) {
+        Map<String, String> map = new HashMap<>();
+
+        Optional<OperationContextParamsTrait> trait = operationInput.getTrait(OperationContextParamsTrait.class);
+        if (trait.isPresent()) {
+            OperationContextParamsTrait operationContextParamsTrait = trait.get();
+            operationContextParamsTrait.getParameters().forEach((name, definition) -> {
+                String separator = ".";
+                String value = "this" + separator + "input";
+                String path = definition.getPath();
+
+                // Split JMESPath expression string on separator and add JavaScript equivalent.
+                for (String part : path.split("[" + separator + "]")) {
+                    // Process keys https://jmespath.org/specification.html#keys
+                    if (part.startsWith("keys(")) {
+                        // Get provided object for which keys are to be extracted.
+                        String object = part.substring(5, part.length() - 1);
+                        value = "Object.keys(" + value + separator + object + ")";
+                        continue;
+                    }
+
+                    // Process list wildcard expression https://jmespath.org/specification.html#wildcard-expressions
+                    if (part.equals("*") || part.equals("[*]")) {
+                        value = "Object.values(" + value + ")";
+                        continue;
+                    }
+
+                    // Process hash wildcard expression https://jmespath.org/specification.html#wildcard-expressions
+                    if (part.endsWith("[*]")) {
+                        // Get key to run hash wildcard on.
+                        String key = part.substring(0, part.length() - 3);
+                        value = "Object.values(" + value + separator + key + ")";
+                        continue;
+                    }
+
+                    // Treat remaining part as identifier without spaces https://jmespath.org/specification.html#identifiers
+                    value += separator + part;
+                }
+
             });
         }
 
