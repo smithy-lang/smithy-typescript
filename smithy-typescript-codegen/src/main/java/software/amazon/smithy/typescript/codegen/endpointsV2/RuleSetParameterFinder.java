@@ -195,6 +195,7 @@ public class RuleSetParameterFinder {
                     value += separator + part;
                 }
 
+                map.put(name, value);
             });
         }
 
