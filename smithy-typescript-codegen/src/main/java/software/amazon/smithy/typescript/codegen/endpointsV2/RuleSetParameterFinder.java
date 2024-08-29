@@ -199,6 +199,11 @@ public class RuleSetParameterFinder {
                     value += separator + part;
                 }
 
+                // Remove no-op map, if it exists.
+                if (value.endsWith(separator + "map(obj => obj")) {
+                    value = value.substring(0, value.length() - 15);
+                }
+
                 // Close all open brackets.
                 value += ")".repeat((int) (
                     value.chars().filter(ch -> ch == '(').count() - value.chars().filter(ch -> ch == ')').count()));
