@@ -187,13 +187,16 @@ public class RuleSetParameterFinder {
                     if (part.endsWith("[*]")) {
                         // Get key to run hash wildcard on.
                         String key = part.substring(0, part.length() - 3);
-                        value = "Object.values(" + value + separator + key + ")";
+                        value = value + separator + key + separator + "map(obj => obj";
                         continue;
                     }
 
                     // Treat remaining part as identifier without spaces https://jmespath.org/specification.html#identifiers
                     value += separator + part;
                 }
+
+                // Close all open brackets.
+                value += ")".repeat((int) value.chars().filter(ch -> ch == '(').count());
 
                 map.put(name, value);
             });
