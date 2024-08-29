@@ -161,8 +161,7 @@ public class RuleSetParameterFinder {
 
         Optional<OperationContextParamsTrait> trait = operation.getTrait(OperationContextParamsTrait.class);
         if (trait.isPresent()) {
-            OperationContextParamsTrait operationContextParamsTrait = trait.get();
-            operationContextParamsTrait.getParameters().forEach((name, definition) -> {
+            trait.get().getParameters().forEach((name, definition) -> {
                 String separator = ".";
                 String value = "this" + separator + "input";
                 String path = definition.getPath();
