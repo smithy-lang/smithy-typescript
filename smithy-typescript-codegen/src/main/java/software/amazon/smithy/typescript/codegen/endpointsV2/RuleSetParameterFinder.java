@@ -156,10 +156,10 @@ public class RuleSetParameterFinder {
     /**
      * Get map of params to JavaScript equivalent of provided JMESPath expressions.
      */
-    public Map<String, String> getOperationContextParamValues(Shape operationInput) {
+    public Map<String, String> getOperationContextParamValues(OperationShape operation) {
         Map<String, String> map = new HashMap<>();
 
-        Optional<OperationContextParamsTrait> trait = operationInput.getTrait(OperationContextParamsTrait.class);
+        Optional<OperationContextParamsTrait> trait = operation.getTrait(OperationContextParamsTrait.class);
         if (trait.isPresent()) {
             OperationContextParamsTrait operationContextParamsTrait = trait.get();
             operationContextParamsTrait.getParameters().forEach((name, definition) -> {
