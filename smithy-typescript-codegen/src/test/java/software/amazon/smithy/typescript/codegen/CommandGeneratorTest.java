@@ -44,6 +44,7 @@ public class CommandGeneratorTest {
                 "opContextParamWildcardExpressionList: { type: \"operationContextParams\", name: this.input.fooList.map(obj => obj) }",
                 "opContextParamWildcardExpressionListObj: { type: \"operationContextParams\", name: this.input.fooListObj.map(obj => obj.key) }",
                 "opContextParamWildcardExpressionHash: { type: \"operationContextParams\", name: Object.values(this.input.fooObjObj).map(obj => obj.bar) }",
+                "opContextParamKeys: { type: \"operationContextParams\", name: Object.keys(this.input.fooKeys) }",
             }
         );
     }

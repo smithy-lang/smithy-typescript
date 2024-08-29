@@ -20,6 +20,9 @@ namespace smithy.example
         opContextParamWildcardExpressionHash: {
             type: "stringArray",
         },
+        opContextParamKeys: {
+            type: "stringArray",
+        },
     },
     rules: []
 })
@@ -34,6 +37,7 @@ service Example {
     "opContextParamWildcardExpressionList": { path: "fooList[*]" }
     "opContextParamWildcardExpressionListObj": { path: "fooListObj[*].key" }
     "opContextParamWildcardExpressionHash": { path: "fooObjObj.*.bar" }
+    "opContextParamKeys": { path: "keys(fooKeys)" }
 )
 operation GetFoo {
     input: GetFooInput,
@@ -42,11 +46,12 @@ operation GetFoo {
 }
 
 structure GetFooInput {
-    fooString: String,
-    fooObj: FooObject,
-    fooObjObj: FooObjectObject,
+    fooKeys: FooObject,
     fooList: FooList,
     fooListObj: FooListObj,
+    fooObj: FooObject,
+    fooObjObj: FooObjectObject,
+    fooString: String,
 }
 
 structure FooObject {
