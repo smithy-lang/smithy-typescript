@@ -169,6 +169,11 @@ public class RuleSetParameterFinder {
 
                 // Split JMESPath expression string on separator and add JavaScript equivalent.
                 for (String part : path.split("[" + separator + "]")) {
+                    if (value.endsWith(")")) {
+                        // The value is an object, which needs to run on map.
+                        value += ".map(obj => obj";
+                    }
+
                     // Process keys https://jmespath.org/specification.html#keys
                     if (part.startsWith("keys(")) {
                         // Get provided object for which keys are to be extracted.
@@ -196,7 +201,8 @@ public class RuleSetParameterFinder {
                 }
 
                 // Close all open brackets.
-                value += ")".repeat((int) value.chars().filter(ch -> ch == '(').count());
+                value += ")".repeat((int) (
+                    value.chars().filter(ch -> ch == '(').count() - value.chars().filter(ch -> ch == ')').count()));
 
                 map.put(name, value);
             });
