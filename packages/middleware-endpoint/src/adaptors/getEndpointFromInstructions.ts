@@ -39,9 +39,19 @@ export const getEndpointFromInstructions = async <
   context?: HandlerExecutionContext
 ): Promise<EndpointV2> => {
   if (!clientConfig.endpoint) {
-    const endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId || "");
+    let endpointFromConfig: string | undefined;
+
+    // This field is guaranteed by the type indicated by the config resolver, but is new
+    // and some existing standalone calls to this function may not provide the function, so
+    // this check should remain here.
+    if (clientConfig.serviceConfiguredEndpoint) {
+      endpointFromConfig = await clientConfig.serviceConfiguredEndpoint();
+    } else {
+      endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId);
+    }
+
     if (endpointFromConfig) {
-      clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig));
+      clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig!));
     }
   }
 
