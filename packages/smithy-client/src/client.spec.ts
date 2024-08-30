@@ -50,4 +50,28 @@ describe("SmithyClient", () => {
     };
     client.send(getCommandWithOutput("foo") as any, options, callback);
   });
+
+  describe("handler caching", () => {
+    beforeEach(() => {
+      delete (client as any).handlers;
+    });
+
+    const privateAccess = () => (client as any).handlers;
+
+    it("should cache the resolved handler", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any)).resolves.toEqual("foo");
+      expect(privateAccess().get({}.constructor)).toBeDefined();
+    });
+
+    it("should not cache the resolved handler if called with request options", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any, {})).resolves.toEqual("foo");
+      expect(privateAccess()).toBeUndefined();
+    });
+
+    it("should clear the handler cache when the middleareStack is modified", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any)).resolves.toEqual("foo");
+      client.middlewareStack.add((n) => (a) => n(a));
+      expect(privateAccess()).toBeUndefined();
+    });
+  });
 });

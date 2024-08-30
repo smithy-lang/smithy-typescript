@@ -3,6 +3,7 @@ import {
   Client as IClient,
   Command,
   FetchHttpHandlerOptions,
+  Handler,
   MetadataBearer,
   MiddlewareStack,
   NodeHttpHandlerOptions,
@@ -44,11 +45,21 @@ export class Client<
   ResolvedClientConfiguration extends SmithyResolvedConfiguration<HandlerOptions>,
 > implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration>
 {
-  public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>();
-  readonly config: ResolvedClientConfiguration;
-  constructor(config: ResolvedClientConfiguration) {
-    this.config = config;
+  public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>({
+    onChange: () => {
+      delete this.handlers;
+    },
+  });
+  /**
+   * May be used to cache the resolved handler function for a Command class.
+   */
+  private handlers?: WeakMap<Function, Handler<any, any>> | undefined;
+  private configRef?: ResolvedClientConfiguration | undefined;
+
+  constructor(public readonly config: ResolvedClientConfiguration) {
+    this.configRef = this.config;
   }
+
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
     options?: HandlerOptions
@@ -69,7 +80,29 @@ export class Client<
   ): Promise<OutputType> | void {
     const options = typeof optionsOrCb !== "function" ? optionsOrCb : undefined;
     const callback = typeof optionsOrCb === "function" ? (optionsOrCb as (err: any, data?: OutputType) => void) : cb;
-    const handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
+
+    const useHandlerCache = options === undefined && this.config === this.configRef;
+
+    let handler: Handler<any, any>;
+
+    if (useHandlerCache) {
+      if (!this.handlers) {
+        this.handlers = new WeakMap();
+      }
+      const handlers = this.handlers!;
+
+      if (handlers.has(command.constructor)) {
+        handler = handlers.get(command.constructor)!;
+      } else {
+        handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
+        handlers.set(command.constructor, handler);
+      }
+    } else {
+      delete this.handlers;
+      handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
+      this.configRef = this.config;
+    }
+
     if (callback) {
       handler(command)
         .then(
@@ -87,6 +120,7 @@ export class Client<
   }
 
   destroy() {
-    if (this.config.requestHandler.destroy) this.config.requestHandler.destroy();
+    this.config.requestHandler.destroy?.();
+    delete this.handlers;
   }
 }

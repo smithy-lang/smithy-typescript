@@ -32,7 +32,14 @@ const getMiddlewareNameWithAliases = (name: string | undefined, aliases: Array<s
   return `${name || "anonymous"}${aliases && aliases.length > 0 ? ` (a.k.a. ${aliases.join(",")})` : ""}`;
 };
 
-export const constructStack = <Input extends object, Output extends object>(): MiddlewareStack<Input, Output> => {
+export const constructStack = <Input extends object, Output extends object>(
+  stackOptions: {
+    /**
+     * Optional change listener, called with stack instance when middleware added/removed.
+     */
+    onChange?: (middlewareStack: MiddlewareStack<any, any>) => void;
+  } = {}
+): MiddlewareStack<Input, Output> => {
   let absoluteEntries: AbsoluteMiddlewareEntry<Input, Output>[] = [];
   let relativeEntries: RelativeMiddlewareEntry<Input, Output>[] = [];
   let identifyOnResolve = false;
@@ -222,6 +229,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
         }
       }
       absoluteEntries.push(entry);
+      stackOptions.onChange?.(stack);
     },
 
     addRelativeTo: (middleware: MiddlewareType<Input, Output>, options: HandlerOptions & RelativeLocation) => {
@@ -258,6 +266,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
         }
       }
       relativeEntries.push(entry);
+      stackOptions.onChange?.(stack);
     },
 
     clone: () => cloneTo(constructStack<Input, Output>()),
@@ -267,8 +276,14 @@ export const constructStack = <Input extends object, Output extends object>(): M
     },
 
     remove: (toRemove: MiddlewareType<Input, Output> | string): boolean => {
-      if (typeof toRemove === "string") return removeByName(toRemove);
-      else return removeByReference(toRemove);
+      let isRemoved: boolean;
+      if (typeof toRemove === "string") {
+        isRemoved = removeByName(toRemove);
+      } else {
+        isRemoved = removeByReference(toRemove);
+      }
+      stackOptions.onChange?.(stack);
+      return isRemoved;
     },
 
     removeByTag: (toRemove: string): boolean => {
@@ -287,6 +302,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
       };
       absoluteEntries = absoluteEntries.filter(filterCb);
       relativeEntries = relativeEntries.filter(filterCb);
+      stackOptions?.onChange?.(stack);
       return isRemoved;
     },
 
