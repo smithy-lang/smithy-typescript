@@ -5,6 +5,8 @@
  */
 
 const path = require("node:path");
+const fs = require("node:fs");
+
 const { spawnProcess } = require("./utils/spawn-process");
 
 const root = path.join(__dirname, "..");
@@ -14,16 +16,6 @@ const testProjectDir = path.join(root, "smithy-typescript-codegen-test");
 const codegenTestDir = path.join(testProjectDir, "build", "smithyprojections", "smithy-typescript-codegen-test");
 
 const weatherClientDir = path.join(codegenTestDir, "source", "typescript-client-codegen");
-
-const releasedClientDir = path.join(
-  testProjectDir,
-  "released-version-test",
-  "build",
-  "smithyprojections",
-  "released-version-test",
-  "source",
-  "typescript-codegen"
-);
 
 // Build generic legacy auth client for integration tests
 const weatherLegacyAuthClientDir = path.join(codegenTestDir, "client-legacy-auth", "typescript-client-codegen");
@@ -54,7 +46,27 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     // as its own package.
     await spawnProcess("touch", ["yarn.lock"], { cwd: codegenDir });
     await spawnProcess("yarn", { cwd: codegenDir });
+    const smithyPackages = path.join(__dirname, "..", "packages");
+    const node_modules = path.join(codegenDir, "node_modules");
+    const localSmithyPkgs = fs.readdirSync(smithyPackages);
+
+    for (const smithyPkg of localSmithyPkgs) {
+      if (!fs.existsSync(path.join(smithyPackages, smithyPkg, "dist-cjs"))) {
+        continue;
+      }
+      await Promise.all(
+        ["dist-cjs", "dist-types", "dist-es", "package.json"].map((folder) =>
+          spawnProcess("cp", [
+            "-r",
+            path.join(smithyPackages, smithyPkg, folder),
+            path.join(node_modules, "@smithy", smithyPkg),
+          ])
+        )
+      );
+    }
+
     await spawnProcess("yarn", ["build"], { cwd: codegenDir });
+
     // Optionally, after building the package, it's packed and copied to node_modules so that
     // it can be used in integration tests by other packages within the monorepo.
     if (nodeModulesDir != undefined) {
@@ -89,6 +101,18 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     httpBearerAuthClientDir,
     nodeModulesDir
   );
+
   // TODO(released-version-test): Test released version of smithy-typescript codegenerators, but currently is not working
+  /*
+  const releasedClientDir = path.join(
+    testProjectDir,
+    "released-version-test",
+    "build",
+    "smithyprojections",
+    "released-version-test",
+    "source",
+    "typescript-codegen"
+  );
+  */
   // await buildAndCopyToNodeModules("released", releasedClientDir, undefined);
 })();

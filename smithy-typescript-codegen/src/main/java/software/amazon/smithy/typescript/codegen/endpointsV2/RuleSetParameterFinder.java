@@ -15,9 +15,17 @@
 
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.Node;
@@ -29,6 +37,14 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.rulesengine.language.Endpoint;
+import software.amazon.smithy.rulesengine.language.EndpointRuleSet;
+import software.amazon.smithy.rulesengine.language.syntax.expressions.Expression;
+import software.amazon.smithy.rulesengine.language.syntax.rule.Condition;
+import software.amazon.smithy.rulesengine.language.syntax.rule.EndpointRule;
+import software.amazon.smithy.rulesengine.language.syntax.rule.ErrorRule;
+import software.amazon.smithy.rulesengine.language.syntax.rule.Rule;
+import software.amazon.smithy.rulesengine.language.syntax.rule.TreeRule;
 import software.amazon.smithy.rulesengine.traits.ClientContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
@@ -38,6 +54,9 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public class RuleSetParameterFinder {
+
+    public static final Pattern URL_PARAMETERS = Pattern.compile("\\{(\\w+)[}#]");
+
     private final ServiceShape service;
     private final EndpointRuleSetTrait ruleset;
 
@@ -46,6 +65,88 @@ public class RuleSetParameterFinder {
         this.ruleset = service.getTrait(EndpointRuleSetTrait.class).orElseThrow(
             () -> new RuntimeException("Service does not have EndpointRuleSetTrait.")
         );
+    }
+
+    /**
+     * It's possible for a parameter to pass validation, i.e. exist in the modeled shapes
+     * and be used in endpoint tests, but have no actual effect on endpoint resolution.
+     *
+     * @return the list of endpoint parameters that are actually used in endpoint resolution.
+     */
+    public List<String> getEffectiveParams() {
+        Set<String> effectiveParams = new TreeSet<>();
+        EndpointRuleSet endpointRuleSet = ruleset.getEndpointRuleSet();
+        Set<String> initialParams = new HashSet<>();
+
+        endpointRuleSet.getParameters().forEach(parameter -> {
+            initialParams.add(parameter.getName().getName().getValue());
+        });
+
+        Queue<Rule> ruleQueue = new ArrayDeque<>(endpointRuleSet.getRules());
+        Queue<Condition> conditionQueue = new ArrayDeque<>();
+        Queue<ObjectNode> argQueue = new ArrayDeque<>();
+
+        while (!ruleQueue.isEmpty() || !conditionQueue.isEmpty() || !argQueue.isEmpty()) {
+            while (!argQueue.isEmpty()) {
+                ObjectNode arg = argQueue.poll();
+                Optional<Node> ref = arg.getMember("ref");
+                if (ref.isPresent()) {
+                    String refName = ref.get().expectStringNode().getValue();
+                    if (initialParams.contains(refName)) {
+                        effectiveParams.add(refName);
+                    }
+                }
+                Optional<Node> argv = arg.getMember("argv");
+                if (argv.isPresent()) {
+                    ArrayNode nestedArgv = argv.get().expectArrayNode();
+                    for (Node nestedArg : nestedArgv) {
+                        if (nestedArg.isObjectNode()) {
+                            argQueue.add(nestedArg.expectObjectNode());
+                        }
+                    }
+                }
+            }
+
+            while (!conditionQueue.isEmpty()) {
+                Condition condition = conditionQueue.poll();
+                ArrayNode argv = condition.toNode()
+                    .expectObjectNode()
+                    .expectArrayMember("argv");
+                for (Node arg : argv) {
+                    if (arg.isObjectNode()) {
+                        argQueue.add(arg.expectObjectNode());
+                    }
+                }
+            }
+
+            Rule rule = ruleQueue.poll();
+            if (null == rule) {
+                continue;
+            }
+            List<Condition> conditions = rule.getConditions();
+            conditionQueue.addAll(conditions);
+            if (rule instanceof TreeRule treeRule) {
+                ruleQueue.addAll(treeRule.getRules());
+            } else if (rule instanceof EndpointRule endpointRule) {
+                Endpoint endpoint = endpointRule.getEndpoint();
+                Expression url = endpoint.getUrl();
+                String urlString = url.toString();
+
+                URL_PARAMETERS
+                    .matcher(urlString)
+                    .results().forEach(matchResult -> {
+                        if (matchResult.groupCount() >= 1) {
+                            if (initialParams.contains(matchResult.group(1))) {
+                                effectiveParams.add(matchResult.group(1));
+                            }
+                        }
+                    });
+            } else if (rule instanceof ErrorRule errorRule) {
+                // no additional use of endpoint parameters in error rules.
+            }
+        }
+
+        return new ArrayList<>(effectiveParams);
     }
 
     /**

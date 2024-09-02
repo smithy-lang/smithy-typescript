@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -79,6 +80,7 @@ public final class EndpointsV2Generator implements Runnable {
     private final EndpointRuleSetTrait endpointRuleSetTrait;
     private final ServiceShape service;
     private final TypeScriptSettings settings;
+    private final RuleSetParameterFinder ruleSetParameterFinder;
 
     public EndpointsV2Generator(
             TypeScriptDelegator delegator,
@@ -90,6 +92,7 @@ public final class EndpointsV2Generator implements Runnable {
         this.settings = settings;
         endpointRuleSetTrait = service.getTrait(EndpointRuleSetTrait.class)
             .orElseThrow(() -> new RuntimeException("service missing EndpointRuleSetTrait"));
+        ruleSetParameterFinder = new RuleSetParameterFinder(service);
     }
 
     @Override
@@ -114,8 +117,6 @@ public final class EndpointsV2Generator implements Runnable {
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        RuleSetParameterFinder ruleSetParameterFinder = new RuleSetParameterFinder(service);
-
                         Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
                         //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
                         Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
@@ -164,10 +165,9 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.openBlock(
                     "export const commonParams = {", "} as const",
                     () -> {
-                        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
                         Set<String> paramNames = new HashSet<>();
 
-                        parameterFinder.getClientContextParams().forEach((name, type) -> {
+                        ruleSetParameterFinder.getClientContextParams().forEach((name, type) -> {
                             if (!paramNames.contains(name)) {
                                 writer.write(
                                     "$L: { type: \"clientContextParams\", name: \"$L\" },",
@@ -176,7 +176,7 @@ public final class EndpointsV2Generator implements Runnable {
                             paramNames.add(name);
                         });
 
-                        parameterFinder.getBuiltInParams().forEach((name, type) -> {
+                        ruleSetParameterFinder.getBuiltInParams().forEach((name, type) -> {
                             if (!paramNames.contains(name)) {
                                 writer.write(
                                     "$L: { type: \"builtInParams\", name: \"$L\" },",
@@ -222,25 +222,29 @@ public final class EndpointsV2Generator implements Runnable {
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
                         ENDPOINT_RULESET_FILE.replace(".ts", "")));
 
-                writer.openBlock(
-                    "export const defaultEndpointResolver = ",
-                    "",
-                    () -> {
-                        writer.openBlock(
-                            "(endpointParams: EndpointParameters, context: { logger?: Logger } = {}): EndpointV2 => {",
-                            "};",
-                            () -> {
-                                writer.openBlock(
-                                    "return resolveEndpoint(ruleSet, {",
-                                    "});",
-                                    () -> {
-                                        writer.write("endpointParams: endpointParams as EndpointParams,");
-                                        writer.write("logger: context.logger,");
-                                    }
-                                );
-                            }
-                        );
-                    }
+                writer.addImport("EndpointCache", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.write("""
+                    const cache = new EndpointCache({
+                        size: 50,
+                        params: [$L]
+                    });
+                    """,
+                    ruleSetParameterFinder.getEffectiveParams()
+                        .stream().collect(Collectors.joining("\",\n \"", "\"", "\""))
+                );
+
+                writer.write(
+                """
+                    export const defaultEndpointResolver = (
+                        endpointParams: EndpointParameters,
+                        context: { logger?: Logger } = {}
+                    ): EndpointV2 => {
+                        return cache.get(endpointParams as EndpointParams, () => resolveEndpoint(ruleSet, {
+                            endpointParams: endpointParams as EndpointParams,
+                            logger: context.logger,
+                        }));
+                    };
+                    """
                 );
             }
         );
