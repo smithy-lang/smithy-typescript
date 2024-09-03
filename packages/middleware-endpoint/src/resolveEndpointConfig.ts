@@ -1,6 +1,7 @@
 import { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@smithy/types";
 import { normalizeProvider } from "@smithy/util-middleware";
 
+import { getEndpointFromConfig } from "./adaptors/getEndpointFromConfig";
 import { toEndpointV1 } from "./adaptors/toEndpointV1";
 
 /**
@@ -42,6 +43,12 @@ export interface EndpointInputConfig<T extends EndpointParameters = EndpointPara
    * Enables FIPS compatible endpoints.
    */
   useFipsEndpoint?: boolean | Provider<boolean>;
+
+  /**
+   * @internal
+   * This field is used internally so you should not fill any value to this field.
+   */
+  serviceConfiguredEndpoint?: never;
 }
 
 interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> {
@@ -49,6 +56,7 @@ interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> 
   region: Provider<string>;
   endpointProvider: (params: T, context?: { logger?: Logger }) => EndpointV2;
   logger?: Logger;
+  serviceId?: string;
 }
 
 /**
@@ -95,6 +103,12 @@ export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointP
    * @internal
    */
   serviceId?: string;
+
+  /**
+   * A configured endpoint global or specific to the service from ENV or AWS SDK configuration files.
+   * @internal
+   */
+  serviceConfiguredEndpoint?: Provider<string | undefined>;
 }
 
 /**
@@ -111,7 +125,7 @@ export const resolveEndpointConfig = <T, P extends EndpointParameters = Endpoint
 
   const isCustomEndpoint = !!endpoint;
 
-  return {
+  const resolvedConfig = {
     ...input,
     endpoint: customEndpointProvider,
     tls,
@@ -119,4 +133,14 @@ export const resolveEndpointConfig = <T, P extends EndpointParameters = Endpoint
     useDualstackEndpoint: normalizeProvider(input.useDualstackEndpoint ?? false),
     useFipsEndpoint: normalizeProvider(input.useFipsEndpoint ?? false),
   } as T & EndpointResolvedConfig<P>;
+
+  let configuredEndpointPromise: undefined | Promise<string | undefined> = undefined;
+  resolvedConfig.serviceConfiguredEndpoint = async () => {
+    if (input.serviceId && !configuredEndpointPromise) {
+      configuredEndpointPromise = getEndpointFromConfig(input.serviceId);
+    }
+    return configuredEndpointPromise;
+  };
+
+  return resolvedConfig;
 };
