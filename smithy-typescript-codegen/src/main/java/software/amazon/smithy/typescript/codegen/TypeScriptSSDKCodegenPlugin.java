@@ -9,6 +9,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Plugin to trigger TypeScript SSDK code generation.
+ * @deprecated Use {@link TypeScriptServerCodegenPlugin} instead.
  */
 @SmithyInternalApi
 @Deprecated
