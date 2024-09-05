@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Client } from "../client";
+import { CommandIO } from "../command";
 import type { HttpHandlerOptions } from "../http";
 import type { MetadataBearer } from "../response";
 import type { Exact } from "./exact";
@@ -103,6 +104,22 @@ type A = {
     // Handles methods with optionally zero args.
     const c = null as unknown as AssertiveClient<MyClient>;
     const list = c.listObjects();
+    const output = null as unknown as Awaited<typeof list>;
+
+    const assert1: Exact<typeof output.a, string | undefined> = true as const;
+    const assert2: Exact<typeof output.b, number | undefined> = true as const;
+    const assert3: Exact<typeof output.c, string | number | undefined> = true as const;
+    if (output.r) {
+      const assert4: Exact<typeof output.r.a, string | undefined> = true as const;
+      const assert5: Exact<typeof output.r.b, number | undefined> = true as const;
+      const assert6: Exact<typeof output.r.c, string | number | undefined> = true as const;
+    }
+  }
+
+  {
+    // Works with outputs of the "send" method.
+    const c = null as unknown as AssertiveClient<MyClient>;
+    const list = c.send(null as unknown as CommandIO<MyInput, MyOutput>);
     const output = null as unknown as Awaited<typeof list>;
 
     const assert1: Exact<typeof output.a, string | undefined> = true as const;

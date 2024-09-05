@@ -1,4 +1,4 @@
-import type { Command } from "../command";
+import type { CommandIO } from "../command";
 import type { MetadataBearer } from "../response";
 import type { StreamingBlobPayloadOutputTypes } from "../streaming-payload/streaming-blob-payload-output-types";
 import type { Transform } from "./type-transform";
@@ -13,23 +13,22 @@ export interface NarrowedInvokeFunction<
   HttpHandlerOptions,
   InputTypes extends object,
   OutputTypes extends MetadataBearer,
-  ResolvedClientConfiguration,
 > {
   <InputType extends InputTypes, OutputType extends OutputTypes>(
-    command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
+    command: CommandIO<InputType, OutputType>,
     options?: HttpHandlerOptions
   ): Promise<Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>>;
   <InputType extends InputTypes, OutputType extends OutputTypes>(
-    command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
+    command: CommandIO<InputType, OutputType>,
     cb: (err: unknown, data?: Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>) => void
   ): void;
   <InputType extends InputTypes, OutputType extends OutputTypes>(
-    command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
+    command: CommandIO<InputType, OutputType>,
     options: HttpHandlerOptions,
     cb: (err: unknown, data?: Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>) => void
   ): void;
   <InputType extends InputTypes, OutputType extends OutputTypes>(
-    command: Command<InputTypes, InputType, OutputTypes, OutputType, ResolvedClientConfiguration>,
+    command: CommandIO<InputType, OutputType>,
     options?: HttpHandlerOptions,
     cb?: (err: unknown, data?: Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>) => void
   ): Promise<Transform<OutputType, StreamingBlobPayloadOutputTypes | undefined, NarrowType>> | void;

@@ -10,7 +10,7 @@ import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
-import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
+import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
 
 public class EndpointsV2GeneratorTest {
     @Test
@@ -79,7 +79,7 @@ public class EndpointsV2GeneratorTest {
                         .build())
                 .build();
 
-        new TypeScriptClientCodegenPlugin().execute(context);
+        new TypeScriptCodegenPlugin().execute(context);
 
         assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts"),
                 is(true));

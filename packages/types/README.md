@@ -34,7 +34,8 @@ const s3b = new S3({}) as UncheckedClient<S3>;
 // and required outputs are not undefined.
 const get = await s3a.getObject({
   Bucket: "",
-  Key: "",
+  // @ts-expect-error (undefined not assignable to string)
+  Key: undefined,
 });
 
 // UncheckedClient makes output fields non-nullable.
@@ -47,6 +48,40 @@ const body = await (
     Key: "",
   })
 ).Body.transformToString();
+```
+
+When using the transform on non-aggregated client with the `Command` syntax,
+the input cannot be validated because it goes through another class.
+
+```ts
+import { S3Client, ListBucketsCommand, GetObjectCommand, GetObjectCommandInput } from "@aws-sdk/client-s3";
+import type { AssertiveClient, UncheckedClient, NoUndefined } from "@smithy/types";
+
+const s3 = new S3Client({}) as UncheckedClient<S3Client>;
+
+const list = await s3.send(
+  new ListBucketsCommand({
+    // command inputs are not validated by the type transform.
+    // because this is a separate class.
+  })
+);
+
+/**
+ * Although less ergonomic, you can use the NoUndefined<T>
+ * transform on the input type.
+ */
+const getObjectInput: NoUndefined<GetObjectCommandInput> = {
+  Bucket: "undefined",
+  // @ts-expect-error (undefined not assignable to string)
+  Key: undefined,
+  // optional params can still be undefined.
+  SSECustomerAlgorithm: undefined,
+};
+
+const get = s3.send(new GetObjectCommand(getObjectInput));
+
+// outputs are still transformed.
+await get.Body.TransformToString();
 ```
 
 ### Scenario: Narrowing a smithy-typescript generated client's output payload blob types

@@ -1,7 +1,8 @@
 import type { IncomingMessage } from "http";
 import type { ClientHttp2Stream } from "http2";
 
-import type { InvokeFunction, InvokeMethod } from "../client";
+import type { InvokeMethod } from "../client";
+import type { GetOutputType } from "../command";
 import type { HttpHandlerOptions } from "../http";
 import type { SdkStream } from "../serde";
 import type {
@@ -9,7 +10,8 @@ import type {
   NodeJsRuntimeStreamingBlobPayloadInputTypes,
   StreamingBlobPayloadInputTypes,
 } from "../streaming-payload/streaming-blob-payload-input-types";
-import type { NarrowedInvokeFunction, NarrowedInvokeMethod } from "./client-method-transforms";
+import type { StreamingBlobPayloadOutputTypes } from "../streaming-payload/streaming-blob-payload-output-types";
+import type { NarrowedInvokeMethod } from "./client-method-transforms";
 import type { Transform } from "./type-transform";
 
 /**
@@ -80,12 +82,15 @@ export type BrowserXhrClient<ClientType extends object> = NarrowPayloadBlobTypes
  */
 export type NarrowPayloadBlobOutputType<T, ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
-    InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>,
+    InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>,
   ]
-    ? NarrowedInvokeFunction<T, HttpHandlerOptions, InputTypes, OutputTypes, ConfigType>
-    : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
-      ? NarrowedInvokeMethod<T, HttpHandlerOptions, FunctionInputTypes, FunctionOutputTypes>
-      : ClientType[key];
+    ? NarrowedInvokeMethod<T, HttpHandlerOptions, FunctionInputTypes, FunctionOutputTypes>
+    : ClientType[key];
+} & {
+  send<Command>(
+    command: Command,
+    options?: any
+  ): Promise<Transform<GetOutputType<Command>, StreamingBlobPayloadOutputTypes | undefined, T>>;
 };
 
 /**
@@ -95,21 +100,18 @@ export type NarrowPayloadBlobOutputType<T, ClientType extends object> = {
  */
 export type NarrowPayloadBlobTypes<I, O, ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
-    InvokeFunction<infer InputTypes, infer OutputTypes, infer ConfigType>,
+    InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>,
   ]
-    ? NarrowedInvokeFunction<
+    ? NarrowedInvokeMethod<
         O,
         HttpHandlerOptions,
-        Transform<InputTypes, StreamingBlobPayloadInputTypes | undefined, I>,
-        OutputTypes,
-        ConfigType
+        Transform<FunctionInputTypes, StreamingBlobPayloadInputTypes | undefined, I>,
+        FunctionOutputTypes
       >
-    : [ClientType[key]] extends [InvokeMethod<infer FunctionInputTypes, infer FunctionOutputTypes>]
-      ? NarrowedInvokeMethod<
-          O,
-          HttpHandlerOptions,
-          Transform<FunctionInputTypes, StreamingBlobPayloadInputTypes | undefined, I>,
-          FunctionOutputTypes
-        >
-      : ClientType[key];
+    : ClientType[key];
+} & {
+  send<Command>(
+    command: Command,
+    options?: any
+  ): Promise<Transform<GetOutputType<Command>, StreamingBlobPayloadOutputTypes | undefined, O>>;
 };
