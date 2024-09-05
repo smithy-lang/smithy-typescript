@@ -489,7 +489,7 @@ public class StructureGeneratorTest {
                         .build())
                 .build();
 
-        new TypeScriptClientCodegenPlugin().execute(context);
+        new TypeScriptCodegenPlugin().execute(context);
         String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "//models/models_0.ts").get();
 
         if (assertContains) {
