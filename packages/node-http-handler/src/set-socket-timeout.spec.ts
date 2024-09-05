@@ -8,6 +8,12 @@ describe("setSocketTimeout", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
   });
 
   it(`sets the request's timeout if provided`, () => {
@@ -17,15 +23,17 @@ describe("setSocketTimeout", () => {
     expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(100, expect.any(Function));
   });
 
-  it(`sets the request's timeout to 0 if not provided`, () => {
+  it(`sets the request's timeout to 0 if not provided`, async () => {
     setSocketTimeout(clientRequest, jest.fn());
+
+    jest.runAllTimers();
 
     expect(clientRequest.setTimeout).toHaveBeenCalledTimes(1);
     expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(0, expect.any(Function));
   });
 
   it(`destroys the request on timeout`, () => {
-    setSocketTimeout(clientRequest, jest.fn());
+    setSocketTimeout(clientRequest, jest.fn(), 1);
     expect(clientRequest.destroy).not.toHaveBeenCalled();
 
     // call setTimeout callback

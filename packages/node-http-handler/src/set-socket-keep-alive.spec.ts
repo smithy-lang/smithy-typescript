@@ -14,7 +14,7 @@ describe("setSocketKeepAlive", () => {
   });
 
   it("should set keepAlive to true", () => {
-    setSocketKeepAlive(request, { keepAlive: true });
+    setSocketKeepAlive(request, { keepAlive: true }, 0);
 
     const setKeepAliveSpy = jest.spyOn(socket, "setKeepAlive");
     request.emit("socket", socket);
@@ -25,7 +25,7 @@ describe("setSocketKeepAlive", () => {
 
   it("should set keepAlive to true with custom initialDelay", () => {
     const initialDelay = 5 * 1000;
-    setSocketKeepAlive(request, { keepAlive: true, keepAliveMsecs: initialDelay });
+    setSocketKeepAlive(request, { keepAlive: true, keepAliveMsecs: initialDelay }, 0);
 
     const setKeepAliveSpy = jest.spyOn(socket, "setKeepAlive");
     request.emit("socket", socket);
@@ -35,7 +35,7 @@ describe("setSocketKeepAlive", () => {
   });
 
   it("should not set keepAlive at all when keepAlive is false", () => {
-    setSocketKeepAlive(request, { keepAlive: false });
+    setSocketKeepAlive(request, { keepAlive: false }, 0);
 
     const setKeepAliveSpy = jest.spyOn(socket, "setKeepAlive");
     request.emit("socket", socket);

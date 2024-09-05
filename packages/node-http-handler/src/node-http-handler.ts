@@ -146,19 +146,20 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       this.config = await this.configProvider;
     }
 
-    let socketCheckTimeoutId: NodeJS.Timeout;
-
     return new Promise((_resolve, _reject) => {
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
+
+      // Timeouts related to this request to clear upon completion.
+      const timeouts = [] as (number | NodeJS.Timeout)[];
+
       const resolve = async (arg: { response: HttpResponse }) => {
         await writeRequestBodyPromise;
-        // if requests are still resolving, cancel the socket usage check.
-        clearTimeout(socketCheckTimeoutId);
+        timeouts.forEach(clearTimeout);
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
         await writeRequestBodyPromise;
-        clearTimeout(socketCheckTimeoutId);
+        timeouts.forEach(clearTimeout);
         _reject(arg);
       };
 
@@ -180,16 +181,18 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // If the request is taking a long time, check socket usage and potentially warn.
       // This warning will be cancelled if the request resolves.
-      socketCheckTimeoutId = setTimeout(
-        () => {
-          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
-            agent,
-            this.socketWarningTimestamp,
-            this.config!.logger
-          );
-        },
-        this.config.socketAcquisitionWarningTimeout ??
-          (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000)
+      timeouts.push(
+        setTimeout(
+          () => {
+            this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
+              agent,
+              this.socketWarningTimestamp,
+              this.config!.logger
+            );
+          },
+          this.config.socketAcquisitionWarningTimeout ??
+            (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000)
+        )
       );
 
       const queryString = buildQueryString(request.query || {});
@@ -237,10 +240,6 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         }
       });
 
-      // wire-up any timeout logic
-      setConnectionTimeout(req, reject, this.config.connectionTimeout);
-      setSocketTimeout(req, reject, this.config.requestTimeout);
-
       // wire-up abort logic
       if (abortSignal) {
         const onAbort = () => {
@@ -261,19 +260,26 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         }
       }
 
+      // Defer registration of socket event listeners if the connection and request timeouts
+      // are longer than a few seconds. This avoids slowing down faster operations.
+      timeouts.push(setConnectionTimeout(req, reject, this.config.connectionTimeout));
+      timeouts.push(setSocketTimeout(req, reject, this.config.requestTimeout));
+
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;
       if (typeof httpAgent === "object" && "keepAlive" in httpAgent) {
-        setSocketKeepAlive(req, {
-          // @ts-expect-error keepAlive is not public on httpAgent.
-          keepAlive: (httpAgent as hAgent).keepAlive,
-          // @ts-expect-error keepAliveMsecs is not public on httpAgent.
-          keepAliveMsecs: (httpAgent as hAgent).keepAliveMsecs,
-        });
+        timeouts.push(
+          setSocketKeepAlive(req, {
+            // @ts-expect-error keepAlive is not public on httpAgent.
+            keepAlive: (httpAgent as hAgent).keepAlive,
+            // @ts-expect-error keepAliveMsecs is not public on httpAgent.
+            keepAliveMsecs: (httpAgent as hAgent).keepAliveMsecs,
+          })
+        );
       }
 
       writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch((e) => {
-        clearTimeout(socketCheckTimeoutId);
+        timeouts.forEach(clearTimeout);
         return _reject(e);
       });
     });
