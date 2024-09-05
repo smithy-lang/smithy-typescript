@@ -7,6 +7,7 @@ describe(EndpointCache.name, () => {
   it("should store and retrieve items", () => {
     const cache = new EndpointCache({
       size: 50,
+      params: ["A", "B", "C"],
     });
 
     expect(cache.get({ A: "b", B: "b" }, () => endpoint1)).toBe(endpoint1);
@@ -30,6 +31,35 @@ describe(EndpointCache.name, () => {
     expect(cache.get({ A: "b", B: "b", C: "cc" }, () => endpoint2)).toBe(endpoint1);
 
     expect(cache.size()).toEqual(1);
+  });
+
+  it("bypasses caching if param values include the cache key delimiter", () => {
+    const cache = new EndpointCache({
+      size: 50,
+      params: ["A", "B"],
+    });
+
+    expect(cache.get({ A: "b", B: "aaa|;aaa" }, () => endpoint1)).toBe(endpoint1);
+    expect(cache.size()).toEqual(0);
+  });
+
+  it("bypasses caching if param list is empty", () => {
+    const cache = new EndpointCache({
+      size: 50,
+      params: [],
+    });
+
+    expect(cache.get({ A: "b", B: "b" }, () => endpoint1)).toBe(endpoint1);
+    expect(cache.size()).toEqual(0);
+  });
+
+  it("bypasses caching if no param list is supplied", () => {
+    const cache = new EndpointCache({
+      size: 50,
+    });
+
+    expect(cache.get({ A: "b", B: "b" }, () => endpoint1)).toBe(endpoint1);
+    expect(cache.size()).toEqual(0);
   });
 
   it("should be an LRU cache", () => {

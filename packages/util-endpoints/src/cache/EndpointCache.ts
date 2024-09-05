@@ -15,7 +15,7 @@ export class EndpointCache {
    *                 before keys are dropped.
    * @param [params] - list of params to consider as part of the cache key.
    *
-   * If the params list is not populated, all object keys will be considered.
+   * If the params list is not populated, no caching will happen.
    * This may be out of order depending on how the object is created and arrives to this class.
    */
   public constructor({ size, params }: { size?: number; params?: string[] }) {
@@ -57,10 +57,16 @@ export class EndpointCache {
     return this.data.size;
   }
 
+  /**
+   * @returns cache key or false if not cachable.
+   */
   private hash(endpointParams: EndpointParams): string | false {
     let buffer = "";
-    const params = this.parameters.length ? this.parameters : Object.keys(endpointParams);
-    for (const param of params) {
+    const { parameters } = this;
+    if (parameters.length === 0) {
+      return false;
+    }
+    for (const param of parameters) {
       const val = String(endpointParams[param] ?? "");
       if (val.includes("|;")) {
         return false;
