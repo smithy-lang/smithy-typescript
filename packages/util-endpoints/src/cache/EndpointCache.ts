@@ -11,6 +11,8 @@ export class EndpointCache {
   private parameters: string[] = [];
 
   /**
+   * @param [size] - desired average maximum capacity. A buffer of 10 additional keys will be allowed
+   *                 before keys are dropped.
    * @param [params] - list of params to consider as part of the cache key.
    *
    * If the params list is not populated, all object keys will be considered.
@@ -30,6 +32,10 @@ export class EndpointCache {
    */
   public get(endpointParams: EndpointParams, resolver: () => EndpointV2): EndpointV2 {
     const key = this.hash(endpointParams);
+    if (key === false) {
+      return resolver();
+    }
+
     if (!this.data.has(key)) {
       if (this.data.size > this.capacity + 10) {
         const keys = this.data.keys();
@@ -51,11 +57,15 @@ export class EndpointCache {
     return this.data.size;
   }
 
-  private hash(endpointParams: EndpointParams): string {
+  private hash(endpointParams: EndpointParams): string | false {
     let buffer = "";
     const params = this.parameters.length ? this.parameters : Object.keys(endpointParams);
     for (const param of params) {
-      buffer += endpointParams[param] ?? "" + "|";
+      const val = String(endpointParams[param] ?? "");
+      if (val.includes("|;")) {
+        return false;
+      }
+      buffer += val + "|;";
     }
     return buffer;
   }
