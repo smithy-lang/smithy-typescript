@@ -84,26 +84,39 @@ public class RuleSetParameterFinder {
 
         Queue<Rule> ruleQueue = new ArrayDeque<>(endpointRuleSet.getRules());
         Queue<Condition> conditionQueue = new ArrayDeque<>();
-        Queue<ObjectNode> argQueue = new ArrayDeque<>();
+        Queue<Node> argQueue = new ArrayDeque<>();
 
         while (!ruleQueue.isEmpty() || !conditionQueue.isEmpty() || !argQueue.isEmpty()) {
             while (!argQueue.isEmpty()) {
-                ObjectNode arg = argQueue.poll();
-                Optional<Node> ref = arg.getMember("ref");
-                if (ref.isPresent()) {
-                    String refName = ref.get().expectStringNode().getValue();
-                    if (initialParams.contains(refName)) {
-                        effectiveParams.add(refName);
-                    }
-                }
-                Optional<Node> argv = arg.getMember("argv");
-                if (argv.isPresent()) {
-                    ArrayNode nestedArgv = argv.get().expectArrayNode();
-                    for (Node nestedArg : nestedArgv) {
-                        if (nestedArg.isObjectNode()) {
-                            argQueue.add(nestedArg.expectObjectNode());
+                Node arg = argQueue.poll();
+                if (arg.isObjectNode()) {
+                    Optional<Node> ref = arg.expectObjectNode().getMember("ref");
+                    if (ref.isPresent()) {
+                        String refName = ref.get().expectStringNode().getValue();
+                        if (initialParams.contains(refName)) {
+                            effectiveParams.add(refName);
                         }
                     }
+                    Optional<Node> argv = arg.expectObjectNode().getMember("argv");
+                    if (argv.isPresent()) {
+                        ArrayNode nestedArgv = argv.get().expectArrayNode();
+                        for (Node nestedArg : nestedArgv) {
+                            if (nestedArg.isObjectNode()) {
+                                argQueue.add(nestedArg.expectObjectNode());
+                            }
+                        }
+                    }
+                } else if (arg.isStringNode()) {
+                    String argString = arg.expectStringNode().getValue();
+                    URL_PARAMETERS
+                        .matcher(argString)
+                        .results().forEach(matchResult -> {
+                            if (matchResult.groupCount() >= 1) {
+                                if (initialParams.contains(matchResult.group(1))) {
+                                    effectiveParams.add(matchResult.group(1));
+                                }
+                            }
+                        });
                 }
             }
 
@@ -113,9 +126,7 @@ public class RuleSetParameterFinder {
                     .expectObjectNode()
                     .expectArrayMember("argv");
                 for (Node arg : argv) {
-                    if (arg.isObjectNode()) {
-                        argQueue.add(arg.expectObjectNode());
-                    }
+                    argQueue.add(arg);
                 }
             }
 

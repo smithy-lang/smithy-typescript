@@ -40,6 +40,11 @@ class RuleSetParameterFinderTest {
                   "required": false,
                   "documentation": "...",
                   "type": "String"
+                },
+                "ShorthandParameter": {
+                  "required": true,
+                  "documentation": "...",
+                  "type": "String"
                 }
               },
               "rules": [
@@ -83,6 +88,13 @@ class RuleSetParameterFinderTest {
                             },
                             true
                           ]
+                        },
+                        {
+                          "fn": "stringEquals",
+                          "argv": [
+                            "literal",
+                            "{ShorthandParameter}"
+                          ]
                         }
                       ],
                       "endpoint": {
@@ -109,6 +121,6 @@ class RuleSetParameterFinderTest {
 
         List<String> effectiveParams = subject.getEffectiveParams();
 
-        assertEquals(List.of("BasicParameter", "NestedParameter", "UrlOnlyParameter"), effectiveParams);
+        assertEquals(List.of("BasicParameter", "NestedParameter", "ShorthandParameter", "UrlOnlyParameter"), effectiveParams);
     }
 }
