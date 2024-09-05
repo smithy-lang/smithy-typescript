@@ -31,7 +31,7 @@ public class TypeScriptCodegenPluginTest {
                                   .build())
                 .build();
 
-        new TypeScriptCodegenPlugin().execute(context);
+        new TypeScriptClientCodegenPlugin().execute(context);
 
         // Did we generate the runtime config files?
         // note that asserting the contents of runtime config files is handled in its own unit tests.
@@ -66,7 +66,7 @@ public class TypeScriptCodegenPluginTest {
                         .build())
                 .build();
 
-        new TypeScriptCodegenPlugin().execute(context);
+        new TypeScriptClientCodegenPlugin().execute(context);
 
         assertTrue(manifest.hasFile("Foo.ts"));
         assertThat(manifest.getFileString("Foo.ts").get(), containsString("export class Foo"));
@@ -88,7 +88,7 @@ public class TypeScriptCodegenPluginTest {
                         .withMember("packageVersion", Node.from("1.0.0"))
                         .build())
                 .build();
-        new TypeScriptCodegenPlugin().execute(context);
+        new TypeScriptClientCodegenPlugin().execute(context);
 
         assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Example.ts"));
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Example.ts").get(),
