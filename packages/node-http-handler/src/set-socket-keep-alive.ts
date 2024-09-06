@@ -17,9 +17,13 @@ export const setSocketKeepAlive = (
   }
 
   const registerListener = () => {
-    request.on("socket", (socket) => {
-      socket.setKeepAlive(keepAlive, keepAliveMsecs || 0);
-    });
+    if (request.socket) {
+      request.socket.setKeepAlive(keepAlive, keepAliveMsecs || 0);
+    } else {
+      request.on("socket", (socket) => {
+        socket.setKeepAlive(keepAlive, keepAliveMsecs || 0);
+      });
+    }
   };
 
   if (deferTimeMs === 0) {

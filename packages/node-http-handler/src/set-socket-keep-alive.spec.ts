@@ -42,4 +42,17 @@ describe("setSocketKeepAlive", () => {
 
     expect(setKeepAliveSpy).not.toHaveBeenCalled();
   });
+
+  it("calls socket operations directly if socket is available", async () => {
+    const request = {
+      on: jest.fn(),
+      socket: {
+        setKeepAlive: jest.fn(),
+      },
+    } as any;
+    setSocketKeepAlive(request, { keepAlive: true, keepAliveMsecs: 1000 }, 0);
+
+    expect(request.socket.setKeepAlive).toHaveBeenCalled();
+    expect(request.on).not.toHaveBeenCalled();
+  });
 });

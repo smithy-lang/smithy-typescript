@@ -1,5 +1,4 @@
 import { ClientRequest } from "http";
-import { Socket } from "net";
 
 const DEFER_EVENT_LISTENER_TIME = 1000;
 
@@ -23,15 +22,21 @@ export const setConnectionTimeout = (
       );
     }, timeoutInMs - offset);
 
-    request.on("socket", (socket: Socket) => {
-      if (socket.connecting) {
+    const doWithSocket = (socket: typeof request.socket) => {
+      if (socket?.connecting) {
         socket.on("connect", () => {
           clearTimeout(timeoutId);
         });
       } else {
         clearTimeout(timeoutId);
       }
-    });
+    };
+
+    if (request.socket) {
+      doWithSocket(request.socket);
+    } else {
+      request.on("socket", doWithSocket);
+    }
   };
 
   if (timeoutInMs < 2000) {
