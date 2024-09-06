@@ -1,6 +1,6 @@
 # Smithy Typescript Codegen Changelog
 
-## 0.22.0 (2024-07-06)
+## 0.22.0 (2024-08-06)
 
 ### Features
 
