@@ -9,7 +9,7 @@ describe("SmithyClient", () => {
   const getCommandWithOutput = (output: string) => ({
     resolveMiddleware: mockResolveMiddleware,
   });
-  const client = new Client({} as any);
+  const client = new Client({ cacheMiddleware: true } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,12 +65,6 @@ describe("SmithyClient", () => {
 
     it("should not cache the resolved handler if called with request options", async () => {
       await expect(client.send(getCommandWithOutput("foo") as any, {})).resolves.toEqual("foo");
-      expect(privateAccess()).toBeUndefined();
-    });
-
-    it("should clear the handler cache when the middleareStack is modified", async () => {
-      await expect(client.send(getCommandWithOutput("foo") as any)).resolves.toEqual("foo");
-      client.middlewareStack.add((n) => (a) => n(a));
       expect(privateAccess()).toBeUndefined();
     });
   });

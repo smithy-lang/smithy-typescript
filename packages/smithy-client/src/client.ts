@@ -25,6 +25,22 @@ export interface SmithyConfiguration<HandlerOptions> {
    * @internal
    */
   readonly apiVersion: string;
+  /**
+   * @public
+   *
+   * Default false.
+   *
+   * When true, the client will only resolve the middleware stack once per
+   * Command class. This means modifying the middlewareStack of the
+   * command or client after requests have been made will not be
+   * recognized.
+   *
+   * Calling client.destroy() also clears this cache.
+   *
+   * Enable this only if needing the additional time saved (0-1ms per request)
+   * and not needing middleware modifications between requests.
+   */
+  cacheMiddleware?: boolean;
 }
 
 /**
@@ -33,6 +49,7 @@ export interface SmithyConfiguration<HandlerOptions> {
 export type SmithyResolvedConfiguration<HandlerOptions> = {
   requestHandler: RequestHandler<any, any, HandlerOptions>;
   readonly apiVersion: string;
+  cacheMiddleware?: boolean;
 };
 
 /**
@@ -45,20 +62,13 @@ export class Client<
   ResolvedClientConfiguration extends SmithyResolvedConfiguration<HandlerOptions>,
 > implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration>
 {
-  public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>({
-    onChange: () => {
-      delete this.handlers;
-    },
-  });
+  public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>();
   /**
    * May be used to cache the resolved handler function for a Command class.
    */
   private handlers?: WeakMap<Function, Handler<any, any>> | undefined;
-  private configRef?: ResolvedClientConfiguration | undefined;
 
-  constructor(public readonly config: ResolvedClientConfiguration) {
-    this.configRef = this.config;
-  }
+  constructor(public readonly config: ResolvedClientConfiguration) {}
 
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
@@ -81,7 +91,7 @@ export class Client<
     const options = typeof optionsOrCb !== "function" ? optionsOrCb : undefined;
     const callback = typeof optionsOrCb === "function" ? (optionsOrCb as (err: any, data?: OutputType) => void) : cb;
 
-    const useHandlerCache = options === undefined && this.config === this.configRef;
+    const useHandlerCache = options === undefined && this.config.cacheMiddleware === true;
 
     let handler: Handler<any, any>;
 
@@ -100,7 +110,6 @@ export class Client<
     } else {
       delete this.handlers;
       handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
-      this.configRef = this.config;
     }
 
     if (callback) {
