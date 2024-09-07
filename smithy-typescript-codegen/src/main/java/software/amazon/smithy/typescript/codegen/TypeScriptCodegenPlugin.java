@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Plugin to trigger TypeScript code generation.
+ * @deprecated Use {@link TypeScriptClientCodegenPlugin} instead.
  */
 @SmithyInternalApi
 @Deprecated
