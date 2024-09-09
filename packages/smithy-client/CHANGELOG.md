@@ -1,5 +1,22 @@
 # Change Log
 
+## 3.3.0
+
+### Minor Changes
+
+- d8df7bf: add client handler caching
+
+### Patch Changes
+
+- Updated dependencies [c8c53ae]
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/middleware-endpoint@3.1.1
+  - @smithy/types@3.4.0
+  - @smithy/util-stream@3.1.4
+  - @smithy/middleware-stack@3.0.4
+  - @smithy/protocol-http@4.1.1
+
 ## 3.2.0
 
 ### Minor Changes

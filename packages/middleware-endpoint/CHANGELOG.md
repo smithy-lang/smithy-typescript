@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.1.1
+
+### Patch Changes
+
+- c8c53ae: resolve service-specific endpoint once per client
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/middleware-serde@3.0.4
+  - @smithy/node-config-provider@3.1.5
+  - @smithy/shared-ini-file-loader@3.1.5
+  - @smithy/url-parser@3.0.4
+  - @smithy/util-middleware@3.0.4
+
 ## 3.1.0
 
 ### Minor Changes

@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- c86a02c: defer socket event listeners for node:http
+
+### Patch Changes
+
+- 5510e83: call socket operations if socket is present in deferred listeners
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/abort-controller@3.1.2
+  - @smithy/protocol-http@4.1.1
+  - @smithy/querystring-builder@3.0.4
+
 ## 3.1.4
 
 ### Patch Changes

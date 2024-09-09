@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- 1ff575c: add endpoint ruleset cache
+
+### Patch Changes
+
+- 77db9e7: Do not take protocol and port from custom Endpoint
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/node-config-provider@3.1.5
+
 ## 2.0.5
 
 ### Patch Changes

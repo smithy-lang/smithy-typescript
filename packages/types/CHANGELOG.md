@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.4.0
+
+### Minor Changes
+
+- 2dad138: Add string array to EndpointParameters
+
+### Patch Changes
+
+- 9f3f2f5: fix type transforms
+
 ## 3.3.0
 
 ### Minor Changes

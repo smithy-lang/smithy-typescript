@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/node-config-provider@3.1.5
+  - @smithy/protocol-http@4.1.1
+  - @smithy/util-middleware@3.0.4
+
 ## 3.0.7
 
 ### Patch Changes

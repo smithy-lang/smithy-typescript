@@ -1,5 +1,14 @@
 # @smithy/util-test
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/protocol-http@4.1.1
+
 ## 0.2.6
 
 ### Patch Changes
