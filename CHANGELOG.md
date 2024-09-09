@@ -1,5 +1,24 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.23.0 (2024-09-09)
+
+### Features
+
+- codegen: Added Smithy RPCv2 CBOR protocol generator ([#1280](https://github.com/smithy-lang/smithy-typescript/pull/1280))
+
+- codegen: Added support for string array parameters in endpoints ([#1376](https://github.com/smithy-lang/smithy-typescript/pull/1376))
+
+- codegen: Added support for operation context params in endpoints ([#1379](https://github.com/smithy-lang/smithy-typescript/pull/1379))
+
+### Bug Fixes
+
+- Added logic to resolve the service specific endpoint once per client instance instead of for each request ([#1382](https://github.com/smithy-lang/smithy-typescript/pull/1382))
+
+- Fixed a bug that prevented a concrete client type (e.g., `S3Client`) to be converted to a `NodeJsClient` ([#1389](https://github.com/smithy-lang/smithy-typescript/pull/1389))
+
+
+### Documentation
+
 ## 0.22.0 (2024-08-06)
 
 ### Features
