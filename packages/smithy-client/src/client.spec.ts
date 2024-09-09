@@ -9,7 +9,7 @@ describe("SmithyClient", () => {
   const getCommandWithOutput = (output: string) => ({
     resolveMiddleware: mockResolveMiddleware,
   });
-  const client = new Client({} as any);
+  const client = new Client({ cacheMiddleware: true } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -49,5 +49,29 @@ describe("SmithyClient", () => {
       AbortSignal: "bar",
     };
     client.send(getCommandWithOutput("foo") as any, options, callback);
+  });
+
+  describe("handler caching", () => {
+    beforeEach(() => {
+      delete (client as any).handlers;
+    });
+
+    const privateAccess = () => (client as any).handlers;
+
+    it("should cache the resolved handler", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any)).resolves.toEqual("foo");
+      expect(privateAccess().get({}.constructor)).toBeDefined();
+    });
+
+    it("should not cache the resolved handler if called with request options", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any, {})).resolves.toEqual("foo");
+      expect(privateAccess()).toBeUndefined();
+    });
+
+    it("unsets the cache if client.destroy() is called.", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any)).resolves.toEqual("foo");
+      client.destroy();
+      expect(privateAccess()).toBeUndefined();
+    });
   });
 });
