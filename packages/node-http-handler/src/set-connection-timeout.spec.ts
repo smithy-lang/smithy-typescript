@@ -74,6 +74,22 @@ describe("setConnectionTimeout", () => {
       );
     });
 
+    it("calls socket operations directly if socket is available", async () => {
+      const request = {
+        on: jest.fn(),
+        socket: {
+          on: jest.fn(),
+          connecting: true,
+        },
+        destroy() {},
+      } as any;
+      setConnectionTimeout(request, () => {}, 1);
+      jest.runAllTimers();
+
+      expect(request.socket.on).toHaveBeenCalled();
+      expect(request.on).not.toHaveBeenCalled();
+    });
+
     it("clears timeout if socket gets connected", () => {
       clientRequest.on.mock.calls[0][1](mockSocket);
 
