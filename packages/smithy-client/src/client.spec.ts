@@ -67,5 +67,11 @@ describe("SmithyClient", () => {
       await expect(client.send(getCommandWithOutput("foo") as any, {})).resolves.toEqual("foo");
       expect(privateAccess()).toBeUndefined();
     });
+
+    it("unsets the cache if client.destroy() is called.", async () => {
+      await expect(client.send(getCommandWithOutput("foo") as any)).resolves.toEqual("foo");
+      client.destroy();
+      expect(privateAccess()).toBeUndefined();
+    });
   });
 });

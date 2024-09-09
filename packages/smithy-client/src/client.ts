@@ -129,7 +129,7 @@ export class Client<
   }
 
   destroy() {
-    this.config.requestHandler.destroy?.();
+    this.config?.requestHandler?.destroy?.();
     delete this.handlers;
   }
 }
