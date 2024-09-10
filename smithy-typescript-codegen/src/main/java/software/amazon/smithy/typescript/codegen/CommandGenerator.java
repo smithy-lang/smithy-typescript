@@ -270,28 +270,38 @@ final class CommandGenerator implements Runnable {
         if (!service.hasTrait(EndpointRuleSetTrait.class)) {
             return;
         }
+
+        writer.addImport(
+            "commonParams", null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
+        );
+
+        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
+        Map<String, String> staticContextParamValues = parameterFinder.getStaticContextParamValues(operation);
+        Map<String, String> contextParams = parameterFinder.getContextParams(
+            model.getShape(operation.getInputShape()).get()
+        );
+        Map<String, String> operationContextParamValues = parameterFinder.getOperationContextParamValues(operation);
+
+        if (staticContextParamValues.isEmpty() && contextParams.isEmpty() && operationContextParamValues.isEmpty()) {
+            writer.write(".ep(commonParams)");
+            return;
+        }
+
         writer.write(".ep({")
             .indent();
         {
-            writer.addImport(
-                "commonParams", null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
-            );
-
             writer.write("...commonParams,");
-
-            RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
             Set<String> paramNames = new HashSet<>();
 
-            parameterFinder.getStaticContextParamValues(operation).forEach((name, value) -> {
+            staticContextParamValues.forEach((name, value) -> {
                 paramNames.add(name);
                 writer.write(
                     "$L: { type: \"staticContextParams\", value: $L },",
                     name, value);
             });
 
-            Shape operationInput = model.getShape(operation.getInputShape()).get();
-            parameterFinder.getContextParams(operationInput).forEach((name, memberName) -> {
+            contextParams.forEach((name, memberName) -> {
                 if (!paramNames.contains(name)) {
                     writer.write(
                         "$L: { type: \"contextParams\", name: \"$L\" },",
@@ -300,7 +310,7 @@ final class CommandGenerator implements Runnable {
                 paramNames.add(name);
             });
 
-            parameterFinder.getOperationContextParamValues(operation).forEach((name, jmesPathForInputInJs) -> {
+            operationContextParamValues.forEach((name, jmesPathForInputInJs) -> {
                 writer.write(
                     """
                     $L: { type: \"operationContextParams\", name: $L },
