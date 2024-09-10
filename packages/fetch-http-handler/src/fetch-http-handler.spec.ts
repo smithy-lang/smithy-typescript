@@ -9,6 +9,7 @@ let timeoutSpy: jest.SpyInstance<any>;
 
 (global as any).Request = mockRequest;
 (global as any).Headers = jest.fn();
+const globalFetch = global.fetch;
 
 describe(FetchHttpHandler.name, () => {
   beforeEach(() => {
@@ -21,6 +22,10 @@ describe(FetchHttpHandler.name, () => {
     if (timeoutSpy) {
       timeoutSpy.mockRestore();
     }
+  });
+
+  afterAll(() => {
+    global.fetch = globalFetch;
   });
 
   it("makes requests using fetch", async () => {
@@ -451,6 +456,73 @@ describe(FetchHttpHandler.name, () => {
       keepAliveSupport.supported = false;
       await fetchHttpHandler.handle({} as any, {});
       expect(mockRequest.mock.calls[0][1]).not.toHaveProperty("keepalive");
+    });
+  });
+
+  describe("custom requestInit", () => {
+    it("should allow setting cache requestInit", async () => {
+      const mockResponse = {
+        headers: {
+          entries() {
+            return [];
+          },
+        },
+        blob: jest.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler({
+        cache: "no-store",
+      });
+
+      await fetchHttpHandler.handle({} as any, {});
+
+      expect(mockRequest.mock.calls[0][1].cache).toBe("no-store");
+    });
+
+    it("should allow setting custom requestInit", async () => {
+      const mockResponse = {
+        headers: {
+          entries() {
+            return [];
+          },
+        },
+        blob: jest.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler({
+        requestInit(req) {
+          return {
+            referrer: "me",
+            cache: "reload",
+            headers: {
+              a: "a",
+              b: req.headers.b,
+            },
+          };
+        },
+      });
+
+      await fetchHttpHandler.handle(
+        {
+          headers: {
+            b: "b",
+          },
+        } as any,
+        {}
+      );
+
+      expect(mockRequest.mock.calls[0][1]).toEqual({
+        referrer: "me",
+        cache: "reload",
+        headers: {
+          a: "a",
+          b: "b",
+        },
+      });
     });
   });
 
