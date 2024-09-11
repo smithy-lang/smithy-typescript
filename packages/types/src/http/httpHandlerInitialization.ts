@@ -109,7 +109,7 @@ export interface FetchHttpHandlerOptions {
    * An optional function that produces additional RequestInit
    * parameters for each httpRequest.
    *
-   * This is applied last and merge-overrides any other values
+   * This is applied last via merging with Object.assign() and overwrites other values
    * set from other sources.
    *
    * @example
