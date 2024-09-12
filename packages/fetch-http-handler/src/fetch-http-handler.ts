@@ -112,7 +112,9 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       headers: new Headers(request.headers),
       method: method,
       credentials,
+      cache: this.config!.cache ?? "default",
     };
+
     if (body) {
       requestOptions.duplex = "half";
     }
@@ -125,6 +127,10 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     // some browsers support keepalive
     if (keepAliveSupport.supported) {
       requestOptions.keepalive = keepAlive;
+    }
+
+    if (typeof this.config.requestInit === "function") {
+      Object.assign(requestOptions, this.config.requestInit(request));
     }
 
     let removeSignalEventListener = () => {};
