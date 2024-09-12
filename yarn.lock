@@ -2250,7 +2250,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/config-resolver@^3.0.6, @smithy/config-resolver@workspace:^, @smithy/config-resolver@workspace:packages/config-resolver":
+"@smithy/config-resolver@workspace:^, @smithy/config-resolver@workspace:packages/config-resolver":
   version: 0.0.0-use.local
   resolution: "@smithy/config-resolver@workspace:packages/config-resolver"
   dependencies:
@@ -2266,7 +2266,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/core@^2.4.1, @smithy/core@workspace:packages/core":
+"@smithy/core@workspace:^, @smithy/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
@@ -2402,7 +2402,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/fetch-http-handler@^3.2.5, @smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
+"@smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
   dependencies:
@@ -2435,7 +2435,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/hash-node@^3.0.4, @smithy/hash-node@workspace:packages/hash-node":
+"@smithy/hash-node@workspace:^, @smithy/hash-node@workspace:packages/hash-node":
   version: 0.0.0-use.local
   resolution: "@smithy/hash-node@workspace:packages/hash-node"
   dependencies:
@@ -2469,7 +2469,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/invalid-dependency@^3.0.4, @smithy/invalid-dependency@workspace:packages/invalid-dependency":
+"@smithy/invalid-dependency@workspace:^, @smithy/invalid-dependency@workspace:packages/invalid-dependency":
   version: 0.0.0-use.local
   resolution: "@smithy/invalid-dependency@workspace:packages/invalid-dependency"
   dependencies:
@@ -2557,7 +2557,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-content-length@^3.0.6, @smithy/middleware-content-length@workspace:packages/middleware-content-length":
+"@smithy/middleware-content-length@workspace:^, @smithy/middleware-content-length@workspace:packages/middleware-content-length":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-content-length@workspace:packages/middleware-content-length"
   dependencies:
@@ -2590,7 +2590,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-retry@^3.0.16, @smithy/middleware-retry@workspace:^, @smithy/middleware-retry@workspace:packages/middleware-retry":
+"@smithy/middleware-retry@workspace:^, @smithy/middleware-retry@workspace:packages/middleware-retry":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-retry@workspace:packages/middleware-retry"
   dependencies:
@@ -2612,7 +2612,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-serde@^3.0.4, @smithy/middleware-serde@workspace:^, @smithy/middleware-serde@workspace:packages/middleware-serde":
+"@smithy/middleware-serde@workspace:^, @smithy/middleware-serde@workspace:packages/middleware-serde":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
   dependencies:
@@ -2626,7 +2626,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-stack@^3.0.4, @smithy/middleware-stack@workspace:^, @smithy/middleware-stack@workspace:packages/middleware-stack":
+"@smithy/middleware-stack@workspace:^, @smithy/middleware-stack@workspace:packages/middleware-stack":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-stack@workspace:packages/middleware-stack"
   dependencies:
@@ -2639,7 +2639,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/node-config-provider@^3.1.5, @smithy/node-config-provider@workspace:^, @smithy/node-config-provider@workspace:packages/node-config-provider":
+"@smithy/node-config-provider@workspace:^, @smithy/node-config-provider@workspace:packages/node-config-provider":
   version: 0.0.0-use.local
   resolution: "@smithy/node-config-provider@workspace:packages/node-config-provider"
   dependencies:
@@ -2655,7 +2655,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/node-http-handler@^3.2.0, @smithy/node-http-handler@workspace:^, @smithy/node-http-handler@workspace:packages/node-http-handler":
+"@smithy/node-http-handler@workspace:^, @smithy/node-http-handler@workspace:packages/node-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/node-http-handler@workspace:packages/node-http-handler"
   dependencies:
@@ -2685,7 +2685,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/protocol-http@^4.1.1, @smithy/protocol-http@workspace:^, @smithy/protocol-http@workspace:packages/protocol-http":
+"@smithy/protocol-http@workspace:^, @smithy/protocol-http@workspace:packages/protocol-http":
   version: 0.0.0-use.local
   resolution: "@smithy/protocol-http@workspace:packages/protocol-http"
   dependencies:
@@ -2784,7 +2784,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/smithy-client@^3.3.0, @smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
+"@smithy/smithy-client@workspace:^, @smithy/smithy-client@workspace:packages/smithy-client":
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-client@workspace:packages/smithy-client"
   dependencies:
@@ -2809,29 +2809,29 @@ __metadata:
     "@aws-crypto/sha256-browser": 5.2.0
     "@aws-crypto/sha256-js": 5.2.0
     "@aws-sdk/types": latest
-    "@smithy/config-resolver": ^3.0.6
-    "@smithy/core": ^2.4.1
-    "@smithy/fetch-http-handler": ^3.2.5
-    "@smithy/hash-node": ^3.0.4
-    "@smithy/invalid-dependency": ^3.0.4
-    "@smithy/middleware-content-length": ^3.0.6
-    "@smithy/middleware-retry": ^3.0.16
-    "@smithy/middleware-serde": ^3.0.4
-    "@smithy/middleware-stack": ^3.0.4
-    "@smithy/node-config-provider": ^3.1.5
-    "@smithy/node-http-handler": ^3.2.0
-    "@smithy/protocol-http": ^4.1.1
-    "@smithy/smithy-client": ^3.3.0
-    "@smithy/types": ^3.4.0
-    "@smithy/url-parser": ^3.0.4
-    "@smithy/util-base64": ^3.0.0
-    "@smithy/util-body-length-browser": ^3.0.0
-    "@smithy/util-body-length-node": ^3.0.0
-    "@smithy/util-defaults-mode-browser": ^3.0.16
-    "@smithy/util-defaults-mode-node": ^3.0.16
-    "@smithy/util-middleware": ^3.0.4
-    "@smithy/util-retry": ^3.0.4
-    "@smithy/util-utf8": ^3.0.0
+    "@smithy/config-resolver": "workspace:^"
+    "@smithy/core": "workspace:^"
+    "@smithy/fetch-http-handler": "workspace:^"
+    "@smithy/hash-node": "workspace:^"
+    "@smithy/invalid-dependency": "workspace:^"
+    "@smithy/middleware-content-length": "workspace:^"
+    "@smithy/middleware-retry": "workspace:^"
+    "@smithy/middleware-serde": "workspace:^"
+    "@smithy/middleware-stack": "workspace:^"
+    "@smithy/node-config-provider": "workspace:^"
+    "@smithy/node-http-handler": "workspace:^"
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/smithy-client": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@smithy/url-parser": "workspace:^"
+    "@smithy/util-base64": "workspace:^"
+    "@smithy/util-body-length-browser": "workspace:^"
+    "@smithy/util-body-length-node": "workspace:^"
+    "@smithy/util-defaults-mode-browser": "workspace:^"
+    "@smithy/util-defaults-mode-node": "workspace:^"
+    "@smithy/util-middleware": "workspace:^"
+    "@smithy/util-retry": "workspace:^"
+    "@smithy/util-utf8": "workspace:^"
     "@tsconfig/node16": 16.1.3
     "@types/node": ^16.18.96
     concurrently: 7.0.0
@@ -2842,7 +2842,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/types@^3.1.0, @smithy/types@^3.4.0, @smithy/types@workspace:^, @smithy/types@workspace:packages/types":
+"@smithy/types@^3.1.0, @smithy/types@workspace:^, @smithy/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
@@ -2854,7 +2854,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/url-parser@^3.0.4, @smithy/url-parser@workspace:^, @smithy/url-parser@workspace:packages/url-parser":
+"@smithy/url-parser@workspace:^, @smithy/url-parser@workspace:packages/url-parser":
   version: 0.0.0-use.local
   resolution: "@smithy/url-parser@workspace:packages/url-parser"
   dependencies:
@@ -2868,7 +2868,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-base64@^3.0.0, @smithy/util-base64@workspace:^, @smithy/util-base64@workspace:packages/util-base64":
+"@smithy/util-base64@workspace:^, @smithy/util-base64@workspace:packages/util-base64":
   version: 0.0.0-use.local
   resolution: "@smithy/util-base64@workspace:packages/util-base64"
   dependencies:
@@ -2883,7 +2883,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-body-length-browser@^3.0.0, @smithy/util-body-length-browser@workspace:^, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
+"@smithy/util-body-length-browser@workspace:^, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/util-body-length-browser@workspace:packages/util-body-length-browser"
   dependencies:
@@ -2895,7 +2895,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-body-length-node@^3.0.0, @smithy/util-body-length-node@workspace:packages/util-body-length-node":
+"@smithy/util-body-length-node@workspace:^, @smithy/util-body-length-node@workspace:packages/util-body-length-node":
   version: 0.0.0-use.local
   resolution: "@smithy/util-body-length-node@workspace:packages/util-body-length-node"
   dependencies:
@@ -2945,7 +2945,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-defaults-mode-browser@^3.0.16, @smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser":
+"@smithy/util-defaults-mode-browser@workspace:^, @smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/util-defaults-mode-browser@workspace:packages/util-defaults-mode-browser"
   dependencies:
@@ -2962,7 +2962,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-defaults-mode-node@^3.0.16, @smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node":
+"@smithy/util-defaults-mode-node@workspace:^, @smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node":
   version: 0.0.0-use.local
   resolution: "@smithy/util-defaults-mode-node@workspace:packages/util-defaults-mode-node"
   dependencies:
@@ -3008,7 +3008,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-middleware@^3.0.4, @smithy/util-middleware@workspace:^, @smithy/util-middleware@workspace:packages/util-middleware":
+"@smithy/util-middleware@workspace:^, @smithy/util-middleware@workspace:packages/util-middleware":
   version: 0.0.0-use.local
   resolution: "@smithy/util-middleware@workspace:packages/util-middleware"
   dependencies:
@@ -3022,7 +3022,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-retry@^3.0.4, @smithy/util-retry@workspace:^, @smithy/util-retry@workspace:packages/util-retry":
+"@smithy/util-retry@workspace:^, @smithy/util-retry@workspace:packages/util-retry":
   version: 0.0.0-use.local
   resolution: "@smithy/util-retry@workspace:packages/util-retry"
   dependencies:
@@ -3118,7 +3118,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-utf8@^3.0.0, @smithy/util-utf8@workspace:^, @smithy/util-utf8@workspace:packages/util-utf8":
+"@smithy/util-utf8@npm:^2.0.0":
+  version: 2.3.0
+  resolution: "@smithy/util-utf8@npm:2.3.0"
+  dependencies:
+    "@smithy/util-buffer-from": ^2.2.0
+    tslib: ^2.6.2
+  checksum: 00e55d4b4e37d48be0eef3599082402b933c52a1407fed7e8e8ad76d94d81a0b30b8bfaf2047c59d9c3af31e5f20e7a8c959cb7ae270f894255e05a2229964f0
+  languageName: node
+  linkType: hard
+
+"@smithy/util-utf8@workspace:^, @smithy/util-utf8@workspace:packages/util-utf8":
   version: 0.0.0-use.local
   resolution: "@smithy/util-utf8@workspace:packages/util-utf8"
   dependencies:
@@ -3130,16 +3140,6 @@ __metadata:
     typedoc: 0.23.23
   languageName: unknown
   linkType: soft
-
-"@smithy/util-utf8@npm:^2.0.0":
-  version: 2.3.0
-  resolution: "@smithy/util-utf8@npm:2.3.0"
-  dependencies:
-    "@smithy/util-buffer-from": ^2.2.0
-    tslib: ^2.6.2
-  checksum: 00e55d4b4e37d48be0eef3599082402b933c52a1407fed7e8e8ad76d94d81a0b30b8bfaf2047c59d9c3af31e5f20e7a8c959cb7ae270f894255e05a2229964f0
-  languageName: node
-  linkType: hard
 
 "@smithy/util-waiter@workspace:packages/util-waiter":
   version: 0.0.0-use.local
