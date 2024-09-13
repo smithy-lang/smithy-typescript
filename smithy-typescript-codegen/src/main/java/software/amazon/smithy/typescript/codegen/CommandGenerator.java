@@ -210,6 +210,37 @@ final class CommandGenerator implements Runnable {
             .protocolGenerator(protocolGenerator)
             .applicationProtocol(applicationProtocol)
             .build());
+
+        {
+            // This block places the most commonly sought type definitions
+            // closer to the command definition, for navigation assistance
+            // in IDEs.
+            Shape operationInputShape = model.expectShape(operation.getInputShape());
+            Symbol baseInput = symbolProvider.toSymbol(operationInputShape);
+            Shape operationOutputShape = model.expectShape(operation.getOutputShape());
+            Symbol baseOutput = symbolProvider.toSymbol(operationOutputShape);
+
+            writer.write("/** @internal type navigation helper, not in runtime. */");
+            writer.openBlock("declare protected static __types: {", "};", () -> {
+                String baseInputStr = operationInputShape.getAllMembers().isEmpty()
+                    ? "{}"
+                    : baseInput.getName();
+                String baseOutputStr = operationOutputShape.getAllMembers().isEmpty()
+                    ? "{}"
+                    : baseOutput.getName();
+                writer.write("""
+                api: {
+                    input: $L;
+                    output: $L;
+                };""", baseInputStr, baseOutputStr);
+                writer.write("""
+                sdk: {
+                    input: $T;
+                    output: $T;
+                };""", inputType, outputType);
+            });
+        }
+
         writer.write("}"); // class close bracket.
     }
 
