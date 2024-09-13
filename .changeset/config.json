@@ -7,5 +7,9 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@aws-smithy/*"]
+  "ignore": ["@aws-smithy/*"],
+  "privatePackages": {
+    "tag": false,
+    "version": false
+  }
 }
