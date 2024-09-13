@@ -24,7 +24,7 @@
   "dependencies": {
     "@smithy/eventstream-codec": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.7.0"
   },
   "devDependencies": {
     "@smithy/util-utf8": "workspace:^",
