@@ -125,3 +125,10 @@ export interface FetchHttpHandlerOptions {
    */
   requestInit?: (httpRequest: IHttpRequest) => RequestInit;
 }
+
+declare global {
+  /**
+   * interface merging stub.
+   */
+  interface RequestInit {}
+}
