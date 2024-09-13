@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.2.6
+
+### Patch Changes
+
+- cf9257e: add requestInit options to fetch
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/protocol-http@4.1.2
+  - @smithy/querystring-builder@3.0.5
+
 ## 3.2.5
 
 ### Patch Changes

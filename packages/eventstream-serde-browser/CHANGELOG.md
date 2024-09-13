@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/eventstream-serde-universal@3.0.7
+
 ## 3.0.7
 
 ### Patch Changes

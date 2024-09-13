@@ -1,5 +1,18 @@
 # Change Log
 
+## 3.0.17
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/node-config-provider@3.1.6
+  - @smithy/protocol-http@4.1.2
+  - @smithy/service-error-classification@3.0.5
+  - @smithy/smithy-client@3.3.1
+  - @smithy/util-middleware@3.0.5
+  - @smithy/util-retry@3.0.5
+
 ## 3.0.16
 
 ### Patch Changes

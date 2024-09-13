@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/node-config-provider@3.1.6
+
 ## 2.1.0
 
 ### Minor Changes

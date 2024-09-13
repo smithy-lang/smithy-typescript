@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.4.1
+
+### Patch Changes
+
+- cf9257e: add requestInit options to fetch
+
 ## 3.4.0
 
 ### Minor Changes

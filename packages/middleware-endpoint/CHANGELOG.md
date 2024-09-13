@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.1.2
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/middleware-serde@3.0.5
+  - @smithy/node-config-provider@3.1.6
+  - @smithy/shared-ini-file-loader@3.1.6
+  - @smithy/url-parser@3.0.5
+  - @smithy/util-middleware@3.0.5
+
 ## 3.1.1
 
 ### Patch Changes
