@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.4.2
+
+### Patch Changes
+
+- e7b438b: add interface stub for browser RequestInit type
+
 ## 3.4.1
 
 ### Patch Changes

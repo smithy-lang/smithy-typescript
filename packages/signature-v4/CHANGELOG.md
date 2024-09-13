@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/protocol-http@4.1.3
+  - @smithy/util-middleware@3.0.6
+
 ## 4.1.2
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/service-error-classification@3.0.6
+
 ## 3.0.5
 
 ### Patch Changes
