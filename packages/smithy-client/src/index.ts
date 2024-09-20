@@ -13,6 +13,7 @@ export * from "./exceptions";
 export * from "./extended-encode-uri-component";
 export * from "./get-array-if-single-item";
 export * from "./get-value-from-text-node";
+export * from "./is-serializable-header-value";
 export * from "./lazy-json";
 export * from "./object-mapping";
 export * from "./parse-utils";
