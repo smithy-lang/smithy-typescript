@@ -4,8 +4,9 @@ import { toUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";
 
 import { headStream } from "../headStream";
-import { ChecksumStream, createChecksumStream } from "./createChecksumStream";
-import { ChecksumStream as ChecksumStreamWeb } from "./createChecksumStream.browser";
+import { ChecksumStream } from "./ChecksumStream";
+import { ChecksumStream as ChecksumStreamWeb } from "./ChecksumStream.browser";
+import { createChecksumStream } from "./createChecksumStream";
 
 describe("Checksum streams", () => {
   /**
