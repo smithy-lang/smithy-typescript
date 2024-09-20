@@ -112,8 +112,12 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       headers: new Headers(request.headers),
       method: method,
       credentials,
-      cache: this.config!.cache ?? "default",
     };
+    // cache property is not supported in workerd runtime
+    // TODO: can we feature detect support for cache and not set this property when not supported?
+    if (this.config?.cache) {
+      requestOptions.cache = this.config.cache;
+    }
 
     if (body) {
       requestOptions.duplex = "half";
