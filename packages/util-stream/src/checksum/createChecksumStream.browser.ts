@@ -1,6 +1,8 @@
 import { Checksum, Encoder } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 
+import { isReadableStream } from "../stream-type-check";
+
 /**
  * @internal
  */
@@ -59,7 +61,7 @@ export const createChecksumStream = ({
   checksumSourceLocation,
   base64Encoder,
 }: ChecksumStreamInit): ReadableStreamType => {
-  if (!(source instanceof ReadableStream)) {
+  if (!isReadableStream(source)) {
     throw new Error(
       `@smithy/util-stream: unsupported source type ${(source as any)?.constructor?.name ?? source} in ChecksumStream.`
     );
@@ -100,5 +102,21 @@ export const createChecksumStream = ({
   });
 
   source.pipeThrough(transform);
-  return transform.readable;
+  const readable = transform.readable;
+  Object.setPrototypeOf(readable, ChecksumStream.prototype);
+  return readable;
 };
+
+/**
+ * This stub exists so that the readable returned by createChecksumStream
+ * identifies as "ChecksumStream" in alignment with the Node.js
+ * implementation.
+ *
+ * @extends ReadableStream
+ */
+export class ChecksumStream {}
+
+if (typeof ReadableStream === "function") {
+  ChecksumStream.prototype = Object.create(ReadableStream.prototype);
+  ChecksumStream.prototype.constructor = ChecksumStream;
+}
