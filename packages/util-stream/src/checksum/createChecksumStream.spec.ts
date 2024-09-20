@@ -43,6 +43,7 @@ describe("Checksum streams", () => {
       });
 
       expect(checksumStream.constructor.name).toEqual("ChecksumStream");
+      expect(checksumStream).toBeInstanceOf(Readable);
 
       const collected = toUtf8(await headStream(checksumStream, Infinity));
       expect(collected).toEqual(canonicalUtf8);
@@ -84,7 +85,6 @@ describe("Checksum streams", () => {
           canonicalData.forEach((byte) => {
             controller.enqueue(new Uint8Array([byte]));
           });
-          controller.enqueue(null);
           controller.close();
         },
       });

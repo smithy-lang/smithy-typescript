@@ -103,9 +103,13 @@ class ChecksumStream extends Duplex {
    * calculate a step update of the checksum.
    */
   public _write(chunk: Buffer, encoding: string, callback: (err?: Error) => void): void {
-    this.checksum.update(chunk);
-    this.push(chunk);
-    callback();
+    try {
+      this.checksum.update(chunk);
+      this.push(chunk);
+    } catch (e: unknown) {
+      return callback(e as Error);
+    }
+    return callback();
   }
 
   /**
@@ -113,12 +117,12 @@ class ChecksumStream extends Duplex {
    *
    * When the upstream source finishes, perform the checksum comparison.
    */
-  public async _final(callback: (err?: Error) => void) {
+  public async _final(callback: (err?: Error) => void): Promise<void> {
     try {
       const digest: Uint8Array = await this.checksum.digest();
       const received = this.base64Encoder(digest);
       if (this.expectedChecksum !== received) {
-        callback(
+        return callback(
           new Error(
             `Checksum mismatch: expected "${this.expectedChecksum}" but received "${received}"` +
               ` in response header "${this.checksumSourceLocation}".`
@@ -126,9 +130,9 @@ class ChecksumStream extends Duplex {
         );
       }
     } catch (e: unknown) {
-      callback(e as Error);
+      return callback(e as Error);
     }
     this.push(null);
-    callback();
+    return callback();
   }
 }
