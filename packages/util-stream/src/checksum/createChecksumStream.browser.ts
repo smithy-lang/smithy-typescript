@@ -107,6 +107,8 @@ export const createChecksumStream = ({
   return readable;
 };
 
+const ReadableStreamRef = typeof ReadableStream === "function" ? ReadableStream : function (): void {};
+
 /**
  * This stub exists so that the readable returned by createChecksumStream
  * identifies as "ChecksumStream" in alignment with the Node.js
@@ -114,9 +116,4 @@ export const createChecksumStream = ({
  *
  * @extends ReadableStream
  */
-export function ChecksumStream(): void {}
-
-if (typeof ReadableStream === "function") {
-  ChecksumStream.prototype = Object.create(ReadableStream.prototype);
-  ChecksumStream.prototype.constructor = ChecksumStream;
-}
+export class ChecksumStream extends (ReadableStreamRef as any) {}
