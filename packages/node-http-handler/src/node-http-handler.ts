@@ -209,9 +209,17 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       if (request.fragment) {
         path += `#${request.fragment}`;
       }
+
+      let hostname = request.hostname ?? "";
+      if (hostname[0] === "[" && hostname.endsWith("]")) {
+        hostname = request.hostname.slice(1, -1);
+      } else {
+        hostname = request.hostname;
+      }
+
       const nodeHttpsOptions: RequestOptions = {
         headers: request.headers,
-        host: request.hostname,
+        host: hostname,
         method: request.method,
         path,
         port: request.port,
