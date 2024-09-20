@@ -210,8 +210,8 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         path += `#${request.fragment}`;
       }
 
-      let hostname: string;
-      if (request.hostname.startsWith("[") && request.hostname.endsWith("]")) {
+      let hostname = request.hostname ?? "";
+      if (hostname[0] === "[" && hostname.endsWith("]")) {
         hostname = request.hostname.slice(1, -1);
       } else {
         hostname = request.hostname;
