@@ -114,7 +114,7 @@ export const createChecksumStream = ({
  *
  * @extends ReadableStream
  */
-export class ChecksumStream {}
+export function ChecksumStream(): void {}
 
 if (typeof ReadableStream === "function") {
   ChecksumStream.prototype = Object.create(ReadableStream.prototype);
