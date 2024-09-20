@@ -36,6 +36,17 @@ export interface ChecksumStreamInit {
 export type ReadableStreamType = ReadableStream;
 
 /**
+ * This is a local copy of
+ * https://developer.mozilla.org/en-US/docs/Web/API/TransformStreamDefaultController
+ * in case users do not have this type.
+ */
+interface TransformStreamDefaultController {
+  enqueue(chunk: any): void;
+  error(error: unknown): void;
+  terminate(): void;
+}
+
+/**
  * @internal
  *
  * Creates a stream adapter for throwing checksum errors for streams without
@@ -64,25 +75,7 @@ export const createChecksumStream = ({
 
   const transform = new TransformStream({
     start() {},
-    transform: async (chunk: any, controller: TransformStreamDefaultController) => {
-      /**
-       * When the upstream source finishes, perform the checksum comparison.
-       */
-      if (null === chunk) {
-        const digest: Uint8Array = await checksum.digest();
-        const received = encoder(digest);
-
-        if (expectedChecksum !== received) {
-          const error = new Error(
-            `Checksum mismatch: expected "${expectedChecksum}" but received "${received}"` +
-              ` in response header "${checksumSourceLocation}".`
-          );
-          controller.error(error);
-          throw error;
-        }
-        controller.terminate();
-        return;
-      }
+    async transform(chunk: any, controller: TransformStreamDefaultController) {
       /**
        * When the upstream source flows data to this stream,
        * calculate a step update of the checksum.
@@ -90,7 +83,20 @@ export const createChecksumStream = ({
       checksum.update(chunk);
       controller.enqueue(chunk);
     },
-    flush() {},
+    async flush(controller: TransformStreamDefaultController) {
+      const digest: Uint8Array = await checksum.digest();
+      const received = encoder(digest);
+
+      if (expectedChecksum !== received) {
+        const error = new Error(
+          `Checksum mismatch: expected "${expectedChecksum}" but received "${received}"` +
+            ` in response header "${checksumSourceLocation}".`
+        );
+        controller.error(error);
+      } else {
+        controller.terminate();
+      }
+    },
   });
 
   source.pipeThrough(transform);
