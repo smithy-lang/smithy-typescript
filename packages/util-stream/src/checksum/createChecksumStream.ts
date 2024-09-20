@@ -129,5 +129,6 @@ class ChecksumStream extends Duplex {
       callback(e as Error);
     }
     this.push(null);
+    callback();
   }
 }
