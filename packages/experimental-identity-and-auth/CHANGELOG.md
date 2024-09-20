@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.3.22
+
+### Patch Changes
+
+- Updated dependencies [806cc7f]
+  - @smithy/signature-v4@4.1.4
+  - @smithy/middleware-retry@3.0.20
+
 ## 0.3.21
 
 ### Patch Changes

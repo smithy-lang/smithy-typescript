@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.4.5
+
+### Patch Changes
+
+- @smithy/smithy-client@3.3.4
+- @smithy/middleware-retry@3.0.20
+
 ## 2.4.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.4
+
+### Patch Changes
+
+- 806cc7f: fix: sort query parameter keys after encoding
+
 ## 4.1.3
 
 ### Patch Changes

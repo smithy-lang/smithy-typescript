@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.8
+
+### Patch Changes
+
+- 0d5ab1d: Omit setting cache setting on request init when using default value
+
 ## 3.2.7
 
 ### Patch Changes
