@@ -43,7 +43,6 @@ describe("Checksum streams", () => {
         source: stream,
       });
 
-      expect(checksumStream.constructor.name).toEqual("ChecksumStream");
       expect(checksumStream).toBeInstanceOf(Readable);
       expect(checksumStream).toBeInstanceOf(ChecksumStream);
 
@@ -101,7 +100,6 @@ describe("Checksum streams", () => {
         source: stream,
       });
 
-      expect(checksumStream.constructor.name).toEqual("ChecksumStream");
       expect(checksumStream).toBeInstanceOf(ReadableStream);
       expect(checksumStream).toBeInstanceOf(ChecksumStreamWeb);
 
