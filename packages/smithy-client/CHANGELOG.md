@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.3
+
+### Patch Changes
+
+- @smithy/util-stream@3.1.7
+
 ## 3.3.2
 
 ### Patch Changes
