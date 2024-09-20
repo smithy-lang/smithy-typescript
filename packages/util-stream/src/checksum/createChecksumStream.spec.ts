@@ -4,7 +4,8 @@ import { toUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";
 
 import { headStream } from "../headStream";
-import { createChecksumStream } from "./createChecksumStream";
+import { ChecksumStream, createChecksumStream } from "./createChecksumStream";
+import { ChecksumStream as ChecksumStreamWeb } from "./createChecksumStream.browser";
 
 describe("Checksum streams", () => {
   /**
@@ -44,6 +45,7 @@ describe("Checksum streams", () => {
 
       expect(checksumStream.constructor.name).toEqual("ChecksumStream");
       expect(checksumStream).toBeInstanceOf(Readable);
+      expect(checksumStream).toBeInstanceOf(ChecksumStream);
 
       const collected = toUtf8(await headStream(checksumStream, Infinity));
       expect(collected).toEqual(canonicalUtf8);
@@ -99,7 +101,9 @@ describe("Checksum streams", () => {
         source: stream,
       });
 
+      expect(checksumStream.constructor.name).toEqual("ChecksumStream");
       expect(checksumStream).toBeInstanceOf(ReadableStream);
+      expect(checksumStream).toBeInstanceOf(ChecksumStreamWeb);
 
       const collected = toUtf8(await headStream(checksumStream, Infinity));
       expect(collected).toEqual(canonicalUtf8);

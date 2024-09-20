@@ -56,7 +56,7 @@ export function createChecksumStream(
  * buffering the stream.
  *
  */
-class ChecksumStream extends Duplex {
+export class ChecksumStream extends Duplex {
   private expectedChecksum: string;
   private checksumSourceLocation: string;
   private checksum: Checksum;
