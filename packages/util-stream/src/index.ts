@@ -5,3 +5,4 @@ export * from "./splitStream";
 export * from "./headStream";
 export * from "./stream-type-check";
 export * from "./checksum/createChecksumStream";
+export * from "./checksum/ChecksumStream";

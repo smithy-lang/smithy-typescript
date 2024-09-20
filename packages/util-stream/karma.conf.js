@@ -6,6 +6,7 @@ module.exports = function (config) {
     files: [
       "src/checksum/createChecksumStream.browser.spec.ts",
       "src/checksum/createChecksumStream.browser.ts",
+      "src/checksum/ChecksumStream.browser.ts",
       "src/getAwsChunkedEncodingStream.browser.spec.ts",
       "src/getAwsChunkedEncodingStream.browser.ts",
       "src/headStream.browser.ts",

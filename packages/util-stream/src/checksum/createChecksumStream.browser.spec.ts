@@ -3,8 +3,8 @@ import { toBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
 
 import { headStream } from "../headStream.browser";
+import { ChecksumStream as ChecksumStreamWeb } from "./ChecksumStream.browser";
 import { createChecksumStream } from "./createChecksumStream.browser";
-import { ChecksumStream as ChecksumStreamWeb } from "./createChecksumStream.browser";
 
 describe("Checksum streams", () => {
   /**
