@@ -1,2 +1,1 @@
-const isSerializableHeaderValue = (value: any): boolean =>
-  value != undefined && value != null;
+const isSerializableHeaderValue = (value: any): boolean => value != null;
