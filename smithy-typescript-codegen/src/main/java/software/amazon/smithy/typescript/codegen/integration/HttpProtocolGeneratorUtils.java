@@ -47,7 +47,6 @@ import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
-import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -277,16 +276,6 @@ public final class HttpProtocolGeneratorUtils {
         writer.write("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => "
                 + "collectBody(streamBody, context).then(body => context.utf8Encoder(body))");
         writer.write("");
-    }
-
-    /**
-     * Writes any additional utils needed for HTTP protocols with bindings.
-     *
-     * @param context The generation context.
-     */
-    static void generateHttpBindingUtils(GenerationContext context) {
-        TypeScriptWriter writer = context.getWriter();
-        writer.write(IoUtils.readUtf8Resource(HttpProtocolGeneratorUtils.class, "http-binding-utils.ts"));
     }
 
     /**

@@ -1,1 +1,0 @@
-const isSerializableHeaderValue = (value: any): boolean => value != null;
