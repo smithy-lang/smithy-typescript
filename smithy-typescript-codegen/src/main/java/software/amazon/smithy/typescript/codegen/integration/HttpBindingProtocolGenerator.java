@@ -201,7 +201,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, getApplicationProtocol().getResponseType());
         HttpProtocolGeneratorUtils.generateCollectBodyString(context);
-        HttpProtocolGeneratorUtils.generateHttpBindingUtils(context);
 
         writer.write(
             context.getStringStore().flushVariableDeclarationCode()
@@ -965,6 +964,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             opening = "const headers: any = {";
             closing = "};";
         } else {
+            writer.addImport("isSerializableHeaderValue", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
             opening = normalHeaderCount > 0
                 ? "const headers: any = map({}, isSerializableHeaderValue, {"
                 : "const headers: any = map({";
@@ -1035,6 +1035,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 : headerValue + defaultValue;
 
             // evaluated value has a function or method call attached
+            context.getWriter()
+                .addImport("isSerializableHeaderValue", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
             headerBuffer.put(headerKey, String.format(
                 "[%s]: [() => isSerializableHeaderValue(%s), () => %s],",
                 context.getStringStore().var(headerKey),
@@ -1093,6 +1095,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         TypeScriptWriter writer = context.getWriter();
 
         // Headers are always present either from the default document or the payload.
+        writer.addImport("isSerializableHeaderValue", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.openBlock("let headers: any = map({}, isSerializableHeaderValue, {", "});", () -> {
             writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
@@ -1373,7 +1376,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             dataSource = "Array.from(" + dataSource + ".values())";
         }
         String collectionTargetValue = getInputValue(context, bindingType, "_entry", targetMember, collectionTarget);
-        String iteratedParam = "(" + dataSource + " || []).map(_entry => " + collectionTargetValue + " as any)";
+        String iteratedParam;
+        if (collectionTargetValue.equals("_entry")) {
+            iteratedParam = "(" + dataSource + " || [])";
+        } else {
+            iteratedParam = "(" + dataSource + " || []).map(_entry => " + collectionTargetValue + " as any)";
+        }
+
         switch (bindingType) {
             case HEADER:
                 return iteratedParam + ".join(', ')";
@@ -2689,6 +2698,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         switch (bindingType) {
             case QUERY_PARAMS:
             case QUERY:
+                if (collectionTargetValue.equals("_entry")) {
+                    return String.format("%1$s", dataSource);
+                }
                 return String.format("%1$s.map(_entry => %2$s as any)", dataSource, collectionTargetValue);
             case LABEL:
                 dataSource = "(" + dataSource + " || \"\")";
@@ -2696,13 +2708,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 outputParam = "" + dataSource + ".split('/')";
 
                 // Iterate over each entry and do deser work.
-                outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
+                if (!collectionTargetValue.equals("_entry")) {
+                    outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
+                }
 
                 return outputParam;
             case HEADER:
                 dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on commas.
-                outputParam = "" + dataSource + ".split(',')";
+                outputParam = dataSource + ".split(',')";
 
                 // Headers that have HTTP_DATE formatted timestamps already contain a ","
                 // in their formatted entry, so split on every other "," instead.
@@ -2719,7 +2733,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 }
 
                 // Iterate over each entry and do deser work.
-                outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
+                if (!collectionTargetValue.equals("_entry")) {
+                    outputParam += ".map(_entry => " + collectionTargetValue + " as any)";
+                }
 
                 return outputParam;
             default:
