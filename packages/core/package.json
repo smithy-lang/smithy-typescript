@@ -68,8 +68,9 @@
     }
   },
   "files": [
-    "dist-*/**",
-    "./cbor.js"
+    "./cbor.d.ts",
+    "./cbor.js",
+    "dist-*/**"
   ],
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/core",
   "repository": {
