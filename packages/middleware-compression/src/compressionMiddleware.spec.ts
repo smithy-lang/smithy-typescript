@@ -95,7 +95,7 @@ describe(compressionMiddleware.name, () => {
             body: mockCompressedStream,
             headers: {
               ...mockArgs.request.headers,
-              "Content-Encoding": "gzip",
+              "content-encoding": "gzip",
             },
           },
         });
@@ -130,7 +130,7 @@ describe(compressionMiddleware.name, () => {
             body: mockCompressedBody,
             headers: {
               ...mockArgs.request.headers,
-              "Content-Encoding": "gzip",
+              "content-encoding": "gzip",
             },
           },
         });
@@ -148,7 +148,7 @@ describe(compressionMiddleware.name, () => {
           request: {
             ...mockArgs.request,
             headers: {
-              "Content-Encoding": mockExistingContentEncoding,
+              "content-encoding": mockExistingContentEncoding,
             },
           },
         } as any);
@@ -160,7 +160,7 @@ describe(compressionMiddleware.name, () => {
             body: mockCompressedBody,
             headers: {
               ...mockArgs.request.headers,
-              "Content-Encoding": [mockExistingContentEncoding, "gzip"].join(","),
+              "content-encoding": [mockExistingContentEncoding, "gzip"].join(","),
             },
           },
         });

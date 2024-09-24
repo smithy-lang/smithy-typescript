@@ -79,13 +79,13 @@ export const compressionMiddleware =
 
         if (isRequestCompressed) {
           // Either append to the header if it already exists, else set it
-          if (headers["Content-Encoding"]) {
+          if (headers["content-encoding"]) {
             updatedHeaders = {
               ...headers,
-              "Content-Encoding": `${headers["Content-Encoding"]},${algorithm}`,
+              "content-encoding": `${headers["content-encoding"]},${algorithm}`,
             };
           } else {
-            updatedHeaders = { ...headers, "Content-Encoding": algorithm };
+            updatedHeaders = { ...headers, "content-encoding": algorithm };
           }
 
           // We've matched on one supported algorithm in the
