@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.4.6
+
+### Patch Changes
+
+- 18dd957: add compatibility types redirect
+- Updated dependencies [64600d8]
+  - @smithy/smithy-client@3.3.5
+  - @smithy/middleware-retry@3.0.21
+
 ## 2.4.5
 
 ### Patch Changes

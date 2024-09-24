@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.5
+
+### Patch Changes
+
+- 64600d8: serialize empty strings and collections in headers
+
 ## 3.3.4
 
 ### Patch Changes
