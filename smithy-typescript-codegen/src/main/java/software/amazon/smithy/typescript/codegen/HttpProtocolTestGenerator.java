@@ -545,9 +545,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void writeHttpBodyAssertions(String body, String mediaType, boolean isClientTest) {
-        // If we expect an empty body, expect it to be falsy.
         if (body.isEmpty()) {
-            writer.write("expect(r.body).toBeFalsy();");
+            // If we expect an empty body, expect it to be falsy.
+            // Or, for JSON an empty object represents an empty body.
+            // mediaType is often UNKNOWN here.
+            writer.write("expect(!r.body || r.body === `{}`).toBeTruthy();");
             return;
         }
 
