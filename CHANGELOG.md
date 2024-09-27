@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.24.0 (2024-09-30)
+
+### Features
+
+* Use spread operator for Command endpoint params only when necessary ([#1396](https://github.com/smithy-lang/smithy-typescript/pull/1396))
+* Improve IDE type navigation assistance for command classes ([#1373](https://github.com/smithy-lang/smithy-typescript/pull/1373))
+
+### Bug Fixes
+
+* Allow empty string field values for headers ([#1412](https://github.com/smithy-lang/smithy-typescript/pull/1412))
+
 ## 0.23.0 (2024-09-09)
 
 ### Features
