@@ -2469,7 +2469,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     + "= __expectObject(await parseBody(output.body, context));");
         } else if (target instanceof UnionShape) {
             // If payload is a Union, then we need to parse the string into JavaScript object.
-            importUnionDeserializer(writer);
             writer.write("const data: Record<string, any> | undefined "
                     + "= await parseBody(output.body, context);");
         } else if (target instanceof StringShape || target instanceof DocumentShape) {
@@ -2485,6 +2484,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 "if (Object.keys(data ?? {}).length) {",
                 "}",
                 () -> {
+                    importUnionDeserializer(writer);
                     writer.write("contents.$L = __expectUnion($L);", binding.getMemberName(), getOutputValue(context,
                         Location.PAYLOAD, "data", binding.getMember(), target));
                 }
