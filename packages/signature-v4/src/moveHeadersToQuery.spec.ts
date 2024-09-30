@@ -99,4 +99,36 @@ describe("moveHeadersToQuery", () => {
       SNAP: "crackle, pop",
     });
   });
+
+  it("should obey hoistableHeaders configuration over unhoistableHeaders", () => {
+    const req = moveHeadersToQuery(
+      new HttpRequest({
+        ...minimalRequest,
+        headers: {
+          Host: "www.example.com",
+          "X-Amz-Website-Redirect-Location": "/index.html",
+          Foo: "bar",
+          fizz: "buzz",
+          SNAP: "crackle, pop",
+          "X-Amz-Storage-Class": "STANDARD_IA",
+        },
+      }),
+      {
+        hoistableHeaders: new Set(["x-amz-website-redirect-location", "snap"]),
+        unhoistableHeaders: new Set(["x-amz-website-redirect-location"]),
+      }
+    );
+
+    expect(req.query).toEqual({
+      SNAP: "crackle, pop",
+      "X-Amz-Storage-Class": "STANDARD_IA",
+      "X-Amz-Website-Redirect-Location": "/index.html",
+    });
+
+    expect(req.headers).toEqual({
+      Host: "www.example.com",
+      Foo: "bar",
+      fizz: "buzz",
+    });
+  });
 });

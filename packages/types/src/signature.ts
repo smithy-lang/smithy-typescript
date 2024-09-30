@@ -75,6 +75,12 @@ export interface RequestPresigningArguments extends RequestSigningArguments {
    * lower case and then checked for existence in the unhoistableHeaders set.
    */
   unhoistableHeaders?: Set<string>;
+
+  /**
+   * This overrides any values set by unhoistableHeaders.
+   * These headers will be hoisted into the query string and signed.
+   */
+  hoistableHeaders?: Set<string>;
 }
 
 /**

@@ -6,12 +6,15 @@ import type { HttpRequest as IHttpRequest, QueryParameterBag } from "@smithy/typ
  */
 export const moveHeadersToQuery = (
   request: IHttpRequest,
-  options: { unhoistableHeaders?: Set<string> } = {}
+  options: { unhoistableHeaders?: Set<string>; hoistableHeaders?: Set<string> } = {}
 ): IHttpRequest & { query: QueryParameterBag } => {
   const { headers, query = {} as QueryParameterBag } = HttpRequest.clone(request);
   for (const name of Object.keys(headers)) {
     const lname = name.toLowerCase();
-    if (lname.slice(0, 6) === "x-amz-" && !options.unhoistableHeaders?.has(lname)) {
+    if (
+      (lname.slice(0, 6) === "x-amz-" && !options.unhoistableHeaders?.has(lname)) ||
+      options.hoistableHeaders?.has(lname)
+    ) {
       query[name] = headers[name];
       delete headers[name];
     }
