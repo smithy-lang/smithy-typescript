@@ -131,6 +131,7 @@ export class SignatureV4 implements RequestPresigner, RequestSigner, StringSigne
       unsignableHeaders,
       unhoistableHeaders,
       signableHeaders,
+      hoistableHeaders,
       signingRegion,
       signingService,
     } = options;
@@ -146,7 +147,7 @@ export class SignatureV4 implements RequestPresigner, RequestSigner, StringSigne
     }
 
     const scope = createScope(shortDate, region, signingService ?? this.service);
-    const request = moveHeadersToQuery(prepareRequest(originalRequest), { unhoistableHeaders });
+    const request = moveHeadersToQuery(prepareRequest(originalRequest), { unhoistableHeaders, hoistableHeaders });
 
     if (credentials.sessionToken) {
       request.query[TOKEN_QUERY_PARAM] = credentials.sessionToken;
