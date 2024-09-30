@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.0.9
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/node-config-provider@3.1.8
+  - @smithy/util-middleware@3.0.7
+
 ## 3.0.8
 
 ### Patch Changes

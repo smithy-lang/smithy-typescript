@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.5.0
+
+### Minor Changes
+
+- a4c1285: configurable hoisted headers
+
 ## 3.4.2
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- a4c1285: configurable hoisted headers
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/protocol-http@4.1.4
+  - @smithy/util-middleware@3.0.7
+
 ## 4.1.4
 
 ### Patch Changes

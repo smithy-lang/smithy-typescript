@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.0.22
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/property-provider@3.1.7
+  - @smithy/smithy-client@3.3.6
+
 ## 3.0.21
 
 ### Patch Changes
