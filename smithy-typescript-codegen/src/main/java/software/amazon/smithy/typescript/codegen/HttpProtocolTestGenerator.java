@@ -92,9 +92,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(HttpProtocolTestGenerator.class.getName());
     private static final String TEST_CASE_FILE_TEMPLATE = "test/functional/%s.spec.ts";
-    private static final Set<String> IGNORE_COMMA_SPACING = SetUtils.of(
-        "content-encoding"
-    );
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -521,17 +518,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         testCase.getHeaders().forEach((header, value) -> {
             header = header.toLowerCase();
             writer.write("expect(r.headers[$S]).toBeDefined();", header);
-            if (IGNORE_COMMA_SPACING.contains(header) && value.contains(",")) {
-                writer.write("""
-                    expect(
-                      r.headers[$S].replaceAll(", ", ",")
-                    ).toBe(
-                      $S.replaceAll(", ", ",")
-                    );
-                    """, header, value);
-            } else {
-                writer.write("expect(r.headers[$S]).toBe($S);", header, value);
-            }
+            writer.write("expect(r.headers[$S]).toBe($S);", header, value);
         });
         writer.write("");
     }

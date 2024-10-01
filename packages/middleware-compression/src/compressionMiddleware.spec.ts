@@ -160,7 +160,7 @@ describe(compressionMiddleware.name, () => {
             body: mockCompressedBody,
             headers: {
               ...mockArgs.request.headers,
-              "content-encoding": [mockExistingContentEncoding, "gzip"].join(","),
+              "content-encoding": [mockExistingContentEncoding, "gzip"].join(", "),
             },
           },
         });
