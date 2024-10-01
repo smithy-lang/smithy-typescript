@@ -71,7 +71,6 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.Pair;
-import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
