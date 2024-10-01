@@ -34,6 +34,9 @@ export const splitHeader = (value: string): string[] => {
   return values.map((v) => {
     v = v.trim();
     const z = v.length;
+    if (z < 2) {
+      return v;
+    }
     if (v[0] === `"` && v[z - 1] === `"`) {
       v = v.slice(1, z - 1);
     }

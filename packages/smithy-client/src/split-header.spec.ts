@@ -7,9 +7,16 @@ describe(splitHeader.name, () => {
     expect(splitHeader("a, b, c")).toEqual(["a", "b", "c"]);
     expect(splitHeader("a , b , c")).toEqual(["a", "b", "c"]);
     expect(splitHeader(`a , b , "  c  "`)).toEqual(["a", "b", "  c  "]);
+    expect(splitHeader(`  a  ,     , b`)).toEqual(["a", "", "b"]);
+    expect(splitHeader(`,,`)).toEqual(["", "", ""]);
+    expect(splitHeader(`    ,    ,    `)).toEqual(["", "", ""]);
   });
   it("should split a string by commas that are not in quotes, and remove outer quotes", () => {
     expect(splitHeader('"b,c", "\\"def\\"", a')).toEqual(["b,c", '"def"', "a"]);
     expect(splitHeader('"a,b,c", ""def"", "a,b ,c"')).toEqual(["a,b,c", '"def"', "a,b ,c"]);
+    expect(splitHeader(`""`)).toEqual([``]);
+    expect(splitHeader(``)).toEqual([``]);
+    expect(splitHeader(`\\"`)).toEqual([`"`]);
+    expect(splitHeader(`"`)).toEqual([`"`]);
   });
 });
