@@ -82,7 +82,7 @@ export const compressionMiddleware =
           if (headers["content-encoding"]) {
             updatedHeaders = {
               ...headers,
-              "content-encoding": `${headers["content-encoding"]},${algorithm}`,
+              "content-encoding": `${headers["content-encoding"]}, ${algorithm}`,
             };
           } else {
             updatedHeaders = { ...headers, "content-encoding": algorithm };

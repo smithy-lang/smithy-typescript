@@ -1385,6 +1385,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         switch (bindingType) {
             case HEADER:
+                if (collectionTarget.isStringShape()) {
+                    context.getWriter().addImport(
+                        "quoteHeader", "__quoteHeader", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    return iteratedParam + ".map(__quoteHeader).join(', ')";
+                }
                 return iteratedParam + ".join(', ')";
             case QUERY:
             case QUERY_PARAMS:
@@ -2464,9 +2469,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     + "= __expectObject(await parseBody(output.body, context));");
         } else if (target instanceof UnionShape) {
             // If payload is a Union, then we need to parse the string into JavaScript object.
-            importUnionDeserializer(writer);
             writer.write("const data: Record<string, any> | undefined "
-                    + "= __expectUnion(await parseBody(output.body, context));");
+                    + "= await parseBody(output.body, context);");
         } else if (target instanceof StringShape || target instanceof DocumentShape) {
             // If payload is String or Document, we need to collect body and convert binary to string.
             writer.write("const data: any = await collectBodyString(output.body, context);");
@@ -2474,8 +2478,22 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             throw new CodegenException(String.format("Unexpected shape type bound to payload: `%s`",
                     target.getType()));
         }
-        writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+
+        if (target instanceof UnionShape) {
+            writer.openBlock(
+                "if (Object.keys(data ?? {}).length) {",
+                "}",
+                () -> {
+                    importUnionDeserializer(writer);
+                    writer.write("contents.$L = __expectUnion($L);", binding.getMemberName(), getOutputValue(context,
+                        Location.PAYLOAD, "data", binding.getMember(), target));
+                }
+            );
+        } else {
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                 Location.PAYLOAD, "data", binding.getMember(), target));
+        }
+
         return binding;
     }
 
@@ -2716,7 +2734,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             case HEADER:
                 dataSource = "(" + dataSource + " || \"\")";
                 // Split these values on commas.
-                outputParam = dataSource + ".split(',')";
+                context.getWriter().addImport("splitHeader", "__splitHeader", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                outputParam = "__splitHeader(" + dataSource + ")";
 
                 // Headers that have HTTP_DATE formatted timestamps already contain a ","
                 // in their formatted entry, so split on every other "," instead.
