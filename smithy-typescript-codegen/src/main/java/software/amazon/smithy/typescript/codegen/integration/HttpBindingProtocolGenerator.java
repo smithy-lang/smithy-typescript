@@ -2452,8 +2452,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // There can only be one payload binding.
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
 
+        boolean isStreaming = target.hasTrait(StreamingTrait.class);
+
         // Handle streaming shapes differently.
-        if (target.hasTrait(StreamingTrait.class)) {
+        if (isStreaming) {
             writer.write("const data: any = output.body;");
             // If payload is streaming blob, return low-level stream with the stream utility functions mixin.
             if (isClientSdk && target instanceof BlobShape) {
@@ -2479,7 +2481,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     target.getType()));
         }
 
-        if (target instanceof UnionShape) {
+        if (!isStreaming && target instanceof UnionShape) {
             writer.openBlock(
                 "if (Object.keys(data ?? {}).length) {",
                 "}",
