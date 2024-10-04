@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.4.8
+
+### Patch Changes
+
+- Updated dependencies [75e0125]
+  - @smithy/smithy-client@3.4.0
+  - @smithy/middleware-retry@3.0.23
+
 ## 2.4.7
 
 ### Patch Changes

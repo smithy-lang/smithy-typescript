@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.12
+
+### Patch Changes
+
+- 75e0125: comma spacing
+
 ## 3.0.11
 
 ### Patch Changes

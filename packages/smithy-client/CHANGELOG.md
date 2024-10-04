@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.4.0
+
+### Minor Changes
+
+- 75e0125: add quoteHeader function
+
 ## 3.3.6
 
 ### Patch Changes
