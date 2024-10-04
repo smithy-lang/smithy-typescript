@@ -13,6 +13,4 @@ export type SmithyFeatures = Partial<{
   ENDPOINT_OVERRIDE: "N";
   SIGV4A_SIGNING: "S";
   CREDENTIALS_CODE: "e";
-  CREDENTIALS_HTTP: "z";
-  CREDENTIALS_IMDS: "0";
 }>;
