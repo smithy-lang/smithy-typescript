@@ -19,6 +19,9 @@
               "name": "Smithy team",
               "url": "https://smithy.io/"
             },
+            "scripts": {
+              "merged": "echo \"this is merged from user configuration.\""
+            },
             "license": "Apache-2.0"
           },
           "private": true,

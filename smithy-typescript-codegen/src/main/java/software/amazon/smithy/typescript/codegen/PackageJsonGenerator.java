@@ -43,9 +43,19 @@ final class PackageJsonGenerator {
     ) {
         // Write the package.json file.
         InputStream resource = PackageJsonGenerator.class.getResourceAsStream("base-package.json");
-        ObjectNode node = Node.parse(IoUtils.toUtf8String(resource))
-                        .expectObjectNode()
-                        .merge(settings.getPackageJson());
+
+        ObjectNode userSuppliedPackageJson = settings.getPackageJson();
+        ObjectNode defaultPackageJson = Node.parse(IoUtils.toUtf8String(resource))
+            .expectObjectNode();
+
+        ObjectNode mergedScripts = defaultPackageJson.expectObjectMember("scripts")
+            .merge(
+                userSuppliedPackageJson.getObjectMember("scripts")
+                    .orElse(ObjectNode.builder().build())
+            );
+
+        ObjectNode node = defaultPackageJson.merge(userSuppliedPackageJson)
+            .withMember("scripts", mergedScripts);
 
         // Merge TypeScript dependencies into the package.json file.
         for (Map.Entry<String, Map<String, SymbolDependency>> depEntry : dependencies.entrySet()) {
