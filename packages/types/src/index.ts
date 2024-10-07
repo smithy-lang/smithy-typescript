@@ -11,6 +11,7 @@ export * from "./endpoint";
 export * from "./endpoints";
 export * from "./eventStream";
 export * from "./extensions";
+export * from "./feature-ids";
 export * from "./http";
 export * from "./http/httpHandlerInitialization";
 export * from "./identity";
