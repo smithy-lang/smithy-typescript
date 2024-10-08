@@ -881,7 +881,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
         if (isIdempotencyToken) {
-            writer.addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
+            writer
+                .addDependency(TypeScriptDependency.UUID_TYPES)
+                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
         }
         boolean isRequired = binding.getMember().isRequired();
         String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
@@ -1013,6 +1015,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
         if (isIdempotencyToken) {
             context.getWriter()
+                .addDependency(TypeScriptDependency.UUID_TYPES)
                 .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
         }
 
