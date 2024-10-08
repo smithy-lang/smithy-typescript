@@ -15,6 +15,7 @@
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/is-array-buffer": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/protocol-http": "workspace:^",

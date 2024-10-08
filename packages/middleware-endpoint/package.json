@@ -23,6 +23,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/middleware-serde": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/shared-ini-file-loader": "workspace:^",

@@ -1,3 +1,4 @@
+import { setFeature } from "@smithy/core";
 import {
   AuthScheme,
   EndpointParameters,
@@ -38,6 +39,10 @@ export const endpointMiddleware = <T extends EndpointParameters>({
       context: HandlerExecutionContext
     ): SerializeHandler<any, Output> =>
     async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
+      if (config.endpoint) {
+        setFeature(context, "ENDPOINT_OVERRIDE", "N");
+      }
+
       const endpoint: EndpointV2 = await getEndpointFromInstructions(
         args.input,
         {
