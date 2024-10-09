@@ -93,7 +93,7 @@ export const compressionMiddleware =
             updatedHeaders = { ...headers, "content-encoding": algorithm };
           }
 
-          if (headers["content-encoding"].includes("gzip")) {
+          if (updatedHeaders["content-encoding"].includes("gzip")) {
             setFeature(context, "GZIP_REQUEST_COMPRESSION", "L");
           }
 

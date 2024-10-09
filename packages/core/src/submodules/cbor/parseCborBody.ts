@@ -1,4 +1,4 @@
-import { collectBody } from "@smithy/core";
+import { collectBody } from "@smithy/core/protocols";
 import { HttpRequest as __HttpRequest } from "@smithy/protocol-http";
 import { HeaderBag as __HeaderBag, HttpResponse, SerdeContext as __SerdeContext, SerdeContext } from "@smithy/types";
 import { calculateBodyLength } from "@smithy/util-body-length-browser";

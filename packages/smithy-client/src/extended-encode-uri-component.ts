@@ -2,4 +2,4 @@
  * @internal
  * Backwards compatibility re-export.
  */
-export { extendedEncodeURIComponent } from "@smithy/core";
+export { extendedEncodeURIComponent } from "@smithy/core/protocols";
