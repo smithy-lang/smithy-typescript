@@ -1,4 +1,3 @@
-import { retryMiddlewareOptions } from "@smithy/middleware-retry";
 import { FinalizeRequestHandlerOptions, Pluggable, RelativeMiddlewareOptions } from "@smithy/types";
 
 import { httpSigningMiddleware } from "./httpSigningMiddleware";
@@ -13,7 +12,7 @@ export const httpSigningMiddlewareOptions: FinalizeRequestHandlerOptions & Relat
   aliases: ["apiKeyMiddleware", "tokenMiddleware", "awsAuthMiddleware"],
   override: true,
   relation: "after",
-  toMiddleware: retryMiddlewareOptions.name!,
+  toMiddleware: "retryMiddleware",
 };
 
 /**

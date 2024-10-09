@@ -2270,14 +2270,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
-    "@smithy/middleware-endpoint": "workspace:^"
-    "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
-    "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
+    "@smithy/util-stream": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     "@types/node": ^16.18.96
     concurrently: 7.0.0
@@ -2541,6 +2539,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-compression@workspace:packages/middleware-compression"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/is-array-buffer": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
@@ -2576,6 +2575,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-endpoint@workspace:packages/middleware-endpoint"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/shared-ini-file-loader": "workspace:^"
@@ -2788,6 +2788,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-client@workspace:packages/smithy-client"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
