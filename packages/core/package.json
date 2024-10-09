@@ -46,14 +46,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@smithy/middleware-endpoint": "workspace:^",
-    "@smithy/middleware-retry": "workspace:^",
     "@smithy/middleware-serde": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
-    "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-body-length-browser": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
+    "@smithy/util-stream": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
     "tslib": "^2.6.2"
   },
