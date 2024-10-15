@@ -37,6 +37,13 @@
       "import": "./dist-es/submodules/cbor/index.js",
       "require": "./dist-cjs/submodules/cbor/index.js",
       "types": "./dist-types/submodules/cbor/index.d.ts"
+    },
+    "./protocols": {
+      "module": "./dist-es/submodules/protocols/index.js",
+      "node": "./dist-cjs/submodules/protocols/index.js",
+      "import": "./dist-es/submodules/protocols/index.js",
+      "require": "./dist-cjs/submodules/protocols/index.js",
+      "types": "./dist-types/submodules/protocols/index.d.ts"
     }
   },
   "author": {
@@ -46,14 +53,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@smithy/middleware-endpoint": "workspace:^",
-    "@smithy/middleware-retry": "workspace:^",
     "@smithy/middleware-serde": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
-    "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-body-length-browser": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
+    "@smithy/util-stream": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
     "tslib": "^2.6.2"
   },
@@ -70,6 +75,8 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./protocols.d.ts",
+    "./protocols.js",
     "dist-*/**"
   ],
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/core",
