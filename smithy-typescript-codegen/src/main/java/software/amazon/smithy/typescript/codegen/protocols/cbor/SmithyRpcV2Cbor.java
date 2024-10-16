@@ -266,7 +266,8 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         writer.openBlock("const SHARED_HEADERS: __HeaderBag = {", "};", () -> {
             writer.write("'content-type': $S,", getDocumentContentType());
             writer.write("""
-                "smithy-protocol": "rpc-v2-cbor"
+                "smithy-protocol": "rpc-v2-cbor",
+                "accept": "application/cbor",
                 """);
         });
     }
