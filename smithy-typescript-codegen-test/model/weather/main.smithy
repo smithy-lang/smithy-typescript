@@ -108,7 +108,9 @@ operation OnlyFakeAuthOptional {}
 operation SameAsService {}
 
 resource City {
-    identifiers: { cityId: CityId }
+    identifiers: {
+        cityId: CityId
+    }
     create: CreateCity
     read: GetCity
     list: ListCities
@@ -122,12 +124,16 @@ resource City {
 }
 
 resource Forecast {
-    identifiers: { cityId: CityId }
+    identifiers: {
+        cityId: CityId
+    }
     read: GetForecast
 }
 
 resource CityImage {
-    identifiers: { cityId: CityId }
+    identifiers: {
+        cityId: CityId
+    }
     read: GetCityImage
 }
 
