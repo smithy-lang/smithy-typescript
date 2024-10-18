@@ -29,7 +29,7 @@
   "dependencies": {
     "@smithy/service-error-classification": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.0"
   },
   "devDependencies": {
     "@types/node": "^16.18.96",
