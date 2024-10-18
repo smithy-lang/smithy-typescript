@@ -1,43 +1,55 @@
 {
   "testCases": [
     {
-      "documentation": "default endpoint",
-      "params": {},
+      "documentation": "Default value is used when parameter is unset",
+      "params": {
+        "bar": "a b"
+      },
+      "operationInputs": [
+        {
+          "operationName": "GetThing",
+          "builtInParams": {
+            "SDK::Endpoint": "https://custom.example.com"
+          },
+          "clientParams": {
+            "bar": "a b"
+          }
+        }
+      ],
       "expect": {
         "endpoint": {
-          "url": "https://fips.us-west-5.amazonaws.com"
+          "url": "https://example.com/baz"
         }
       }
     },
     {
-      "documentation": "test case where FIPS is disabled",
+      "documentation": "Default value is not used when the parameter is set",
       "params": {
-        "UseFips": false
+        "bar": "a b",
+        "baz": "BIG"
       },
-      "expect": {
-        "error": "UseFips = false"
-      }
-    },
-    {
-      "documentation": "test case where FIPS is enabled explicitly",
-      "params": {
-        "UseFips": true
-      },
+      "operationInputs": [
+        {
+          "operationName": "GetThing",
+          "builtInParams": {
+            "SDK::Endpoint": "https://custom.example.com"
+          },
+          "clientParams": {
+            "bar": "a b",
+            "baz": "BIG"
+          }
+        }
+      ],
       "expect": {
         "endpoint": {
-          "url": "https://fips.us-west-5.amazonaws.com"
+          "url": "https://example.com/BIG"
         }
       }
     },
     {
-      "documentation": "defaults can be overridden",
-      "params": {
-        "Region": "us-east-1"
-      },
+      "documentation": "a documentation string",
       "expect": {
-        "endpoint": {
-          "url": "https://fips.us-east-1.amazonaws.com"
-        }
+        "error": "endpoint error"
       }
     }
   ],
