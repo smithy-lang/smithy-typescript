@@ -8,6 +8,10 @@ export function blobReader(
   chunkSize: number = 1024 * 1024
 ): Promise<void> {
   return new Promise((resolve, reject) => {
+    /**
+     * TODO(react-native): https://github.com/facebook/react-native/issues/34402
+     * To drop FileReader in react-native, we need the Blob.arrayBuffer() method to work.
+     */
     const fileReader = new FileReader();
 
     fileReader.onerror = reject;
