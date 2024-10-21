@@ -24,7 +24,7 @@
   "dependencies": {
     "@smithy/querystring-parser": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.0"
   },
   "typesVersions": {
     "<4.0": {

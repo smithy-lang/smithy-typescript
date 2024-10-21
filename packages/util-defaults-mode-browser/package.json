@@ -26,7 +26,7 @@
     "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
     "bowser": "^2.11.0",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.0"
   },
   "devDependencies": {
     "@types/node": "^16.18.96",
