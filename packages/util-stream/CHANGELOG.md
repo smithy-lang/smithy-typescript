@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.1
+
+### Patch Changes
+
+- ccdd49f: add bundler metadata for ChecksumStream file
+
 ## 3.2.0
 
 ### Minor Changes

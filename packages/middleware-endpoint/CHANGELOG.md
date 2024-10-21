@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.1
+
+### Patch Changes
+
+- @smithy/core@2.5.1
+
 ## 3.2.0
 
 ### Minor Changes

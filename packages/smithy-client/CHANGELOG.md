@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.4.2
+
+### Patch Changes
+
+- Updated dependencies [ccdd49f]
+  - @smithy/util-stream@3.2.1
+  - @smithy/core@2.5.1
+  - @smithy/middleware-endpoint@3.2.1
+
 ## 3.4.1
 
 ### Patch Changes

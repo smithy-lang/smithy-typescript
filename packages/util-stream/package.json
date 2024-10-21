@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-stream",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline util-stream",
@@ -55,8 +55,8 @@
     "dist-*/**"
   ],
   "browser": {
-    "./dist-es/checksum/createChecksumStream": "./dist-es/checksum/createChecksumStream.browser",
     "./dist-es/checksum/ChecksumStream": "./dist-es/checksum/ChecksumStream.browser",
+    "./dist-es/checksum/createChecksumStream": "./dist-es/checksum/createChecksumStream.browser",
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
     "./dist-es/headStream": "./dist-es/headStream.browser",
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
