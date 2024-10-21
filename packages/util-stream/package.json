@@ -56,6 +56,7 @@
   ],
   "browser": {
     "./dist-es/checksum/createChecksumStream": "./dist-es/checksum/createChecksumStream.browser",
+    "./dist-es/checksum/ChecksumStream": "./dist-es/checksum/ChecksumStream.browser",
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
     "./dist-es/headStream": "./dist-es/headStream.browser",
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
@@ -63,11 +64,13 @@
   },
   "react-native": {
     "./dist-es/checksum/createChecksumStream": "./dist-es/checksum/createChecksumStream.browser",
+    "./dist-es/checksum/ChecksumStream": "./dist-es/checksum/ChecksumStream.browser",
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
     "./dist-es/headStream": "./dist-es/headStream.browser",
     "./dist-es/splitStream": "./dist-es/splitStream.browser",
     "./dist-cjs/checksum/createChecksumStream": "./dist-cjs/checksum/createChecksumStream.browser",
+    "./dist-cjs/checksum/ChecksumStream": "./dist-cjs/checksum/ChecksumStream.browser",
     "./dist-cjs/getAwsChunkedEncodingStream": "./dist-cjs/getAwsChunkedEncodingStream.browser",
     "./dist-cjs/sdk-stream-mixin": "./dist-cjs/sdk-stream-mixin.browser",
     "./dist-cjs/headStream": "./dist-cjs/headStream.browser",
