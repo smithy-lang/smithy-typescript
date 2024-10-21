@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.1.7
+
+### Patch Changes
+
+- Updated dependencies [c257049]
+- Updated dependencies [84bec05]
+  - @smithy/chunked-blob-reader@4.0.0
+  - @smithy/chunked-blob-reader-native@3.0.1
+  - @smithy/types@3.6.0
+
 ## 3.1.6
 
 ### Patch Changes

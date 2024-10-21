@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- c257049: replace FileReader with Blob.arrayBuffer() where possible
+
 ## 3.0.0
 
 ### Major Changes

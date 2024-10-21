@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.4.1
+
+### Patch Changes
+
+- d07b0ab: reorganize smithy/core to be upstream of smithy/smithy-client
+- Updated dependencies [f4e0bd9]
+- Updated dependencies [84bec05]
+- Updated dependencies [d07b0ab]
+- Updated dependencies [d07b0ab]
+  - @smithy/util-stream@3.2.0
+  - @smithy/types@3.6.0
+  - @smithy/core@2.5.0
+  - @smithy/middleware-endpoint@3.2.0
+  - @smithy/middleware-stack@3.0.8
+  - @smithy/protocol-http@4.1.5
+
 ## 3.4.0
 
 ### Minor Changes

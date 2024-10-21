@@ -1,5 +1,23 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- d07b0ab: feature detection for custom endpoint and gzip
+
+### Patch Changes
+
+- d07b0ab: reorganize smithy/core to be upstream of smithy/smithy-client
+- Updated dependencies [84bec05]
+- Updated dependencies [d07b0ab]
+- Updated dependencies [d07b0ab]
+  - @smithy/types@3.6.0
+  - @smithy/core@2.5.0
+  - @smithy/node-config-provider@3.1.9
+  - @smithy/protocol-http@4.1.5
+  - @smithy/util-middleware@3.0.8
+
 ## 3.0.12
 
 ### Patch Changes

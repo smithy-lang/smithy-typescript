@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- f4e0bd9: create checksum stream adapter
+
+### Patch Changes
+
+- Updated dependencies [c257049]
+- Updated dependencies [84bec05]
+  - @smithy/fetch-http-handler@4.0.0
+  - @smithy/types@3.6.0
+  - @smithy/node-http-handler@3.2.5
+
 ## 3.1.9
 
 ### Patch Changes

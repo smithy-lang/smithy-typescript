@@ -1,5 +1,23 @@
 # Change Log
 
+## 2.5.0
+
+### Minor Changes
+
+- 84bec05: add feature identification map to smithy context
+- d07b0ab: feature detection for custom endpoint and gzip
+
+### Patch Changes
+
+- d07b0ab: reorganize smithy/core to be upstream of smithy/smithy-client
+- Updated dependencies [f4e0bd9]
+- Updated dependencies [84bec05]
+  - @smithy/util-stream@3.2.0
+  - @smithy/types@3.6.0
+  - @smithy/middleware-serde@3.0.8
+  - @smithy/protocol-http@4.1.5
+  - @smithy/util-middleware@3.0.8
+
 ## 2.4.8
 
 ### Patch Changes

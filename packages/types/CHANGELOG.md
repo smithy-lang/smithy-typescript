@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.6.0
+
+### Minor Changes
+
+- 84bec05: add feature identification map to smithy context
+
 ## 3.5.0
 
 ### Minor Changes

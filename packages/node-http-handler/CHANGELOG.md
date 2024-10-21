@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.2.5
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/abort-controller@3.1.6
+  - @smithy/protocol-http@4.1.5
+  - @smithy/querystring-builder@3.0.8
+
 ## 3.2.4
 
 ### Patch Changes
