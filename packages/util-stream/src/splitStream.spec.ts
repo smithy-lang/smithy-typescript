@@ -40,4 +40,19 @@ describe(splitStream.name, () => {
       expect(bytes1).toEqual(bytes2);
     }
   });
+  it("should split a web:Blob", async () => {
+    if (typeof Blob !== "undefined") {
+      const inputChunks = [97, 98, 99, 100];
+
+      const myBlob = new Blob([new Uint8Array(inputChunks)]);
+
+      const [a, b] = await splitWebStream(myBlob);
+
+      const bytes1 = await webStreamCollector(a);
+      const bytes2 = await webStreamCollector(b);
+
+      expect(bytes1).toEqual(new Uint8Array([97, 98, 99, 100]));
+      expect(bytes1).toEqual(bytes2);
+    }
+  });
 });
