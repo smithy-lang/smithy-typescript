@@ -44,7 +44,7 @@ describe(splitStream.name, () => {
     if (typeof Blob !== "undefined") {
       const inputChunks = [97, 98, 99, 100];
 
-      const myBlob = new Blob([new Uint8Array(inputChunks)])
+      const myBlob = new Blob([new Uint8Array(inputChunks)]);
 
       const [a, b] = await splitWebStream(myBlob);
 
