@@ -1,6 +1,8 @@
+import EventEmitter from "events";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setConnectionTimeout } from "./set-connection-timeout";
+import { timing } from "./timing";
 
 describe("setConnectionTimeout", () => {
   const reject = vi.fn();
@@ -8,6 +10,13 @@ describe("setConnectionTimeout", () => {
     on: vi.fn(),
     destroy: vi.fn(),
   };
+
+  vi.spyOn(timing, "setTimeout").mockImplementation(((fn: Function, ms: number) => {
+    return setTimeout(fn, ms);
+  }) as any);
+  vi.spyOn(timing, "clearTimeout").mockImplementation(((timer: any) => {
+    return clearTimeout(timer);
+  }) as any);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,8 +40,8 @@ describe("setConnectionTimeout", () => {
     };
 
     beforeEach(() => {
-      vi.useFakeTimers({ legacyFakeTimers: true });
-      setConnectionTimeout(clientRequest, reject, timeoutInMs);
+      vi.useFakeTimers();
+      vi.clearAllMocks();
     });
 
     afterEach(() => {
@@ -41,24 +50,23 @@ describe("setConnectionTimeout", () => {
     });
 
     it("attaches listener", () => {
+      setConnectionTimeout(clientRequest, reject, timeoutInMs);
       expect(clientRequest.on).toHaveBeenCalledTimes(1);
       expect(clientRequest.on).toHaveBeenCalledWith("socket", expect.any(Function));
     });
 
     it("doesn't set timeout if socket is already connected", () => {
-      clientRequest.on.mock.calls[0][1]({
-        ...mockSocket,
-        connecting: false,
-      });
+      setConnectionTimeout(clientRequest, reject, timeoutInMs);
       expect(mockSocket.on).not.toHaveBeenCalled();
-      expect(setTimeout).toHaveBeenCalled();
+      expect(timing.setTimeout).toHaveBeenCalled();
       expect(reject).not.toHaveBeenCalled();
     });
 
-    it("rejects and aborts request if socket isn't connected by timeout", () => {
+    it("rejects and aborts request if socket isn't connected by timeout", async () => {
+      setConnectionTimeout(clientRequest, reject, timeoutInMs);
       clientRequest.on.mock.calls[0][1](mockSocket);
-      expect(setTimeout).toHaveBeenCalledTimes(1);
-      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), timeoutInMs);
+      expect(timing.setTimeout).toHaveBeenCalledTimes(1);
+      expect(timing.setTimeout).toHaveBeenCalledWith(expect.any(Function), timeoutInMs);
       expect(mockSocket.on).toHaveBeenCalledTimes(1);
       expect(mockSocket.on).toHaveBeenCalledWith("connect", expect.any(Function));
 
@@ -77,6 +85,7 @@ describe("setConnectionTimeout", () => {
     });
 
     it("calls socket operations directly if socket is available", async () => {
+      setConnectionTimeout(clientRequest, reject, timeoutInMs);
       const request = {
         on: vi.fn(),
         socket: {
@@ -93,17 +102,27 @@ describe("setConnectionTimeout", () => {
     });
 
     it("clears timeout if socket gets connected", () => {
-      clientRequest.on.mock.calls[0][1](mockSocket);
+      const socket = new EventEmitter() as any;
+      socket.connecting = true;
+
+      setConnectionTimeout(
+        {
+          ...clientRequest,
+          socket,
+        },
+        reject,
+        timeoutInMs
+      );
 
       expect(clientRequest.destroy).not.toHaveBeenCalled();
       expect(reject).not.toHaveBeenCalled();
-      expect(clearTimeout).not.toHaveBeenCalled();
+      expect(timing.clearTimeout).not.toHaveBeenCalled();
 
       // Fast-forward for half the amount of time and call connect callback to clear timer.
       vi.advanceTimersByTime(timeoutInMs / 2);
-      mockSocket.on.mock.calls[0][1]();
+      socket.emit("connect");
 
-      expect(clearTimeout).toHaveBeenCalled();
+      expect(timing.clearTimeout).toHaveBeenCalled();
 
       // Fast-forward until timer has been executed.
       vi.runAllTimers();

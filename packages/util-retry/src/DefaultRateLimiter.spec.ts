@@ -16,7 +16,7 @@ describe(DefaultRateLimiter.name, () => {
 
   describe("getSendToken", () => {
     beforeEach(() => {
-      vi.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
@@ -28,6 +28,7 @@ describe(DefaultRateLimiter.name, () => {
       [1, 1785.7142857142856],
       [2, 2000],
     ])("timestamp: %d, delay: %d", async (timestamp, delay) => {
+      const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
       vi.spyOn(Date, "now").mockImplementation(() => 0);
       const rateLimiter = new DefaultRateLimiter();
 
@@ -37,7 +38,7 @@ describe(DefaultRateLimiter.name, () => {
 
       rateLimiter.getSendToken();
       vi.runAllTimers();
-      expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), delay);
+      expect(spy).toHaveBeenLastCalledWith(expect.any(Function), delay);
     });
   });
 

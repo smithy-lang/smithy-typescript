@@ -10,6 +10,7 @@ import { getTransformedHeaders } from "./get-transformed-headers";
 import { setConnectionTimeout } from "./set-connection-timeout";
 import { setSocketKeepAlive } from "./set-socket-keep-alive";
 import { setSocketTimeout } from "./set-socket-timeout";
+import { timing } from "./timing";
 import { writeRequestBody } from "./write-request-body";
 
 export { NodeHttpHandlerOptions };
@@ -154,12 +155,12 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       const resolve = async (arg: { response: HttpResponse }) => {
         await writeRequestBodyPromise;
-        timeouts.forEach(clearTimeout);
+        timeouts.forEach(timing.clearTimeout);
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
         await writeRequestBodyPromise;
-        timeouts.forEach(clearTimeout);
+        timeouts.forEach(timing.clearTimeout);
         _reject(arg);
       };
 
@@ -182,7 +183,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // If the request is taking a long time, check socket usage and potentially warn.
       // This warning will be cancelled if the request resolves.
       timeouts.push(
-        setTimeout(
+        timing.setTimeout(
           () => {
             this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
               agent,
@@ -287,7 +288,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       }
 
       writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch((e) => {
-        timeouts.forEach(clearTimeout);
+        timeouts.forEach(timing.clearTimeout);
         return _reject(e);
       });
     });

@@ -2,7 +2,7 @@ import { SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
 import util from "util";
-import { afterAll, beforeAll, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
 
@@ -89,7 +89,9 @@ describe(sdkStreamMixin.name, () => {
     });
 
     it("should transform the stream to string with utf-8 encoding by default", async () => {
-      vi.mocked(fromArrayBuffer).mockImplementation(vi.requireActual("@smithy/util-buffer-from").fromArrayBuffer);
+      vi.mocked(fromArrayBuffer).mockImplementation(
+        (await vi.importActual("@smithy/util-buffer-from") as any).fromArrayBuffer
+      );
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("foo")]);
       const transformed = await sdkStream.transformToString();
@@ -99,7 +101,7 @@ describe(sdkStreamMixin.name, () => {
     it.each([undefined, "utf-8", "ascii", "base64", "latin1", "binary"])(
       "should transform the stream to string with %s encoding",
       async (encoding) => {
-        vi.mocked(fromArrayBuffer).mockReturnValue({ toString: toStringMock });
+        vi.mocked(fromArrayBuffer).mockReturnValue({ toString: toStringMock } as any);
         const sdkStream = sdkStreamMixin(passThrough);
         await writeDataToStream(passThrough, [Buffer.from("foo")]);
         await sdkStream.transformToString(encoding);
@@ -110,17 +112,17 @@ describe(sdkStreamMixin.name, () => {
     it.each(["ibm866", "iso-8859-2", "koi8-r", "macintosh", "windows-874", "gbk", "gb18030", "euc-jp"])(
       "should transform the stream to string with TextDecoder config %s",
       async (encoding) => {
-        vi.spyOn(util, "TextDecoder").mockImplementation(
+        vi.spyOn(global, "TextDecoder").mockImplementation(
           () =>
             ({
               decode: vi.fn(),
             }) as any
         );
-        vi.mocked(fromArrayBuffer).mockReturnValue({ toString: toStringMock });
+        vi.mocked(fromArrayBuffer).mockReturnValue({ toString: toStringMock } as any);
         const sdkStream = sdkStreamMixin(passThrough);
         await writeDataToStream(passThrough, [Buffer.from("foo")]);
         await sdkStream.transformToString(encoding as BufferEncoding);
-        expect(util.TextDecoder).toBeCalledWith(encoding);
+        expect(TextDecoder).toBeCalledWith(encoding);
       }
     );
 

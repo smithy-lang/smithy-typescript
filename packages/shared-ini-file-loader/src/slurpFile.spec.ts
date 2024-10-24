@@ -17,12 +17,12 @@ describe("slurpFile", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.resetModules();
   });
 
   describe("makes one readFile call for a filepath irrespective of slurpFile calls", () => {
-    // @ts-ignore: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/34617
     it.each([10, 100, 1000, 10000])("parallel calls: %d ", async (num: number) => {
-        const { slurpFile } = require("./slurpFile");
+        const { slurpFile } = await import("./slurpFile");
         const mockPath = "/mock/path";
         const mockPathContent = getMockFileContents(mockPath);
 
@@ -36,7 +36,7 @@ describe("slurpFile", () => {
     });
 
     it("two parallel calls and one sequential call", async () =>  {
-        const { slurpFile } = require("./slurpFile");
+        const { slurpFile } = await import("./slurpFile");
         const mockPath = "/mock/path";
         const mockPathContent = getMockFileContents(mockPath);
 
@@ -57,7 +57,7 @@ describe("slurpFile", () => {
   });
 
   it("makes multiple readFile calls with based on filepaths", async () =>  {
-      const { slurpFile } = require("./slurpFile");
+      const { slurpFile } = await import("./slurpFile");
 
       const mockPath1 = "/mock/path/1";
       const mockPathContent1 = getMockFileContents(mockPath1);
@@ -84,7 +84,7 @@ describe("slurpFile", () => {
   });
 
   it("makes multiple readFile calls when called with ignoreCache option", async () =>  {
-      const { slurpFile } = require("./slurpFile");
+      const { slurpFile } = await import("./slurpFile");
 
       const mockPath1 = "/mock/path/1";
       const mockPathContent1 = getMockFileContents(mockPath1);

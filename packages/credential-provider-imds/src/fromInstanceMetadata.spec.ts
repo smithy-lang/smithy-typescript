@@ -288,8 +288,7 @@ describe("fromInstanceMetadata", () => {
     await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
   });
 
-  // ToDo: Investigate why Jest29 throws TypeError: Class constructor cannot be invoked without 'new'
-  it.skip("allows blocking imdsv1 fallback", async () => {
+  it("allows blocking imdsv1 fallback", async () => {
     const tokenError = Object.assign(new Error("Error"), { statusCode: 406 });
 
     vi.mocked(httpRequest).mockRejectedValueOnce(tokenError);
@@ -300,7 +299,6 @@ describe("fromInstanceMetadata", () => {
     const fromInstanceMetadataFunc = fromInstanceMetadata({
       ec2MetadataV1Disabled: true,
     });
-    await fromInstanceMetadataFunc();
     await expect(() => fromInstanceMetadataFunc()).rejects.toBeInstanceOf(InstanceMetadataV1FallbackError);
   });
 });

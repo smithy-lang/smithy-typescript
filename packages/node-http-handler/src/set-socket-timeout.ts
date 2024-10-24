@@ -1,4 +1,5 @@
 import { ClientRequest } from "http";
+import { timing } from "./timing";
 
 const DEFER_EVENT_LISTENER_TIME = 3000;
 
@@ -20,7 +21,7 @@ export const setSocketTimeout = (
     return 0;
   }
 
-  return setTimeout(
+  return timing.setTimeout(
     registerTimeout.bind(null, timeoutInMs === 0 ? 0 : DEFER_EVENT_LISTENER_TIME),
     DEFER_EVENT_LISTENER_TIME
   );

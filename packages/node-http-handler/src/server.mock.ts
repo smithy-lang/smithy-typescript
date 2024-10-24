@@ -5,6 +5,7 @@ import { createServer as createHttp2Server, Http2Server } from "http2";
 import { createServer as createHttpsServer, Server as HttpsServer } from "https";
 import { join } from "path";
 import { Readable } from "stream";
+import { timing } from "./timing";
 
 const fixturesDir = join(__dirname, "..", "fixtures");
 
@@ -33,13 +34,13 @@ export const createResponseFunctionWithDelay =
   (httpResp: HttpResponse, delay: number) => (request: IncomingMessage, response: ServerResponse) => {
     response.statusCode = httpResp.statusCode;
     setResponseHeaders(response, httpResp.headers);
-    setTimeout(() => setResponseBody(response, httpResp.body), delay);
+    timing.setTimeout(() => setResponseBody(response, httpResp.body), delay);
   };
 
 export const createContinueResponseFunction =
   (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
     response.writeContinue();
-    setTimeout(() => {
+    timing.setTimeout(() => {
       createResponseFunction(httpResp)(request, response);
     }, 100);
   };

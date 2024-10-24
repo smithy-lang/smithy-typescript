@@ -1,6 +1,6 @@
 import { homedir } from "os";
 import { sep } from "path";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";
 
@@ -30,6 +30,7 @@ describe(getHomeDir.name, () => {
   afterEach(() => {
     process.env = OLD_ENV;
     vi.clearAllMocks();
+    vi.resetModules();
   });
 
   it("returns value in process.env.HOME first", () => {
@@ -70,28 +71,26 @@ describe(getHomeDir.name, () => {
     expect(processGeteuidSpy).toHaveBeenCalledTimes(1);
   });
 
-  describe("makes one homedir call irrespective of getHomeDir calls", () => {
-    const testSingleHomeDirCall = (num: number) => {
-      vi.isolateModules(() => {
-        const { getHomeDir } = require("./getHomeDir");
-        process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
+  describe("makes one homedir call irrespective of getHomeDir calls", async () => {
+    const testSingleHomeDirCall = async (num: number) => {
+      const { getHomeDir } = await import("./getHomeDir");
+      process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
 
-        expect(homedir).not.toHaveBeenCalled();
-        const homeDirArr = Array(num)
-          .fill(num)
-          .map(() => getHomeDir());
-        expect(homeDirArr).toStrictEqual(Array(num).fill(mockHomeDir));
+      expect(homedir).not.toHaveBeenCalled();
+      const homeDirArr = Array(num)
+        .fill(num)
+        .map(() => getHomeDir());
+      expect(homeDirArr).toStrictEqual(Array(num).fill(mockHomeDir));
 
-        // There is one homedir call even through getHomeDir is called num times.
-        expect(homedir).toHaveBeenCalledTimes(1);
-      });
+      // There is one homedir call even through getHomeDir is called num times.
+      expect(homedir).toHaveBeenCalledTimes(1);
     };
 
     describe("when geteuid is available", () => {
-      it.each([10, 100, 1000, 10000])("calls: %d ", (num: number) => {
+      it.each([10, 100, 1000, 10000])("calls: %d ", async (num: number) => {
         const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
         expect(processGeteuidSpy).not.toHaveBeenCalled();
-        testSingleHomeDirCall(num);
+        await testSingleHomeDirCall(num);
         expect(processGeteuidSpy).toHaveBeenCalledTimes(num);
       });
     });
@@ -112,35 +111,34 @@ describe(getHomeDir.name, () => {
     });
   });
 
-  describe("makes multiple homedir calls with based on UIDs", () => {
-    it.each([2, 10, 100])("calls: %d ", (num: number) => {
-      vi.isolateModules(() => {
-        const { getHomeDir } = require("./getHomeDir");
-        const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
-        for (let i = 0; i < num; i++) {
-          vi.spyOn(process, "geteuid").mockReturnValueOnce(mockUid + i);
-        }
-        process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
+  describe("makes multiple homedir calls with based on UIDs", async () => {
+    it.each([2, 10, 100])("calls: %d ", async (num: number) => {
+      const { getHomeDir } = await import("./getHomeDir");
+      const processGeteuidSpy = vi.spyOn(process, "geteuid");
+      processGeteuidSpy.mockReturnValue(mockUid);
+      for (let i = 0; i < num; i++) {
+        processGeteuidSpy.mockReturnValueOnce(mockUid + i);
+      }
+      process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
 
-        expect(homedir).not.toHaveBeenCalled();
-        expect(processGeteuidSpy).not.toHaveBeenCalled();
-        const homeDirArr = Array(num)
-          .fill(num)
-          .map(() => getHomeDir());
-        expect(homeDirArr).toStrictEqual(Array(num).fill(mockHomeDir));
+      expect(homedir).not.toHaveBeenCalled();
+      expect(processGeteuidSpy).not.toHaveBeenCalled();
+      const homeDirArr = Array(num)
+        .fill(num)
+        .map(() => getHomeDir());
+      expect(homeDirArr).toStrictEqual(Array(num).fill(mockHomeDir));
 
-        // There is num homedir calls as each call returns different UID
-        expect(homedir).toHaveBeenCalledTimes(num);
-        expect(processGeteuidSpy).toHaveBeenCalledTimes(num);
+      // There is num homedir calls as each call returns different UID
+      expect(homedir).toHaveBeenCalledTimes(num);
+      expect(processGeteuidSpy).toHaveBeenCalledTimes(num);
 
-        const homeDir = getHomeDir();
-        expect(homeDir).toStrictEqual(mockHomeDir);
+      const homeDir = getHomeDir();
+      expect(homeDir).toStrictEqual(mockHomeDir);
 
-        // No extra calls made to homedir, as mockUid is same as the first call.
-        expect(homedir).toHaveBeenCalledTimes(num);
-        // Extra call was made to geteuid to get the same UID as the first call.
-        expect(processGeteuidSpy).toHaveBeenCalledTimes(num + 1);
-      });
+      // No extra calls made to homedir, as mockUid is same as the first call.
+      expect(homedir).toHaveBeenCalledTimes(num);
+      // Extra call was made to geteuid to get the same UID as the first call.
+      expect(processGeteuidSpy).toHaveBeenCalledTimes(num + 1);
     });
   });
 });

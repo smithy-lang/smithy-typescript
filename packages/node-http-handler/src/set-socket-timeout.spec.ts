@@ -1,12 +1,20 @@
 import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setSocketTimeout } from "./set-socket-timeout";
+import { timing } from "./timing";
 
 describe("setSocketTimeout", () => {
   const clientRequest: any = {
     destroy: vi.fn(),
     setTimeout: vi.fn(),
   };
+
+  vi.spyOn(timing, "setTimeout").mockImplementation(((fn: Function, ms: number) => {
+    return setTimeout(fn, ms);
+  }) as any);
+  vi.spyOn(timing, "clearTimeout").mockImplementation(((timer: any) => {
+    return clearTimeout(timer);
+  }) as any);
 
   beforeEach(() => {
     vi.clearAllMocks();

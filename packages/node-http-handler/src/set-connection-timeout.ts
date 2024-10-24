@@ -1,5 +1,7 @@
 import { ClientRequest } from "http";
 
+import { timing } from "./timing";
+
 const DEFER_EVENT_LISTENER_TIME = 1000;
 
 export const setConnectionTimeout = (
@@ -13,7 +15,7 @@ export const setConnectionTimeout = (
 
   const registerTimeout = (offset: number) => {
     // Throw a connecting timeout error unless a connection is made within time.
-    const timeoutId = setTimeout(() => {
+    const timeoutId = timing.setTimeout(() => {
       request.destroy();
       reject(
         Object.assign(new Error(`Socket timed out without establishing a connection within ${timeoutInMs} ms`), {
@@ -25,10 +27,10 @@ export const setConnectionTimeout = (
     const doWithSocket = (socket: typeof request.socket) => {
       if (socket?.connecting) {
         socket.on("connect", () => {
-          clearTimeout(timeoutId);
+          timing.clearTimeout(timeoutId);
         });
       } else {
-        clearTimeout(timeoutId);
+        timing.clearTimeout(timeoutId);
       }
     };
 
@@ -44,5 +46,5 @@ export const setConnectionTimeout = (
     return 0;
   }
 
-  return setTimeout(registerTimeout.bind(null, DEFER_EVENT_LISTENER_TIME), DEFER_EVENT_LISTENER_TIME);
+  return timing.setTimeout(registerTimeout.bind(null, DEFER_EVENT_LISTENER_TIME), DEFER_EVENT_LISTENER_TIME);
 };

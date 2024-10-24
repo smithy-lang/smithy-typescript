@@ -1,4 +1,5 @@
 import { ClientRequest } from "http";
+import { timing } from "./timing";
 
 const DEFER_EVENT_LISTENER_TIME = 3000;
 
@@ -31,5 +32,5 @@ export const setSocketKeepAlive = (
     return 0;
   }
 
-  return setTimeout(registerListener, deferTimeMs);
+  return timing.setTimeout(registerListener, deferTimeMs);
 };

@@ -2,6 +2,7 @@ import { HttpRequest } from "@smithy/types";
 import { ClientRequest } from "http";
 import { ClientHttp2Stream } from "http2";
 import { Readable } from "stream";
+import { timing } from "./timing";
 
 const MIN_WAIT_TIME = 1000;
 
@@ -26,16 +27,16 @@ export async function writeRequestBody(
   if (expect === "100-continue") {
     await Promise.race<void>([
       new Promise((resolve) => {
-        timeoutId = Number(setTimeout(resolve, Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
+        timeoutId = Number(timing.setTimeout(resolve, Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
       }),
       new Promise((resolve) => {
         httpRequest.on("continue", () => {
-          clearTimeout(timeoutId);
+          timing.clearTimeout(timeoutId);
           resolve();
         });
         httpRequest.on("error", () => {
           hasError = true;
-          clearTimeout(timeoutId);
+          timing.clearTimeout(timeoutId);
           // this handler does not reject with the error
           // because there is already an error listener
           // on the request in node-http-handler
