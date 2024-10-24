@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from "fs";
 import { resolve } from "path";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { resolveEndpoint } from "./resolveEndpoint";
 import { EndpointError } from "./types";

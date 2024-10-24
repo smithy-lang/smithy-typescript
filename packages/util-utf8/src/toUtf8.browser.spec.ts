@@ -1,8 +1,5 @@
-/**
- * @jest-environment jsdom
- */
 import type { Encoder } from "@smithy/types";
-import { describe, expect,test as it, vi } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { toUtf8 } from "./toUtf8.browser";
 

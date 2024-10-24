@@ -1,4 +1,4 @@
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { Int64 } from "./Int64";
 

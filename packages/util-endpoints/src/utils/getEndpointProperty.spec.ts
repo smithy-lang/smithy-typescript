@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { EndpointError } from "../types";
 import { evaluateTemplate } from "./evaluateTemplate";

@@ -5,6 +5,7 @@ import { createServer as createHttp2Server, Http2Server } from "http2";
 import { createServer as createHttpsServer, Server as HttpsServer } from "https";
 import { join } from "path";
 import { Readable } from "stream";
+
 import { timing } from "./timing";
 
 const fixturesDir = join(__dirname, "..", "fixtures");

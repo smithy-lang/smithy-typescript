@@ -60,7 +60,7 @@ describe("fromInstanceMetadata", () => {
 
   beforeEach(() => {
     vi.mocked(staticStabilityProvider).mockImplementation((input) => input);
-    vi.mocked(getInstanceMetadataEndpoint).mockResolvedValue({ hostname });
+    vi.mocked(getInstanceMetadataEndpoint).mockResolvedValue({ hostname } as any);
     (isImdsCredentials as unknown as any).mockReturnValue(true);
     vi.mocked(providerConfigFromInit).mockReturnValue({
       timeout: mockTimeout,
@@ -74,9 +74,9 @@ describe("fromInstanceMetadata", () => {
 
   it("gets token and profile name to fetch credentials", async () => {
     vi.mocked(httpRequest)
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
@@ -93,9 +93,9 @@ describe("fromInstanceMetadata", () => {
 
   it("trims profile returned name from IMDS", async () => {
     vi.mocked(httpRequest)
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce("   " + mockProfile + "  ")
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(("   " + mockProfile + "  ") as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
@@ -135,9 +135,9 @@ describe("fromInstanceMetadata", () => {
 
   it("throws CredentialsProviderError if credentials returned are incorrect", async () => {
     vi.mocked(httpRequest)
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     (isImdsCredentials as unknown as any).mockReturnValueOnce(false);
@@ -154,7 +154,9 @@ describe("fromInstanceMetadata", () => {
 
   it("throws Error if httpRequest for profile fails", async () => {
     const mockError = new Error("profile not found");
-    vi.mocked(httpRequest).mockResolvedValueOnce(mockToken).mockRejectedValueOnce(mockError);
+    vi.mocked(httpRequest)
+      .mockResolvedValueOnce(mockToken as any)
+      .mockRejectedValueOnce(mockError);
     vi.mocked(retry).mockImplementation((fn: any) => fn());
 
     await expect(fromInstanceMetadata()()).rejects.toEqual(mockError);
@@ -165,8 +167,8 @@ describe("fromInstanceMetadata", () => {
   it("throws Error if httpRequest for credentials fails", async () => {
     const mockError = new Error("creds not found");
     vi.mocked(httpRequest)
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
       .mockRejectedValueOnce(mockError);
     vi.mocked(retry).mockImplementation((fn: any) => fn());
 
@@ -178,9 +180,9 @@ describe("fromInstanceMetadata", () => {
 
   it("throws SyntaxError if httpRequest returns unparseable creds", async () => {
     vi.mocked(httpRequest)
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(".");
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce("." as any);
     vi.mocked(retry).mockImplementation((fn: any) => fn());
 
     await expect(fromInstanceMetadata()()).rejects.toThrow("Unexpected token");
@@ -200,9 +202,9 @@ describe("fromInstanceMetadata", () => {
 
   it("should call staticStabilityProvider with the credential loader", async () => {
     vi.mocked(httpRequest)
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
@@ -222,10 +224,10 @@ describe("fromInstanceMetadata", () => {
 
       vi.mocked(httpRequest)
         .mockRejectedValueOnce(tokenError)
-        .mockResolvedValueOnce(mockProfile)
-        .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
-        .mockResolvedValueOnce(mockProfile)
-        .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+        .mockResolvedValueOnce(mockProfile as any)
+        .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any)
+        .mockResolvedValueOnce(mockProfile as any)
+        .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
       const fromInstanceMetadataFunc = fromInstanceMetadata();
       await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
@@ -238,10 +240,10 @@ describe("fromInstanceMetadata", () => {
 
         vi.mocked(httpRequest)
           .mockRejectedValueOnce(tokenError)
-          .mockResolvedValueOnce(mockProfile)
-          .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
-          .mockResolvedValueOnce(mockProfile)
-          .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+          .mockResolvedValueOnce(mockProfile as any)
+          .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any)
+          .mockResolvedValueOnce(mockProfile as any)
+          .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
         const fromInstanceMetadataFunc = fromInstanceMetadata();
         await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
@@ -255,11 +257,11 @@ describe("fromInstanceMetadata", () => {
 
     vi.mocked(httpRequest)
       .mockRejectedValueOnce(tokenError)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any)
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
@@ -274,11 +276,11 @@ describe("fromInstanceMetadata", () => {
 
     vi.mocked(httpRequest)
       .mockRejectedValueOnce(tokenError)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
-      .mockResolvedValueOnce(mockToken)
-      .mockResolvedValueOnce(mockProfile)
-      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any)
+      .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(mockProfile as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);

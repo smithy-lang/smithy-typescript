@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { resolveEndpoint } from "./resolveEndpoint";

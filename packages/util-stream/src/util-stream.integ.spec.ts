@@ -1,11 +1,12 @@
 import { HttpHandler, HttpResponse } from "@smithy/protocol-http";
 import { HttpRequest as IHttpRequest } from "@smithy/types";
 import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
-import { requireRequestsFrom } from "@smithy/util-test";
 import { fromUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 import { Weather } from "weather";
+
+import { requireRequestsFrom } from "../../../private/util-test/src/index";
 
 describe("util-stream", () => {
   describe(Weather.name, () => {

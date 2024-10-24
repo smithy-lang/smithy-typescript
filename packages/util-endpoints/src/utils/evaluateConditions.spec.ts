@@ -1,4 +1,4 @@
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
 import { ConditionObject, EvaluateOptions } from "../types";

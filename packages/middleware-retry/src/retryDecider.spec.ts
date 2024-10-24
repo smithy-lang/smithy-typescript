@@ -5,7 +5,7 @@ import {
   isTransientError,
 } from "@smithy/service-error-classification";
 import { SdkError } from "@smithy/types";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { defaultRetryDecider } from "./retryDecider";
 

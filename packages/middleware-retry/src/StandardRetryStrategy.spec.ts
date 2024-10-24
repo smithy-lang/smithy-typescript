@@ -8,7 +8,7 @@ import {
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
 import { v4 } from "uuid";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
@@ -24,7 +24,7 @@ vi.mock("@smithy/protocol-http");
 vi.mock("uuid");
 
 describe("defaultStrategy", () => {
-  let next: vi.Mock; // variable for next mock function in utility methods
+  let next: any; // variable for next mock function in utility methods
   const maxAttempts = 3;
 
   const mockDefaultRetryQuota = {
@@ -76,7 +76,7 @@ describe("defaultStrategy", () => {
       output: { $metadata: {} },
     };
 
-    next = jest
+    next = vi
       .fn()
       .mockRejectedValueOnce(mockError)
       .mockRejectedValueOnce(mockError)

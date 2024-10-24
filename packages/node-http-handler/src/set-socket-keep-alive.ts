@@ -1,4 +1,5 @@
 import { ClientRequest } from "http";
+
 import { timing } from "./timing";
 
 const DEFER_EVENT_LISTENER_TIME = 3000;

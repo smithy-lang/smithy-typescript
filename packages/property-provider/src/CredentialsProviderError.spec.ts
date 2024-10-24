@@ -1,4 +1,4 @@
-import { describe, expect,test as it, vi } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { CredentialsProviderError } from "./CredentialsProviderError";
 import { ProviderError } from "./ProviderError";

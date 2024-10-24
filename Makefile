@@ -18,3 +18,8 @@ generate-protocol-tests:
 
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals)
+
+turbo-clean:
+	@read -p "Are you sure you want to delete your local cache? [y/N]: " ans && [ $${ans:-N} = y ]
+	@echo "\nDeleted cache folders: \n--------"
+	@find . -name '.turbo' -type d -prune -print -exec rm -rf '{}' + && echo '\n'

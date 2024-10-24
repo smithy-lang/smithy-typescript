@@ -1,7 +1,7 @@
 import { Checksum } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { headStream } from "../headStream.browser";
 import { ChecksumStream as ChecksumStreamWeb } from "./ChecksumStream.browser";

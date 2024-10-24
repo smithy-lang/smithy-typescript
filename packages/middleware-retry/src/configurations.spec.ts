@@ -1,6 +1,6 @@
 import { normalizeProvider } from "@smithy/util-middleware";
 import { AdaptiveRetryStrategy, DEFAULT_MAX_ATTEMPTS, StandardRetryStrategy } from "@smithy/util-retry";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   CONFIG_MAX_ATTEMPTS,

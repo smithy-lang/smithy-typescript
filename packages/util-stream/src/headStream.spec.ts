@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { headStream } from "./headStream";
 import { headStream as headWebStream } from "./headStream.browser";

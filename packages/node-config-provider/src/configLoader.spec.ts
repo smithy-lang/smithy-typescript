@@ -1,6 +1,6 @@
 import { chain, fromStatic, memoize } from "@smithy/property-provider";
 import { Profile } from "@smithy/types";
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";

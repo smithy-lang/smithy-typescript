@@ -1,4 +1,4 @@
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { getAttr } from "../lib";
 import { evaluateTemplate } from "./evaluateTemplate";

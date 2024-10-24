@@ -1,8 +1,5 @@
-/**
- * @jest-environment jsdom
- */
 import bowser from "bowser";
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { DEFAULTS_MODE_OPTIONS } from "./constants";
 import { resolveDefaultsModeConfig } from "./resolveDefaultsModeConfig";

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { getEndpointProperties } from "./getEndpointProperties";
 import { getEndpointProperty } from "./getEndpointProperty";

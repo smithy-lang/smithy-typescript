@@ -1,6 +1,6 @@
 // ToDo: Change to "fs/promises" when supporting nodejs>=14
 import { promises } from "fs";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getSSOTokenFilepath } from "./getSSOTokenFilepath";
 import { getSSOTokenFromFile } from "./getSSOTokenFromFile";

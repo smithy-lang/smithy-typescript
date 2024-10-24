@@ -1,7 +1,6 @@
 import { SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
-import util from "util";
 import { afterAll, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
@@ -90,7 +89,7 @@ describe(sdkStreamMixin.name, () => {
 
     it("should transform the stream to string with utf-8 encoding by default", async () => {
       vi.mocked(fromArrayBuffer).mockImplementation(
-        (await vi.importActual("@smithy/util-buffer-from") as any).fromArrayBuffer
+        ((await vi.importActual("@smithy/util-buffer-from")) as any).fromArrayBuffer
       );
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("foo")]);

@@ -1,5 +1,5 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { afterAll, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { fromEnv, GetterFromEnv } from "./fromEnv";
 
@@ -21,7 +21,7 @@ describe("fromEnv", () => {
     });
 
     describe("CredentialsProviderError", () => {
-      it("is behaving as expected cross-package in jest", () => {
+      it("is behaving as expected cross-package in vitest", () => {
         expect(new CredentialsProviderError("msg", {}).message).toEqual("msg");
         expect(new CredentialsProviderError("msg", {}).name).toEqual("CredentialsProviderError");
       });

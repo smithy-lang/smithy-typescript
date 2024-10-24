@@ -1,5 +1,5 @@
 import { EvaluateOptions } from "@smithy/types";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
 import { ConditionObject, EndpointRuleObject } from "../types";

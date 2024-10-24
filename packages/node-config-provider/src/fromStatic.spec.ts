@@ -1,5 +1,5 @@
 import { fromStatic as convertToProvider } from "@smithy/property-provider";
-import { describe, expect,test as it, vi } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { fromStatic } from "./fromStatic";
 
