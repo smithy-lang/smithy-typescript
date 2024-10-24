@@ -1,4 +1,4 @@
-import { describe, expect,test as it, vi } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { chain } from "./chain";
 import { ProviderError } from "./ProviderError";

@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { fromArrayBuffer, fromString } from "./";
 

@@ -23,5 +23,5 @@
     "jsxFragmentFactory": "JSX.Fragment"
   },
   "include": ["packages/", "smithy-typescript-ssdk-libs/"],
-  "exclude": ["node_modules/", "**/*.spec.ts"]
+  "exclude": ["node_modules/", "**/*.spec.ts", "vitest.*"]
 }

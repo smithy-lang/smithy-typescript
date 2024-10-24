@@ -1,5 +1,5 @@
 import { Message } from "@smithy/types";
-import { describe, expect,test as it, vi } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { SmithyMessageEncoderStream } from "./SmithyMessageEncoderStream";
 

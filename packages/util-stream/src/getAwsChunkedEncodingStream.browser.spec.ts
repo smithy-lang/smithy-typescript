@@ -1,6 +1,5 @@
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
-// @jest-environment jsdom
 import { getAwsChunkedEncodingStream } from "./getAwsChunkedEncodingStream.browser";
 
 describe(getAwsChunkedEncodingStream.name, () => {

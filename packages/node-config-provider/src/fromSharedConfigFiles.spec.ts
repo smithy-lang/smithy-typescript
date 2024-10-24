@@ -1,7 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
 import { ParsedIniData, Profile } from "@smithy/types";
-import { beforeEach, describe, expect,test as it, vi } from "vitest";
+import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 

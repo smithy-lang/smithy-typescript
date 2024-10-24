@@ -1,8 +1,5 @@
-import { describe, expect,test as it, vi } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
-/**
- * @jest-environment jsdom
- */
 import { fromUtf8 } from "./fromUtf8.browser";
 
 declare const global: any;

@@ -1,5 +1,5 @@
 import { DefaultRateLimiter, RateLimiter, RETRY_MODES } from "@smithy/util-retry";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";

@@ -1,5 +1,5 @@
 import { IniSectionType } from "@smithy/types";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { getConfigData } from "./getConfigData";
 import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";

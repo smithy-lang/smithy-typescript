@@ -80,9 +80,9 @@ describe("expectBoolean", () => {
   });
 
   describe("reluctantly", () => {
-    let consoleMock: any<void, [message?: any, ...optionalParams: any[]]>;
+    let consoleMock: any;
     beforeEach(() => {
-      consoleMock = vi.spyOn(logger, "warn").mockImplementation();
+      consoleMock = vi.spyOn(logger, "warn");
     });
 
     afterEach(() => {
@@ -119,9 +119,9 @@ describe("expectNumber", () => {
   });
 
   describe("reluctantly", () => {
-    let consoleMock: any<void, [message?: any, ...optionalParams: any[]]>;
+    let consoleMock: any;
     beforeEach(() => {
-      consoleMock = vi.spyOn(logger, "warn").mockImplementation();
+      consoleMock = vi.spyOn(logger, "warn");
     });
 
     afterEach(() => {
@@ -355,9 +355,9 @@ describe("expectString", () => {
   });
 
   describe("reluctantly", () => {
-    let consoleMock: any<void, [message?: any, ...optionalParams: any[]]>;
+    let consoleMock: any;
     beforeEach(() => {
-      consoleMock = vi.spyOn(logger, "warn").mockImplementation();
+      consoleMock = vi.spyOn(logger, "warn");
     });
 
     afterEach(() => {
@@ -399,7 +399,7 @@ describe("expectUnion", () => {
 });
 
 describe("strictParseDouble", () => {
-  describe("accepts non-numeric floats as strings", () => {
+  it("accepts non-numeric floats as strings", () => {
     expect(strictParseDouble("Infinity")).toEqual(Infinity);
     expect(strictParseDouble("-Infinity")).toEqual(-Infinity);
     expect(strictParseDouble("NaN")).toEqual(NaN);
@@ -452,12 +452,12 @@ describe("strictParseDouble", () => {
   });
 
   it.each([null, undefined])("accepts %s", (value) => {
-    expect(strictParseDouble(value)).toEqual(undefined);
+    expect(strictParseDouble(value as any)).toEqual(undefined);
   });
 });
 
 describe("strictParseFloat32", () => {
-  describe("accepts non-numeric floats as strings", () => {
+  it("accepts non-numeric floats as strings", () => {
     expect(strictParseFloat32("Infinity")).toEqual(Infinity);
     expect(strictParseFloat32("-Infinity")).toEqual(-Infinity);
     expect(strictParseFloat32("NaN")).toEqual(NaN);
@@ -516,7 +516,7 @@ describe("strictParseFloat32", () => {
   });
 
   it.each([null, undefined])("accepts %s", (value) => {
-    expect(strictParseFloat32(value)).toEqual(undefined);
+    expect(strictParseFloat32(value as any)).toEqual(undefined);
   });
 });
 
@@ -561,7 +561,7 @@ describe("limitedParseDouble", () => {
     });
   });
 
-  it.each([null, undefined])("accepts %s", (value) => {
+  it.each([null, undefined])("accepts %s", (value: any) => {
     expect(limitedParseDouble(value)).toEqual(undefined);
   });
 });
@@ -613,7 +613,7 @@ describe("limitedParseFloat32", () => {
     });
   });
 
-  it.each([null, undefined])("accepts %s", (value) => {
+  it.each([null, undefined])("accepts %s", (value: any) => {
     expect(limitedParseFloat32(value)).toEqual(undefined);
   });
 });
@@ -631,7 +631,7 @@ describe("strictParseLong", () => {
     expect(strictParseLong("1")).toEqual(1);
   });
 
-  it.each([null, undefined])("accepts %s", (value) => {
+  it.each([null, undefined])("accepts %s", (value: any) => {
     expect(strictParseLong(value)).toEqual(undefined);
   });
 
@@ -669,7 +669,7 @@ describe("strictParseInt32", () => {
     expect(strictParseInt32("1")).toEqual(1);
   });
 
-  it.each([null, undefined])("accepts %s", (value) => {
+  it.each([null, undefined])("accepts %s", (value: any) => {
     expect(strictParseInt32(value)).toEqual(undefined);
   });
 
@@ -711,7 +711,7 @@ describe("strictParseShort", () => {
     expect(strictParseShort("1")).toEqual(1);
   });
 
-  it.each([null, undefined])("accepts %s", (value) => {
+  it.each([null, undefined])("accepts %s", (value: any) => {
     expect(strictParseShort(value)).toEqual(undefined);
   });
 
@@ -755,7 +755,7 @@ describe("strictParseByte", () => {
     expect(strictParseByte("1")).toEqual(1);
   });
 
-  it.each([null, undefined])("accepts %s", (value) => {
+  it.each([null, undefined])("accepts %s", (value: any) => {
     expect(strictParseByte(value)).toEqual(undefined);
   });
 

@@ -11,6 +11,7 @@ import { NodeHttp2Handler, NodeHttp2HandlerOptions } from "./node-http2-handler"
 import { createMockHttp2Server, createResponseFunction, createResponseFunctionWithDelay } from "./server.mock";
 import { timing } from "./timing";
 
+// TODO(vitest): fix this test.
 describe.skip(NodeHttp2Handler.name, () => {
   let nodeH2Handler: NodeHttp2Handler;
 

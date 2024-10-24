@@ -1,5 +1,5 @@
 import { CONFIG_PREFIX_SEPARATOR } from "@smithy/shared-ini-file-loader";
-import { afterEach, beforeEach, describe, expect,test as it } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it } from "vitest";
 
 import { getEndpointUrlConfig } from "./getEndpointUrlConfig";
 

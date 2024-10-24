@@ -8,12 +8,12 @@
       "outputs": ["dist-types/**", "dist-cjs/**", "dist-es/**"]
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": []
+      "dependsOn": ["build", "^build"],
+      "cache": false
     },
     "test:integration": {
-      "dependsOn": ["build"],
-      "outputs": []
+      "dependsOn": ["build", "^build"],
+      "cache": false
     },
     "lint": {
       "outputs": []

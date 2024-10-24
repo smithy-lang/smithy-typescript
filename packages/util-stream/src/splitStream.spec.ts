@@ -1,7 +1,7 @@
 import { streamCollector as webStreamCollector } from "@smithy/fetch-http-handler";
 import { streamCollector } from "@smithy/node-http-handler";
 import { Readable } from "stream";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { splitStream } from "./splitStream";
 import { splitStream as splitWebStream } from "./splitStream.browser";

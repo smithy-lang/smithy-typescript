@@ -3,7 +3,7 @@ import { isServerError, isThrottlingError, isTransientError } from "@smithy/serv
 import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "./retryMiddleware";
 

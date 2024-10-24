@@ -1,10 +1,9 @@
-// @jest-environment jsdom
 import { streamCollector } from "@smithy/fetch-http-handler";
 import { SdkStreamMixin } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUtf8 } from "@smithy/util-utf8";
-import { afterEach, beforeAll, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin.browser";
 
@@ -14,7 +13,7 @@ vi.mock("@smithy/util-hex-encoding");
 vi.mock("@smithy/util-utf8");
 
 const mockStreamCollectorReturn = Uint8Array.from([117, 112, 113]);
-vi.mocked(streamCollector).mockReturnValue(mockStreamCollectorReturn);
+vi.mocked(streamCollector).mockReturnValue(Promise.resolve(mockStreamCollectorReturn));
 
 describe(sdkStreamMixin.name, () => {
   const expectAllTransformsToFail = async (sdkStream: SdkStreamMixin) => {
@@ -59,13 +58,15 @@ describe(sdkStreamMixin.name, () => {
 
   it("should throw if input stream is not a Blob or Web Stream instance", () => {
     const originalBlobCtr = global.Blob;
+    // @ts-expect-error
     global.Blob = undefined;
+    // @ts-expect-error
     global.ReadableStream = undefined;
     try {
       sdkStreamMixin({});
       fail("expect unexpected stream to fail");
     } catch (e) {
-      expect(e.message).toContain("unexpected stream implementation");
+      expect(e.message).toContain("Unexpected stream implementation");
       global.Blob = originalBlobCtr;
     }
   });
@@ -127,6 +128,7 @@ describe(sdkStreamMixin.name, () => {
     });
 
     it("should throw if TextDecoder is not available", async () => {
+      // @ts-expect-error
       global.TextDecoder = null;
       const utfLabel = "windows-1251";
       const sdkStream = sdkStreamMixin(payloadStream);
@@ -177,6 +179,7 @@ describe(sdkStreamMixin.name, () => {
     global.Blob = Blob as any;
 
     beforeEach(() => {
+      // @ts-expect-error
       global.ReadableStream = undefined;
       originalBlobCtr = global.Blob;
       vi.clearAllMocks();

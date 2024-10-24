@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { join } from "path";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";
 import { getSSOTokenFilepath } from "./getSSOTokenFilepath";

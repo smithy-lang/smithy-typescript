@@ -1,5 +1,5 @@
 import type { Encoder } from "@smithy/types";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { toUtf8 } from "./toUtf8";
 

@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import type { Encoder } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 

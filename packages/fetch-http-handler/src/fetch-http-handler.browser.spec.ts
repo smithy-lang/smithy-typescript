@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { FetchHttpHandler } from "./fetch-http-handler";
 
+// TODO(vitest): fix this test.
 describe.skip(FetchHttpHandler.name, () => {
   interface MockHttpRequestOptions {
     method?: string;

@@ -1,6 +1,5 @@
 import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
 
-// @jest-environment jsdom
 import { AsyncGzip } from "fflate";
 import { ReadableStream } from "web-streams-polyfill";
 

@@ -1,5 +1,5 @@
 import { join } from "path";
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { ENV_CREDENTIALS_PATH, getCredentialsFilepath } from "./getCredentialsFilepath";
 import { getHomeDir } from "./getHomeDir";

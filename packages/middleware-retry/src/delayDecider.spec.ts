@@ -1,5 +1,5 @@
 import { MAXIMUM_RETRY_DELAY } from "@smithy/util-retry";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { defaultDelayDecider } from "./delayDecider";
 

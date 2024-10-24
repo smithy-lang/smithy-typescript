@@ -7,16 +7,12 @@ describe(checkExceptions.name, () => {
 
   it(`throw AbortError if state is ${WaiterState.ABORTED}`, () => {
     const result = { state: WaiterState.ABORTED, reason };
-    expect(() => checkExceptions(result)).toThrowError(
-      JSON.stringify({ ...result, reason: "Request was aborted" }),
-    );
+    expect(() => checkExceptions(result)).toThrowError(JSON.stringify({ ...result, reason: "Request was aborted" }));
   });
 
   it(`throw TimeoutError if state is ${WaiterState.TIMEOUT}`, () => {
     const result = { state: WaiterState.TIMEOUT, reason };
-    expect(() => checkExceptions(result)).toThrowError(
-      JSON.stringify({ ...result, reason: "Waiter has timed out" })
-    );
+    expect(() => checkExceptions(result)).toThrowError(JSON.stringify({ ...result, reason: "Waiter has timed out" }));
   });
 
   it(`throw generic Error if state is ${WaiterState.RETRY}`, () => {

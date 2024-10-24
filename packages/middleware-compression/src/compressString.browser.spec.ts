@@ -1,6 +1,5 @@
 import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
 
-// @jest-environment jsdom
 import { toUint8Array } from "@smithy/util-utf8";
 import { gzip } from "fflate";
 

@@ -1,5 +1,5 @@
 import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
-import { describe, expect,test as it } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { collectBody } from "./collect-stream-body";
 

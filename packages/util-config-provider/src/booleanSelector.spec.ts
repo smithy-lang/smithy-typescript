@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect,test as it } from "vitest";
+import { beforeEach, describe, expect, test as it } from "vitest";
 
 import { booleanSelector } from "./booleanSelector";
 import { SelectorType } from "./types";
