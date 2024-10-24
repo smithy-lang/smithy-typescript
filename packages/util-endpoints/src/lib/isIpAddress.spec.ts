@@ -1,3 +1,5 @@
+import { describe, expect,test as it } from "vitest";
+
 import { isIpAddress } from "./isIpAddress";
 
 describe(isIpAddress.name, () => {

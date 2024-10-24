@@ -1,3 +1,5 @@
+import { describe, expect,test as it, vi } from "vitest";
+
 import { MessageEncoderStream } from "./MessageEncoderStream";
 
 describe("MessageEncoderStream", () => {
@@ -13,7 +15,7 @@ describe("MessageEncoderStream", () => {
     };
 
     const messageEncoderMock = {
-      encode: jest.fn().mockReturnValueOnce(new Uint8Array(1)).mockReturnValueOnce(new Uint8Array(2)),
+      encode: vi.fn().mockReturnValueOnce(new Uint8Array(1)).mockReturnValueOnce(new Uint8Array(2)),
     };
 
     const inputStream = async function* () {
@@ -49,7 +51,7 @@ describe("MessageEncoderStream", () => {
     };
 
     const messageEncoderMock = {
-      encode: jest.fn().mockReturnValueOnce(new Uint8Array(1)).mockReturnValueOnce(new Uint8Array(2)),
+      encode: vi.fn().mockReturnValueOnce(new Uint8Array(1)).mockReturnValueOnce(new Uint8Array(2)),
     };
 
     const inputStream = async function* () {

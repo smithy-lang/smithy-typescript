@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { map, ObjectMappingInstructions, SourceMappingInstructions, take } from "./object-mapping";
 
 describe("object mapping", () => {

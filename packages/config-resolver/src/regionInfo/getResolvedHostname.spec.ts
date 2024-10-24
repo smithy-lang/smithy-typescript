@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, test as it, vi } from "vitest";
+
 import { getResolvedHostname } from "./getResolvedHostname";
 
 describe(getResolvedHostname.name, () => {
@@ -5,7 +7,7 @@ describe(getResolvedHostname.name, () => {
   const mockHostname = "{region}.mockHostname.com";
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("returns hostname if available in regionHostname", () => {

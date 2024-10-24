@@ -1,3 +1,5 @@
+import { describe, expect,test as it } from "vitest";
+
 import { EndpointError } from "../types";
 import { getAttrPathList } from "./getAttrPathList";
 

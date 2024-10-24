@@ -1,11 +1,12 @@
 import { ProviderError } from "@smithy/property-provider";
 import http, { createServer } from "http";
 import nock from "nock";
+import { afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
 import { httpRequest } from "./httpRequest";
 
 describe("httpRequest", () => {
-  const requestSpy = jest.spyOn(http, "request");
+  const requestSpy = vi.spyOn(http, "request");
   let port: number;
   const hostname = "localhost";
   const path = "/";
@@ -28,7 +29,7 @@ describe("httpRequest", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("returns response", () => {

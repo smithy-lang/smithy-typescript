@@ -8,6 +8,7 @@ import {
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
 import { v4 } from "uuid";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
@@ -15,25 +16,25 @@ import { defaultRetryDecider } from "./retryDecider";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import { RetryQuota } from "./types";
 
-jest.mock("@smithy/service-error-classification");
-jest.mock("./delayDecider");
-jest.mock("./retryDecider");
-jest.mock("./defaultRetryQuota");
-jest.mock("@smithy/protocol-http");
-jest.mock("uuid");
+vi.mock("@smithy/service-error-classification");
+vi.mock("./delayDecider");
+vi.mock("./retryDecider");
+vi.mock("./defaultRetryQuota");
+vi.mock("@smithy/protocol-http");
+vi.mock("uuid");
 
 describe("defaultStrategy", () => {
-  let next: jest.Mock; // variable for next mock function in utility methods
+  let next: vi.Mock; // variable for next mock function in utility methods
   const maxAttempts = 3;
 
   const mockDefaultRetryQuota = {
-    hasRetryTokens: jest.fn().mockReturnValue(true),
-    retrieveRetryTokens: jest.fn().mockReturnValue(1),
-    releaseRetryTokens: jest.fn(),
+    hasRetryTokens: vi.fn().mockReturnValue(true),
+    retrieveRetryTokens: vi.fn().mockReturnValue(1),
+    releaseRetryTokens: vi.fn(),
   };
 
   const mockSuccessfulOperation = (maxAttempts: number, options?: { mockResponse?: string }) => {
-    next = jest.fn().mockResolvedValueOnce({
+    next = vi.fn().mockResolvedValueOnce({
       response: options?.mockResponse,
       output: { $metadata: {} },
     });
@@ -44,7 +45,7 @@ describe("defaultStrategy", () => {
 
   const mockFailedOperation = async (maxAttempts: number, options?: { mockError?: Error }) => {
     const mockError = options?.mockError ?? new Error("mockError");
-    next = jest.fn().mockRejectedValue(mockError);
+    next = vi.fn().mockRejectedValue(mockError);
 
     const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
     try {
@@ -62,7 +63,7 @@ describe("defaultStrategy", () => {
       output: { $metadata: {} },
     };
 
-    next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockResponse);
+    next = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockResponse);
 
     const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
     return retryStrategy.retry(next, { request: { headers: {} } } as any);
@@ -86,21 +87,21 @@ describe("defaultStrategy", () => {
   };
 
   beforeEach(() => {
-    (isThrottlingError as jest.Mock).mockReturnValue(true);
-    (defaultDelayDecider as jest.Mock).mockReturnValue(0);
-    (defaultRetryDecider as jest.Mock).mockReturnValue(true);
-    (getDefaultRetryQuota as jest.Mock).mockReturnValue(mockDefaultRetryQuota);
-    (HttpRequest as unknown as jest.Mock).mockReturnValue({
-      isInstance: jest.fn().mockReturnValue(false),
+    vi.mocked(isThrottlingError).mockReturnValue(true);
+    vi.mocked(defaultDelayDecider).mockReturnValue(0);
+    vi.mocked(defaultRetryDecider).mockReturnValue(true);
+    vi.mocked(getDefaultRetryQuota).mockReturnValue(mockDefaultRetryQuota);
+    (HttpRequest as unknown as any).mockReturnValue({
+      isInstance: vi.fn().mockReturnValue(false),
     });
-    (HttpResponse as unknown as jest.Mock).mockReturnValue({
-      isInstance: jest.fn().mockReturnValue(false),
+    (HttpResponse as unknown as any).mockReturnValue({
+      isInstance: vi.fn().mockReturnValue(false),
     });
-    (v4 as jest.Mock).mockReturnValue("42");
+    vi.mocked(v4).mockReturnValue("42");
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("sets maxAttemptsProvider as class member variable", () => {
@@ -120,7 +121,7 @@ describe("defaultStrategy", () => {
     const maxAttempts = 1;
     const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
     for (const error of nonStandardErrors) {
-      next = jest.fn().mockRejectedValue(error);
+      next = vi.fn().mockRejectedValue(error);
       expect(retryStrategy.retry(next, { request: { headers: {} } } as any)).rejects.toBeInstanceOf(Error);
     }
   });
@@ -137,7 +138,7 @@ describe("defaultStrategy", () => {
     });
 
     it("sets options.retryDecider if defined", () => {
-      const retryDecider = jest.fn();
+      const retryDecider = vi.fn();
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts), {
         retryDecider,
       });
@@ -157,7 +158,7 @@ describe("defaultStrategy", () => {
     });
 
     it("sets options.delayDecider if defined", () => {
-      const delayDecider = jest.fn();
+      const delayDecider = vi.fn();
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts), {
         delayDecider,
       });
@@ -188,15 +189,15 @@ describe("defaultStrategy", () => {
   describe("delayDecider", () => {
     describe("delayBase value passed", () => {
       const testDelayBasePassed = async (delayBaseToTest: number, mockThrottlingError: boolean) => {
-        (isThrottlingError as jest.Mock).mockReturnValueOnce(mockThrottlingError);
+        vi.mocked(isThrottlingError).mockReturnValueOnce(mockThrottlingError);
 
         const mockError = new Error();
         await mockSuccessAfterOneFail(maxAttempts, { mockError });
 
-        expect(isThrottlingError as jest.Mock).toHaveBeenCalledTimes(1);
-        expect(isThrottlingError as jest.Mock).toHaveBeenCalledWith(mockError);
-        expect(defaultDelayDecider as jest.Mock).toHaveBeenCalledTimes(1);
-        expect((defaultDelayDecider as jest.Mock).mock.calls[0][0]).toBe(delayBaseToTest);
+        expect(vi.mocked(isThrottlingError)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(isThrottlingError)).toHaveBeenCalledWith(mockError);
+        expect(vi.mocked(defaultDelayDecider)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(defaultDelayDecider).mock.calls[0][0]).toBe(delayBaseToTest);
       };
 
       it("should be equal to THROTTLING_RETRY_DELAY_BASE if error is throttling error", async () => {
@@ -211,41 +212,41 @@ describe("defaultStrategy", () => {
     describe("attempts value passed", () => {
       it("on successful operation", async () => {
         await mockSuccessfulOperation(maxAttempts);
-        expect(defaultDelayDecider as jest.Mock).not.toHaveBeenCalled();
+        expect(vi.mocked(defaultDelayDecider)).not.toHaveBeenCalled();
       });
 
       it("in case of single failure", async () => {
         await mockSuccessAfterOneFail(maxAttempts);
-        expect(defaultDelayDecider as jest.Mock).toHaveBeenCalledTimes(1);
-        expect((defaultDelayDecider as jest.Mock).mock.calls[0][1]).toBe(1);
+        expect(vi.mocked(defaultDelayDecider)).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(defaultDelayDecider).mock.calls[0][1]).toBe(1);
       });
 
       it("on all fails", async () => {
         await mockFailedOperation(maxAttempts);
-        expect(defaultDelayDecider as jest.Mock).toHaveBeenCalledTimes(2);
-        expect((defaultDelayDecider as jest.Mock).mock.calls[0][1]).toBe(1);
-        expect((defaultDelayDecider as jest.Mock).mock.calls[1][1]).toBe(2);
+        expect(vi.mocked(defaultDelayDecider)).toHaveBeenCalledTimes(2);
+        expect(vi.mocked(defaultDelayDecider).mock.calls[0][1]).toBe(1);
+        expect(vi.mocked(defaultDelayDecider).mock.calls[1][1]).toBe(2);
       });
     });
 
     describe("totalRetryDelay", () => {
       describe("when retry-after is not set", () => {
         it("should be equal to sum of values computed by delayDecider", async () => {
-          jest.spyOn(global, "setTimeout");
+          vi.spyOn(global, "setTimeout");
 
           const FIRST_DELAY = 100;
           const SECOND_DELAY = 200;
 
-          (defaultDelayDecider as jest.Mock).mockReturnValueOnce(FIRST_DELAY).mockReturnValueOnce(SECOND_DELAY);
+          vi.mocked(defaultDelayDecider).mockReturnValueOnce(FIRST_DELAY).mockReturnValueOnce(SECOND_DELAY);
 
           const maxAttempts = 3;
           const error = await mockFailedOperation(maxAttempts);
           expect(error.$metadata.totalRetryDelay).toEqual(FIRST_DELAY + SECOND_DELAY);
 
-          expect(defaultDelayDecider as jest.Mock).toHaveBeenCalledTimes(maxAttempts - 1);
+          expect(vi.mocked(defaultDelayDecider)).toHaveBeenCalledTimes(maxAttempts - 1);
           expect(setTimeout).toHaveBeenCalledTimes(maxAttempts - 1);
-          expect((setTimeout as unknown as jest.Mock).mock.calls[0][1]).toBe(FIRST_DELAY);
-          expect((setTimeout as unknown as jest.Mock).mock.calls[1][1]).toBe(SECOND_DELAY);
+          expect((setTimeout as unknown as any).mock.calls[0][1]).toBe(FIRST_DELAY);
+          expect((setTimeout as unknown as any).mock.calls[1][1]).toBe(SECOND_DELAY);
         });
       });
 
@@ -255,7 +256,7 @@ describe("defaultStrategy", () => {
           retryAfter: number | string,
           retryAfterHeaderName?: string
         ) => {
-          (defaultDelayDecider as jest.Mock).mockReturnValueOnce(delayDeciderInMs);
+          vi.mocked(defaultDelayDecider).mockReturnValueOnce(delayDeciderInMs);
 
           const maxAttempts = 2;
           const mockError = new Error();
@@ -265,20 +266,20 @@ describe("defaultStrategy", () => {
             },
           });
           const error = await mockFailedOperation(maxAttempts, { mockError });
-          expect(defaultDelayDecider as jest.Mock).toHaveBeenCalledTimes(maxAttempts - 1);
+          expect(vi.mocked(defaultDelayDecider)).toHaveBeenCalledTimes(maxAttempts - 1);
           expect(setTimeout).toHaveBeenCalledTimes(maxAttempts - 1);
 
           return error;
         };
 
         beforeEach(() => {
-          jest.spyOn(global, "setTimeout");
+          vi.spyOn(global, "setTimeout");
         });
 
         describe("uses retry-after value if it's greater than that from delayDecider", () => {
           beforeEach(() => {
             const { isInstance } = HttpResponse;
-            (isInstance as unknown as jest.Mock).mockReturnValueOnce(true);
+            (isInstance as unknown as any).mockReturnValueOnce(true);
           });
 
           describe("when value is in seconds", () => {
@@ -288,7 +289,7 @@ describe("defaultStrategy", () => {
 
               const error = await getErrorWithValues(delayDeciderInMs, retryAfterInSeconds, retryAfterHeaderName);
               expect(error.$metadata.totalRetryDelay).toEqual(retryAfterInSeconds * 1000);
-              expect((setTimeout as unknown as jest.Mock).mock.calls[0][1]).toBe(retryAfterInSeconds * 1000);
+              expect((setTimeout as unknown as any).mock.calls[0][1]).toBe(retryAfterInSeconds * 1000);
             };
 
             it("with header in small case", async () => {
@@ -302,7 +303,7 @@ describe("defaultStrategy", () => {
 
           it("when value is a Date", async () => {
             const mockDateNow = Date.now();
-            jest.spyOn(Date, "now").mockReturnValue(mockDateNow);
+            vi.spyOn(Date, "now").mockReturnValue(mockDateNow);
 
             const delayDeciderInMs = 2000;
             const retryAfterInSeconds = 3;
@@ -310,7 +311,7 @@ describe("defaultStrategy", () => {
 
             const error = await getErrorWithValues(delayDeciderInMs, retryAfterDate.toISOString());
             expect(error.$metadata.totalRetryDelay).toEqual(retryAfterInSeconds * 1000);
-            expect((setTimeout as unknown as jest.Mock).mock.calls[0][1]).toBe(retryAfterInSeconds * 1000);
+            expect((setTimeout as unknown as any).mock.calls[0][1]).toBe(retryAfterInSeconds * 1000);
           });
         });
 
@@ -320,7 +321,7 @@ describe("defaultStrategy", () => {
 
           const error = await getErrorWithValues(delayDeciderInMs, retryAfterInSeconds);
           expect(error.$metadata.totalRetryDelay).toEqual(delayDeciderInMs);
-          expect((setTimeout as unknown as jest.Mock).mock.calls[0][1]).toBe(delayDeciderInMs);
+          expect((setTimeout as unknown as any).mock.calls[0][1]).toBe(delayDeciderInMs);
         });
       });
     });
@@ -358,7 +359,7 @@ describe("defaultStrategy", () => {
       it("called once with retryTokenAmount in case of single failure", async () => {
         const retryTokens = 15;
         const { releaseRetryTokens, retrieveRetryTokens } = getDefaultRetryQuota(INITIAL_RETRY_TOKENS);
-        (retrieveRetryTokens as jest.Mock).mockReturnValueOnce(retryTokens);
+        vi.mocked(retrieveRetryTokens).mockReturnValueOnce(retryTokens);
 
         await mockSuccessAfterOneFail(maxAttempts);
         expect(releaseRetryTokens).toHaveBeenCalledTimes(1);
@@ -371,7 +372,7 @@ describe("defaultStrategy", () => {
 
         const { releaseRetryTokens, retrieveRetryTokens } = getDefaultRetryQuota(INITIAL_RETRY_TOKENS);
 
-        (retrieveRetryTokens as jest.Mock).mockReturnValueOnce(retryTokensFirst).mockReturnValueOnce(retryTokensSecond);
+        vi.mocked(retrieveRetryTokens).mockReturnValueOnce(retryTokensFirst).mockReturnValueOnce(retryTokensSecond);
 
         await mockSuccessAfterTwoFails(maxAttempts);
         expect(releaseRetryTokens).toHaveBeenCalledTimes(1);
@@ -416,27 +417,27 @@ describe("defaultStrategy", () => {
       expect(response).toStrictEqual(mockResponse);
       expect(output.$metadata.attempts).toBe(1);
       expect(output.$metadata.totalRetryDelay).toBe(0);
-      expect(defaultRetryDecider as jest.Mock).not.toHaveBeenCalled();
-      expect(defaultDelayDecider as jest.Mock).not.toHaveBeenCalled();
+      expect(vi.mocked(defaultRetryDecider)).not.toHaveBeenCalled();
+      expect(vi.mocked(defaultDelayDecider)).not.toHaveBeenCalled();
     });
 
     it("when retryDecider returns false", async () => {
-      (defaultRetryDecider as jest.Mock).mockReturnValueOnce(false);
+      vi.mocked(defaultRetryDecider).mockReturnValueOnce(false);
       const mockError = new Error();
       await mockFailedOperation(maxAttempts, { mockError });
-      expect(defaultRetryDecider as jest.Mock).toHaveBeenCalledTimes(1);
-      expect(defaultRetryDecider as jest.Mock).toHaveBeenCalledWith(mockError);
+      expect(vi.mocked(defaultRetryDecider)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(defaultRetryDecider)).toHaveBeenCalledWith(mockError);
     });
 
     it("when the maximum number of attempts is reached", async () => {
       await mockFailedOperation(maxAttempts);
-      expect(defaultRetryDecider as jest.Mock).toHaveBeenCalledTimes(maxAttempts - 1);
+      expect(vi.mocked(defaultRetryDecider)).toHaveBeenCalledTimes(maxAttempts - 1);
     });
 
     describe("when retryQuota.hasRetryTokens returns false", () => {
       it("in the first request", async () => {
         const { hasRetryTokens, retrieveRetryTokens, releaseRetryTokens } = getDefaultRetryQuota(INITIAL_RETRY_TOKENS);
-        (hasRetryTokens as jest.Mock).mockReturnValueOnce(false);
+        vi.mocked(hasRetryTokens).mockReturnValueOnce(false);
 
         const mockError = new Error();
         await mockFailedOperation(maxAttempts, { mockError });
@@ -449,7 +450,7 @@ describe("defaultStrategy", () => {
 
       it("after the first retry", async () => {
         const { hasRetryTokens, retrieveRetryTokens, releaseRetryTokens } = getDefaultRetryQuota(INITIAL_RETRY_TOKENS);
-        (hasRetryTokens as jest.Mock).mockReturnValueOnce(true).mockReturnValueOnce(false);
+        vi.mocked(hasRetryTokens).mockReturnValueOnce(true).mockReturnValueOnce(false);
 
         const mockError = new Error();
         await mockFailedOperation(maxAttempts, { mockError });
@@ -492,13 +493,13 @@ describe("defaultStrategy", () => {
 
     it("uses a unique header for every SDK operation invocation", async () => {
       const { isInstance } = HttpRequest;
-      (isInstance as unknown as jest.Mock).mockReturnValue(true);
+      (isInstance as unknown as any).mockReturnValue(true);
 
       const uuidForInvocationOne = "uuid-invocation-1";
       const uuidForInvocationTwo = "uuid-invocation-2";
-      (v4 as jest.Mock).mockReturnValueOnce(uuidForInvocationOne).mockReturnValueOnce(uuidForInvocationTwo);
+      vi.mocked(v4).mockReturnValueOnce(uuidForInvocationOne).mockReturnValueOnce(uuidForInvocationTwo);
 
-      const next = jest.fn().mockResolvedValue({
+      const next = vi.fn().mockResolvedValue({
         response: "mockResponse",
         output: { $metadata: {} },
       });
@@ -511,15 +512,15 @@ describe("defaultStrategy", () => {
       expect(next.mock.calls[0][0].request.headers["amz-sdk-invocation-id"]).toBe(uuidForInvocationOne);
       expect(next.mock.calls[1][0].request.headers["amz-sdk-invocation-id"]).toBe(uuidForInvocationTwo);
 
-      (isInstance as unknown as jest.Mock).mockReturnValue(false);
+      (isInstance as unknown as any).mockReturnValue(false);
     });
 
     it("uses same value for additional HTTP requests associated with an SDK operation", async () => {
       const { isInstance } = HttpRequest;
-      (isInstance as unknown as jest.Mock).mockReturnValueOnce(true);
+      (isInstance as unknown as any).mockReturnValueOnce(true);
 
       const uuidForInvocation = "uuid-invocation-1";
-      (v4 as jest.Mock).mockReturnValueOnce(uuidForInvocation);
+      vi.mocked(v4).mockReturnValueOnce(uuidForInvocation);
 
       await mockSuccessAfterOneFail(maxAttempts);
 
@@ -527,7 +528,7 @@ describe("defaultStrategy", () => {
       expect(next.mock.calls[0][0].request.headers["amz-sdk-invocation-id"]).toBe(uuidForInvocation);
       expect(next.mock.calls[1][0].request.headers["amz-sdk-invocation-id"]).toBe(uuidForInvocation);
 
-      (isInstance as unknown as jest.Mock).mockReturnValue(false);
+      (isInstance as unknown as any).mockReturnValue(false);
     });
   });
 
@@ -558,12 +559,12 @@ describe("defaultStrategy", () => {
 
     it("adds header for each attempt", async () => {
       const { isInstance } = HttpRequest;
-      (isInstance as unknown as jest.Mock).mockReturnValue(true);
+      (isInstance as unknown as any).mockReturnValue(true);
 
       const mockError = new Error("mockError");
-      next = jest.fn((args) => {
-        // the header needs to be verified inside jest.Mock as arguments in
-        // jest.mocks.calls has the value passed in final call
+      next = vi.fn((args) => {
+        // the header needs to be verified inside vi.Mock as arguments in
+        // vi.mocks.calls has the value passed in final call
         const index = next.mock.calls.length - 1;
         expect(args.request.headers["amz-sdk-request"]).toBe(`attempt=${index + 1}; max=${maxAttempts}`);
         throw mockError;
@@ -578,16 +579,16 @@ describe("defaultStrategy", () => {
       }
 
       expect(next).toHaveBeenCalledTimes(maxAttempts);
-      (isInstance as unknown as jest.Mock).mockReturnValue(false);
+      (isInstance as unknown as any).mockReturnValue(false);
     });
   });
 
   describe("defaults maxAttempts to DEFAULT_MAX_ATTEMPTS", () => {
     it("when maxAttemptsProvider throws error", async () => {
       const { isInstance } = HttpRequest;
-      (isInstance as unknown as jest.Mock).mockReturnValue(true);
+      (isInstance as unknown as any).mockReturnValue(true);
 
-      next = jest.fn((args) => {
+      next = vi.fn((args) => {
         expect(args.request.headers["amz-sdk-request"]).toBe(`attempt=1; max=${DEFAULT_MAX_ATTEMPTS}`);
         return Promise.resolve({
           response: "mockResponse",
@@ -599,7 +600,7 @@ describe("defaultStrategy", () => {
       await retryStrategy.retry(next, { request: { headers: {} } } as any);
 
       expect(next).toHaveBeenCalledTimes(1);
-      (isInstance as unknown as jest.Mock).mockReturnValue(false);
+      (isInstance as unknown as any).mockReturnValue(false);
     });
   });
 });

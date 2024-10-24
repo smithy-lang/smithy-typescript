@@ -1,9 +1,10 @@
 import { homedir } from "os";
 import { sep } from "path";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";
 
-jest.mock("os");
+vi.mock("os");
 
 describe(getHomeDir.name, () => {
   const mockUid = 1;
@@ -16,7 +17,7 @@ describe(getHomeDir.name, () => {
   const OLD_ENV = process.env;
 
   beforeEach(() => {
-    (homedir as jest.Mock).mockReturnValue(mockHomeDir);
+    vi.mocked(homedir).mockReturnValue(mockHomeDir);
     process.env = {
       ...OLD_ENV,
       HOME: mockHOME,
@@ -28,7 +29,7 @@ describe(getHomeDir.name, () => {
 
   afterEach(() => {
     process.env = OLD_ENV;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("returns value in process.env.HOME first", () => {
@@ -62,7 +63,7 @@ describe(getHomeDir.name, () => {
   });
 
   it("returns value from homedir fourth", () => {
-    const processGeteuidSpy = jest.spyOn(process, "geteuid").mockReturnValue(mockUid);
+    const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
     process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
     expect(getHomeDir()).toEqual(mockHomeDir);
     expect(homedir).toHaveBeenCalledTimes(1);
@@ -71,7 +72,7 @@ describe(getHomeDir.name, () => {
 
   describe("makes one homedir call irrespective of getHomeDir calls", () => {
     const testSingleHomeDirCall = (num: number) => {
-      jest.isolateModules(() => {
+      vi.isolateModules(() => {
         const { getHomeDir } = require("./getHomeDir");
         process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
 
@@ -88,7 +89,7 @@ describe(getHomeDir.name, () => {
 
     describe("when geteuid is available", () => {
       it.each([10, 100, 1000, 10000])("calls: %d ", (num: number) => {
-        const processGeteuidSpy = jest.spyOn(process, "geteuid").mockReturnValue(mockUid);
+        const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
         expect(processGeteuidSpy).not.toHaveBeenCalled();
         testSingleHomeDirCall(num);
         expect(processGeteuidSpy).toHaveBeenCalledTimes(num);
@@ -113,11 +114,11 @@ describe(getHomeDir.name, () => {
 
   describe("makes multiple homedir calls with based on UIDs", () => {
     it.each([2, 10, 100])("calls: %d ", (num: number) => {
-      jest.isolateModules(() => {
+      vi.isolateModules(() => {
         const { getHomeDir } = require("./getHomeDir");
-        const processGeteuidSpy = jest.spyOn(process, "geteuid").mockReturnValue(mockUid);
+        const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
         for (let i = 0; i < num; i++) {
-          jest.spyOn(process, "geteuid").mockReturnValueOnce(mockUid + i);
+          vi.spyOn(process, "geteuid").mockReturnValueOnce(mockUid + i);
         }
         process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
 

@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { LazyJsonString } from "./lazy-json";
 describe("LazyJsonString", () => {
   it("should has string methods", () => {

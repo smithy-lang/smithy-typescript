@@ -1,4 +1,5 @@
 import { AwsCredentialIdentity } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import { fromImdsCredentials, ImdsCredentials, isImdsCredentials } from "./ImdsCredentials";
 

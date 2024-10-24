@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { RetryErrorInfo, RetryErrorType } from "@smithy/types";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { RETRY_MODES } from "./config";
 import { DEFAULT_RETRY_DELAY_BASE } from "./constants";
 import { createDefaultRetryToken } from "./defaultRetryToken";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 
-jest.mock("./defaultRetryToken");
+vi.mock("./defaultRetryToken");
 
 describe(StandardRetryStrategy.name, () => {
   const maxAttempts = 3;
@@ -19,11 +20,11 @@ describe(StandardRetryStrategy.name, () => {
   const errorInfo = { errorType: "TRANSIENT" } as RetryErrorInfo;
 
   beforeEach(() => {
-    (createDefaultRetryToken as jest.Mock).mockReturnValue(mockRetryToken);
+    vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("sets maxAttemptsProvider as a class member variable", () => {
@@ -53,13 +54,13 @@ describe(StandardRetryStrategy.name, () => {
 
   describe("refreshRetryTokenForRetry", () => {
     it("refreshes the token", async () => {
-      const getRetryCount = jest.fn().mockReturnValue(0);
-      const hasRetryTokens = jest.fn().mockReturnValue(true);
+      const getRetryCount = vi.fn().mockReturnValue(0);
+      const hasRetryTokens = vi.fn().mockReturnValue(true);
       const mockRetryToken = {
         getRetryCount,
         hasRetryTokens,
       };
-      (createDefaultRetryToken as jest.Mock).mockReturnValue(mockRetryToken);
+      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
@@ -71,7 +72,7 @@ describe(StandardRetryStrategy.name, () => {
         getRetryCount: () => 0,
         getRetryTokenCount: (errorInfo: any) => 1,
       };
-      (createDefaultRetryToken as jest.Mock).mockReturnValue(mockRetryToken);
+      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(1);
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
@@ -87,7 +88,7 @@ describe(StandardRetryStrategy.name, () => {
         getRetryCount: () => 2,
         getRetryTokenCount: (errorInfo: any) => 1,
       };
-      (createDefaultRetryToken as jest.Mock).mockReturnValue(mockRetryToken);
+      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(1));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
@@ -103,7 +104,7 @@ describe(StandardRetryStrategy.name, () => {
         getRetryCount: () => 5,
         getRetryTokenCount: (errorInfo: any) => 1,
       };
-      (createDefaultRetryToken as jest.Mock).mockReturnValue(mockRetryToken);
+      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(5));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
@@ -120,7 +121,7 @@ describe(StandardRetryStrategy.name, () => {
         getRetryTokenCount: (errorInfo: any) => 1,
         hasRetryTokens: (errorType: RetryErrorType) => true,
       };
-      (createDefaultRetryToken as jest.Mock).mockReturnValue(mockRetryToken);
+      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       const errorInfo = {

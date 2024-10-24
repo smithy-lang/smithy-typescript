@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect,test as it } from "vitest";
+
 import { DEFAULT_PROFILE, ENV_PROFILE, getProfileName } from "./getProfileName";
 
 describe(getProfileName.name, () => {

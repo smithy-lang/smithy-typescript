@@ -1,4 +1,5 @@
 import { requireRequestsFrom } from "@smithy/util-test";
+import { describe, test as it } from "vitest";
 import { Weather } from "weather";
 
 describe("middleware-serde", () => {

@@ -1,4 +1,5 @@
 import { EvaluateOptions } from "@smithy/types";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
 import { ConditionObject, EndpointRuleObject } from "../types";
@@ -8,17 +9,17 @@ import { getEndpointHeaders } from "./getEndpointHeaders";
 import { getEndpointProperties } from "./getEndpointProperties";
 import { getEndpointUrl } from "./getEndpointUrl";
 
-jest.mock("./evaluateConditions");
-jest.mock("./getEndpointUrl");
-jest.mock("./getEndpointHeaders");
-jest.mock("./getEndpointProperties");
+vi.mock("./evaluateConditions");
+vi.mock("./getEndpointUrl");
+vi.mock("./getEndpointHeaders");
+vi.mock("./getEndpointProperties");
 
 describe(evaluateEndpointRule.name, () => {
   const mockLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   };
   const mockOptions: EvaluateOptions = {
     endpointParams: {},
@@ -37,7 +38,7 @@ describe(evaluateEndpointRule.name, () => {
   };
 
   it("returns undefined if conditions are false", () => {
-    (evaluateConditions as jest.Mock).mockReturnValue({ result: false });
+    vi.mocked(evaluateConditions).mockReturnValue({ result: false });
     const result = evaluateEndpointRule(mockEndpointRule, mockOptions);
     expect(result).toBeUndefined();
     expect(evaluateConditions).toHaveBeenCalledWith(mockConditions, mockOptions);
@@ -55,17 +56,17 @@ describe(evaluateEndpointRule.name, () => {
     };
 
     beforeEach(() => {
-      (evaluateConditions as jest.Mock).mockReturnValue({
+      vi.mocked(evaluateConditions).mockReturnValue({
         result: true,
         referenceRecord: mockReferenceRecord,
       });
-      (getEndpointUrl as jest.Mock).mockReturnValue(mockEndpointUrl);
+      vi.mocked(getEndpointUrl).mockReturnValue(mockEndpointUrl);
     });
 
     afterEach(() => {
       expect(evaluateConditions).toHaveBeenCalledWith(mockConditions, mockOptions);
       expect(getEndpointUrl).toHaveBeenCalledWith(mockEndpoint.url, mockUpdatedOptions);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it("without headers and properties", () => {
@@ -88,8 +89,8 @@ describe(evaluateEndpointRule.name, () => {
       const mockOutputHeaders = { headerKey: ["headerOutputValue"] };
       const mockOutputProperties = { propertyKey: "propertyOutputValue" };
 
-      (getEndpointHeaders as jest.Mock).mockReturnValue(mockOutputHeaders);
-      (getEndpointProperties as jest.Mock).mockReturnValue(mockOutputProperties);
+      vi.mocked(getEndpointHeaders).mockReturnValue(mockOutputHeaders);
+      vi.mocked(getEndpointProperties).mockReturnValue(mockOutputProperties);
       const headerEndpoint = {
         ...mockEndpoint,
         headers: mockInputHeaders,

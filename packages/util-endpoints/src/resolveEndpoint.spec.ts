@@ -1,9 +1,11 @@
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { resolveEndpoint } from "./resolveEndpoint";
 import { EndpointError, EndpointParams, ParameterObject, RuleSetObject } from "./types";
 import { evaluateRules } from "./utils";
 
-jest.mock("./utils");
+vi.mock("./utils");
 
 describe(resolveEndpoint.name, () => {
   const boolParamKey = "boolParamKey";
@@ -46,11 +48,11 @@ describe(resolveEndpoint.name, () => {
   const mockResolvedEndpoint = { url: new URL("http://example.com") };
 
   beforeEach(() => {
-    (evaluateRules as jest.Mock).mockReturnValue(mockResolvedEndpoint);
+    vi.mocked(evaluateRules).mockReturnValue(mockResolvedEndpoint);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("should use the default value if a parameter is not set", () => {
@@ -116,10 +118,10 @@ describe(resolveEndpoint.name, () => {
   it("should debug proper infos", () => {
     const { paramWithDefaultKey: ignored, ...endpointParamsWithoutDefault } = mockEndpointParams;
     const mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     };
 
     const resolvedEndpoint = resolveEndpoint(mockRuleSetObject, {

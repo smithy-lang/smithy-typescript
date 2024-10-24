@@ -1,12 +1,13 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
 import { ParsedIniData, Profile } from "@smithy/types";
+import { beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 
-jest.mock("@smithy/shared-ini-file-loader", () => ({
-  getProfileName: jest.fn(),
-  loadSharedConfigFiles: jest.fn(),
+vi.mock("@smithy/shared-ini-file-loader", () => ({
+  getProfileName: vi.fn(),
+  loadSharedConfigFiles: vi.fn(),
 }));
 
 describe("fromSharedConfigFiles", () => {
@@ -108,11 +109,11 @@ describe("fromSharedConfigFiles", () => {
     loadedConfigResolves.forEach(
       ({ message, iniDataInConfig, iniDataInCredentials, configValueToVerify, profile, preferredFile }) => {
         it(message, () => {
-          (loadSharedConfigFiles as jest.Mock).mockResolvedValueOnce({
+          vi.mocked(loadSharedConfigFiles).mockResolvedValueOnce({
             configFile: iniDataInConfig,
             credentialsFile: iniDataInCredentials,
           });
-          (getProfileName as jest.Mock).mockReturnValueOnce(profile ?? "default");
+          vi.mocked(getProfileName).mockReturnValueOnce(profile ?? "default");
           return expect(fromSharedConfigFiles(configGetter, { profile, preferredFile })()).resolves.toBe(
             configValueToVerify
           );
@@ -122,11 +123,11 @@ describe("fromSharedConfigFiles", () => {
 
     loadedConfigRejects.forEach(({ message, iniDataInConfig, iniDataInCredentials, profile, preferredFile }) => {
       it(message, () => {
-        (loadSharedConfigFiles as jest.Mock).mockResolvedValueOnce({
+        vi.mocked(loadSharedConfigFiles).mockResolvedValueOnce({
           configFile: iniDataInConfig,
           credentialsFile: iniDataInCredentials,
         });
-        (getProfileName as jest.Mock).mockReturnValueOnce(profile ?? "default");
+        vi.mocked(getProfileName).mockReturnValueOnce(profile ?? "default");
         return expect(fromSharedConfigFiles(configGetter, { profile, preferredFile })()).rejects.toEqual(
           getCredentialsProviderError(profile ?? "default")
         );
@@ -138,7 +139,7 @@ describe("fromSharedConfigFiles", () => {
       const failGetter = () => {
         throw new Error(message);
       };
-      (loadSharedConfigFiles as jest.Mock).mockResolvedValueOnce({
+      vi.mocked(loadSharedConfigFiles).mockResolvedValueOnce({
         configFile: {},
         credentialsFile: {},
       });
@@ -158,11 +159,11 @@ describe("fromSharedConfigFiles", () => {
     };
 
     beforeEach(() => {
-      (loadSharedConfigFiles as jest.Mock).mockResolvedValueOnce(loadedConfigData);
+      vi.mocked(loadSharedConfigFiles).mockResolvedValueOnce(loadedConfigData);
     });
 
     it.each(["foo", "default"])("returns config value from %s profile", (profile) => {
-      (getProfileName as jest.Mock).mockReturnValueOnce(profile);
+      vi.mocked(getProfileName).mockReturnValueOnce(profile);
       return expect(fromSharedConfigFiles(configGetter)()).resolves.toBe(
         loadedConfigData.configFile[profile][CONFIG_KEY]
       );

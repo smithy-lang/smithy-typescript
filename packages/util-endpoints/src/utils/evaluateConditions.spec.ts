@@ -1,16 +1,18 @@
+import { afterEach, describe, expect,test as it, vi } from "vitest";
+
 import { debugId, toDebugString } from "../debug";
 import { ConditionObject, EvaluateOptions } from "../types";
 import { evaluateCondition } from "./evaluateCondition";
 import { evaluateConditions } from "./evaluateConditions";
 
-jest.mock("./evaluateCondition");
+vi.mock("./evaluateCondition");
 
 describe(evaluateConditions.name, () => {
   const mockLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   };
   const mockOptions: EvaluateOptions = {
     endpointParams: {},
@@ -21,12 +23,12 @@ describe(evaluateConditions.name, () => {
   const mockCn2: ConditionObject = { fn: "fn2", argv: ["arg2"], assign: "assign2" };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("returns false as soon as one condition is false", () => {
     it("first condition is false", () => {
-      (evaluateCondition as jest.Mock).mockReturnValueOnce({ result: false });
+      vi.mocked(evaluateCondition).mockReturnValueOnce({ result: false });
       const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], mockOptions);
       expect(result).toBe(false);
       expect(referenceRecord).toBeUndefined();
@@ -34,8 +36,8 @@ describe(evaluateConditions.name, () => {
     });
 
     it("second condition is false", () => {
-      (evaluateCondition as jest.Mock).mockReturnValueOnce({ result: true });
-      (evaluateCondition as jest.Mock).mockReturnValueOnce({ result: false });
+      vi.mocked(evaluateCondition).mockReturnValueOnce({ result: true });
+      vi.mocked(evaluateCondition).mockReturnValueOnce({ result: false });
       const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], mockOptions);
       expect(result).toBe(false);
       expect(referenceRecord).toBeUndefined();
@@ -48,11 +50,11 @@ describe(evaluateConditions.name, () => {
     const value1 = "value1";
     const value2 = "value2";
 
-    (evaluateCondition as jest.Mock).mockReturnValueOnce({
+    vi.mocked(evaluateCondition).mockReturnValueOnce({
       result: true,
       toAssign: { name: mockCn1.assign, value: value1 },
     });
-    (evaluateCondition as jest.Mock).mockReturnValueOnce({
+    vi.mocked(evaluateCondition).mockReturnValueOnce({
       result: true,
       toAssign: { name: mockCn2.assign, value: value2 },
     });

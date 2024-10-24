@@ -1,9 +1,11 @@
+import { describe, expect,test as it, vi } from "vitest";
+
 import { debugId, toDebugString } from "../debug";
 import { EndpointError, EvaluateOptions } from "../types";
 import { callFunction } from "./callFunction";
 import { evaluateCondition } from "./evaluateCondition";
 
-jest.mock("./callFunction");
+vi.mock("./callFunction");
 
 describe(evaluateCondition.name, () => {
   const mockOptions: EvaluateOptions = {
@@ -33,12 +35,12 @@ describe(evaluateCondition.name, () => {
     ])("returns %s for", (result, testCases) => {
       it.each(testCases)(`value: '%s'`, (mockReturn) => {
         const mockLogger = {
-          debug: jest.fn(),
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
+          debug: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
+          error: vi.fn(),
         };
-        (callFunction as jest.Mock).mockReturnValue(mockReturn);
+        vi.mocked(callFunction).mockReturnValue(mockReturn);
         const { result, toAssign } = evaluateCondition(mockFnArgs, { ...mockOptions, logger: mockLogger });
         expect(result).toBe(result);
         expect(toAssign).toBeUndefined();
@@ -53,12 +55,12 @@ describe(evaluateCondition.name, () => {
   it("returns assigned value if defined", () => {
     const mockAssignedValue = "mockAssignedValue";
     const mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     };
-    (callFunction as jest.Mock).mockReturnValue(mockAssignedValue);
+    vi.mocked(callFunction).mockReturnValue(mockAssignedValue);
     const { result, toAssign } = evaluateCondition(
       { assign: mockAssign, ...mockFnArgs },
       { ...mockOptions, logger: mockLogger }

@@ -4,16 +4,17 @@ import { SdkStreamMixin } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUtf8 } from "@smithy/util-utf8";
+import { afterEach, beforeAll, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin.browser";
 
-jest.mock("@smithy/fetch-http-handler");
-jest.mock("@smithy/util-base64");
-jest.mock("@smithy/util-hex-encoding");
-jest.mock("@smithy/util-utf8");
+vi.mock("@smithy/fetch-http-handler");
+vi.mock("@smithy/util-base64");
+vi.mock("@smithy/util-hex-encoding");
+vi.mock("@smithy/util-utf8");
 
 const mockStreamCollectorReturn = Uint8Array.from([117, 112, 113]);
-(streamCollector as jest.Mock).mockReturnValue(mockStreamCollectorReturn);
+vi.mocked(streamCollector).mockReturnValue(mockStreamCollectorReturn);
 
 describe(sdkStreamMixin.name, () => {
   const expectAllTransformsToFail = async (sdkStream: SdkStreamMixin) => {
@@ -33,7 +34,7 @@ describe(sdkStreamMixin.name, () => {
   };
 
   let originalReadableStreamCtr = global.ReadableStream;
-  const mockReadableStream = jest.fn();
+  const mockReadableStream = vi.fn();
   class ReadableStream {
     constructor() {
       mockReadableStream();
@@ -48,7 +49,7 @@ describe(sdkStreamMixin.name, () => {
 
   beforeEach(() => {
     originalReadableStreamCtr = global.ReadableStream;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     payloadStream = new ReadableStream();
   });
 
@@ -73,7 +74,7 @@ describe(sdkStreamMixin.name, () => {
     it("should transform binary stream to byte array", async () => {
       const sdkStream = sdkStreamMixin(payloadStream);
       const byteArray = await sdkStream.transformToByteArray();
-      expect(streamCollector as jest.Mock).toBeCalledWith(payloadStream);
+      expect(vi.mocked(streamCollector)).toBeCalledWith(payloadStream);
       expect(byteArray).toEqual(mockStreamCollectorReturn);
     });
 
@@ -86,14 +87,14 @@ describe(sdkStreamMixin.name, () => {
 
   describe("transformToString", () => {
     let originalTextDecoder = global.TextDecoder;
-    const mockDecode = jest.fn();
-    global.TextDecoder = jest.fn().mockImplementation(function () {
+    const mockDecode = vi.fn();
+    global.TextDecoder = vi.fn().mockImplementation(function () {
       return { decode: mockDecode };
     });
 
     beforeEach(() => {
       originalTextDecoder = global.TextDecoder;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterEach(() => {
@@ -108,7 +109,7 @@ describe(sdkStreamMixin.name, () => {
       ["hex", toHex],
     ])("should transform to string with %s encoding", async (encoding, encodingFn) => {
       const mockEncodedStringValue = `a string with ${encoding} encoding`;
-      (encodingFn as jest.Mock).mockReturnValueOnce(mockEncodedStringValue);
+      vi.mocked(encodingFn).mockReturnValueOnce(mockEncodedStringValue);
       const sdkStream = sdkStreamMixin(payloadStream);
       const str = await sdkStream.transformToString(encoding);
       expect(streamCollector).toBeCalled();
@@ -162,8 +163,8 @@ describe(sdkStreamMixin.name, () => {
 
   describe("transformToWebStream with Blob payload", () => {
     let originalBlobCtr = global.Blob;
-    const mockBlob = jest.fn();
-    const mockBlobStream = jest.fn();
+    const mockBlob = vi.fn();
+    const mockBlobStream = vi.fn();
     class Blob {
       constructor() {
         mockBlob();
@@ -178,7 +179,7 @@ describe(sdkStreamMixin.name, () => {
     beforeEach(() => {
       global.ReadableStream = undefined;
       originalBlobCtr = global.Blob;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterEach(() => {

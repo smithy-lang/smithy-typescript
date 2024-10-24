@@ -1,4 +1,5 @@
 import { toHex } from "@smithy/util-hex-encoding";
+import { describe, expect,test as it } from "vitest";
 
 import { blobHasher } from "./index";
 

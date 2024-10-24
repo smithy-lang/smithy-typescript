@@ -1,3 +1,5 @@
+import { test as it, vi, afterEach, describe, expect } from "vitest";
+
 import { numberSelector, SelectorType } from "@smithy/util-config-provider";
 
 import {
@@ -7,23 +9,23 @@ import {
   NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_INI_NAME,
 } from "./NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS";
 
-jest.mock("@smithy/util-config-provider");
+vi.mock("@smithy/util-config-provider");
 
 describe("NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS", () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const test = (func: Function, obj: Record<string, string>, key: string, type: SelectorType) => {
     it.each([0, 1, undefined])("returns %s", (output) => {
-      (numberSelector as jest.Mock).mockReturnValueOnce(output);
+      (vi.mocked(numberSelector)).mockReturnValueOnce(output);
       expect(func(obj)).toEqual(output);
       expect(numberSelector).toBeCalledWith(obj, key, type);
     });
 
     it("throws error", () => {
       const mockError = new Error("error");
-      (numberSelector as jest.Mock).mockImplementationOnce(() => {
+      (vi.mocked(numberSelector)).mockImplementationOnce(() => {
         throw mockError;
       });
       expect(() => {

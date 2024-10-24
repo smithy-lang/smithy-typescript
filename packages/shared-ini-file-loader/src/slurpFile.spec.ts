@@ -1,27 +1,27 @@
 // ToDo: Change to "fs/promises" when supporting nodejs>=14
 import { promises } from "fs";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
-jest.mock("fs", () => ({ promises: { readFile: jest.fn() } }));
+vi.mock("fs", () => ({ promises: { readFile: vi.fn() } }));
 
 describe("slurpFile", () => {
   const UTF8 = "utf8";
   const getMockFileContents = (path: string, options = UTF8) => JSON.stringify({ path, options });
 
   beforeEach(() => {
-    (promises.readFile as jest.Mock).mockImplementation(async (path, options) => {
+    (promises.readFile as any).mockImplementation(async (path, options) => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return getMockFileContents(path, options);
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("makes one readFile call for a filepath irrespective of slurpFile calls", () => {
     // @ts-ignore: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/34617
-    it.each([10, 100, 1000, 10000])("parallel calls: %d ", (num: number, done: Function) => {
-      jest.isolateModules(async () => {
+    it.each([10, 100, 1000, 10000])("parallel calls: %d ", async (num: number) => {
         const { slurpFile } = require("./slurpFile");
         const mockPath = "/mock/path";
         const mockPathContent = getMockFileContents(mockPath);
@@ -33,12 +33,9 @@ describe("slurpFile", () => {
         // There is one readFile call even through slurpFile is called in parallel num times.
         expect(promises.readFile).toHaveBeenCalledTimes(1);
         expect(promises.readFile).toHaveBeenCalledWith(mockPath, UTF8);
-        done();
-      });
     });
 
-    it("two parallel calls and one sequential call", (done) => {
-      jest.isolateModules(async () => {
+    it("two parallel calls and one sequential call", async () =>  {
         const { slurpFile } = require("./slurpFile");
         const mockPath = "/mock/path";
         const mockPathContent = getMockFileContents(mockPath);
@@ -56,13 +53,10 @@ describe("slurpFile", () => {
 
         // There is one readFile call even through slurpFile is called for the third time.
         expect(promises.readFile).toHaveBeenCalledTimes(1);
-        done();
-      });
     });
   });
 
-  it("makes multiple readFile calls with based on filepaths", (done) => {
-    jest.isolateModules(async () => {
+  it("makes multiple readFile calls with based on filepaths", async () =>  {
       const { slurpFile } = require("./slurpFile");
 
       const mockPath1 = "/mock/path/1";
@@ -87,12 +81,9 @@ describe("slurpFile", () => {
 
       // There is one readFile call even through slurpFile is called for the third time.
       expect(promises.readFile).toHaveBeenCalledTimes(2);
-      done();
-    });
   });
 
-  it("makes multiple readFile calls when called with ignoreCache option", (done) => {
-    jest.isolateModules(async () => {
+  it("makes multiple readFile calls when called with ignoreCache option", async () =>  {
       const { slurpFile } = require("./slurpFile");
 
       const mockPath1 = "/mock/path/1";
@@ -115,7 +106,5 @@ describe("slurpFile", () => {
 
       // There is no readFile call since slurpFile is now called without refresh.
       expect(promises.readFile).toHaveBeenCalledTimes(2);
-      done();
-    });
   });
 });

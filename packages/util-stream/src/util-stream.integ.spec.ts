@@ -4,6 +4,7 @@ import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { requireRequestsFrom } from "@smithy/util-test";
 import { fromUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";
+import { describe, expect,test as it } from "vitest";
 import { Weather } from "weather";
 
 describe("util-stream", () => {

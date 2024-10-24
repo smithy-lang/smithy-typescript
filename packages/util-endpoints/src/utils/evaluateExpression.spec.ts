@@ -1,12 +1,14 @@
+import { afterEach, describe, expect,test as it, vi } from "vitest";
+
 import { EndpointError } from "../types";
 import { callFunction } from "./callFunction";
 import { evaluateExpression } from "./evaluateExpression";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getReferenceValue } from "./getReferenceValue";
 
-jest.mock("./callFunction");
-jest.mock("./getReferenceValue");
-jest.mock("./evaluateTemplate");
+vi.mock("./callFunction");
+vi.mock("./getReferenceValue");
+vi.mock("./evaluateTemplate");
 
 describe(evaluateExpression.name, () => {
   const mockOptions = {
@@ -17,12 +19,12 @@ describe(evaluateExpression.name, () => {
   const mockResult = "mockResult";
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("calls evaluateTemplate if input is string", () => {
     const mockInput = "mockInput";
-    (evaluateTemplate as jest.Mock).mockReturnValue(mockResult);
+    vi.mocked(evaluateTemplate).mockReturnValue(mockResult);
     const result = evaluateExpression(mockInput, mockKeyName, mockOptions);
     expect(result).toBe(mockResult);
     expect(evaluateTemplate).toHaveBeenCalledWith(mockInput, mockOptions);
@@ -32,7 +34,7 @@ describe(evaluateExpression.name, () => {
 
   it("calls callFunction if input constains 'fn' key", () => {
     const mockInput = { fn: "fn", argv: ["arg1"] };
-    (callFunction as jest.Mock).mockReturnValue(mockResult);
+    vi.mocked(callFunction).mockReturnValue(mockResult);
     const result = evaluateExpression(mockInput, mockKeyName, mockOptions);
     expect(result).toBe(mockResult);
     expect(evaluateTemplate).not.toHaveBeenCalled();
@@ -42,7 +44,7 @@ describe(evaluateExpression.name, () => {
 
   it("calls getReferenceValue if input constains 'ref' key", () => {
     const mockInput = { ref: "ref" };
-    (getReferenceValue as jest.Mock).mockReturnValue(mockResult);
+    vi.mocked(getReferenceValue).mockReturnValue(mockResult);
     const result = evaluateExpression(mockInput, mockKeyName, mockOptions);
     expect(result).toBe(mockResult);
     expect(evaluateTemplate).not.toHaveBeenCalled();

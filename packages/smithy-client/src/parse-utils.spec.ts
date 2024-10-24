@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import {
   expectByte,
   expectFloat32,
@@ -78,9 +80,9 @@ describe("expectBoolean", () => {
   });
 
   describe("reluctantly", () => {
-    let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+    let consoleMock: any<void, [message?: any, ...optionalParams: any[]]>;
     beforeEach(() => {
-      consoleMock = jest.spyOn(logger, "warn").mockImplementation();
+      consoleMock = vi.spyOn(logger, "warn").mockImplementation();
     });
 
     afterEach(() => {
@@ -117,9 +119,9 @@ describe("expectNumber", () => {
   });
 
   describe("reluctantly", () => {
-    let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+    let consoleMock: any<void, [message?: any, ...optionalParams: any[]]>;
     beforeEach(() => {
-      consoleMock = jest.spyOn(logger, "warn").mockImplementation();
+      consoleMock = vi.spyOn(logger, "warn").mockImplementation();
     });
 
     afterEach(() => {
@@ -353,9 +355,9 @@ describe("expectString", () => {
   });
 
   describe("reluctantly", () => {
-    let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+    let consoleMock: any<void, [message?: any, ...optionalParams: any[]]>;
     beforeEach(() => {
-      consoleMock = jest.spyOn(logger, "warn").mockImplementation();
+      consoleMock = vi.spyOn(logger, "warn").mockImplementation();
     });
 
     afterEach(() => {

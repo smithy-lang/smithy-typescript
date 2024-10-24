@@ -1,14 +1,16 @@
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import { setConnectionTimeout } from "./set-connection-timeout";
 
 describe("setConnectionTimeout", () => {
-  const reject = jest.fn();
+  const reject = vi.fn();
   const clientRequest: any = {
-    on: jest.fn(),
-    destroy: jest.fn(),
+    on: vi.fn(),
+    destroy: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("will not attach listeners if timeout is 0", () => {
@@ -25,17 +27,17 @@ describe("setConnectionTimeout", () => {
     const timeoutInMs = 100;
     const mockSocket = {
       connecting: true,
-      on: jest.fn(),
+      on: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
       setConnectionTimeout(clientRequest, reject, timeoutInMs);
     });
 
     afterEach(() => {
-      jest.advanceTimersByTime(10000);
-      jest.useRealTimers();
+      vi.advanceTimersByTime(10000);
+      vi.useRealTimers();
     });
 
     it("attaches listener", () => {
@@ -64,7 +66,7 @@ describe("setConnectionTimeout", () => {
       expect(reject).not.toHaveBeenCalled();
 
       // Fast-forward until timer has been executed.
-      jest.advanceTimersByTime(timeoutInMs);
+      vi.advanceTimersByTime(timeoutInMs);
       expect(clientRequest.destroy).toHaveBeenCalledTimes(1);
       expect(reject).toHaveBeenCalledTimes(1);
       expect(reject).toHaveBeenCalledWith(
@@ -76,15 +78,15 @@ describe("setConnectionTimeout", () => {
 
     it("calls socket operations directly if socket is available", async () => {
       const request = {
-        on: jest.fn(),
+        on: vi.fn(),
         socket: {
-          on: jest.fn(),
+          on: vi.fn(),
           connecting: true,
         },
         destroy() {},
       } as any;
       setConnectionTimeout(request, () => {}, 1);
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(request.socket.on).toHaveBeenCalled();
       expect(request.on).not.toHaveBeenCalled();
@@ -98,13 +100,13 @@ describe("setConnectionTimeout", () => {
       expect(clearTimeout).not.toHaveBeenCalled();
 
       // Fast-forward for half the amount of time and call connect callback to clear timer.
-      jest.advanceTimersByTime(timeoutInMs / 2);
+      vi.advanceTimersByTime(timeoutInMs / 2);
       mockSocket.on.mock.calls[0][1]();
 
       expect(clearTimeout).toHaveBeenCalled();
 
       // Fast-forward until timer has been executed.
-      jest.runAllTimers();
+      vi.runAllTimers();
       expect(clientRequest.destroy).not.toHaveBeenCalled();
       expect(reject).not.toHaveBeenCalled();
     });

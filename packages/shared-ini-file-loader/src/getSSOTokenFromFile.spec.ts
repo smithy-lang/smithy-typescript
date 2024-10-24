@@ -1,11 +1,12 @@
 // ToDo: Change to "fs/promises" when supporting nodejs>=14
 import { promises } from "fs";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { getSSOTokenFilepath } from "./getSSOTokenFilepath";
 import { getSSOTokenFromFile } from "./getSSOTokenFromFile";
 
-jest.mock("fs", () => ({ promises: { readFile: jest.fn() } }));
-jest.mock("./getSSOTokenFilepath");
+vi.mock("fs", () => ({ promises: { readFile: vi.fn() } }));
+vi.mock("./getSSOTokenFilepath");
 
 describe(getSSOTokenFromFile.name, () => {
   const mockSsoStartUrl = "mock_sso_start_url";
@@ -17,17 +18,17 @@ describe(getSSOTokenFromFile.name, () => {
   };
 
   beforeEach(() => {
-    (getSSOTokenFilepath as jest.Mock).mockReturnValue(mockSsoTokenFilepath);
-    (promises.readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockToken));
+    vi.mocked(getSSOTokenFilepath).mockReturnValue(mockSsoTokenFilepath);
+    (promises.readFile as any).mockResolvedValue(JSON.stringify(mockToken));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("re-throws if getting SSO Token filepath fails", async () => {
     const expectedError = new Error("error");
-    (getSSOTokenFilepath as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(getSSOTokenFilepath).mockImplementationOnce(() => {
       throw expectedError;
     });
 
@@ -42,7 +43,7 @@ describe(getSSOTokenFromFile.name, () => {
 
   it("re-throws if readFile fails", async () => {
     const expectedError = new Error("error");
-    (promises.readFile as jest.Mock).mockRejectedValue(expectedError);
+    (promises.readFile as any).mockRejectedValue(expectedError);
 
     try {
       await getSSOTokenFromFile(mockSsoStartUrl);
@@ -55,7 +56,7 @@ describe(getSSOTokenFromFile.name, () => {
 
   it("re-throws if token is not a valid JSON", async () => {
     const errMsg = "Unexpected token";
-    (promises.readFile as jest.Mock).mockReturnValue("invalid JSON");
+    (promises.readFile as any).mockReturnValue("invalid JSON");
 
     try {
       await getSSOTokenFromFile(mockSsoStartUrl);

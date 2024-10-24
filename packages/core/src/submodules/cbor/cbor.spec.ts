@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import JSONbig from "json-bigint";
 import * as path from "path";
+import { describe, expect,test as it } from "vitest";
 
 import { cbor } from "./cbor";
 import { bytesToFloat16 } from "./cbor-decode";

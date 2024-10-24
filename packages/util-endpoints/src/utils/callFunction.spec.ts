@@ -1,9 +1,11 @@
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+
 import { callFunction } from "./callFunction";
 import { customEndpointFunctions } from "./customEndpointFunctions";
 import { endpointFunctions } from "./endpointFunctions";
 import { evaluateExpression } from "./evaluateExpression";
 
-jest.mock("./evaluateExpression");
+vi.mock("./evaluateExpression");
 
 describe(callFunction.name, () => {
   const mockOptions = {
@@ -14,11 +16,11 @@ describe(callFunction.name, () => {
   const mockArgReturn = "mockArgReturn";
 
   beforeEach(() => {
-    (evaluateExpression as jest.Mock).mockReturnValue(mockArgReturn);
+    vi.mocked(evaluateExpression).mockReturnValue(mockArgReturn);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([
@@ -32,7 +34,7 @@ describe(callFunction.name, () => {
     "subsgtring",
     "urlEncode",
   ])("calls built-in endpoint function %s", (builtIn) => {
-    endpointFunctions[builtIn] = jest.fn().mockReturnValue(mockReturn);
+    endpointFunctions[builtIn] = vi.fn().mockReturnValue(mockReturn);
     const mockArg = "mockArg";
     const mockFn = { fn: builtIn, argv: [mockArg] };
 
@@ -67,7 +69,7 @@ describe(callFunction.name, () => {
   );
 
   it("calls custom endpoint functions", () => {
-    const mockCustomFunction = jest.fn().mockReturnValue(mockReturn);
+    const mockCustomFunction = vi.fn().mockReturnValue(mockReturn);
     customEndpointFunctions["ns"] = {
       mockCustomFunction,
     };

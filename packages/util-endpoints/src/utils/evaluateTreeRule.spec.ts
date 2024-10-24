@@ -1,10 +1,12 @@
+import { describe, expect,test as it, vi } from "vitest";
+
 import { TreeRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateRules } from "./evaluateRules";
 import { evaluateTreeRule } from "./evaluateTreeRule";
 
-jest.mock("./evaluateConditions");
-jest.mock("./evaluateRules");
+vi.mock("./evaluateConditions");
+vi.mock("./evaluateRules");
 
 describe(evaluateTreeRule.name, () => {
   const mockOptions = {
@@ -22,7 +24,7 @@ describe(evaluateTreeRule.name, () => {
   };
 
   it("returns undefined if conditions evaluate to false", () => {
-    (evaluateConditions as jest.Mock).mockReturnValue({ result: false });
+    vi.mocked(evaluateConditions).mockReturnValue({ result: false });
     const result = evaluateTreeRule(mockTreeRule, mockOptions);
     expect(result).toBeUndefined();
     expect(evaluateConditions).toHaveBeenCalledWith(mockConditions, mockOptions);
@@ -33,8 +35,8 @@ describe(evaluateTreeRule.name, () => {
     const mockReferenceRecord = { key: "value" };
     const mockEndpointUrl = new URL("http://example.com");
 
-    (evaluateConditions as jest.Mock).mockReturnValue({ result: true, referenceRecord: mockReferenceRecord });
-    (evaluateRules as jest.Mock).mockReturnValue(mockEndpointUrl);
+    vi.mocked(evaluateConditions).mockReturnValue({ result: true, referenceRecord: mockReferenceRecord });
+    vi.mocked(evaluateRules).mockReturnValue(mockEndpointUrl);
 
     const result = evaluateTreeRule(mockTreeRule, mockOptions);
     expect(result).toBe(mockEndpointUrl);

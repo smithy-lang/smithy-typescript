@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { normalizeProvider } from "@smithy/util-middleware";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { resolveEndpointsConfig } from "./resolveEndpointsConfig";
 import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 
-jest.mock("@smithy/util-middleware");
-jest.mock("./utils/getEndpointFromRegion");
+vi.mock("@smithy/util-middleware");
+vi.mock("./utils/getEndpointFromRegion");
 
 describe(resolveEndpointsConfig.name, () => {
   const mockEndpoint = {
@@ -16,20 +17,20 @@ describe(resolveEndpointsConfig.name, () => {
 
   const mockInput = {
     endpoint: mockEndpoint,
-    urlParser: jest.fn(() => mockEndpoint),
+    urlParser: vi.fn(() => mockEndpoint),
     useDualstackEndpoint: () => Promise.resolve(false),
     useFipsEndpoint: () => Promise.resolve(false),
   } as any;
 
   beforeEach(() => {
-    (getEndpointFromRegion as jest.Mock).mockResolvedValueOnce(mockEndpoint);
-    (normalizeProvider as jest.Mock).mockImplementation((input) =>
+    vi.mocked(getEndpointFromRegion).mockResolvedValueOnce(mockEndpoint);
+    vi.mocked(normalizeProvider).mockImplementation((input) =>
       typeof input === "function" ? input : () => Promise.resolve(input)
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("tls", () => {

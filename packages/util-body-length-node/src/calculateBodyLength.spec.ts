@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { calculateBodyLength } from "./calculateBodyLength";
 
@@ -10,7 +11,7 @@ describe(calculateBodyLength.name, () => {
   const view = new DataView(arrayBuffer);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([

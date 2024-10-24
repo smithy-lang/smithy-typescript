@@ -3,6 +3,7 @@ import { HttpRequest } from "@smithy/protocol-http";
 import http, { Server as HttpServer } from "http";
 import https, { Server as HttpsServer } from "https";
 import { AddressInfo } from "net";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
 import { ReadFromBuffers } from "./readable.mock";
@@ -17,8 +18,8 @@ import {
 
 describe("NodeHttpHandler", () => {
   describe("constructor and #handle", () => {
-    let hRequestSpy: jest.SpyInstance;
-    let hsRequestSpy: jest.SpyInstance;
+    let hRequestSpy: any;
+    let hsRequestSpy: any;
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
     const mockRequestImpl = (protocol: string) => (_options, cb) => {
       cb({
@@ -31,8 +32,8 @@ describe("NodeHttpHandler", () => {
     };
 
     beforeEach(() => {
-      hRequestSpy = jest.spyOn(http, "request").mockImplementation(mockRequestImpl("http:"));
-      hsRequestSpy = jest.spyOn(https, "request").mockImplementation(mockRequestImpl("https:"));
+      hRequestSpy = vi.spyOn(http, "request").mockImplementation(mockRequestImpl("http:"));
+      hsRequestSpy = vi.spyOn(https, "request").mockImplementation(mockRequestImpl("https:"));
     });
 
     afterEach(() => {
@@ -266,16 +267,16 @@ describe("NodeHttpHandler", () => {
       };
 
       mockHttpServer.addListener("checkContinue", createContinueResponseFunction(mockResponse));
-      let endSpy: jest.SpyInstance<any>;
+      let endSpy: any;
       let continueWasTriggered = false;
-      const spy = jest.spyOn(http, "request").mockImplementationOnce(() => {
+      const spy = vi.spyOn(http, "request").mockImplementationOnce(() => {
         const calls = spy.mock.calls;
         const currentIndex = calls.length - 1;
         const request = http.request(calls[currentIndex][0], calls[currentIndex][1]);
         request.on("continue", () => {
           continueWasTriggered = true;
         });
-        endSpy = jest.spyOn(request, "end");
+        endSpy = vi.spyOn(request, "end");
 
         return request;
       });
@@ -308,7 +309,7 @@ describe("NodeHttpHandler", () => {
       const body = new ReadFromBuffers({
         buffers: [Buffer.from("t"), Buffer.from("e"), Buffer.from("s"), Buffer.from("t")],
       });
-      const inputBodySpy = jest.spyOn(body, "pipe");
+      const inputBodySpy = vi.spyOn(body, "pipe");
       const mockResponse = {
         statusCode: 200,
         headers: {},
@@ -342,12 +343,12 @@ describe("NodeHttpHandler", () => {
         headers: {},
       };
       mockHttpServer.addListener("request", createResponseFunction(mockResponse));
-      let endSpy: jest.SpyInstance<any>;
-      const spy = jest.spyOn(http, "request").mockImplementationOnce(() => {
+      let endSpy: any;
+      const spy = vi.spyOn(http, "request").mockImplementationOnce(() => {
         const calls = spy.mock.calls;
         const currentIndex = calls.length - 1;
         const request = http.request(calls[currentIndex][0], calls[currentIndex][1]);
-        endSpy = jest.spyOn(request, "end");
+        endSpy = vi.spyOn(request, "end");
         return request;
       });
 
@@ -433,7 +434,7 @@ describe("NodeHttpHandler", () => {
         "request",
         createResponseFunction(mockResponse)
       );
-      const spy = jest.spyOn(https, "request").mockImplementationOnce(() => {
+      const spy = vi.spyOn(https, "request").mockImplementationOnce(() => {
         let calls = spy.mock.calls;
         let currentIndex = calls.length - 1;
         return https.request(calls[currentIndex][0], calls[currentIndex][1]);
@@ -469,9 +470,9 @@ describe("NodeHttpHandler", () => {
         "checkContinue",
         createContinueResponseFunction(mockResponse)
       );
-      let endSpy: jest.SpyInstance<any>;
+      let endSpy: any;
       let continueWasTriggered = false;
-      const spy = jest.spyOn(https, "request").mockImplementationOnce(() => {
+      const spy = vi.spyOn(https, "request").mockImplementationOnce(() => {
         let calls = spy.mock.calls;
         let currentIndex = calls.length - 1;
         const request = https.request(
@@ -481,7 +482,7 @@ describe("NodeHttpHandler", () => {
         request.on("continue", () => {
           continueWasTriggered = true;
         });
-        endSpy = jest.spyOn(request, "end");
+        endSpy = vi.spyOn(request, "end");
 
         return request;
       });
@@ -519,7 +520,7 @@ describe("NodeHttpHandler", () => {
           Buffer.from("t")
         ]
       });
-      let inputBodySpy = jest.spyOn(body, "pipe");
+      let inputBodySpy = vi.spyOn(body, "pipe");
       const mockResponse = {
         statusCode: 200,
         headers: {}
@@ -580,7 +581,7 @@ describe("NodeHttpHandler", () => {
         body: "test",
       };
       mockHttpsServer.addListener("request", createResponseFunction(mockResponse));
-      const spy = jest.spyOn(https, "request").mockImplementationOnce(() => {
+      const spy = vi.spyOn(https, "request").mockImplementationOnce(() => {
         const calls = spy.mock.calls;
         const currentIndex = calls.length - 1;
         return https.request(calls[currentIndex][0], calls[currentIndex][1]);
@@ -638,11 +639,11 @@ describe("NodeHttpHandler", () => {
       mockHttpsServer.addListener("request", createResponseFunction(mockResponse));
       let httpRequest: http.ClientRequest;
       let reqDestroySpy: any;
-      const spy = jest.spyOn(https, "request").mockImplementationOnce(() => {
+      const spy = vi.spyOn(https, "request").mockImplementationOnce(() => {
         const calls = spy.mock.calls;
         const currentIndex = calls.length - 1;
         httpRequest = https.request(calls[currentIndex][0], calls[currentIndex][1]);
-        reqDestroySpy = jest.spyOn(httpRequest, "destroy");
+        reqDestroySpy = vi.spyOn(httpRequest, "destroy");
         return httpRequest;
       });
       const nodeHttpHandler = new NodeHttpHandler();
@@ -745,11 +746,11 @@ describe("NodeHttpHandler", () => {
 
   describe("checkSocketUsage", () => {
     beforeEach(() => {
-      jest.spyOn(console, "warn").mockImplementation(jest.fn());
+      vi.spyOn(console, "warn").mockImplementation(vi.fn());
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it("warns when socket exhaustion is detected", async () => {

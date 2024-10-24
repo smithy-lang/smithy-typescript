@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { _json } from "./serde-json";
 
 describe(_json.name, () => {

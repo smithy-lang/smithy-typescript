@@ -1,4 +1,5 @@
 import { RetryErrorInfo, StandardRetryToken } from "@smithy/types";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { RETRY_MODES } from "./config";
@@ -6,15 +7,15 @@ import { DefaultRateLimiter } from "./DefaultRateLimiter";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import { RateLimiter } from "./types";
 
-jest.mock("./StandardRetryStrategy");
-jest.mock("./DefaultRateLimiter");
+vi.mock("./StandardRetryStrategy");
+vi.mock("./DefaultRateLimiter");
 
 describe(AdaptiveRetryStrategy.name, () => {
-  const maxAttemptsProvider = jest.fn();
+  const maxAttemptsProvider = vi.fn();
   const retryTokenScope = "scope";
   const mockDefaultRateLimiter = {
-    getSendToken: jest.fn(),
-    updateClientSendingRate: jest.fn(),
+    getSendToken: vi.fn(),
+    updateClientSendingRate: vi.fn(),
   };
   const mockRetryToken: StandardRetryToken = {
     getRetryCost: () => 1,
@@ -26,11 +27,11 @@ describe(AdaptiveRetryStrategy.name, () => {
   } as RetryErrorInfo;
 
   beforeEach(() => {
-    (DefaultRateLimiter as jest.Mock).mockReturnValue(mockDefaultRateLimiter);
+    vi.mocked(DefaultRateLimiter).mockReturnValue(mockDefaultRateLimiter);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`sets mode=${RETRY_MODES.ADAPTIVE}`, () => {
@@ -60,7 +61,7 @@ describe(AdaptiveRetryStrategy.name, () => {
 
   describe("acquireInitialRetryToken", () => {
     it("calls rateLimiter.getSendToken and returns initial retry token ", async () => {
-      const mockedStandardRetryStrategy = jest.spyOn(StandardRetryStrategy.prototype, "acquireInitialRetryToken");
+      const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "acquireInitialRetryToken");
       mockedStandardRetryStrategy.mockResolvedValue(mockRetryToken);
       const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
         rateLimiter: mockDefaultRateLimiter,
@@ -73,7 +74,7 @@ describe(AdaptiveRetryStrategy.name, () => {
   });
   describe("refreshRetryTokenForRetry", () => {
     it("calls rateLimiter.updateCientSendingRate and refreshes retry token", async () => {
-      const mockedStandardRetryStrategy = jest.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry");
+      const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry");
       mockedStandardRetryStrategy.mockResolvedValue(mockRetryToken);
       const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
         rateLimiter: mockDefaultRateLimiter,
@@ -88,7 +89,7 @@ describe(AdaptiveRetryStrategy.name, () => {
   });
   describe("recordSuccess", () => {
     it("rateLimiter.updateCientSendingRate and records success on token", async () => {
-      const mockedStandardRetryStrategy = jest.spyOn(StandardRetryStrategy.prototype, "recordSuccess");
+      const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "recordSuccess");
       const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
         rateLimiter: mockDefaultRateLimiter,
       });

@@ -4,6 +4,7 @@ import { rejects } from "assert";
 import http2, { ClientHttp2Session, ClientHttp2Stream, constants, Http2Server, Http2Stream } from "http2";
 import { Duplex } from "stream";
 import { promisify } from "util";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
 import { NodeHttp2Handler, NodeHttp2HandlerOptions } from "./node-http2-handler";
@@ -47,7 +48,7 @@ describe(NodeHttp2Handler.name, () => {
 
   afterEach(() => {
     mockH2Server.removeAllListeners("request");
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     for (const p in mockH2Servers) {
       mockH2Servers[p].removeAllListeners("request");
       mockH2Servers[p].close();
@@ -62,15 +63,15 @@ describe(NodeHttp2Handler.name, () => {
   ])("without options in constructor parameter of %s", (_, option) => {
     let createdSessions!: ClientHttp2Session[];
     const connectReal = http2.connect;
-    let connectSpy!: jest.SpiedFunction<typeof http2.connect>;
+    let connectSpy!: vi.SpiedFunction<typeof http2.connect>;
 
     beforeEach(() => {
       createdSessions = [];
-      connectSpy = jest.spyOn(http2, "connect").mockImplementation((...args) => {
+      connectSpy = vi.spyOn(http2, "connect").mockImplementation((...args) => {
         const session = connectReal(...args);
-        jest.spyOn(session, "ref");
-        jest.spyOn(session, "unref");
-        jest.spyOn(session, "settings");
+        vi.spyOn(session, "ref");
+        vi.spyOn(session, "unref");
+        vi.spyOn(session, "settings");
         createdSessions.push(session);
         return session;
       });
@@ -123,7 +124,7 @@ describe(NodeHttp2Handler.name, () => {
       });
 
       it("is one if multiple requests are made on same URL", async () => {
-        const connectSpy = jest.spyOn(http2, "connect");
+        const connectSpy = vi.spyOn(http2, "connect");
 
         // Make two requests.
         const { response: response1 } = await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
@@ -139,7 +140,7 @@ describe(NodeHttp2Handler.name, () => {
       });
 
       it("is many if requests are made on different URLs", async () => {
-        const connectSpy = jest.spyOn(http2, "connect");
+        const connectSpy = vi.spyOn(http2, "connect");
 
         // Make first request on default URL.
         const { response: response1 } = await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
@@ -337,7 +338,7 @@ describe(NodeHttp2Handler.name, () => {
 
         // @ts-ignore: access private property
         const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
-        const requestSpy = jest.spyOn(session, "request");
+        const requestSpy = vi.spyOn(session, "request");
 
         await expect(
           nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {
@@ -516,7 +517,7 @@ describe(NodeHttp2Handler.name, () => {
     const fakeRstCode = 1;
     // @ts-ignore: fake result code
     fakeStream.rstCode = fakeRstCode;
-    jest.spyOn(session, "request").mockImplementation(() => fakeStream);
+    vi.spyOn(session, "request").mockImplementation(() => fakeStream);
     // @ts-ignore: access private property
     nodeH2Handler.connectionManager.sessionCache.set(authority, new NodeHttp2ConnectionPool([session]));
     // Delay response so that onabort is called earlier
@@ -537,7 +538,7 @@ describe(NodeHttp2Handler.name, () => {
     // @ts-ignore: access private property
     const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
     const fakeStream = new Duplex() as ClientHttp2Stream;
-    jest.spyOn(session, "request").mockImplementation(() => fakeStream);
+    vi.spyOn(session, "request").mockImplementation(() => fakeStream);
     // @ts-ignore: access private property
     nodeH2Handler.connectionManager.sessionCache.set(authority, new NodeHttp2ConnectionPool([session]));
     // Delay response so that onabort is called earlier
@@ -561,12 +562,12 @@ describe(NodeHttp2Handler.name, () => {
 
     describe("number calls to http2.connect", () => {
       it("is zero on initialization", () => {
-        const connectSpy = jest.spyOn(http2, "connect");
+        const connectSpy = vi.spyOn(http2, "connect");
         expect(connectSpy).not.toHaveBeenCalled();
       });
 
       it("is one when request is made", async () => {
-        const connectSpy = jest.spyOn(http2, "connect");
+        const connectSpy = vi.spyOn(http2, "connect");
 
         // Make single request.
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
@@ -575,7 +576,7 @@ describe(NodeHttp2Handler.name, () => {
       });
 
       it("is many if multiple requests are made on same URL", async () => {
-        const connectSpy = jest.spyOn(http2, "connect");
+        const connectSpy = vi.spyOn(http2, "connect");
 
         // Make two requests.
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
@@ -587,7 +588,7 @@ describe(NodeHttp2Handler.name, () => {
       });
 
       it("is many if requests are made on different URLs", async () => {
-        const connectSpy = jest.spyOn(http2, "connect");
+        const connectSpy = vi.spyOn(http2, "connect");
 
         // Make first request on default URL.
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});

@@ -1,3 +1,5 @@
+import { describe, expect,test as it } from "vitest";
+
 import { fromUtf8 } from "./fromUtf8";
 
 const utf8StringsToByteArrays: Record<string, Uint8Array> = {

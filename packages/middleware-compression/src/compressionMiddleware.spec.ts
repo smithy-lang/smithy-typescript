@@ -1,3 +1,5 @@
+import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
+
 import { HttpRequest } from "@smithy/protocol-http";
 
 import { compressionMiddleware } from "./compressionMiddleware";
@@ -6,15 +8,15 @@ import { compressString } from "./compressString";
 import { CompressionAlgorithm } from "./constants";
 import { isStreaming } from "./isStreaming";
 
-jest.mock("@smithy/protocol-http");
-jest.mock("./compressString");
-jest.mock("./compressStream");
-jest.mock("./isStreaming");
+vi.mock("@smithy/protocol-http");
+vi.mock("./compressString");
+vi.mock("./compressStream");
+vi.mock("./isStreaming");
 
 describe(compressionMiddleware.name, () => {
   const mockBody = "body";
   const mockConfig = {
-    bodyLengthChecker: jest.fn().mockReturnValue(mockBody.length),
+    bodyLengthChecker: vi.fn().mockReturnValue(mockBody.length),
     disableRequestCompression: async () => false,
     requestMinCompressionSizeBytes: async () => 0,
   };
@@ -22,17 +24,17 @@ describe(compressionMiddleware.name, () => {
     encodings: [CompressionAlgorithm.GZIP],
   };
 
-  const mockNext = jest.fn();
+  const mockNext = vi.fn();
   const mockContext = {};
   const mockArgs = { request: { headers: {}, body: mockBody } };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("skips compression if it's not an HttpRequest", async () => {
     const { isInstance } = HttpRequest;
-    (isInstance as unknown as jest.Mock).mockReturnValue(false);
+    (isInstance as unknown as any).mockReturnValue(false);
     await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
     expect(mockNext).toHaveBeenCalledWith(mockArgs);
   });
@@ -40,8 +42,8 @@ describe(compressionMiddleware.name, () => {
   describe("HttpRequest", () => {
     beforeEach(() => {
       const { isInstance } = HttpRequest;
-      (isInstance as unknown as jest.Mock).mockReturnValue(true);
-      (isStreaming as jest.Mock).mockReturnValue(false);
+      (isInstance as unknown as any).mockReturnValue(true);
+      (vi.mocked(isStreaming)).mockReturnValue(false);
     });
 
     it("skips compression if disabled", async () => {
@@ -64,7 +66,7 @@ describe(compressionMiddleware.name, () => {
 
     describe("streaming", () => {
       beforeEach(() => {
-        (isStreaming as jest.Mock).mockReturnValue(true);
+        (vi.mocked(isStreaming)).mockReturnValue(true);
       });
 
       it("throws error if streaming blob requires length", async () => {
@@ -82,7 +84,7 @@ describe(compressionMiddleware.name, () => {
 
       it("compresses streaming blob", async () => {
         const mockCompressedStream = "compressed-stream";
-        (compressStream as jest.Mock).mockResolvedValueOnce(mockCompressedStream);
+        (vi.mocked(compressStream)).mockResolvedValueOnce(mockCompressedStream);
 
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
 
@@ -119,7 +121,7 @@ describe(compressionMiddleware.name, () => {
 
       it("compresses body", async () => {
         const mockCompressedBody = "compressed-body";
-        (compressString as jest.Mock).mockResolvedValueOnce(mockCompressedBody);
+        (vi.mocked(compressString)).mockResolvedValueOnce(mockCompressedBody);
 
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
 
@@ -140,7 +142,7 @@ describe(compressionMiddleware.name, () => {
 
       it("appends algorithm to existing Content-Encoding header", async () => {
         const mockCompressedBody = "compressed-body";
-        (compressString as jest.Mock).mockResolvedValueOnce(mockCompressedBody);
+        (vi.mocked(compressString)).mockResolvedValueOnce(mockCompressedBody);
 
         const mockExistingContentEncoding = "deflate";
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({

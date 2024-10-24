@@ -5,6 +5,7 @@ import {
   SameAsServiceCommand,
 } from "@smithy/identity-and-auth-http-bearer-auth-service";
 import { requireRequestsFrom } from "@smithy/util-test";
+import { describe, expect,test as it } from "vitest";
 
 describe("@httpBearerAuth integration tests", () => {
   // Arbitrary mock token

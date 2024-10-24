@@ -1,4 +1,5 @@
 import type { MessageHeaders } from "@smithy/types";
+import { describe, expect,test as it } from "vitest";
 
 import { HeaderFormatter, Int64 } from "./HeaderFormatter";
 

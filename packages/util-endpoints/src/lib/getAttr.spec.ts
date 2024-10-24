@@ -1,18 +1,20 @@
+import { afterEach, describe, expect,test as it, vi } from "vitest";
+
 import { EndpointError } from "../types";
 import { getAttr } from "./getAttr";
 import { getAttrPathList } from "./getAttrPathList";
 
-jest.mock("./getAttrPathList");
+vi.mock("./getAttrPathList");
 
 describe(getAttr.name, () => {
   const testSuccess = (value: any, input: string, output: unknown, pathList: string[]) => {
-    (getAttrPathList as jest.Mock).mockReturnValueOnce(pathList);
+    vi.mocked(getAttrPathList).mockReturnValueOnce(pathList);
     expect(getAttr(value, input)).toEqual(output);
     expect(getAttrPathList).toHaveBeenCalledWith(input);
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("object", () => {
@@ -42,7 +44,7 @@ describe(getAttr.name, () => {
   it("rethrows error from getAttrPathList", () => {
     const mockPath = "mockPath";
     const mockError = new Error("test");
-    (getAttrPathList as jest.Mock).mockImplementationOnce(() => {
+    vi.mocked(getAttrPathList).mockImplementationOnce(() => {
       throw mockError;
     });
     expect(() => getAttr({}, mockPath)).toThrow(mockError);
@@ -52,7 +54,7 @@ describe(getAttr.name, () => {
   it("throws error if attribute parent is not defined", () => {
     const mockPath = "foo.bar";
     const mockObj = { foo: "bar" };
-    (getAttrPathList as jest.Mock).mockReturnValueOnce(mockPath.split("."));
+    vi.mocked(getAttrPathList).mockReturnValueOnce(mockPath.split("."));
     expect(() => getAttr(mockObj, mockPath)).toThrow(
       new EndpointError(`Index 'bar' in '${mockPath}' not found in '${JSON.stringify(mockObj)}'`)
     );

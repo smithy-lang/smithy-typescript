@@ -1,12 +1,14 @@
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+
 import { EndpointError, EndpointRuleObject, ErrorRuleObject, TreeRuleObject } from "../types";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
 import { evaluateErrorRule } from "./evaluateErrorRule";
 import { evaluateRules } from "./evaluateRules";
 import { evaluateTreeRule } from "./evaluateTreeRule";
 
-jest.mock("./evaluateEndpointRule");
-jest.mock("./evaluateErrorRule");
-jest.mock("./evaluateTreeRule");
+vi.mock("./evaluateEndpointRule");
+vi.mock("./evaluateErrorRule");
+vi.mock("./evaluateTreeRule");
 
 describe(evaluateRules.name, () => {
   const mockOptions = {
@@ -43,18 +45,18 @@ describe(evaluateRules.name, () => {
   const mockRules = [mockEndpointRule, mockErrorRule, mockTreeRule];
 
   beforeEach(() => {
-    (evaluateEndpointRule as jest.Mock).mockReturnValue(undefined);
-    (evaluateErrorRule as jest.Mock).mockReturnValue(undefined);
-    (evaluateTreeRule as jest.Mock).mockReturnValue(undefined);
+    vi.mocked(evaluateEndpointRule).mockReturnValue(undefined);
+    vi.mocked(evaluateErrorRule).mockReturnValue(undefined);
+    vi.mocked(evaluateTreeRule).mockReturnValue(undefined);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe("returns endpoint if defined", () => {
     it("from EndPoint Rule", () => {
-      (evaluateEndpointRule as jest.Mock).mockReturnValue(mockEndpointResult);
+      vi.mocked(evaluateEndpointRule).mockReturnValue(mockEndpointResult);
       const result = evaluateRules(mockRules, mockOptions);
       expect(result).toEqual(mockEndpointResult);
       expect(evaluateEndpointRule).toHaveBeenCalledWith(mockEndpointRule, mockOptions);
@@ -63,7 +65,7 @@ describe(evaluateRules.name, () => {
     });
 
     it("from Tree Rule", () => {
-      (evaluateTreeRule as jest.Mock).mockReturnValue(mockEndpointResult);
+      vi.mocked(evaluateTreeRule).mockReturnValue(mockEndpointResult);
       const result = evaluateRules(mockRules, mockOptions);
       expect(result).toEqual(mockEndpointResult);
       expect(evaluateEndpointRule).toHaveBeenCalledWith(mockEndpointRule, mockOptions);
@@ -74,7 +76,7 @@ describe(evaluateRules.name, () => {
 
   it("re-throws error from Error Rule, if it occurs before endpoint evaluation", () => {
     const mockError = new Error("mockError");
-    (evaluateErrorRule as jest.Mock).mockImplementation(() => {
+    vi.mocked(evaluateErrorRule).mockImplementation(() => {
       throw mockError;
     });
     expect(() => evaluateRules(mockRules, mockOptions)).toThrow(mockError);

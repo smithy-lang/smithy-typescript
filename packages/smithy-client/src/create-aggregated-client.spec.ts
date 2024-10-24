@@ -1,7 +1,9 @@
+import { describe, expect, test as it, vi } from "vitest";
+
 import { createAggregatedClient } from "./create-aggregated-client";
 
 class BaseClient {
-  send = jest.fn() as any;
+  send = vi.fn() as any;
 }
 class AggregatedClient extends BaseClient {
   constructor(commands) {
@@ -14,7 +16,7 @@ class UserClient extends AggregatedClient {}
 describe(createAggregatedClient.name, () => {
   it("extends its base client", async () => {
     const commands = {
-      ActionCommand: jest.fn(),
+      ActionCommand: vi.fn(),
     };
 
     const aggregatedClient: any = new AggregatedClient(commands);
@@ -25,7 +27,7 @@ describe(createAggregatedClient.name, () => {
 
   it("is extensible", async () => {
     const commands = {
-      ActionCommand: jest.fn(),
+      ActionCommand: vi.fn(),
     };
 
     const aggregatedClient: any = new UserClient(commands);
@@ -37,7 +39,7 @@ describe(createAggregatedClient.name, () => {
 
   it("should dispatch using the command lookup", async () => {
     const commands = {
-      ActionCommand: jest.fn(),
+      ActionCommand: vi.fn(),
     };
     const aggregatedClient: any = new AggregatedClient(commands);
 
@@ -49,7 +51,7 @@ describe(createAggregatedClient.name, () => {
 
   it("should call send with the matching command", async () => {
     const commands = {
-      ActionCommand: jest.fn(),
+      ActionCommand: vi.fn(),
     };
     const aggregatedClient: any = new AggregatedClient(commands);
 

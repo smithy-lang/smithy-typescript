@@ -1,28 +1,30 @@
+import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
+
 // @jest-environment jsdom
 import { AsyncGzip } from "fflate";
 import { ReadableStream } from "web-streams-polyfill";
 
 import { compressStream } from "./compressStream.browser";
 
-jest.mock("fflate");
+vi.mock("fflate");
 
 describe(compressStream.name, () => {
   const compressionSuffix = "compressed";
   const compressionSeparator = ".";
   const asyncGzip = {
-    ondata: jest.fn(),
-    push: jest.fn().mockImplementation((chunk, final) => {
+    ondata: vi.fn(),
+    push: vi.fn().mockImplementation((chunk, final) => {
       const data = typeof chunk === "string" ? [chunk, compressionSuffix].join(compressionSeparator) : null;
       asyncGzip.ondata(undefined, data, final);
     }),
   };
 
   beforeEach(() => {
-    (AsyncGzip as jest.Mock).mockImplementation(() => asyncGzip);
+    (vi.mocked(AsyncGzip)).mockImplementation(() => asyncGzip);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("compresses a stream", async () => {
@@ -58,7 +60,7 @@ describe(compressStream.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    (AsyncGzip as jest.Mock).mockImplementationOnce(() => {
+    (vi.mocked(AsyncGzip)).mockImplementationOnce(() => {
       throw compressionError;
     });
 

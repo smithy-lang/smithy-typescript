@@ -1,6 +1,7 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { AwsCredentialIdentity } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
+import { beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { clearCredentialCache, createScope, getSigningKey } from "./credentialDerivation";
 
@@ -34,7 +35,7 @@ describe("getSigningKey", () => {
   it("should trap errors encountered while hashing", () => {
     return expect(
       getSigningKey(
-        jest.fn(() => {
+        vi.fn(() => {
           throw new Error("PANIC");
         }),
         credentials,
@@ -47,7 +48,7 @@ describe("getSigningKey", () => {
 
   describe("caching", () => {
     it("should return the same signing key when called with the same date, region, service, and credentials", async () => {
-      const mockSha256Constructor = jest.fn().mockImplementation((args) => {
+      const mockSha256Constructor = vi.fn().mockImplementation((args) => {
         return new Sha256(args);
       });
       const key1 = await getSigningKey(mockSha256Constructor, credentials, shortDate, region, service);

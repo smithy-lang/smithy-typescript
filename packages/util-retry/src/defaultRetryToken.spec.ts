@@ -1,7 +1,9 @@
+import { describe, expect, test as it, vi } from "vitest";
+
 import { DEFAULT_RETRY_DELAY_BASE, MAXIMUM_RETRY_DELAY } from "./constants";
 import { createDefaultRetryToken } from "./defaultRetryToken";
 
-jest.mock("./defaultRetryBackoffStrategy");
+vi.mock("./defaultRetryBackoffStrategy");
 
 describe("defaultRetryToken", () => {
   describe("getRetryCost", () => {

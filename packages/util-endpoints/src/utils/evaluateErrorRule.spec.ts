@@ -1,10 +1,12 @@
+import { describe, expect,test as it, vi } from "vitest";
+
 import { EndpointError, ErrorRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateErrorRule } from "./evaluateErrorRule";
 import { evaluateExpression } from "./evaluateExpression";
 
-jest.mock("./evaluateConditions");
-jest.mock("./evaluateExpression");
+vi.mock("./evaluateConditions");
+vi.mock("./evaluateExpression");
 
 describe(evaluateErrorRule.name, () => {
   const mockOptions = {
@@ -23,7 +25,7 @@ describe(evaluateErrorRule.name, () => {
   };
 
   it("returns undefined if conditions evaluate to false", () => {
-    (evaluateConditions as jest.Mock).mockReturnValue({ result: false });
+    vi.mocked(evaluateConditions).mockReturnValue({ result: false });
     const result = evaluateErrorRule(mockErrorRule, mockOptions);
     expect(result).toBeUndefined();
     expect(evaluateConditions).toHaveBeenCalledWith(mockConditions, mockOptions);
@@ -34,8 +36,8 @@ describe(evaluateErrorRule.name, () => {
     const mockErrorMsg = "mockErrorMsg";
     const mockReferenceRecord = { key: "value" };
 
-    (evaluateConditions as jest.Mock).mockReturnValue({ result: true, referenceRecord: mockReferenceRecord });
-    (evaluateExpression as jest.Mock).mockReturnValue(mockErrorMsg);
+    vi.mocked(evaluateConditions).mockReturnValue({ result: true, referenceRecord: mockReferenceRecord });
+    vi.mocked(evaluateExpression).mockReturnValue(mockErrorMsg);
 
     expect(() => evaluateErrorRule(mockErrorRule, mockOptions)).toThrowError(new EndpointError(`mockErrorMsg`));
     expect(evaluateConditions).toHaveBeenCalledWith(mockConditions, mockOptions);

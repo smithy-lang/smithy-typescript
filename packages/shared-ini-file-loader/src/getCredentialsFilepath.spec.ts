@@ -1,10 +1,11 @@
 import { join } from "path";
+import { afterEach, describe, expect,test as it, vi } from "vitest";
 
 import { ENV_CREDENTIALS_PATH, getCredentialsFilepath } from "./getCredentialsFilepath";
 import { getHomeDir } from "./getHomeDir";
 
-jest.mock("path");
-jest.mock("./getHomeDir");
+vi.mock("path");
+vi.mock("./getHomeDir");
 
 describe(getCredentialsFilepath.name, () => {
   const mockSeparator = "/";
@@ -14,12 +15,12 @@ describe(getCredentialsFilepath.name, () => {
   const defaultConfigFilepath = `${mockHomeDir}/.aws/credentials`;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("returns configFilePath from default locations", () => {
-    (join as jest.Mock).mockImplementation((...args) => args.join(mockSeparator));
-    (getHomeDir as jest.Mock).mockReturnValue(mockHomeDir);
+    vi.mocked(join).mockImplementation((...args) => args.join(mockSeparator));
+    vi.mocked(getHomeDir).mockReturnValue(mockHomeDir);
     expect(getCredentialsFilepath()).toStrictEqual(defaultConfigFilepath);
     expect(getHomeDir).toHaveBeenCalledWith();
     expect(join).toHaveBeenCalledWith(mockHomeDir, ".aws", "credentials");

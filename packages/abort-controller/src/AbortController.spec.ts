@@ -1,3 +1,5 @@
+import { describe, expect,test as it } from "vitest";
+
 import { AbortController } from "./AbortController";
 import { AbortSignal } from "./AbortSignal";
 

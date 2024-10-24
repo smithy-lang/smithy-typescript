@@ -1,16 +1,18 @@
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+
 import { memoize } from "./memoize";
 
 describe("memoize", () => {
-  let provider: jest.Mock;
+  let provider: vi.Mock;
   const mockReturn = "foo";
   const repeatTimes = 10;
 
   beforeEach(() => {
-    provider = jest.fn().mockResolvedValue(mockReturn);
+    provider = vi.fn().mockResolvedValue(mockReturn);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("static memoization", () => {
@@ -68,12 +70,12 @@ describe("memoize", () => {
   });
 
   describe("refreshing memoization", () => {
-    let isExpired: jest.Mock;
-    let requiresRefresh: jest.Mock;
+    let isExpired: vi.Mock;
+    let requiresRefresh: vi.Mock;
 
     beforeEach(() => {
-      isExpired = jest.fn().mockReturnValue(true);
-      requiresRefresh = jest.fn().mockReturnValue(false);
+      isExpired = vi.fn().mockReturnValue(true);
+      requiresRefresh = vi.fn().mockReturnValue(false);
     });
 
     describe("should not reinvoke the underlying provider while isExpired returns `false`", () => {

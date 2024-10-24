@@ -5,6 +5,7 @@ import {
   SameAsServiceCommand,
 } from "@smithy/identity-and-auth-http-api-key-auth-service";
 import { requireRequestsFrom } from "@smithy/util-test";
+import { describe, expect,test as it } from "vitest";
 
 describe("@httpApiKeyAuth integration tests", () => {
   // Match `HttpApiKeyAuthService` `@httpApiKeyAuth` trait

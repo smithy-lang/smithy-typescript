@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, test as it } from "vitest";
+
 import { WaiterOptions } from "../waiter";
 import { validateWaiterOptions } from "./validate";
 
@@ -13,20 +15,18 @@ describe(validateWaiterOptions.name, () => {
     };
   });
 
-  it("should not throw an error when maxDelay is proper", (done) => {
+  it("should not throw an error when maxDelay is proper", () => {
     waiterOptions.maxDelay = 300;
     waiterOptions.minDelay = 200;
     waiterOptions.maxWaitTime = 250;
     try {
       validateWaiterOptions(waiterOptions);
-      expect(1).toBe(1);
-      done();
     } catch (e) {
       expect(e).toBe("SHOULD NOT ERROR HERE");
     }
   });
 
-  it("should not throw an error when maxDelay is less than minDelay", (done) => {
+  it("should not throw an error when maxDelay is less than minDelay", () => {
     waiterOptions.maxDelay = 120;
     waiterOptions.minDelay = 200;
     waiterOptions.maxWaitTime = 250;
@@ -37,34 +37,30 @@ describe(validateWaiterOptions.name, () => {
       expect(e.toString()).toBe(
         "Error: WaiterConfiguration.maxDelay [120] must be greater than WaiterConfiguration.minDelay [200] for this waiter"
       );
-      done();
     }
   });
 
-  it("should not throw an error when maxWaitTime is proper", (done) => {
+  it("should not throw an error when maxWaitTime is proper", () => {
     waiterOptions.maxWaitTime = 300;
     waiterOptions.minDelay = 200;
     try {
       validateWaiterOptions(waiterOptions);
-      expect(1).toBe(1);
-      done();
     } catch (e) {
       expect(e).toBe("SHOULD NOT ERROR HERE");
     }
   });
 
-  it("should throw when maxWaitTime is less than 0", (done) => {
+  it("should throw when maxWaitTime is less than 0", () => {
     waiterOptions.maxWaitTime = -2;
     waiterOptions.minDelay = -1;
     try {
       validateWaiterOptions(waiterOptions);
     } catch (e) {
       expect(e.toString()).toBe("Error: WaiterConfiguration.maxWaitTime must be greater than 0");
-      done();
     }
   });
 
-  it("should throw when maxWaitTime is less than minDelay", (done) => {
+  it("should throw when maxWaitTime is less than minDelay", () => {
     waiterOptions.maxWaitTime = 150;
     waiterOptions.minDelay = 200;
     try {
@@ -73,7 +69,6 @@ describe(validateWaiterOptions.name, () => {
       expect(e.toString()).toBe(
         "Error: WaiterConfiguration.maxWaitTime [150] must be greater than WaiterConfiguration.minDelay [200] for this waiter"
       );
-      done();
     }
   });
 

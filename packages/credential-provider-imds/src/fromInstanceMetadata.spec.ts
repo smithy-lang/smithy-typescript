@@ -1,4 +1,5 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
 import { fromInstanceMetadata } from "./fromInstanceMetadata";
@@ -9,12 +10,12 @@ import { retry } from "./remoteProvider/retry";
 import { getInstanceMetadataEndpoint } from "./utils/getInstanceMetadataEndpoint";
 import { staticStabilityProvider } from "./utils/staticStabilityProvider";
 
-jest.mock("./remoteProvider/httpRequest");
-jest.mock("./remoteProvider/ImdsCredentials");
-jest.mock("./remoteProvider/retry");
-jest.mock("./remoteProvider/RemoteProviderInit");
-jest.mock("./utils/getInstanceMetadataEndpoint");
-jest.mock("./utils/staticStabilityProvider");
+vi.mock("./remoteProvider/httpRequest");
+vi.mock("./remoteProvider/ImdsCredentials");
+vi.mock("./remoteProvider/retry");
+vi.mock("./remoteProvider/RemoteProviderInit");
+vi.mock("./utils/getInstanceMetadataEndpoint");
+vi.mock("./utils/staticStabilityProvider");
 
 describe("fromInstanceMetadata", () => {
   const hostname = "127.0.0.1";
@@ -58,27 +59,27 @@ describe("fromInstanceMetadata", () => {
   });
 
   beforeEach(() => {
-    (staticStabilityProvider as jest.Mock).mockImplementation((input) => input);
-    (getInstanceMetadataEndpoint as jest.Mock).mockResolvedValue({ hostname });
-    (isImdsCredentials as unknown as jest.Mock).mockReturnValue(true);
-    (providerConfigFromInit as jest.Mock).mockReturnValue({
+    vi.mocked(staticStabilityProvider).mockImplementation((input) => input);
+    vi.mocked(getInstanceMetadataEndpoint).mockResolvedValue({ hostname });
+    (isImdsCredentials as unknown as any).mockReturnValue(true);
+    vi.mocked(providerConfigFromInit).mockReturnValue({
       timeout: mockTimeout,
       maxRetries: mockMaxRetries,
     });
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("gets token and profile name to fetch credentials", async () => {
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockResolvedValueOnce(mockToken)
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
     await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
     expect(httpRequest).toHaveBeenCalledTimes(3);
@@ -91,13 +92,13 @@ describe("fromInstanceMetadata", () => {
   });
 
   it("trims profile returned name from IMDS", async () => {
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockResolvedValueOnce(mockToken)
       .mockResolvedValueOnce("   " + mockProfile + "  ")
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
     await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
     expect(httpRequest).toHaveBeenNthCalledWith(3, {
@@ -107,7 +108,7 @@ describe("fromInstanceMetadata", () => {
   });
 
   it("passes {} to providerConfigFromInit if init not defined", async () => {
-    (retry as jest.Mock).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
+    vi.mocked(retry).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
 
     await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
     expect(providerConfigFromInit).toHaveBeenCalledTimes(1);
@@ -115,7 +116,7 @@ describe("fromInstanceMetadata", () => {
   });
 
   it("passes init to providerConfigFromInit", async () => {
-    (retry as jest.Mock).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
+    vi.mocked(retry).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
 
     const init = { maxRetries: 5, timeout: 1213 };
     await expect(fromInstanceMetadata(init)()).resolves.toEqual(mockCreds);
@@ -124,22 +125,22 @@ describe("fromInstanceMetadata", () => {
   });
 
   it("passes maxRetries returned from providerConfigFromInit to retry", async () => {
-    (retry as jest.Mock).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
+    vi.mocked(retry).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
 
     await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
     expect(retry).toHaveBeenCalledTimes(2);
-    expect((retry as jest.Mock).mock.calls[0][1]).toBe(mockMaxRetries);
-    expect((retry as jest.Mock).mock.calls[1][1]).toBe(mockMaxRetries);
+    expect(vi.mocked(retry).mock.calls[0][1]).toBe(mockMaxRetries);
+    expect(vi.mocked(retry).mock.calls[1][1]).toBe(mockMaxRetries);
   });
 
   it("throws CredentialsProviderError if credentials returned are incorrect", async () => {
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockResolvedValueOnce(mockToken)
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (isImdsCredentials as unknown as jest.Mock).mockReturnValueOnce(false);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    (isImdsCredentials as unknown as any).mockReturnValueOnce(false);
 
     await expect(fromInstanceMetadata()()).rejects.toEqual(
       new CredentialsProviderError("Invalid response received from instance metadata service.")
@@ -153,8 +154,8 @@ describe("fromInstanceMetadata", () => {
 
   it("throws Error if httpRequest for profile fails", async () => {
     const mockError = new Error("profile not found");
-    (httpRequest as jest.Mock).mockResolvedValueOnce(mockToken).mockRejectedValueOnce(mockError);
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
+    vi.mocked(httpRequest).mockResolvedValueOnce(mockToken).mockRejectedValueOnce(mockError);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
 
     await expect(fromInstanceMetadata()()).rejects.toEqual(mockError);
     expect(retry).toHaveBeenCalledTimes(1);
@@ -163,11 +164,11 @@ describe("fromInstanceMetadata", () => {
 
   it("throws Error if httpRequest for credentials fails", async () => {
     const mockError = new Error("creds not found");
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockResolvedValueOnce(mockToken)
       .mockResolvedValueOnce(mockProfile)
       .mockRejectedValueOnce(mockError);
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
 
     await expect(fromInstanceMetadata()()).rejects.toEqual(mockError);
     expect(retry).toHaveBeenCalledTimes(2);
@@ -176,11 +177,11 @@ describe("fromInstanceMetadata", () => {
   });
 
   it("throws SyntaxError if httpRequest returns unparseable creds", async () => {
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockResolvedValueOnce(mockToken)
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(".");
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
 
     await expect(fromInstanceMetadata()()).rejects.toThrow("Unexpected token");
     expect(retry).toHaveBeenCalledTimes(2);
@@ -192,34 +193,34 @@ describe("fromInstanceMetadata", () => {
     const tokenError = Object.assign(new Error("token not found"), {
       statusCode: 400,
     });
-    (httpRequest as jest.Mock).mockRejectedValueOnce(tokenError);
+    vi.mocked(httpRequest).mockRejectedValueOnce(tokenError);
 
     await expect(fromInstanceMetadata()()).rejects.toEqual(tokenError);
   });
 
   it("should call staticStabilityProvider with the credential loader", async () => {
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockResolvedValueOnce(mockToken)
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
     await fromInstanceMetadata()();
-    expect(staticStabilityProvider as jest.Mock).toBeCalledTimes(1);
+    expect(vi.mocked(staticStabilityProvider)).toBeCalledTimes(1);
   });
 
   describe("disables fetching of token", () => {
     beforeEach(() => {
-      (retry as jest.Mock).mockImplementation((fn: any) => fn());
-      (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+      vi.mocked(retry).mockImplementation((fn: any) => fn());
+      vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
     });
 
     it("when token fetch returns with TimeoutError", async () => {
       const tokenError = new Error("TimeoutError");
 
-      (httpRequest as jest.Mock)
+      vi.mocked(httpRequest)
         .mockRejectedValueOnce(tokenError)
         .mockResolvedValueOnce(mockProfile)
         .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
@@ -235,7 +236,7 @@ describe("fromInstanceMetadata", () => {
       it(`when token fetch errors with statusCode ${statusCode}`, async () => {
         const tokenError = Object.assign(new Error(), { statusCode });
 
-        (httpRequest as jest.Mock)
+        vi.mocked(httpRequest)
           .mockRejectedValueOnce(tokenError)
           .mockResolvedValueOnce(mockProfile)
           .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
@@ -252,7 +253,7 @@ describe("fromInstanceMetadata", () => {
   it("uses insecure data flow once, if error is not TimeoutError", async () => {
     const tokenError = new Error("Error");
 
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockRejectedValueOnce(tokenError)
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
@@ -260,8 +261,8 @@ describe("fromInstanceMetadata", () => {
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
     const fromInstanceMetadataFunc = fromInstanceMetadata();
     await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
@@ -271,7 +272,7 @@ describe("fromInstanceMetadata", () => {
   it("uses insecure data flow once, if error statusCode is not 400, 403, 404, 405", async () => {
     const tokenError = Object.assign(new Error("Error"), { statusCode: 406 });
 
-    (httpRequest as jest.Mock)
+    vi.mocked(httpRequest)
       .mockRejectedValueOnce(tokenError)
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds))
@@ -279,8 +280,8 @@ describe("fromInstanceMetadata", () => {
       .mockResolvedValueOnce(mockProfile)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds));
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
     const fromInstanceMetadataFunc = fromInstanceMetadata();
     await expect(fromInstanceMetadataFunc()).resolves.toEqual(mockCreds);
@@ -291,10 +292,10 @@ describe("fromInstanceMetadata", () => {
   it.skip("allows blocking imdsv1 fallback", async () => {
     const tokenError = Object.assign(new Error("Error"), { statusCode: 406 });
 
-    (httpRequest as jest.Mock).mockRejectedValueOnce(tokenError);
+    vi.mocked(httpRequest).mockRejectedValueOnce(tokenError);
 
-    (retry as jest.Mock).mockImplementation((fn: any) => fn());
-    (fromImdsCredentials as jest.Mock).mockReturnValue(mockCreds);
+    vi.mocked(retry).mockImplementation((fn: any) => fn());
+    vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
     const fromInstanceMetadataFunc = fromInstanceMetadata({
       ec2MetadataV1Disabled: true,

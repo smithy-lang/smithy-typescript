@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { EndpointMode } from "./EndpointMode";
 import {
   CONFIG_ENDPOINT_MODE_NAME,

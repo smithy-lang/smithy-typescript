@@ -1,7 +1,9 @@
+import { afterEach, describe, expect,test as it, vi } from "vitest";
+
 import { evaluateExpression } from "./evaluateExpression";
 import { getEndpointHeaders } from "./getEndpointHeaders";
 
-jest.mock("./evaluateExpression");
+vi.mock("./evaluateExpression");
 
 describe(getEndpointHeaders.name, () => {
   const mockOptions = {
@@ -10,7 +12,7 @@ describe(getEndpointHeaders.name, () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return an empty object if empty headers are provided", () => {
@@ -23,7 +25,7 @@ describe(getEndpointHeaders.name, () => {
     const outputHeaderValue = "outputHeaderValue";
     const mockHeaders = { key: [inputHeaderValue] };
 
-    (evaluateExpression as jest.Mock).mockReturnValue(outputHeaderValue);
+    vi.mocked(evaluateExpression).mockReturnValue(outputHeaderValue);
     expect(getEndpointHeaders(mockHeaders, mockOptions)).toEqual({ key: [outputHeaderValue] });
     expect(evaluateExpression).toHaveBeenCalledWith("inputHeaderValue", "Header value entry", mockOptions);
   });
@@ -35,7 +37,7 @@ describe(getEndpointHeaders.name, () => {
       const inputHeaderValue = "inputHeaderValue";
       const mockHeaders = { [inputHeaderKey]: [inputHeaderValue] };
 
-      (evaluateExpression as jest.Mock).mockReturnValue(notStringValue);
+      vi.mocked(evaluateExpression).mockReturnValue(notStringValue);
       expect(() => getEndpointHeaders(mockHeaders, mockOptions)).toThrowError(
         `Header '${inputHeaderKey}' value '${notStringValue}' is not a string`
       );

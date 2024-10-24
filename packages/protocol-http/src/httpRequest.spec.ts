@@ -1,4 +1,5 @@
 import { QueryParameterBag } from "@smithy/types";
+import { describe, expect,test as it } from "vitest";
 
 import { HttpRequest, IHttpRequest } from "./httpRequest";
 

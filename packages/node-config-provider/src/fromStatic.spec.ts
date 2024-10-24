@@ -1,28 +1,29 @@
 import { fromStatic as convertToProvider } from "@smithy/property-provider";
+import { describe, expect,test as it, vi } from "vitest";
 
 import { fromStatic } from "./fromStatic";
 
-jest.mock("@smithy/property-provider", () => ({
-  fromStatic: jest.fn(),
+vi.mock("@smithy/property-provider", () => ({
+  fromStatic: vi.fn(),
 }));
 
 describe("fromStatic", () => {
   const value = "default";
   it("should convert static values to provider", async () => {
-    (convertToProvider as jest.Mock).mockReturnValue(value);
+    vi.mocked(convertToProvider).mockReturnValue(value);
     fromStatic(value);
-    expect(convertToProvider as jest.Mock).toHaveBeenCalledWith(value);
+    expect(vi.mocked(convertToProvider)).toHaveBeenCalledWith(value);
   });
 
   it("should call the getter function", async () => {
-    const getter = jest.fn().mockReturnValue(value);
+    const getter = vi.fn().mockReturnValue(value);
     const config = fromStatic(getter);
     expect(await config()).toBe(value);
     expect(getter).toHaveBeenCalled();
   });
 
   it("should call the async provider function", async () => {
-    const getter = jest.fn().mockResolvedValue(value);
+    const getter = vi.fn().mockResolvedValue(value);
     const config = fromStatic(getter);
     expect(await config()).toBe(value);
     expect(getter).toHaveBeenCalled();

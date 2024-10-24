@@ -1,34 +1,35 @@
 import { createHash } from "crypto";
 import { join } from "path";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";
 import { getSSOTokenFilepath } from "./getSSOTokenFilepath";
 
-jest.mock("crypto");
-jest.mock("./getHomeDir");
+vi.mock("crypto");
+vi.mock("./getHomeDir");
 
 describe(getSSOTokenFilepath.name, () => {
   const mockCacheName = "mockCacheName";
-  const mockDigest = jest.fn().mockReturnValue(mockCacheName);
-  const mockUpdate = jest.fn().mockReturnValue({ digest: mockDigest });
+  const mockDigest = vi.fn().mockReturnValue(mockCacheName);
+  const mockUpdate = vi.fn().mockReturnValue({ digest: mockDigest });
   const mockHomeDir = "/home/dir";
   const mockSsoStartUrl = "mock_sso_start_url";
 
   beforeEach(() => {
-    (createHash as jest.Mock).mockReturnValue({ update: mockUpdate });
-    (getHomeDir as jest.Mock).mockReturnValue(mockHomeDir);
+    vi.mocked(createHash).mockReturnValue({ update: mockUpdate });
+    vi.mocked(getHomeDir).mockReturnValue(mockHomeDir);
   });
 
   afterEach(() => {
     expect(createHash).toHaveBeenCalledWith("sha1");
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("re-throws error", () => {
     const mockError = new Error("error");
 
     it("when createHash throws error", () => {
-      (createHash as jest.Mock).mockImplementationOnce(() => {
+      vi.mocked(createHash).mockImplementationOnce(() => {
         throw mockError;
       });
       expect(() => getSSOTokenFilepath(mockSsoStartUrl)).toThrow(mockError);
@@ -58,7 +59,7 @@ describe(getSSOTokenFilepath.name, () => {
     });
 
     it("when getHomeDir() throws error", () => {
-      (getHomeDir as jest.Mock).mockImplementationOnce(() => {
+      vi.mocked(getHomeDir).mockImplementationOnce(() => {
         throw mockError;
       });
       expect(() => getSSOTokenFilepath(mockSsoStartUrl)).toThrow(mockError);
