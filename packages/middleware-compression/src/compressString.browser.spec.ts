@@ -1,11 +1,12 @@
-// @jest-environment jsdom
+import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
+
 import { toUint8Array } from "@smithy/util-utf8";
 import { gzip } from "fflate";
 
 import { compressString } from "./compressString.browser";
 
-jest.mock("@smithy/util-utf8");
-jest.mock("fflate");
+vi.mock("@smithy/util-utf8");
+vi.mock("fflate");
 
 describe(compressString.name, () => {
   const testData = "test";
@@ -13,15 +14,15 @@ describe(compressString.name, () => {
   const compressionSeparator = ".";
 
   beforeEach(() => {
-    (toUint8Array as jest.Mock).mockImplementation((data) => data);
+    (vi.mocked(toUint8Array)).mockImplementation((data) => data);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should compress data with gzip", async () => {
-    (gzip as jest.Mock).mockImplementation((data, callback) => {
+    (vi.mocked(gzip)).mockImplementation((data, callback) => {
       callback(null, [data, compressionSuffix].join(compressionSeparator));
     });
     const receivedOutput = await compressString(testData);
@@ -37,7 +38,7 @@ describe(compressString.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    (gzip as jest.Mock).mockImplementation((data, callback) => {
+    (vi.mocked(gzip)).mockImplementation((data, callback) => {
       callback(compressionError);
     });
 

@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import { getHostnameFromVariants } from "./getHostnameFromVariants";
 import { getRegionInfo } from "./getRegionInfo";
 import { getResolvedHostname } from "./getResolvedHostname";
@@ -6,10 +8,10 @@ import { getResolvedSigningRegion } from "./getResolvedSigningRegion";
 import { PartitionHash } from "./PartitionHash";
 import { RegionHash } from "./RegionHash";
 
-jest.mock("./getHostnameFromVariants");
-jest.mock("./getResolvedHostname");
-jest.mock("./getResolvedPartition");
-jest.mock("./getResolvedSigningRegion");
+vi.mock("./getHostnameFromVariants");
+vi.mock("./getResolvedHostname");
+vi.mock("./getResolvedPartition");
+vi.mock("./getResolvedSigningRegion");
 
 describe(getRegionInfo.name, () => {
   const mockPartition = "mockPartition";
@@ -63,17 +65,17 @@ describe(getRegionInfo.name, () => {
   });
 
   beforeEach(() => {
-    (getHostnameFromVariants as jest.Mock).mockReturnValue(mockHostname);
-    (getResolvedHostname as jest.Mock).mockReturnValue(mockHostname);
-    (getResolvedPartition as jest.Mock).mockReturnValue(mockPartition);
-    (getResolvedSigningRegion as jest.Mock).mockReturnValue(undefined);
+    vi.mocked(getHostnameFromVariants).mockReturnValue(mockHostname);
+    vi.mocked(getResolvedHostname).mockReturnValue(mockHostname);
+    vi.mocked(getResolvedPartition).mockReturnValue(mockPartition);
+    vi.mocked(getResolvedSigningRegion).mockReturnValue(undefined);
   });
 
   afterEach(() => {
     expect(getHostnameFromVariants).toHaveBeenCalledTimes(2);
     expect(getResolvedHostname).toHaveBeenCalledTimes(1);
     expect(getResolvedPartition).toHaveBeenCalledTimes(1);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("returns data based on options passed", () => {
@@ -88,8 +90,8 @@ describe(getRegionInfo.name, () => {
       const mockRegionHostname = mockGetRegionInfoOptions.regionHash[mockResolvedRegion]?.hostname;
       const mockPartitionHostname = mockGetRegionInfoOptions.partitionHash[mockPartition]?.hostname;
 
-      (getHostnameFromVariants as jest.Mock).mockReturnValueOnce(mockRegionHostname);
-      (getHostnameFromVariants as jest.Mock).mockReturnValueOnce(mockPartitionHostname);
+      vi.mocked(getHostnameFromVariants).mockReturnValueOnce(mockRegionHostname);
+      vi.mocked(getHostnameFromVariants).mockReturnValueOnce(mockPartitionHostname);
 
       expect(getRegionInfo(mockRegion, mockGetRegionInfoOptions)).toEqual({
         signingService: mockSigningService,
@@ -132,7 +134,7 @@ describe(getRegionInfo.name, () => {
 
     it.each(Object.values(RegionCase))("%s", (regionCase) => {
       const mockSigningRegion = "mockSigningRegion";
-      (getResolvedSigningRegion as jest.Mock).mockReturnValueOnce(mockSigningRegion);
+      vi.mocked(getResolvedSigningRegion).mockReturnValueOnce(mockSigningRegion);
       const mockRegionHash = getMockRegionHash(regionCase);
       const mockPartitionHash = getMockPartitionHash(regionCase);
 
@@ -143,8 +145,8 @@ describe(getRegionInfo.name, () => {
       const mockRegionHostname = mockGetRegionInfoOptions.regionHash[mockResolvedRegion]?.hostname;
       const mockPartitionHostname = mockGetRegionInfoOptions.partitionHash[mockPartition]?.hostname;
 
-      (getHostnameFromVariants as jest.Mock).mockReturnValueOnce(mockRegionHostname);
-      (getHostnameFromVariants as jest.Mock).mockReturnValueOnce(mockPartitionHostname);
+      vi.mocked(getHostnameFromVariants).mockReturnValueOnce(mockRegionHostname);
+      vi.mocked(getHostnameFromVariants).mockReturnValueOnce(mockPartitionHostname);
 
       const mockRegionHashWithSigningRegion = getMockRegionHashWithSigningRegion(
         regionCase,
@@ -207,8 +209,8 @@ describe(getRegionInfo.name, () => {
       const mockRegionHostname = mockGetRegionInfoOptions.regionHash[mockResolvedRegion]?.hostname;
       const mockPartitionHostname = mockGetRegionInfoOptions.partitionHash[mockPartition]?.hostname;
 
-      (getHostnameFromVariants as jest.Mock).mockReturnValueOnce(mockRegionHostname);
-      (getHostnameFromVariants as jest.Mock).mockReturnValueOnce(mockPartitionHostname);
+      vi.mocked(getHostnameFromVariants).mockReturnValueOnce(mockRegionHostname);
+      vi.mocked(getHostnameFromVariants).mockReturnValueOnce(mockPartitionHostname);
 
       const mockRegionHashWithSigningRegion = getMockRegionHashWithSigningService(
         regionCase,
@@ -237,7 +239,7 @@ describe(getRegionInfo.name, () => {
   });
 
   it("throws error if hostname is not defined", () => {
-    (getResolvedHostname as jest.Mock).mockReturnValueOnce(undefined);
+    vi.mocked(getResolvedHostname).mockReturnValueOnce(undefined);
     const mockRegionHash = getMockRegionHash(RegionCase.REGION);
     const mockPartitionHash = getMockPartitionHash(RegionCase.REGION);
     expect(() => {

@@ -1,20 +1,21 @@
 import { Logger } from "@smithy/types";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
 
 describe("getExtendedInstanceMetadataCredentials()", () => {
-  let nowMock: jest.SpyInstance;
+  let nowMock: any;
   const staticSecret = {
     accessKeyId: "key",
     secretAccessKey: "secret",
   };
   const logger: Logger = {
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as any;
 
   beforeEach(() => {
-    jest.spyOn(global.Math, "random");
-    nowMock = jest.spyOn(Date, "now").mockReturnValueOnce(new Date("2022-02-22T00:00:00Z").getTime());
+    vi.spyOn(global.Math, "random");
+    nowMock = vi.spyOn(Date, "now").mockReturnValueOnce(new Date("2022-02-22T00:00:00Z").getTime());
   });
 
   afterEach(() => {
@@ -23,7 +24,7 @@ describe("getExtendedInstanceMetadataCredentials()", () => {
 
   it("should extend the expiration random time(5~10 mins) from now", () => {
     const anyDate: Date = "any date" as unknown as Date;
-    (Math.random as jest.Mock).mockReturnValue(0.5);
+    (Math.random as any).mockReturnValue(0.5);
     expect(getExtendedInstanceMetadataCredentials({ ...staticSecret, expiration: anyDate }, logger)).toEqual({
       ...staticSecret,
       originalExpiration: anyDate,

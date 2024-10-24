@@ -1,4 +1,5 @@
 import { Endpoint } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import { parseUrl } from ".";
 
@@ -37,7 +38,7 @@ describe("parseUrl", () => {
     ],
   ]);
 
-  const testFunc = typeof URL !== "undefined" ? it : xit;
+  const testFunc = typeof URL !== "undefined" ? it : it.skip;
 
   for (const [url, parsed] of testCases) {
     testFunc(`should correctly parse ${url}`, () => {

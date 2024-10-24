@@ -1,5 +1,6 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { SHA256_HEADER, UNSIGNED_PAYLOAD } from "./constants";
 import { getPayloadHash } from "./getPayloadHash";
@@ -28,7 +29,7 @@ describe("getPayloadHash", () => {
             [SHA256_HEADER]: "foo",
           },
         }),
-        jest.fn(() => {
+        vi.fn(() => {
           throw new Error("I should not have been invoked!");
         })
       )

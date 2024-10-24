@@ -1,6 +1,7 @@
 import { EventStreamCodec } from "@smithy/eventstream-codec";
 import { Message } from "@smithy/types";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
+import { describe, expect, test as it } from "vitest";
 
 import { endEventMessage, exception, recordEventMessage, statsEventMessage } from "./getChunkedStream.spec";
 import { getUnmarshalledStream } from "./getUnmarshalledStream";

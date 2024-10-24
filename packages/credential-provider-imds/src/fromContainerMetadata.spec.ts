@@ -1,3 +1,5 @@
+import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import {
   ENV_CMDS_AUTH_TOKEN,
   ENV_CMDS_FULL_URI,
@@ -8,7 +10,7 @@ import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, ImdsCredentials } from "./remoteProvider/ImdsCredentials";
 
 const mockHttpRequest = <any>httpRequest;
-jest.mock("./remoteProvider/httpRequest");
+vi.mock("./remoteProvider/httpRequest");
 
 const relativeUri = process.env[ENV_CMDS_RELATIVE_URI];
 const fullUri = process.env[ENV_CMDS_FULL_URI];

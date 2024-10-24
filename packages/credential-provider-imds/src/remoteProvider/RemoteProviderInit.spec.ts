@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { DEFAULT_MAX_RETRIES, DEFAULT_TIMEOUT, providerConfigFromInit } from "./RemoteProviderInit";
 
 describe("providerConfigFromInit", () => {

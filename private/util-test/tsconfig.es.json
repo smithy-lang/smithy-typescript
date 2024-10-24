@@ -4,7 +4,8 @@
     "lib": [],
     "outDir": "dist-es",
     "rootDir": "src",
-    "stripInternal": true
+    "stripInternal": true,
+    "skipLibCheck": true
   },
   "extends": "../../tsconfig.es.json",
   "include": ["src/"]

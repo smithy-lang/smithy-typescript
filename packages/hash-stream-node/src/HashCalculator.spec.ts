@@ -1,4 +1,5 @@
 import { toUint8Array } from "@smithy/util-utf8/src";
+import { describe, expect, test as it } from "vitest";
 
 import { HashCalculator } from "./HashCalculator";
 

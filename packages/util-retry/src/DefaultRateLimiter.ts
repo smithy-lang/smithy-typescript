@@ -17,6 +17,11 @@ export interface DefaultRateLimiterOptions {
  * @public
  */
 export class DefaultRateLimiter implements RateLimiter {
+  /**
+   * Only used in testing.
+   */
+  private static setTimeoutFn = setTimeout;
+
   // User configurable constants
   private beta: number;
   private minCapacity: number;
@@ -71,7 +76,7 @@ export class DefaultRateLimiter implements RateLimiter {
     this.refillTokenBucket();
     if (amount > this.currentCapacity) {
       const delay = ((amount - this.currentCapacity) / this.fillRate) * 1000;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => DefaultRateLimiter.setTimeoutFn(resolve, delay));
     }
     this.currentCapacity = this.currentCapacity - amount;
   }

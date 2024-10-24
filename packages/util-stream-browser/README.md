@@ -9,4 +9,4 @@ Package with utilities to operate on browser streams.
 
 ## Usage
 
-You probably shouldn't, at least directly.
+This package is deprecated for `@smithy/util-stream`, which provides the same functionality merging Node.js and browser.

@@ -1,3 +1,5 @@
+import { describe, expect, test as it, vi } from "vitest";
+
 import { AbortController } from "./AbortController";
 
 describe("AbortSignal", () => {
@@ -13,7 +15,7 @@ describe("AbortSignal", () => {
   it("should invoke the onabort handler when the signal is aborted", () => {
     const controller = new AbortController();
     const { signal } = controller;
-    const abortHandler = jest.fn();
+    const abortHandler = vi.fn();
     signal.onabort = abortHandler;
     expect(abortHandler.mock.calls.length).toBe(0);
     controller.abort();
@@ -23,7 +25,7 @@ describe("AbortSignal", () => {
   it("should not invoke the onabort handler multiple time", () => {
     const controller = new AbortController();
     const { signal } = controller;
-    const abortHandler = jest.fn();
+    const abortHandler = vi.fn();
     signal.onabort = abortHandler;
     expect(abortHandler.mock.calls.length).toBe(0);
     controller.abort();

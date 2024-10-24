@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { isValidHostname } from "./isValidHostname";
 
 describe("implementation selection", () => {

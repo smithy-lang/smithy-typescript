@@ -1,3 +1,5 @@
+import { describe, expect, test as it, vi } from "vitest";
+
 import { CredentialsProviderError } from "./CredentialsProviderError";
 import { ProviderError } from "./ProviderError";
 
@@ -28,11 +30,11 @@ describe(CredentialsProviderError.name, () => {
 
   it("should use logger.debug if provided", () => {
     const logger = {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-      trace: jest.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
     };
     new CredentialsProviderError("PANIC", { logger });
 

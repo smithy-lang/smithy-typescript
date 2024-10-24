@@ -1,9 +1,10 @@
 import { Logger } from "@smithy/types";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
 import { staticStabilityProvider } from "./staticStabilityProvider";
 
-jest.mock("./getExtendedInstanceMetadataCredentials");
+vi.mock("./getExtendedInstanceMetadataCredentials");
 
 describe("staticStabilityProvider", () => {
   const ONE_HOUR_IN_FUTURE = new Date(Date.now() + 60 * 60 * 1000);
@@ -15,7 +16,7 @@ describe("staticStabilityProvider", () => {
   };
 
   beforeEach(() => {
-    (getExtendedInstanceMetadataCredentials as jest.Mock).mockImplementation(
+    vi.mocked(getExtendedInstanceMetadataCredentials).mockImplementation(
       (() => {
         let extensionCount = 0;
         return (input) => {
@@ -27,15 +28,15 @@ describe("staticStabilityProvider", () => {
         };
       })()
     );
-    jest.spyOn(global.console, "warn").mockImplementation(() => {});
+    vi.spyOn(global.console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("should refresh credentials if provider is functional", async () => {
-    const provider = jest.fn();
+    const provider = vi.fn();
     const stableProvider = staticStabilityProvider(provider);
     const repeat = 3;
     for (let i = 0; i < repeat; i++) {
@@ -46,7 +47,7 @@ describe("staticStabilityProvider", () => {
   });
 
   it("should throw if cannot load credentials at 1st load", async () => {
-    const provider = jest.fn().mockRejectedValue("Error");
+    const provider = vi.fn().mockRejectedValue("Error");
     try {
       await staticStabilityProvider(provider)();
       fail("This provider should throw");
@@ -58,7 +59,7 @@ describe("staticStabilityProvider", () => {
   });
 
   it("should extend expired credentials if refresh fails", async () => {
-    const provider = jest.fn().mockResolvedValueOnce(mockCreds).mockRejectedValue("Error");
+    const provider = vi.fn().mockResolvedValueOnce(mockCreds).mockRejectedValue("Error");
     const stableProvider = staticStabilityProvider(provider);
     expect(await stableProvider()).toEqual(mockCreds);
     const repeat = 3;
@@ -76,7 +77,7 @@ describe("staticStabilityProvider", () => {
 
   it("should extend expired credentials if loaded expired credentials", async () => {
     const ONE_HOUR_AGO = new Date(Date.now() - 60 * 60 * 1000);
-    const provider = jest.fn().mockResolvedValue({ ...mockCreds, expiration: ONE_HOUR_AGO });
+    const provider = vi.fn().mockResolvedValue({ ...mockCreds, expiration: ONE_HOUR_AGO });
     const stableProvider = staticStabilityProvider(provider);
     const repeat = 3;
     for (let i = 0; i < repeat; i++) {
@@ -88,8 +89,8 @@ describe("staticStabilityProvider", () => {
   });
 
   it("should allow custom logger to print warning messages", async () => {
-    const provider = jest.fn().mockResolvedValueOnce(mockCreds).mockRejectedValue("Error");
-    const logger = { warn: jest.fn() } as unknown as Logger;
+    const provider = vi.fn().mockResolvedValueOnce(mockCreds).mockRejectedValue("Error");
+    const logger = { warn: vi.fn() } as unknown as Logger;
     const stableProvider = staticStabilityProvider(provider, { logger });
     expect(await stableProvider()).toEqual(mockCreds); // load initial creds
     await stableProvider();

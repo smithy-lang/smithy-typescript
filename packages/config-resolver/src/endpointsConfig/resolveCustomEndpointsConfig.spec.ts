@@ -1,8 +1,9 @@
 import { normalizeProvider } from "@smithy/util-middleware";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { resolveCustomEndpointsConfig } from "./resolveCustomEndpointsConfig";
 
-jest.mock("@smithy/util-middleware");
+vi.mock("@smithy/util-middleware");
 
 describe(resolveCustomEndpointsConfig.name, () => {
   const mockEndpoint = {
@@ -13,18 +14,18 @@ describe(resolveCustomEndpointsConfig.name, () => {
 
   const mockInput = {
     endpoint: mockEndpoint,
-    urlParser: jest.fn(() => mockEndpoint),
+    urlParser: vi.fn(() => mockEndpoint),
     useDualstackEndpoint: () => Promise.resolve(false),
   } as any;
 
   beforeEach(() => {
-    (normalizeProvider as jest.Mock).mockImplementation((input) =>
+    vi.mocked(normalizeProvider).mockImplementation((input) =>
       typeof input === "function" ? input : () => Promise.resolve(input)
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("tls", () => {

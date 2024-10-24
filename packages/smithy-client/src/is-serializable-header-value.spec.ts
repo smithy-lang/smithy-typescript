@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { isSerializableHeaderValue } from "./is-serializable-header-value";
 
 describe(isSerializableHeaderValue.name, () => {

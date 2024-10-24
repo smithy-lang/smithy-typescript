@@ -1,3 +1,5 @@
+import { describe, expect, test as it, vi } from "vitest";
+
 import { getResolvedSigningRegion } from "./getResolvedSigningRegion";
 
 describe(getResolvedSigningRegion.name, () => {
@@ -22,7 +24,7 @@ describe(getResolvedSigningRegion.name, () => {
     });
 
     it("regionRegex does not return a match in hostname", () => {
-      const matchSpy = jest.spyOn(String.prototype, "match").mockReturnValueOnce(null);
+      const matchSpy = vi.spyOn(String.prototype, "match").mockReturnValueOnce(null);
 
       expect(getResolvedSigningRegion(mockHostname, { ...mockOptions, useFipsEndpoint: true })).not.toBeDefined();
       expect(matchSpy).toHaveBeenCalledTimes(1);

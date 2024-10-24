@@ -1,4 +1,5 @@
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
+import { describe, expect, test as it } from "vitest";
 
 import { EventStreamCodec } from "./EventStreamCodec";
 import { vectors } from "./TestVectors.fixture";

@@ -129,7 +129,7 @@ class PackageJsonGeneratorTest {
         String packageJson = manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).get();
         String configString = manifest.getFileString(PackageJsonGenerator.VITEST_CONFIG_FILENAME).get();
 
-        assertThat(packageJson, containsString("\"test\": \"vitest run --passWithNoTests\""));
+        assertThat(packageJson, containsString("\"test\": \"yarn g:vitest run --passWithNoTests\""));
         assertThat(configString, containsString("include: ['**/*.spec.ts']"));
     }
 
@@ -160,7 +160,7 @@ class PackageJsonGeneratorTest {
         assertTrue(manifest.getFileString(PackageJsonGenerator.TYPEDOC_FILE_NAME).isEmpty());
 
         String packageJson = manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).get();
-        
+
         assertThat(packageJson, not(containsString("\"build:docs\": \"typedoc\"")));
         assertThat(packageJson, not(containsString("\"typedoc\": \"0.23.23\"")));
     }
@@ -193,7 +193,7 @@ class PackageJsonGeneratorTest {
         assertTrue(manifest.getFileString(PackageJsonGenerator.TYPEDOC_FILE_NAME).isPresent());
 
         String packageJson = manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).get();
-        
+
         assertThat(packageJson, containsString("\"build:docs\": \"typedoc\""));
         assertThat(packageJson, containsString("\"typedoc\": \"0.23.23\""));
     }

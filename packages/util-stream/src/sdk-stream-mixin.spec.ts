@@ -1,11 +1,11 @@
 import { SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
 import { PassThrough, Readable, Writable } from "stream";
-import util from "util";
+import { afterAll, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";
 
-jest.mock("@smithy/util-buffer-from");
+vi.mock("@smithy/util-buffer-from");
 
 describe(sdkStreamMixin.name, () => {
   const writeDataToStream = (stream: Writable, data: Array<ArrayBufferLike>): Promise<void> =>
@@ -82,13 +82,15 @@ describe(sdkStreamMixin.name, () => {
   });
 
   describe("transformToString", () => {
-    const toStringMock = jest.fn();
+    const toStringMock = vi.fn();
     beforeAll(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it("should transform the stream to string with utf-8 encoding by default", async () => {
-      (fromArrayBuffer as jest.Mock).mockImplementation(jest.requireActual("@smithy/util-buffer-from").fromArrayBuffer);
+      vi.mocked(fromArrayBuffer).mockImplementation(
+        ((await vi.importActual("@smithy/util-buffer-from")) as any).fromArrayBuffer
+      );
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("foo")]);
       const transformed = await sdkStream.transformToString();
@@ -98,7 +100,7 @@ describe(sdkStreamMixin.name, () => {
     it.each([undefined, "utf-8", "ascii", "base64", "latin1", "binary"])(
       "should transform the stream to string with %s encoding",
       async (encoding) => {
-        (fromArrayBuffer as jest.Mock).mockReturnValue({ toString: toStringMock });
+        vi.mocked(fromArrayBuffer).mockReturnValue({ toString: toStringMock } as any);
         const sdkStream = sdkStreamMixin(passThrough);
         await writeDataToStream(passThrough, [Buffer.from("foo")]);
         await sdkStream.transformToString(encoding);
@@ -109,17 +111,17 @@ describe(sdkStreamMixin.name, () => {
     it.each(["ibm866", "iso-8859-2", "koi8-r", "macintosh", "windows-874", "gbk", "gb18030", "euc-jp"])(
       "should transform the stream to string with TextDecoder config %s",
       async (encoding) => {
-        jest.spyOn(util, "TextDecoder").mockImplementation(
+        vi.spyOn(global, "TextDecoder").mockImplementation(
           () =>
             ({
-              decode: jest.fn(),
+              decode: vi.fn(),
             }) as any
         );
-        (fromArrayBuffer as jest.Mock).mockReturnValue({ toString: toStringMock });
+        vi.mocked(fromArrayBuffer).mockReturnValue({ toString: toStringMock } as any);
         const sdkStream = sdkStreamMixin(passThrough);
         await writeDataToStream(passThrough, [Buffer.from("foo")]);
         await sdkStream.transformToString(encoding as BufferEncoding);
-        expect(util.TextDecoder).toBeCalledWith(encoding);
+        expect(TextDecoder).toBeCalledWith(encoding);
       }
     );
 
@@ -171,7 +173,7 @@ describe(sdkStreamMixin.name, () => {
       const originalToWebImpl = Readable.toWeb;
       beforeAll(() => {
         // @ts-expect-error
-        Readable.toWeb = jest.fn().mockReturnValue("A web stream");
+        Readable.toWeb = vi.fn().mockReturnValue("A web stream");
       });
 
       afterAll(() => {

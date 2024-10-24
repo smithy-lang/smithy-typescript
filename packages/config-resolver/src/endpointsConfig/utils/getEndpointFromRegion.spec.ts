@@ -1,11 +1,13 @@
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import { getEndpointFromRegion } from "./getEndpointFromRegion";
 
 describe(getEndpointFromRegion.name, () => {
-  const mockRegion = jest.fn();
-  const mockUrlParser = jest.fn();
-  const mockRegionInfoProvider = jest.fn();
-  const mockUseFipsEndpoint = jest.fn();
-  const mockUseDualstackEndpoint = jest.fn();
+  const mockRegion = vi.fn();
+  const mockUrlParser = vi.fn();
+  const mockRegionInfoProvider = vi.fn();
+  const mockUseFipsEndpoint = vi.fn();
+  const mockUseDualstackEndpoint = vi.fn();
 
   const mockInput = {
     region: mockRegion,
@@ -33,7 +35,7 @@ describe(getEndpointFromRegion.name, () => {
 
   afterEach(() => {
     expect(mockRegion).toHaveBeenCalledTimes(1);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("tls", () => {

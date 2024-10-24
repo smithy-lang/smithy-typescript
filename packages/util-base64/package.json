@@ -14,7 +14,8 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "yarn g:jest"
+    "test": "yarn g:vitest run",
+    "test:watch": "yarn g:vitest watch"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",

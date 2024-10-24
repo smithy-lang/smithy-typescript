@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { escapeUriPath } from "./escape-uri-path";
 
 describe("escapeUriPath", () => {

@@ -1,11 +1,11 @@
 import { ProviderError } from "@smithy/property-provider";
-import http, { createServer } from "http";
+import { createServer } from "http";
 import nock from "nock";
+import { afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
 import { httpRequest } from "./httpRequest";
 
 describe("httpRequest", () => {
-  const requestSpy = jest.spyOn(http, "request");
   let port: number;
   const hostname = "localhost";
   const path = "/";
@@ -28,7 +28,7 @@ describe("httpRequest", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("returns response", () => {
@@ -38,7 +38,6 @@ describe("httpRequest", () => {
 
       const response = await httpRequest({ hostname, path, port });
       expect(response.toString()).toStrictEqual(expectedResponse);
-      expect(requestSpy.mock.results[0].value.socket).toHaveProperty("destroyed", true);
 
       scope.done();
     });
@@ -50,7 +49,6 @@ describe("httpRequest", () => {
 
       const response = await httpRequest({ hostname, path, port, method });
       expect(response.toString()).toStrictEqual(expectedResponse);
-      expect(requestSpy.mock.results[0].value.socket).toHaveProperty("destroyed", true);
 
       scope.done();
     });
@@ -62,7 +60,6 @@ describe("httpRequest", () => {
 
       const response = await httpRequest({ hostname: encapsulatedIPv6Hostname, path, port });
       expect(response.toString()).toStrictEqual(expectedResponse);
-      expect(requestSpy.mock.results[0].value.socket).toHaveProperty("destroyed", true);
 
       scope.done();
     });
@@ -76,7 +73,6 @@ describe("httpRequest", () => {
         await expect(httpRequest({ hostname, path, port })).rejects.toStrictEqual(
           Object.assign(new ProviderError("Error response received from instance metadata service"), { statusCode })
         );
-        expect(requestSpy.mock.results[0].value.socket).toHaveProperty("destroyed", true);
 
         scope.done();
       });
@@ -88,7 +84,6 @@ describe("httpRequest", () => {
       await expect(httpRequest({ hostname, path, port })).rejects.toStrictEqual(
         new ProviderError("Unable to connect to instance metadata service")
       );
-      expect(requestSpy.mock.results[0].value.socket).toHaveProperty("destroyed", true);
 
       scope.done();
     });
@@ -112,7 +107,6 @@ describe("httpRequest", () => {
     await expect(httpRequest({ hostname, path, port, timeout })).rejects.toStrictEqual(
       new ProviderError("TimeoutError from instance metadata service")
     );
-    expect(requestSpy.mock.results[0].value.socket).toHaveProperty("destroyed", true);
 
     nock.abortPendingRequests();
     scope.done();

@@ -1,21 +1,21 @@
 import { AbortController } from "@smithy/abort-controller";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { WaiterOptions, WaiterState } from "./waiter";
 
-const mockValidate = jest.fn();
-jest.mock("./utils/validate", () => ({
-  validateWaiterOptions: mockValidate,
+vi.mock("./utils/validate", () => ({
+  validateWaiterOptions: vi.fn(),
 }));
 
 import { createWaiter } from "./createWaiter";
 
 describe("createWaiter", () => {
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const minimalWaiterConfig = {
@@ -41,7 +41,7 @@ describe("createWaiter", () => {
 
   it("should abort when abortController is signalled", async () => {
     const abortController = new AbortController();
-    const mockAcceptorChecks = jest.fn().mockResolvedValue(retryState);
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     const statusPromise = createWaiter(
       {
         ...minimalWaiterConfig,
@@ -51,13 +51,13 @@ describe("createWaiter", () => {
       input,
       mockAcceptorChecks
     );
-    jest.advanceTimersByTime(10 * 1000);
+    vi.advanceTimersByTime(10 * 1000);
     abortController.abort(); // Abort before maxWaitTime(20s);
     expect(await statusPromise).toEqual(abortedState);
   });
 
   it("should success when acceptor checker returns seccess", async () => {
-    const mockAcceptorChecks = jest.fn().mockResolvedValue(successState);
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(successState);
     const statusPromise = createWaiter(
       {
         ...minimalWaiterConfig,
@@ -66,12 +66,12 @@ describe("createWaiter", () => {
       input,
       mockAcceptorChecks
     );
-    jest.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
+    vi.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
     expect(await statusPromise).toEqual(successState);
   });
 
   it("should fail when acceptor checker returns failure", async () => {
-    const mockAcceptorChecks = jest.fn().mockResolvedValue(failureState);
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(failureState);
     const statusPromise = createWaiter(
       {
         ...minimalWaiterConfig,
@@ -80,7 +80,7 @@ describe("createWaiter", () => {
       input,
       mockAcceptorChecks
     );
-    jest.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
+    vi.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
     expect(await statusPromise).toEqual(failureState);
   });
 });

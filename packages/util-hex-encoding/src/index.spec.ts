@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { fromHex, toHex } from "./";
 
 const encoded = "dead" + "beef" + "cafe" + "babe" + "face";

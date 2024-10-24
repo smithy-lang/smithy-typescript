@@ -1,3 +1,5 @@
+import { describe, expect, test as it, vi } from "vitest";
+
 import { SmithyMessageDecoderStream } from "./SmithyMessageDecoderStream";
 
 describe("SmithyMessageDecoderStream", () => {
@@ -12,7 +14,7 @@ describe("SmithyMessageDecoderStream", () => {
       body: new Uint8Array(2),
     };
 
-    const deserializer = jest
+    const deserializer = vi
       .fn()
       .mockReturnValueOnce(Promise.resolve("first"))
       .mockReturnValueOnce(Promise.resolve("second"));

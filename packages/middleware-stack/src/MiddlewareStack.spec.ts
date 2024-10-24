@@ -6,6 +6,7 @@ import {
   InitializeHandler,
   Pluggable,
 } from "@smithy/types";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { constructStack } from "./MiddlewareStack";
 
@@ -53,7 +54,7 @@ describe("MiddlewareStack", () => {
         priority: "low",
         step: "deserialize",
       });
-      const inner = jest.fn();
+      const inner = vi.fn();
 
       const composed = stack.resolve(inner, {} as any);
       await composed({ input: [] });
@@ -92,7 +93,7 @@ describe("MiddlewareStack", () => {
         const stack = constructStack<input, output>();
         stack.add(getConcatMiddleware("A"), { name: "A" });
         stack.add(getConcatMiddleware("override"), { name: "A", override: true });
-        const inner = jest.fn();
+        const inner = vi.fn();
         const composed = stack.resolve(inner, {} as any);
         await composed({ input: [] });
         expect(inner.mock.calls.length).toBe(1);
@@ -105,7 +106,7 @@ describe("MiddlewareStack", () => {
         const stack = constructStack<input, output>();
         stack.add(getConcatMiddleware("A"), { aliases: ["ALIAS"] });
         stack.add(getConcatMiddleware("override"), { name: "ALIAS", override: true });
-        const inner = jest.fn();
+        const inner = vi.fn();
         const composed = stack.resolve(inner, {} as any);
         await composed({ input: [] });
         expect(inner.mock.calls.length).toBe(1);
@@ -118,7 +119,7 @@ describe("MiddlewareStack", () => {
         const stack = constructStack<input, output>();
         stack.add(getConcatMiddleware("A"), { name: "ALIAS" });
         stack.add(getConcatMiddleware("override"), { aliases: ["ALIAS"], override: true });
-        const inner = jest.fn();
+        const inner = vi.fn();
         const composed = stack.resolve(inner, {} as any);
         await composed({ input: [] });
         expect(inner.mock.calls.length).toBe(1);
@@ -209,7 +210,7 @@ describe("MiddlewareStack", () => {
         relation: "after",
         toMiddleware: "AliasI",
       });
-      const inner = jest.fn();
+      const inner = vi.fn();
       const composed = stack.resolve(inner, {} as any);
       await composed({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
@@ -240,7 +241,7 @@ describe("MiddlewareStack", () => {
         toMiddleware: "AliasF",
       });
       stack.add(getConcatMiddleware("G"), { name: "G" });
-      const inner = jest.fn();
+      const inner = vi.fn();
       const composed = stack.resolve(inner, {} as any);
       await composed({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
@@ -269,7 +270,7 @@ describe("MiddlewareStack", () => {
         relation: "after",
         toMiddleware: "A",
       });
-      const inner = jest.fn();
+      const inner = vi.fn();
       const composed = stack.resolve(inner, {} as any);
       await composed({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
@@ -284,7 +285,7 @@ describe("MiddlewareStack", () => {
         relation: "before",
         toMiddleware: "non_exist",
       });
-      const inner = jest.fn();
+      const inner = vi.fn();
       try {
         stack.resolve(inner, {} as any);
       } catch (e) {
@@ -303,7 +304,7 @@ describe("MiddlewareStack", () => {
           toMiddleware: "A",
           override: true,
         });
-        const inner = jest.fn();
+        const inner = vi.fn();
         const composed = stack.resolve(inner, {} as any);
         await composed({ input: [] });
         expect(inner.mock.calls.length).toBe(1);
@@ -326,7 +327,7 @@ describe("MiddlewareStack", () => {
           toMiddleware: "A",
           override: true,
         });
-        const inner = jest.fn();
+        const inner = vi.fn();
         const composed = stack.resolve(inner, {} as any);
         await composed({ input: [] });
         expect(inner.mock.calls.length).toBe(1);
@@ -349,7 +350,7 @@ describe("MiddlewareStack", () => {
           toMiddleware: "A",
           override: true,
         });
-        const inner = jest.fn();
+        const inner = vi.fn();
         const composed = stack.resolve(inner, {} as any);
         await composed({ input: [] });
         expect(inner.mock.calls.length).toBe(1);
@@ -427,7 +428,7 @@ describe("MiddlewareStack", () => {
         aliases: ["AliasC"],
       });
       const secondStack = stack.clone();
-      const inner = jest.fn();
+      const inner = vi.fn();
       await secondStack.resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({ input: ["A", "B", "C"] });
@@ -464,7 +465,7 @@ describe("MiddlewareStack", () => {
         toMiddleware: "AliasB",
       });
 
-      const inner = jest.fn();
+      const inner = vi.fn();
       await stack.concat(secondStack).resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({ input: ["A", "B", "C", "D"] });
@@ -475,7 +476,7 @@ describe("MiddlewareStack", () => {
       stack.add(getConcatMiddleware("A"));
       const secondStack = constructStack<input, output>();
       secondStack.add(getConcatMiddleware("B"));
-      const inner = jest.fn();
+      const inner = vi.fn();
       await stack.concat(secondStack).resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({ input: ["A", "B"] });
@@ -505,7 +506,7 @@ describe("MiddlewareStack", () => {
 
       stack.remove("toRemove");
 
-      const inner = jest.fn();
+      const inner = vi.fn();
       await stack.resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({ input: ["don't remove me"] });
@@ -527,7 +528,7 @@ describe("MiddlewareStack", () => {
 
       stack.remove("toRemove");
 
-      const inner = jest.fn();
+      const inner = vi.fn();
       await stack.resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({ input: ["don't remove me"] });
@@ -541,7 +542,7 @@ describe("MiddlewareStack", () => {
       stack.add(mw, { aliases: ["toRemove2"] });
       stack.remove(mw);
 
-      const inner = jest.fn();
+      const inner = vi.fn();
       await stack.resolve(inner, {} as any)({ input: [] });
       expect(inner.mock.calls.length).toBe(1);
       expect(inner).toBeCalledWith({ input: ["don't remove me!"] });
@@ -605,7 +606,7 @@ describe("MiddlewareStack", () => {
         },
       };
       stack.use(plugin);
-      const inner = jest.fn(({ input }: DeserializeHandlerArguments<input>) => {
+      const inner = vi.fn(({ input }: DeserializeHandlerArguments<input>) => {
         expect(input).toEqual(["first", "second"]);
         return Promise.resolve({ response: {} });
       });

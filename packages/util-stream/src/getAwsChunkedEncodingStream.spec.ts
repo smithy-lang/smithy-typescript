@@ -1,13 +1,14 @@
 import { Readable } from "stream";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getAwsChunkedEncodingStream } from "./getAwsChunkedEncodingStream";
 
 describe(getAwsChunkedEncodingStream.name, () => {
-  const mockBase64Encoder = jest.fn();
-  const mockBodyLengthChecker = jest.fn();
-  const mockChecksumAlgorithmFn = jest.fn();
+  const mockBase64Encoder = vi.fn();
+  const mockBodyLengthChecker = vi.fn();
+  const mockChecksumAlgorithmFn = vi.fn();
   const mockChecksumLocationName = "mockChecksumLocationName";
-  const mockStreamHasher = jest.fn();
+  const mockStreamHasher = vi.fn();
 
   const mockOptions = {
     base64Encoder: mockBase64Encoder,
@@ -42,12 +43,14 @@ describe(getAwsChunkedEncodingStream.name, () => {
     mockStreamChunks.forEach((chunk, index) => {
       expect(mockBodyLengthChecker).toHaveBeenNthCalledWith(index + 1, Buffer.from(chunk));
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("skips checksum computation", () => {
-    const validateStreamWithoutChecksum = (awsChunkedEncodingStream: Readable, done: Function) => {
+    const validateStreamWithoutChecksum = async (awsChunkedEncodingStream: Readable) => {
       let buffer = "";
+      let resolve: Function;
+      const promise = new Promise((r) => (resolve = r));
       awsChunkedEncodingStream.on("data", (data) => {
         buffer += data.toString();
       });
@@ -60,34 +63,36 @@ Hello\r
 World\r
 0\r
 `);
-        done();
+        resolve();
       });
+      await promise;
     };
 
-    it("if none of the required options are passed", (done) => {
+    it("if none of the required options are passed", async () => {
       const readableStream = getMockReadableStream();
       const awsChunkedEncodingStream = getAwsChunkedEncodingStream(readableStream, {
         bodyLengthChecker: mockBodyLengthChecker,
       });
-      validateStreamWithoutChecksum(awsChunkedEncodingStream, done);
+      await validateStreamWithoutChecksum(awsChunkedEncodingStream);
     });
 
     ["base64Encoder", "checksumAlgorithmFn", "checksumLocationName", "streamHasher"].forEach((optionToRemove) => {
-      it(`if option '${optionToRemove}' is not passed`, (done) => {
+      it(`if option '${optionToRemove}' is not passed`, async () => {
         const readableStream = getMockReadableStream();
         const awsChunkedEncodingStream = getAwsChunkedEncodingStream(readableStream, {
           ...mockOptions,
           [optionToRemove]: undefined,
         });
-        validateStreamWithoutChecksum(awsChunkedEncodingStream, done);
+        await validateStreamWithoutChecksum(awsChunkedEncodingStream);
       });
     });
   });
 
-  it("computes checksum and adds it to the end event", (done) => {
+  it("computes checksum and adds it to the end event", async () => {
     const readableStream = getMockReadableStream();
     const awsChunkedEncodingStream = getAwsChunkedEncodingStream(readableStream, mockOptions);
-
+    let resolve: Function;
+    const promise = new Promise((r) => (resolve = r));
     let buffer = "";
     awsChunkedEncodingStream.on("data", (data) => {
       buffer += data.toString();
@@ -103,7 +108,8 @@ World\r
 mockChecksumLocationName:mockChecksum\r
 \r
 `);
-      done();
+      resolve();
     });
+    await promise;
   });
 });

@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { getResolvedPartition } from "./getResolvedPartition";
 import { PartitionHash } from "./PartitionHash";
 

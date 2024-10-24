@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { isArnBucketName } from "./s3";
 
 describe("S3 customizations for endpoint resolution", () => {

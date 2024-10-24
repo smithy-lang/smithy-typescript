@@ -1,25 +1,26 @@
 import { isThrottlingError } from "@smithy/service-error-classification";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 
-jest.mock("@smithy/service-error-classification");
+vi.mock("@smithy/service-error-classification");
 
 describe(DefaultRateLimiter.name, () => {
   beforeEach(() => {
-    (isThrottlingError as jest.Mock).mockReturnValue(false);
+    vi.mocked(isThrottlingError).mockReturnValue(false);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getSendToken", () => {
     beforeEach(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it.each([
@@ -27,16 +28,17 @@ describe(DefaultRateLimiter.name, () => {
       [1, 1785.7142857142856],
       [2, 2000],
     ])("timestamp: %d, delay: %d", async (timestamp, delay) => {
-      jest.spyOn(Date, "now").mockImplementation(() => 0);
+      const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
       const rateLimiter = new DefaultRateLimiter();
 
-      (isThrottlingError as jest.Mock).mockReturnValueOnce(true);
-      jest.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
       rateLimiter.updateClientSendingRate({});
 
       rateLimiter.getSendToken();
-      jest.runAllTimers();
-      expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), delay);
+      vi.runAllTimers();
+      expect(spy).toHaveBeenLastCalledWith(expect.any(Function), delay);
     });
   });
 
@@ -50,14 +52,14 @@ describe(DefaultRateLimiter.name, () => {
       [10, 21.26626836],
       [11, 36.42599853],
     ])("timestamp: %d, calculatedRate: %d", (timestamp, calculatedRate) => {
-      jest.spyOn(Date, "now").mockImplementation(() => 0);
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
       const rateLimiter = new DefaultRateLimiter();
       rateLimiter["lastMaxRate"] = 10;
       rateLimiter["lastThrottleTime"] = 5;
 
-      jest.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
+      vi.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
 
-      const cubicSuccessSpy = jest.spyOn(DefaultRateLimiter.prototype as any, "cubicSuccess");
+      const cubicSuccessSpy = vi.spyOn(DefaultRateLimiter.prototype as any, "cubicSuccess");
       rateLimiter.updateClientSendingRate({});
       expect(cubicSuccessSpy).toHaveLastReturnedWith(calculatedRate);
     });
@@ -71,21 +73,21 @@ describe(DefaultRateLimiter.name, () => {
       [8, 0.07],
       [9, 0.06222222],
     ])("timestamp: %d, calculatedRate: %d", (timestamp, calculatedRate) => {
-      jest.spyOn(Date, "now").mockImplementation(() => 0);
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
       const rateLimiter = new DefaultRateLimiter();
       rateLimiter["lastMaxRate"] = 10;
       rateLimiter["lastThrottleTime"] = 5;
 
-      (isThrottlingError as jest.Mock).mockReturnValueOnce(true);
-      jest.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
-      const cubicThrottleSpy = jest.spyOn(DefaultRateLimiter.prototype as any, "cubicThrottle");
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
+      const cubicThrottleSpy = vi.spyOn(DefaultRateLimiter.prototype as any, "cubicThrottle");
       rateLimiter.updateClientSendingRate({});
       expect(cubicThrottleSpy).toHaveLastReturnedWith(calculatedRate);
     });
   });
 
   it("updateClientSendingRate", () => {
-    jest.spyOn(Date, "now").mockImplementation(() => 0);
+    vi.spyOn(Date, "now").mockImplementation(() => 0);
     const rateLimiter = new DefaultRateLimiter();
 
     const testCases: [boolean, number, number, number][] = [
@@ -109,8 +111,8 @@ describe(DefaultRateLimiter.name, () => {
     ];
 
     testCases.forEach(([isThrottlingErrorReturn, timestamp, measuredTxRate, fillRate]) => {
-      (isThrottlingError as jest.Mock).mockReturnValue(isThrottlingErrorReturn);
-      jest.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
+      vi.mocked(isThrottlingError).mockReturnValue(isThrottlingErrorReturn);
+      vi.spyOn(Date, "now").mockImplementation(() => timestamp * 1000);
 
       rateLimiter.updateClientSendingRate({});
       expect(rateLimiter["measuredTxRate"]).toEqual(measuredTxRate);

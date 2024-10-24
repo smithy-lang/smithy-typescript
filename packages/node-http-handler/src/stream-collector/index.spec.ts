@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { streamCollector } from "./index";
 import { ReadFromBuffers } from "./readable.mock";
 

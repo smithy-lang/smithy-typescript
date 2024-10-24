@@ -1,11 +1,12 @@
 import { Buffer } from "buffer";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { fromArrayBuffer, fromString } from "./";
 
-jest.mock("buffer");
+vi.mock("buffer");
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("fromArrayBuffer", () => {

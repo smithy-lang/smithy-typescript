@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, test as it, vi } from "vitest";
+
 import { getReferenceValue } from "./getReferenceValue";
 
 describe(getReferenceValue.name, () => {
@@ -9,7 +11,7 @@ describe(getReferenceValue.name, () => {
   const mockRefValue = "mockRefValue";
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("returns reference value if reference exists", () => {
