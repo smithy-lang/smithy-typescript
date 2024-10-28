@@ -12,7 +12,7 @@ vi.mock("./create-request", async () => {
   };
 });
 
-describe(FetchHttpHandler.name, () => {
+(typeof Blob === "function" ? describe : describe.skip)(FetchHttpHandler.name, () => {
   interface MockHttpRequestOptions {
     method?: string;
     body?: any;
@@ -92,9 +92,11 @@ describe(FetchHttpHandler.name, () => {
       const username = "foo";
       const password = "bar";
       const mockHttpRequest = getMockHttpRequest({ username, password });
-      await fetchHttpHandler.handle(mockHttpRequest).catch(error => {
-        expect(String(error)).toContain("TypeError: Request cannot be constructed from a URL that includes credentials");
-      })
+      await fetchHttpHandler.handle(mockHttpRequest).catch((error) => {
+        expect(String(error)).toContain(
+          "TypeError: Request cannot be constructed from a URL that includes credentials"
+        );
+      });
 
       const mockAuth = `${mockHttpRequest.username}:${mockHttpRequest.password}`;
       const expectedUrl = `${mockHttpRequest.protocol}//${mockAuth}@${mockHttpRequest.hostname}/`;

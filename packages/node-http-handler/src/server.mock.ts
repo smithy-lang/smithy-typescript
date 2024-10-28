@@ -27,7 +27,9 @@ const setResponseBody = (response: ServerResponse, body: string | NodeJsRuntimeB
 export const createResponseFunction =
   (httpResp: HttpResponse) => (request: IncomingMessage, response: ServerResponse) => {
     response.statusCode = httpResp.statusCode;
-    response.statusMessage = httpResp.reason;
+    if (httpResp.reason) {
+      response.statusMessage = httpResp.reason;
+    }
     setResponseHeaders(response, httpResp.headers);
     setResponseBody(response, httpResp.body);
   };
@@ -35,7 +37,9 @@ export const createResponseFunction =
 export const createResponseFunctionWithDelay =
   (httpResp: HttpResponse, delay: number) => (request: IncomingMessage, response: ServerResponse) => {
     response.statusCode = httpResp.statusCode;
-    response.statusMessage = httpResp.reason;
+    if (httpResp.reason) {
+      response.statusMessage = httpResp.reason;
+    }
     setResponseHeaders(response, httpResp.headers);
     timing.setTimeout(() => setResponseBody(response, httpResp.body), delay);
   };

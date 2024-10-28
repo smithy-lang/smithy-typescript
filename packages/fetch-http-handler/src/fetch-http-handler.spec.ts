@@ -12,7 +12,7 @@ let timeoutSpy: any;
 (global as any).Headers = vi.fn();
 const globalFetch = global.fetch;
 
-describe(FetchHttpHandler.name, () => {
+(typeof Blob === "function" ? describe : describe.skip)(FetchHttpHandler.name, () => {
   beforeEach(() => {
     (global as any).AbortController = void 0;
     vi.clearAllMocks();
