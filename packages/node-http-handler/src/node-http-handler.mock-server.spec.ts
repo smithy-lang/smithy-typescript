@@ -20,15 +20,7 @@ vi.mock("http", async () => {
   const actual = (await vi.importActual("http")) as any;
   const pkg = {
     ...actual,
-    request: vi.fn().mockImplementation((_options, cb) => {
-      cb({
-        statusCode: 200,
-        body: "body",
-        headers: {},
-        protocol: "http:",
-      });
-      return new actual.ClientRequest({ ..._options, protocol: "http:" });
-    }),
+    request: vi.fn().mockImplementation(actual.request),
   };
   return {
     ...pkg,
@@ -38,18 +30,9 @@ vi.mock("http", async () => {
 
 vi.mock("https", async () => {
   const actual = (await vi.importActual("https")) as any;
-  const http = (await vi.importActual("http")) as any;
   const pkg = {
     ...actual,
-    request: vi.fn().mockImplementation((_options, cb) => {
-      cb({
-        statusCode: 200,
-        body: "body",
-        headers: {},
-        protocol: "https:",
-      });
-      return new http.ClientRequest({ ..._options, protocol: "https:" });
-    }),
+    request: vi.fn().mockImplementation(actual.request),
   };
   return {
     ...pkg,
@@ -144,7 +127,7 @@ describe("http", () => {
     });
   });
 
-  it.only("can handle expect 100-continue", async () => {
+  it("can handle expect 100-continue", async () => {
     const body = Buffer.from("test");
     const mockResponse = {
       statusCode: 200,
@@ -302,7 +285,7 @@ describe("https", () => {
       body: "test",
     };
     mockHttpsServer.addListener("request", createResponseFunction(mockResponse));
-    const spy = vi.spyOn(https, "request").mockImplementationOnce(() => {
+    const spy = vi.mocked(hsRequest).mockImplementationOnce(() => {
       const calls = spy.mock.calls;
       const currentIndex = calls.length - 1;
       return https.request(calls[currentIndex][0], calls[currentIndex][1]);
@@ -360,7 +343,7 @@ describe("https", () => {
     mockHttpsServer.addListener("request", createResponseFunction(mockResponse));
     let httpRequest: http.ClientRequest;
     let reqDestroySpy: any;
-    const spy = vi.spyOn(https, "request").mockImplementationOnce(() => {
+    const spy = vi.mocked(hsRequest).mockImplementationOnce(() => {
       const calls = spy.mock.calls;
       const currentIndex = calls.length - 1;
       httpRequest = https.request(calls[currentIndex][0], calls[currentIndex][1]);
