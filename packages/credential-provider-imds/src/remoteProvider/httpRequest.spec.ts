@@ -1,91 +1,110 @@
 import { ProviderError } from "@smithy/property-provider";
-import { createServer } from "http";
-import nock from "nock";
-import { afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { httpRequest } from "./httpRequest";
+
+vi.mock("http", async () => {
+  const actual: any = vi.importActual("http");
+
+  const pkg = {
+    ...actual,
+    request: vi.fn(),
+  };
+  return {
+    ...pkg,
+    default: pkg,
+  };
+});
+
+import EventEmitter from "events";
+import { request } from "http";
 
 describe("httpRequest", () => {
   let port: number;
   const hostname = "localhost";
   const path = "/";
 
-  const getOpenPort = async (candidatePort = 4321): Promise<number> => {
-    try {
-      return new Promise<number>((resolve, reject) => {
-        const server = createServer();
-        server.on("error", () => reject());
-        server.listen(candidatePort);
-        server.close(() => resolve(candidatePort));
-      });
-    } catch (e) {
-      return await getOpenPort(candidatePort + 1);
-    }
-  };
-
-  beforeAll(async () => {
-    port = await getOpenPort();
-  });
-
   afterEach(() => {
     vi.clearAllMocks();
   });
 
+  function mockResponse({ expectedResponse, statusCode = 200 }: any) {
+    return vi.mocked(request).mockImplementationOnce((() => {
+      const request = Object.assign(new EventEmitter(), {
+        destroy: vi.fn(),
+        end: vi.fn(),
+      });
+      const response = new EventEmitter() as any;
+      response.statusCode = statusCode;
+      setTimeout(() => {
+        request.emit("response", response);
+        setTimeout(() => {
+          response.emit("data", Buffer.from(expectedResponse));
+          response.emit("end");
+        }, 50);
+      }, 50);
+      return request;
+    }) as any);
+  }
+
   describe("returns response", () => {
     it("defaults to method GET", async () => {
       const expectedResponse = "expectedResponse";
-      const scope = nock(`http://${hostname}:${port}`).get(path).reply(200, expectedResponse);
+
+      mockResponse({ expectedResponse });
 
       const response = await httpRequest({ hostname, path, port });
       expect(response.toString()).toStrictEqual(expectedResponse);
-
-      scope.done();
     });
 
     it("uses method passed in options", async () => {
       const method = "POST";
       const expectedResponse = "expectedResponse";
-      const scope = nock(`http://${hostname}:${port}`).post(path).reply(200, expectedResponse);
+      mockResponse({ expectedResponse });
 
       const response = await httpRequest({ hostname, path, port, method });
       expect(response.toString()).toStrictEqual(expectedResponse);
-
-      scope.done();
     });
 
     it("works with IPv6 hostname with encapsulated brackets", async () => {
       const expectedResponse = "expectedResponse";
       const encapsulatedIPv6Hostname = "[::1]";
-      const scope = nock(`http://${encapsulatedIPv6Hostname}:${port}`).get(path).reply(200, expectedResponse);
+      mockResponse({ expectedResponse });
 
       const response = await httpRequest({ hostname: encapsulatedIPv6Hostname, path, port });
       expect(response.toString()).toStrictEqual(expectedResponse);
-
-      scope.done();
     });
   });
 
   describe("throws error", () => {
     const errorOnStatusCode = async (statusCode: number) => {
       it(`statusCode: ${statusCode}`, async () => {
-        const scope = nock(`http://${hostname}:${port}`).get(path).reply(statusCode, "continue");
+        mockResponse({
+          statusCode,
+          expectedResponse: "continue",
+        });
 
         await expect(httpRequest({ hostname, path, port })).rejects.toStrictEqual(
           Object.assign(new ProviderError("Error response received from instance metadata service"), { statusCode })
         );
-
-        scope.done();
       });
     };
 
     it("when request throws error", async () => {
-      const scope = nock(`http://${hostname}:${port}`).get(path).replyWithError("error");
+      vi.mocked(request).mockImplementationOnce((() => {
+        const request = Object.assign(new EventEmitter(), {
+          destroy: vi.fn(),
+          end: vi.fn(),
+        });
+        setTimeout(() => {
+          request.emit("error");
+        }, 50);
+        return request;
+      }) as any);
 
       await expect(httpRequest({ hostname, path, port })).rejects.toStrictEqual(
         new ProviderError("Unable to connect to instance metadata service")
       );
-
-      scope.done();
     });
 
     describe("when request returns with statusCode < 200", () => {
@@ -99,16 +118,21 @@ describe("httpRequest", () => {
 
   it("timeout", async () => {
     const timeout = 1000;
-    const scope = nock(`http://${hostname}:${port}`)
-      .get(path)
-      .delay(timeout * 2)
-      .reply(200, "expectedResponse");
+    vi.mocked(request).mockImplementationOnce((() => {
+      const request = Object.assign(new EventEmitter(), {
+        destroy: vi.fn(),
+        end: vi.fn(),
+      });
+      const response = new EventEmitter() as any;
+      response.statusCode = 200;
+      setTimeout(() => {
+        request.emit("timeout");
+      }, 50);
+      return request;
+    }) as any);
 
     await expect(httpRequest({ hostname, path, port, timeout })).rejects.toStrictEqual(
       new ProviderError("TimeoutError from instance metadata service")
     );
-
-    nock.abortPendingRequests();
-    scope.done();
   });
 });
