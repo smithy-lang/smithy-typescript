@@ -6,11 +6,30 @@ import { createRequest } from "./create-request";
 import { FetchHttpHandler, keepAliveSupport } from "./fetch-http-handler";
 
 vi.mock("./create-request", async () => {
-  const actual: any = await vi.importActual("./create-request");
   return {
-    createRequest: vi.fn().mockImplementation(actual.createRequest),
+    createRequest: vi.fn().mockImplementation((_url, options) => {
+      const url = new URL(_url);
+      return {
+        protocol: url.protocol,
+        hostname: url.hostname,
+        ...options,
+      } as any;
+    }),
   };
 });
+
+vi.spyOn(global, "fetch").mockImplementation((async () => {
+  return {
+    headers: {
+      entries() {
+        return [];
+      },
+    },
+    async blob() {
+      return undefined;
+    },
+  };
+}) as any);
 
 (typeof Blob === "function" ? describe : describe.skip)(FetchHttpHandler.name, () => {
   interface MockHttpRequestOptions {
@@ -23,7 +42,7 @@ vi.mock("./create-request", async () => {
   }
 
   const getMockHttpRequest = (options: MockHttpRequestOptions): HttpRequest =>
-    new HttpRequest({ hostname: "example.com", ...options });
+    new HttpRequest({ hostname: "localhost", protocol: "http", ...options });
 
   describe("fetch", () => {
     beforeAll(() => {
