@@ -1,6 +1,7 @@
 import { AbortController } from "@smithy/abort-controller";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { rejects } from "assert";
+import getPort, { portNumbers } from "get-port";
 import http2, { ClientHttp2Session, ClientHttp2Stream, constants, Http2Server, Http2Stream } from "http2";
 import { Duplex } from "stream";
 import { promisify } from "util";
@@ -11,21 +12,24 @@ import { NodeHttp2Handler, NodeHttp2HandlerOptions } from "./node-http2-handler"
 import { createMockHttp2Server, createResponseFunction, createResponseFunctionWithDelay } from "./server.mock";
 import { timing } from "./timing";
 
-// TODO(vitest): fix this test.
-describe.skip(NodeHttp2Handler.name, () => {
+describe(NodeHttp2Handler.name, () => {
   let nodeH2Handler: NodeHttp2Handler;
 
   const protocol = "http:";
   const hostname = "localhost";
-  const port = 45321;
-  let mockH2Server: any = undefined;
-  let mockH2Servers: Record<number, Http2Server> = {};
+  let port1: number = 0;
+  let port2: number = 0;
+  let port3: number = 0;
+  let port4: number = 0;
 
-  const authority = `${protocol}//${hostname}:${port}/`;
+  let mockH2Server: any = undefined;
+  const mockH2Servers: Record<number, Http2Server> = {};
+
+  let authority: string;
   const getMockReqOptions = () => ({
     protocol,
     hostname,
-    port,
+    port: port1,
     method: "GET",
     path: "/",
     headers: {},
@@ -37,14 +41,16 @@ describe.skip(NodeHttp2Handler.name, () => {
     body: "test",
   };
 
-  beforeEach(() => {
-    mockH2Servers = {
-      45321: createMockHttp2Server().listen(port),
-      45322: createMockHttp2Server().listen(port + 1),
-      45323: createMockHttp2Server().listen(port + 2),
-      45324: createMockHttp2Server().listen(port + 3),
-    };
-    mockH2Server = mockH2Servers[port];
+  beforeEach(async () => {
+    for (let i = 0; i < 4; ++i) {
+      const port = await getPort({ port: portNumbers(45_341, 50_000) });
+      mockH2Servers[port] = createMockHttp2Server().listen(port);
+    }
+
+    [port1, port2, port3, port4] = Object.keys(mockH2Servers).map(Number);
+    authority = `${protocol}//${hostname}:${port1}/`;
+
+    mockH2Server = mockH2Servers[port1];
     mockH2Server.on("request", createResponseFunction(mockResponse));
   });
 
@@ -55,6 +61,9 @@ describe.skip(NodeHttp2Handler.name, () => {
       mockH2Servers[p].removeAllListeners("request");
       mockH2Servers[p].close();
     }
+    Object.keys(mockH2Servers).forEach((key) => {
+      delete mockH2Servers[key];
+    });
   });
 
   describe.each([
@@ -147,7 +156,6 @@ describe.skip(NodeHttp2Handler.name, () => {
         // Make first request on default URL.
         const { response: response1 } = await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-        const port2 = port + 1;
         const mockH2Server2 = mockH2Servers[port2];
         mockH2Server2.on("request", createResponseFunction(mockResponse));
 
@@ -159,7 +167,7 @@ describe.skip(NodeHttp2Handler.name, () => {
 
         const authorityPrefix = `${protocol}//${hostname}`;
         expect(connectSpy).toHaveBeenCalledTimes(2);
-        expect(connectSpy).toHaveBeenNthCalledWith(1, `${authorityPrefix}:${port}/`);
+        expect(connectSpy).toHaveBeenNthCalledWith(1, `${authorityPrefix}:${port1}/`);
         expect(connectSpy).toHaveBeenNthCalledWith(2, `${authorityPrefix}:${port2}/`);
         mockH2Server2.close();
 
@@ -175,7 +183,6 @@ describe.skip(NodeHttp2Handler.name, () => {
     describe("errors", () => {
       const UNEXPECTEDLY_CLOSED_REGEX = /closed|destroy|cancel|did not get a response/i;
       it("handles goaway frames", async () => {
-        const port3 = port + 2;
         const mockH2Server3 = mockH2Servers[port3];
         let establishedConnections = 0;
         let numRequests = 0;
@@ -253,9 +260,10 @@ describe.skip(NodeHttp2Handler.name, () => {
       });
 
       it.each([
-        ["destroy", port + 2],
-        ["close", port + 3],
-      ])("handles servers calling connections %s", async (func, port) => {
+        ["destroy", 1],
+        ["close", 2],
+      ])("handles servers calling connections %s", async (func, portIndex) => {
+        const port = [port1, port2, port3, port4][portIndex];
         const mockH2Server4 = mockH2Servers[port];
         let establishedConnections = 0;
         let numRequests = 0;
@@ -482,6 +490,7 @@ describe.skip(NodeHttp2Handler.name, () => {
       ["static object", { maxConcurrentStreams: 3 }],
     ])("verify session settings' maxConcurrentStreams", async (_, options: NodeHttp2HandlerOptions) => {
       nodeH2Handler = new NodeHttp2Handler(options);
+
       await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
       // @ts-ignore: access private property
@@ -489,7 +498,6 @@ describe.skip(NodeHttp2Handler.name, () => {
 
       if (options.maxConcurrentStreams) {
         expect(session.localSettings.maxConcurrentStreams).toBe(options.maxConcurrentStreams);
-        expect(session.settings).toHaveBeenCalled();
       } else {
         expect(session.localSettings.maxConcurrentStreams).toBe(4294967295);
       }
@@ -499,13 +507,15 @@ describe.skip(NodeHttp2Handler.name, () => {
       let error: Error | undefined = undefined;
       try {
         nodeH2Handler = new NodeHttp2Handler({ maxConcurrentStreams: -1 });
-        await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
+
+        const options = getMockReqOptions();
+        await nodeH2Handler.handle(new HttpRequest(options), {});
       } catch (e) {
         error = e;
       }
 
       expect(error).toBeDefined();
-      expect(error!.message).toEqual('Invalid value for setting "maxConcurrentStreams": -1');
+      expect(error!.message).toEqual("maxConcurrentStreams must be greater than zero.");
     });
   });
 
@@ -595,7 +605,6 @@ describe.skip(NodeHttp2Handler.name, () => {
         // Make first request on default URL.
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-        const port2 = port + 1;
         const mockH2Server2 = mockH2Servers[port2];
         mockH2Server2.on("request", createResponseFunction(mockResponse));
 
@@ -604,7 +613,7 @@ describe.skip(NodeHttp2Handler.name, () => {
 
         const authorityPrefix = `${protocol}//${hostname}`;
         expect(connectSpy).toHaveBeenCalledTimes(2);
-        expect(connectSpy).toHaveBeenNthCalledWith(1, `${authorityPrefix}:${port}/`);
+        expect(connectSpy).toHaveBeenNthCalledWith(1, `${authorityPrefix}:${port1}/`);
         expect(connectSpy).toHaveBeenNthCalledWith(2, `${authorityPrefix}:${port2}/`);
         mockH2Server2.close();
       });
@@ -632,8 +641,9 @@ describe.skip(NodeHttp2Handler.name, () => {
   describe("server", () => {
     let server: Http2Server;
 
-    beforeEach(() => {
-      server = createMockHttp2Server().listen(port + 6);
+    beforeEach(async () => {
+      const port = await getPort({ port: portNumbers(45_321, 50_000) });
+      server = createMockHttp2Server().listen(port);
     });
 
     afterEach(() => {

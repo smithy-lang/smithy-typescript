@@ -4,24 +4,41 @@ import https from "https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
-import { timing } from "./timing";
-
-function mockRequestImpl(protocol: string) {
-  return vi.fn().mockImplementation((_options, cb) => {
-    cb({
-      statusCode: 200,
-      body: "body",
-      headers: {},
-      protocol,
-    });
-    return new http.ClientRequest({ ..._options, protocol });
-  });
-}
 
 vi.mock("http", async () => {
+  const actual = (await vi.importActual("http")) as any;
   const pkg = {
-    ...((await vi.importActual("http")) as any),
-    request: mockRequestImpl("http:"),
+    ...actual,
+    request: vi.fn().mockImplementation((_options, cb) => {
+      cb({
+        statusCode: 200,
+        body: "body",
+        headers: {},
+        protocol: "http:",
+      });
+      return new actual.ClientRequest({ ..._options, protocol: "http:" });
+    }),
+  };
+  return {
+    ...pkg,
+    default: pkg,
+  };
+});
+
+vi.mock("https", async () => {
+  const actual = (await vi.importActual("https")) as any;
+  const http = (await vi.importActual("http")) as any;
+  const pkg = {
+    ...actual,
+    request: vi.fn().mockImplementation((_options, cb) => {
+      cb({
+        statusCode: 200,
+        body: "body",
+        headers: {},
+        protocol: "https:",
+      });
+      return new http.ClientRequest({ ..._options, protocol: "https:" });
+    }),
   };
   return {
     ...pkg,
@@ -30,27 +47,17 @@ vi.mock("http", async () => {
 });
 
 import { request as hRequest } from "http";
-
-vi.mock("https", async () => {
-  const pkg = {
-    ...((await vi.importActual("https")) as any),
-    request: mockRequestImpl("https:"),
-  };
-  return {
-    ...pkg,
-    default: pkg,
-  };
-});
-
 import { request as hsRequest } from "https";
 
 describe("NodeHttpHandler", () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   describe("constructor and #handle", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
+
+    beforeEach(() => {});
+
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
 
     describe("constructor", () => {
       it("allows https.Agent and http.Agent ctor args in place of actual instances", async () => {
@@ -123,7 +130,7 @@ describe("NodeHttpHandler", () => {
         let providerResolvedCount = 0;
         const slowConfigProvider = async () => {
           providerInvokedCount += 1;
-          await new Promise((r) => timing.setTimeout(r, 15));
+          await new Promise((r) => setTimeout(r, 15));
           providerResolvedCount += 1;
           return {
             connectionTimeout: 12345,

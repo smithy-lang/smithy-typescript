@@ -3,6 +3,7 @@ import { buildQueryString } from "@smithy/querystring-builder";
 import type { FetchHttpHandlerOptions } from "@smithy/types";
 import { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
+import { createRequest } from "./create-request";
 import { requestTimeout } from "./request-timeout";
 
 declare let AbortController: any;
@@ -22,7 +23,7 @@ export const keepAliveSupport = {
 /**
  * @internal
  */
-type AdditionalRequestParameters = {
+export type AdditionalRequestParameters = {
   // This is required in Node.js when Request has a body, and does nothing in the browser.
   // Duplex: half means the request is fully transmitted before attempting to process the response.
   // As of writing this is the only accepted value in https://fetch.spec.whatwg.org/.
@@ -62,7 +63,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     }
     if (keepAliveSupport.supported === undefined) {
       keepAliveSupport.supported = Boolean(
-        typeof Request !== "undefined" && "keepalive" in new Request("https://[::1]")
+        typeof Request !== "undefined" && "keepalive" in createRequest("https://[::1]")
       );
     }
   }
@@ -139,7 +140,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
 
     let removeSignalEventListener = () => {};
 
-    const fetchRequest = new Request(url, requestOptions);
+    const fetchRequest = createRequest(url, requestOptions);
     const raceOfPromises = [
       fetch(fetchRequest).then((response) => {
         const fetchHeaders: any = response.headers;
