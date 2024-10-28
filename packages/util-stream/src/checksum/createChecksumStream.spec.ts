@@ -78,6 +78,7 @@ describe("Checksum streams", () => {
 
   describe(createChecksumStream.name + " webstreams API", () => {
     if (typeof ReadableStream !== "function") {
+      it.skip("Skipped when ReadableStream is not globally available.", () => {});
       // test not applicable to Node.js 16.
       return;
     }
