@@ -7,7 +7,7 @@ import { headStream } from "../headStream.browser";
 import { ChecksumStream as ChecksumStreamWeb } from "./ChecksumStream.browser";
 import { createChecksumStream } from "./createChecksumStream.browser";
 
-(typeof ReadableStream === "function" ? describe : describe.skip)("Checksum streams", () => {
+(typeof ReadableStream === "function" && process.version >= "v18" ? describe : describe.skip)("Checksum streams", () => {
   /**
    * Hash "algorithm" that appends all data together.
    */
