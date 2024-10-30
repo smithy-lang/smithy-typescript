@@ -1,6 +1,5 @@
-/**
- * @jest-environment jsdom
- */
+import { describe, expect, test as it } from "vitest";
+
 import testCases from "./__mocks__/testCases.json";
 import { fromBase64 } from "./fromBase64.browser";
 

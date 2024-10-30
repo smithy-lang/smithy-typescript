@@ -1,8 +1,10 @@
+import { test as it, vi, describe, expect } from "vitest";
+
 import { resolveCompressionConfig } from "./resolveCompressionConfig";
 
 describe(resolveCompressionConfig.name, () => {
   const mockConfig = {
-    bodyLengthChecker: jest.fn(),
+    bodyLengthChecker: vi.fn(),
     disableRequestCompression: false,
     requestMinCompressionSizeBytes: 0,
   };

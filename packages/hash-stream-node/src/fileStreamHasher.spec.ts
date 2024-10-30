@@ -4,6 +4,7 @@ import { createReadStream, mkdtempSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Readable } from "stream";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { fileStreamHasher } from "./fileStreamHasher";
 
@@ -30,8 +31,8 @@ describe("fileStreamHasher", () => {
   it("does not exhaust the input stream", async () => {
     const inputStream = createReadStream(temporaryFile);
 
-    const onSpy = jest.spyOn(inputStream, "on");
-    const pipeSpy = jest.spyOn(inputStream, "pipe");
+    const onSpy = vi.spyOn(inputStream, "on");
+    const pipeSpy = vi.spyOn(inputStream, "pipe");
 
     const result = await fileStreamHasher(Sha256, inputStream);
 

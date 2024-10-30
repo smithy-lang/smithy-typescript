@@ -1,7 +1,9 @@
+import { afterEach, describe, expect, test as it, vi } from "vitest";
+
 import { getAttr } from "../lib";
 import { evaluateTemplate } from "./evaluateTemplate";
 
-jest.mock("../lib");
+vi.mock("../lib");
 
 describe(evaluateTemplate.name, () => {
   const mockOptions = {
@@ -10,7 +12,7 @@ describe(evaluateTemplate.name, () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should not escape template without braces", () => {
@@ -43,8 +45,8 @@ describe(evaluateTemplate.name, () => {
     const ref1 = { key1: "value1" };
     const ref2 = { key2: "value2" };
 
-    (getAttr as jest.Mock).mockReturnValueOnce(ref1["key1"]);
-    (getAttr as jest.Mock).mockReturnValueOnce(ref2["key2"]);
+    vi.mocked(getAttr).mockReturnValueOnce(ref1["key1"]);
+    vi.mocked(getAttr).mockReturnValueOnce(ref2["key2"]);
 
     expect(
       evaluateTemplate("foo {ref1#key1} bar {ref2#key2} baz", { ...mockOptions, referenceRecord: { ref1, ref2 } })

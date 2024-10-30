@@ -1,6 +1,7 @@
 import { NODE_REGION_CONFIG_OPTIONS } from "@smithy/config-resolver";
 import * as ImdsProvider from "@smithy/credential-provider-imds";
 import * as NodeConfigProvider from "@smithy/node-config-provider";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   AWS_DEFAULT_REGION_ENV,
@@ -13,12 +14,12 @@ import {
 import { NODE_DEFAULTS_MODE_CONFIG_OPTIONS } from "./defaultsModeConfig";
 import { resolveDefaultsModeConfig } from "./resolveDefaultsModeConfig";
 
-jest.mock("@smithy/node-config-provider");
-jest.mock("@smithy/credential-provider-imds");
+vi.mock("@smithy/node-config-provider");
+vi.mock("@smithy/credential-provider-imds");
 
 describe("resolveDefaultsModeConfig", () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should default to legacy", async () => {
@@ -40,7 +41,7 @@ describe("resolveDefaultsModeConfig", () => {
   });
 
   it("should memoize the response", async () => {
-    const providerMock = jest.fn().mockResolvedValue("legacy");
+    const providerMock = vi.fn().mockResolvedValue("legacy");
     const defaultsMode = resolveDefaultsModeConfig({ defaultsMode: providerMock });
     await defaultsMode();
     const mockInvokeCount = providerMock.mock.calls.length;
@@ -49,14 +50,14 @@ describe("resolveDefaultsModeConfig", () => {
   });
 
   it("should resolve client region from Node config provider chain", async () => {
-    const loadConfigMock = NodeConfigProvider.loadConfig as jest.Mock;
+    const loadConfigMock = NodeConfigProvider.loadConfig as any;
     loadConfigMock.mockReturnValueOnce(undefined);
     expect(await resolveDefaultsModeConfig({ defaultsMode: () => Promise.resolve("mobile") })()).toBe("mobile");
     expect(loadConfigMock.mock.calls[0][0]).toBe(NODE_REGION_CONFIG_OPTIONS);
   });
 
   it("should resolve defaults mode from Node config provider chain", async () => {
-    const loadConfigMock = NodeConfigProvider.loadConfig as jest.Mock;
+    const loadConfigMock = NodeConfigProvider.loadConfig as any;
     loadConfigMock.mockReturnValueOnce("us-west-2").mockReturnValueOnce("mobile");
     expect(await resolveDefaultsModeConfig({})()).toBe("mobile");
     expect(loadConfigMock.mock.calls[1][0]).toBe(NODE_DEFAULTS_MODE_CONFIG_OPTIONS);
@@ -90,10 +91,8 @@ describe("resolveDefaultsModeConfig", () => {
 
     it("should make request to IMDS endpoint to resolve client region", async () => {
       const fakeImdsEndpoint = { path: "foo", hostname: "bar" };
-      const getImdsEndpointMock = (ImdsProvider.getInstanceMetadataEndpoint as jest.Mock).mockResolvedValue(
-        fakeImdsEndpoint
-      );
-      const httpRequestMock = (ImdsProvider.httpRequest as jest.Mock).mockResolvedValue("us-west-2");
+      const getImdsEndpointMock = (ImdsProvider.getInstanceMetadataEndpoint as any).mockResolvedValue(fakeImdsEndpoint);
+      const httpRequestMock = (ImdsProvider.httpRequest as any).mockResolvedValue("us-west-2");
       expect(await resolveDefaultsModeConfig({ region: "us-west-1", defaultsMode: "auto" })()).toBe("cross-region");
       expect(getImdsEndpointMock).toBeCalled();
       expect(httpRequestMock.mock.calls[0][0]).toMatchObject({ ...fakeImdsEndpoint, path: IMDS_REGION_PATH });
@@ -103,8 +102,8 @@ describe("resolveDefaultsModeConfig", () => {
 
     it(`should skip calling IMDS if ${ENV_IMDS_DISABLED} is set`, async () => {
       process.env[ENV_IMDS_DISABLED] = "true";
-      const getImdsEndpointMock = ImdsProvider.getInstanceMetadataEndpoint as jest.Mock;
-      const httpRequestMock = ImdsProvider.httpRequest as jest.Mock;
+      const getImdsEndpointMock = ImdsProvider.getInstanceMetadataEndpoint as any;
+      const httpRequestMock = ImdsProvider.httpRequest as any;
       expect(await resolveDefaultsModeConfig({ region: "us-west-1", defaultsMode: "auto" })()).toBe("standard");
       expect(getImdsEndpointMock).not.toBeCalled();
       expect(httpRequestMock).not.toBeCalled();

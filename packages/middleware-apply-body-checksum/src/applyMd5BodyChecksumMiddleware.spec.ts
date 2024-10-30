@@ -1,19 +1,20 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import { ChecksumConstructor } from "@smithy/types";
+import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { applyMd5BodyChecksumMiddleware } from "./applyMd5BodyChecksumMiddleware";
 
 describe("applyMd5BodyChecksumMiddleware", () => {
-  const mockEncoder = jest.fn().mockReturnValue("encoded");
-  const mockHashUpdate = jest.fn();
-  const mockHashDigest = jest.fn().mockReturnValue(new Uint8Array(0));
-  const mockHashReset = jest.fn();
+  const mockEncoder = vi.fn().mockReturnValue("encoded");
+  const mockHashUpdate = vi.fn();
+  const mockHashDigest = vi.fn().mockReturnValue(new Uint8Array(0));
+  const mockHashReset = vi.fn();
   const MockHash: ChecksumConstructor = class {} as any;
   MockHash.prototype.update = mockHashUpdate;
   MockHash.prototype.digest = mockHashDigest;
   MockHash.prototype.reset = mockHashReset;
 
-  const next = jest.fn();
+  const next = vi.fn();
 
   class ExoticStream {}
 

@@ -1,10 +1,12 @@
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import { EndpointError } from "../types";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getEndpointProperties } from "./getEndpointProperties";
 import { getEndpointProperty } from "./getEndpointProperty";
 
-jest.mock("./evaluateTemplate");
-jest.mock("./getEndpointProperties");
+vi.mock("./evaluateTemplate");
+vi.mock("./getEndpointProperties");
 
 describe(getEndpointProperty.name, () => {
   const mockOptions = {
@@ -19,12 +21,12 @@ describe(getEndpointProperty.name, () => {
   const mockBoolean = false;
 
   beforeEach(() => {
-    (evaluateTemplate as jest.Mock).mockReturnValue(mockOutputString);
-    (getEndpointProperties as jest.Mock).mockReturnValue(mockOutputObject);
+    vi.mocked(evaluateTemplate).mockReturnValue(mockOutputString);
+    vi.mocked(getEndpointProperties).mockReturnValue(mockOutputObject);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("processes each property in an array", () => {

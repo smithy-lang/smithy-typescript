@@ -1,5 +1,7 @@
-import { requireRequestsFrom } from "@smithy/util-test";
+import { describe, test as it } from "vitest";
 import { Weather } from "weather";
+
+import { requireRequestsFrom } from "../../../private/util-test/src/index";
 
 describe("middleware-serde", () => {
   describe(Weather.name, () => {

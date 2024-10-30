@@ -32,6 +32,7 @@ export interface HttpRequest extends HttpMessage, URI {
  */
 export interface HttpResponse extends HttpMessage {
   statusCode: number;
+  reason?: string;
 }
 
 /**

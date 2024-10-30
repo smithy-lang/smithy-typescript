@@ -2,6 +2,7 @@ import { Checksum } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";
+import { describe, expect, test as it } from "vitest";
 
 import { headStream } from "../headStream";
 import { ChecksumStream } from "./ChecksumStream";
@@ -77,6 +78,7 @@ describe("Checksum streams", () => {
 
   describe(createChecksumStream.name + " webstreams API", () => {
     if (typeof ReadableStream !== "function") {
+      it.skip("Skipped when ReadableStream is not globally available.", () => {});
       // test not applicable to Node.js 16.
       return;
     }

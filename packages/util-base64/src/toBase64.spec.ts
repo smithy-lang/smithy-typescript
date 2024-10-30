@@ -1,4 +1,5 @@
 import type { Encoder } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import testCases from "./__mocks__/testCases.json";
 import { toBase64 } from "./toBase64";

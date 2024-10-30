@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { CONFIG_ENDPOINT_NAME, ENDPOINT_CONFIG_OPTIONS, ENV_ENDPOINT_NAME } from "./EndpointConfigOptions";
 
 describe("ENDPOINT_CONFIG_OPTIONS", () => {

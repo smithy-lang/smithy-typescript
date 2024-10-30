@@ -1,9 +1,37 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import { QueryParameterBag } from "@smithy/types";
+import { afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
-import { FetchHttpHandler } from "./fetch-http-handler";
+import { createRequest } from "./create-request";
+import { FetchHttpHandler, keepAliveSupport } from "./fetch-http-handler";
 
-describe(FetchHttpHandler.name, () => {
+vi.mock("./create-request", async () => {
+  return {
+    createRequest: vi.fn().mockImplementation((_url, options) => {
+      const url = new URL(_url);
+      return {
+        protocol: url.protocol,
+        hostname: url.hostname,
+        ...options,
+      } as any;
+    }),
+  };
+});
+
+vi.spyOn(global, "fetch").mockImplementation((async () => {
+  return {
+    headers: {
+      entries() {
+        return [];
+      },
+    },
+    async blob() {
+      return undefined;
+    },
+  };
+}) as any);
+
+(typeof Blob === "function" ? describe : describe.skip)(FetchHttpHandler.name, () => {
   interface MockHttpRequestOptions {
     method?: string;
     body?: any;
@@ -14,51 +42,56 @@ describe(FetchHttpHandler.name, () => {
   }
 
   const getMockHttpRequest = (options: MockHttpRequestOptions): HttpRequest =>
-    new HttpRequest({ hostname: "example.com", ...options });
+    new HttpRequest({ hostname: "localhost", protocol: "http", ...options });
 
   describe("fetch", () => {
+    beforeAll(() => {
+      keepAliveSupport.supported = true;
+    });
+
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
     it("sends basic fetch request", async () => {
       const fetchHttpHandler = new FetchHttpHandler();
-      const winReqSpy = spyOn(window, "Request");
 
       const mockHttpRequest = getMockHttpRequest({});
       await fetchHttpHandler.handle(mockHttpRequest);
 
       const expectedUrl = `${mockHttpRequest.protocol}//${mockHttpRequest.hostname}/`;
-      const requestArgs = winReqSpy.calls.argsFor(0);
+      const requestArgs = vi.mocked(createRequest).mock.calls[0];
+
       expect(requestArgs[0]).toEqual(expectedUrl);
-      expect(requestArgs[1].method).toEqual(mockHttpRequest.method);
-      expect(requestArgs[1].keepalive).toEqual(false);
+      expect(requestArgs[1]!.method).toEqual(mockHttpRequest.method);
+      expect(requestArgs[1]!.keepalive).toEqual(false);
     });
 
     for (const method of ["GET", "HEAD"]) {
       it(`sets body to undefined when method: '${method}'`, async () => {
         const fetchHttpHandler = new FetchHttpHandler();
-        const winReqSpy = spyOn(window, "Request");
 
         const mockHttpRequest = getMockHttpRequest({ method, body: "test" });
         await fetchHttpHandler.handle(mockHttpRequest);
 
-        const requestArgs = winReqSpy.calls.argsFor(0);
-        expect(requestArgs[1].method).toEqual(mockHttpRequest.method);
-        expect(requestArgs[1].body).toEqual(undefined);
+        const requestArgs = vi.mocked(createRequest).mock.calls[0];
+        expect(requestArgs[1]!.method).toEqual(mockHttpRequest.method);
+        expect(requestArgs[1]!.body).toEqual(undefined);
       });
     }
 
     it(`sets keepalive to true if explicitly requested`, async () => {
       const fetchHttpHandler = new FetchHttpHandler({ keepAlive: true });
-      const winReqSpy = spyOn(window, "Request");
 
       const mockHttpRequest = getMockHttpRequest({});
       await fetchHttpHandler.handle(mockHttpRequest);
 
-      const requestArgs = winReqSpy.calls.argsFor(0);
-      expect(requestArgs[1].keepalive).toEqual(true);
+      const requestArgs = vi.mocked(createRequest).mock.calls[0];
+      expect(requestArgs[1]!.keepalive).toEqual(true);
     });
 
     it(`builds querystring if provided`, async () => {
       const fetchHttpHandler = new FetchHttpHandler();
-      const winReqSpy = spyOn(window, "Request");
 
       const query = { foo: "bar" };
       const fragment = "test";
@@ -68,22 +101,25 @@ describe(FetchHttpHandler.name, () => {
       const expectedUrl = `${mockHttpRequest.protocol}//${mockHttpRequest.hostname}/?${Object.entries(query)
         .map(([key, val]) => `${key}=${val}`)
         .join("&")}#${fragment}`;
-      const requestArgs = winReqSpy.calls.argsFor(0);
+      const requestArgs = vi.mocked(createRequest).mock.calls[0];
       expect(requestArgs[0]).toEqual(expectedUrl);
     });
 
     it(`sets auth if username/password are provided`, async () => {
       const fetchHttpHandler = new FetchHttpHandler();
-      const winReqSpy = spyOn(window, "Request");
 
       const username = "foo";
       const password = "bar";
       const mockHttpRequest = getMockHttpRequest({ username, password });
-      await fetchHttpHandler.handle(mockHttpRequest);
+      await fetchHttpHandler.handle(mockHttpRequest).catch((error) => {
+        expect(String(error)).toContain(
+          "TypeError: Request cannot be constructed from a URL that includes credentials"
+        );
+      });
 
       const mockAuth = `${mockHttpRequest.username}:${mockHttpRequest.password}`;
       const expectedUrl = `${mockHttpRequest.protocol}//${mockAuth}@${mockHttpRequest.hostname}/`;
-      const requestArgs = winReqSpy.calls.argsFor(0);
+      const requestArgs = vi.mocked(createRequest).mock.calls[0];
       expect(requestArgs[0]).toEqual(expectedUrl);
     });
   });

@@ -1,4 +1,5 @@
 import { RetryableTrait, SdkError } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import {
   CLOCK_SKEW_ERROR_CODES,

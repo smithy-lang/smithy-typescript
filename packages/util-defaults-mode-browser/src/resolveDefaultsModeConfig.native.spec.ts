@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { DEFAULTS_MODE_OPTIONS } from "./constants";
 import { resolveDefaultsModeConfig } from "./resolveDefaultsModeConfig.native";
 

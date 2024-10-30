@@ -109,7 +109,7 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
   }
 
   public setMaxConcurrentStreams(maxConcurrentStreams: number) {
-    if (this.config.maxConcurrency && this.config.maxConcurrency <= 0) {
+    if (maxConcurrentStreams && maxConcurrentStreams <= 0) {
       throw new RangeError("maxConcurrentStreams must be greater than zero.");
     }
     this.config.maxConcurrency = maxConcurrentStreams;

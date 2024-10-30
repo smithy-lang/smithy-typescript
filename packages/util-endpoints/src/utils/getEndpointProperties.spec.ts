@@ -1,7 +1,9 @@
+import { afterEach, describe, expect, test as it, vi } from "vitest";
+
 import { getEndpointProperties } from "./getEndpointProperties";
 import { getEndpointProperty } from "./getEndpointProperty";
 
-jest.mock("./getEndpointProperty");
+vi.mock("./getEndpointProperty");
 
 describe(getEndpointProperties.name, () => {
   const mockOptions = {
@@ -10,7 +12,7 @@ describe(getEndpointProperties.name, () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return an empty object if empty properties are provided", () => {
@@ -22,7 +24,7 @@ describe(getEndpointProperties.name, () => {
     const outputPropertyValue = "outputPropertyValue";
     const mockProperties = { key: inputPropertyValue };
 
-    (getEndpointProperty as jest.Mock).mockReturnValue(outputPropertyValue);
+    vi.mocked(getEndpointProperty).mockReturnValue(outputPropertyValue);
     expect(getEndpointProperties(mockProperties, mockOptions)).toEqual({ key: outputPropertyValue });
     expect(getEndpointProperty).toHaveBeenCalledWith(inputPropertyValue, mockOptions);
   });

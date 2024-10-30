@@ -74,7 +74,7 @@ import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * Generates HTTP protocol test cases to be run using Jest.
+ * Generates HTTP protocol test cases to be run using Vitest.
  *
  * <p>Protocol tests are defined for HTTP protocols using the
  * {@code smithy.test#httpRequestTests}, {@code smithy.test#httpResponseTests}
@@ -308,7 +308,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Create a mock function to set in place of the server operation function so we can capture
             // input and other information.
-            writer.write("const testFunction = jest.fn();");
+            writer.write("const testFunction = vi.fn();");
             writer.write("testFunction.mockReturnValue(Promise.resolve({}));");
 
             boolean usesDefaultValidation = !context.getSettings().isDisableDefaultValidation();
@@ -354,7 +354,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Create a mock function to set in place of the server operation function so we can capture
             // input and other information.
-            writer.write("const testFunction = jest.fn();");
+            writer.write("const testFunction = vi.fn();");
             writer.openBlock("testFunction.mockImplementation(() => {", "});", () -> {
                 writer.write("throw new Error($S);", "This request should have been rejected.");
             });

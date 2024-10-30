@@ -1,4 +1,5 @@
 import { Blob as BlobPolyfill } from "buffer";
+import { describe, expect, test as it } from "vitest";
 
 import { blobReader } from "./index";
 

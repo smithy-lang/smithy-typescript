@@ -1,8 +1,8 @@
 import { StreamCollector } from "@smithy/types";
 
 export const streamCollector: StreamCollector = async (stream: Blob | ReadableStream): Promise<Uint8Array> => {
-  if (typeof Blob === "function" && stream instanceof Blob) {
-    return new Uint8Array(await stream.arrayBuffer());
+  if ((typeof Blob === "function" && stream instanceof Blob) || stream.constructor?.name === "Blob") {
+    return new Uint8Array(await (stream as Blob).arrayBuffer());
   }
 
   return collectStream(stream as ReadableStream);
