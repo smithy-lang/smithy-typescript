@@ -558,7 +558,7 @@ public final class TypeScriptSettings {
         NULLABLE("nullable"),
 
         /**
-         * This will dissallow members marked as {@link RequiredTrait} to be {@code undefined}.
+         * This will disallow members marked as {@link RequiredTrait} to be {@code undefined}.
          * Use this mode with CAUTION because it comes with certain risks. When a server drops
          * {@link RequiredTrait} from an output shape (and it is replaced with {@link DefaultTrait}
          * as defined by the spec), if the server does not always serialize a value,

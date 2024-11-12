@@ -106,6 +106,9 @@ final class StructuredMemberWriter {
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
             String typeSuffix = requiredMemberMode == RequiredMemberMode.NULLABLE
                     && isRequiredMember(member) ? " | undefined" : "";
+            if (optionalSuffix.equals("?")) {
+                typeSuffix = " | undefined"; // support exactOptionalPropertyTypes.
+            }
             writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
                     symbolProvider.toSymbol(member), typeSuffix);
 
