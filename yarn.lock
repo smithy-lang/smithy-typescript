@@ -6155,14 +6155,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:14.12.3":
-  version: 14.12.3
-  resolution: "happy-dom@npm:14.12.3"
+"happy-dom@npm:15.11.4":
+  version: 15.11.4
+  resolution: "happy-dom@npm:15.11.4"
   dependencies:
     entities: ^4.5.0
     webidl-conversions: ^7.0.0
     whatwg-mimetype: ^3.0.0
-  checksum: 9d5bc8d5aea3f07f5050e5a82aaa0b0063feee43f99755de5e0ca01ce328f0282c183085ad83404a777a02d7bea98bd13b8fedb0dc566d4df7563bf4287282ad
+  checksum: 7726d528002ef362a859b44661b45e2a3fdfbf2e72929c145650f16404546da1de7b9a23c8349fd1b841c19acba011a6ca0d3e962d0bf29e73e030eb9b84c6e9
   languageName: node
   linkType: hard
 
@@ -9197,7 +9197,7 @@ __metadata:
     eslint-plugin-tsdoc: 0.2.17
     get-port: ^7.1.0
     glob: ^7.1.6
-    happy-dom: 14.12.3
+    happy-dom: 15.11.4
     husky: ^4.2.3
     jest: 29.7.0
     prettier: 3.2.5
