@@ -56,7 +56,7 @@
     "typescript": "~5.2.2",
     "vite": "4.5.5",
     "vitest": "0.34.6",
-    "webpack": "5.91.0",
+    "webpack": "5.96.1",
     "yarn": "1.22.22"
   },
   "overrides": {
