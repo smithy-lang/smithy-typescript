@@ -1,5 +1,18 @@
 # Change Log
 
+## 3.0.27
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/node-config-provider@3.1.11
+  - @smithy/protocol-http@4.1.7
+  - @smithy/service-error-classification@3.0.10
+  - @smithy/smithy-client@3.4.4
+  - @smithy/util-middleware@3.0.10
+  - @smithy/util-retry@3.0.10
+
 ## 3.0.26
 
 ### Patch Changes

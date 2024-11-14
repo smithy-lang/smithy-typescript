@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.0.27
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/property-provider@3.1.10
+  - @smithy/smithy-client@3.4.4
+
 ## 3.0.26
 
 ### Patch Changes

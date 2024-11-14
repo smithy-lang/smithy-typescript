@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+
 ## 3.1.7
 
 ### Patch Changes

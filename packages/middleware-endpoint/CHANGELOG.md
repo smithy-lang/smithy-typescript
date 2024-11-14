@@ -1,5 +1,18 @@
 # Change Log
 
+## 3.2.3
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/core@2.5.3
+  - @smithy/middleware-serde@3.0.10
+  - @smithy/node-config-provider@3.1.11
+  - @smithy/shared-ini-file-loader@3.1.11
+  - @smithy/url-parser@3.0.10
+  - @smithy/util-middleware@3.0.10
+
 ## 3.2.2
 
 ### Patch Changes

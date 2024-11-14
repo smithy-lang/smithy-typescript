@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.7.1
+
+### Patch Changes
+
+- fcd5ca8: prevent infinite recursion with NoUndefined and RecursiveRequired re: DocumentType
+
 ## 3.7.0
 
 ### Minor Changes

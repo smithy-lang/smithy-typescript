@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.5.3
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/middleware-serde@3.0.10
+  - @smithy/protocol-http@4.1.7
+  - @smithy/util-middleware@3.0.10
+  - @smithy/util-stream@3.3.1
+
 ## 2.5.2
 
 ### Patch Changes

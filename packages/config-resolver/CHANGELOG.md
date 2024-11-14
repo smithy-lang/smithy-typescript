@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.0.12
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/node-config-provider@3.1.11
+  - @smithy/util-middleware@3.0.10
+
 ## 3.0.11
 
 ### Patch Changes

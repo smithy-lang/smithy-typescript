@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.14
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/node-http-handler@3.3.1
+
 ## 3.0.13
 
 ### Patch Changes

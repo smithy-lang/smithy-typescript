@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.12
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/eventstream-codec@3.1.9
+
 ## 3.0.11
 
 ### Patch Changes
