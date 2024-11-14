@@ -3,6 +3,7 @@ import type { Client } from "../client";
 import { CommandIO } from "../command";
 import type { HttpHandlerOptions } from "../http";
 import type { MetadataBearer } from "../response";
+import { DocumentType } from "../shapes";
 import type { Exact } from "./exact";
 import type { AssertiveClient, NoUndefined, UncheckedClient } from "./no-undefined";
 
@@ -13,6 +14,7 @@ type A = {
   required: string | undefined;
   optional?: string;
   nested: A;
+  document: DocumentType;
 };
 
 {
@@ -22,6 +24,8 @@ type A = {
   const assert1: Exact<T["required"], string> = true as const;
   const assert2: Exact<T["nested"]["required"], string> = true as const;
   const assert3: Exact<T["nested"]["nested"]["required"], string> = true as const;
+  const assert4: Exact<T["document"], DocumentType> = true as const;
+  const assert5: Exact<T["nested"]["document"], DocumentType> = true as const;
 }
 
 {
@@ -30,6 +34,7 @@ type A = {
     b: number | undefined;
     c: string | number | undefined;
     optional?: string;
+    document: DocumentType | undefined;
   };
 
   type MyOutput = {
@@ -37,6 +42,7 @@ type A = {
     b?: number;
     c?: string | number;
     r?: MyOutput;
+    document?: DocumentType;
   } & MetadataBearer;
 
   type MyConfig = {
@@ -66,6 +72,7 @@ type A = {
       a: "",
       b: 0,
       c: 0,
+      document: { aa: "b" },
     };
     const get = c.getObject(input);
     const output = null as unknown as Awaited<typeof get>;
@@ -73,10 +80,12 @@ type A = {
     const assert1: Exact<typeof output.a, string | undefined> = true as const;
     const assert2: Exact<typeof output.b, number | undefined> = true as const;
     const assert3: Exact<typeof output.c, string | number | undefined> = true as const;
+    const assert4: Exact<typeof output.document, DocumentType | undefined> = true as const;
     if (output.r) {
-      const assert4: Exact<typeof output.r.a, string | undefined> = true as const;
-      const assert5: Exact<typeof output.r.b, number | undefined> = true as const;
-      const assert6: Exact<typeof output.r.c, string | number | undefined> = true as const;
+      const assert5: Exact<typeof output.r.a, string | undefined> = true as const;
+      const assert6: Exact<typeof output.r.b, number | undefined> = true as const;
+      const assert7: Exact<typeof output.r.c, string | number | undefined> = true as const;
+      const assert8: Exact<typeof output.r.document, DocumentType | undefined> = true as const;
     }
   }
 
@@ -88,6 +97,7 @@ type A = {
       a: "",
       b: 0,
       c: 0,
+      document: { aa: "b" },
     };
     const get = c.getObject(input);
     const output = null as unknown as Awaited<typeof get>;
@@ -95,9 +105,11 @@ type A = {
     const assert1: Exact<typeof output.a, string> = true as const;
     const assert2: Exact<typeof output.b, number> = true as const;
     const assert3: Exact<typeof output.c, string | number> = true as const;
-    const assert4: Exact<typeof output.r.a, string> = true as const;
-    const assert5: Exact<typeof output.r.b, number> = true as const;
-    const assert6: Exact<typeof output.r.c, string | number> = true as const;
+    const assert4: Exact<typeof output.document, DocumentType> = true as const;
+    const assert5: Exact<typeof output.r.a, string> = true as const;
+    const assert6: Exact<typeof output.r.b, number> = true as const;
+    const assert7: Exact<typeof output.r.c, string | number> = true as const;
+    const assert8: Exact<typeof output.r.document, DocumentType> = true as const;
   }
 
   {
@@ -109,10 +121,12 @@ type A = {
     const assert1: Exact<typeof output.a, string | undefined> = true as const;
     const assert2: Exact<typeof output.b, number | undefined> = true as const;
     const assert3: Exact<typeof output.c, string | number | undefined> = true as const;
+    const assert4: Exact<typeof output.document, DocumentType | undefined> = true as const;
     if (output.r) {
-      const assert4: Exact<typeof output.r.a, string | undefined> = true as const;
-      const assert5: Exact<typeof output.r.b, number | undefined> = true as const;
-      const assert6: Exact<typeof output.r.c, string | number | undefined> = true as const;
+      const assert5: Exact<typeof output.r.a, string | undefined> = true as const;
+      const assert6: Exact<typeof output.r.b, number | undefined> = true as const;
+      const assert7: Exact<typeof output.r.c, string | number | undefined> = true as const;
+      const assert8: Exact<typeof output.r.document, DocumentType | undefined> = true as const;
     }
   }
 
@@ -125,10 +139,12 @@ type A = {
     const assert1: Exact<typeof output.a, string | undefined> = true as const;
     const assert2: Exact<typeof output.b, number | undefined> = true as const;
     const assert3: Exact<typeof output.c, string | number | undefined> = true as const;
+    const assert4: Exact<typeof output.document, DocumentType | undefined> = true as const;
     if (output.r) {
-      const assert4: Exact<typeof output.r.a, string | undefined> = true as const;
-      const assert5: Exact<typeof output.r.b, number | undefined> = true as const;
-      const assert6: Exact<typeof output.r.c, string | number | undefined> = true as const;
+      const assert5: Exact<typeof output.r.a, string | undefined> = true as const;
+      const assert6: Exact<typeof output.r.b, number | undefined> = true as const;
+      const assert7: Exact<typeof output.r.c, string | number | undefined> = true as const;
+      const assert8: Exact<typeof output.r.document, DocumentType | undefined> = true as const;
     }
   }
 }
