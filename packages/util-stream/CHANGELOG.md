@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.3.0
+
+### Minor Changes
+
+- cd1929b: vitest compatibility
+
+### Patch Changes
+
+- c8d257b: allow Blob in node.js splitStream
+- Updated dependencies [cd1929b]
+  - @smithy/fetch-http-handler@4.1.0
+  - @smithy/node-http-handler@3.3.0
+  - @smithy/types@3.7.0
+
 ## 3.2.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/abort-controller@3.1.7
+
 ## 3.1.7
 
 ### Patch Changes

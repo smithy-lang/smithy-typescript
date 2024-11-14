@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.2.2
+
+### Patch Changes
+
+- Updated dependencies [c6ef519]
+- Updated dependencies [cd1929b]
+  - @smithy/core@2.5.2
+  - @smithy/types@3.7.0
+  - @smithy/middleware-serde@3.0.9
+  - @smithy/node-config-provider@3.1.10
+  - @smithy/shared-ini-file-loader@3.1.10
+  - @smithy/url-parser@3.0.9
+  - @smithy/util-middleware@3.0.9
+
 ## 3.2.1
 
 ### Patch Changes

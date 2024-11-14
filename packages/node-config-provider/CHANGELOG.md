@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.1.10
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/property-provider@3.1.9
+  - @smithy/shared-ini-file-loader@3.1.10
+
 ## 3.1.9
 
 ### Patch Changes

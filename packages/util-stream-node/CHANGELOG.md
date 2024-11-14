@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.13
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/node-http-handler@3.3.0
+  - @smithy/types@3.7.0
+
 ## 3.0.12
 
 ### Patch Changes

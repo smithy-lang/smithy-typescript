@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.5.2
+
+### Patch Changes
+
+- c6ef519: avoid self referencing submodule import
+- Updated dependencies [c8d257b]
+- Updated dependencies [cd1929b]
+  - @smithy/util-stream@3.3.0
+  - @smithy/types@3.7.0
+  - @smithy/middleware-serde@3.0.9
+  - @smithy/protocol-http@4.1.6
+  - @smithy/util-middleware@3.0.9
+
 ## 2.5.1
 
 ### Patch Changes

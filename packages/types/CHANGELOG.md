@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.7.0
+
+### Minor Changes
+
+- cd1929b: vitest compatibility
+
 ## 3.6.0
 
 ### Minor Changes
