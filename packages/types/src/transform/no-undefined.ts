@@ -1,6 +1,6 @@
 import type { InvokeMethod, InvokeMethodOptionalArgs } from "../client";
 import type { GetOutputType } from "../command";
-import type { DocumentType } from "../shapes"
+import type { DocumentType } from "../shapes";
 
 /**
  * @public
@@ -34,14 +34,14 @@ export type UncheckedClient<Client extends object> = UncheckedClientOutputTypes<
  * Excludes undefined recursively.
  */
 export type NoUndefined<T> = T extends Function
-  ? T 
+  ? T
   : T extends DocumentType
-  ? T 
-  : [T] extends [object]
-    ? {
-        [key in keyof T]: NoUndefined<T[key]>;
-      }
-    : Exclude<T, undefined>;
+    ? T
+    : [T] extends [object]
+      ? {
+          [key in keyof T]: NoUndefined<T[key]>;
+        }
+      : Exclude<T, undefined>;
 
 /**
  * @internal
@@ -51,12 +51,12 @@ export type NoUndefined<T> = T extends Function
 export type RecursiveRequired<T> = T extends Function
   ? T
   : T extends DocumentType
-  ? T
-  : [T] extends [object]
-    ? {
-        [key in keyof T]-?: RecursiveRequired<T[key]>;
-      }
-    : Exclude<T, undefined>;
+    ? T
+    : [T] extends [object]
+      ? {
+          [key in keyof T]-?: RecursiveRequired<T[key]>;
+        }
+      : Exclude<T, undefined>;
 
 /**
  * @internal
