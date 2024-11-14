@@ -110,6 +110,19 @@ const walk = require("../../../scripts/utils/walk");
         );
       }
     }
+
+    const subModuleImports = [
+      ...new Set(
+        (sourceCode.toString().match(/(from |import\()"\@smithy\/core\/(.*?)";/g) || []).map(
+          (_) => _.match(/@smithy\/core\/(.*?)"/)[1]
+        )
+      ),
+    ];
+    const ownModule = item.match(/src\/submodules\/(.*?)\//)?.[1];
+
+    if (subModuleImports.includes(ownModule)) {
+      errors.push(`self-referencing submodule import found in ${item}`);
+    }
   }
 })().then(() => {
   if (errors.length) {
