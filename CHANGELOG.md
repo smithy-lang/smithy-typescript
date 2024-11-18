@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.25.0 (2024-11-18)
+
+### Features
+- Upgraded smithyVersion to 1.52.0 ([#1434](https://github.com/smithy-lang/smithy-typescript/pull/1434))
+- Added default accepts=application/cbor header for Smithy RPC v2 CBOR protocol ([#1427](https://github.com/smithy-lang/smithy-typescript/pull/1427))
+- Added `| undefined` for optional type properties to support `exactOptionalPropertyTypes` ([#1448](https://github.com/smithy-lang/smithy-typescript/pull/1448))
+
+### Bug Fixes
+- Added uuid types import when adding uuid import ([#1428](https://github.com/smithy-lang/smithy-typescript/pull/1428))
+
+
 ## 0.24.0 (2024-09-30)
 
 ### Features
@@ -48,7 +59,7 @@
 
 - codegen: Fixed incorrect usage of string templates when generating commands ([#1354](https://github.com/smithy-lang/smithy-typescript/pull/1354))
 
-- codegen: Fixed serialization of `:event-type` in event-streams where the member target-id was being used instead of the member name ([#1349](https://github.com/smithy-lang/smithy-typescript/pull/1349)) 
+- codegen: Fixed serialization of `:event-type` in event-streams where the member target-id was being used instead of the member name ([#1349](https://github.com/smithy-lang/smithy-typescript/pull/1349))
 
 - codegen: Fixed issue where content-type was being set when input body was empty ([#1304](https://github.com/smithy-lang/smithy-typescript/pull/1304))
 
@@ -160,7 +171,7 @@
 * Update to generate enum Record keys when target is enum ([#1037](https://github.com/awslabs/smithy-typescript/pull/1037))
 * Removed "| string" and "| number" from enum targeted members ([#1028](https://github.com/awslabs/smithy-typescript/pull/1003))
 * Added `-p` for `mkdir` in `build-generated-test-packages` ([#1010](https://github.com/awslabs/smithy-typescript/pull/1003))
-* Added logging for `buildAndCopyToNodeModules()` ([#1003](https://github.com/awslabs/smithy-typescript/pull/1003)) 
+* Added logging for `buildAndCopyToNodeModules()` ([#1003](https://github.com/awslabs/smithy-typescript/pull/1003))
 * Reorganized models in `smithy-typescript-codegen-test` ([#995](https://github.com/awslabs/smithy-typescript/pull/995))
 * Updated to export empty model index if no `model_*` files exist ([#996](https://github.com/awslabs/smithy-typescript/pull/996))
 * Read service specific endpoints for environment or config ([#1014](https://github.com/awslabs/smithy-typescript/pull/1014))
