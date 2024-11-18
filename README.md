@@ -37,7 +37,7 @@ smithy-typescript-example-client/
 └── smithy-build.json
 ```
 
-To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`: 
+To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`:
 
 ```json
 // smithy-build.json
@@ -47,7 +47,7 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
     // Add the Smithy TypeScript code generator dependency
     "maven": {
         "dependencies": [
-            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.24.0"
+            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.25.0"
         ]
     },
     "plugins": {
@@ -102,7 +102,7 @@ smithy-typescript-example-client-gradle/
 └── smithy-build.json
 ```
 
-To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`: 
+To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`:
 
 ```json
 // smithy-build.json
@@ -141,7 +141,7 @@ dependencies {
     smithyCli("software.amazon.smithy:smithy-cli:$smithyVersion")
 
     // Add the Smithy TypeScript code generator dependency
-    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.24.0")
+    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.25.0")
 
     // Uncomment below to add various smithy dependencies (see full list of smithy dependencies in https://github.com/awslabs/smithy)
     // implementation("software.amazon.smithy:smithy-model:$smithyVersion")
@@ -327,9 +327,9 @@ Once a `ProtocolGenerator` is implemented, the implementation can be registered 
   ```java
   // src/main/java/typescript/example/client/gradle/ExampleClientProtocolGeneratorIntegration.java
   package typescript.example.client.gradle;
-  
+
   // ...
-  
+
   public class ExampleClientProtocolGeneratorIntegration implements TypeScriptIntegration {
       // ProtocolGenerator implementation is inline for brevity, but should be in its
       // own file
@@ -368,9 +368,9 @@ Smithy TypeScript has the `CustomEndpoints` configuration which can be used to a
   ```java
   // src/main/java/typescript/example/client/gradle/ExampleClientEndpointResolutionIntegration.java
   package typescript.example.client.gradle;
-  
+
   // ...
-  
+
   public class ExampleClientEndpointResolutionIntegration implements TypeScriptIntegration {
       @Override
       public List<RuntimeClientPlugin> getClientPlugins() {
