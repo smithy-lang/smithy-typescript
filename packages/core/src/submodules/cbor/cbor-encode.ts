@@ -187,7 +187,9 @@ export function encode(_input: any): void {
           encodeHeader(majorTag, input.tag);
           continue;
         } else {
-          throw new Error("tag encountered with missing fields, need 'tag' and 'value', found: " + JSON.stringify(input));
+          throw new Error(
+            "tag encountered with missing fields, need 'tag' and 'value', found: " + JSON.stringify(input)
+          );
         }
       }
       const keys = Object.keys(input);
