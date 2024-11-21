@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.5.4
+
+### Patch Changes
+
+- 9c40f7b: make CBOR tags more distinct in JS
+
 ## 2.5.3
 
 ### Patch Changes
