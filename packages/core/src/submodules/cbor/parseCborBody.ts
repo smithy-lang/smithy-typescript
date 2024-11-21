@@ -4,6 +4,7 @@ import { HeaderBag as __HeaderBag, HttpResponse, SerdeContext as __SerdeContext,
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
 
 import { cbor } from "./cbor";
+import { tag, tagSymbol } from "./cbor-types";
 
 /**
  * @internal
@@ -27,11 +28,11 @@ export const parseCborBody = (streamBody: any, context: SerdeContext): any => {
 /**
  * @internal
  */
-export const dateToTag = (date: Date): { tag: 1; value: number } => {
-  return {
+export const dateToTag = (date: Date): { tag: number | bigint; value: any; [tagSymbol]: true } => {
+  return tag({
     tag: 1,
     value: date.getTime() / 1000,
-  };
+  });
 };
 
 /**

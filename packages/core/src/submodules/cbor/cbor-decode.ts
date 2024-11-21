@@ -26,6 +26,7 @@ import {
   specialNull,
   specialTrue,
   specialUndefined,
+  tag,
   Uint8,
   Uint32,
   Uint64,
@@ -122,7 +123,7 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
         const valueOffset = _offset;
 
         _offset = offset + valueOffset;
-        return { tag: castBigInt(unsignedInt), value };
+        return tag({ tag: castBigInt(unsignedInt), value });
       }
     case majorUtf8String:
     case majorMap:

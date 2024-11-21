@@ -17,8 +17,13 @@ export const cbor = {
     return decode(0, payload.length);
   },
   serialize(input: any) {
-    encode(input);
-    return toUint8Array();
+    try {
+      encode(input);
+      return toUint8Array();
+    } catch (e) {
+      toUint8Array(); // resets cursor.
+      throw e;
+    }
   },
   /**
    * @public
