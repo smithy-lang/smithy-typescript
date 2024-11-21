@@ -5,6 +5,8 @@ import { describe, expect, test as it } from "vitest";
 
 import { cbor } from "./cbor";
 import { bytesToFloat16 } from "./cbor-decode";
+import { tagSymbol } from "./cbor-types";
+import { dateToTag } from "./parseCborBody";
 
 // syntax is ESM but the test target is CJS.
 const here = __dirname;
@@ -180,6 +182,18 @@ describe("cbor", () => {
       ]),
     },
     {
+      name: "date=0",
+      data: dateToTag(new Date(0)),
+      // major tag (6 or 110), minor 1 (timestamp)
+      cbor: allocByteArray([0b11000001, 0]),
+    },
+    {
+      name: "date=turn of the millenium",
+      data: dateToTag(new Date(946684799999)),
+      // major tag (6 or 110), minor 1 (timestamp)
+      cbor: allocByteArray([0b11000001, 251, 65, 204, 54, 161, 191, 255, 223, 59]),
+    },
+    {
       name: "complex object",
       data: {
         number: 135019305913059,
@@ -202,7 +216,7 @@ describe("cbor", () => {
   ];
 
   const toBytes = (hex: string) => {
-    const bytes = [];
+    const bytes = [] as number[];
     hex.replace(/../g, (substr: string): string => {
       bytes.push(parseInt(substr, 16));
       return substr;
@@ -211,6 +225,19 @@ describe("cbor", () => {
   };
 
   describe("locally curated scenarios", () => {
+    it("should throw an error if serializing a tag with missing properties", () => {
+      expect(() =>
+        cbor.serialize({
+          myTag: {
+            [tagSymbol]: true,
+            tag: 1,
+            // value: undefined
+          },
+        })
+      ).toThrowError("tag encountered with missing fields, need 'tag' and 'value', found: {\"tag\":1}");
+      cbor.resizeEncodingBuffer(0);
+    });
+
     for (const { name, data, cbor: cbor_representation } of examples) {
       it(`should encode for ${name}`, async () => {
         const serialized = cbor.serialize(data);
@@ -292,6 +319,7 @@ describe("cbor", () => {
           return {
             tag: id,
             value: translateTestData(tagValue),
+            [tagSymbol]: true,
           };
         default:
           throw new Error(`Unrecognized test scenario <expect> type ${type}.`);

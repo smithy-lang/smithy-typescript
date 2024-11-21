@@ -10,6 +10,7 @@ export type CborItemType =
 export type CborTagType = {
   tag: Uint64 | number;
   value: CborValueType;
+  [tagSymbol]: true;
 };
 export type CborUnstructuredByteStringType = Uint8Array;
 export type CborListType<T = any> = Array<T>;
@@ -65,4 +66,27 @@ export const minorIndefinite = 31; // 0b11111
 
 export function alloc(size: number) {
   return typeof Buffer !== "undefined" ? Buffer.alloc(size) : new Uint8Array(size);
+}
+
+/**
+ * @public
+ *
+ * The presence of this symbol as an object key indicates it should be considered a tag
+ * for CBOR serialization purposes.
+ *
+ * The object must also have the properties "tag" and "value".
+ */
+export const tagSymbol = Symbol("@smithy/core/cbor::tagSymbol");
+
+/**
+ * @public
+ * Applies the tag symbol to the object.
+ */
+export function tag(data: { tag: number | bigint; value: any; [tagSymbol]?: true }): {
+  tag: number | bigint;
+  value: any;
+  [tagSymbol]: true;
+} {
+  data[tagSymbol] = true;
+  return data as typeof data & { [tagSymbol]: true };
 }

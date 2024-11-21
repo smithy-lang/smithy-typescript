@@ -9,12 +9,14 @@ import {
   majorMap,
   majorNegativeInt64,
   majorSpecial,
+  majorTag,
   majorUint64,
   majorUnstructuredByteString,
   majorUtf8String,
   specialFalse,
   specialNull,
   specialTrue,
+  tagSymbol,
   Uint64,
 } from "./cbor-types";
 import { alloc } from "./cbor-types";
@@ -179,6 +181,17 @@ export function encode(_input: any): void {
       cursor += input.byteLength;
       continue;
     } else if (typeof input === "object") {
+      if (input[tagSymbol]) {
+        if ("tag" in input && "value" in input) {
+          encodeStack.push(input.value);
+          encodeHeader(majorTag, input.tag);
+          continue;
+        } else {
+          throw new Error(
+            "tag encountered with missing fields, need 'tag' and 'value', found: " + JSON.stringify(input)
+          );
+        }
+      }
       const keys = Object.keys(input);
       for (let i = keys.length - 1; i >= 0; --i) {
         const key = keys[i];
