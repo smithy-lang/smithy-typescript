@@ -23,7 +23,7 @@ export async function writeRequestBody(
   const expect = headers["Expect"] || headers["expect"];
 
   let timeoutId = -1;
-  let hasError = false;
+  let skipWritingBody = false;
 
   if (expect === "100-continue") {
     await Promise.race<void>([
@@ -35,8 +35,16 @@ export async function writeRequestBody(
           timing.clearTimeout(timeoutId);
           resolve();
         });
+        httpRequest.on("response", () => {
+          // if this handler is called, then response is
+          // already received and there is no point in
+          // sending body or waiting
+          skipWritingBody = true;
+          timing.clearTimeout(timeoutId);
+          resolve();
+        });
         httpRequest.on("error", () => {
-          hasError = true;
+          skipWritingBody = true;
           timing.clearTimeout(timeoutId);
           // this handler does not reject with the error
           // because there is already an error listener
@@ -48,7 +56,7 @@ export async function writeRequestBody(
     ]);
   }
 
-  if (!hasError) {
+  if (!skipWritingBody) {
     writeBody(httpRequest, request.body);
   }
 }
