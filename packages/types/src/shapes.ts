@@ -90,4 +90,5 @@ export type SdkError = Error &
        */
       readonly clockSkewCorrected?: true;
     };
+    cause?: Error;
   };

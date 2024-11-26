@@ -35,7 +35,8 @@ export const isTransientError = (error: SdkError) =>
   isClockSkewCorrectedError(error) ||
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
-  TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0);
+  TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
+  (error.cause !== undefined && isTransientError(error.cause));
 
 export const isServerError = (error: SdkError) => {
   if (error.$metadata?.httpStatusCode !== undefined) {
