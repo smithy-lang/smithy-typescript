@@ -59,6 +59,54 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         scopeCount = 0;
     }
 
+    private String serializeObject(Map<String, Object> obj) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        boolean first = true; // first key-value pair
+        for (Map.Entry<String, Object> entry: obj.entrySet()) {
+            if (!first) {
+                builder.append(",");
+            }
+            builder.append("\"").append(entry.getKey()).append("\":");
+            // recursively serialize value (could be primitive, obj, array)
+            builder.append(serializeValue(entry.getValue()));
+            first = false;
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
+    private String serializeArray(ArrayList<Object> array) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        boolean first = true;
+        for (Object value: array) {
+            if (!first) {
+                builder.append(",");
+            }
+            builder.append(serializeValue(value));
+            first = false;
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private String serializeValue(Object value) {
+        if (value == null) {
+            return "null";
+        } else if (value instanceof String) {
+            return "\"" + value + "\"";
+        } else if (value instanceof Number || value instanceof Boolean) {
+            return value.toString();
+        } else if (value instanceof Map) {
+            return serializeObject((Map<String, Object>) value);
+        } else if (value instanceof ArrayList) {
+            return serializeArray((ArrayList<Object>) value);
+        }
+        throw new CodegenException("Unsupported literal type: " + value.getClass());
+    }
+
     public void run() {
         writer.openBlock("let returnComparator = () => {", "}", () -> {
             executionContext = accessor;
@@ -196,10 +244,15 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
                 executionContext = "\"" + expression.getValue().toString() + "\"";
                 break;
             case OBJECT:
+                @SuppressWarnings("unchecked")
+                Map<String, Object> objValue = (Map<String, Object>) expression.getValue();
+                executionContext = serializeObject(objValue);
+                break;
             case ARRAY:
-                // TODO: resolve JMESPATH OBJECTS and ARRAY types as literals
-                throw new CodegenException("TypeScriptJmesPath visitor has not implemented resolution of ARRAY and"
-                        + " OBJECT literials ");
+                @SuppressWarnings("unchecked")
+                ArrayList<Object> arrayValue = (ArrayList<Object>) expression.getValue();
+                executionContext = serializeArray(arrayValue);
+                break;
             default:
                 // All other options are already valid js literials.
                 // (BOOLEAN, ANY, NULL, NUMBER, EXPRESSION)
