@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
+import java.util.Map;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.jmespath.ExpressionVisitor;
 import software.amazon.smithy.jmespath.JmespathExpression;
