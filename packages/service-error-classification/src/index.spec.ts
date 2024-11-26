@@ -135,6 +135,12 @@ describe("isTransientError", () => {
       checkForErrorType(isTransientError, { cause: { name } }, true);
     });
   });
+
+  it("should limit recursion to 10 depth", () => {
+    const error = { cause: null } as SdkError;
+    error.cause = error;
+    checkForErrorType(isTransientError, { cause: error }, false);
+  });
 });
 
 describe("isServerError", () => {
