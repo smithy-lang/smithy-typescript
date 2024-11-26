@@ -16,7 +16,9 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.jmespath.ExpressionVisitor;
 import software.amazon.smithy.jmespath.JmespathExpression;
@@ -61,35 +63,17 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     }
 
     private String serializeObject(Map<String, Object> obj) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-        boolean first = true; // first key-value pair
-        for (Map.Entry<String, Object> entry: obj.entrySet()) {
-            if (!first) {
-                builder.append(",");
-            }
-            builder.append("\"").append(entry.getKey()).append("\":");
-            // recursively serialize value (could be primitive, obj, array)
-            builder.append(serializeValue(entry.getValue()));
-            first = false;
-        }
-        builder.append("}");
-        return builder.toString();
+        return "{" + obj.entrySet().stream()
+            .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
+            .collect(Collectors.joining(","))
+            + "}";
     }
 
-    private String serializeArray(ArrayList<Object> array) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        boolean first = true;
-        for (Object value: array) {
-            if (!first) {
-                builder.append(",");
-            }
-            builder.append(serializeValue(value));
-            first = false;
-        }
-        builder.append("]");
-        return builder.toString();
+    private String serializeArray(List<Object> array) {
+        return "[" + array.stream()
+            .map(this::serializeValue)
+            .collect(Collectors.joining(","))
+            + "]";
     }
 
     @SuppressWarnings("unchecked")
@@ -103,7 +87,7 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         } else if (value instanceof Map) {
             return serializeObject((Map<String, Object>) value);
         } else if (value instanceof ArrayList) {
-            return serializeArray((ArrayList<Object>) value);
+            return serializeArray((List<Object>) value);
         }
         throw new CodegenException("Unsupported literal type: " + value.getClass());
     }
@@ -245,14 +229,10 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
                 executionContext = "\"" + expression.getValue().toString() + "\"";
                 break;
             case OBJECT:
-                @SuppressWarnings("unchecked")
-                Map<String, Object> objValue = (Map<String, Object>) expression.getValue();
-                executionContext = serializeObject(objValue);
+                executionContext = serializeObject(expression.expectObjectValue());
                 break;
             case ARRAY:
-                @SuppressWarnings("unchecked")
-                ArrayList<Object> arrayValue = (ArrayList<Object>) expression.getValue();
-                executionContext = serializeArray(arrayValue);
+                executionContext = serializeArray(expression.expectArrayValue());
                 break;
             default:
                 // All other options are already valid js literials.
