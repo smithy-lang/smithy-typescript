@@ -1,4 +1,4 @@
-# <img alt="Smithy" src="https://github.com/smithy-lang/smithy/blob/main/docs/_static/favicon.png?raw=true" width="28"> Smithy TypeScript
+# <img alt="Smithy" src="https://github.com/smithy-lang/smithy/blob/main/docs/_static/smithy-anvil.svg?raw=true" width="32"> Smithy TypeScript
 
 > **WARNING: Smithy TypeScript is currently in [Developer Preview](https://aws.amazon.com/blogs/devops/smithy-server-and-client-generator-for-typescript). All interfaces and supported JavaScript platforms are subject to change.**
 
