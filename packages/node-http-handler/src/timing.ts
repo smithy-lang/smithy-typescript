@@ -3,6 +3,6 @@
  * For test spies.
  */
 export const timing = {
-  setTimeout: setTimeout.bind(this),
-  clearTimeout: clearTimeout.bind(this),
+  setTimeout: (cb, timeout) => setTimeout(cb, timeout),
+  clearTimeout: (id) => clearTimeout(id),
 };
