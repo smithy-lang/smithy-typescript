@@ -40,6 +40,12 @@ export type WaiterResult = {
    * (optional) Indicates a reason for why a waiter has reached its state.
    */
   reason?: any;
+
+  /**
+   * Responses observed by the waiter during its polling, where the value
+   * is the count.
+   */
+  observedResponses?: Record<string, number>;
 };
 
 /**

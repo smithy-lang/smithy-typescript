@@ -17,11 +17,19 @@ describe(runPolling.name, () => {
   const input = "mockInput";
   const abortedState = {
     state: WaiterState.ABORTED,
+    observedResponses: {
+      "AbortController signal aborted.": 1,
+    },
   };
   const failureState = {
     state: WaiterState.FAILURE,
     reason: {
       mockedReason: "some-failure-value",
+    },
+    observedResponses: {
+      [JSON.stringify({
+        mockedReason: "some-failure-value",
+      })]: 1,
     },
   };
   const successState = {
@@ -29,13 +37,20 @@ describe(runPolling.name, () => {
     reason: {
       mockedReason: "some-success-value",
     },
+    observedResponses: {
+      [JSON.stringify({
+        mockedReason: "some-success-value",
+      })]: 1,
+    },
   };
   const retryState = {
     state: WaiterState.RETRY,
     reason: undefined,
+    observedResponses: {},
   };
   const timeoutState = {
     state: WaiterState.TIMEOUT,
+    observedResponses: {},
   };
 
   let mockAcceptorChecks;
