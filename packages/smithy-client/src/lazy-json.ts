@@ -1,57 +1,39 @@
 /**
- * Lazy String holder for JSON typed contents.
- */
-
-interface StringWrapper {
-  new (arg: any): String;
-}
-
-/**
- * Because of https://github.com/microsoft/tslib/issues/95,
- * TS 'extends' shim doesn't support extending native types like String.
- * So here we create StringWrapper that duplicate everything from String
- * class including its prototype chain. So we can extend from here.
+ * @internal
  *
- * @internal
+ * This class allows the usage of data objects in fields that expect
+ * JSON strings. It serializes the data object into JSON
+ * if needed during the request serialization step.
+ *
  */
-// @ts-ignore StringWrapper implementation is not a simple constructor
-export const StringWrapper: StringWrapper = function () {
-  //@ts-ignore 'this' cannot be assigned to any, but Object.getPrototypeOf accepts any
-  const Class = Object.getPrototypeOf(this).constructor;
-  const Constructor = Function.bind.apply(String, [null as any, ...arguments]);
-  //@ts-ignore Call wrapped String constructor directly, don't bother typing it.
-  const instance = new Constructor();
-  Object.setPrototypeOf(instance, Class.prototype);
-  return instance as String;
-};
-StringWrapper.prototype = Object.create(String.prototype, {
-  constructor: {
-    value: StringWrapper,
-    enumerable: false,
-    writable: true,
-    configurable: true,
-  },
-});
-Object.setPrototypeOf(StringWrapper, String);
+export class LazyJsonString {
+  private constructor(private value: string) {}
 
-/**
- * @internal
- */
-export class LazyJsonString extends StringWrapper {
-  deserializeJSON(): any {
-    return JSON.parse(super.toString());
+  public toString(): string {
+    return this.value;
   }
 
-  toJSON(): string {
-    return super.toString();
+  public valueOf(): string {
+    return this.value;
   }
 
-  static fromObject(object: any): LazyJsonString {
+  public toJSON(): string {
+    return this.value;
+  }
+
+  public static from(object: any): LazyJsonString {
     if (object instanceof LazyJsonString) {
       return object;
-    } else if (object instanceof String || typeof object === "string") {
+    } else if (typeof object === "string") {
       return new LazyJsonString(object);
     }
     return new LazyJsonString(JSON.stringify(object));
+  }
+
+  /**
+   * @deprecated call from() instead.
+   */
+  public static fromObject(object: any): LazyJsonString {
+    return LazyJsonString.from(object);
   }
 }
