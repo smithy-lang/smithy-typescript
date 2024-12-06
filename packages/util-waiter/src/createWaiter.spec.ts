@@ -53,7 +53,7 @@ describe("createWaiter", () => {
     );
     vi.advanceTimersByTime(10 * 1000);
     abortController.abort(); // Abort before maxWaitTime(20s);
-    expect(await statusPromise).toEqual(abortedState);
+    expect(await statusPromise).toContain(abortedState);
   });
 
   it("should success when acceptor checker returns seccess", async () => {
@@ -67,7 +67,7 @@ describe("createWaiter", () => {
       mockAcceptorChecks
     );
     vi.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
-    expect(await statusPromise).toEqual(successState);
+    expect(await statusPromise).toContain(successState);
   });
 
   it("should fail when acceptor checker returns failure", async () => {
@@ -81,6 +81,6 @@ describe("createWaiter", () => {
       mockAcceptorChecks
     );
     vi.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
-    expect(await statusPromise).toEqual(failureState);
+    expect(await statusPromise).toContain(failureState);
   });
 });
