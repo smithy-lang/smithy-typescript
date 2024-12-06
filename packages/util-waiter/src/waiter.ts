@@ -45,7 +45,7 @@ export type WaiterResult = {
    * Responses observed by the waiter during its polling, where the value
    * is the count.
    */
-  observedResponses?: Record<string, number>
+  observedResponses?: Record<string, number>;
 };
 
 /**

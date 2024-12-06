@@ -32,7 +32,7 @@ export const runPolling = async <Client, Input>(
   const { state, reason } = await acceptorChecks(client, input);
   if (reason) {
     const message = createMessageFromResponse(reason);
-    observedResponses[message] |= 0
+    observedResponses[message] |= 0;
     observedResponses[message] += 1;
   }
 
@@ -48,7 +48,7 @@ export const runPolling = async <Client, Input>(
   while (true) {
     if (abortController?.signal?.aborted || abortSignal?.aborted) {
       const message = "AbortController signal aborted.";
-      observedResponses[message] |= 0
+      observedResponses[message] |= 0;
       observedResponses[message] += 1;
       return { state: WaiterState.ABORTED, observedResponses };
     }
@@ -63,7 +63,7 @@ export const runPolling = async <Client, Input>(
 
     if (reason) {
       const message = createMessageFromResponse(reason);
-      observedResponses[message] |= 0
+      observedResponses[message] |= 0;
       observedResponses[message] += 1;
     }
 
