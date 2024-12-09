@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.5.0
+
+### Minor Changes
+
+- 70275bd: remove String extension in LazyJsonString
+
 ## 3.4.6
 
 ### Patch Changes
