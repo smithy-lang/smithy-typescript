@@ -23,7 +23,7 @@
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "dependencies": {
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "types": "./dist-types/index.d.ts",
   "engines": {

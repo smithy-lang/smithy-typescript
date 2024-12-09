@@ -28,7 +28,7 @@
     "@smithy/is-array-buffer": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "engines": {
     "node": ">=16.0.0"
