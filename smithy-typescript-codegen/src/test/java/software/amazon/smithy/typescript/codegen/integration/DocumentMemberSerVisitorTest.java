@@ -83,7 +83,7 @@ public class DocumentMemberSerVisitorTest {
                 {StringShape.builder().id(id).build(), DATA_SOURCE},
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                    "__LazyJsonString.fromObject(" + DATA_SOURCE + ")"
+                    "__LazyJsonString.from(" + DATA_SOURCE + ")"
                 },
                 {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
                 {DocumentShape.builder().id(id).build(), delegate},
