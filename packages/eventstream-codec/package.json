@@ -26,7 +26,7 @@
     "@aws-crypto/crc32": "5.2.0",
     "@smithy/types": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@smithy/util-utf8": "workspace:^",

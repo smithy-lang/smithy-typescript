@@ -3,7 +3,7 @@
   "version": "3.1.12",
   "dependencies": {
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@types/node": "^16.18.96",
