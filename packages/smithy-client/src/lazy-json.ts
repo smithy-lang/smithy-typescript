@@ -1,57 +1,73 @@
 /**
- * Lazy String holder for JSON typed contents.
- */
-
-interface StringWrapper {
-  new (arg: any): String;
-}
-
-/**
- * Because of https://github.com/microsoft/tslib/issues/95,
- * TS 'extends' shim doesn't support extending native types like String.
- * So here we create StringWrapper that duplicate everything from String
- * class including its prototype chain. So we can extend from here.
+ * @public
  *
- * @internal
+ * A model field with this type means that you may provide a JavaScript
+ * object in lieu of a JSON string, and it will be serialized to JSON
+ * automatically before being sent in a request.
+ *
+ * For responses, you will receive a "LazyJsonString", which is a boxed String object
+ * with additional mixin methods.
+ * To get the string value, call `.toString()`, or to get the JSON object value,
+ * call `.deserializeJSON()` or parse it yourself.
  */
-// @ts-ignore StringWrapper implementation is not a simple constructor
-export const StringWrapper: StringWrapper = function () {
-  //@ts-ignore 'this' cannot be assigned to any, but Object.getPrototypeOf accepts any
-  const Class = Object.getPrototypeOf(this).constructor;
-  const Constructor = Function.bind.apply(String, [null as any, ...arguments]);
-  //@ts-ignore Call wrapped String constructor directly, don't bother typing it.
-  const instance = new Constructor();
-  Object.setPrototypeOf(instance, Class.prototype);
-  return instance as String;
-};
-StringWrapper.prototype = Object.create(String.prototype, {
-  constructor: {
-    value: StringWrapper,
-    enumerable: false,
-    writable: true,
-    configurable: true,
-  },
-});
-Object.setPrototypeOf(StringWrapper, String);
+export type AutomaticJsonStringConversion = Parameters<typeof JSON.stringify>[0] | LazyJsonString;
 
 /**
  * @internal
+ *
  */
-export class LazyJsonString extends StringWrapper {
-  deserializeJSON(): any {
-    return JSON.parse(super.toString());
-  }
+export interface LazyJsonString extends String {
+  new (s: string): typeof LazyJsonString;
 
-  toJSON(): string {
-    return super.toString();
-  }
+  /**
+   * @returns the JSON parsing of the string value.
+   */
+  deserializeJSON(): any;
 
-  static fromObject(object: any): LazyJsonString {
-    if (object instanceof LazyJsonString) {
-      return object;
-    } else if (object instanceof String || typeof object === "string") {
-      return new LazyJsonString(object);
-    }
-    return new LazyJsonString(JSON.stringify(object));
-  }
+  /**
+   * @returns the original string value rather than a JSON.stringified value.
+   */
+  toJSON(): string;
 }
+
+/**
+ * @internal
+ *
+ * Extension of the native String class in the previous implementation
+ * has negative global performance impact on method dispatch for strings,
+ * and is generally discouraged.
+ *
+ * This current implementation may look strange, but is necessary to preserve the interface and
+ * behavior of extending the String class.
+ */
+export function LazyJsonString(val: string): void {
+  const str = Object.assign(new String(val), {
+    deserializeJSON() {
+      return JSON.parse(String(val));
+    },
+
+    toString() {
+      return String(val);
+    },
+
+    toJSON() {
+      return String(val);
+    },
+  });
+
+  return str as never;
+}
+
+LazyJsonString.from = (object: any): LazyJsonString => {
+  if (object && typeof object === "object" && (object instanceof LazyJsonString || "deserializeJSON" in object)) {
+    return object as any;
+  } else if (typeof object === "string" || Object.getPrototypeOf(object) === String.prototype) {
+    return LazyJsonString(String(object) as string) as any;
+  }
+  return LazyJsonString(JSON.stringify(object)) as any;
+};
+
+/**
+ * @deprecated use from.
+ */
+LazyJsonString.fromObject = LazyJsonString.from;
