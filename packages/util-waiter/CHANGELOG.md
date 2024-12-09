@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 8950c05: record observed responses in waiter results
+
 ## 3.1.10
 
 ### Patch Changes
