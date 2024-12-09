@@ -16,6 +16,9 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.jmespath.ExpressionVisitor;
 import software.amazon.smithy.jmespath.JmespathExpression;
@@ -66,44 +69,6 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
             writer.write("return $L;", executionContext);
         });
         executionContext = "returnComparator()";
-    }
-
-    private String makeNewScope(String prefix) {
-        scopeCount += 1;
-        return prefix + scopeCount;
-    }
-
-    void writeBooleanExpectation(String expectedValue, String returnValue) {
-        writer.openBlock("if ($L == $L) {", "}", executionContext, expectedValue, () -> {
-            writer.write("return $L;", returnValue);
-        });
-    }
-
-    void writeAnyStringEqualsExpectation(String expectedValue, String returnValue) {
-        String element = makeNewScope("anyStringEq_");
-        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
-            writer.openBlock("if ($L == $S) {", "}", element, expectedValue, () -> {
-                writer.write("return $L;", returnValue);
-            });
-        });
-    }
-
-    void writeAllStringEqualsExpectation(String expectedValue, String returnValue) {
-        String element = makeNewScope("element_");
-        String result = makeNewScope("allStringEq_");
-        writer.write("let $L = ($L.length > 0);", result, executionContext);
-        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
-            writer.write("$L = $L && ($L == $S)", result, result, element, expectedValue);
-        });
-        writer.openBlock("if ($L) {", "}", result, () -> {
-            writer.write("return $L;", returnValue);
-        });
-    }
-
-    void writeStringExpectation(String expectedValue, String returnValue) {
-        writer.openBlock("if ($L === $S) {", "}", executionContext, expectedValue, () -> {
-            writer.write("return $L;", returnValue);
-        });
     }
 
     @Override
@@ -196,10 +161,11 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
                 executionContext = "\"" + expression.getValue().toString() + "\"";
                 break;
             case OBJECT:
+                executionContext = serializeObject(expression.expectObjectValue());
+                break;
             case ARRAY:
-                // TODO: resolve JMESPATH OBJECTS and ARRAY types as literals
-                throw new CodegenException("TypeScriptJmesPath visitor has not implemented resolution of ARRAY and"
-                        + " OBJECT literials ");
+                executionContext = serializeArray(expression.expectArrayValue());
+                break;
             default:
                 // All other options are already valid js literials.
                 // (BOOLEAN, ANY, NULL, NUMBER, EXPRESSION)
@@ -339,5 +305,73 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         expression.getLeft().accept(this);
         expression.getRight().accept(this);
         return null;
+    }
+
+    void writeBooleanExpectation(String expectedValue, String returnValue) {
+        writer.openBlock("if ($L == $L) {", "}", executionContext, expectedValue, () -> {
+            writer.write("return $L;", returnValue);
+        });
+    }
+
+    void writeAnyStringEqualsExpectation(String expectedValue, String returnValue) {
+        String element = makeNewScope("anyStringEq_");
+        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
+            writer.openBlock("if ($L == $S) {", "}", element, expectedValue, () -> {
+                writer.write("return $L;", returnValue);
+            });
+        });
+    }
+
+    void writeAllStringEqualsExpectation(String expectedValue, String returnValue) {
+        String element = makeNewScope("element_");
+        String result = makeNewScope("allStringEq_");
+        writer.write("let $L = ($L.length > 0);", result, executionContext);
+        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
+            writer.write("$L = $L && ($L == $S)", result, result, element, expectedValue);
+        });
+        writer.openBlock("if ($L) {", "}", result, () -> {
+            writer.write("return $L;", returnValue);
+        });
+    }
+
+    void writeStringExpectation(String expectedValue, String returnValue) {
+        writer.openBlock("if ($L === $S) {", "}", executionContext, expectedValue, () -> {
+            writer.write("return $L;", returnValue);
+        });
+    }
+
+    private String makeNewScope(String prefix) {
+        scopeCount += 1;
+        return prefix + scopeCount;
+    }
+
+    private String serializeObject(Map<String, Object> obj) {
+        return "{" + obj.entrySet().stream()
+            .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
+            .collect(Collectors.joining(","))
+            + "}";
+    }
+
+    private String serializeArray(List<Object> array) {
+        return "[" + array.stream()
+            .map(this::serializeValue)
+            .collect(Collectors.joining(","))
+            + "]";
+    }
+
+    @SuppressWarnings("unchecked")
+    private String serializeValue(Object value) {
+        if (value == null) {
+            return "null";
+        } else if (value instanceof String) {
+            return "\"" + value + "\"";
+        } else if (value instanceof Number || value instanceof Boolean) {
+            return value.toString();
+        } else if (value instanceof Map) {
+            return serializeObject((Map<String, Object>) value);
+        } else if (value instanceof ArrayList) {
+            return serializeArray((List<Object>) value);
+        }
+        throw new CodegenException("Unsupported literal type: " + value.getClass());
     }
 }
