@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.11
+
+### Patch Changes
+
+- b52b4e8: add support for error cause in transient error checks
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+
 ## 3.0.10
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.7.2
+
+### Patch Changes
+
+- b52b4e8: add support for error cause in transient error checks
+
 ## 3.7.1
 
 ### Patch Changes

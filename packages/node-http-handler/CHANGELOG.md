@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.3.2
+
+### Patch Changes
+
+- f4e1a45: skip sending body without waiting for a timeout on response, if "expect" request header with "100-continue" is provided
+- a257792: Added context binding to the setTimeout and clearTimeout functions
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/abort-controller@3.1.9
+  - @smithy/protocol-http@4.1.8
+  - @smithy/querystring-builder@3.0.11
+
 ## 3.3.1
 
 ### Patch Changes

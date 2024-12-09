@@ -1,5 +1,18 @@
 # Change Log
 
+## 3.0.29
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/service-error-classification@3.0.11
+  - @smithy/types@3.7.2
+  - @smithy/util-retry@3.0.11
+  - @smithy/node-config-provider@3.1.12
+  - @smithy/protocol-http@4.1.8
+  - @smithy/smithy-client@3.4.6
+  - @smithy/util-middleware@3.0.11
+
 ## 3.0.28
 
 ### Patch Changes
