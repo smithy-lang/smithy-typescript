@@ -118,7 +118,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                                     TypeScriptDependency.NODE_CONFIG_PROVIDER);
                             writer.addImport("NODE_MAX_ATTEMPT_CONFIG_OPTIONS", null,
                                     TypeScriptDependency.MIDDLEWARE_RETRY);
-                            writer.write("loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS)");
+                            writer.write("loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config)");
                         },
                         "retryMode", writer -> {
                             writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
@@ -128,7 +128,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                             writer.addImport("NODE_RETRY_MODE_CONFIG_OPTIONS", null,
                                     TypeScriptDependency.MIDDLEWARE_RETRY);
                             writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
-                            writer.openBlock("loadNodeConfig({", "})", () -> {
+                            writer.openBlock("loadNodeConfig({", "}, config)", () -> {
                                 writer.write("...NODE_RETRY_MODE_CONFIG_OPTIONS,");
                                 writer.write("default: async () => "
                                              + "(await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE,");
