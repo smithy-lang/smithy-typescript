@@ -312,7 +312,9 @@ public final class CodegenUtils {
                         throw new CodegenException("Plugin function parameters map must be Map<String, String>");
                     }
                     List<String> valueStringList = valueMap.entrySet().stream()
-                        .map(entry -> String.format("%s: \"%s\"", entry.getKey(), entry.getValue()))
+                        .map(entry -> String.format("""
+                            "%s": "%s"
+                          """, entry.getKey(), entry.getValue()))
                         .collect(Collectors.toList());
                     functionParametersList.add(String.format("%s: {%s}",
                         key, valueStringList.stream().collect(Collectors.joining(", "))));
