@@ -301,9 +301,9 @@ public final class CodegenUtils {
                         throw new CodegenException("Plugin function parameters list must be List<String>");
                     }
                     List<String> valueStringList = valueList.stream()
-                        .map(item -> String.format("\"%s\"", item))
+                        .map(item -> String.format("'%s'", item))
                         .collect(Collectors.toList());
-                    functionParametersList.add(String.format("%s: [%s]",
+                    functionParametersList.add(String.format("'%s': [%s]",
                         key, valueStringList.stream().collect(Collectors.joining(", "))));
                 } else if (value instanceof Map) {
                     Map<?, ?> valueMap = (Map<?, ?>) value;
@@ -312,9 +312,7 @@ public final class CodegenUtils {
                         throw new CodegenException("Plugin function parameters map must be Map<String, String>");
                     }
                     List<String> valueStringList = valueMap.entrySet().stream()
-                        .map(entry -> String.format("""
-                            "%s": "%s"
-                          """, entry.getKey(), entry.getValue()))
+                        .map(entry -> String.format("'%s': '%s'", entry.getKey(), entry.getValue()))
                         .collect(Collectors.toList());
                     functionParametersList.add(String.format("%s: {%s}",
                         key, valueStringList.stream().collect(Collectors.joining(", "))));
