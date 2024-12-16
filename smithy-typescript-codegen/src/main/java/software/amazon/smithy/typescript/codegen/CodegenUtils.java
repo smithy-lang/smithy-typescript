@@ -296,13 +296,26 @@ public final class CodegenUtils {
                 } else if (value instanceof Boolean) {
                     functionParametersList.add(String.format("%s: %s", key, value));
                 } else if (value instanceof List) {
-                    if (!((List) value).isEmpty() && !(((List) value).get(0) instanceof String)) {
-                        throw new CodegenException("Plugin function parameters not supported for type List<"
-                            + ((List) value).get(0).getClass() + ">");
+                    List<?> valueList = (List<?>) value;
+                    if (!valueList.isEmpty() && !(valueList.get(0) instanceof String)) {
+                        throw new CodegenException("Plugin function parameters list must be List<String>");
                     }
+                    List<String> valueStringList = valueList.stream()
+                        .map(item -> String.format("\"%s\"", item))
+                        .collect(Collectors.toList());
                     functionParametersList.add(String.format("%s: [%s]",
-                        key, ((List<String>) value).stream()
-                            .collect(Collectors.joining("\", \"", "\"", "\""))));
+                        key, valueStringList.stream().collect(Collectors.joining(", "))));
+                } else if (value instanceof Map) {
+                    Map<?, ?> valueMap = (Map<?, ?>) value;
+                    if (!valueMap.isEmpty() && valueMap.keySet().stream().anyMatch(k -> !(k instanceof String))
+                        && valueMap.values().stream().anyMatch(v -> !(v instanceof String))) {
+                        throw new CodegenException("Plugin function parameters map must be Map<String, String>");
+                    }
+                    List<String> valueStringList = valueMap.entrySet().stream()
+                        .map(entry -> String.format("%s: \"%s\"", entry.getKey(), entry.getValue()))
+                        .collect(Collectors.toList());
+                    functionParametersList.add(String.format("%s: {%s}",
+                        key, valueStringList.stream().collect(Collectors.joining(", "))));
                 } else {
                     // Future support for param type should be added in else if.
                     throw new CodegenException("Plugin function parameters not supported for type "
