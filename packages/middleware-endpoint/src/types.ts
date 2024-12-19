@@ -6,7 +6,8 @@ export interface EndpointParameterInstructions {
     | BuiltInParamInstruction
     | ClientContextParamInstruction
     | StaticContextParamInstruction
-    | ContextParamInstruction;
+    | ContextParamInstruction
+    | OperationContextParamInstruction;
 }
 
 /**
@@ -39,4 +40,12 @@ export interface StaticContextParamInstruction {
 export interface ContextParamInstruction {
   type: "contextParams";
   name: string; // The input structure's member name that has contextParams trait
+}
+
+/**
+ * @internal
+ */
+export interface OperationContextParamInstruction {
+  type: "operationContextParams";
+  get(input: any): any;
 }
