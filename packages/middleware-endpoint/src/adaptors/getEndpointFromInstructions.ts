@@ -92,6 +92,9 @@ export const resolveParams = async <
       case "builtInParams":
         endpointParams[name] = await createConfigValueProvider<Config>(instruction.name, name, clientConfig)();
         break;
+      case "operationContextParams":
+        endpointParams[name] = instruction.get(commandInput);
+        break;
       default:
         throw new Error("Unrecognized endpoint parameter instruction: " + JSON.stringify(instruction));
     }

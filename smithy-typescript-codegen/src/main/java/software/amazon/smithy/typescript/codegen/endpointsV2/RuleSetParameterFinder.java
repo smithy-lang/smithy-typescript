@@ -274,28 +274,28 @@ public class RuleSetParameterFinder {
         Optional<OperationContextParamsTrait> trait = operation.getTrait(OperationContextParamsTrait.class);
         if (trait.isPresent()) {
             trait.get().getParameters().forEach((name, definition) -> {
-                String separator = ".";
-                String value = "this" + separator + "input";
+                String separator = "?.";
+                String value = "input";
                 String path = definition.getPath();
 
                 // Split JMESPath expression string on separator and add JavaScript equivalent.
                 for (String part : path.split("[" + separator + "]")) {
                     if (value.endsWith(")")) {
                         // The value is an object, which needs to run on map.
-                        value += ".map(obj => obj";
+                        value += ".map((obj: any) => obj";
                     }
 
                     // Process keys https://jmespath.org/specification.html#keys
                     if (part.startsWith("keys(")) {
                         // Get provided object for which keys are to be extracted.
                         String object = part.substring(5, part.length() - 1);
-                        value = "Object.keys(" + value + separator + object + ")";
+                        value = "Object.keys(" + value + separator + object + " ?? {})";
                         continue;
                     }
 
                     // Process list wildcard expression https://jmespath.org/specification.html#wildcard-expressions
                     if (part.equals("*") || part.equals("[*]")) {
-                        value = "Object.values(" + value + ")";
+                        value = "Object.values(" + value + " ?? {})";
                         continue;
                     }
 
@@ -303,7 +303,7 @@ public class RuleSetParameterFinder {
                     if (part.endsWith("[*]")) {
                         // Get key to run hash wildcard on.
                         String key = part.substring(0, part.length() - 3);
-                        value = value + separator + key + separator + "map(obj => obj";
+                        value = value + separator + key + separator + "map((obj: any) => obj";
                         continue;
                     }
 
@@ -312,8 +312,9 @@ public class RuleSetParameterFinder {
                 }
 
                 // Remove no-op map, if it exists.
-                if (value.endsWith(separator + "map(obj => obj")) {
-                    value = value.substring(0, value.length() - 15);
+                final String noOpMap = "map((obj: any) => obj";
+                if (value.endsWith(separator + noOpMap)) {
+                    value = value.substring(0, value.length() - noOpMap.length() - separator.length());
                 }
 
                 // Close all open brackets.
