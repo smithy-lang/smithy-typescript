@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.5.1
+
+### Patch Changes
+
+- 7f17426: fix new operator typing for LazyJsonString
+- Updated dependencies [e27d42d]
+  - @smithy/middleware-endpoint@3.2.6
+
 ## 3.5.0
 
 ### Minor Changes

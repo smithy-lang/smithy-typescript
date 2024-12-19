@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.6
+
+### Patch Changes
+
+- e27d42d: fix for operation context params
+
 ## 3.2.5
 
 ### Patch Changes
