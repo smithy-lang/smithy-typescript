@@ -39,12 +39,12 @@ public class CommandGeneratorTest {
         testCommmandCodegen(
             "endpointsV2/endpoints-operation-context-params.smithy",
             new String[] {
-                "opContextParamIdentifier: { type: \"operationContextParams\", get: (input: any) => input.fooString }",
-                "opContextParamSubExpression: { type: \"operationContextParams\", get: (input: any) => input.fooObj.bar }",
-                "opContextParamWildcardExpressionList: { type: \"operationContextParams\", get: (input: any) => input.fooList }",
-                "opContextParamWildcardExpressionListObj: { type: \"operationContextParams\", get: (input: any) => input.fooListObj.map((obj: any) => obj.key) }",
-                "opContextParamWildcardExpressionHash: { type: \"operationContextParams\", get: (input: any) => Object.values(input.fooObjObj).map((obj: any) => obj.bar) }",
-                "opContextParamKeys: { type: \"operationContextParams\", get: (input: any) => Object.keys(input.fooKeys) }",
+                "opContextParamIdentifier: { type: \"operationContextParams\", get: (input?: any) => input?.fooString }",
+                "opContextParamSubExpression: { type: \"operationContextParams\", get: (input?: any) => input?.fooObj?.bar }",
+                "opContextParamWildcardExpressionList: { type: \"operationContextParams\", get: (input?: any) => input?.fooList }",
+                "opContextParamWildcardExpressionListObj: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObj?.map((obj: any) => obj?.key) }",
+                "opContextParamWildcardExpressionHash: { type: \"operationContextParams\", get: (input?: any) => Object.values(input?.fooObjObj ?? {}).map((obj: any) => obj?.bar) }",
+                "opContextParamKeys: { type: \"operationContextParams\", get: (input?: any) => Object.keys(input?.fooKeys ?? {}) }",
             }
         );
     }

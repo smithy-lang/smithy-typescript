@@ -274,7 +274,7 @@ public class RuleSetParameterFinder {
         Optional<OperationContextParamsTrait> trait = operation.getTrait(OperationContextParamsTrait.class);
         if (trait.isPresent()) {
             trait.get().getParameters().forEach((name, definition) -> {
-                String separator = ".";
+                String separator = "?.";
                 String value = "input";
                 String path = definition.getPath();
 
@@ -289,13 +289,13 @@ public class RuleSetParameterFinder {
                     if (part.startsWith("keys(")) {
                         // Get provided object for which keys are to be extracted.
                         String object = part.substring(5, part.length() - 1);
-                        value = "Object.keys(" + value + separator + object + ")";
+                        value = "Object.keys(" + value + separator + object + " ?? {})";
                         continue;
                     }
 
                     // Process list wildcard expression https://jmespath.org/specification.html#wildcard-expressions
                     if (part.equals("*") || part.equals("[*]")) {
-                        value = "Object.values(" + value + ")";
+                        value = "Object.values(" + value + " ?? {})";
                         continue;
                     }
 
