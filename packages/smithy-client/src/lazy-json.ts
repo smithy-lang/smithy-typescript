@@ -17,8 +17,6 @@ export type AutomaticJsonStringConversion = Parameters<typeof JSON.stringify>[0]
  *
  */
 export interface LazyJsonString extends String {
-  new (s: string): typeof LazyJsonString;
-
   /**
    * @returns the JSON parsing of the string value.
    */
@@ -40,7 +38,7 @@ export interface LazyJsonString extends String {
  * This current implementation may look strange, but is necessary to preserve the interface and
  * behavior of extending the String class.
  */
-export function LazyJsonString(val: string): void {
+export const LazyJsonString = function LazyJsonString(val: string): void {
   const str = Object.assign(new String(val), {
     deserializeJSON() {
       return JSON.parse(String(val));
@@ -56,7 +54,15 @@ export function LazyJsonString(val: string): void {
   });
 
   return str as never;
-}
+} as any as {
+  new (s: string): LazyJsonString;
+  (s: string): LazyJsonString;
+  from(s: any): LazyJsonString;
+  /**
+   * @deprecated use #from.
+   */
+  fromObject(s: any): LazyJsonString;
+};
 
 LazyJsonString.from = (object: any): LazyJsonString => {
   if (object && typeof object === "object" && (object instanceof LazyJsonString || "deserializeJSON" in object)) {
@@ -68,6 +74,6 @@ LazyJsonString.from = (object: any): LazyJsonString => {
 };
 
 /**
- * @deprecated use from.
+ * @deprecated use #from.
  */
 LazyJsonString.fromObject = LazyJsonString.from;
