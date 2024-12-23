@@ -10,11 +10,17 @@ export const setSocketTimeout = (
   timeoutInMs = 0
 ): NodeJS.Timeout | number => {
   const registerTimeout = (offset: number) => {
-    request.setTimeout(timeoutInMs - offset, () => {
-      // destroy the request
+    const timeout = timeoutInMs - offset;
+    const onTimeout = () => {
       request.destroy();
       reject(Object.assign(new Error(`Connection timed out after ${timeoutInMs} ms`), { name: "TimeoutError" }));
-    });
+    };
+
+    if (request.socket) {
+      request.socket.setTimeout(timeout, onTimeout);
+    } else {
+      request.setTimeout(timeout, onTimeout);
+    }
   };
 
   if (0 < timeoutInMs && timeoutInMs < 6000) {
