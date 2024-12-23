@@ -42,6 +42,31 @@ describe("setSocketTimeout", () => {
     expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(0, expect.any(Function));
   });
 
+  describe("event listener registration deferral", () => {
+    const clientRequestWithSocket: any = {
+      destroy: vi.fn(),
+      setTimeout: vi.fn(),
+      socket: {
+        setTimeout: vi.fn(),
+      },
+    };
+
+    it("calls setTimeout on the socket if it is available after deferral", async () => {
+      const eventListenerMinimumTimeoutToDefer = 6000;
+      const deferralTimeout = 3000;
+      const expectedDeferredSocketTimeout = eventListenerMinimumTimeoutToDefer - deferralTimeout;
+      setSocketTimeout(clientRequestWithSocket, vi.fn(), eventListenerMinimumTimeoutToDefer);
+
+      vi.runAllTimers();
+
+      expect(clientRequestWithSocket.socket.setTimeout).toHaveBeenCalledTimes(1);
+      expect(clientRequestWithSocket.socket.setTimeout).toHaveBeenLastCalledWith(
+        expectedDeferredSocketTimeout,
+        expect.any(Function)
+      );
+    });
+  });
+
   it(`destroys the request on timeout`, () => {
     setSocketTimeout(clientRequest, vi.fn(), 1);
     expect(clientRequest.destroy).not.toHaveBeenCalled();
