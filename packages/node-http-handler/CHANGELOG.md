@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.3
+
+### Patch Changes
+
+- 5e73108: fix delayed calling of setTimeout on requests
+
 ## 3.3.2
 
 ### Patch Changes

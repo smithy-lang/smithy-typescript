@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.5.2
+
+### Patch Changes
+
+- @smithy/util-stream@3.3.3
+- @smithy/core@2.5.6
+- @smithy/middleware-endpoint@3.2.7
+
 ## 3.5.1
 
 ### Patch Changes

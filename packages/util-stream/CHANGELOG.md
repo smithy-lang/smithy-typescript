@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.3.3
+
+### Patch Changes
+
+- Updated dependencies [5e73108]
+  - @smithy/node-http-handler@3.3.3
+
 ## 3.3.2
 
 ### Patch Changes
