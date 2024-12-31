@@ -51,6 +51,9 @@ export interface EndpointInputConfig<T extends EndpointParameters = EndpointPara
   serviceConfiguredEndpoint?: never;
 }
 
+/**
+ * @internal
+ */
 interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> {
   urlParser: UrlParser;
   region: Provider<string>;
@@ -63,7 +66,7 @@ interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> 
  * @internal
  *
  * This supercedes the similarly named EndpointsResolvedConfig (no parametric types)
- * from resolveEndpointsConfig.ts in @smithy/config-resolver.
+ * from resolveEndpointsConfig.ts in \@smithy/config-resolver.
  */
 export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointParameters> {
   /**

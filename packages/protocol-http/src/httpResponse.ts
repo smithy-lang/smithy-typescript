@@ -6,8 +6,21 @@ type HttpResponseOptions = Partial<HttpMessage> & {
   reason?: string;
 };
 
+/**
+ * Use the distinct IHttpResponse interface from \@smithy/types instead.
+ * This should not be used due to
+ * overlapping with the concrete class' name.
+ *
+ * This is not marked deprecated since that would mark the concrete class
+ * deprecated as well.
+ *
+ * @internal
+ */
 export interface HttpResponse extends IHttpResponse {}
 
+/**
+ * @public
+ */
 export class HttpResponse {
   public statusCode: number;
   public reason?: string;

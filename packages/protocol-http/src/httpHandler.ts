@@ -18,8 +18,6 @@ export type HttpHandler<HttpHandlerConfig extends object = {}> = RequestHandler<
 > & {
   /**
    * @internal
-   * @param key
-   * @param value
    */
   updateHttpClientConfig(key: keyof HttpHandlerConfig, value: HttpHandlerConfig[typeof key]): void;
 

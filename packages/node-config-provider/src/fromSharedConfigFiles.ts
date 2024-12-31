@@ -4,6 +4,9 @@ import { ParsedIniData, Profile, Provider } from "@smithy/types";
 
 import { getSelectorName } from "./getSelectorName";
 
+/**
+ * @internal
+ */
 export interface SharedConfigInit extends SourceProfileInit {
   /**
    * The preferred shared ini file to load the config. "config" option refers to
@@ -13,10 +16,14 @@ export interface SharedConfigInit extends SourceProfileInit {
   preferredFile?: "config" | "credentials";
 }
 
+/**
+ * @internal
+ */
 export type GetterFromConfig<T> = (profile: Profile, configFile?: ParsedIniData) => T | undefined;
 
 /**
  * Get config value from the shared config files with inferred profile name.
+ * @internal
  */
 export const fromSharedConfigFiles =
   <T = string>(

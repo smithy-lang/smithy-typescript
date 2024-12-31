@@ -47,10 +47,11 @@ export interface NodeHttpHandlerOptions {
   socketAcquisitionWarningTimeout?: number;
 
   /**
-   * @deprecated Use {@link requestTimeout}
-   *
+   * This field is deprecated, and requestTimeout should be used instead.
    * The maximum time in milliseconds that a socket may remain idle before it
    * is closed.
+   *
+   * @deprecated Use {@link requestTimeout}
    */
   socketTimeout?: number;
 

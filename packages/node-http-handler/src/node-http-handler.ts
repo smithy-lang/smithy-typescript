@@ -20,8 +20,16 @@ interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "ht
   httpsAgent: hsAgent;
 }
 
+/**
+ * @public
+ * A default of 0 means no timeout.
+ */
 export const DEFAULT_REQUEST_TIMEOUT = 0;
 
+/**
+ * @public
+ * A request handler that uses the Node.js http and https modules.
+ */
 export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private config?: ResolvedNodeHttpHandlerConfig;
   private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;

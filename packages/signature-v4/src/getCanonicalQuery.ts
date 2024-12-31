@@ -4,7 +4,7 @@ import { escapeUri } from "@smithy/util-uri-escape";
 import { SIGNATURE_HEADER } from "./constants";
 
 /**
- * @private
+ * @internal
  */
 export const getCanonicalQuery = ({ query = {} }: HttpRequest): string => {
   const keys: Array<string> = [];

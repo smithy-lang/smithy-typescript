@@ -5,7 +5,8 @@ import { splitStream as splitWebStream } from "./splitStream.browser";
 import { isBlob, isReadableStream } from "./stream-type-check";
 
 /**
- * @param stream
+ * @internal
+ * @param stream - to be split.
  * @returns stream split into two identical streams.
  */
 export async function splitStream(stream: Readable): Promise<[Readable, Readable]>;

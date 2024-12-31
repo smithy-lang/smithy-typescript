@@ -3,6 +3,9 @@ import { NO_RETRY_INCREMENT, RETRY_COST, TIMEOUT_RETRY_COST } from "@smithy/util
 
 import { RetryQuota } from "./types";
 
+/**
+ * @internal
+ */
 export interface DefaultRetryQuotaOptions {
   /**
    * The total amount of retry token to be incremented from retry token balance
@@ -22,6 +25,9 @@ export interface DefaultRetryQuotaOptions {
   timeoutRetryCost?: number;
 }
 
+/**
+ * @internal
+ */
 export const getDefaultRetryQuota = (initialRetryTokens: number, options?: DefaultRetryQuotaOptions): RetryQuota => {
   const MAX_CAPACITY = initialRetryTokens;
   const noRetryIncrement = options?.noRetryIncrement ?? NO_RETRY_INCREMENT;

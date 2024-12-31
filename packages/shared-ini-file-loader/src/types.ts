@@ -5,16 +5,19 @@ import {
 } from "@smithy/types";
 
 /**
- * @deprecated Use Profile from "@smithy/types" instead
+ * @internal
+ * @deprecated Use Profile from "\@smithy/types" instead
  */
 export type Profile = __Profile;
 
 /**
- * @deprecated Use ParsedIniData from "@smithy/types" instead
+ * @internal
+ * @deprecated Use ParsedIniData from "\@smithy/types" instead
  */
 export type ParsedIniData = __ParsedIniData;
 
 /**
- * @deprecated Use SharedConfigFiles from "@smithy/types" instead
+ * @internal
+ * @deprecated Use SharedConfigFiles from "\@smithy/types" instead
  */
 export type SharedConfigFiles = __SharedConfigFiles;

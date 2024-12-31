@@ -2,7 +2,7 @@ import { HttpRequest } from "@smithy/protocol-http";
 import type { HttpRequest as IHttpRequest, QueryParameterBag } from "@smithy/types";
 
 /**
- * @private
+ * @internal
  */
 export const moveHeadersToQuery = (
   request: IHttpRequest,

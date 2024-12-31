@@ -5,8 +5,14 @@ import { fromEnv, GetterFromEnv } from "./fromEnv";
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 import { fromStatic, FromStaticConfig } from "./fromStatic";
 
+/**
+ * @internal
+ */
 export type LocalConfigOptions = SharedConfigInit;
 
+/**
+ * @internal
+ */
 export interface LoadedConfigSelectors<T> {
   /**
    * A getter function getting the config values from all the environment
@@ -24,6 +30,9 @@ export interface LoadedConfigSelectors<T> {
   default: FromStaticConfig<T>;
 }
 
+/**
+ * @internal
+ */
 export const loadConfig = <T = string>(
   { environmentVariableSelector, configFileSelector, default: defaultValue }: LoadedConfigSelectors<T>,
   configuration: LocalConfigOptions = {}

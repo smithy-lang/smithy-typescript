@@ -5,6 +5,9 @@ import http2, { ClientHttp2Session } from "http2";
 
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
 
+/**
+ * @public
+ */
 export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2Session> {
   constructor(config: ConnectionManagerConfiguration) {
     this.config = config;

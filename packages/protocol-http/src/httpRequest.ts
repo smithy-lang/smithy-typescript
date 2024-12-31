@@ -4,12 +4,14 @@ import { HeaderBag, HttpMessage, HttpRequest as IHttpRequest, QueryParameterBag,
 type HttpRequestOptions = Partial<HttpMessage> & Partial<URI> & { method?: string };
 
 /**
- * Use the distinct IHttpRequest interface from @smithy/types instead.
+ * Use the distinct IHttpRequest interface from \@smithy/types instead.
  * This should not be used due to
  * overlapping with the concrete class' name.
  *
  * This is not marked deprecated since that would mark the concrete class
  * deprecated as well.
+ *
+ * @internal
  */
 export interface HttpRequest extends IHttpRequest {}
 

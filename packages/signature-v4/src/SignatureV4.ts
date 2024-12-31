@@ -50,6 +50,9 @@ import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
 import { iso8601 } from "./utilDate";
 
+/**
+ * @public
+ */
 export interface SignatureV4Init {
   /**
    * The service signing name.
@@ -94,10 +97,16 @@ export interface SignatureV4Init {
   applyChecksum?: boolean;
 }
 
+/**
+ * @public
+ */
 export interface SignatureV4CryptoInit {
   sha256: ChecksumConstructor | HashConstructor;
 }
 
+/**
+ * @public
+ */
 export class SignatureV4 implements RequestPresigner, RequestSigner, StringSigner, EventSigner, MessageSigner {
   private readonly service: string;
   private readonly regionProvider: Provider<string>;

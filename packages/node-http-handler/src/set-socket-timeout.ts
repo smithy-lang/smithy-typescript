@@ -1,5 +1,6 @@
 import { ClientRequest } from "http";
 
+import { DEFAULT_REQUEST_TIMEOUT } from "./node-http-handler";
 import { timing } from "./timing";
 
 const DEFER_EVENT_LISTENER_TIME = 3000;
@@ -7,7 +8,7 @@ const DEFER_EVENT_LISTENER_TIME = 3000;
 export const setSocketTimeout = (
   request: ClientRequest,
   reject: (err: Error) => void,
-  timeoutInMs = 0
+  timeoutInMs = DEFAULT_REQUEST_TIMEOUT
 ): NodeJS.Timeout | number => {
   const registerTimeout = (offset: number) => {
     const timeout = timeoutInMs - offset;
