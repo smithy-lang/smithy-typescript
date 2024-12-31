@@ -3,6 +3,9 @@ import { ParsedIniData } from "@smithy/types";
 import { loadSharedConfigFiles, SharedConfigInit } from "./loadSharedConfigFiles";
 import { mergeConfigFiles } from "./mergeConfigFiles";
 
+/**
+ * @public
+ */
 export interface SourceProfileInit extends SharedConfigInit {
   /**
    * The configuration profile to use.

@@ -24,14 +24,20 @@ export interface RequestHandlerMetadata {
   handlerProtocol: RequestHandlerProtocol | string;
 }
 
-// Values from ALPN Protocol IDs
-// https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
+/**
+ * @public
+ * Values from ALPN Protocol IDs.
+ * @see https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
+ */
 export enum RequestHandlerProtocol {
   HTTP_0_9 = "http/0.9",
   HTTP_1_0 = "http/1.0",
   TDS_8_0 = "tds/8.0",
 }
 
+/**
+ * @public
+ */
 export interface RequestContext {
   destination: URL;
 }

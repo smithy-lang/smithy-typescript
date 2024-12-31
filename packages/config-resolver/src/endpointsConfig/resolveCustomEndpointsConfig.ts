@@ -13,6 +13,9 @@ export interface CustomEndpointsInputConfig extends EndpointsInputConfig {
   endpoint: string | Endpoint | Provider<Endpoint>;
 }
 
+/**
+ * @internal
+ */
 interface PreviouslyResolved {
   urlParser: UrlParser;
 }

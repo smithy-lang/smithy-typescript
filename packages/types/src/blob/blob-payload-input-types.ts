@@ -45,6 +45,7 @@ export type NodeJsRuntimeBlobTypes = Readable | Buffer;
 export type BrowserRuntimeBlobTypes = BlobOptionalType | ReadableStreamOptionalType;
 
 /**
+ * @internal
  * @deprecated renamed to BlobPayloadInputTypes.
  */
 export type BlobTypes = BlobPayloadInputTypes;

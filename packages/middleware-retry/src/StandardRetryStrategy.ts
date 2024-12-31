@@ -21,6 +21,8 @@ import { asSdkError } from "./util";
 
 /**
  * Strategy options to be passed to StandardRetryStrategy
+ * @public
+ * @deprecated use StandardRetryStrategy from @smithy/util-retry
  */
 export interface StandardRetryStrategyOptions {
   retryDecider?: RetryDecider;
@@ -29,6 +31,7 @@ export interface StandardRetryStrategyOptions {
 }
 
 /**
+ * @public
  * @deprecated use StandardRetryStrategy from @smithy/util-retry
  */
 export class StandardRetryStrategy implements RetryStrategy {

@@ -1,3 +1,6 @@
+/**
+ * @public
+ */
 export interface ConnectionPool<T> {
   /**
    * Retrieve the first connection in the pool
@@ -23,6 +26,11 @@ export interface ConnectionPool<T> {
   [Symbol.iterator](): Iterator<T>;
 }
 
+/**
+ * Unused.
+ * @internal
+ * @deprecated
+ */
 export interface CacheKey {
   destination: string;
 }

@@ -24,6 +24,9 @@ export interface EndpointsInputConfig {
   useDualstackEndpoint?: boolean | Provider<boolean>;
 }
 
+/**
+ * @internal
+ */
 interface PreviouslyResolved {
   regionInfoProvider: RegionInfoProvider;
   urlParser: UrlParser;
@@ -55,7 +58,7 @@ export interface EndpointsResolvedConfig extends Required<EndpointsInputConfig> 
 /**
  * @internal
  *
- * @deprecated endpoints rulesets use @smithy/middleware-endpoint resolveEndpointConfig.
+ * @deprecated endpoints rulesets use \@smithy/middleware-endpoint resolveEndpointConfig.
  * All generated clients should migrate to Endpoints 2.0 endpointRuleSet traits.
  */
 export const resolveEndpointsConfig = <T>(

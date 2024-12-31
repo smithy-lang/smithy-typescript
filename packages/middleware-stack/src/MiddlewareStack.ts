@@ -32,6 +32,9 @@ const getMiddlewareNameWithAliases = (name: string | undefined, aliases: Array<s
   return `${name || "anonymous"}${aliases && aliases.length > 0 ? ` (a.k.a. ${aliases.join(",")})` : ""}`;
 };
 
+/**
+ * @internal
+ */
 export const constructStack = <Input extends object, Output extends object>(): MiddlewareStack<Input, Output> => {
   let absoluteEntries: AbsoluteMiddlewareEntry<Input, Output>[] = [];
   let relativeEntries: RelativeMiddlewareEntry<Input, Output>[] = [];

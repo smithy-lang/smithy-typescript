@@ -34,7 +34,7 @@ import type { BlobOptionalType, ReadableStreamOptionalType } from "../externals-
  *    There is also the type utility "NodeJsClient", "BrowserClient" and more
  *    exported from this package. These can be applied at the client level
  *    to pre-narrow these streaming payload blobs. For usage see the readme.md
- *    in the root of the @smithy/types NPM package.
+ *    in the root of the \@smithy/types NPM package.
  */
 export type StreamingBlobPayloadInputTypes =
   | NodeJsRuntimeStreamingBlobPayloadInputTypes

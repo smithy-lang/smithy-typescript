@@ -55,12 +55,18 @@ export interface HttpMessage {
  */
 export type QueryParameterBag = Record<string, string | Array<string> | null>;
 
+/**
+ * @public
+ */
 export type FieldOptions = {
   name: string;
   kind?: FieldPosition;
   values?: string[];
 };
 
+/**
+ * @public
+ */
 export enum FieldPosition {
   HEADER,
   TRAILER,

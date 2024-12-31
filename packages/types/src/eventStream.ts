@@ -23,16 +23,46 @@ export interface Message {
  */
 export type MessageHeaders = Record<string, MessageHeaderValue>;
 
-type HeaderValue<K extends string, V> = { type: K; value: V };
+/**
+ * @public
+ */
+export type HeaderValue<K extends string, V> = { type: K; value: V };
 
+/**
+ * @public
+ */
 export type BooleanHeaderValue = HeaderValue<"boolean", boolean>;
+/**
+ * @public
+ */
 export type ByteHeaderValue = HeaderValue<"byte", number>;
+/**
+ * @public
+ */
 export type ShortHeaderValue = HeaderValue<"short", number>;
+/**
+ * @public
+ */
 export type IntegerHeaderValue = HeaderValue<"integer", number>;
+/**
+ * @public
+ */
 export type LongHeaderValue = HeaderValue<"long", Int64>;
+/**
+ * @public
+ */
 export type BinaryHeaderValue = HeaderValue<"binary", Uint8Array>;
+/**
+ * @public
+ */
 export type StringHeaderValue = HeaderValue<"string", string>;
+/**
+ * @public
+ */
 export type TimestampHeaderValue = HeaderValue<"timestamp", Date>;
+/**
+ * @public
+ */
 export type UuidHeaderValue = HeaderValue<"uuid", string>;
 
 /**

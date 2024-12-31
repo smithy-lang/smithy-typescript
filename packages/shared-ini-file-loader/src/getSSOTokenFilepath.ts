@@ -5,6 +5,7 @@ import { getHomeDir } from "./getHomeDir";
 
 /**
  * Returns the filepath of the file where SSO token is stored.
+ * @internal
  */
 export const getSSOTokenFilepath = (id: string) => {
   const hasher = createHash("sha1");

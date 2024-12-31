@@ -4,7 +4,7 @@ import type { HttpRequest as IHttpRequest } from "@smithy/types";
 import { GENERATED_HEADERS } from "./constants";
 
 /**
- * @private
+ * @internal
  */
 export const prepareRequest = (request: IHttpRequest): IHttpRequest => {
   // Create a clone of the request object that does not clone the body

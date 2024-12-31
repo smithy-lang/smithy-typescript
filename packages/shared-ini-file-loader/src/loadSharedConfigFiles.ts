@@ -8,6 +8,9 @@ import { getHomeDir } from "./getHomeDir";
 import { parseIni } from "./parseIni";
 import { slurpFile } from "./slurpFile";
 
+/**
+ * @public
+ */
 export interface SharedConfigInit {
   /**
    * The path at which to locate the ini credentials file. Defaults to the
@@ -37,8 +40,15 @@ export interface SharedConfigInit {
 
 const swallowError = () => ({});
 
+/**
+ * @internal
+ */
 export const CONFIG_PREFIX_SEPARATOR = ".";
 
+/**
+ * Loads the config and credentials files.
+ * @internal
+ */
 export const loadSharedConfigFiles = async (init: SharedConfigInit = {}): Promise<SharedConfigFiles> => {
   const { filepath = getCredentialsFilepath(), configFilepath = getConfigFilepath() } = init;
   const homeDir = getHomeDir();

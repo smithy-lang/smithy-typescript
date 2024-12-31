@@ -6,7 +6,7 @@ import { toUint8Array } from "@smithy/util-utf8";
 import { SHA256_HEADER, UNSIGNED_PAYLOAD } from "./constants";
 
 /**
- * @private
+ * @internal
  */
 export const getPayloadHash = async (
   { headers, body }: HttpRequest,

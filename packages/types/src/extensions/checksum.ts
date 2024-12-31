@@ -22,6 +22,7 @@ export interface ChecksumAlgorithm {
 
 /**
  * @deprecated unused.
+ * @internal
  */
 type ChecksumConfigurationLegacy = {
   /**
@@ -40,6 +41,7 @@ export interface ChecksumConfiguration extends ChecksumConfigurationLegacy {
 
 /**
  * @deprecated will be removed for implicit type.
+ * @internal
  */
 type GetChecksumConfigurationType = (
   runtimeConfig: Partial<{
@@ -86,6 +88,7 @@ export const getChecksumConfiguration: GetChecksumConfigurationType = (
 };
 
 /**
+ * @internal
  * @deprecated will be removed for implicit type.
  */
 type ResolveChecksumRuntimeConfigType = (clientConfig: ChecksumConfiguration) => any;

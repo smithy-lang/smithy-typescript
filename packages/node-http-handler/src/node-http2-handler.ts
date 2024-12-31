@@ -9,6 +9,7 @@ import { writeRequestBody } from "./write-request-body";
 
 /**
  * Represents the http2 options that can be passed to a node http2 client.
+ * @public
  */
 export interface NodeHttp2HandlerOptions {
   /**
@@ -41,6 +42,10 @@ export interface NodeHttp2HandlerOptions {
   maxConcurrentStreams?: number;
 }
 
+/**
+ * A request handler using the node:http2 package.
+ * @public
+ */
 export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
   private config?: NodeHttp2HandlerOptions;
   private configProvider: Promise<NodeHttp2HandlerOptions>;
@@ -242,7 +247,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
 
   /**
    * Destroys a session.
-   * @param session The session to destroy.
+   * @param session - the session to destroy.
    */
   private destroySession(session: ClientHttp2Session): void {
     if (!session.destroyed) {

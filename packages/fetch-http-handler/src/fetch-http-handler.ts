@@ -8,9 +8,10 @@ import { requestTimeout } from "./request-timeout";
 
 declare let AbortController: any;
 
+/**
+ * @public
+ */
 export { FetchHttpHandlerOptions };
-
-type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 
 /**
  * @internal
@@ -35,9 +36,9 @@ export type AdditionalRequestParameters = {
  *
  * HttpHandler implementation using browsers' `fetch` global function.
  */
-export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
-  private config?: FetchHttpHandlerConfig;
-  private configProvider: Promise<FetchHttpHandlerConfig>;
+export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
+  private config?: FetchHttpHandlerOptions;
+  private configProvider: Promise<FetchHttpHandlerOptions>;
 
   /**
    * @returns the input if it is an HttpHandler of any class,
@@ -51,7 +52,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       return instanceOrOptions as HttpHandler<any>;
     }
     // input is ctor options or undefined.
-    return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerConfig);
+    return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerOptions);
   }
 
   constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | void>) {
@@ -199,7 +200,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     return Promise.race(raceOfPromises).finally(removeSignalEventListener);
   }
 
-  updateHttpClientConfig(key: keyof FetchHttpHandlerConfig, value: FetchHttpHandlerConfig[typeof key]): void {
+  updateHttpClientConfig(key: keyof FetchHttpHandlerOptions, value: FetchHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
       (config as Record<typeof key, typeof value>)[key] = value;
@@ -207,7 +208,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     });
   }
 
-  httpHandlerConfigs(): FetchHttpHandlerConfig {
+  httpHandlerConfigs(): FetchHttpHandlerOptions {
     return this.config ?? {};
   }
 }
