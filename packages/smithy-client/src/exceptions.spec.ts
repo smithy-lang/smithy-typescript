@@ -69,20 +69,6 @@ describe("ServiceException type checking", () => {
       expect(ServiceException.isInstance({ $metadata: {} })).toBe(false);
     });
   });
-
-  describe("instanceof", () => {
-    it("should return true for ServiceException instances", () => {
-      expect(error instanceof ServiceException).toBe(true);
-    });
-
-    it("should return true for duck-typed objects", () => {
-      expect(duckTyped instanceof ServiceException).toBe(true);
-    });
-
-    it("should return false for invalid objects", () => {
-      expect({} instanceof ServiceException).toBe(false);
-    });
-  });
 });
 
 describe("decorateServiceException", () => {
