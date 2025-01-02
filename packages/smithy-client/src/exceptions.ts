@@ -37,23 +37,6 @@ export class ServiceException extends Error implements SmithyException, Metadata
     this.$fault = options.$fault;
     this.$metadata = options.$metadata;
   }
-
-  /**
-   * Checks if a value is an instance of ServiceException (duck typed)
-   */
-  public static isInstance(value: unknown): value is ServiceException {
-    if (!value) return false;
-    const candidate = value as ServiceException;
-    return (
-      Boolean(candidate.$fault) &&
-      Boolean(candidate.$metadata) &&
-      (candidate.$fault === "client" || candidate.$fault === "server")
-    );
-  }
-
-  public static [Symbol.hasInstance](instance: unknown) {
-    return ServiceException.isInstance(instance);
-  }
 }
 
 /**
