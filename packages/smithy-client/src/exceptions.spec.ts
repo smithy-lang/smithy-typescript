@@ -34,36 +34,54 @@ it("ExceptionOptionType allows specifying message", () => {
   expect(exception.code).toBe("code");
 });
 
-describe("ServiceException.isInstance", () => {
-  it("should return true for valid ServiceException instances", () => {
-    const error = new ServiceException({
-      name: "Error",
-      $fault: "client",
-      $metadata: {},
+describe("ServiceException type checking", () => {
+  const error = new ServiceException({
+    name: "Error",
+    $fault: "client",
+    $metadata: {},
+  });
+
+  const duckTyped = {
+    $fault: "server",
+    $metadata: {},
+  };
+
+  describe("isInstance", () => {
+    it("should return true for ServiceException instances", () => {
+      expect(ServiceException.isInstance(error)).toBe(true);
     });
-    expect(ServiceException.isInstance(error)).toBe(true);
+
+    it("should return true for duck-typed objects", () => {
+      expect(ServiceException.isInstance(duckTyped)).toBe(true);
+    });
+
+    it("should return false for null or undefined", () => {
+      expect(ServiceException.isInstance(null)).toBe(false);
+      expect(ServiceException.isInstance(undefined)).toBe(false);
+    });
+
+    it("should return false for invalid $fault values", () => {
+      expect(ServiceException.isInstance({ $fault: "invalid", $metadata: {} })).toBe(false);
+    });
+
+    it("should return false for missing properties", () => {
+      expect(ServiceException.isInstance({ $fault: "client" })).toBe(false);
+      expect(ServiceException.isInstance({ $metadata: {} })).toBe(false);
+    });
   });
 
-  it("should return true for valid duck-typed objects", () => {
-    const duckTyped = {
-      $fault: "server",
-      $metadata: {},
-    };
-    expect(ServiceException.isInstance(duckTyped)).toBe(true);
-  });
+  describe("instanceof", () => {
+    it("should return true for ServiceException instances", () => {
+      expect(error instanceof ServiceException).toBe(true);
+    });
 
-  it("should return false for null or undefined", () => {
-    expect(ServiceException.isInstance(null)).toBe(false);
-    expect(ServiceException.isInstance(undefined)).toBe(false);
-  });
+    it("should return true for duck-typed objects", () => {
+      expect(duckTyped instanceof ServiceException).toBe(true);
+    });
 
-  it("should return false for invalid $fault values", () => {
-    expect(ServiceException.isInstance({ $fault: "invalid", $metadata: {} })).toBe(false);
-  });
-
-  it("should return false for missing properties", () => {
-    expect(ServiceException.isInstance({ $fault: "client" })).toBe(false);
-    expect(ServiceException.isInstance({ $metadata: {} })).toBe(false);
+    it("should return false for invalid objects", () => {
+      expect({} instanceof ServiceException).toBe(false);
+    });
   });
 });
 

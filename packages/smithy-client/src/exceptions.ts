@@ -50,6 +50,10 @@ export class ServiceException extends Error implements SmithyException, Metadata
       (candidate.$fault === "client" || candidate.$fault === "server")
     );
   }
+
+  static [Symbol.hasInstance](instance: unknown) {
+    return ServiceException.isInstance(instance);
+  }
 }
 
 /**
