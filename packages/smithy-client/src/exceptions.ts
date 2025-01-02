@@ -51,7 +51,7 @@ export class ServiceException extends Error implements SmithyException, Metadata
     );
   }
 
-  static [Symbol.hasInstance](instance: unknown) {
+  public static [Symbol.hasInstance](instance: unknown) {
     return ServiceException.isInstance(instance);
   }
 }
