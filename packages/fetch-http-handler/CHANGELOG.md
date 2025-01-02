@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.3
+
+### Patch Changes
+
+- 1dd6ace: Add polyfill to collect Blob in react-native environments
+
 ## 4.1.2
 
 ### Patch Changes

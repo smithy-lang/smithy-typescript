@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.7.0
+
+### Minor Changes
+
+- a0e71d5: fix(smithy-client): remove support for instanceof operator
+
+### Patch Changes
+
+- @smithy/util-stream@3.3.4
+- @smithy/core@2.5.7
+- @smithy/middleware-endpoint@3.2.8
+
 ## 3.6.0
 
 ### Minor Changes

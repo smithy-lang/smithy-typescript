@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-stream-browser",
-  "version": "2.2.19",
+  "version": "2.2.20",
   "scripts": {
     "build": "concurrently 'yarn:build:es' 'yarn:build:types'",
     "build:es": "yarn g:tsc -p tsconfig.es.json",
