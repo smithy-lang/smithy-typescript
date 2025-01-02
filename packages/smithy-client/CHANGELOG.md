@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.6.0
+
+### Minor Changes
+
+- 23129d9: feat: type check helper method to to know if something is an instance of the ServiceException class
+
 ## 3.5.2
 
 ### Patch Changes
