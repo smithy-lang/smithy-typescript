@@ -27,7 +27,7 @@
   "types": "./dist-types/index.d.ts",
   "dependencies": {
     "@smithy/types": "workspace:^",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "concurrently": "7.0.0",
