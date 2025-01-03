@@ -1,4 +1,5 @@
 import { Client } from "./client";
+import { Pluggable } from "./middleware";
 
 /**
  * @public
@@ -25,4 +26,5 @@ export interface PaginationConfiguration {
    * instead of when it is not present.
    */
   stopOnSameToken?: boolean;
+  pluggableMiddleware?: Pluggable<any, any>[];
 }
