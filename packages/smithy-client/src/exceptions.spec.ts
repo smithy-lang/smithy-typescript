@@ -35,11 +35,24 @@ it("ExceptionOptionType allows specifying message", () => {
 });
 
 describe("ServiceException type checking", () => {
-  const error = new ServiceException({
+  class TestServiceException extends ServiceException {
+    constructor() {
+      super({
+        name: "TestServiceException",
+        $fault: "client",
+        $metadata: {},
+      });
+      Object.setPrototypeOf(this, TestServiceException.prototype);
+    }
+  }
+
+  const baseError = new ServiceException({
     name: "Error",
     $fault: "client",
     $metadata: {},
   });
+
+  const subclassError = new TestServiceException();
 
   const duckTyped = {
     $fault: "server",
@@ -48,7 +61,7 @@ describe("ServiceException type checking", () => {
 
   describe("isInstance", () => {
     it("should return true for ServiceException instances", () => {
-      expect(ServiceException.isInstance(error)).toBe(true);
+      expect(ServiceException.isInstance(baseError)).toBe(true);
     });
 
     it("should return true for duck-typed objects", () => {
@@ -67,6 +80,44 @@ describe("ServiceException type checking", () => {
     it("should return false for missing properties", () => {
       expect(ServiceException.isInstance({ $fault: "client" })).toBe(false);
       expect(ServiceException.isInstance({ $metadata: {} })).toBe(false);
+    });
+  });
+
+  describe("instanceof operator", () => {
+    it("should return true for ServiceException base class with actual instances", () => {
+      expect(baseError instanceof ServiceException).toBe(true);
+      expect(subclassError instanceof ServiceException).toBe(true);
+    });
+
+    it("should return true for ServiceException base class with duck-typed objects", () => {
+      expect(duckTyped instanceof ServiceException).toBe(true);
+    });
+
+    it("should handle subclass instanceof checks correctly", () => {
+      expect(subclassError instanceof TestServiceException).toBe(true);
+      expect(baseError instanceof TestServiceException).toBe(false);
+      expect(duckTyped instanceof TestServiceException).toBe(false);
+    });
+
+    it("should prevent duck-typed objects from matching subclass instanceof checks", () => {
+      const dummyServiceException = new ServiceException({
+        name: "TEST_ERROR",
+        message: "TEST_MESSAGE",
+        $fault: "server",
+        $metadata: {},
+      });
+
+      class SpecificError extends ServiceException {
+        constructor() {
+          super({
+            name: "SpecificError",
+            $fault: "client",
+            $metadata: {},
+          });
+        }
+      }
+
+      expect(dummyServiceException instanceof SpecificError).toBe(false);
     });
   });
 });

@@ -32,7 +32,7 @@ export class ServiceException extends Error implements SmithyException, Metadata
 
   constructor(options: ServiceExceptionOptions) {
     super(options.message);
-    Object.setPrototypeOf(this, ServiceException.prototype);
+    Object.setPrototypeOf(this, Object.getPrototypeOf(this).constructor.prototype);
     this.name = options.name;
     this.$fault = options.$fault;
     this.$metadata = options.$metadata;
@@ -49,6 +49,20 @@ export class ServiceException extends Error implements SmithyException, Metadata
       Boolean(candidate.$metadata) &&
       (candidate.$fault === "client" || candidate.$fault === "server")
     );
+  }
+
+  /**
+   * Custom instanceof check to support the operator for ServiceException base class
+   */
+  public static [Symbol.hasInstance](instance: unknown): boolean {
+    if (this === ServiceException) {
+      // For the base ServiceException class, use duck typing
+      return ServiceException.isInstance(instance);
+    } else {
+      // For subclasses, use standard prototype chain check
+      return instance instanceof Error &&
+             this.prototype.isPrototypeOf(instance);
+    }
   }
 }
 
