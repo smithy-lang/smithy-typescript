@@ -1,11 +1,5 @@
 # Change Log
 
-## 3.1.11
-
-### Patch Changes
-
-- @smithy/chunked-blob-reader-native@3.0.2
-
 ## 3.1.10
 
 ### Patch Changes

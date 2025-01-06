@@ -1,15 +1,5 @@
 # Change Log
 
-## 4.0.0
-
-### Major Changes
-
-- 4e8f4ff: drop node16 support
-
-### Patch Changes
-
-- @smithy/util-utf8@3.0.1
-
 ## 3.0.11
 
 ### Patch Changes
