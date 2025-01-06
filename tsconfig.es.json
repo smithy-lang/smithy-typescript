@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "importHelpers": true,
-    "module": "esnext",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "noEmitHelpers": false,
     "target": "ES2020",
     "strict": true

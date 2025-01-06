@@ -113,7 +113,7 @@ __metadata:
     jest: 29.7.0
     rimraf: ^3.0.2
     tslib: ^1.8.0
-    typescript: ~4.9.5
+    typescript: ~5.2.2
   languageName: unknown
   linkType: soft
 
@@ -130,7 +130,7 @@ __metadata:
     re2-wasm: ^1.0.2
     rimraf: ^3.0.2
     tslib: ^1.8.0
-    typescript: ^4.9.5
+    typescript: ~5.2.2
   languageName: unknown
   linkType: soft
 
@@ -146,7 +146,7 @@ __metadata:
     jest: 29.7.0
     rimraf: ^3.0.2
     tslib: ^1.8.0
-    typescript: ~4.9.5
+    typescript: ~5.2.2
   languageName: unknown
   linkType: soft
 
@@ -2827,7 +2827,7 @@ __metadata:
     downlevel-dts: 0.10.1
     rimraf: ^3.0.0
     tslib: ^2.6.2
-    typescript: ~4.9.5
+    typescript: ~5.2.2
   languageName: unknown
   linkType: soft
 
@@ -9996,7 +9996,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.1.0-dev.20201026, typescript@npm:^4.9.5, typescript@npm:~4.9.5":
+"typescript@npm:^4.1.0-dev.20201026":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -10036,7 +10036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.1.0-dev.20201026#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@~4.9.5#~builtin<compat/typescript>":
+"typescript@patch:typescript@^4.1.0-dev.20201026#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
