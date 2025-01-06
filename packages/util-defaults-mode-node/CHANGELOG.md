@@ -1,19 +1,5 @@
 # Change Log
 
-## 4.0.0
-
-### Major Changes
-
-- 4e8f4ff: drop node16 support
-
-### Patch Changes
-
-- Updated dependencies [4e8f4ff]
-  - @smithy/credential-provider-imds@4.0.0
-  - @smithy/node-config-provider@4.0.0
-  - @smithy/smithy-client@4.0.0
-  - @smithy/config-resolver@3.0.14
-
 ## 3.0.34
 
 ### Patch Changes

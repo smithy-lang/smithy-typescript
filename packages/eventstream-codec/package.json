@@ -1,6 +1,6 @@
 {
   "name": "@smithy/eventstream-codec",
-  "version": "4.0.0",
+  "version": "3.1.10",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline eventstream-codec",
@@ -57,5 +57,8 @@
   },
   "publishConfig": {
     "directory": ".release/package"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
