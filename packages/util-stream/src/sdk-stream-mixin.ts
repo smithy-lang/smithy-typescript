@@ -55,7 +55,7 @@ export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob
         throw new Error("The stream has been consumed by other callbacks.");
       }
       if (typeof Readable.toWeb !== "function") {
-        throw new Error("Readable.toWeb() is not supported. Please make ensure a polyfill is available.");
+        throw new Error("Readable.toWeb() is not supported. Please ensure a polyfill is available.");
       }
       transformed = true;
       return Readable.toWeb(stream) as ReadableStream;
