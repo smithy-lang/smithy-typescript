@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/util-buffer-from@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/types@4.0.0
+
 ## 3.0.11
 
 ### Patch Changes

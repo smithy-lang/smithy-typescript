@@ -1,5 +1,11 @@
 # Change Log
 
+## 5.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
 ## 4.0.0
 
 ### Major Changes

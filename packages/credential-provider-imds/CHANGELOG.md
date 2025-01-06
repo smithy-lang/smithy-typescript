@@ -1,5 +1,19 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/property-provider@4.0.0
+  - @smithy/types@4.0.0
+  - @smithy/url-parser@4.0.0
+
 ## 3.2.8
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # Change Log
 
+## 0.3.37
+
+### Patch Changes
+
+- 20d99be: major version bump for dropping node16 support
+- Updated dependencies [20d99be]
+  - @smithy/middleware-endpoint@4.0.0
+  - @smithy/middleware-retry@4.0.0
+  - @smithy/util-middleware@4.0.0
+  - @smithy/signature-v4@5.0.0
+  - @smithy/middleware-serde@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+
 ## 0.3.36
 
 ### Patch Changes

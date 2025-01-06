@@ -1,5 +1,22 @@
 # Change Log
 
+## 5.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/util-middleware@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/is-array-buffer@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+  - @smithy/util-hex-encoding@4.0.0
+  - @smithy/util-uri-escape@4.0.0
+
 ## 4.2.4
 
 ### Patch Changes
