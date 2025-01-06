@@ -2831,7 +2831,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/types@^3.1.0, @smithy/types@workspace:^, @smithy/types@workspace:packages/types":
+"@smithy/types@npm:^3.1.0":
+  version: 3.7.2
+  resolution: "@smithy/types@npm:3.7.2"
+  dependencies:
+    tslib: ^2.6.2
+  checksum: f3ae277d2f81eeb67c12e651b2e999225cda115dff8fab257a77fbe3739d32c515dbd19218590dd2c33d203259b00c80c9fc6027f8484c50725390a8fc0f1e3e
+  languageName: node
+  linkType: hard
+
+"@smithy/types@workspace:^, @smithy/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
