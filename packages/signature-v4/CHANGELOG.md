@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.2.5
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/util-middleware@4.0.0
+  - @smithy/util-utf8@3.0.1
+
 ## 4.2.4
 
 ### Patch Changes

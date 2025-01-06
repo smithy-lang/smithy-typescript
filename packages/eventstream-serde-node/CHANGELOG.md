@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 4e8f4ff: drop node16 support
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/eventstream-serde-universal@4.0.0
+
 ## 3.0.13
 
 ### Patch Changes

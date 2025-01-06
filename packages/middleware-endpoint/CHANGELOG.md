@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.2.9
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/shared-ini-file-loader@4.0.0
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/util-middleware@4.0.0
+  - @smithy/core@3.0.0
+
 ## 3.2.8
 
 ### Patch Changes

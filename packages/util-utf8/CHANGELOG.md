@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/util-buffer-from@4.0.0
+
 ## 3.0.0
 
 ### Major Changes

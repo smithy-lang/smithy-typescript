@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.2.21
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/util-base64@4.0.0
+  - @smithy/util-utf8@3.0.1
+  - @smithy/fetch-http-handler@4.1.4
+
 ## 2.2.20
 
 ### Patch Changes

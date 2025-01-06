@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 4e8f4ff: drop node16 support
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/node-http-handler@4.0.0
+  - @smithy/util-buffer-from@4.0.0
+
 ## 3.0.16
 
 ### Patch Changes

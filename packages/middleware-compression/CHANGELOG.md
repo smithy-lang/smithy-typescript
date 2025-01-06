@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/util-config-provider@4.0.0
+  - @smithy/util-middleware@4.0.0
+  - @smithy/core@3.0.0
+  - @smithy/util-utf8@3.0.1
+
 ## 3.1.7
 
 ### Patch Changes

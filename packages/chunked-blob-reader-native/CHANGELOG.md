@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/util-base64@4.0.0
+
 ## 3.0.1
 
 ### Patch Changes

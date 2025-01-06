@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 4e8f4ff: drop node16 support
+
 ## 3.0.0
 
 ### Major Changes

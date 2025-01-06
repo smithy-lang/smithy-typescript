@@ -1,5 +1,18 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 4e8f4ff: drop node16 support
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/util-middleware@4.0.0
+  - @smithy/util-stream@4.0.0
+  - @smithy/util-utf8@3.0.1
+
 ## 2.5.7
 
 ### Patch Changes

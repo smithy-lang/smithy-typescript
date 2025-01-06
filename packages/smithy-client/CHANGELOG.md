@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 4e8f4ff: drop node16 support
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/util-stream@4.0.0
+  - @smithy/core@3.0.0
+  - @smithy/middleware-endpoint@3.2.9
+
 ## 3.7.0
 
 ### Minor Changes

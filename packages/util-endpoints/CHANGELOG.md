@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 4e8f4ff: drop node16 support
+
+### Patch Changes
+
+- Updated dependencies [4e8f4ff]
+  - @smithy/node-config-provider@4.0.0
+
 ## 2.1.7
 
 ### Patch Changes
