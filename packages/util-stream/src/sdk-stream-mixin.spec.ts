@@ -146,14 +146,12 @@ describe(sdkStreamMixin.name, () => {
     });
 
     describe("when Readable.toWeb() is not supported", () => {
-      // @ts-expect-error
       const originalToWebImpl = Readable.toWeb;
       beforeAll(() => {
         // @ts-expect-error
         Readable.toWeb = undefined;
       });
       afterAll(() => {
-        // @ts-expect-error
         Readable.toWeb = originalToWebImpl;
       });
 
@@ -169,22 +167,18 @@ describe(sdkStreamMixin.name, () => {
     });
 
     describe("when Readable.toWeb() is supported", () => {
-      // @ts-expect-error
       const originalToWebImpl = Readable.toWeb;
       beforeAll(() => {
-        // @ts-expect-error
         Readable.toWeb = vi.fn().mockReturnValue("A web stream");
       });
 
       afterAll(() => {
-        // @ts-expect-error
         Readable.toWeb = originalToWebImpl;
       });
 
       it("should transform Node stream to web stream", async () => {
         const sdkStream = sdkStreamMixin(passThrough);
         sdkStream.transformToWebStream();
-        // @ts-expect-error
         expect(Readable.toWeb).toBeCalled();
       });
 

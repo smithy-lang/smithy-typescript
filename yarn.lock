@@ -2821,7 +2821,7 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@tsconfig/node16": 16.1.3
+    "@tsconfig/node18": 18.2.4
     "@types/node": ^18.19.69
     concurrently: 7.0.0
     downlevel-dts: 0.10.1
@@ -3151,10 +3151,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node16@npm:16.1.3":
-  version: 16.1.3
-  resolution: "@tsconfig/node16@npm:16.1.3"
-  checksum: 097f33cb7fe9577cc3c4b7a8d26c7e8b6c45c868d3bda1e2cd120111693b98f88a5138e643e7a6f79d53d94717c3624dc33398804647bf6e0e8782604bbfad53
+"@tsconfig/node18@npm:18.2.4":
+  version: 18.2.4
+  resolution: "@tsconfig/node18@npm:18.2.4"
+  checksum: 80623cb9c129c78d51fe6c4a256ba986f12f02ff02dc2a1e5b33dd13a7983f767b6792cfcd51b3dd1c8256ea105f1fea31f64a2070564e37787ab3d9a1a1e7e3
   languageName: node
   linkType: hard
 
