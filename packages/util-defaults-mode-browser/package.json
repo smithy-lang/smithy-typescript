@@ -37,7 +37,7 @@
     "typedoc": "0.23.23"
   },
   "engines": {
-    "node": ">= 10.0.0"
+    "node": ">=18.0.0"
   },
   "typesVersions": {
     "<4.0": {
