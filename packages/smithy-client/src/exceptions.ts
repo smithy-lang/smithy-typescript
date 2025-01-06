@@ -60,8 +60,7 @@ export class ServiceException extends Error implements SmithyException, Metadata
       return ServiceException.isInstance(instance);
     } else {
       // For subclasses, use standard prototype chain check
-      return instance instanceof Error &&
-             this.prototype.isPrototypeOf(instance);
+      return instance instanceof Error && this.prototype.isPrototypeOf(instance);
     }
   }
 }
