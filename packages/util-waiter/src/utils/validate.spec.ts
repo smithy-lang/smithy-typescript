@@ -50,6 +50,17 @@ describe(validateWaiterOptions.name, () => {
     }
   });
 
+  it("should not throw an error with small decimal numbers", () => {
+    waiterOptions.maxWaitTime = 0.5;
+    waiterOptions.minDelay = 0.0001;
+    waiterOptions.maxDelay = 0.4;
+    try {
+      validateWaiterOptions(waiterOptions);
+    } catch (e) {
+      expect(e).toBe("SHOULD NOT ERROR HERE");
+    }
+  });  
+
   it("should throw when maxWaitTime is less than 0", () => {
     waiterOptions.maxWaitTime = -2;
     waiterOptions.minDelay = -1;
