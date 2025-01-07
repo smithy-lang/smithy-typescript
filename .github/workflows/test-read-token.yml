@@ -33,7 +33,6 @@ jobs:
       - name: Fetch NPM token
         id: token
         run: |
-          aws configure --profile token set role_arn ${{ secrets.JS_TEAM_TOKEN_ROLE }}
           aws configure --profile token set credential_source Environment
           npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=smithy-typescript-npm-token --query SecretString --output text --profile token)
           echo "::add-mask::$npm_token"
