@@ -41,7 +41,7 @@ describe("Exception Hierarchy Tests", () => {
       super({
         name: "ClientServiceException",
         $fault: "client",
-        $metadata: {}
+        $metadata: {},
       });
       Object.setPrototypeOf(this, ClientServiceException.prototype);
     }
@@ -55,7 +55,7 @@ describe("Exception Hierarchy Tests", () => {
     }
   }
 
-  describe("Plain Object Tests", () => {
+  describe("Empty Object Tests", () => {
     it("empty object should not be instanceof any exception", () => {
       expect({} instanceof Error).toBe(false);
       expect({} instanceof ServiceException).toBe(false);
@@ -78,7 +78,7 @@ describe("Exception Hierarchy Tests", () => {
     const serviceException = new ServiceException({
       name: "ServiceException",
       $fault: "client",
-      $metadata: {}
+      $metadata: {},
     });
 
     it("ServiceException instance should be instanceof Error and ServiceException", () => {
