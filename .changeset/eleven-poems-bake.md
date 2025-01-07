@@ -1,5 +1,5 @@
 ---
-"@smithy/util-waiter": minor
+"@smithy/util-waiter": patch
 ---
 
-modify the waitUntilObjectExists Validation for minDelay
+this validation is fixed for all waiters

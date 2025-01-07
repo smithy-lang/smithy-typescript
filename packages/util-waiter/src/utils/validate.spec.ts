@@ -54,11 +54,7 @@ describe(validateWaiterOptions.name, () => {
     waiterOptions.maxWaitTime = 0.5;
     waiterOptions.minDelay = 0.0001;
     waiterOptions.maxDelay = 0.4;
-    try {
-      validateWaiterOptions(waiterOptions);
-    } catch (e) {
-      expect(e).toBe("SHOULD NOT ERROR HERE");
-    }
+    validateWaiterOptions(waiterOptions); 
   });  
 
   it("should throw when maxWaitTime is less than 0", () => {
