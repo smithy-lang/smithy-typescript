@@ -54,17 +54,11 @@
     "ts-jest": "29.1.2",
     "turbo": "latest",
     "typescript": "~5.2.2",
-    "vite": "4.5.5",
-    "vitest": "0.34.6",
+    "vitest": "2.1.8",
     "webpack": "5.91.0",
     "yarn": "1.22.22"
   },
-  "overrides": {
-    "vite": "4.5.5"
-  },
-  "resolutions": {
-    "vite": "4.5.5"
-  },
+  "overrides": {},
   "workspaces": [
     "packages/*",
     "smithy-typescript-ssdk-libs/*",
