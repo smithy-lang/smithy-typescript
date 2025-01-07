@@ -65,7 +65,12 @@ export class ServiceException extends Error implements SmithyException, Metadata
     // For subclasses, check both prototype chain and name match
     // Note: instance must be ServiceException first (having $-props)
     if (ServiceException.isInstance(instance)) {
-      return this.prototype.isPrototypeOf(instance) || candidate.name === this.name;
+      // Only do name comparison if both sides have non-empty names
+      if (candidate.name && this.name) {
+        return this.prototype.isPrototypeOf(instance) || candidate.name === this.name;
+      }
+      // Otherwise fall back to just prototype check
+      return this.prototype.isPrototypeOf(instance);
     }
     return false;
   }
