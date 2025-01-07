@@ -55,13 +55,19 @@ export class ServiceException extends Error implements SmithyException, Metadata
    * Custom instanceof check to support the operator for ServiceException base class
    */
   public static [Symbol.hasInstance](instance: unknown): boolean {
+    // Handle null/undefined
+    if (!instance) return false;
+    const candidate = instance as ServiceException;
+    // For ServiceException, check only $-props
     if (this === ServiceException) {
-      // For the base ServiceException class, use duck typing
       return ServiceException.isInstance(instance);
-    } else {
-      // For subclasses, use standard prototype chain check
-      return instance instanceof Error && this.prototype.isPrototypeOf(instance);
     }
+    // For subclasses, check both prototype chain and name match
+    // Note: instance must be ServiceException first (having $-props)
+    if (ServiceException.isInstance(instance)) {
+      return this.prototype.isPrototypeOf(instance) || candidate.name === this.name;
+    }
+    return false;
   }
 }
 

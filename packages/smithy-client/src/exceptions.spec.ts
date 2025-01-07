@@ -34,90 +34,120 @@ it("ExceptionOptionType allows specifying message", () => {
   expect(exception.code).toBe("code");
 });
 
-describe("ServiceException type checking", () => {
-  class TestServiceException extends ServiceException {
+describe("Exception Hierarchy Tests", () => {
+  // test classes to represent the hierarchy
+  class ClientServiceException extends ServiceException {
     constructor() {
       super({
-        name: "TestServiceException",
+        name: "ClientServiceException",
         $fault: "client",
-        $metadata: {},
+        $metadata: {}
       });
-      Object.setPrototypeOf(this, TestServiceException.prototype);
+      Object.setPrototypeOf(this, ClientServiceException.prototype);
     }
   }
 
-  const baseError = new ServiceException({
-    name: "Error",
-    $fault: "client",
-    $metadata: {},
-  });
+  class ModeledClientServiceException extends ClientServiceException {
+    constructor() {
+      super();
+      this.name = "ModeledClientServiceException";
+      Object.setPrototypeOf(this, ModeledClientServiceException.prototype);
+    }
+  }
 
-  const subclassError = new TestServiceException();
-
-  const duckTyped = {
-    $fault: "server",
-    $metadata: {},
-  };
-
-  describe("isInstance", () => {
-    it("should return true for ServiceException instances", () => {
-      expect(ServiceException.isInstance(baseError)).toBe(true);
-    });
-
-    it("should return true for duck-typed objects", () => {
-      expect(ServiceException.isInstance(duckTyped)).toBe(true);
-    });
-
-    it("should return false for null or undefined", () => {
-      expect(ServiceException.isInstance(null)).toBe(false);
-      expect(ServiceException.isInstance(undefined)).toBe(false);
-    });
-
-    it("should return false for invalid $fault values", () => {
-      expect(ServiceException.isInstance({ $fault: "invalid", $metadata: {} })).toBe(false);
-    });
-
-    it("should return false for missing properties", () => {
-      expect(ServiceException.isInstance({ $fault: "client" })).toBe(false);
-      expect(ServiceException.isInstance({ $metadata: {} })).toBe(false);
+  describe("Plain Object Tests", () => {
+    it("empty object should not be instanceof any exception", () => {
+      expect({} instanceof Error).toBe(false);
+      expect({} instanceof ServiceException).toBe(false);
+      expect({} instanceof ClientServiceException).toBe(false);
+      expect({} instanceof ModeledClientServiceException).toBe(false);
     });
   });
 
-  describe("instanceof operator", () => {
-    it("should return true for ServiceException base class with actual instances", () => {
-      expect(baseError instanceof ServiceException).toBe(true);
-      expect(subclassError instanceof ServiceException).toBe(true);
+  describe("Error Instance Tests", () => {
+    const error = new Error();
+    it("Error instance should only be instanceof Error", () => {
+      expect(error instanceof Error).toBe(true);
+      expect(error instanceof ServiceException).toBe(false);
+      expect(error instanceof ClientServiceException).toBe(false);
+      expect(error instanceof ModeledClientServiceException).toBe(false);
+    });
+  });
+
+  describe("ServiceException Instance Tests", () => {
+    const serviceException = new ServiceException({
+      name: "ServiceException",
+      $fault: "client",
+      $metadata: {}
     });
 
-    it("should return true for ServiceException base class with duck-typed objects", () => {
-      expect(duckTyped instanceof ServiceException).toBe(true);
+    it("ServiceException instance should be instanceof Error and ServiceException", () => {
+      expect(serviceException instanceof Error).toBe(true);
+      expect(serviceException instanceof ServiceException).toBe(true);
+      expect(serviceException instanceof ClientServiceException).toBe(false);
+      expect(serviceException instanceof ModeledClientServiceException).toBe(false);
+    });
+  });
+
+  describe("ClientServiceException Instance Tests", () => {
+    const clientException = new ClientServiceException();
+    it("ClientServiceException instance should be instanceof Error, ServiceException, and ClientServiceException", () => {
+      expect(clientException instanceof Error).toBe(true);
+      expect(clientException instanceof ServiceException).toBe(true);
+      expect(clientException instanceof ClientServiceException).toBe(true);
+      expect(clientException instanceof ModeledClientServiceException).toBe(false);
+    });
+  });
+
+  describe("ModeledClientServiceException Instance Tests", () => {
+    const modeledException = new ModeledClientServiceException();
+    it("ModeledClientServiceException instance should be instanceof Error, ServiceException, ClientServiceException, and ModeledClientServiceException", () => {
+      expect(modeledException instanceof Error).toBe(true);
+      expect(modeledException instanceof ServiceException).toBe(true);
+      expect(modeledException instanceof ClientServiceException).toBe(true);
+      expect(modeledException instanceof ModeledClientServiceException).toBe(true);
+    });
+  });
+
+  describe("Duck-Typed Object Tests", () => {
+    it("object with only name should not be instanceof any exception", () => {
+      const obj = { name: "Error" };
+      expect(obj instanceof Error).toBe(false);
+      expect(obj instanceof ServiceException).toBe(false);
+      expect(obj instanceof ClientServiceException).toBe(false);
+      expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
 
-    it("should handle subclass instanceof checks correctly", () => {
-      expect(subclassError instanceof TestServiceException).toBe(true);
-      expect(baseError instanceof TestServiceException).toBe(false);
-      expect(duckTyped instanceof TestServiceException).toBe(false);
+    it("object with only $-props should be instanceof ServiceException", () => {
+      const obj = { $fault: "client" as const, $metadata: {} };
+      expect(obj instanceof Error).toBe(false);
+      expect(obj instanceof ServiceException).toBe(true);
+      expect(obj instanceof ClientServiceException).toBe(false);
+      expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
 
-    it("should prevent duck-typed objects from matching subclass instanceof checks", () => {
-      const dummyServiceException = new ServiceException({
-        name: "TEST_ERROR",
-        message: "TEST_MESSAGE",
-        $fault: "server",
-        $metadata: {},
-      });
+    it("object with ServiceException name and $-props should be instanceof ServiceException only", () => {
+      const obj = { name: "ServiceException", $fault: "client" as const, $metadata: {} };
+      expect(obj instanceof Error).toBe(false);
+      expect(obj instanceof ServiceException).toBe(true);
+      expect(obj instanceof ClientServiceException).toBe(false);
+      expect(obj instanceof ModeledClientServiceException).toBe(false);
+    });
 
-      class SpecificError extends ServiceException {
-        constructor() {
-          super({
-            name: "SpecificError",
-            $fault: "client",
-            $metadata: {},
-          });
-        }
-      }
+    it("object with ClientServiceException name and $-props should be instanceof ServiceException and ClientServiceException", () => {
+      const obj = { name: "ClientServiceException", $fault: "client" as const, $metadata: {} };
+      expect(obj instanceof Error).toBe(false);
+      expect(obj instanceof ServiceException).toBe(true);
+      expect(obj instanceof ClientServiceException).toBe(true);
+      expect(obj instanceof ModeledClientServiceException).toBe(false);
+    });
 
-      expect(dummyServiceException instanceof SpecificError).toBe(false);
+    it("object with ModeledClientServiceException name and $-props should be instanceof ServiceException and ModeledClientServiceException", () => {
+      const obj = { name: "ModeledClientServiceException", $fault: "client" as const, $metadata: {} };
+      expect(obj instanceof Error).toBe(false);
+      expect(obj instanceof ServiceException).toBe(true);
+      expect(obj instanceof ClientServiceException).toBe(false);
+      expect(obj instanceof ModeledClientServiceException).toBe(true);
     });
   });
 });
