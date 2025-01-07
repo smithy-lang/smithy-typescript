@@ -1,1 +1,41 @@
+name: test-read-token
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Test reading NPM token
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{secrets.PUSH_TOKEN}}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "yarn"
+      - name: Configure AWS Credentials
+        id: credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.JS_TEAM_ROLE_TO_ASSUME }}
+          role-session-name: SmithyTypeScriptGitHubRelease
+          audience: sts.amazonaws.com
+      - name: Fetch NPM token
+        id: token
+        if: steps.commit.outcome == 'success'
+        run: |
+          aws configure --profile token set role_arn ${{ secrets.JS_TEAM_TOKEN_ROLE }}
+          aws configure --profile token set credential_source Environment
+          npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=smithy-typescript-npm-token --query SecretString --output text --profile token)
+          echo "::add-mask::$npm_token"
+          echo "NPM_TOKEN=$npm_token" >> $GITHUB_ENV
