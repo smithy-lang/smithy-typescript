@@ -7,11 +7,11 @@ import { WaiterOptions } from "../waiter";
  * @param options - a waiter configuration object
  */
 export const validateWaiterOptions = <Client>(options: WaiterOptions<Client>): void => {
-  if (options.maxWaitTime < 1) {
+  if (options.maxWaitTime <= 0) {
     throw new Error(`WaiterConfiguration.maxWaitTime must be greater than 0`);
-  } else if (options.minDelay < 1) {
+  } else if (options.minDelay <= 0) {
     throw new Error(`WaiterConfiguration.minDelay must be greater than 0`);
-  } else if (options.maxDelay < 1) {
+  } else if (options.maxDelay <= 0) {
     throw new Error(`WaiterConfiguration.maxDelay must be greater than 0`);
   } else if (options.maxWaitTime <= options.minDelay) {
     throw new Error(
