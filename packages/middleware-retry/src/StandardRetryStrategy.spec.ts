@@ -104,11 +104,13 @@ describe("defaultStrategy", () => {
     vi.clearAllMocks();
   });
 
-  it("sets maxAttemptsProvider as class member variable", () => {
-    [1, 2, 3].forEach((maxAttempts) => {
-      const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
-      expect(retryStrategy["maxAttemptsProvider"]()).resolves.toBe(maxAttempts);
-    });
+  it("sets maxAttemptsProvider as class member variable", async () => {
+    await Promise.all(
+      [1, 2, 3].map(async (maxAttempts) => {
+        const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
+        expect(await retryStrategy["maxAttemptsProvider"]()).toBe(maxAttempts);
+      })
+    );
   });
 
   it(`sets mode=${RETRY_MODES.STANDARD}`, () => {
@@ -116,13 +118,15 @@ describe("defaultStrategy", () => {
     expect(retryStrategy.mode).toStrictEqual(RETRY_MODES.STANDARD);
   });
 
-  it("handles non-standard errors", () => {
+  it("handles non-standard errors", async () => {
     const nonStandardErrors = [undefined, "foo", { foo: "bar" }, 123, false, null];
     const maxAttempts = 1;
     const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
     for (const error of nonStandardErrors) {
       next = vi.fn().mockRejectedValue(error);
-      expect(retryStrategy.retry(next, { request: { headers: {} } } as any)).rejects.toBeInstanceOf(Error);
+      expect(await retryStrategy.retry(next, { request: { headers: {} } } as any).catch((_) => _)).toBeInstanceOf(
+        Error
+      );
     }
   });
 

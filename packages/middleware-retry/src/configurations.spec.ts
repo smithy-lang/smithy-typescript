@@ -1,3 +1,4 @@
+import type { Provider } from "@smithy/types";
 import { normalizeProvider } from "@smithy/util-middleware";
 import { AdaptiveRetryStrategy, DEFAULT_MAX_ATTEMPTS, StandardRetryStrategy } from "@smithy/util-retry";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
@@ -17,7 +18,7 @@ describe(resolveRetryConfig.name, () => {
 
   beforeEach(() => {
     vi.mocked(normalizeProvider).mockImplementation((input) =>
-      typeof input === "function" ? input : () => Promise.resolve(input)
+      typeof input === "function" ? (input as Provider<unknown>) : () => Promise.resolve(input)
     );
   });
 
@@ -38,7 +39,7 @@ describe(resolveRetryConfig.name, () => {
   });
 
   describe("retryStrategy", () => {
-    it("passes retryStrategy if present", () => {
+    it("passes retryStrategy if present", async () => {
       const mockRetryStrategy = {
         retry: vi.fn(),
       };
@@ -46,7 +47,7 @@ describe(resolveRetryConfig.name, () => {
         retryMode,
         retryStrategy: mockRetryStrategy,
       });
-      expect(retryStrategy()).resolves.toEqual(mockRetryStrategy);
+      expect(await retryStrategy()).toEqual(mockRetryStrategy);
     });
 
     describe("creates RetryStrategy if retryStrategy not present", () => {
@@ -141,7 +142,7 @@ describe(resolveRetryConfig.name, () => {
       it(`should throw if if value of env ${ENV_MAX_ATTEMPTS} is not a number`, () => {
         const value = "not a number";
         const env = { [ENV_MAX_ATTEMPTS]: value };
-        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.environmentVariableSelector(env)).toThrow("");
+        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.environmentVariableSelector(env)).toThrow();
       });
     });
 
@@ -159,7 +160,7 @@ describe(resolveRetryConfig.name, () => {
       it(`should throw if shared INI files entry ${CONFIG_MAX_ATTEMPTS} is not a number`, () => {
         const value = "not a number";
         const profile = { [CONFIG_MAX_ATTEMPTS]: value };
-        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.configFileSelector(profile)).toThrow("");
+        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.configFileSelector(profile)).toThrow();
       });
     });
 
