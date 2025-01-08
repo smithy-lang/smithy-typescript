@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.1
+
+### Patch Changes
+
+- a147146: fix range validation in waiters
+
 ## 4.0.0
 
 ### Major Changes
