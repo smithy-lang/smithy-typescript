@@ -6,7 +6,7 @@ import type { Command } from "./command";
  *
  * Expected type definition of a paginator.
  */
-export type Paginator<T> = AsyncGenerator<T, undefined, unknown>;
+export type Paginator<T> = AsyncGenerator<T, undefined, Promise<T | undefined>>;
 
 /**
  * @public

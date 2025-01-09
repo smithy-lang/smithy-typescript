@@ -36,14 +36,16 @@ export function createPaginator<
     input: InputType,
     ...additionalArguments: any[]
   ): Paginator<OutputType> {
-    let token: any = config.startingToken || (input as any)[inputTokenName];
+    const _input = input as any;
+    // for legacy reasons this coalescing order is inverted from that of pageSize.
+    let token: any = config.startingToken ?? _input[inputTokenName];
     let hasNext = true;
     let page: OutputType;
 
     while (hasNext) {
-      (input as any)[inputTokenName] = token;
+      _input[inputTokenName] = token;
       if (pageSizeTokenName) {
-        (input as any)[pageSizeTokenName] = (input as any)[pageSizeTokenName] ?? config.pageSize;
+        _input[pageSizeTokenName] = _input[pageSizeTokenName] ?? config.pageSize;
       }
       if (config.client instanceof ClientCtor) {
         page = await makePagedClientRequest(
@@ -61,7 +63,6 @@ export function createPaginator<
       token = get(page, outputTokenName);
       hasNext = !!(token && (!config.stopOnSameToken || token !== prevToken));
     }
-    // @ts-ignore
     return undefined;
   };
 }
