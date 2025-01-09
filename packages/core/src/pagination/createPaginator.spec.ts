@@ -36,6 +36,17 @@ describe(createPaginator.name, () => {
     }
   }
 
+  class ClientStringToken {
+    private pages = 5;
+    async send(command: any) {
+      if (--this.pages > 0) {
+        return {
+          outToken: command.input.inToken,
+        };
+      }
+      return {};
+    }
+  }
   class CommandStringToken {
     public middlewareStack = {
       add: vi.fn(),
@@ -89,6 +100,158 @@ describe(createPaginator.name, () => {
     }
 
     expect(pages).toEqual(5);
+  });
+
+  it("should prioritize token set in paginator config, fallback to token set in input parameters", async () => {
+    class CommandExpectPaginatorConfigToken {
+      public constructor(public input: any) {
+        expect(input).toMatchObject({
+          inToken: "abc",
+        });
+      }
+    }
+    class CommandExpectOperationInputToken {
+      public constructor(public input: any) {
+        expect(input).toMatchObject({
+          inToken: "xyz",
+        });
+      }
+    }
+    {
+      const paginate = createPaginator<
+        PaginationConfiguration,
+        { inToken?: string; sizeToken?: number },
+        { outToken: string }
+      >(ClientStringToken, CommandExpectPaginatorConfigToken, "inToken", "outToken", "sizeToken");
+
+      let pages = 0;
+      const client = new ClientStringToken() as any;
+
+      for await (const page of paginate(
+        {
+          client,
+          startingToken: "abc",
+        },
+        {
+          inToken: "xyz",
+        }
+      )) {
+        pages += 1;
+        expect(page).toBeDefined();
+      }
+
+      expect(pages).toEqual(5);
+    }
+    {
+      const paginate = createPaginator<
+        PaginationConfiguration,
+        { inToken?: string; sizeToken?: number },
+        { outToken: string }
+      >(ClientStringToken, CommandExpectOperationInputToken, "inToken", "outToken", "sizeToken");
+
+      let pages = 0;
+      const client = new ClientStringToken() as any;
+
+      for await (const page of paginate(
+        {
+          client,
+        },
+        {
+          inToken: "xyz",
+        }
+      )) {
+        pages += 1;
+        expect(page).toBeDefined();
+      }
+
+      expect(pages).toEqual(5);
+    }
+  });
+
+  it("should prioritize page size set in operation input, fallback to page size set in paginator config (inverted from token priority)", async () => {
+    class CommandExpectPaginatorPageSize {
+      public constructor(public input: any) {
+        expect(input).toMatchObject({
+          sizeToken: 100,
+        });
+      }
+    }
+    class CommandExpectOperationInputPageSize {
+      public constructor(public input: any) {
+        expect(input).toMatchObject({
+          sizeToken: 99,
+        });
+      }
+    }
+    {
+      const paginate = createPaginator<
+        PaginationConfiguration,
+        { inToken?: string; sizeToken?: number },
+        { outToken: string }
+      >(ClientStringToken, CommandExpectPaginatorPageSize, "inToken", "outToken", "sizeToken");
+
+      let pages = 0;
+      const client = new ClientStringToken() as any;
+
+      for await (const page of paginate(
+        {
+          client,
+          pageSize: 100,
+        },
+        {
+          inToken: "abc",
+        }
+      )) {
+        pages += 1;
+        expect(page).toBeDefined();
+      }
+
+      expect(pages).toEqual(5);
+    }
+    {
+      const paginate = createPaginator<
+        PaginationConfiguration,
+        { inToken?: string; sizeToken?: number },
+        { outToken: string }
+      >(ClientStringToken, CommandExpectOperationInputPageSize, "inToken", "outToken", "sizeToken");
+
+      let pages = 0;
+      const client = new ClientStringToken() as any;
+
+      for await (const page of paginate(
+        {
+          client,
+          pageSize: 100,
+        },
+        {
+          sizeToken: 99,
+          inToken: "abc",
+        }
+      )) {
+        pages += 1;
+        expect(page).toBeDefined();
+      }
+
+      expect(pages).toEqual(5);
+    }
+  });
+
+  it("should have the correct AsyncGenerator.TNext type", async () => {
+    const paginate = createPaginator<
+      PaginationConfiguration,
+      { inToken?: string; sizeToken: number },
+      {
+        outToken: string;
+      }
+    >(ClientStringToken, CommandStringToken, "inToken", "outToken.outToken2.outToken3", "sizeToken");
+    const asyncGenerator = paginate(
+      { client: new ClientStringToken() as any },
+      { inToken: "TOKEN_VALUE", sizeToken: 100 }
+    );
+
+    const { value, done } = await asyncGenerator.next();
+    expect(value?.outToken).toBeTypeOf("string");
+    expect(done).toBe(false);
   });
 
   it("should handle deep paths", async () => {

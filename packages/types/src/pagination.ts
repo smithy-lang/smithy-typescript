@@ -29,7 +29,7 @@ export interface PaginationConfiguration {
   /**
    * @param command - reference to the instantiated command. This callback is executed
    *                  prior to sending the command with the paginator's client.
-   * @returns the original command or a replacement.
+   * @returns the original command or a replacement, defaulting to the original command object.
    */
-  withCommand?: (command: Command<any, any, any, any, any>) => typeof command;
+  withCommand?: (command: Command<any, any, any, any, any>) => typeof command | undefined;
 }
