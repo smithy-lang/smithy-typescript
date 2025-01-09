@@ -7,7 +7,7 @@ const makePagedClientRequest = async <ClientType extends Client<any, any, any>, 
   CommandCtor: any,
   client: ClientType,
   input: InputType,
-  withCommand: (command: Command<any, any, any, any, any>) => typeof command = (_) => _,
+  withCommand: (command: Command<any, any, any, any, any>) => typeof command | undefined = (_) => _,
   ...args: any[]
 ): Promise<OutputType> => {
   let command = new CommandCtor(input);
