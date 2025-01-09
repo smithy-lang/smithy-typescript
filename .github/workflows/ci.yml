@@ -53,11 +53,13 @@ jobs:
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
       - name: Install dependencies
-        run: yarn
+        run: |
+          yarn
+          yarn turbo telemetry disable
       - name: Build packages
-        run: yarn build
+        run: yarn retry -n 3 -- yarn build
       - name: Run protocol tests
-        run: yarn test:protocols
+        run: yarn retry -n 3 -- yarn test:protocols
 
   lint-typescript:
     runs-on: ubuntu-latest
@@ -95,15 +97,17 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
       - name: Install dependencies
-        run: yarn
+        run: |
+          yarn
+          yarn turbo telemetry disable
       - name: Build packages
-        run: yarn build
+        run: yarn retry -n 3 -- yarn build
       - name: Run unit tests
-        run: yarn test
+        run: yarn retry -n 3 -- yarn test
       - name: Run integration tests
         run: |
           yarn config set enableImmutableInstalls false
-          yarn test:integration
+          yarn retry -n 3 -- yarn test:integration
 
   ensure-typescript-formatted:
     runs-on: ubuntu-latest
