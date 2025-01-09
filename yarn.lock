@@ -2680,7 +2680,7 @@ __metadata:
     fflate: "npm:0.8.1"
     rimraf: "npm:3.0.2"
     tslib: "npm:^2.6.2"
-    web-streams-polyfill: "npm:3.2.1"
+    web-streams-polyfill: "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
@@ -10554,10 +10554,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-streams-polyfill@npm:3.2.1":
-  version: 3.2.1
-  resolution: "web-streams-polyfill@npm:3.2.1"
-  checksum: 10c0/70ed6b5708e14afa2ab699221ea197d7c68ec0c8274bbe0181aecc5ba636ca27cbd383d2049f0eb9d529e738f5c088825502b317f3df24d18a278e4cc9a10e8b
+"web-streams-polyfill@npm:4.1.0":
+  version: 4.1.0
+  resolution: "web-streams-polyfill@npm:4.1.0"
+  checksum: 10c0/1022a7d13f0994002c1fa65f53576d85ea76ec59f8ffb3413f052dfcc0ca656bbcbe2611a35180b14f9bca6f3fe83802028b641ec9d200362797c99fa3e68e4e
   languageName: node
   linkType: hard
 
