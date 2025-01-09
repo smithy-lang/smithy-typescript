@@ -2984,7 +2984,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
-    "@types/node": "npm:^18.19.69"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:3.0.2"
