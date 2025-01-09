@@ -1,4 +1,5 @@
 ---
+"@smithy/types": minor
 "@smithy/core": minor
 ---
 
