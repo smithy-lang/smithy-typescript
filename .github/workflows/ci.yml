@@ -57,9 +57,9 @@ jobs:
           yarn
           yarn turbo telemetry disable
       - name: Build packages
-        run: yarn retry -n 3 -- yarn build
+        run: node ./scripts/retry -- yarn build
       - name: Run protocol tests
-        run: yarn retry -n 3 -- yarn test:protocols
+        run: node ./scripts/retry -- yarn test:protocols
 
   lint-typescript:
     runs-on: ubuntu-latest
@@ -101,13 +101,13 @@ jobs:
           yarn
           yarn turbo telemetry disable
       - name: Build packages
-        run: yarn retry -n 3 -- yarn build
+        run: node ./scripts/retry -- yarn build
       - name: Run unit tests
-        run: yarn retry -n 3 -- yarn test
+        run: node ./scripts/retry -- yarn test
       - name: Run integration tests
         run: |
           yarn config set enableImmutableInstalls false
-          yarn retry -n 3 -- yarn test:integration
+          node ./scripts/retry -- yarn test:integration
 
   ensure-typescript-formatted:
     runs-on: ubuntu-latest
