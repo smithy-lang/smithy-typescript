@@ -1,5 +1,22 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 2aff9df: Added middleware support to pagination
+- 000b2ae: allow paginator token fallback to be specified by operation input
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/middleware-serde@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/util-middleware@4.0.1
+  - @smithy/util-stream@4.0.1
+
 ## 3.0.0
 
 ### Major Changes

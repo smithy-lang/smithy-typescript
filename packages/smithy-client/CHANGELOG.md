@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 292c134: adds support for instanceof operator for ServiceException class
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/core@3.1.0
+  - @smithy/middleware-endpoint@4.0.1
+  - @smithy/middleware-stack@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/util-stream@4.0.1
+
 ## 4.0.0
 
 ### Major Changes

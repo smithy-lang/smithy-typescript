@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 2aff9df: Added middleware support to pagination
+- 000b2ae: allow paginator token fallback to be specified by operation input
+
 ## 4.0.0
 
 ### Major Changes
