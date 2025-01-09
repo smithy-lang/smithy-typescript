@@ -1,5 +1,5 @@
 import { PaginationConfiguration } from "@smithy/types";
-import { describe, expect, test as it } from "vitest";
+import { afterEach,describe, expect, test as it, vi } from "vitest";
 
 import { createPaginator } from "./createPaginator";
 
@@ -20,6 +20,10 @@ describe(createPaginator.name, () => {
     }
   }
   class CommandObjectToken {
+    public middlewareStack = {
+      add: vi.fn(),
+      addRelativeTo: vi.fn(),
+    };
     public constructor(public input: any) {
       expect(input).toEqual({
         sizeToken: 100,
@@ -33,6 +37,10 @@ describe(createPaginator.name, () => {
   }
 
   class CommandStringToken {
+    public middlewareStack = {
+      add: vi.fn(),
+      addRelativeTo: vi.fn(),
+    };
     public constructor(public input: any) {
       expect(input).toEqual({
         sizeToken: 100,
@@ -40,6 +48,10 @@ describe(createPaginator.name, () => {
       });
     }
   }
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
 
   it("should create a paginator", async () => {
     const paginate = createPaginator<PaginationConfiguration, { inToken?: string }, { outToken: string }>(
@@ -111,5 +123,57 @@ describe(createPaginator.name, () => {
     }
 
     expect(pages).toEqual(5);
+  });
+
+  it("should allow modification of the instantiated command", async () => {
+    const paginate = createPaginator<PaginationConfiguration, { inToken?: string }, { outToken: string }>(
+      Client,
+      CommandObjectToken,
+      "inToken",
+      "outToken",
+      "sizeToken"
+    );
+
+    let pages = 0;
+    const client: any = new Client();
+    vi.spyOn(client, "send");
+    const config = {
+      client,
+      pageSize: 100,
+      startingToken: {
+        outToken2: {
+          outToken3: "TOKEN_VALUE",
+        },
+      },
+      withCommand(command) {
+        command.middlewareStack.add((next) => (args) => next(args));
+        command.middlewareStack.addRelativeTo((next: any) => (args: any) => next(args), {
+          toMiddleware: "",
+          relation: "before",
+        });
+        expect(command.middlewareStack.add).toHaveBeenCalledTimes(1);
+        expect(command.middlewareStack.addRelativeTo).toHaveBeenCalledTimes(1);
+        return command;
+      },
+    } as Parameters<typeof paginate>[0];
+    vi.spyOn(config, "withCommand");
+
+    for await (const page of paginate(config, {})) {
+      pages += 1;
+      if (pages === 5) {
+        expect(page.outToken).toBeUndefined();
+      } else {
+        expect(page.outToken).toEqual({
+          outToken2: {
+            outToken3: "TOKEN_VALUE",
+          },
+        });
+      }
+    }
+
+    expect(pages).toEqual(5);
+    expect(client.send).toHaveBeenCalledTimes(5);
+    expect(config.withCommand).toHaveBeenCalledTimes(5);
+    expect(config.withCommand).toHaveBeenCalledWith(expect.any(CommandObjectToken));
   });
 });
