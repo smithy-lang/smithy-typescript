@@ -11,7 +11,7 @@ const makePagedClientRequest = async <ClientType extends Client<any, any, any>, 
   ...args: any[]
 ): Promise<OutputType> => {
   let command = new CommandCtor(input);
-  command = withCommand(command);
+  command = withCommand(command) ?? command;
   return await client.send(command, ...args);
 };
 
