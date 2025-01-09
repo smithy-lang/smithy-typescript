@@ -1,4 +1,4 @@
-import type { Client, PaginationConfiguration, Paginator } from "@smithy/types";
+import type { Client, Command, PaginationConfiguration, Paginator } from "@smithy/types";
 
 /**
  * @internal
@@ -7,9 +7,12 @@ const makePagedClientRequest = async <ClientType extends Client<any, any, any>, 
   CommandCtor: any,
   client: ClientType,
   input: InputType,
+  withCommand: (command: Command<any, any, any, any, any>) => typeof command = (_) => _,
   ...args: any[]
 ): Promise<OutputType> => {
-  return await client.send(new CommandCtor(input), ...args);
+  let command = new CommandCtor(input);
+  command = withCommand(command);
+  return await client.send(command, ...args);
 };
 
 /**
@@ -43,7 +46,13 @@ export function createPaginator<
         (input as any)[pageSizeTokenName] = (input as any)[pageSizeTokenName] ?? config.pageSize;
       }
       if (config.client instanceof ClientCtor) {
-        page = await makePagedClientRequest(CommandCtor, config.client, input, ...additionalArguments);
+        page = await makePagedClientRequest(
+          CommandCtor,
+          config.client,
+          input,
+          config.withCommand,
+          ...additionalArguments
+        );
       } else {
         throw new Error(`Invalid client, expected instance of ${ClientCtor.name}`);
       }
