@@ -36,7 +36,7 @@ export function createPaginator<
     input: InputType,
     ...additionalArguments: any[]
   ): Paginator<OutputType> {
-    let token: any = config.startingToken || undefined;
+    let token: any = config.startingToken || (input as any)[inputTokenName];
     let hasNext = true;
     let page: OutputType;
 
