@@ -45,9 +45,10 @@ export class ServiceException extends Error implements SmithyException, Metadata
     if (!value) return false;
     const candidate = value as ServiceException;
     return (
-      Boolean(candidate.$fault) &&
-      Boolean(candidate.$metadata) &&
-      (candidate.$fault === "client" || candidate.$fault === "server")
+      ServiceException.prototype.isPrototypeOf(candidate) ||
+      (Boolean(candidate.$fault) &&
+        Boolean(candidate.$metadata) &&
+        (candidate.$fault === "client" || candidate.$fault === "server"))
     );
   }
 
