@@ -152,10 +152,10 @@ describe("Exception Hierarchy Tests", () => {
 
     it("should handle exceptions where name indicates error type", () => {
       const egError = new ServiceException({
-        name: "EgTooLarge",  // specific error type name
+        name: "EgTooLarge", // specific error type name
         message: "Some size limit error",
         $fault: "server",
-        $metadata: {}
+        $metadata: {},
       });
       // Should be recognized as a ServiceException
       expect(egError instanceof ServiceException).toBe(true);
