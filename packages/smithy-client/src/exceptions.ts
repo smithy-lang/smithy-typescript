@@ -45,9 +45,10 @@ export class ServiceException extends Error implements SmithyException, Metadata
     if (!value) return false;
     const candidate = value as ServiceException;
     return (
-      Boolean(candidate.$fault) &&
-      Boolean(candidate.$metadata) &&
-      (candidate.$fault === "client" || candidate.$fault === "server")
+      ServiceException.prototype.isPrototypeOf(candidate) ||
+      (Boolean(candidate.$fault) &&
+        Boolean(candidate.$metadata) &&
+        (candidate.$fault === "client" || candidate.$fault === "server"))
     );
   }
 
@@ -58,9 +59,9 @@ export class ServiceException extends Error implements SmithyException, Metadata
     // Handle null/undefined
     if (!instance) return false;
     const candidate = instance as ServiceException;
-    // For ServiceException, check prototype chain or $-props
+    // For ServiceException, check only $-props
     if (this === ServiceException) {
-      return this.prototype.isPrototypeOf(instance) || ServiceException.isInstance(instance);
+      return ServiceException.isInstance(instance);
     }
     // For subclasses, check both prototype chain and name match
     // Note: instance must be ServiceException first (having $-props)
