@@ -149,6 +149,19 @@ describe("Exception Hierarchy Tests", () => {
       expect(obj instanceof ClientServiceException).toBe(false);
       expect(obj instanceof ModeledClientServiceException).toBe(true);
     });
+
+    it("should handle exceptions where name indicates error type", () => {
+      const egError = new ServiceException({
+        name: "EgTooLarge",  // specific error type name
+        message: "Some size limit error",
+        $fault: "server",
+        $metadata: {}
+      });
+      // Should be recognized as a ServiceException
+      expect(egError instanceof ServiceException).toBe(true);
+      // The name property can be used to identify specific error types
+      expect(egError.name).toBe("EgTooLarge");
+    });
   });
 });
 
