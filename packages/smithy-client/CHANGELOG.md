@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.1
+
+### Patch Changes
+
+- e87f2b3: prototype chain fallback for service exception
+
 ## 4.1.0
 
 ### Minor Changes
