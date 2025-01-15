@@ -11,10 +11,12 @@ import type {
   Logger,
   MetadataBearer,
   MiddlewareStack as IMiddlewareStack,
+  OperationSchema,
   OptionalParameter,
   Pluggable,
   RequestHandler,
   SerdeContext,
+  Mutable,
 } from "@smithy/types";
 import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 
@@ -31,6 +33,7 @@ export abstract class Command<
 {
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
+  public readonly schema: OperationSchema;
 
   /**
    * Factory for Command ClassBuilder.
@@ -131,6 +134,12 @@ class ClassBuilder<
   private _outputFilterSensitiveLog = (_: any) => _;
   private _serializer: (input: I, context: SerdeContext | any) => Promise<IHttpRequest> = null as any;
   private _deserializer: (output: IHttpResponse, context: SerdeContext | any) => Promise<O> = null as any;
+  private _operationSchema: OperationSchema = {
+    traits: {},
+    input: void 0,
+    output: void 0,
+  };
+
   /**
    * Optional init callback.
    */
@@ -212,6 +221,16 @@ class ClassBuilder<
     this._deserializer = deserializer;
     return this;
   }
+
+  /**
+   * Sets input/output schema for the operation.
+   */
+  public sc(operation: OperationSchema): ClassBuilder<I, O, C, SI, SO> {
+    this._operationSchema = operation;
+    this._smithyContext.operationSchema = operation;
+    return this;
+  }
+
   /**
    * @returns a Command class with the classBuilder properties.
    */
@@ -241,6 +260,7 @@ class ClassBuilder<
         super();
         this.input = input ?? ({} as unknown as I);
         closure._init(this);
+        (this as Mutable<typeof this>).schema = closure._operationSchema;
       }
 
       /**

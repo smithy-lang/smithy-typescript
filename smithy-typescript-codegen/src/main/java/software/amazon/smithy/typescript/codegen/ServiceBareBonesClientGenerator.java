@@ -432,6 +432,13 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             writer.write("super($L);", generateConfigVariable(configVariable));
             writer.write("this.config = $L;", generateConfigVariable(configVariable));
 
+            writer.addImportSubmodule(
+                "getSchemaSerdePlugin", null,
+                TypeScriptDependency.SMITHY_CORE, "/schema"
+            );
+            writer.write("""
+                this.middlewareStack.use(getSchemaSerdePlugin(this.config));""");
+
             // Add runtime plugins that contain middleware to the middleware stack
             // of the client.
             for (RuntimeClientPlugin plugin : runtimePlugins) {

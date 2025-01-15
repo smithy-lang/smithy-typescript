@@ -1,8 +1,7 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { RecursiveShapesInputOutput } from "../models/models_0";
-import { de_RecursiveShapesCommand, se_RecursiveShapesCommand } from "../protocols/Rpcv2cbor";
-import { getSerdePlugin } from "@smithy/middleware-serde";
+import { RecursiveShapes } from "../schemas/smithy.protocoltests.rpcv2Cbor";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
@@ -87,13 +86,12 @@ export class RecursiveShapesCommand extends $Command
     ServiceOutputTypes
   >()
   .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getSerdePlugin(config, this.serialize, this.deserialize)];
+    return [];
   })
   .s("RpcV2Protocol", "RecursiveShapes", {})
   .n("RpcV2ProtocolClient", "RecursiveShapesCommand")
   .f(void 0, void 0)
-  .ser(se_RecursiveShapesCommand)
-  .de(de_RecursiveShapesCommand)
+  .sc(RecursiveShapes)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {

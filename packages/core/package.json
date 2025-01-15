@@ -45,6 +45,13 @@
       "import": "./dist-es/submodules/protocols/index.js",
       "require": "./dist-cjs/submodules/protocols/index.js",
       "types": "./dist-types/submodules/protocols/index.d.ts"
+    },
+    "./schema": {
+      "module": "./dist-es/submodules/schema/index.js",
+      "node": "./dist-cjs/submodules/schema/index.js",
+      "import": "./dist-es/submodules/schema/index.js",
+      "require": "./dist-cjs/submodules/schema/index.js",
+      "types": "./dist-types/submodules/schema/index.d.ts"
     }
   },
   "author": {
@@ -78,6 +85,8 @@
     "./cbor.js",
     "./protocols.d.ts",
     "./protocols.js",
+    "./schema.d.ts",
+    "./schema.js",
     "dist-*/**"
   ],
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/core",
