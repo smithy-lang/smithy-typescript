@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.1
+
+### Patch Changes
+
+- @smithy/util-stream@4.0.2
+
 ## 3.1.0
 
 ### Minor Changes

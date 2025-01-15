@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.2
+
+### Patch Changes
+
+- fbd06eb: fix sending request when 100 Continue response takes more than 1 second
+
 ## 4.0.1
 
 ### Patch Changes
