@@ -46,6 +46,13 @@
       "require": "./dist-cjs/submodules/protocols/index.js",
       "types": "./dist-types/submodules/protocols/index.d.ts"
     },
+    "./schema": {
+      "module": "./dist-es/submodules/schema/index.js",
+      "node": "./dist-cjs/submodules/schema/index.js",
+      "import": "./dist-es/submodules/schema/index.js",
+      "require": "./dist-cjs/submodules/schema/index.js",
+      "types": "./dist-types/submodules/schema/index.d.ts"
+    },
     "./serde": {
       "module": "./dist-es/submodules/serde/index.js",
       "node": "./dist-cjs/submodules/serde/index.js",
@@ -64,6 +71,7 @@
     "@smithy/middleware-serde": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
+    "@smithy/util-base64": "workspace:^",
     "@smithy/util-body-length-browser": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-stream": "workspace:^",
@@ -85,6 +93,8 @@
     "./cbor.js",
     "./protocols.d.ts",
     "./protocols.js",
+    "./schema.d.ts",
+    "./schema.js",
     "./serde.d.ts",
     "./serde.js",
     "dist-*/**"

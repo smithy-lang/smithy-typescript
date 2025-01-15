@@ -35,6 +35,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.sections.ClientBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.ClientConfigCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.ClientConstructorCodeSection;
@@ -434,6 +435,15 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 generateConfigVariable(configVariable - 1));
 
             writer.write("this.config = $L;", generateConfigVariable(configVariable));
+
+            if (SchemaGenerationAllowlist.contains(service.getId())) {
+                writer.addImportSubmodule(
+                    "getSchemaSerdePlugin", null,
+                    TypeScriptDependency.SMITHY_CORE, "/schema"
+                );
+                writer.write("""
+                this.middlewareStack.use(getSchemaSerdePlugin(this.config));""");
+            }
 
             // Add runtime plugins that contain middleware to the middleware stack
             // of the client.
