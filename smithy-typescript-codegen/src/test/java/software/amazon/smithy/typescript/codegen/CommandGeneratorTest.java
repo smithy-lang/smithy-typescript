@@ -11,26 +11,10 @@ import software.amazon.smithy.model.node.Node;
 
 public class CommandGeneratorTest {
     @Test
-    public void addsCommandSpecificPlugins() {
+    public void writesOperationSchemaRef() {
         testCommmandCodegen(
             "output-structure.smithy",
-            new String[] {"getSerdePlugin(config, this.serialize, this.deserialize)"}
-        );
-    }
-
-    @Test
-    public void writesSerializer() {
-        testCommmandCodegen(
-            "output-structure.smithy",
-            new String[] {".ser("}
-        );
-    }
-
-    @Test
-    public void writesDeserializer() {
-        testCommmandCodegen(
-            "output-structure.smithy",
-            new String[] {".de("}
+            new String[] {".sc("}
         );
     }
 
