@@ -313,11 +313,11 @@ const applyInstruction = (
 };
 
 /**
- * internal
+ * @internal
  */
 const nonNullish = (_: any) => _ != null;
 
 /**
- * internal
+ * @internal
  */
 const pass = (_: any) => _;

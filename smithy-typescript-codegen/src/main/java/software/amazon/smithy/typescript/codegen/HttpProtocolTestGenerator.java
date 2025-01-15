@@ -107,10 +107,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private TypeScriptWriter writer;
 
     public HttpProtocolTestGenerator(
-            GenerationContext context,
-            ProtocolGenerator protocolGenerator,
-            TestFilter testFilter,
-            MalformedRequestTestFilter malformedRequestTestFilter
+        GenerationContext context,
+        ProtocolGenerator protocolGenerator,
+        TestFilter testFilter,
+        MalformedRequestTestFilter malformedRequestTestFilter
     ) {
         this.settings = context.getSettings();
         this.model = context.getModel();
@@ -165,7 +165,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
                         for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
                             onlyIfProtocolMatches(testCase,
-                                    () -> generateErrorResponseTest(operation, error, testCase));
+                                () -> generateErrorResponseTest(operation, error, testCase));
                         }
                     });
                 }
@@ -199,7 +199,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     error.getTrait(HttpResponseTestsTrait.class).ifPresent(trait -> {
                         for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
                             onlyIfProtocolMatches(testCase,
-                                    () -> generateServerErrorResponseTest(operation, error, testCase));
+                                () -> generateServerErrorResponseTest(operation, error, testCase));
                         }
                     });
                 }
@@ -220,7 +220,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private void onlyIfProtocolMatches(HttpMalformedRequestTestCase testCase, Runnable runnable) {
         if (testCase.getProtocol().equals(protocol)) {
             LOGGER.fine(() -> format("Generating malformed request test case for %s.%s",
-                    service.getId(), testCase.getId()));
+                service.getId(), testCase.getId()));
             initializeWriterIfNeeded();
             runnable.run();
         }
@@ -234,13 +234,15 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.addDependency(TypeScriptDependency.PROTOCOL_HTTP);
             // Add the template to each generated test.
             writer.write(IoUtils.readUtf8Resource(getClass(), "protocol-test-stub.ts"));
+            writer.addImport("test", "it", TypeScriptDependency.VITEST);
+            writer.addImport("expect", null, TypeScriptDependency.VITEST);
         }
     }
 
     private String createTestCaseFilename() {
         String baseName = protocol.getName().toLowerCase(Locale.US)
-                .replace("-", "_")
-                .replace(".", "_");
+            .replace("-", "_")
+            .replace(".", "_");
         return TEST_CASE_FILE_TEMPLATE.replace("%s", baseName);
     }
 
@@ -252,11 +254,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
         openTestBlock(operation, testCase, testName, () -> {
             // Create a client with a custom request handler that intercepts requests.
             writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
-                    writer.write("...clientParams,");
-                    testCase.getHost().ifPresent(host -> {
-                        writer.write("endpoint: \"https://$L\",", host);
-                    });
-                    writer.write("requestHandler: new RequestSerializationTestHandler(),");
+                writer.write("...clientParams,");
+                testCase.getHost().ifPresent(host -> {
+                    writer.write("endpoint: \"https://$L\",", host);
+                });
+                writer.write("requestHandler: new RequestSerializationTestHandler(),");
             });
 
             // Run the parameters through a visitor to adjust for TS specific inputs.
@@ -265,27 +267,27 @@ public final class HttpProtocolTestGenerator implements Runnable {
             if (inputOptional.isPresent()) {
                 StructureShape inputShape = model.expectShape(inputOptional.get(), StructureShape.class);
                 writer.write("const command = new $T(", operationSymbol)
-                        .call(() -> params.accept(new CommandInputNodeVisitor(inputShape)))
-                        .write(");");
+                    .call(() -> params.accept(new CommandInputNodeVisitor(inputShape)))
+                    .write(");");
             } else {
                 writer.write("const command = new $T({});", operationSymbol);
             }
 
             // Send the request and look for the expected exception to then perform assertions.
             writer.write("try {\n"
-                       + "  await client.send(command);\n"
-                       + "  fail('Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown');\n"
-                       + "  return;\n"
-                       + "} catch (err) {\n"
-                       + "  if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {\n"
-                       + "    fail(err);\n"
-                       + "    return;\n"
-                       + "  }\n"
-                       + "  const r = err.request;")
-                    .indent()
-                    .call(() -> writeHttpRequestAssertions(testCase))
-                    .dedent()
-                    .write("}");
+                    + "  await client.send(command);\n"
+                    + "  fail('Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown');\n"
+                    + "  return;\n"
+                    + "} catch (err) {\n"
+                    + "  if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {\n"
+                    + "    fail(err);\n"
+                    + "    return;\n"
+                    + "  }\n"
+                    + "  const r = err.request;")
+                .indent()
+                .call(() -> writeHttpRequestAssertions(testCase))
+                .dedent()
+                .write("}");
         });
     }
 
@@ -294,8 +296,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         // Lowercase all the headers we're expecting as this is what we'll get.
         Map<String, String> headers = testCase.getHeaders().entrySet().stream()
-                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
-                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
+            .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+            .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
         String queryParameters = Node.prettyPrintJson(buildQueryBag(testCase.getQueryParams()));
         String headerParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(headers));
         String body = testCase.getBody().orElse(null);
@@ -340,8 +342,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
 
         Map<String, String> requestHeaders = testCase.getRequest().getHeaders().entrySet().stream()
-                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
-                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
+            .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+            .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
         String queryParameters = Node.prettyPrintJson(buildQueryBag(testCase.getRequest().getQueryParams()));
         String requestHeaderParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(requestHeaders));
         String requestBody = testCase.getRequest().getBody().orElse(null);
@@ -401,9 +403,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Cast the service as any so TS will ignore the fact that the type being passed in is incomplete.
             writer.openBlock(
-                    "const handler = $L(testService as $T<{}>, (ctx: {}, failures: __ValidationFailure[]) => {",
-                    "});", getHandlerName, serviceSymbol,
-                    () -> writer.write("if (failures) { throw failures; } return undefined;")
+                "const handler = $L(testService as $T<{}>, (ctx: {}, failures: __ValidationFailure[]) => {",
+                "});", getHandlerName, serviceSymbol,
+                () -> writer.write("if (failures) { throw failures; } return undefined;")
             );
         } else {
             writer.write("const handler = $L(testService as $T<{}>);", getHandlerName, serviceSymbol);
@@ -466,7 +468,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
         writer.write("expect(r.statusCode).toBe($L);", responseDefinition.getCode());
         responseDefinition.getHeaders().forEach((header, value) -> {
             header = header.toLowerCase();
-            writer.write("expect(r.headers[$S]).toBeDefined();", header);
             writer.write("expect(r.headers[$S]).toBe($S);", header, value);
         });
         writer.write("");
@@ -484,11 +485,20 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpQueryAssertions(HttpRequestTestCase testCase) {
         testCase.getRequireQueryParams().forEach(requiredQueryParam ->
-                writer.write("expect(r.query[$S]).toBeDefined();", requiredQueryParam));
+            writer.write("""
+                expect(
+                  r.query[$1S],
+                  `Query key $1S should have been defined in $${JSON.stringify(r.query)}`
+                ).toBeDefined();""", requiredQueryParam)
+        );
         writer.write("");
 
         testCase.getForbidQueryParams().forEach(forbidQueryParam ->
-                writer.write("expect(r.query[$S]).toBeUndefined();", forbidQueryParam));
+            writer.write("""
+                expect(
+                  r.query[$1S],
+                  `Query key $1S should have been undefined in $${JSON.stringify(r.query)}`
+                ).toBeUndefined();""", forbidQueryParam));
         writer.write("");
 
         List<String> explicitQueryValues = testCase.getQueryParams();
@@ -499,24 +509,31 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             writer.write("const queryString = buildQueryString(r.query);");
             explicitQueryValues.forEach(explicitQueryValue ->
-                    writer.write("expect(queryString).toContain($S);", explicitQueryValue));
+                writer.write("expect(queryString).toContain($S);", explicitQueryValue));
         }
         writer.write("");
     }
 
     private void writeHttpHeaderAssertions(HttpMessageTestCase testCase) {
         testCase.getRequireHeaders().forEach(requiredHeader -> {
-            writer.write("expect(r.headers[$S]).toBeDefined();", requiredHeader.toLowerCase());
+            writer.write("""
+                expect(
+                    r.headers[$1S],
+                    `Header key $1S should have been defined in $${JSON.stringify(r.headers)}`
+                ).toBeDefined();""", requiredHeader.toLowerCase());
         });
         writer.write("");
 
         testCase.getForbidHeaders().forEach(forbidHeader ->
-                writer.write("expect(r.headers[$S]).toBeUndefined();", forbidHeader.toLowerCase()));
+            writer.write("""
+            expect(
+              r.headers[$1S],
+              `Header key $1S should have been undefined in $${JSON.stringify(r.headers)}`
+            ).toBeUndefined();""", forbidHeader.toLowerCase()));
         writer.write("");
 
         testCase.getHeaders().forEach((header, value) -> {
             header = header.toLowerCase();
-            writer.write("expect(r.headers[$S]).toBeDefined();", header);
             writer.write("expect(r.headers[$S]).toBe($S);", header, value);
         });
         writer.write("");
@@ -524,7 +541,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpHostAssertion(HttpRequestTestCase testCase) {
         testCase.getResolvedHost().ifPresent(resolvedHost -> {
-            writer.write("expect(r.headers[\"host\"]).toBeDefined();");
             writer.write("expect(r.headers[\"host\"]).toBe($S);", resolvedHost);
             writer.write("");
         });
@@ -540,7 +556,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         }
 
         // Fast fail if we don't have a body.
-        writer.write("expect(r.body).toBeDefined();");
+        writer.write("expect(r.body, `Body was undefined.`).toBeDefined();");
 
         // Otherwise load a media type specific comparator and do a comparison.
         String comparatorInvoke = registerBodyComparatorStub(mediaType);
@@ -566,14 +582,14 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpBodyMessageAssertion(String messageRegex, String mediaType) {
         // Fast fail if we don't have a body.
-        writer.write("expect(r.body).toBeDefined();");
+        writer.write("expect(r.body, `Body was undefined`).toBeDefined();");
 
         // Otherwise load a media type specific matcher
         String comparatorInvoke = registerMessageRegexStub(mediaType);
 
         writer.writeInline("expect(")
-                .writeInline(comparatorInvoke, messageRegex)
-                .write(").toEqual(true);");
+            .writeInline(comparatorInvoke, messageRegex)
+            .write(").toEqual(true);");
     }
 
     private String registerBodyComparatorStub(String mediaType) {
@@ -607,7 +623,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 return "compareEquivalentCborBodies(bodyString, r.body)";
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
-                        + "`, defaulting to direct comparison.");
+                    + "`, defaulting to direct comparison.");
                 writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
                 return "compareEquivalentUnknownTypeBodies(utf8Encoder, bodyString, r.body)";
@@ -635,17 +651,17 @@ public final class HttpProtocolTestGenerator implements Runnable {
             Symbol outputType = operationSymbol.expectProperty("outputType", Symbol.class);
             writer.openBlock("class TestService implements Partial<$T<{}>> {", "}", serviceSymbol, () -> {
                 writer.openBlock("$L(input: any, ctx: {}): Promise<$T> {", "}",
-                        operationSymbol.getName(), outputType, () -> {
-                    Optional<ShapeId> outputOptional = operation.getOutput();
-                    if (outputOptional.isPresent()) {
-                        StructureShape outputShape = model.expectShape(outputOptional.get(), StructureShape.class);
-                        writer.writeInline("let response = ");
-                        testCase.getParams().accept(new CommandInputNodeVisitor(outputShape, true));
-                        writer.write("return Promise.resolve({ ...response, '$$metadata': {} });");
-                    } else {
-                        writer.write("return Promise.resolve({ '$$metadata': {} });");
-                    }
-                });
+                    operationSymbol.getName(), outputType, () -> {
+                        Optional<ShapeId> outputOptional = operation.getOutput();
+                        if (outputOptional.isPresent()) {
+                            StructureShape outputShape = model.expectShape(outputOptional.get(), StructureShape.class);
+                            writer.writeInline("let response = ");
+                            testCase.getParams().accept(new CommandInputNodeVisitor(outputShape, true));
+                            writer.write("return Promise.resolve({ ...response, '$$metadata': {} });");
+                        } else {
+                            writer.write("return Promise.resolve({ '$$metadata': {} });");
+                        }
+                    });
             });
             writeServerResponseTest(operation, testCase);
         });
@@ -660,19 +676,19 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // Invoke the handler and look for the expected response to then perform assertions.
             writer.write("let r: any;");
             writer.write("try {\n"
-                       + "  r = await client.send(command);\n"
-                       + "} catch (err) {\n"
-                       + "  fail(\"Expected a valid response to be returned, got \" + err);\n"
-                       + "  return;\n"
-                       + "}");
+                + "  r = await client.send(command);\n"
+                + "} catch (err) {\n"
+                + "  fail(\"Expected a valid response to be returned, got \" + err);\n"
+                + "  return;\n"
+                + "}");
             writeResponseAssertions(operation, testCase);
         });
     }
 
     private void generateServerErrorResponseTest(
-            OperationShape operation,
-            StructureShape error,
-            HttpResponseTestCase testCase
+        OperationShape operation,
+        StructureShape error,
+        HttpResponseTestCase testCase
     ) {
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
@@ -747,22 +763,22 @@ public final class HttpProtocolTestGenerator implements Runnable {
         writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("OperationSerializer", "__OperationSerializer", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock("const serFn: (op: $1T) => __OperationSerializer<$2T<{}>, $1T, __ServiceException> = (op) =>"
-                        + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
+            + " { return new TestSerializer(); };", serviceOperationsSymbol, serviceSymbol);
 
         writer.addRelativeImport("serializeFrameworkException", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
                 ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
         writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
         writer.write("const handler = new $T(service, testMux, serFn, serializeFrameworkException, "
-                + "(ctx: {}, f: __ValidationFailure[]) => { if (f) { throw f; } return undefined;});", handlerSymbol);
+            + "(ctx: {}, f: __ValidationFailure[]) => { if (f) { throw f; } return undefined;});", handlerSymbol);
         writer.write("let r = await handler.handle(request, {})").write("");
         writeHttpResponseAssertions(testCase);
     }
 
     private void generateErrorResponseTest(
-            OperationShape operation,
-            StructureShape error,
-            HttpResponseTestCase testCase
+        OperationShape operation,
+        StructureShape error,
+        HttpResponseTestCase testCase
     ) {
         // Use a compound test_case name so we generate unique tests
         // for each error on each operation safely. This is useful in validating
@@ -775,19 +791,19 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Invoke the handler and look for the expected exception to then perform assertions.
             writer.write("try {\n"
-                       + "  await client.send(command);\n"
-                       + "} catch (err) {\n"
-                       + "  if (err.name !== \"$1L\") {\n"
-                       + "    console.log(err);\n"
-                       + "    fail(`Expected a $1L to be thrown, got $${err.name} instead`);\n"
-                       + "    return;\n"
-                       + "  }\n"
-                       + "  const r: any = err;", error.getId().getName())
-                    .indent()
-                    .call(() -> writeResponseAssertions(error, testCase))
-                    .write("return;")
-                    .dedent()
-                    .write("}");
+                    + "  await client.send(command);\n"
+                    + "} catch (err) {\n"
+                    + "  if (err.name !== \"$1L\") {\n"
+                    + "    console.log(err);\n"
+                    + "    fail(`Expected a $1L to be thrown, got $${err.name} instead`);\n"
+                    + "    return;\n"
+                    + "  }\n"
+                    + "  const r: any = err;", error.getId().getName())
+                .indent()
+                .call(() -> writeResponseAssertions(error, testCase))
+                .write("return;")
+                .dedent()
+                .write("}");
             writer.write("fail('Expected an exception to be thrown from response');");
         });
     }
@@ -797,23 +813,23 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         // Lowercase all the headers we're expecting as this is what we'll get.
         Map<String, String> headers = testCase.getHeaders().entrySet().stream()
-                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
-                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
+            .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+            .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
         String headerParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(headers));
         String body = testCase.getBody().orElse(null);
 
         // Create a client with a custom request handler that intercepts requests.
         writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
-                writer.write("...clientParams,");
-                writer.openBlock("requestHandler: new ResponseDeserializationTestHandler(", ")", () -> {
-                    writer.write("$L,", isSuccess);
-                    writer.write("$L,", testCase.getCode());
-                    writer.write("$L,", headers.isEmpty() ? "undefined" : headerParameters);
-                    if (body != null) {
-                        writer.write("`$L`,", body);
-                    }
-                });
+            writer.write("...clientParams,");
+            writer.openBlock("requestHandler: new ResponseDeserializationTestHandler(", ")", () -> {
+                writer.write("$L,", isSuccess);
+                writer.write("$L,", testCase.getCode());
+                writer.write("$L,", headers.isEmpty() ? "undefined" : headerParameters);
+                if (body != null) {
+                    writer.write("`$L`,", body);
+                }
             });
+        });
 
         // Set the command's parameters to empty, using the any type to
         // trick TS in to letting us send this command through.
@@ -825,20 +841,20 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private void writeResponseAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         writer.write("expect(r['$$metadata'].httpStatusCode).toBe($L);", testCase.getCode());
 
-        writeReponseParamAssertions(operationOrError, testCase);
+        writeResponseParamAssertions(operationOrError, testCase);
     }
 
     private void writeRequestParamAssertions(OperationShape operation, HttpRequestTestCase testCase) {
         ObjectNode params = testCase.getParams();
         if (!params.isEmpty()) {
             StructureShape testInputShape = model.expectShape(
-                    operation.getInput().orElseThrow(() -> new CodegenException("Foo")),
-                    StructureShape.class);
+                operation.getInput().orElseThrow(() -> new CodegenException("Foo")),
+                StructureShape.class);
 
             // Use this trick wrapper to not need more complex trailing comma handling.
             writer.write("const paramsToValidate: any = [")
-                    .call(() -> params.accept(new CommandOutputNodeVisitor(testInputShape)))
-                    .write("][0];");
+                .call(() -> params.accept(new CommandOutputNodeVisitor(testInputShape)))
+                .write("][0];");
 
             // Extract a payload binding if present.
             Optional<HttpBinding> pb = Optional.empty();
@@ -854,12 +870,12 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 writer.addImport("streamCollector", "__streamCollector",
                     TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
                 writer.write("const comparableBlob = await __streamCollector(r[$S]);",
-                        payloadBinding.get().getMemberName());
+                    payloadBinding.get().getMemberName());
             });
         }
     }
 
-    private void writeReponseParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
+    private void writeResponseParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         ObjectNode params = testCase.getParams();
         if (!params.isEmpty()) {
             StructureShape testOutputShape;
@@ -867,49 +883,49 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 testOutputShape = operationOrError.asStructureShape().get();
             } else {
                 testOutputShape = model.expectShape(
-                        operationOrError.asOperationShape().get().getOutput()
-                                .orElseThrow(() -> new CodegenException("Foo")),
-                        StructureShape.class);
+                    operationOrError.asOperationShape().get().getOutput()
+                        .orElseThrow(() -> new CodegenException("Foo")),
+                    StructureShape.class);
             }
 
             // Use this trick wrapper to not need more complex trailing comma handling.
             writer.write("const paramsToValidate: any = [")
-                    .call(() -> params.accept(new CommandOutputNodeVisitor(testOutputShape)))
-                    .write("][0];");
+                .call(() -> params.accept(new CommandOutputNodeVisitor(testOutputShape)))
+                .write("][0];");
 
             // Extract a payload binding if present.
             Optional<HttpBinding> payloadBinding = operationOrError.asOperationShape()
-                    .map(operationShape -> {
-                        HttpBindingIndex index = HttpBindingIndex.of(model);
-                        List<HttpBinding> payloadBindings = index.getResponseBindings(operationOrError,
-                                Location.PAYLOAD);
-                        if (!payloadBindings.isEmpty()) {
-                            return payloadBindings.get(0);
-                        }
-                        return null;
-                    });
+                .map(operationShape -> {
+                    HttpBindingIndex index = HttpBindingIndex.of(model);
+                    List<HttpBinding> payloadBindings = index.getResponseBindings(operationOrError,
+                        Location.PAYLOAD);
+                    if (!payloadBindings.isEmpty()) {
+                        return payloadBindings.get(0);
+                    }
+                    return null;
+                });
 
             writeParamAssertions(writer, payloadBinding, () -> {
                 writer.write("const comparableBlob = await client.config.streamCollector(r[$S]);",
-                        payloadBinding.get().getMemberName());
+                    payloadBinding.get().getMemberName());
             });
         }
     }
 
     private void writeParamAssertions(
-            TypeScriptWriter writer,
-            Optional<HttpBinding> payloadBinding,
-            Runnable writeComparableBlob
+        TypeScriptWriter writer,
+        Optional<HttpBinding> payloadBinding,
+        Runnable writeComparableBlob
     ) {
         // If we have a streaming payload blob, we need to collect it to something that
         // can be compared with the test contents. This emulates the customer experience.
         boolean hasStreamingPayloadBlob = payloadBinding
-                .map(binding ->
-                        model.getShape(binding.getMember().getTarget())
-                                .filter(Shape::isBlobShape)
-                                .filter(s -> s.hasTrait(StreamingTrait.ID))
-                                .isPresent())
-                .orElse(false);
+            .map(binding ->
+                model.getShape(binding.getMember().getTarget())
+                    .filter(Shape::isBlobShape)
+                    .filter(s -> s.hasTrait(StreamingTrait.ID))
+                    .isPresent())
+            .orElse(false);
 
         if (hasStreamingPayloadBlob) {
             writeComparableBlob.run();
@@ -917,10 +933,14 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         // Perform parameter comparisons.
         writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
-            writer.write("expect(r[param]).toBeDefined();");
+            writer.write("""
+            expect(
+                r[param],
+                `The output field $${param} should have been defined in $${JSON.stringify(r, null, 2)}`
+            ).toBeDefined();""");
             if (hasStreamingPayloadBlob) {
                 writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
-                        writer.write("""
+                    writer.write("""
                             expect(equivalentContents(paramsToValidate[param], \
                             comparableBlob)).toBe(true);
                             """));
@@ -937,10 +957,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void openTestBlock(
-            OperationShape operation,
-            HttpMessageTestCase testCase,
-            String testName,
-            Runnable f
+        OperationShape operation,
+        HttpMessageTestCase testCase,
+        String testName,
+        Runnable f
     ) {
         // Skipped tests are still generated, just not run.
         if (testFilter.skip(service, operation, testCase, settings)) {
@@ -951,10 +971,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void openTestBlock(
-            OperationShape operation,
-            HttpMalformedRequestTestCase testCase,
-            String testName,
-            Runnable f
+        OperationShape operation,
+        HttpMalformedRequestTestCase testCase,
+        String testName,
+        Runnable f
     ) {
         // Skipped tests are still generated, just not run.
         if (malformedRequestTestFilter.skip(service, operation, testCase, settings)) {
@@ -1075,7 +1095,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         memberShape = wrapperShape.asMapShape().get().getValue();
                     } else {
                         throw new CodegenException("Unknown shape type for object node when "
-                                + "generating protocol test input: " + wrapperShape.getType());
+                            + "generating protocol test input: " + wrapperShape.getType());
                     }
 
                     // Handle auto-filling idempotency token values to the explicit value.
@@ -1129,7 +1149,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         break;
                     default:
                         throw new CodegenException(String.format(
-                                "Unexpected string value for `%s`: \"%s\"", workingShape.getId(), node.getValue()));
+                            "Unexpected string value for `%s`: \"%s\"", workingShape.getId(), node.getValue()));
                 }
             } else {
                 writer.write("$S,", node.getValue());
@@ -1157,10 +1177,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
          * @return True if the test should be skipped, false otherwise.
          */
         boolean skip(
-                ServiceShape service,
-                OperationShape operation,
-                HttpMessageTestCase testCase,
-                TypeScriptSettings settings
+            ServiceShape service,
+            OperationShape operation,
+            HttpMessageTestCase testCase,
+            TypeScriptSettings settings
         );
     }
 
@@ -1183,10 +1203,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
          * @return True if the test should be skipped, false otherwise.
          */
         boolean skip(
-                ServiceShape service,
-                OperationShape operation,
-                HttpMalformedRequestTestCase testCase,
-                TypeScriptSettings settings
+            ServiceShape service,
+            OperationShape operation,
+            HttpMalformedRequestTestCase testCase,
+            TypeScriptSettings settings
         );
     }
 
@@ -1279,7 +1299,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         memberShape = wrapperShape.asMapShape().get().getValue();
                     } else {
                         throw new CodegenException("Unknown shape type for object node when "
-                                + "generating protocol test output: " + wrapperShape.getType());
+                            + "generating protocol test output: " + wrapperShape.getType());
                     }
 
                     // Handle error standardization to the down-cased "message".
@@ -1293,8 +1313,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     // Alter valueNode to downcase keys if it's a map for prefixHeaders.
                     // This is an enforced behavior of the fetch handler.
                     Node renderNode = memberShape.hasTrait(HttpPrefixHeadersTrait.class)
-                            ? downcaseNodeKeys(valueNode.expectObjectNode())
-                            : valueNode;
+                        ? downcaseNodeKeys(valueNode.expectObjectNode())
+                        : valueNode;
                     writer.call(() -> renderNode.accept(this));
                 });
                 this.workingShape = wrapperShape;
@@ -1306,7 +1326,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             ObjectNode downcasedNode = Node.objectNode();
             for (Map.Entry<StringNode, Node> entry : startingNode.getMembers().entrySet()) {
                 downcasedNode = downcasedNode.withMember(entry.getKey().getValue().toLowerCase(Locale.US),
-                        entry.getValue());
+                    entry.getValue());
             }
             return downcasedNode;
         }
@@ -1329,7 +1349,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         break;
                     default:
                         throw new CodegenException(String.format(
-                                "Unexpected string value for `%s`: \"%s\"", workingShape.getId(), node.getValue()));
+                            "Unexpected string value for `%s`: \"%s\"", workingShape.getId(), node.getValue()));
                 }
             } else {
                 writer.write("$S,", node.getValue());

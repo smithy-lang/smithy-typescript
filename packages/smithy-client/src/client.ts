@@ -7,6 +7,7 @@ import {
   MetadataBearer,
   MiddlewareStack,
   NodeHttpHandlerOptions,
+  Protocol,
   RequestHandler,
 } from "@smithy/types";
 
@@ -14,6 +15,11 @@ import {
  * @public
  */
 export interface SmithyConfiguration<HandlerOptions> {
+  /**
+   * A requestHandler instance or its initializer object.
+   *
+   * @public
+   */
   requestHandler:
     | RequestHandler<any, any, HandlerOptions>
     | NodeHttpHandlerOptions
@@ -26,8 +32,6 @@ export interface SmithyConfiguration<HandlerOptions> {
    */
   readonly apiVersion: string;
   /**
-   * @public
-   *
    * Default false.
    *
    * When true, the client will only resolve the middleware stack once per
@@ -39,8 +43,19 @@ export interface SmithyConfiguration<HandlerOptions> {
    *
    * Enable this only if needing the additional time saved (0-1ms per request)
    * and not needing middleware modifications between requests.
+   *
+   * @public
    */
   cacheMiddleware?: boolean;
+  /**
+   * The protocol controlling the message type (e.g. HTTP) and format (e.g. JSON)
+   * may be overridden. A default will always be set by the client.
+   *
+   * Available options depend on the service's supported protocols.
+   *
+   * @public
+   */
+  protocol?: Protocol<any, any>;
 }
 
 /**
@@ -50,6 +65,7 @@ export type SmithyResolvedConfiguration<HandlerOptions> = {
   requestHandler: RequestHandler<any, any, HandlerOptions>;
   readonly apiVersion: string;
   cacheMiddleware?: boolean;
+  protocol: Protocol<any, any>;
 };
 
 /**

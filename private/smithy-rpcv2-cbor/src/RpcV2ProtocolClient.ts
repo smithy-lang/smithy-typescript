@@ -41,6 +41,7 @@ import {
   resolveCustomEndpointsConfig,
 } from "@smithy/config-resolver";
 import { DefaultIdentityProviderConfig, getHttpAuthSchemePlugin, getHttpSigningPlugin } from "@smithy/core";
+import { getSchemaSerdePlugin } from "@smithy/core/schema";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import { RetryInputConfig, RetryResolvedConfig, getRetryPlugin, resolveRetryConfig } from "@smithy/middleware-retry";
 import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
@@ -254,6 +255,7 @@ export class RpcV2ProtocolClient extends __Client<
     let _config_3 = resolveHttpAuthSchemeConfig(_config_2);
     let _config_4 = resolveRuntimeExtensions(_config_3, configuration?.extensions || []);
     this.config = _config_4;
+    this.middlewareStack.use(getSchemaSerdePlugin(this.config));
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));
     this.middlewareStack.use(

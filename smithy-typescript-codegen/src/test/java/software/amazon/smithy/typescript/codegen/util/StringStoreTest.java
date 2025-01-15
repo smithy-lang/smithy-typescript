@@ -1,7 +1,6 @@
 package software.amazon.smithy.typescript.codegen.util;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,5 +120,63 @@ class StringStoreTest {
                 Objects.toString(i) + ": " + actual[i].trim()
             );
         }
+    }
+
+    @Test
+    void construction() {
+        StringStore subject = new StringStore(true);
+        subject.var("ListWordsCamelCase");
+        subject.var("list-words-hyphenated");
+        subject.var("ListWordsCamelCaseButWithTooShortWordOk");
+        subject.var("list-words-hyphenated-with-too-short-word-ok");
+
+        subject.var("LongRepeatedPrefixBoolean");
+        subject.var("LongRepeatedPrefixBlob");
+        subject.var("LongRepeatedPrefixByte");
+        subject.var("LongRepeatedPrefixInteger");
+        subject.var("LongRepeatedPrefixList");
+        subject.var("LongRepeatedPrefixMap");
+
+        assertEquals(
+            """
+                const _s = "-short";
+                const _B = "But";
+                const _w = "-with";
+                const _Bl = "Blob";
+                const _W = "Word";
+                const _wo = "-word";
+                const _C = "Camel";
+                const _P = "Prefix";
+                const _R = "Repeated";
+                const _l = "list";
+                const _Wi = "With";
+                const _Ca = "Case";
+                const _I = "Integer";
+                const _t = "-too";
+                const _h = "-hyphenated";
+                const _T = "Too";
+                const _wor = "-words";
+                const _Wo = "Words";
+                const _By = "Byte";
+                const _L = "Long";
+                const _Li = "List";
+                const _Bo = "Boolean";
+                const _M = "Map";
+                const _S = "Short";
+                const _c0 = _L+_R+_P;
+                
+                const _LRPB = _c0+_Bo as "LongRepeatedPrefixBoolean";
+                const _LRPBo = _c0+_Bl as "LongRepeatedPrefixBlob";
+                const _LRPBon = _c0+_By as "LongRepeatedPrefixByte";
+                const _LRPI = _c0+_I as "LongRepeatedPrefixInteger";
+                const _LRPL = _c0+_Li as "LongRepeatedPrefixList";
+                const _LRPM = _c0+_M as "LongRepeatedPrefixMap";
+                const _LWCC = _Li+_Wo+_C+_Ca as "ListWordsCamelCase";
+                const _LWCCBWTSWO = _Li+_Wo+_C+_Ca+_B+_Wi+_T+_S+_W + "Ok" as "ListWordsCamelCaseButWithTooShortWordOk";
+                const _lwh = _l+_wor+_h as "list-words-hyphenated";
+                const _lwhwtswo = _l+_wor+_h+_w+_t+_s+_wo + "-ok" as "list-words-hyphenated-with-too-short-word-ok";
+                """,
+            subject.flushVariableDeclarationCode()
+        );
     }
 }

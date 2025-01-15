@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,6 +35,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -58,6 +61,7 @@ import software.amazon.smithy.typescript.codegen.documentation.StructureExampleG
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
@@ -75,6 +79,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class CommandGenerator implements Runnable {
 
     static final String COMMANDS_FOLDER = "commands";
+    static final String SCHEMAS_FOLDER = "schemas";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -90,6 +95,9 @@ final class CommandGenerator implements Runnable {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
     private final SensitiveDataFinder sensitiveDataFinder;
+    private final ReservedWords reservedWords = new ReservedWordsBuilder()
+        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
+        .build();
 
     CommandGenerator(
             TypeScriptSettings settings,
@@ -493,7 +501,10 @@ final class CommandGenerator implements Runnable {
         );
         {
             // Add serialization and deserialization plugin.
-            writer.write("$T(config, this.serialize, this.deserialize),", serde);
+            if (!SchemaGenerationAllowlist.contains(service.getId())) {
+                writer.write("$T(config, this.serialize, this.deserialize),", serde);
+            }
+
             // EndpointsV2
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 writer.addImport(
@@ -661,10 +672,25 @@ final class CommandGenerator implements Runnable {
         }
     }
 
+    private void writeSchemaSerde() {
+        String operationSchema = reservedWords.escape(operation.getId().getName());
+        writer.addRelativeImport(operationSchema, null, Paths.get(
+            ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas"
+        ));
+        writer.write("""
+            .sc($L)""",
+            operationSchema
+        );
+    }
+
     private void writeSerde() {
-        writer
-            .write(".ser($L)", getSerdeDispatcher(true))
-            .write(".de($L)", getSerdeDispatcher(false));
+        if (SchemaGenerationAllowlist.contains(service.getId())) {
+            writeSchemaSerde();
+        } else {
+            writer
+                .write(".ser($L)", getSerdeDispatcher(true))
+                .write(".de($L)", getSerdeDispatcher(false));
+        }
     }
 
     private String getSerdeDispatcher(boolean isInput) {
@@ -672,11 +698,11 @@ final class CommandGenerator implements Runnable {
             return "() => { throw new Error(\"No supported protocol was found\"); }";
         } else {
             String serdeFunctionName = isInput
-                    ? ProtocolGenerator.getSerFunctionShortName(symbol)
-                    : ProtocolGenerator.getDeserFunctionShortName(symbol);
+                ? ProtocolGenerator.getSerFunctionShortName(symbol)
+                : ProtocolGenerator.getDeserFunctionShortName(symbol);
             writer.addRelativeImport(serdeFunctionName, null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                            ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
             return serdeFunctionName;
         }
     }

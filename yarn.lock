@@ -2402,6 +2402,7 @@ __metadata:
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-base64": "workspace:^"
     "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-stream": "workspace:^"
@@ -2986,6 +2987,7 @@ __metadata:
     rimraf: "npm:^3.0.0"
     tslib: "npm:^2.6.2"
     typescript: "npm:~5.2.2"
+    vitest: "npm:2.1.8"
   languageName: unknown
   linkType: soft
 

@@ -1,4 +1,5 @@
 import { Endpoint } from "./http";
+import { Protocol } from "./schema/schema";
 import { RequestHandler } from "./transfer";
 import { Decoder, Encoder, Provider } from "./util";
 
@@ -34,6 +35,7 @@ export interface StreamCollector {
 export interface SerdeContext extends SerdeFunctions, EndpointBearer {
   requestHandler: RequestHandler<any, any>;
   disableHostPrefix: boolean;
+  protocol?: Protocol<any, any>;
 }
 
 /**
@@ -51,6 +53,7 @@ export interface SerdeFunctions {
 
 /**
  * @public
+ * @deprecated - use SchemaRequestSerializer.
  */
 export interface RequestSerializer<Request, Context extends EndpointBearer = any> {
   /**
@@ -65,6 +68,7 @@ export interface RequestSerializer<Request, Context extends EndpointBearer = any
 
 /**
  * @public
+ * @deprecated - use SchemaResponseDeserializer.
  */
 export interface ResponseDeserializer<OutputType, ResponseType = any, Context = any> {
   /**

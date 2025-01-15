@@ -1,8 +1,7 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { Float16Output } from "../models/models_0";
-import { de_Float16Command, se_Float16Command } from "../protocols/Rpcv2cbor";
-import { getSerdePlugin } from "@smithy/middleware-serde";
+import { Float16 } from "../schemas/schemas";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
@@ -51,6 +50,7 @@ export interface Float16CommandOutput extends Float16Output, __MetadataBearer {}
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class Float16Command extends $Command
   .classBuilder<
@@ -61,13 +61,12 @@ export class Float16Command extends $Command
     ServiceOutputTypes
   >()
   .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getSerdePlugin(config, this.serialize, this.deserialize)];
+    return [];
   })
   .s("RpcV2Protocol", "Float16", {})
   .n("RpcV2ProtocolClient", "Float16Command")
   .f(void 0, void 0)
-  .ser(se_Float16Command)
-  .de(de_Float16Command)
+  .sc(Float16)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {

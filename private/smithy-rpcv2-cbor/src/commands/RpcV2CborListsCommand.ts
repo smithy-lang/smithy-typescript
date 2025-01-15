@@ -1,8 +1,7 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { RpcV2CborListInputOutput } from "../models/models_0";
-import { de_RpcV2CborListsCommand, se_RpcV2CborListsCommand } from "../protocols/Rpcv2cbor";
-import { getSerdePlugin } from "@smithy/middleware-serde";
+import { RpcV2CborLists } from "../schemas/schemas";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
@@ -131,6 +130,7 @@ export interface RpcV2CborListsCommandOutput extends RpcV2CborListInputOutput, _
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  * @public
  */
 export class RpcV2CborListsCommand extends $Command
@@ -142,13 +142,12 @@ export class RpcV2CborListsCommand extends $Command
     ServiceOutputTypes
   >()
   .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getSerdePlugin(config, this.serialize, this.deserialize)];
+    return [];
   })
   .s("RpcV2Protocol", "RpcV2CborLists", {})
   .n("RpcV2ProtocolClient", "RpcV2CborListsCommand")
   .f(void 0, void 0)
-  .ser(se_RpcV2CborListsCommand)
-  .de(de_RpcV2CborListsCommand)
+  .sc(RpcV2CborLists)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {
