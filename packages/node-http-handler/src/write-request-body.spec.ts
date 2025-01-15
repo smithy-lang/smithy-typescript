@@ -59,4 +59,25 @@ describe(writeRequestBody.name, () => {
       await promise;
     }
   );
+
+  it("should send the body if the 100 Continue response is not received before the timeout", async () => {
+    const httpRequest = Object.assign(new EventEmitter(), {
+      end: vi.fn(),
+    }) as any;
+    const request = {
+      headers: {
+        expect: "100-continue",
+      },
+      body: Buffer.from("abcd"),
+      method: "GET",
+      hostname: "",
+      protocol: "https:",
+      path: "/",
+    };
+
+    const promise = writeRequestBody(httpRequest, request);
+    expect(httpRequest.end).not.toHaveBeenCalled();
+    await promise;
+    expect(httpRequest.end).toHaveBeenCalled();
+  });
 });

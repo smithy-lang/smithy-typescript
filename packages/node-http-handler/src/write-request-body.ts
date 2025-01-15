@@ -28,7 +28,7 @@ export async function writeRequestBody(
   if (expect === "100-continue") {
     sendBody = await Promise.race<boolean>([
       new Promise((resolve) => {
-        timeoutId = Number(timing.setTimeout(resolve, Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
+        timeoutId = Number(timing.setTimeout(() => resolve(true), Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
       }),
       new Promise((resolve) => {
         httpRequest.on("continue", () => {
