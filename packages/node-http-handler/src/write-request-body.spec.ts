@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import { describe, expect, test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { writeRequestBody } from "./write-request-body";
 
@@ -59,4 +59,36 @@ describe(writeRequestBody.name, () => {
       await promise;
     }
   );
+
+  describe("with fake timers", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+    it("should send the body if the 100 Continue response is not received before the timeout", async () => {
+      const httpRequest = Object.assign(new EventEmitter(), {
+        end: vi.fn(),
+      }) as any;
+      const request = {
+        headers: {
+          expect: "100-continue",
+        },
+        body: Buffer.from("abcd"),
+        method: "GET",
+        hostname: "",
+        protocol: "https:",
+        path: "/",
+      };
+
+      const promise = writeRequestBody(httpRequest, request, 12_000);
+      expect(httpRequest.end).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(13000);
+      await promise;
+
+      expect(httpRequest.end).toHaveBeenCalled();
+    });
+  });
 });
