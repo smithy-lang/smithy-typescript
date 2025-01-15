@@ -5,14 +5,14 @@ import { Readable } from "stream";
 
 import { timing } from "./timing";
 
-const MIN_WAIT_TIME = 1000;
+const MIN_WAIT_TIME = 6_000;
 
 /**
  * This resolves when writeBody has been called.
  *
  * @param httpRequest - opened Node.js request.
  * @param request - container with the request body.
- * @param maxContinueTimeoutMs - maximum time to wait for the continue event. Minimum of 1000ms.
+ * @param maxContinueTimeoutMs - time to wait for the continue event.
  */
 export async function writeRequestBody(
   httpRequest: ClientRequest | ClientHttp2Stream,
@@ -28,6 +28,14 @@ export async function writeRequestBody(
   if (expect === "100-continue") {
     sendBody = await Promise.race<boolean>([
       new Promise((resolve) => {
+        // If this resolves first (wins the race), it means that at least MIN_WAIT_TIME ms
+        // elapsed and no continue, response, or error has happened.
+        // The high default timeout is to give the server ample time to respond.
+        // This is an unusual situation, and indicates the server may not be S3 actual
+        // and did not correctly implement 100-continue event handling.
+        // Strictly speaking, we should perhaps keep waiting up to the request timeout
+        // and then throw an error, but we resolve true to allow the server to deal
+        // with the request body.
         timeoutId = Number(timing.setTimeout(() => resolve(true), Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
       }),
       new Promise((resolve) => {
