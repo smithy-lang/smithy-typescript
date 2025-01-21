@@ -1,6 +1,6 @@
 {
   "name": "@smithy/types",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline types",
@@ -49,7 +49,8 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "rimraf": "3.0.2",
-    "typedoc": "0.23.23"
+    "typedoc": "0.23.23",
+    "@types/node": "^18.11.9"
   },
   "typedoc": {
     "entryPoint": "src/index.ts"

@@ -17,6 +17,7 @@ export * from "./http/httpHandlerInitialization";
 export * from "./identity";
 export * from "./logger";
 export * from "./middleware";
+export * from "./model";
 export * from "./pagination";
 export * from "./profile";
 export * from "./response";
