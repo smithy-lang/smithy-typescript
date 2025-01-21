@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- a4242633: Added `Model` class for parsing Smithy AST
+- c49460c6: Added `Model` class for parsing Smithy AST
  
 ## 4.1.0
 
