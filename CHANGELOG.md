@@ -1,5 +1,18 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.26.0 (2025-01-22)
+
+### Features
+- Dropped support for Node.js 16 ([#1487](https://github.com/smithy-lang/smithy-typescript/pull/1487))
+- Upgraded smithyGradleVersion to 1.2.0 ([#1499](https://github.com/smithy-lang/smithy-typescript/pull/1499))
+- Passed client configuration to loadNodeConfig calls ([#1471](https://github.com/smithy-lang/smithy-typescript/pull/1471))
+- Removed String extension in LazyJsonString ([#1468](https://github.com/smithy-lang/smithy-typescript/pull/1468))
+- Upgraded vitest to 2.1.8 ([#1496](https://github.com/smithy-lang/smithy-typescript/pull/1496))
+
+### Bug Fixes
+- Fixed code generation issue for operationContextParam ([#1475](https://github.com/smithy-lang/smithy-typescript/pull/1475))
+- Resolved obj and array JS literals from JMESPath types for waiters ([#1462](https://github.com/smithy-lang/smithy-typescript/pull/1462))
+
 ## 0.25.0 (2024-11-18)
 
 ### Features
