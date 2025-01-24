@@ -99,4 +99,44 @@ describe("deserializerMiddleware", () => {
       expect(e.$response.body).toEqual("oh no");
     }
   });
+
+  it("handles unwritable error.message", async () => {
+    const exception = Object.assign({}, mockNextResponse.response, {
+      $response: {
+        body: "",
+      },
+      $responseBodyText: "oh no",
+    });
+
+    Object.defineProperty(exception, "message", {
+      set() {
+        throw new Error("may not call setter");
+      },
+      get() {
+        return "MockException";
+      },
+    });
+
+    const sink = vi.fn();
+
+    mockDeserializer.mockReset();
+    mockDeserializer.mockRejectedValueOnce(exception);
+    try {
+      await deserializerMiddleware(mockOptions, mockDeserializer)(mockNext, {
+        logger: {
+          debug: sink,
+          info: sink,
+          warn: sink,
+          error: sink,
+        },
+      })(mockArgs);
+      fail("DeserializerMiddleware should throw");
+    } catch (e) {
+      expect(sink).toHaveBeenCalledWith(
+        `Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object.`
+      );
+      expect(e.message).toEqual("MockException");
+      expect(e.$response.body).toEqual("oh no");
+    }
+  });
 });
