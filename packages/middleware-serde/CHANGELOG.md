@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.2
+
+### Patch Changes
+
+- f5d0bac: handle unwritable error.message field
+
 ## 4.0.1
 
 ### Patch Changes
