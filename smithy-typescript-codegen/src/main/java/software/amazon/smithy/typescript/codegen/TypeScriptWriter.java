@@ -266,7 +266,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     docs = docs.replace("{", "\\{")
                         .replace("}", "\\}");
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
-                        docs = "@deprecated\n\n" + docs;
+                        docs = docs + "\n\n@deprecated";
                     }
                     docs = addReleaseTag(member, docs);
                     writeDocs(docs);
