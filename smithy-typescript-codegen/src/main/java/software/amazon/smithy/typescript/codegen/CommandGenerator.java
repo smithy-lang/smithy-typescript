@@ -254,7 +254,7 @@ final class CommandGenerator implements Runnable {
                         packageName)
                 + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
                         packageName)
-                + String.format("const client = new %s(config);%n", serviceName)
+                + String.format("const client = new %s(config); // See AWS SDK config options: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html%n", serviceName)
                 + String.format("const input = %s%n",
                         StructureExampleGenerator.generateStructuralHintDocumentation(
                                 model.getShape(operation.getInputShape()).get(), model, false, true))
