@@ -582,6 +582,9 @@ it("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
         message: "Hi",
       },
     ][0];
+
+    console.log('whew', err);
+
     Object.keys(paramsToValidate).forEach((param) => {
       expect(r[param]).toBeDefined();
       expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);

@@ -43,6 +43,14 @@ public final class StringStore {
     }
 
     /**
+     * @param literal - query.
+     * @return whether the literal has already been assigned.
+     */
+    public boolean hasVar(String literal) {
+        return literalToVariable.containsKey(literal);
+    }
+
+    /**
      * Outputs the generated code for any constants that have been
      * allocated but not yet retrieved.
      */
