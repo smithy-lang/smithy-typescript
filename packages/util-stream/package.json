@@ -61,6 +61,7 @@
   "browser": {
     "./dist-es/checksum/ChecksumStream": "./dist-es/checksum/ChecksumStream.browser",
     "./dist-es/checksum/createChecksumStream": "./dist-es/checksum/createChecksumStream.browser",
+    "./dist-es/createBufferedReadable": "./dist-es/createBufferedReadableStream",
     "./dist-es/getAwsChunkedEncodingStream": "./dist-es/getAwsChunkedEncodingStream.browser",
     "./dist-es/headStream": "./dist-es/headStream.browser",
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
@@ -73,12 +74,14 @@
     "./dist-es/sdk-stream-mixin": "./dist-es/sdk-stream-mixin.browser",
     "./dist-es/headStream": "./dist-es/headStream.browser",
     "./dist-es/splitStream": "./dist-es/splitStream.browser",
+    "./dist-es/createBufferedReadable": "./dist-es/createBufferedReadableStream",
     "./dist-cjs/checksum/createChecksumStream": "./dist-cjs/checksum/createChecksumStream.browser",
     "./dist-cjs/checksum/ChecksumStream": "./dist-cjs/checksum/ChecksumStream.browser",
     "./dist-cjs/getAwsChunkedEncodingStream": "./dist-cjs/getAwsChunkedEncodingStream.browser",
     "./dist-cjs/sdk-stream-mixin": "./dist-cjs/sdk-stream-mixin.browser",
     "./dist-cjs/headStream": "./dist-cjs/headStream.browser",
-    "./dist-cjs/splitStream": "./dist-cjs/splitStream.browser"
+    "./dist-cjs/splitStream": "./dist-cjs/splitStream.browser",
+    "./dist-cjs/createBufferedReadable": "./dist-cjs/createBufferedReadableStream"
   },
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-stream",
   "repository": {
