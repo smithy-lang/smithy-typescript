@@ -2,6 +2,7 @@ import { Readable } from "node:stream";
 import { describe, expect, test as it, vi } from "vitest";
 
 import { createBufferedReadable } from "./createBufferedReadableStream";
+import { headStream } from "./headStream.browser";
 
 describe("Buffered ReadableStream", () => {
   function stringStream(size: number, chunkSize: number) {
@@ -22,7 +23,28 @@ describe("Buffered ReadableStream", () => {
     }
     return Readable.toWeb(Readable.from(generate()));
   }
+  function patternedByteStream(size: number, chunkSize: number) {
+    let n = 0;
+    const data = Array(size);
+    for (let i = 0; i < size; ++i) {
+      data[i] = n++ % 255;
+    }
+    let dataCursor = 0;
 
+    async function* generate() {
+      while (size > 0) {
+        const z = Math.min(size, chunkSize);
+        const bytes = new Uint8Array(data.slice(dataCursor, dataCursor + z));
+        size -= z;
+        dataCursor += z;
+        yield bytes;
+      }
+    }
+    return {
+      stream: Readable.toWeb(Readable.from(size === 0 ? Buffer.from("") : generate())) as unknown as ReadableStream,
+      array: new Uint8Array(data),
+    };
+  }
   const logger = {
     debug: vi.fn(),
     info: vi.fn(),
@@ -104,4 +126,21 @@ describe("Buffered ReadableStream", () => {
     expect(downstreamChunkCount).toEqual(22);
     expect(logger.warn).toHaveBeenCalled();
   });
+
+  const dataSizes = [0, 10, 101, 1_001, 10_001, 100_001];
+  const chunkSizes = [1, 8, 16, 32, 64, 128, 1024, 8 * 1024, 64 * 1024, 1024 * 1024];
+  const bufferSizes = [0, 1024, 8 * 1024, 32 * 1024, 64 * 1024, 1024 * 1024];
+
+  for (const dataSize of dataSizes) {
+    for (const chunkSize of chunkSizes) {
+      for (const bufferSize of bufferSizes) {
+        it(`should maintain data integrity for data=${dataSize} chunk=${chunkSize} min-buffer=${bufferSize}`, async () => {
+          const { stream, array } = patternedByteStream(dataSize, chunkSize);
+          const bufferedStream = createBufferedReadable(stream, bufferSize);
+          const collected = await headStream(bufferedStream, Infinity);
+          expect(collected).toEqual(array);
+        });
+      }
+    }
+  }
 });
