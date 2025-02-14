@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [efedb20]
+  - @smithy/util-stream@4.1.1
+
 ## 3.1.3
 
 ### Patch Changes

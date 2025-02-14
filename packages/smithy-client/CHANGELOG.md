@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [efedb20]
+  - @smithy/util-stream@4.1.1
+  - @smithy/core@3.1.4
+  - @smithy/middleware-endpoint@4.0.5
+
 ## 4.1.4
 
 ### Patch Changes

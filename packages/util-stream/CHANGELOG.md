@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.1
+
+### Patch Changes
+
+- efedb20: handle case of empty upstream
+
 ## 4.1.0
 
 ### Minor Changes
