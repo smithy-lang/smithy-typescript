@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- d1d1f72: utility for buffering stream chunks
+
 ## 4.0.2
 
 ### Patch Changes

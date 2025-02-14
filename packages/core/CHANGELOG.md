@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [d1d1f72]
+  - @smithy/util-stream@4.1.0
+
 ## 3.1.2
 
 ### Patch Changes
