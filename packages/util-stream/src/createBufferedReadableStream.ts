@@ -27,9 +27,11 @@ export function createBufferedReadableStream(upstream: ReadableStream, size: num
     const chunk = value;
 
     if (done) {
-      const remainder = flush(buffers, mode);
-      if (sizeOf(remainder) > 0) {
-        controller.enqueue(remainder);
+      if (mode !== -1) {
+        const remainder = flush(buffers, mode);
+        if (sizeOf(remainder) > 0) {
+          controller.enqueue(remainder);
+        }
       }
       controller.close();
     } else {

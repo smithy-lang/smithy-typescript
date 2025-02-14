@@ -70,7 +70,12 @@ export function createBufferedReadable(
     }
   });
   upstream.on("end", () => {
-    downstream.push(flush(buffers, mode));
+    if (mode !== -1) {
+      const remainder = flush(buffers, mode);
+      if (sizeOf(remainder) > 0) {
+        downstream.push(remainder);
+      }
+    }
     downstream.push(null);
   });
 
