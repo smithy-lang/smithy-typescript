@@ -158,7 +158,7 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
                 writer.write("$L: value => ({ $S: $L }),", memberName, memberName,
                     target.accept(getMemberVisitor("value")));
             });
-            writer.write("_: (name, value) => ({ name: value } as any)");
+            writer.write("_: (name, value) => ({ [name]: value } as any)");
         });
     }
 
