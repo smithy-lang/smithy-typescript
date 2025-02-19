@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,6 +35,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -70,6 +73,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class CommandGenerator implements Runnable {
 
     static final String COMMANDS_FOLDER = "commands";
+    static final String SCHEMAS_FOLDER = "schemas";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -85,6 +89,9 @@ final class CommandGenerator implements Runnable {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
     private final SensitiveDataFinder sensitiveDataFinder;
+    private final ReservedWords reservedWords = new ReservedWordsBuilder()
+        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
+        .build();
 
     CommandGenerator(
             TypeScriptSettings settings,
@@ -344,7 +351,7 @@ final class CommandGenerator implements Runnable {
             operationContextParamValues.forEach((name, jmesPathForInputInJs) -> {
                 writer.write(
                     """
-                    $L: { type: \"operationContextParams\", get: (input?: any) => $L },
+                    $L: { type: "operationContextParams", get: (input?: any) => $L },
                     """,
                     name, jmesPathForInputInJs);
             });
@@ -354,7 +361,6 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandMiddlewareResolver(String configType) {
-        Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
 
         Function<StructureShape, String> getFilterFunctionName = input -> {
             if (sensitiveDataFinder.findsSensitiveDataIn(input)) {
@@ -397,8 +403,6 @@ final class CommandGenerator implements Runnable {
             """
         );
         {
-            // Add serialization and deserialization plugin.
-            writer.write("$T(config, this.serialize, this.deserialize),", serde);
             // EndpointsV2
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 writer.addImport(
@@ -567,23 +571,15 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeSerde() {
-        writer
-            .write(".ser($L)", getSerdeDispatcher(true))
-            .write(".de($L)", getSerdeDispatcher(false));
-    }
-
-    private String getSerdeDispatcher(boolean isInput) {
-        if (protocolGenerator == null) {
-            return "() => { throw new Error(\"No supported protocol was found\"); }";
-        } else {
-            String serdeFunctionName = isInput
-                    ? ProtocolGenerator.getSerFunctionShortName(symbol)
-                    : ProtocolGenerator.getDeserFunctionShortName(symbol);
-            writer.addRelativeImport(serdeFunctionName, null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                            ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
-            return serdeFunctionName;
-        }
+        String operationSchema = reservedWords.escape(operation.getId().getName());
+        String namespace = operation.getId().getNamespace();
+        writer.addRelativeImport(operationSchema, null, Paths.get(
+            ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, namespace
+        ));
+        writer.write("""
+            .sc($L)""",
+            operationSchema
+        );
     }
 
     static void writeIndex(
