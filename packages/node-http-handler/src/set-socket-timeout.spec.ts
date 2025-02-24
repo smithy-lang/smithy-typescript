@@ -49,6 +49,7 @@ describe("setSocketTimeout", () => {
       socket: {
         setTimeout: vi.fn(),
       },
+      on: vi.fn(),
     };
 
     it("calls setTimeout on the socket if it is available after deferral", async () => {
@@ -64,6 +65,8 @@ describe("setSocketTimeout", () => {
         expectedDeferredSocketTimeout,
         expect.any(Function)
       );
+      expect(clientRequestWithSocket.on).toHaveBeenCalledTimes(1);
+      expect(clientRequestWithSocket.on).toHaveBeenLastCalledWith("close", expect.any(Function));
     });
   });
 

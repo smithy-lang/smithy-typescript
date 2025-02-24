@@ -19,6 +19,7 @@ export const setSocketTimeout = (
 
     if (request.socket) {
       request.socket.setTimeout(timeout, onTimeout);
+      request.on("close", () => request.socket?.removeListener("timeout", onTimeout));
     } else {
       request.setTimeout(timeout, onTimeout);
     }
