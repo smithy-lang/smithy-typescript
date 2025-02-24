@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.0.3
+
+### Patch Changes
+
+- 54d2416: Fix constructor socketAcquisitionWarningTimeout does not work
+- fba050c: Clear obsolete timeout handlers from socket.
+
 ## 4.0.2
 
 ### Patch Changes
