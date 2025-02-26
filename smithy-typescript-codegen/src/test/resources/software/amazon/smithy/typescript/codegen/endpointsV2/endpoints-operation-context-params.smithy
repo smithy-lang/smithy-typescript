@@ -40,7 +40,7 @@ service Example {
     "opContextParamWildcardExpressionList": { path: "fooList[*]" }
     "opContextParamWildcardExpressionListObj": { path: "fooListObj[*].key" }
     "opContextParamWildcardExpressionHash": { path: "fooObjObj.*.bar" }
-    "opContextParamMultiSelectList": { path: "fooListObjObj[*].[baz.bar, qux]" }
+    "opContextParamMultiSelectList": { path: "fooListObjObj[*].[fooList[0], fooObject.bar, fooString]" }
     "opContextParamKeys": { path: "keys(fooKeys)" }
 )
 operation GetFoo {
@@ -68,8 +68,9 @@ list FooListObjectObject {
 }
 
 structure FooMultiSelectObjectObject {
-    baz: FooObject
-    qux: String
+    fooList: FooList
+    fooObject: FooObject
+    fooString: String
 }
 
 structure FooObjectObject {

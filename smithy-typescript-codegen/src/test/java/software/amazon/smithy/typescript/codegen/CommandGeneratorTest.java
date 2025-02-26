@@ -44,7 +44,7 @@ public class CommandGeneratorTest {
                 "opContextParamWildcardExpressionList: { type: \"operationContextParams\", get: (input?: any) => input?.fooList }",
                 "opContextParamWildcardExpressionListObj: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObj?.map((obj: any) => obj?.key) }",
                 "opContextParamWildcardExpressionHash: { type: \"operationContextParams\", get: (input?: any) => Object.values(input?.fooObjObj ?? {}).map((obj: any) => obj?.bar) }",
-                "opContextParamMultiSelectList: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObjObj?.map((obj: any) => [obj?.baz?.bar,obj?.qux].filter((i) => i)) }",
+                "opContextParamMultiSelectList: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObjObj?.map((obj: any) => [obj?.fooList[0],obj?.fooObject?.bar,obj?.fooString].filter((i) => i)) }",
                 "opContextParamKeys: { type: \"operationContextParams\", get: (input?: any) => Object.keys(input?.fooKeys ?? {}) }",
             }
         );
