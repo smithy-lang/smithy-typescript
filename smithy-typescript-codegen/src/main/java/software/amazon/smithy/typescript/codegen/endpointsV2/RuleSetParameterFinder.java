@@ -279,7 +279,11 @@ public class RuleSetParameterFinder {
                 String path = definition.getPath();
 
                 // Split JMESPath expression string on separator and add JavaScript equivalent.
-                for (String part : path.split("[" + separator + "]")) {
+                while (path.length() > 0) {
+                    int dotIndex = path.indexOf(".");
+                    String part = dotIndex == -1 ? path : path.substring(0, dotIndex);
+                    path = dotIndex == -1 ? "" : path.substring(dotIndex + 1);
+
                     if (value.endsWith(")")) {
                         // The value is an object, which needs to run on map.
                         value += ".map((obj: any) => obj";
