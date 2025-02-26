@@ -48,7 +48,7 @@ operation GetFoo {
 structure GetFooInput {
     fooKeys: FooObject,
     fooList: FooList,
-    fooListObj: FooListObj,
+    fooListObj: FooListObject,
     fooObj: FooObject,
     fooObjObj: FooObjectObject,
     fooString: String,
@@ -66,11 +66,11 @@ list FooList {
     member: String
 }
 
-list FooListObj {
-    member: FooListObjMember
+list FooListObject {
+    member: FooListObjectMember
 }
 
-structure FooListObjMember {
+structure FooListObjectMember {
     key: String
 }
 
