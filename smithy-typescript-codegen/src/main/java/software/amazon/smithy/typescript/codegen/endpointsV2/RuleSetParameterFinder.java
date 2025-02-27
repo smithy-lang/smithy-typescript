@@ -316,9 +316,15 @@ public class RuleSetParameterFinder {
                     value += getJmesPathExpression(separator, "obj", part) + ",";
                     if (commaIndex == -1) {
                         // Remove trailing comma and close bracket.
-                        value = value.substring(0, value.length() - 1) + "].filter((i) => i))";
+                        value = value.substring(0, value.length() - 1) + "].filter((i) => i)";
                         break;
                     }
+                }
+
+                // Process Flatten operator https://jmespath.org/specification.html#flatten-operator
+                if (path.startsWith("[]")) {
+                    value += ".flat()";
+                    path = path.substring(2);
                 }
                 continue;
             }
@@ -356,6 +362,21 @@ public class RuleSetParameterFinder {
             // Get key to run hash wildcard on.
             String key = part.substring(0, part.length() - 3);
             value = value + separator + key + separator + "map((obj: any) => obj";
+            return value;
+        }
+
+        // Process Flatten operator https://jmespath.org/specification.html#flatten-operator
+        if (part.endsWith("[]")) {
+            // Get key to run hash wildcard on.
+            String key = part.substring(0, part.length() - 2);
+
+            // If key is on list item
+            if (key.endsWith("[*]")) {
+                value = value + separator + key.substring(0, key.length() - 3) + ".flat()";
+            } else {
+                // key is on object
+                value = value + separator + key + ").flat()";
+            }
             return value;
         }
 

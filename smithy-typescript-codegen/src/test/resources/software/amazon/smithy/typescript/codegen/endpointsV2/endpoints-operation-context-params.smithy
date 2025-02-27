@@ -14,13 +14,22 @@ namespace smithy.example
         opContextParamWildcardExpressionList: {
             type: "stringArray",
         },
+        opContextParamWildcardExpressionListFlatten: {
+            type: "stringArray",
+        },
         opContextParamWildcardExpressionListObj: {
+            type: "stringArray",
+        },
+        opContextParamWildcardExpressionListObjListFlatten: {
             type: "stringArray",
         },
         opContextParamWildcardExpressionHash: {
             type: "stringArray",
         },
         opContextParamMultiSelectList: {
+            type: "stringArray",
+        },
+        opContextParamMultiSelectListFlatten: {
             type: "stringArray",
         },
         opContextParamKeys: {
@@ -38,9 +47,12 @@ service Example {
     "opContextParamIdentifier": { path: "fooString" }
     "opContextParamSubExpression": { path: "fooObj.bar" }
     "opContextParamWildcardExpressionList": { path: "fooList[*]" }
+    "opContextParamWildcardExpressionListFlatten": { path: "fooListList[*][]" }
     "opContextParamWildcardExpressionListObj": { path: "fooListObj[*].key" }
+    "opContextParamWildcardExpressionListObjListFlatten": { path: "fooListObjList[*].key[]" }
     "opContextParamWildcardExpressionHash": { path: "fooObjObj.*.bar" }
     "opContextParamMultiSelectList": { path: "fooListObjObj[*].[fooList[0], fooObject.bar, fooString]" }
+    "opContextParamMultiSelectListFlatten": { path: "fooListObjObj[*].[fooList][]" }
     "opContextParamKeys": { path: "keys(fooKeys)" }
 )
 operation GetFoo {
@@ -52,7 +64,9 @@ operation GetFoo {
 structure GetFooInput {
     fooKeys: FooObject,
     fooList: FooList,
+    fooListList: FooListList,
     fooListObj: FooListObject,
+    fooListObjList: FooListObjectList,
     fooListObjObj: FooListObjectObject,
     fooObj: FooObject,
     fooObjObj: FooObjectObject,
@@ -77,6 +91,10 @@ structure FooObjectObject {
     baz: FooObject
 }
 
+list FooListList {
+    member: FooList
+}
+
 list FooList {
     member: String
 }
@@ -87,6 +105,14 @@ list FooListObject {
 
 structure FooListObjectMember {
     key: String
+}
+
+list FooListObjectList {
+    member: FooListObjectListMember
+}
+
+structure FooListObjectListMember {
+    key: FooList
 }
 
 structure GetFooOutput {}
