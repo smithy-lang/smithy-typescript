@@ -277,39 +277,7 @@ public class RuleSetParameterFinder {
                 String separator = "?.";
                 String value = "input";
                 String path = definition.getPath();
-
-                // Split JMESPath expression string on separator and add JavaScript equivalent.
-                for (String part : path.split("[" + separator + "]")) {
-                    if (value.endsWith(")")) {
-                        // The value is an object, which needs to run on map.
-                        value += ".map((obj: any) => obj";
-                    }
-
-                    // Process keys https://jmespath.org/specification.html#keys
-                    if (part.startsWith("keys(")) {
-                        // Get provided object for which keys are to be extracted.
-                        String object = part.substring(5, part.length() - 1);
-                        value = "Object.keys(" + value + separator + object + " ?? {})";
-                        continue;
-                    }
-
-                    // Process list wildcard expression https://jmespath.org/specification.html#wildcard-expressions
-                    if (part.equals("*") || part.equals("[*]")) {
-                        value = "Object.values(" + value + " ?? {})";
-                        continue;
-                    }
-
-                    // Process hash wildcard expression https://jmespath.org/specification.html#wildcard-expressions
-                    if (part.endsWith("[*]")) {
-                        // Get key to run hash wildcard on.
-                        String key = part.substring(0, part.length() - 3);
-                        value = value + separator + key + separator + "map((obj: any) => obj";
-                        continue;
-                    }
-
-                    // Treat remaining part as identifier without spaces https://jmespath.org/specification.html#identifiers
-                    value += separator + part;
-                }
+                value = getJmesPathExpression(separator, value, path);
 
                 // Remove no-op map, if it exists.
                 final String noOpMap = "map((obj: any) => obj";
@@ -326,6 +294,74 @@ public class RuleSetParameterFinder {
         }
 
         return map;
+    }
+
+    private String getJmesPathExpression(String separator, String value, String path) {
+        // Split JMESPath expression string on separator and add JavaScript equivalent.
+        while (path.length() > 0) {
+            if (path.startsWith("[") && !path.startsWith("[*]")) {
+                // Process MultiSelect List https://jmespath.org/specification.html#multiselect-list
+                if (value.endsWith("obj")) {
+                   value = value.substring(0, value.length() - 3);
+                }
+
+                value += "[";
+                path = path.substring(1);
+
+                while (true) {
+                    int commaIndex = path.indexOf(",");
+                    int sepIndex = (commaIndex == -1) ? path.indexOf("]") : commaIndex;
+                    String part = path.substring(0, sepIndex);
+                    path = path.substring(sepIndex + 1).trim();
+                    value += getJmesPathExpression(separator, "obj", part) + ",";
+                    if (commaIndex == -1) {
+                        // Remove trailing comma and close bracket.
+                        value = value.substring(0, value.length() - 1) + "].filter((i) => i))";
+                        break;
+                    }
+                }
+                continue;
+            }
+
+            int dotIndex = path.indexOf(".");
+            String part = dotIndex == -1 ? path : path.substring(0, dotIndex);
+            path = dotIndex == -1 ? "" : path.substring(dotIndex + 1);
+            value = getJmesPathExpressionSection(separator, value, part);
+        }
+        return value;
+    }
+
+    private String getJmesPathExpressionSection(String separator, String value, String part) {
+        if (value.endsWith(")")) {
+            // The value is an object, which needs to run on map.
+            value += ".map((obj: any) => obj";
+        }
+
+        // Process keys https://jmespath.org/specification.html#keys
+        if (part.startsWith("keys(")) {
+            // Get provided object for which keys are to be extracted.
+            String object = part.substring(5, part.length() - 1);
+            value = "Object.keys(" + value + separator + object + " ?? {})";
+            return value;
+        }
+
+        // Process list wildcard expression https://jmespath.org/specification.html#wildcard-expressions
+        if (part.equals("*") || part.equals("[*]")) {
+            value = "Object.values(" + value + " ?? {})";
+            return value;
+        }
+
+        // Process hash wildcard expression https://jmespath.org/specification.html#wildcard-expressions
+        if (part.endsWith("[*]")) {
+            // Get key to run hash wildcard on.
+            String key = part.substring(0, part.length() - 3);
+            value = value + separator + key + separator + "map((obj: any) => obj";
+            return value;
+        }
+
+        // Treat remaining part as identifier without spaces https://jmespath.org/specification.html#identifiers
+        value += separator + part;
+        return value;
     }
 
     private static class RuleSetParameterFinderVisitor extends NodeVisitor.Default<Void> {
