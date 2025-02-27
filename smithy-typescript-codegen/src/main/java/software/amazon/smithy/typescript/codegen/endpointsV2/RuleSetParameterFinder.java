@@ -366,10 +366,17 @@ public class RuleSetParameterFinder {
         }
 
         // Process Flatten operator https://jmespath.org/specification.html#flatten-operator
-        if (part.endsWith("[*][]")) {
+        if (part.endsWith("[]")) {
             // Get key to run hash wildcard on.
-            String key = part.substring(0, part.length() - 5);
-            value = value + separator + key + ".flat()";
+            String key = part.substring(0, part.length() - 2);
+
+            // If key is on list item
+            if (key.endsWith("[*]")) {
+                value = value + separator + key.substring(0, key.length() - 3) + ".flat()";
+            } else {
+                // key is on object
+                value = value + separator + key + ").flat()";
+            }
             return value;
         }
 
