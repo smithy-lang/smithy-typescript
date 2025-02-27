@@ -316,9 +316,15 @@ public class RuleSetParameterFinder {
                     value += getJmesPathExpression(separator, "obj", part) + ",";
                     if (commaIndex == -1) {
                         // Remove trailing comma and close bracket.
-                        value = value.substring(0, value.length() - 1) + "].filter((i) => i))";
+                        value = value.substring(0, value.length() - 1) + "].filter((i) => i)";
                         break;
                     }
+                }
+
+                // Process Flatten operator https://jmespath.org/specification.html#flatten-operator
+                if (path.startsWith("[]")) {
+                    value += ".flat()";
+                    path = path.substring(2);
                 }
                 continue;
             }
