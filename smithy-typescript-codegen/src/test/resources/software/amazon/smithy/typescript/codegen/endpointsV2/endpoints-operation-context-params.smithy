@@ -23,6 +23,9 @@ namespace smithy.example
         opContextParamMultiSelectList: {
             type: "stringArray",
         },
+        opContextParamMultiSelectListFlatten: {
+            type: "stringArray",
+        },
         opContextParamKeys: {
             type: "stringArray",
         },
@@ -41,6 +44,7 @@ service Example {
     "opContextParamWildcardExpressionListObj": { path: "fooListObj[*].key" }
     "opContextParamWildcardExpressionHash": { path: "fooObjObj.*.bar" }
     "opContextParamMultiSelectList": { path: "fooListObjObj[*].[fooList[0], fooObject.bar, fooString]" }
+    "opContextParamMultiSelectListFlatten": { path: "fooListObjObj[*].[fooList][]" }
     "opContextParamKeys": { path: "keys(fooKeys)" }
 )
 operation GetFoo {
