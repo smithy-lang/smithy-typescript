@@ -14,6 +14,9 @@ namespace smithy.example
         opContextParamWildcardExpressionList: {
             type: "stringArray",
         },
+        opContextParamWildcardExpressionListFlatten: {
+            type: "stringArray",
+        },
         opContextParamWildcardExpressionListObj: {
             type: "stringArray",
         },
@@ -41,6 +44,7 @@ service Example {
     "opContextParamIdentifier": { path: "fooString" }
     "opContextParamSubExpression": { path: "fooObj.bar" }
     "opContextParamWildcardExpressionList": { path: "fooList[*]" }
+    "opContextParamWildcardExpressionListFlatten": { path: "fooListList[*][]" }
     "opContextParamWildcardExpressionListObj": { path: "fooListObj[*].key" }
     "opContextParamWildcardExpressionHash": { path: "fooObjObj.*.bar" }
     "opContextParamMultiSelectList": { path: "fooListObjObj[*].[fooList[0], fooObject.bar, fooString]" }
@@ -56,6 +60,7 @@ operation GetFoo {
 structure GetFooInput {
     fooKeys: FooObject,
     fooList: FooList,
+    fooListList: FooListList,
     fooListObj: FooListObject,
     fooListObjObj: FooListObjectObject,
     fooObj: FooObject,
@@ -79,6 +84,10 @@ structure FooMultiSelectObjectObject {
 
 structure FooObjectObject {
     baz: FooObject
+}
+
+list FooListList {
+    member: FooList
 }
 
 list FooList {
