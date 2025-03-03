@@ -6,5 +6,6 @@ export * from "./schemas/OperationSchema";
 export * from "./schemas/ErrorSchema";
 export * from "./schemas/NormalizedSchema";
 export * from "./schemas/Schema";
+export * from "./schemas/SimpleSchema";
 export * from "./schemas/StructureSchema";
 export * from "./TypeRegistry";
