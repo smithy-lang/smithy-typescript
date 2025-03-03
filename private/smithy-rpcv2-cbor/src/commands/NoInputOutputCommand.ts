@@ -47,6 +47,7 @@ export interface NoInputOutputCommandOutput extends __MetadataBearer {}
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class NoInputOutputCommand extends $Command
   .classBuilder<
@@ -65,7 +66,7 @@ export class NoInputOutputCommand extends $Command
   .sc(NoInputOutput)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: {};
       output: {};

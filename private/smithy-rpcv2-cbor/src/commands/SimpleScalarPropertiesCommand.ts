@@ -70,6 +70,7 @@ export interface SimpleScalarPropertiesCommandOutput extends SimpleScalarStructu
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class SimpleScalarPropertiesCommand extends $Command
   .classBuilder<
@@ -88,7 +89,7 @@ export class SimpleScalarPropertiesCommand extends $Command
   .sc(SimpleScalarProperties)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: SimpleScalarStructure;
       output: SimpleScalarStructure;

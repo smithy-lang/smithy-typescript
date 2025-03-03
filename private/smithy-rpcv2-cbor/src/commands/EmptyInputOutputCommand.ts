@@ -48,6 +48,7 @@ export interface EmptyInputOutputCommandOutput extends EmptyStructure, __Metadat
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class EmptyInputOutputCommand extends $Command
   .classBuilder<
@@ -66,7 +67,7 @@ export class EmptyInputOutputCommand extends $Command
   .sc(EmptyInputOutput)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: {};
       output: {};

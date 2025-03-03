@@ -50,6 +50,7 @@ export interface FractionalSecondsCommandOutput extends FractionalSecondsOutput,
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class FractionalSecondsCommand extends $Command
   .classBuilder<
@@ -68,7 +69,7 @@ export class FractionalSecondsCommand extends $Command
   .sc(FractionalSeconds)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: {};
       output: FractionalSecondsOutput;

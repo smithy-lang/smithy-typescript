@@ -13,7 +13,7 @@ export class MapSchema extends Schema implements IMapSchema {
   }
 }
 
-export function map(name: string, traits: SchemaTraits = {}, valueSchema: SchemaRef = void 0): MapSchema {
+export function map(name: string, traits: SchemaTraits = {}, valueSchema: SchemaRef): MapSchema {
   const schema = new MapSchema(name, traits, typeof valueSchema === "function" ? valueSchema() : valueSchema);
   if (TypeRegistry.active) {
     TypeRegistry.active.register(name, schema);

@@ -33,11 +33,7 @@ export abstract class Command<
 {
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
-  public readonly schema?: OperationSchema = {
-    input: void 0,
-    output: void 0,
-    traits: {},
-  };
+  public readonly schema?: OperationSchema;
 
   /**
    * Factory for Command ClassBuilder.
@@ -138,11 +134,7 @@ class ClassBuilder<
   private _outputFilterSensitiveLog = (_: any) => _;
   private _serializer: (input: I, context: SerdeContext | any) => Promise<IHttpRequest> = null as any;
   private _deserializer: (output: IHttpResponse, context: SerdeContext | any) => Promise<O> = null as any;
-  private _operationSchema: OperationSchema = {
-    traits: {},
-    input: void 0,
-    output: void 0,
-  };
+  private _operationSchema?: OperationSchema;
 
   /**
    * Optional init callback.

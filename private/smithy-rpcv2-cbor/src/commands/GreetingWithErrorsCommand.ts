@@ -62,6 +62,7 @@ export interface GreetingWithErrorsCommandOutput extends GreetingWithErrorsOutpu
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  * @public
  */
 export class GreetingWithErrorsCommand extends $Command
@@ -81,7 +82,7 @@ export class GreetingWithErrorsCommand extends $Command
   .sc(GreetingWithErrors)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: {};
       output: GreetingWithErrorsOutput;

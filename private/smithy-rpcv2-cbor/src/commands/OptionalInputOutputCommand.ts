@@ -52,6 +52,7 @@ export interface OptionalInputOutputCommandOutput extends SimpleStructure, __Met
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class OptionalInputOutputCommand extends $Command
   .classBuilder<
@@ -70,7 +71,7 @@ export class OptionalInputOutputCommand extends $Command
   .sc(OptionalInputOutput)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: SimpleStructure;
       output: SimpleStructure;

@@ -41,7 +41,7 @@ public class CommandGeneratorTest {
     @Disabled
     @Test
     public void writesOperationSchemaRef() {
-        testCommmandCodegen(
+        testCommandCodegen(
             "output-structure.smithy",
             new String[] {".sc("}
         );

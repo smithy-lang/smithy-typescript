@@ -130,6 +130,7 @@ export interface RpcV2CborListsCommandOutput extends RpcV2CborListInputOutput, _
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  * @public
  */
 export class RpcV2CborListsCommand extends $Command
@@ -149,7 +150,7 @@ export class RpcV2CborListsCommand extends $Command
   .sc(RpcV2CborLists)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: RpcV2CborListInputOutput;
       output: RpcV2CborListInputOutput;

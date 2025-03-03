@@ -62,6 +62,7 @@ export interface SparseNullsOperationCommandOutput extends SparseNullsOperationI
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class SparseNullsOperationCommand extends $Command
   .classBuilder<
@@ -80,7 +81,7 @@ export class SparseNullsOperationCommand extends $Command
   .sc(SparseNullsOperation)
   .build() {
   /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
+  declare protected static __types: {
     api: {
       input: SparseNullsOperationInputOutput;
       output: SparseNullsOperationInputOutput;
