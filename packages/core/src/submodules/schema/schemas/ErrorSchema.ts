@@ -7,23 +7,25 @@ export class ErrorSchema extends StructureSchema {
   public constructor(
     public name: string,
     public traits: SchemaTraits,
-    public members: Record<string, [SchemaRef, SchemaTraits]>,
+    public memberNames: string[],
+    public memberList: SchemaRef[],
     /**
      * Constructor for a modeled service exception class that extends Error.
      */
     public ctor: any
   ) {
-    super(name, traits, members);
+    super(name, traits, memberNames, memberList);
   }
 }
 
 export function error(
   name: string,
   traits: SchemaTraits = {},
-  members: Record<string, [SchemaRef, SchemaTraits]> = {},
+  memberNames: string[],
+  memberList: SchemaRef[],
   ctor: any
 ): ErrorSchema {
-  const schema = new ErrorSchema(name, traits, members, ctor);
+  const schema = new ErrorSchema(name, traits, memberNames, memberList, ctor);
   if (TypeRegistry.active) {
     TypeRegistry.active.register(name, schema);
   }

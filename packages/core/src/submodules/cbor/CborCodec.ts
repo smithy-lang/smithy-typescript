@@ -1,15 +1,6 @@
-import { deref, ListSchema, MapSchema, StructureSchema } from "@smithy/core/schema";
+import { NormalizedSchema } from "@smithy/core/schema";
 import { copyDocumentWithTransform, parseEpochTimestamp } from "@smithy/core/serde";
-import {
-  Codec,
-  MemberSchema,
-  Schema,
-  SchemaRef,
-  SerdeContext,
-  ShapeDeserializer,
-  ShapeSerializer,
-  TraitsSchema,
-} from "@smithy/types";
+import { Codec, Schema, SchemaRef, SerdeContext, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 
 import { cbor } from "./cbor";
 import { dateToTag } from "./parseCborBody";
@@ -46,17 +37,19 @@ export class CborShapeSerializer implements ShapeSerializer<Uint8Array> {
       if (_ instanceof Date) {
         return dateToTag(_);
       }
-      const schema = deref((schemaRef as MemberSchema)?.[0] ?? schemaRef);
       if (_ instanceof Uint8Array) {
         return _;
       }
-      const sparse = (schema as TraitsSchema)?.traits?.sparse;
+
+      const ns = NormalizedSchema.of(schemaRef);
+      const sparse = !!ns.getMergedTraits().sparse;
+
       if (Array.isArray(_)) {
         if (!sparse) {
           return _.filter((item) => item != null);
         }
       } else if (_ && typeof _ === "object") {
-        if (!sparse) {
+        if (!sparse || ns.isStructSchema()) {
           for (const [k, v] of Object.entries(_)) {
             if (v == null) {
               delete _[k];
@@ -65,6 +58,7 @@ export class CborShapeSerializer implements ShapeSerializer<Uint8Array> {
           return _;
         }
       }
+
       return _;
     });
   }
@@ -88,15 +82,20 @@ export class CborShapeDeserializer implements ShapeDeserializer {
     return this.readValue(schema, data);
   }
 
-  private readValue(schema: Schema, value: any): any {
-    if (typeof schema === "string") {
-      if (schema === "time" || schema === "epoch-seconds" || schema === "date-time") {
+  private readValue(_schema: Schema, value: any): any {
+    const ns = NormalizedSchema.of(_schema);
+    const schema = ns.getSchema();
+
+    if (typeof schema === "number") {
+      if (ns.isTimestampSchema()) {
+        // format is ignored.
         return parseEpochTimestamp(value);
       }
-      if (schema === "blob" || schema === "streaming-blob") {
+      if (ns.isBlobSchema()) {
         return value;
       }
     }
+
     switch (typeof value) {
       case "undefined":
       case "boolean":
@@ -116,22 +115,16 @@ export class CborShapeDeserializer implements ShapeDeserializer {
         if (value instanceof Date) {
           return value;
         }
-        const traits =
-          Array.isArray(schema) && schema.length >= 2
-            ? {
-                ...(deref((schema as MemberSchema)[0]) as TraitsSchema)?.traits,
-                ...(schema as MemberSchema)[1],
-              }
-            : (deref(schema) as TraitsSchema)?.traits;
 
         if (Array.isArray(value)) {
           const newArray = [];
+          const memberSchema = ns.getValueSchema();
+          const sparse = ns.isListSchema() && !!ns.getMergedTraits().sparse;
+
           for (const item of value) {
-            newArray.push(this.readValue(schema instanceof ListSchema ? deref(schema.valueSchema) : void 0, item));
-            if (!traits?.sparse) {
-              if (newArray[newArray.length - 1] == null) {
-                newArray.pop();
-              }
+            newArray.push(this.readValue(memberSchema, item));
+            if (!sparse && newArray[newArray.length - 1] == null) {
+              newArray.pop();
             }
           }
           return newArray;
@@ -139,15 +132,19 @@ export class CborShapeDeserializer implements ShapeDeserializer {
 
         const newObject = {} as any;
         for (const key of Object.keys(value)) {
-          const targetSchema =
-            schema instanceof StructureSchema
-              ? deref(schema.members[key]?.[0])
-              : schema instanceof MapSchema
-                ? deref(schema.valueSchema)
-                : void 0;
-          newObject[key] = this.readValue(targetSchema, value[key]);
-          if (!traits?.sparse && newObject[key] == null) {
-            delete newObject[key];
+          if (ns.isMapSchema() || ns.isDocumentSchema()) {
+            const targetSchema = ns.getValueSchema();
+            newObject[key] = this.readValue(targetSchema, value[key]);
+
+            if (ns.isMapSchema() && newObject[key] == null && !ns.getMergedTraits().sparse) {
+              delete newObject[key];
+            }
+          } else if (ns.isStructSchema()) {
+            const targetSchema = ns.getMemberSchema(key);
+            if (targetSchema === undefined) {
+              continue;
+            }
+            newObject[key] = this.readValue(targetSchema, value[key]);
           }
         }
         return newObject;

@@ -1,4 +1,4 @@
-import { HttpInterceptingShapeSerializer,HttpProtocol } from "@smithy/core/protocols";
+import { HttpInterceptingShapeSerializer, HttpProtocol } from "@smithy/core/protocols";
 import { deref, ErrorSchema, OperationSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   HandlerExecutionContext,
@@ -36,6 +36,10 @@ export class SmithyRpcV2CborProtocol extends HttpProtocol {
       delete request.body;
       delete request.headers["content-type"];
     } else {
+      if (!request.body) {
+        this.serializer.write(15, {})
+        request.body = this.serializer.flush();
+      }
       try {
         request.headers["content-length"] = String((request.body as Uint8Array).byteLength);
       } catch (e) {}
@@ -82,6 +86,7 @@ export class SmithyRpcV2CborProtocol extends HttpProtocol {
       // TODO(schema) throw client base exception using the dataObject.
       throw new Error("schema not found for " + error);
     }
+
     const message = dataObject.message ?? dataObject.Message ?? "Unknown";
     const exception = new errorSchema.ctor(message);
     Object.assign(exception, {
