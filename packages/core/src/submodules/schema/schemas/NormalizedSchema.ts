@@ -63,27 +63,60 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   public isListSchema(): boolean {
-    return this.schema === 2 || this.schema instanceof ListSchema;
+    if (typeof this.schema === "number") {
+      return this.schema >> 6 === 0b01;
+    }
+    return this.schema instanceof ListSchema;
   }
 
   public isMapSchema(): boolean {
-    return this.schema === 4 || this.schema instanceof MapSchema;
+    if (typeof this.schema === "number") {
+      return this.schema >> 6 === 0b10;
+    }
+    return this.schema instanceof MapSchema;
+  }
+
+  public isDocumentSchema(): boolean {
+    return this.schema === 15;
   }
 
   public isStructSchema(): boolean {
     return (
-      this.schema === 8 ||
       (this.schema !== null && typeof this.schema === "object" && "members" in this.schema) ||
       this.schema instanceof StructureSchema
     );
   }
 
   public isBlobSchema(): boolean {
-    return this.schema === "blob" || this.schema === "streaming-blob";
+    return this.schema === 21 || this.schema === 42;
+  }
+
+  public isTimestampSchema(): boolean {
+    return typeof this.schema === "number" && this.schema >= 4 && this.schema <= 7;
+  }
+
+  public isStringSchema(): boolean {
+    return this.schema === 0;
+  }
+
+  public isBooleanSchema(): boolean {
+    return this.schema === 2;
+  }
+
+  public isNumericSchema(): boolean {
+    return this.schema === 1;
+  }
+
+  public isBigIntegerSchema(): boolean {
+    return this.schema === 17;
+  }
+
+  public isBigDecimalSchema(): boolean {
+    return this.schema === 19;
   }
 
   public isStreaming(): boolean {
-    return !!this.getMergedTraits().streaming || this.getSchema() === "streaming-blob";
+    return !!this.getMergedTraits().streaming || this.getSchema() === 42;
   }
 
   public getMergedTraits(): SchemaTraits {
@@ -101,34 +134,55 @@ export class NormalizedSchema implements INormalizedSchema {
     return this.traits;
   }
 
-  public getMemberSchema(member?: string): NormalizedSchema {
-    if (typeof this.schema !== "object") {
-      return NormalizedSchema.of(void 0, member as string);
+  public getValueSchema(): NormalizedSchema {
+    if (typeof this.schema === "number" && this.schema >= 0b0010_0000) {
+      return NormalizedSchema.of(0b0011_1111 & this.schema);
     }
-    if ("members" in (this.schema as StructureSchema)) {
-      if (typeof member === "undefined") {
-        throw new Error("cannot call getMemberSchema(void) with StructureSchema");
+    if (this.schema && typeof this.schema === "object") {
+      if (this.isStructSchema()) {
+        throw new Error("cannot call getValueSchema() with StructureSchema");
       }
-      return NormalizedSchema.of((this.schema as StructureSchema).members[member], member as string);
-    }
-    if ("valueSchema" in (this.schema as MapSchema | ListSchema)) {
-      if (typeof member !== "undefined") {
-        throw new Error("cannot call getMemberSchema(string) with List or Map Schema");
+      const collection = this.schema as MapSchema | ListSchema;
+      if ("valueSchema" in collection) {
+        return NormalizedSchema.of(collection.valueSchema);
       }
-      return NormalizedSchema.of((this.schema as MapSchema | ListSchema).valueSchema);
     }
-    return NormalizedSchema.of(void 0, member as string);
+    if (this.isDocumentSchema()) {
+      return NormalizedSchema.of(15);
+    }
+    throw new Error("@smithy/core/schema - the schema does not have a value member.");
+  }
+
+  public getMemberSchema(member: string): NormalizedSchema | undefined {
+    if (this.schema && typeof this.schema === "object") {
+      const struct = this.schema as StructureSchema;
+      if ("members" in struct) {
+        if (typeof member === "undefined") {
+          throw new Error("cannot call getMemberSchema(void) with StructureSchema");
+        }
+        if (!(member in struct.members)) {
+          // indicates the member is not recognized.
+          return undefined;
+        }
+        return NormalizedSchema.of(struct.members[member], member as string);
+      }
+    }
+    if (this.isDocumentSchema()) {
+      return NormalizedSchema.of(15);
+    }
+    throw new Error("@smithy/core/schema - the schema does not have members.");
   }
 
   public getMemberSchemas(): Record<string, NormalizedSchema> {
     const { schema } = this;
-    if (!schema || typeof schema !== "object") {
+    const struct = schema as StructureSchema;
+    if (!struct || typeof struct !== "object") {
       return {};
     }
-    if ("members" in (schema as StructureSchema)) {
+    if ("members" in struct) {
       const buffer = {} as Record<string, NormalizedSchema>;
-      for (const member of Object.keys((schema as StructureSchema).members)) {
-        buffer[member] = this.getMemberSchema(member);
+      for (const member of struct.memberNames) {
+        buffer[member] = this.getMemberSchema(member)!;
       }
       return buffer;
     }

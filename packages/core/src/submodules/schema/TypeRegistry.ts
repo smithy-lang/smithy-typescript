@@ -29,23 +29,10 @@ export class TypeRegistry {
    * @param schema - to be registered.
    */
   public register(shapeId: string, schema: ISchema) {
-    const qualifiedName = this.namespace + "#" + shapeId;
+    const qualifiedName = this.normalizeShapeId(shapeId);
     this.schemas.set(qualifiedName, schema);
     if (typeof schema === "object") {
       TypeRegistry.schemaToRegistry.set(schema, this);
-    }
-  }
-
-  /**
-   * Used to disambiguate e.g. XML values, which are all strings,
-   * into other simple JavaScript types like boolean and number.
-   *
-   * @param simpleTypes - map of shape id strings to simple type.
-   */
-  public registerSimpleTypes(simpleTypes: Record<string, "boolean" | "number" | "bigint" | "bigdecimal">): void {
-    for (const [name, type] of Object.entries(simpleTypes)) {
-      const normalizedName = name.includes("#") ? name : this.namespace + "#" + name;
-      this.simpleTypes[normalizedName] = type;
     }
   }
 
@@ -57,10 +44,7 @@ export class TypeRegistry {
    * @returns simple type of the shape id in this registry.
    */
   public getSimpleType(shapeId: string): string {
-    if (shapeId.includes("#")) {
-      return this.simpleTypes[shapeId];
-    }
-    return this.simpleTypes[this.namespace + "#" + shapeId] ?? "unknown";
+    return this.simpleTypes[this.normalizeShapeId(shapeId)] ?? "unknown";
   }
 
   /**
@@ -68,10 +52,11 @@ export class TypeRegistry {
    * @returns the schema.
    */
   public getSchema(shapeId: string): ISchema {
-    if (shapeId.includes("#")) {
-      return this.schemas.get(shapeId);
+    const id = this.normalizeShapeId(shapeId);
+    if (!this.schemas.has(id)) {
+      throw new Error(`@smithy/core/schema - schema not found for ${id}`);
     }
-    return this.schemas.get(this.namespace + "#" + shapeId);
+    return this.schemas.get(id)!;
   }
 
   /**
@@ -92,5 +77,12 @@ export class TypeRegistry {
   public destroy() {
     TypeRegistry.registries.delete(this.namespace);
     this.schemas.clear();
+  }
+
+  private normalizeShapeId(shapeId: string) {
+    if (shapeId.includes("#")) {
+      return shapeId;
+    }
+    return this.namespace + "#" + shapeId;
   }
 }

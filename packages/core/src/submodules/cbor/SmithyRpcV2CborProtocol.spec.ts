@@ -154,10 +154,10 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         const protocol = new SmithyRpcV2CborProtocol();
         const httpRequest = await protocol.serializeRequest(
           {
+            name: "dummy",
             input: testCase.schema,
             output: void 0,
             traits: {},
-            errors: [],
           },
           testCase.input,
           {
@@ -249,10 +249,10 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         const protocol = new SmithyRpcV2CborProtocol();
         const output = await protocol.deserializeResponse(
           {
+            name: "dummy",
             input: void 0,
             output: testCase.schema,
             traits: {},
-            errors: [],
           },
           {},
           new HttpResponse({

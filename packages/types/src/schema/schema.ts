@@ -2,15 +2,20 @@ import { EndpointV2 } from "../endpoint";
 import { HandlerExecutionContext } from "../middleware";
 import { MetadataBearer } from "../response";
 import { SerdeContext } from "../serde";
-
-/**
- * The default schema is a sentinel value
- * indicating that the schema for a shape
- * behaves no differently than a Document.
- *
- * @public
- */
-export type DefaultSchema = undefined;
+import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BlobSchema,
+  BooleanSchema,
+  DocumentSchema,
+  NumericSchema,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampDateTimeSchema,
+  TimestampDefaultSchema,
+  TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
+} from "./sentinels";
 
 /**
  * Sentinel value for Timestamp schema.
@@ -18,14 +23,18 @@ export type DefaultSchema = undefined;
  *
  * @public
  */
-export type TimestampSchema = "time" | "date-time" | "http-date" | "epoch-seconds" | string;
+export type TimestampSchemas =
+  | TimestampDefaultSchema
+  | TimestampDateTimeSchema
+  | TimestampHttpDateSchema
+  | TimestampEpochSecondsSchema
+  | string;
 
 /**
- * Sentinel value for Blob schema.
- *
+ * Sentinel values for Blob schema.
  * @public
  */
-export type BlobSchema = "blob" | "streaming-blob";
+export type BlobSchemas = BlobSchema | StreamingBlobSchema;
 
 /**
  * Signal value for operation Unit input or output.
@@ -75,12 +84,6 @@ export interface StructureSchema extends TraitsSchema {
 }
 
 /**
- * Sentinel value for structure schema with no traits.
- * @public
- */
-export type DefaultStructureSchema = 8;
-
-/**
  * @public
  */
 export interface ListSchema extends TraitsSchema {
@@ -90,12 +93,6 @@ export interface ListSchema extends TraitsSchema {
 }
 
 /**
- * Sentinel value for list schema with no traits.
- * @public
- */
-export type DefaultListSchema = 2;
-
-/**
  * @public
  */
 export interface MapSchema extends TraitsSchema {
@@ -103,12 +100,6 @@ export interface MapSchema extends TraitsSchema {
   traits: SchemaTraits;
   valueSchema: SchemaRef;
 }
-
-/**
- * Sentinel value for map schema with no traits.
- * @public
- */
-export type DefaultMapSchema = 4;
 
 /**
  * @public
@@ -140,26 +131,52 @@ export interface NormalizedSchema extends TraitsSchema {
   isListSchema(): boolean;
   isMapSchema(): boolean;
   isStructSchema(): boolean;
+  isBlobSchema(): boolean;
+  isTimestampSchema(): boolean;
+  isStringSchema(): boolean;
+  isBooleanSchema(): boolean;
+  isNumericSchema(): boolean;
+  isBigIntegerSchema(): boolean;
+  isBigDecimalSchema(): boolean;
+  isStreaming(): boolean;
   getMergedTraits(): SchemaTraits;
   getMemberTraits(): SchemaTraits;
   getOwnTraits(): SchemaTraits;
-  getMemberSchema(member?: string): NormalizedSchema;
+  /**
+   * For list/set/map.
+   */
+  getValueSchema(): NormalizedSchema;
+  /**
+   * For struct/union.
+   */
+  getMemberSchema(member: string): NormalizedSchema | undefined;
+  getMemberSchemas(): Record<string, NormalizedSchema>;
 }
+
+/**
+ * @public
+ */
+export type SimpleSchema =
+  | BlobSchemas
+  | StringSchema
+  | BooleanSchema
+  | NumericSchema
+  | BigIntegerSchema
+  | BigDecimalSchema
+  | DocumentSchema
+  | TimestampSchemas
+  | number;
 
 /**
  * @public
  */
 export type Schema =
   | UnitSchema
-  | DefaultSchema
-  | TimestampSchema
-  | BlobSchema
+  | TraitsSchema
+  | SimpleSchema
   | ListSchema
-  | DefaultListSchema
   | MapSchema
-  | DefaultMapSchema
   | StructureSchema
-  | DefaultStructureSchema
   | MemberSchema
   | OperationSchema
   | NormalizedSchema;
