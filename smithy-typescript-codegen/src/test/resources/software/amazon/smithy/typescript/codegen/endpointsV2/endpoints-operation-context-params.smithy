@@ -51,7 +51,7 @@ service Example {
     "opContextParamWildcardExpressionListObj": { path: "fooListObj[*].key" }
     "opContextParamWildcardExpressionListObjListFlatten": { path: "fooListObjList[*].key[]" }
     "opContextParamWildcardExpressionHash": { path: "fooObjObj.*.bar" }
-    "opContextParamMultiSelectList": { path: "fooListObjObj[*].[fooList[0], fooObject.bar, fooString]" }
+    "opContextParamMultiSelectList": { path: "fooListObjObj[*].[fooObject.bar, fooString]" }
     "opContextParamMultiSelectListFlatten": { path: "fooListObjObj[*].[fooList][]" }
     "opContextParamKeys": { path: "keys(fooKeys)" }
 )
