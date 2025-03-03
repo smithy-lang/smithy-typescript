@@ -1,5 +1,5 @@
 import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
-import { parseRfc3339DateTimeWithOffset, splitHeader } from "@smithy/core/serde";
+import { NumericValue,parseRfc3339DateTimeWithOffset, splitHeader } from "@smithy/core/serde";
 import { Schema, SerdeContext, ShapeDeserializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
@@ -21,25 +21,23 @@ export class FromStringShapeDeserializer implements ShapeDeserializer<string> {
     if (ns.isListSchema()) {
       return splitHeader(data);
     }
-    if (schema === "blob" || schema === "streaming-blob") {
+    if (schema === 0b0001_0101 || schema === 0b0010_1010) {
       return fromBase64(data);
     }
-    if (schema === "time") {
+    if (schema === 0b0000_0100) {
       return this.defaultTimestampParser(data);
     }
-    if (schema === "date-time") {
+    if (schema === 0b0000_0101) {
       return parseRfc3339DateTimeWithOffset(data);
     }
-    const simpleType = this.registry.getSimpleType(ns.getName() ?? "");
-    switch (simpleType) {
-      case "number":
+    switch (true) {
+      case ns.isNumericSchema():
         return Number(data);
-      case "bigint":
+      case ns.isBigIntegerSchema():
         return BigInt(data);
-      case "bigdecimal":
-        // todo(schema)
-        throw new Error("bigdecimal not implemented");
-      case "boolean":
+      case ns.isBigDecimalSchema():
+        return new NumericValue(data, "bigDecimal");
+      case ns.isBooleanSchema():
         return String(data).toLowerCase() === "true";
     }
     return data;

@@ -22,6 +22,7 @@ export * from "./profile";
 export * from "./response";
 export * from "./retry";
 export * from "./schema/schema";
+export * from "./schema/sentinels";
 export * from "./serde";
 export * from "./shapes";
 export * from "./signature";

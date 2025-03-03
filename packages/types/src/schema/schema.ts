@@ -2,15 +2,21 @@ import { EndpointV2 } from "../endpoint";
 import { HandlerExecutionContext } from "../middleware";
 import { MetadataBearer } from "../response";
 import { SerdeContext } from "../serde";
-
-/**
- * The default schema is a sentinel value
- * indicating that the schema for a shape
- * behaves no differently than a Document.
- *
- * @public
- */
-export type DefaultSchema = undefined;
+import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BlobSchema,
+  BooleanSchema,
+  DocumentSchema,
+  NumericSchema,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampDateTimeSchema,
+  TimestampDefaultSchema,
+  TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
+} from "./sentinels";
+import type { TraitBitVector } from "./traits";
 
 /**
  * Sentinel value for Timestamp schema.
@@ -18,37 +24,63 @@ export type DefaultSchema = undefined;
  *
  * @public
  */
-export type TimestampSchema = "time" | "date-time" | "http-date" | "epoch-seconds" | string;
+export type TimestampSchemas =
+  | TimestampDefaultSchema
+  | TimestampDateTimeSchema
+  | TimestampHttpDateSchema
+  | TimestampEpochSecondsSchema;
 
 /**
- * Sentinel value for Blob schema.
- *
+ * Sentinel values for Blob schema.
  * @public
  */
-export type BlobSchema = "blob" | "streaming-blob";
+export type BlobSchemas = BlobSchema | StreamingBlobSchema;
 
 /**
  * Signal value for operation Unit input or output.
  *
  * @internal
  */
-export type UnitSchema = "Unit";
+export type UnitSchema = "unit";
 
 /**
  * Traits attached to schema objects.
+ *
+ * When this is a number, it refers to a pre-allocated
+ * trait combination that is equivalent to one of the
+ * object type's variations.
+ *
  * @public
  */
-export type SchemaTraits = {
+export type SchemaTraits = TraitBitVector | SchemaTraitsObject;
+
+/**
+ * @public
+ */
+export type SchemaTraitsObject = {
+  idempotent?: 1;
+  idempotencyToken?: 1;
+  sensitive?: 1;
+
+  /**
+   * timestampFormat is expressed by the sentinel values of 4, 5, 6, and 7,
+   * and not contained in trait objects.
+   */
+  timestampFormat?: never;
+
   httpLabel?: 1;
   httpHeader?: string;
   httpQuery?: string;
   httpPrefixHeaders?: string;
-  httpQueryParams?: {};
-  httpPayload?: {};
-  http?: [string?, string?, number?];
+  httpQueryParams?: 1;
+  httpPayload?: 1;
+  http?: [string, string, number?];
+  httpResponseCode?: 1;
+
   xmlName?: string;
   xmlFlattened?: 1;
   jsonName?: string;
+
   [traitName: string]: any;
 };
 
@@ -75,12 +107,6 @@ export interface StructureSchema extends TraitsSchema {
 }
 
 /**
- * Sentinel value for structure schema with no traits.
- * @public
- */
-export type DefaultStructureSchema = 8;
-
-/**
  * @public
  */
 export interface ListSchema extends TraitsSchema {
@@ -90,12 +116,6 @@ export interface ListSchema extends TraitsSchema {
 }
 
 /**
- * Sentinel value for list schema with no traits.
- * @public
- */
-export type DefaultListSchema = 2;
-
-/**
  * @public
  */
 export interface MapSchema extends TraitsSchema {
@@ -103,12 +123,6 @@ export interface MapSchema extends TraitsSchema {
   traits: SchemaTraits;
   valueSchema: SchemaRef;
 }
-
-/**
- * Sentinel value for map schema with no traits.
- * @public
- */
-export type DefaultMapSchema = 4;
 
 /**
  * @public
@@ -122,7 +136,7 @@ export type MemberSchema = [SchemaRef, SchemaTraits];
  */
 export interface OperationSchema extends TraitsSchema {
   name: string;
-  traits: Record<string, any>;
+  traits: SchemaTraits;
   input: SchemaRef;
   output: SchemaRef;
 }
@@ -140,26 +154,52 @@ export interface NormalizedSchema extends TraitsSchema {
   isListSchema(): boolean;
   isMapSchema(): boolean;
   isStructSchema(): boolean;
-  getMergedTraits(): SchemaTraits;
-  getMemberTraits(): SchemaTraits;
-  getOwnTraits(): SchemaTraits;
-  getMemberSchema(member?: string): NormalizedSchema;
+  isBlobSchema(): boolean;
+  isTimestampSchema(): boolean;
+  isStringSchema(): boolean;
+  isBooleanSchema(): boolean;
+  isNumericSchema(): boolean;
+  isBigIntegerSchema(): boolean;
+  isBigDecimalSchema(): boolean;
+  isStreaming(): boolean;
+  getMergedTraits(): SchemaTraitsObject;
+  getMemberTraits(): SchemaTraitsObject;
+  getOwnTraits(): SchemaTraitsObject;
+  /**
+   * For list/set/map.
+   */
+  getValueSchema(): NormalizedSchema;
+  /**
+   * For struct/union.
+   */
+  getMemberSchema(member: string): NormalizedSchema | undefined;
+  getMemberSchemas(): Record<string, NormalizedSchema>;
 }
+
+/**
+ * @public
+ */
+export type SimpleSchema =
+  | BlobSchemas
+  | StringSchema
+  | BooleanSchema
+  | NumericSchema
+  | BigIntegerSchema
+  | BigDecimalSchema
+  | DocumentSchema
+  | TimestampSchemas
+  | number;
 
 /**
  * @public
  */
 export type Schema =
   | UnitSchema
-  | DefaultSchema
-  | TimestampSchema
-  | BlobSchema
+  | TraitsSchema
+  | SimpleSchema
   | ListSchema
-  | DefaultListSchema
   | MapSchema
-  | DefaultMapSchema
   | StructureSchema
-  | DefaultStructureSchema
   | MemberSchema
   | OperationSchema
   | NormalizedSchema;

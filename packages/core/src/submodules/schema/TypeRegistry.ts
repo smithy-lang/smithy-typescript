@@ -2,10 +2,8 @@ import type { Schema as ISchema } from "@smithy/types";
 
 export class TypeRegistry {
   public static active: TypeRegistry | null = null;
-  public static registries = new Map<string, TypeRegistry>();
-  public static schemaToRegistry = new Map<object, TypeRegistry>();
-
-  private simpleTypes: Record<string, string> = {};
+  public static readonly registries = new Map<string, TypeRegistry>();
+  public static readonly schemaToRegistry = new Map<object, TypeRegistry>();
 
   private constructor(
     public readonly namespace: string,
@@ -29,38 +27,12 @@ export class TypeRegistry {
    * @param schema - to be registered.
    */
   public register(shapeId: string, schema: ISchema) {
-    const qualifiedName = this.namespace + "#" + shapeId;
-    this.schemas.set(qualifiedName, schema);
+    const qualifiedName = this.normalizeShapeId(shapeId);
+    const registry = TypeRegistry.for(this.getNamespace(shapeId));
+    registry.schemas.set(qualifiedName, schema);
     if (typeof schema === "object") {
       TypeRegistry.schemaToRegistry.set(schema, this);
     }
-  }
-
-  /**
-   * Used to disambiguate e.g. XML values, which are all strings,
-   * into other simple JavaScript types like boolean and number.
-   *
-   * @param simpleTypes - map of shape id strings to simple type.
-   */
-  public registerSimpleTypes(simpleTypes: Record<string, "boolean" | "number" | "bigint" | "bigdecimal">): void {
-    for (const [name, type] of Object.entries(simpleTypes)) {
-      const normalizedName = name.includes("#") ? name : this.namespace + "#" + name;
-      this.simpleTypes[normalizedName] = type;
-    }
-  }
-
-  /**
-   * Used to disambiguate e.g. XML values, which are all strings,
-   * into other simple JavaScript types like boolean and number.
-   *
-   * @param shapeId - to query.
-   * @returns simple type of the shape id in this registry.
-   */
-  public getSimpleType(shapeId: string): string {
-    if (shapeId.includes("#")) {
-      return this.simpleTypes[shapeId];
-    }
-    return this.simpleTypes[this.namespace + "#" + shapeId] ?? "unknown";
   }
 
   /**
@@ -68,10 +40,11 @@ export class TypeRegistry {
    * @returns the schema.
    */
   public getSchema(shapeId: string): ISchema {
-    if (shapeId.includes("#")) {
-      return this.schemas.get(shapeId);
+    const id = this.normalizeShapeId(shapeId);
+    if (!this.schemas.has(id)) {
+      throw new Error(`@smithy/core/schema - schema not found for ${id}`);
     }
-    return this.schemas.get(this.namespace + "#" + shapeId);
+    return this.schemas.get(id)!;
   }
 
   /**
@@ -91,6 +64,20 @@ export class TypeRegistry {
 
   public destroy() {
     TypeRegistry.registries.delete(this.namespace);
+    for (const schema of this.schemas) {
+      TypeRegistry.schemaToRegistry.delete(schema);
+    }
     this.schemas.clear();
+  }
+
+  private normalizeShapeId(shapeId: string) {
+    if (shapeId.includes("#")) {
+      return shapeId;
+    }
+    return this.namespace + "#" + shapeId;
+  }
+
+  private getNamespace(shapeId: string) {
+    return this.normalizeShapeId(shapeId).split("#")[0];
   }
 }

@@ -13,7 +13,7 @@ export class ListSchema extends Schema implements IListSchema {
   }
 }
 
-export function list(name: string, traits: SchemaTraits = {}, valueSchema: SchemaRef = void 0): ListSchema {
+export function list(name: string, traits: SchemaTraits = {}, valueSchema: SchemaRef): ListSchema {
   const schema = new ListSchema(name, traits, typeof valueSchema === "function" ? valueSchema() : valueSchema);
   if (TypeRegistry.active) {
     TypeRegistry.active.register(name, schema);
