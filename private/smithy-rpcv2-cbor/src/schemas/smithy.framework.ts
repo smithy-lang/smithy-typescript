@@ -1,10 +1,15 @@
 const _VE = "ValidationException";
+const _VEF = "ValidationExceptionField";
+const _VEFL = "ValidationExceptionFieldList";
 const _c = "client";
 const _e = "error";
+const _fL = "fieldList";
+const _m = "message";
+const _p = "path";
 
 // smithy-typescript generated code
 import { ValidationException as __ValidationException } from "../models/index";
-import { TypeRegistry, error as __error } from "@smithy/core/schema";
+import { TypeRegistry, error as __error, list as __list, struct as __struct } from "@smithy/core/schema";
 
 /* eslint no-var: 0 */
 
@@ -15,13 +20,11 @@ export var ValidationException = __error(
   {
     [_e]: _c,
   },
-  {},
+  [_m, _fL],
+  [0, () => ValidationExceptionFieldList],
 
   __ValidationException
 );
-export var ValidationExceptionField = 8 as const;
-
-export var ValidationExceptionFieldList = 2 as const;
-
-smithy_frameworkRegistry.registerSimpleTypes({});
+export var ValidationExceptionField = __struct(_VEF, {}, [_p, _m], [0, 0]);
+export var ValidationExceptionFieldList = __list(_VEFL, {}, () => ValidationExceptionField);
 smithy_frameworkRegistry.stopCapture();

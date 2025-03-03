@@ -87,6 +87,9 @@ export abstract class HttpProtocol implements Protocol<IHttpRequest, IHttpRespon
 
     for (const memberName of Object.keys(_input)) {
       const memberNs = ns.getMemberSchema(memberName);
+      if (memberNs === undefined) {
+        continue;
+      }
       const memberSchema = memberNs.getSchema();
       const memberTraits = memberNs.getMergedTraits();
       const inputMember = (_input as any)[memberName] as any;
@@ -122,13 +125,13 @@ export abstract class HttpProtocol implements Protocol<IHttpRequest, IHttpRespon
       } else if (memberTraits.httpPrefixHeaders) {
         for (const [key, val] of Object.entries(inputMember)) {
           const amalgam = memberTraits.httpPrefixHeaders + key;
-          serializer.write([, { httpHeader: amalgam }], val);
+          serializer.write([0, { httpHeader: amalgam }], val);
           headers[amalgam.toLowerCase()] = String(serializer.flush()).toLowerCase();
         }
         delete _input[memberName];
       } else if (memberTraits.httpQueryParams) {
         for (const [key, val] of Object.entries(inputMember)) {
-          serializer.write([, { httpQuery: key }], val);
+          serializer.write([0, { httpQuery: key }], val);
           query[key] = serializer.flush() as string;
         }
         delete _input[memberName];
@@ -178,6 +181,16 @@ export abstract class HttpProtocol implements Protocol<IHttpRequest, IHttpRespon
     const schema = ns.getSchema() as StructureSchema;
 
     let dataObject: any = {};
+
+    if (response.statusCode >= 300) {
+      const bytes: Uint8Array = await collectBody(response.body, context as SerdeContext);
+      if (bytes.byteLength > 0) {
+        Object.assign(dataObject, await deserializer.read(15, bytes));
+      }
+      await this.handleError(operationSchema, context, response, dataObject, this.deserializeMetadata(response));
+      throw new Error("@smithy/core/protocols - HTTP Protocol error handler failed to throw.");
+    }
+
     let hasNonHttpBindingMember = false;
 
     for (const header in response.headers) {
@@ -188,6 +201,9 @@ export abstract class HttpProtocol implements Protocol<IHttpRequest, IHttpRespon
 
     for (const [memberName] of Object.entries(schema?.members ?? {})) {
       const memberSchema = ns.getMemberSchema(memberName);
+      if (memberSchema === undefined) {
+        continue;
+      }
       const memberSchemas = memberSchema.getMemberSchemas();
       const memberTraits = memberSchema.getMemberTraits();
 
@@ -259,10 +275,6 @@ export abstract class HttpProtocol implements Protocol<IHttpRequest, IHttpRespon
       if (bytes.byteLength > 0) {
         Object.assign(dataObject, await deserializer.read(ns, bytes));
       }
-    }
-
-    if (response.statusCode >= 300) {
-      await this.handleError(operationSchema, context, response, dataObject, this.deserializeMetadata(response));
     }
 
     const output: Output = {
