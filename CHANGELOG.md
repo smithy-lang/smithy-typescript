@@ -1,5 +1,20 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.27.0 (2025-03-04)
+
+### Features
+- Support MultiSelect List in OperationContextParams ([#1536](https://github.com/smithy-lang/smithy-typescript/pull/1536))
+- Support MultiSelect Flatten in OperationContextParams ([#1537](https://github.com/smithy-lang/smithy-typescript/pull/1537))
+- Upgrade smithy version to 1.53.0 ([#1538](https://github.com/smithy-lang/smithy-typescript/pull/1538))
+- Upgrade smithy version to 1.54.0 ([#1540](https://github.com/smithy-lang/smithy-typescript/pull/1540))
+
+### Bug Fixes
+- Fixed union member serialization in CBOR ([#1526](https://github.com/smithy-lang/smithy-typescript/pull/1526))
+- Fixed allocation of strings starting with underscore and other cases ([#1527](https://github.com/smithy-lang/smithy-typescript/pull/1527))
+
+### Documentation
+- Moved description block before deprecated tag ([#1516](https://github.com/smithy-lang/smithy-typescript/pull/1516))
+
 ## 0.26.0 (2025-01-22)
 
 ### Features
