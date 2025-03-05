@@ -106,6 +106,8 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
                 intermediate.toBuilder().name(serviceName + "Operations").build());
         builder.putProperty("handler",
                 intermediate.toBuilder().name(serviceName + "Handler").build());
+        builder.putProperty("mux",
+                intermediate.toBuilder().name(serviceName + "Mux").build());
         return builder.build();
     }
 
