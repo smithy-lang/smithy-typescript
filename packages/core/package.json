@@ -45,6 +45,13 @@
       "import": "./dist-es/submodules/protocols/index.js",
       "require": "./dist-cjs/submodules/protocols/index.js",
       "types": "./dist-types/submodules/protocols/index.d.ts"
+    },
+    "./serde": {
+      "module": "./dist-es/submodules/serde/index.js",
+      "node": "./dist-cjs/submodules/serde/index.js",
+      "import": "./dist-es/submodules/serde/index.js",
+      "require": "./dist-cjs/submodules/serde/index.js",
+      "types": "./dist-types/submodules/serde/index.d.ts"
     }
   },
   "author": {
@@ -78,6 +85,8 @@
     "./cbor.js",
     "./protocols.d.ts",
     "./protocols.js",
+    "./serde.d.ts",
+    "./serde.js",
     "dist-*/**"
   ],
   "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/core",
