@@ -39,10 +39,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/property-provider",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/property-provider",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/property-provider"
   },
   "devDependencies": {

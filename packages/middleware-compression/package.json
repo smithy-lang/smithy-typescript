@@ -58,10 +58,10 @@
     "./dist-es/compressString": "./dist-es/compressString.browser"
   },
   "react-native": {},
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/middleware-compression",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-compression",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/middleware-compression"
   },
   "publishConfig": {

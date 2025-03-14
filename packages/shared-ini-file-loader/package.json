@@ -57,10 +57,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/shared-ini-file-loader",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/shared-ini-file-loader",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/shared-ini-file-loader"
   },
   "typedoc": {

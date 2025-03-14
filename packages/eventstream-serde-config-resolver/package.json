@@ -40,10 +40,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/eventstream-serde-config-resolver",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/eventstream-serde-config-resolver",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/eventstream-serde-config-resolver"
   },
   "devDependencies": {

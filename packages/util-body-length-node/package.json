@@ -46,10 +46,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-body-length-node",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-body-length-node",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-body-length-node"
   },
   "typedoc": {

@@ -41,10 +41,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/service-error-classification",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/service-error-classification",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/service-error-classification"
   },
   "typedoc": {

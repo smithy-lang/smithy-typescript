@@ -49,10 +49,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/config-resolver",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/config-resolver",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/config-resolver"
   },
   "typedoc": {

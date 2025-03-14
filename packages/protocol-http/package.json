@@ -40,10 +40,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/protocol-http",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/protocol-http",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/protocol-http"
   },
   "devDependencies": {

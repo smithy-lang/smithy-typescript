@@ -51,10 +51,10 @@
     "./dist-es/toUtf8": "./dist-es/toUtf8.browser"
   },
   "react-native": {},
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-utf8",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-utf8",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-utf8"
   },
   "typedoc": {

@@ -46,10 +46,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-buffer-from",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-buffer-from",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-buffer-from"
   },
   "typedoc": {
