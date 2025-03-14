@@ -1,8 +1,7 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { GreetingWithErrorsOutput } from "../models/models_0";
-import { de_GreetingWithErrorsCommand, se_GreetingWithErrorsCommand } from "../protocols/Rpcv2cbor";
-import { getSerdePlugin } from "@smithy/middleware-serde";
+import { GreetingWithErrors } from "../schemas/smithy.protocoltests.rpcv2Cbor";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
@@ -74,13 +73,12 @@ export class GreetingWithErrorsCommand extends $Command
     ServiceOutputTypes
   >()
   .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getSerdePlugin(config, this.serialize, this.deserialize)];
+    return [];
   })
   .s("RpcV2Protocol", "GreetingWithErrors", {})
   .n("RpcV2ProtocolClient", "GreetingWithErrorsCommand")
   .f(void 0, void 0)
-  .ser(se_GreetingWithErrorsCommand)
-  .de(de_GreetingWithErrorsCommand)
+  .sc(GreetingWithErrors)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {
