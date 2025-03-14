@@ -9,5 +9,5 @@
 
 This package is experimental for the development of `experimentalIdentityAndAuth`.
 
-See [experimental features](https://github.com/awslabs/smithy-typescript/blob/main/CONTRIBUTING.md#experimental-features)
+See [experimental features](https://github.com/smithy-lang/smithy-typescript/blob/main/CONTRIBUTING.md#experimental-features)
 for more information.

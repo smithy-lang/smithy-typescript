@@ -60,10 +60,10 @@ describe(parseIni.name, () => {
     );
 
     // Some characters are not allowed in profile name, but we parse them as customers use them.
-    // `@` https://github.com/awslabs/smithy-typescript/issues/1026
+    // `@` https://github.com/smithy-lang/smithy-typescript/issues/1026
     // `+` https://github.com/aws/aws-sdk-js-v3/issues/5373
     // `.` https://github.com/aws/aws-sdk-js-v3/issues/5449
-    // `/` https://github.com/awslabs/smithy-typescript/issues/1053
+    // `/` https://github.com/smithy-lang/smithy-typescript/issues/1053
     // `%` https://github.com/aws/aws-sdk-java-v2/pull/1538
     // `:` https://github.com/aws/aws-sdk-java-v2/pull/1898
     it.each(["-", "_", "@", "+", ".", "/", "%", ":"])(

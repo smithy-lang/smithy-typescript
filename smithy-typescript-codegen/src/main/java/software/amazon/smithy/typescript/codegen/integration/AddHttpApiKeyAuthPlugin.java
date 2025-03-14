@@ -123,7 +123,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         }
 
         String noTouchNoticePrefix = "// Please do not touch this file. It's generated from a template in:\n"
-                + "// https://github.com/awslabs/smithy-typescript/blob/main/smithy-typescript-codegen/"
+                + "// https://github.com/smithy-lang/smithy-typescript/blob/main/smithy-typescript-codegen/"
                 + "src/main/resources/software/amazon/smithy/aws/typescript/codegen/integration/";
 
         // Write the middleware source.
