@@ -36,10 +36,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/invalid-dependency",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/invalid-dependency",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/invalid-dependency"
   },
   "devDependencies": {

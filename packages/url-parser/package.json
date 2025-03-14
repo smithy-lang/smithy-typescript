@@ -37,10 +37,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/url-parser",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/url-parser",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/url-parser"
   },
   "devDependencies": {

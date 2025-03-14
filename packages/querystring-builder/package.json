@@ -39,10 +39,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/querystring-builder",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/querystring-builder",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/querystring-builder"
   },
   "devDependencies": {

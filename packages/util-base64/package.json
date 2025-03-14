@@ -58,10 +58,10 @@
     "./dist-cjs/fromBase64": "./dist-cjs/fromBase64.browser",
     "./dist-cjs/toBase64": "./dist-cjs/toBase64.browser"
   },
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-base64",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-base64",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-base64"
   },
   "typedoc": {

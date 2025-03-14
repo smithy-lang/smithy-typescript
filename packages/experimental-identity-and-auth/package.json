@@ -48,10 +48,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/experimental-identity-and-auth",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/experimental-identity-and-auth",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/experimental-identity-and-auth"
   },
   "devDependencies": {

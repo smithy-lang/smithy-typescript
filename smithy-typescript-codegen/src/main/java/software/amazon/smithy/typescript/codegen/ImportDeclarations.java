@@ -122,7 +122,7 @@ final class ImportDeclarations implements ImportContainer {
                 Map<String, String> moduleImports = entry.getValue();
                 Set<Map.Entry<String, String>> entries = moduleImports.entrySet();
 
-                // "*" imports are not supported https://github.com/awslabs/smithy-typescript/issues/211
+                // "*" imports are not supported https://github.com/smithy-lang/smithy-typescript/issues/211
                 for (Map.Entry<String, String> importEntry : entries) {
                     if (importEntry.getValue().equals("*")) {
                         throw new CodegenException("Star imports are not supported, attempted for " + module

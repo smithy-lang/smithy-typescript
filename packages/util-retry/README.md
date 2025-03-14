@@ -74,5 +74,5 @@ const client = new S3Client({
 
 You can implement the `RetryStrategyV2` interface.
 
-Source: https://github.com/awslabs/smithy-typescript/blob/main/packages/types/src/retry.ts
+Source: https://github.com/smithy-lang/smithy-typescript/blob/main/packages/types/src/retry.ts
 API Docs: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-smithy-types/Interface/RetryStrategyV2/

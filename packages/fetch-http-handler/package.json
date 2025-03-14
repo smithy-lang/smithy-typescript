@@ -50,10 +50,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/fetch-http-handler",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/fetch-http-handler",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/fetch-http-handler"
   },
   "typedoc": {

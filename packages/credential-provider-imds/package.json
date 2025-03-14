@@ -54,10 +54,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/credential-provider-imds",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/credential-provider-imds",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/credential-provider-imds"
   },
   "typedoc": {

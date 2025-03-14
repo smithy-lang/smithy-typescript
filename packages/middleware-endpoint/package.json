@@ -59,10 +59,10 @@
     "./dist-es/adaptors/getEndpointFromConfig": "./dist-es/adaptors/getEndpointFromConfig.browser",
     "./dist-cjs/adaptors/getEndpointFromConfig": "./dist-cjs/adaptors/getEndpointFromConfig.browser"
   },
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/middleware-endpoint",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-endpoint",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/middleware-endpoint"
   },
   "typedoc": {

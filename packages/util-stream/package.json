@@ -83,10 +83,10 @@
     "./dist-cjs/splitStream": "./dist-cjs/splitStream.browser",
     "./dist-cjs/createBufferedReadable": "./dist-cjs/createBufferedReadableStream"
   },
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-stream",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-stream",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-stream"
   },
   "typedoc": {
