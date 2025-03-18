@@ -52,6 +52,13 @@
       "import": "./dist-es/submodules/serde/index.js",
       "require": "./dist-cjs/submodules/serde/index.js",
       "types": "./dist-types/submodules/serde/index.d.ts"
+    },
+    "./debug": {
+      "module": "./dist-es/submodules/debug/index.js",
+      "node": "./dist-cjs/submodules/debug/index.js",
+      "import": "./dist-es/submodules/debug/index.js",
+      "require": "./dist-cjs/submodules/debug/index.js",
+      "types": "./dist-types/submodules/debug/index.d.ts"
     }
   },
   "author": {
@@ -83,6 +90,8 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./debug.d.ts",
+    "./debug.js",
     "./protocols.d.ts",
     "./protocols.js",
     "./serde.d.ts",
