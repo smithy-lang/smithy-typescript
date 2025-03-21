@@ -9,6 +9,13 @@ describe("resolveEventStreamSerdeConfig", () => {
     vi.clearAllMocks();
   });
 
+  it("maintains object custody", () => {
+    const input = {
+      eventStreamSerdeProvider: vi.fn(),
+    };
+    expect(resolveEventStreamSerdeConfig(input)).toBe(input);
+  });
+
   it("sets value returned by eventStreamSerdeProvider", () => {
     const mockReturn = "mockReturn";
     eventStreamSerdeProvider.mockReturnValueOnce(mockReturn);

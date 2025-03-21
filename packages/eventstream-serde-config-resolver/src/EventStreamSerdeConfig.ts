@@ -28,7 +28,7 @@ interface PreviouslyResolved {
  */
 export const resolveEventStreamSerdeConfig = <T>(
   input: T & PreviouslyResolved & EventStreamSerdeInputConfig
-): T & EventStreamSerdeResolvedConfig => ({
-  ...input,
-  eventStreamMarshaller: input.eventStreamSerdeProvider(input),
-});
+): T & EventStreamSerdeResolvedConfig =>
+  Object.assign(input, {
+    eventStreamMarshaller: input.eventStreamSerdeProvider(input),
+  });

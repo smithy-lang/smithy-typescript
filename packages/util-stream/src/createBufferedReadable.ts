@@ -36,7 +36,7 @@ export function createBufferedReadable(
   let mode: Modes | -1 = -1;
 
   upstream.on("data", (chunk) => {
-    const chunkMode = modeOf(chunk);
+    const chunkMode = modeOf(chunk, true);
     if (mode !== chunkMode) {
       if (mode >= 0) {
         downstream.push(flush(buffers, mode));

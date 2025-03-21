@@ -146,8 +146,7 @@ public final class EndpointsV2Generator implements Runnable {
                         + "): T & ClientResolvedEndpointParameters => {",
                     "}",
                     () -> {
-                        writer.openBlock("return {", "}", () -> {
-                            writer.write("...options,");
+                        writer.openBlock("return Object.assign(options, {", "});", () -> {
                             ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
