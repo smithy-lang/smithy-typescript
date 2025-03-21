@@ -20,12 +20,17 @@ describe(resolveCustomEndpointsConfig.name, () => {
 
   beforeEach(() => {
     vi.mocked(normalizeProvider).mockImplementation((input) =>
-      typeof input === "function" ? input : () => Promise.resolve(input)
+      typeof input === "function" ? (input as any) : () => Promise.resolve(input)
     );
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("maintains object custody", () => {
+    const input = { ...mockInput };
+    expect(resolveCustomEndpointsConfig(input)).toBe(input);
   });
 
   describe("tls", () => {
@@ -44,7 +49,7 @@ describe(resolveCustomEndpointsConfig.name, () => {
   });
 
   it("returns true for isCustomEndpoint", () => {
-    expect(resolveCustomEndpointsConfig(mockInput).isCustomEndpoint).toStrictEqual(true);
+    expect(resolveCustomEndpointsConfig({ ...mockInput }).isCustomEndpoint).toStrictEqual(true);
   });
 
   it("returns false when useDualstackEndpoint is not defined", async () => {
@@ -56,23 +61,25 @@ describe(resolveCustomEndpointsConfig.name, () => {
   });
 
   describe("returns normalized endpoint", () => {
-    afterEach(() => {
-      expect(normalizeProvider).toHaveBeenCalledTimes(2);
-      expect(normalizeProvider).toHaveBeenNthCalledWith(1, mockInput.endpoint);
-      expect(normalizeProvider).toHaveBeenNthCalledWith(2, mockInput.useDualstackEndpoint);
-    });
-
     it("calls urlParser endpoint is of type string", async () => {
       const mockEndpointString = "http://localhost/";
       const endpoint = await resolveCustomEndpointsConfig({ ...mockInput, endpoint: mockEndpointString }).endpoint();
       expect(endpoint).toStrictEqual(mockEndpoint);
       expect(mockInput.urlParser).toHaveBeenCalledWith(mockEndpointString);
+
+      expect(normalizeProvider).toHaveBeenCalledTimes(2);
+      expect(normalizeProvider).toHaveBeenNthCalledWith(1, mockInput.endpoint);
+      expect(normalizeProvider).toHaveBeenNthCalledWith(2, mockInput.useDualstackEndpoint);
     });
 
     it("passes endpoint to normalize if not string", async () => {
-      const endpoint = await resolveCustomEndpointsConfig(mockInput).endpoint();
+      const endpoint = await resolveCustomEndpointsConfig({ ...mockInput }).endpoint();
       expect(endpoint).toStrictEqual(mockEndpoint);
       expect(mockInput.urlParser).not.toHaveBeenCalled();
+
+      expect(normalizeProvider).toHaveBeenCalledTimes(2);
+      expect(normalizeProvider).toHaveBeenNthCalledWith(1, mockInput.endpoint);
+      expect(normalizeProvider).toHaveBeenNthCalledWith(2, mockInput.useDualstackEndpoint);
     });
   });
 });

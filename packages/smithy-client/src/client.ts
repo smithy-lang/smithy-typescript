@@ -63,6 +63,16 @@ export class Client<
 > implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration>
 {
   public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>();
+
+  /**
+   * Holds an object reference to the initial configuration object.
+   * Used to check that the config resolver stack does not create
+   * dangling instances of an intermediate form of the configuration object.
+   *
+   * @internal
+   */
+  public initConfig?: object;
+
   /**
    * May be used to cache the resolved handler function for a Command class.
    */

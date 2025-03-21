@@ -86,7 +86,7 @@ public class RuntimeExtensionsGenerator {
             writer.indent().onSection("getPartialExtensionConfigurations", original -> {
                 for (TypeScriptIntegration integration : integrations) {
                     integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
-                        writer.indent(2).write("...asPartial($L(runtimeConfig)),",
+                        writer.indent(2).write("$L(runtimeConfig),",
                                 configurationInterface.getExtensionConfigurationFn().left);
                         writer.dedent(2);
                     });
@@ -97,7 +97,7 @@ public class RuntimeExtensionsGenerator {
             writer.indent().onSection("resolvePartialRuntimeConfigs", original -> {
                 for (TypeScriptIntegration integration : integrations) {
                     integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
-                        writer.indent(2).write("...$L(extensionConfiguration),",
+                        writer.indent(2).write("$L(extensionConfiguration),",
                                 configurationInterface.resolveRuntimeConfigFn().left);
                         writer.dedent(2);
                     });

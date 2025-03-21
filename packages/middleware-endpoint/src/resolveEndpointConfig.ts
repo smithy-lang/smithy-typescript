@@ -121,21 +121,20 @@ export const resolveEndpointConfig = <T, P extends EndpointParameters = Endpoint
   input: T & EndpointInputConfig<P> & PreviouslyResolved<P>
 ): T & EndpointResolvedConfig<P> => {
   const tls = input.tls ?? true;
-  const { endpoint } = input;
+  const { endpoint, useDualstackEndpoint, useFipsEndpoint } = input;
 
   const customEndpointProvider =
     endpoint != null ? async () => toEndpointV1(await normalizeProvider(endpoint)()) : undefined;
 
   const isCustomEndpoint = !!endpoint;
 
-  const resolvedConfig = {
-    ...input,
+  const resolvedConfig = Object.assign(input, {
     endpoint: customEndpointProvider,
     tls,
     isCustomEndpoint,
-    useDualstackEndpoint: normalizeProvider(input.useDualstackEndpoint ?? false),
-    useFipsEndpoint: normalizeProvider(input.useFipsEndpoint ?? false),
-  } as T & EndpointResolvedConfig<P>;
+    useDualstackEndpoint: normalizeProvider(useDualstackEndpoint ?? false),
+    useFipsEndpoint: normalizeProvider(useFipsEndpoint ?? false),
+  }) as T & EndpointResolvedConfig<P>;
 
   let configuredEndpointPromise: undefined | Promise<string | undefined> = undefined;
   resolvedConfig.serviceConfiguredEndpoint = async () => {

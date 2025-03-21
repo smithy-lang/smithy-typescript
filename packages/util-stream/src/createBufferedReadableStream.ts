@@ -10,7 +10,7 @@ export type Modes = 0 | 1 | 2;
  * @internal
  * @param upstream - any ReadableStream.
  * @param size - byte or character length minimum. Buffering occurs when a chunk fails to meet this value.
- * @param onBuffer - for emitting warnings when buffering occurs.
+ * @param logger - for emitting warnings when buffering occurs.
  * @returns another stream of the same data, but buffers chunks until
  * the minimum size is met, except for the last chunk.
  */
@@ -35,7 +35,7 @@ export function createBufferedReadableStream(upstream: ReadableStream, size: num
       }
       controller.close();
     } else {
-      const chunkMode = modeOf(chunk);
+      const chunkMode = modeOf(chunk, false);
       if (mode !== chunkMode) {
         if (mode >= 0) {
           controller.enqueue(flush(buffers, mode));
@@ -135,10 +135,11 @@ export function sizeOf(chunk?: { byteLength?: number; length?: number }): number
 /**
  * @internal
  * @param chunk - from upstream Readable.
+ * @param allowBuffer - allow mode 2 (Buffer), otherwise Buffer will return mode 1.
  * @returns type index of the chunk.
  */
-export function modeOf(chunk: BufferUnion): Modes | -1 {
-  if (typeof Buffer !== "undefined" && chunk instanceof Buffer) {
+export function modeOf(chunk: BufferUnion, allowBuffer = true): Modes | -1 {
+  if (allowBuffer && typeof Buffer !== "undefined" && chunk instanceof Buffer) {
     return 2;
   }
   if (chunk instanceof Uint8Array) {
