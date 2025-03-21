@@ -368,7 +368,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         w.writeDocs("@internal");
         w.writeInline("""
-            export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig""");
+            export const resolveHttpAuthSchemeConfig = <T, R extends object>(config: T & HttpAuthSchemeInputConfig""");
         if (!previousResolvedFunctions.isEmpty()) {
             w.writeInline(" & ");
             Iterator<ResolveConfigFunction> iter = previousResolvedFunctions.values().iterator();
@@ -381,7 +381,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             }
         }
         w.write("""
-            , { client }: { client: () => { config: AwsSdkSigV4AuthResolvedConfig } }
+            , { client }: { client: () => { config: R } }
             ): T & HttpAuthSchemeResolvedConfig => {""");
         w.indent();
         w.pushState(ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection.builder()
