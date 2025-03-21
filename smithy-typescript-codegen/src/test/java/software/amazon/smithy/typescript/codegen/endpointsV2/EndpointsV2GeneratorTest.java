@@ -50,11 +50,10 @@ public class EndpointsV2GeneratorTest {
         String endpointParameters = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts").get();
 
         assertThat(endpointParameters, containsString(
-                "  return {\n" +
-                "    ...options,\n" +
+                "  return Object.assign(options, {\n" +
                 "    stage: options.stage ?? \"production\",\n" +
                 "    defaultSigningName: \"\",\n" +
-                "  }\n"));
+                "  });\n"));
         assertThat(endpointParameters, containsString(
                 "export interface ClientInputEndpointParameters {\n" +
                 "  region?: string|Provider<string>;\n" +
