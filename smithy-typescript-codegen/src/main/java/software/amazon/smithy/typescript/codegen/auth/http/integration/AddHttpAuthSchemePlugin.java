@@ -85,6 +85,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
                         .name("resolveHttpAuthSchemeConfig")
                         .build())
+                .additionalResolveFunctionParamsSupplier((m, s, o) -> Map.of(
+                    "client", Symbol.builder().name("() => this").build()
+                ))
                 .build()
         );
     }
@@ -364,7 +367,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             .filter(e -> e.getValue().previouslyResolved().isPresent())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         w.writeDocs("@internal");
-        w.writeInline("export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig");
+        w.writeInline("""
+            export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig""");
         if (!previousResolvedFunctions.isEmpty()) {
             w.writeInline(" & ");
             Iterator<ResolveConfigFunction> iter = previousResolvedFunctions.values().iterator();
@@ -376,7 +380,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 }
             }
         }
-        w.write("): T & HttpAuthSchemeResolvedConfig => {");
+        w.write("""
+            , { client }: { client: () => { config: AwsSdkSigV4AuthResolvedConfig } }
+            ): T & HttpAuthSchemeResolvedConfig => {""");
         w.indent();
         w.pushState(ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection.builder()
             .service(s.getService())
@@ -402,7 +408,18 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         Integer i = 0;
         String configName = "config";
         for (ResolveConfigFunction resolveConfigFunction : resolveConfigFunctions.values()) {
-            w.write("const config_$L = $T($L);", i, resolveConfigFunction.resolveConfigFunction(), configName);
+            w.openBlock(
+                "const config_$L = $T($L",
+                ");",
+                i,
+                resolveConfigFunction.resolveConfigFunction(),
+                configName,
+                () -> {
+                    for (String addArg : resolveConfigFunction.addArgs()) {
+                        w.writeInline(", $L", addArg);
+                    }
+                }
+            );
             configName = "config_" + i;
             i++;
         }
