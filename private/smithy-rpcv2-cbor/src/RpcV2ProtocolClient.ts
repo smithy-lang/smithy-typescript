@@ -246,7 +246,7 @@ export class RpcV2ProtocolClient extends __Client<
   readonly config: RpcV2ProtocolClientResolvedConfig;
 
   constructor(...[configuration]: __CheckOptionalClientConfig<RpcV2ProtocolClientConfig>) {
-    let _config_0 = __getRuntimeConfig(configuration || {});
+    let _config_0 = (this.initConfig = __getRuntimeConfig(configuration || {}));
     let _config_1 = resolveCustomEndpointsConfig(_config_0);
     let _config_2 = resolveRetryConfig(_config_1);
     let _config_3 = resolveHttpAuthSchemeConfig(_config_2);

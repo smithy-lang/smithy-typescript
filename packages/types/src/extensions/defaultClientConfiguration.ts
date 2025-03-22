@@ -21,9 +21,7 @@ type GetDefaultConfigurationType = (runtimeConfig: any) => DefaultClientConfigur
  *
  */
 export const getDefaultClientConfiguration: GetDefaultConfigurationType = (runtimeConfig: any) => {
-  return {
-    ...getChecksumConfiguration(runtimeConfig),
-  };
+  return getChecksumConfiguration(runtimeConfig);
 };
 
 /**
@@ -38,7 +36,5 @@ type ResolveDefaultRuntimeConfigType = (clientConfig: DefaultClientConfiguration
  * Helper function to resolve runtime config from default client configuration
  */
 export const resolveDefaultRuntimeConfig: ResolveDefaultRuntimeConfigType = (config: DefaultClientConfiguration) => {
-  return {
-    ...resolveChecksumRuntimeConfig(config),
-  };
+  return resolveChecksumRuntimeConfig(config);
 };

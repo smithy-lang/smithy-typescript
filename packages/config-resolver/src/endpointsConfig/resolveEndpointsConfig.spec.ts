@@ -25,12 +25,17 @@ describe(resolveEndpointsConfig.name, () => {
   beforeEach(() => {
     vi.mocked(getEndpointFromRegion).mockResolvedValueOnce(mockEndpoint);
     vi.mocked(normalizeProvider).mockImplementation((input) =>
-      typeof input === "function" ? input : () => Promise.resolve(input)
+      typeof input === "function" ? (input as any) : () => Promise.resolve(input)
     );
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("maintains object custody", () => {
+    const input = { ...mockInput };
+    expect(resolveEndpointsConfig(input)).toBe(input);
   });
 
   describe("tls", () => {
@@ -53,7 +58,7 @@ describe(resolveEndpointsConfig.name, () => {
     });
 
     it("returns true when endpoint is defined", () => {
-      expect(resolveEndpointsConfig(mockInput).isCustomEndpoint).toStrictEqual(true);
+      expect(resolveEndpointsConfig({ ...mockInput }).isCustomEndpoint).toStrictEqual(true);
     });
 
     it("returns false when endpoint is not defined", () => {
@@ -90,7 +95,7 @@ describe(resolveEndpointsConfig.name, () => {
       });
 
       it("passes endpoint to normalize if not string", async () => {
-        const endpoint = await resolveEndpointsConfig(mockInput).endpoint();
+        const endpoint = await resolveEndpointsConfig({ ...mockInput }).endpoint();
         expect(endpoint).toStrictEqual(mockEndpoint);
         expect(mockInput.urlParser).not.toHaveBeenCalled();
       });

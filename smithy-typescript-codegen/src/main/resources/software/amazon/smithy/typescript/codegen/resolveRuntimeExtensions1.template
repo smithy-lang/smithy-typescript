@@ -14,8 +14,6 @@ export interface RuntimeExtensionsConfig {
     extensions: RuntimeExtension[]
 }
 
-const asPartial = <T extends Partial<${extensionConfigName}>>(t: T) => t;
-
 /**
  * @internal
  */
@@ -23,8 +21,8 @@ export const resolveRuntimeExtensions = (
     runtimeConfig: any,
     extensions: RuntimeExtension[]
 ) => {
-  const extensionConfiguration: ${extensionConfigName} = {
+  const extensionConfiguration: ${extensionConfigName} = Object.assign(
 ${getPartialExtensionConfigurations}
-  };
+  );
 
   extensions.forEach(extension => extension.configure(extensionConfiguration));

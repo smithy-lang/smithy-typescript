@@ -14,10 +14,7 @@ export type DefaultExtensionRuntimeConfigType = PartialRetryRuntimeConfigType & 
  * Helper function to resolve default extension configuration from runtime config
  */
 export const getDefaultExtensionConfiguration = (runtimeConfig: DefaultExtensionRuntimeConfigType) => {
-  return {
-    ...getChecksumConfiguration(runtimeConfig),
-    ...getRetryConfiguration(runtimeConfig),
-  };
+  return Object.assign(getChecksumConfiguration(runtimeConfig), getRetryConfiguration(runtimeConfig));
 };
 
 /**
@@ -36,8 +33,5 @@ export const getDefaultClientConfiguration = getDefaultExtensionConfiguration;
 export const resolveDefaultRuntimeConfig = (
   config: DefaultExtensionConfiguration
 ): DefaultExtensionRuntimeConfigType => {
-  return {
-    ...resolveChecksumRuntimeConfig(config),
-    ...resolveRetryRuntimeConfig(config),
-  };
+  return Object.assign(resolveChecksumRuntimeConfig(config), resolveRetryRuntimeConfig(config));
 };

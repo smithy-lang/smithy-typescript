@@ -86,22 +86,22 @@ export interface RetryResolvedConfig {
  * @internal
  */
 export const resolveRetryConfig = <T>(input: T & PreviouslyResolved & RetryInputConfig): T & RetryResolvedConfig => {
-  const { retryStrategy } = input;
-  const maxAttempts = normalizeProvider(input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS);
-  return {
-    ...input,
+  const { retryStrategy, retryMode: _retryMode, maxAttempts: _maxAttempts } = input;
+  const maxAttempts = normalizeProvider(_maxAttempts ?? DEFAULT_MAX_ATTEMPTS);
+
+  return Object.assign(input, {
     maxAttempts,
     retryStrategy: async () => {
       if (retryStrategy) {
         return retryStrategy;
       }
-      const retryMode = await normalizeProvider(input.retryMode)();
+      const retryMode = await normalizeProvider(_retryMode)();
       if (retryMode === RETRY_MODES.ADAPTIVE) {
         return new AdaptiveRetryStrategy(maxAttempts);
       }
       return new StandardRetryStrategy(maxAttempts);
     },
-  };
+  });
 };
 
 /**

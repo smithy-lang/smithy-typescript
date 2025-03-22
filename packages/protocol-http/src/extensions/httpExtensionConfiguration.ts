@@ -25,19 +25,18 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
 export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends object = {}>(
   runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig>
 ) => {
-  let httpHandler = runtimeConfig.httpHandler!;
   return {
     setHttpHandler(handler: HttpHandler<HandlerConfig>): void {
-      httpHandler = handler;
+      runtimeConfig.httpHandler = handler;
     },
     httpHandler(): HttpHandler<HandlerConfig> {
-      return httpHandler;
+      return runtimeConfig.httpHandler!;
     },
     updateHttpClientConfig(key: keyof HandlerConfig, value: HandlerConfig[typeof key]): void {
-      httpHandler.updateHttpClientConfig(key, value);
+      runtimeConfig.httpHandler?.updateHttpClientConfig(key, value);
     },
     httpHandlerConfigs(): HandlerConfig {
-      return httpHandler.httpHandlerConfigs();
+      return runtimeConfig.httpHandler!.httpHandlerConfigs();
     },
   };
 };

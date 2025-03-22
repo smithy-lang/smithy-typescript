@@ -32,12 +32,11 @@ export const getChecksumConfiguration = (runtimeConfig: PartialChecksumRuntimeCo
   }
 
   return {
-    _checksumAlgorithms: checksumAlgorithms,
     addChecksumAlgorithm(algo: ChecksumAlgorithm): void {
-      this._checksumAlgorithms.push(algo);
+      checksumAlgorithms.push(algo);
     },
     checksumAlgorithms(): ChecksumAlgorithm[] {
-      return this._checksumAlgorithms;
+      return checksumAlgorithms;
     },
   };
 };
