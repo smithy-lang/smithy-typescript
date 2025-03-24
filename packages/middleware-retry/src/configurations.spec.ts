@@ -26,6 +26,13 @@ describe(resolveRetryConfig.name, () => {
     vi.clearAllMocks();
   });
 
+  it("maintains object custody", () => {
+    const input = {
+      retryMode: "STANDARD",
+    };
+    expect(resolveRetryConfig(input)).toBe(input);
+  });
+
   describe("maxAttempts", () => {
     it.each([1, 2, 3])("assigns provided value %s", async (maxAttempts) => {
       const output = await resolveRetryConfig({ maxAttempts, retryMode }).maxAttempts();

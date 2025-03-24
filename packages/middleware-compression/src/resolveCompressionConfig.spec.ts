@@ -9,6 +9,14 @@ describe(resolveCompressionConfig.name, () => {
     requestMinCompressionSizeBytes: 0,
   };
 
+  it("maintains object custody", () => {
+    const input = {
+      disableRequestCompression: false,
+      requestMinCompressionSizeBytes: 10_000,
+    };
+    expect(resolveCompressionConfig(input)).toBe(input);
+  });
+
   it("should throw an error if requestMinCompressionSizeBytes is less than 0", async () => {
     const requestMinCompressionSizeBytes = -1;
     const resolvedConfig = resolveCompressionConfig({ ...mockConfig, requestMinCompressionSizeBytes });
