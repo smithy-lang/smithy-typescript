@@ -85,6 +85,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
                         .name("resolveHttpAuthSchemeConfig")
                         .build())
+                .additionalResolveFunctionParamsSupplier((m, s, o) -> Map.of(
+                    "client", Symbol.builder().name("() => this").build()
+                ))
                 .build()
         );
     }
@@ -344,12 +347,13 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
       const region = config.region ? normalizeProvider(config.region) : undefined;
       const apiKey = memoizeIdentityProvider(config.apiKey, isIdentityExpired, doesIdentityRequireRefresh);
       const token = memoizeIdentityProvider(config.token, isIdentityExpired, doesIdentityRequireRefresh);
-      return Object.assign(config, {
+      return {
+        ...config,
         credentials,
         region,
         apiKey,
         token,
-      }) as HttpAuthSchemeResolvedConfig;
+      } as HttpAuthSchemeResolvedConfig;
     };
     */
     private void generateResolveHttpAuthSchemeConfigFunction(
@@ -364,7 +368,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         w.writeDocs("@internal");
         w.writeInline("""
-            export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig""");
+            export const resolveHttpAuthSchemeConfig = <T, R extends object>(config: T & HttpAuthSchemeInputConfig""");
         if (!previousResolvedFunctions.isEmpty()) {
             w.writeInline(" & ");
             Iterator<ResolveConfigFunction> iter = previousResolvedFunctions.values().iterator();
@@ -377,6 +381,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             }
         }
         w.write("""
+            , { client }: { client: () => { config: R } }
             ): T & HttpAuthSchemeResolvedConfig => {""");
         w.indent();
         w.pushState(ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection.builder()
@@ -418,16 +423,16 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             configName = "config_" + i;
             i++;
         }
-        w.write("return Object.assign(");
+        w.write("return {");
         w.indent();
-        w.write("$L, {", configName);
+        w.write("...$L,", configName);
         for (ConfigField configField : configFields.values()) {
             if (configField.configFieldWriter().isPresent()) {
                 w.write("$L,", configField.name());
             }
         }
         w.dedent();
-        w.write("}) as T & HttpAuthSchemeResolvedConfig;");
+        w.write("} as T & HttpAuthSchemeResolvedConfig;");
         w.popState();
         w.dedent();
         w.write("};");

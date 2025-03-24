@@ -247,12 +247,11 @@ export class RpcV2ProtocolClient extends __Client<
 
   constructor(...[configuration]: __CheckOptionalClientConfig<RpcV2ProtocolClientConfig>) {
     let _config_0 = __getRuntimeConfig(configuration || {});
-    super(_config_0 as any);
-    this.initConfig = _config_0;
     let _config_1 = resolveCustomEndpointsConfig(_config_0);
     let _config_2 = resolveRetryConfig(_config_1);
     let _config_3 = resolveHttpAuthSchemeConfig(_config_2);
     let _config_4 = resolveRuntimeExtensions(_config_3, configuration?.extensions || []);
+    super(_config_4);
     this.config = _config_4;
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));

@@ -1,4 +1,5 @@
-  return Object.assign(runtimeConfig,
+  return {
+    ...runtimeConfig,
 ${resolvePartialRuntimeConfigs}
-  );
+  };
 }

@@ -375,11 +375,8 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 .build());
 
             int configVariable = 0;
-            String initialConfigVar = generateConfigVariable(configVariable);
             writer.write("let $L = __getRuntimeConfig(configuration || {});",
-                initialConfigVar);
-            writer.write("super($L as any);", initialConfigVar);
-            writer.write("this.initConfig = $L;", initialConfigVar);
+                    generateConfigVariable(configVariable));
 
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 configVariable++;
@@ -432,6 +429,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 generateConfigVariable(configVariable),
                 generateConfigVariable(configVariable - 1));
 
+            writer.write("super($L);", generateConfigVariable(configVariable));
             writer.write("this.config = $L;", generateConfigVariable(configVariable));
 
             // Add runtime plugins that contain middleware to the middleware stack
