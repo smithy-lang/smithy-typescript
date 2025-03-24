@@ -1,6 +1,6 @@
 {
   "name": "@smithy/shared-ini-file-loader",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "dependencies": {
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"

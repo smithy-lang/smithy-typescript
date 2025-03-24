@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.0.8
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/smithy-client@4.2.0
+  - @smithy/types@4.2.0
+  - @smithy/property-provider@4.0.2
+
 ## 4.0.7
 
 ### Patch Changes

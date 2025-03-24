@@ -1,5 +1,20 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 02ef79c: add numeric value container for serde
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/protocol-http@5.1.0
+  - @smithy/util-stream@4.2.0
+  - @smithy/types@4.2.0
+  - @smithy/middleware-serde@4.0.3
+  - @smithy/util-middleware@4.0.2
+
 ## 3.1.5
 
 ### Patch Changes

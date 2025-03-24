@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- e917e61: enforce singular config object during client instantiation
+
 ## 4.1.0
 
 ### Minor Changes

@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- e917e61: enforce singular config object during client instantiation
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/fetch-http-handler@5.0.2
+  - @smithy/node-http-handler@4.0.4
+
 ## 4.1.2
 
 ### Patch Changes
