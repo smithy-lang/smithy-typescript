@@ -260,6 +260,7 @@ final class CommandGenerator implements Runnable {
                                 model.getShape(operation.getInputShape()).get(), model, false, true))
                 + String.format("const command = new %s(input);%n", commandName)
                 + "const response = await client.send(command);\n"
+                + getReadStreamExample()
                 + String.format("%s%n",
                         StructureExampleGenerator.generateStructuralHintDocumentation(
                                 model.getShape(operation.getOutputShape()).get(), model, true, false))
@@ -270,6 +271,15 @@ final class CommandGenerator implements Runnable {
                 + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
                 + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
                 + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+    }
+
+    private String getReadStreamExample() {
+        boolean hasStreamingBlobOutput = false;
+        if (hasStreamingBlobOutput) {
+            String memberName = "";
+            return "const byte = await response[`%s`].transformToByteArray();".formatted(memberName);
+        }
+        return "";
     }
 
     private String getThrownExceptions() {
