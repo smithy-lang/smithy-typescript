@@ -49,6 +49,7 @@ import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
@@ -274,10 +275,25 @@ final class CommandGenerator implements Runnable {
     }
 
     private String getReadStreamExample() {
-        boolean hasStreamingBlobOutput = false;
-        if (hasStreamingBlobOutput) {
-            String memberName = "";
-            return "const byte = await response[`%s`].transformToByteArray();".formatted(memberName);
+        String streamingBlobOutputMemberName = model.expectShape(operation.getOutputShape())
+            .asStructureShape().get()
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(ms -> {
+                Shape target = model.expectShape(ms.getTarget());
+                return target.isBlobShape()
+                    && (ms.hasTrait(StreamingTrait.class) || target.hasTrait(StreamingTrait.class));
+            })
+            .findFirst()
+            .map(MemberShape::getMemberName)
+            .orElse("");
+
+        if (!streamingBlobOutputMemberName.isEmpty()) {
+            return """
+                // Read the stream or discard it to free the socket.
+                const bytes = await response[`%s`].transformToByteArray();\n"""
+                .formatted(streamingBlobOutputMemberName);
         }
         return "";
     }
