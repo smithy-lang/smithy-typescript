@@ -39,6 +39,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -48,8 +49,10 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.ExamplesTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.typescript.codegen.documentation.DocumentationExampleGenerator;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -133,11 +136,13 @@ final class CommandGenerator implements Runnable {
         String name = symbol.getName();
 
         StringBuilder additionalDocs = new StringBuilder()
-                .append("\n")
-                .append(getCommandExample(
-                        serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
-                .append("\n")
-                .append(getThrownExceptions());
+            .append("\n")
+            .append(getCommandExample(
+                    serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
+            .append("\n")
+            .append(getThrownExceptions())
+            .append("\n")
+            .append(getCuratedExamples(name));
 
         boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
 
@@ -244,10 +249,12 @@ final class CommandGenerator implements Runnable {
         writer.write("}"); // class close bracket.
     }
 
-    private String getCommandExample(String serviceName, String configName, String commandName, String commandInput,
-            String commandOutput) {
+    private String getCommandExample(
+            String serviceName, String configName, String commandName,
+            String commandInput, String commandOutput
+    ) {
         String packageName = settings.getPackageName();
-        return "@example\n"
+        String exampleDoc = "@example\n"
                 + "Use a bare-bones client and the command you need to make an API call.\n"
                 + "```javascript\n"
                 + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
@@ -270,6 +277,46 @@ final class CommandGenerator implements Runnable {
                 + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
                 + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
                 + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+
+        return exampleDoc;
+    }
+
+    /**
+     * Handwritten examples from the operation ExamplesTrait.
+     */
+    private String getCuratedExamples(String commandName) {
+        String exampleDoc = "";
+        if (operation.getTrait(ExamplesTrait.class).isPresent()) {
+            List<ExamplesTrait.Example> examples = operation.getTrait(ExamplesTrait.class).get().getExamples();
+            StringBuilder buffer = new StringBuilder();
+
+            for (ExamplesTrait.Example example : examples) {
+                ObjectNode input = example.getInput();
+                Optional<ObjectNode> output = example.getOutput();
+                buffer
+                    .append("\n")
+                    .append(String.format("@example %s%n", example.getTitle()))
+                    .append("```javascript\n")
+                    .append(String.format("// %s%n", example.getDocumentation().orElse("")))
+                    .append("""
+                    const input = %s;
+                    const command = new %s(input);
+                    const response = await client.send(command);
+                    /* response is
+                    %s
+                    */
+                    """.formatted(
+                        DocumentationExampleGenerator.inputToJavaScriptObject(input),
+                        commandName,
+                        DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
+                    ))
+                    .append("```")
+                    .append("\n");
+            }
+
+            exampleDoc +=  buffer.toString();
+        }
+        return exampleDoc;
     }
 
     private String getThrownExceptions() {
