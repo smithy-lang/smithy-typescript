@@ -49,6 +49,7 @@ import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
@@ -260,6 +261,7 @@ final class CommandGenerator implements Runnable {
                                 model.getShape(operation.getInputShape()).get(), model, false, true))
                 + String.format("const command = new %s(input);%n", commandName)
                 + "const response = await client.send(command);\n"
+                + getReadStreamExample()
                 + String.format("%s%n",
                         StructureExampleGenerator.generateStructuralHintDocumentation(
                                 model.getShape(operation.getOutputShape()).get(), model, true, false))
@@ -270,6 +272,30 @@ final class CommandGenerator implements Runnable {
                 + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
                 + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
                 + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+    }
+
+    private String getReadStreamExample() {
+        String streamingBlobOutputMemberName = model.expectShape(operation.getOutputShape())
+            .asStructureShape().get()
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(ms -> {
+                Shape target = model.expectShape(ms.getTarget());
+                return target.isBlobShape()
+                    && (ms.hasTrait(StreamingTrait.class) || target.hasTrait(StreamingTrait.class));
+            })
+            .findFirst()
+            .map(MemberShape::getMemberName)
+            .orElse("");
+
+        if (!streamingBlobOutputMemberName.isEmpty()) {
+            return """
+                // Read the stream or discard it to free the socket.
+                const bytes = await response[`%s`].transformToByteArray();\n"""
+                .formatted(streamingBlobOutputMemberName);
+        }
+        return "";
     }
 
     private String getThrownExceptions() {
