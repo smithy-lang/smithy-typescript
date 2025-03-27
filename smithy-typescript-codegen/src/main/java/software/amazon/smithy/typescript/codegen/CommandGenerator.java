@@ -51,6 +51,7 @@ import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.ExamplesTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.documentation.DocumentationExampleGenerator;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
@@ -63,6 +64,7 @@ import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeS
 import software.amazon.smithy.typescript.codegen.sections.PreCommandClassCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
 import software.amazon.smithy.typescript.codegen.util.CommandWriterConsumer;
+import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -255,28 +257,30 @@ final class CommandGenerator implements Runnable {
     ) {
         String packageName = settings.getPackageName();
         String exampleDoc = "@example\n"
-                + "Use a bare-bones client and the command you need to make an API call.\n"
-                + "```javascript\n"
-                + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
-                        packageName)
-                + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
-                        packageName)
-                + String.format("const client = new %s(config);%n", serviceName)
-                + String.format("const input = %s%n",
-                        StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getInputShape()).get(), model, false, true))
-                + String.format("const command = new %s(input);%n", commandName)
-                + "const response = await client.send(command);\n"
-                + String.format("%s%n",
-                        StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getOutputShape()).get(), model, true, false))
-                + "\n```\n"
-                + "\n"
-                + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
-                + String.format("@returns {@link %s}%n", commandOutput)
-                + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
-                + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
-                + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+            + "Use a bare-bones client and the command you need to make an API call.\n"
+            + "```javascript\n"
+            + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
+                    packageName)
+            + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
+                    packageName)
+            + String.format("const client = new %s(config);%n", serviceName)
+            + String.format("const input = %s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                            model.getShape(operation.getInputShape()).get(), model, false, true))
+            + String.format("const command = new %s(input);%n", commandName)
+            + "const response = await client.send(command);"
+            + getStreamingBlobOutputAddendum()
+            + "\n"
+            + String.format("%s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                            model.getShape(operation.getOutputShape()).get(), model, true, false))
+            + "\n```\n"
+            + "\n"
+            + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
+            + String.format("@returns {@link %s}%n", commandOutput)
+            + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
+            + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
+            + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
 
         return exampleDoc;
     }
@@ -301,13 +305,14 @@ final class CommandGenerator implements Runnable {
                     .append("""
                     const input = %s;
                     const command = new %s(input);
-                    const response = await client.send(command);
+                    const response = await client.send(command);%s
                     /* response is
                     %s
                     */
                     """.formatted(
                         DocumentationExampleGenerator.inputToJavaScriptObject(input),
                         commandName,
+                        getStreamingBlobOutputAddendum(),
                         DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
                     ))
                     .append("```")
@@ -317,6 +322,49 @@ final class CommandGenerator implements Runnable {
             exampleDoc +=  buffer.toString();
         }
         return exampleDoc;
+    }
+
+    /**
+     * @param operation - to query.
+     * @return member name of the streaming blob http payload, or empty string.
+     */
+    private String getStreamingBlobOutputMember(OperationShape operation) {
+        return (model.expectShape(operation.getOutputShape()))
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(memberShape -> {
+                Shape target = model.expectShape(memberShape.getTarget());
+                return target.isBlobShape() && (
+                    target.hasTrait(StreamingTrait.class)
+                        || memberShape.hasTrait(StreamingTrait.class)
+                );
+            })
+            .map(MemberShape::getMemberName)
+            .findFirst()
+            .orElse("");
+    }
+
+    /**
+     * @return e.g. appendable "const bytes = await response.Body.transformToByteArray();".
+     */
+    private String getStreamingBlobOutputAddendum() {
+        String streamingBlobAddendum = "";
+        String streamingBlobMemberName = getStreamingBlobOutputMember(operation);
+        if (!streamingBlobMemberName.isEmpty()) {
+            String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
+            streamingBlobAddendum = """
+                    \n// consume or destroy the stream to free the socket.
+                    const bytes = await %s.transformToByteArray();
+                    // const str = await %s.transformToString();
+                    // %s.destroy(); // only applicable to Node.js Readable streams.
+                    """.formatted(
+                propAccess,
+                propAccess,
+                propAccess
+            );
+        }
+        return streamingBlobAddendum;
     }
 
     private String getThrownExceptions() {
