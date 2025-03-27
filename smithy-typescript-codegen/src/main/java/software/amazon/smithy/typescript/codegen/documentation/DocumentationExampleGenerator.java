@@ -84,6 +84,9 @@ public final class DocumentationExampleGenerator {
             }
             case STRING -> {
                 StringNode stringNode = node.expectStringNode();
+                if (stringNode.getValue().contains("\"")) {
+                    return "`" + stringNode.getValue() + "`";
+                }
                 return "\"" + stringNode.getValue() + "\"";
             }
             case NUMBER -> {
