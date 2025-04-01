@@ -1,6 +1,6 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { AwsCredentialIdentity, HttpRequest } from "@smithy/types";
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
 
 import { SignatureV4a } from "./SignatureV4a";
 

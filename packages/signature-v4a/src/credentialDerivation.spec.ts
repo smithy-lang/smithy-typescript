@@ -1,5 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from "vitest";
 
 import { N_MINUS_TWO } from "./constants";
 import { addOneToArray, buildFixedInputBuffer, getSigV4aSigningKey, isBiggerThanNMinus2 } from "./credentialDerivation";
@@ -28,7 +28,16 @@ describe("signatureV4a signing key", () => {
     const accessKey = "key";
     const result = buildFixedInputBuffer(startBuffer, accessKey, 1);
 
-    expect(result).toEqual("start   AWS4-ECDSA-P256-SHA256 key   ");
+    const expectedString =
+      "start" +
+      "\u0000\u0000\u0000\u0001" +
+      "AWS4-ECDSA-P256-SHA256" +
+      "\u0000" +
+      "key" +
+      "\u0001" +
+      "\u0000\u0000\u0001\u0000";
+
+    expect(result).toEqual(expectedString);
   });
 
   it("addOneToArray, no carry", () => {
