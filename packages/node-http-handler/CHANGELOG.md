@@ -1,5 +1,177 @@
 # Change Log
 
+## 4.0.4
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/protocol-http@5.1.0
+  - @smithy/types@4.2.0
+  - @smithy/abort-controller@4.0.2
+  - @smithy/querystring-builder@4.0.2
+
+## 4.0.3
+
+### Patch Changes
+
+- 54d2416: Fix constructor socketAcquisitionWarningTimeout does not work
+- fba050c: Clear obsolete timeout handlers from socket.
+
+## 4.0.2
+
+### Patch Changes
+
+- fbd06eb: fix sending request when 100 Continue response takes more than 1 second
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/abort-controller@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/querystring-builder@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/abort-controller@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/querystring-builder@4.0.0
+  - @smithy/types@4.0.0
+
+## 3.3.3
+
+### Patch Changes
+
+- 5e73108: fix delayed calling of setTimeout on requests
+
+## 3.3.2
+
+### Patch Changes
+
+- f4e1a45: skip sending body without waiting for a timeout on response, if "expect" request header with "100-continue" is provided
+- a257792: Added context binding to the setTimeout and clearTimeout functions
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/abort-controller@3.1.9
+  - @smithy/protocol-http@4.1.8
+  - @smithy/querystring-builder@3.0.11
+
+## 3.3.1
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/abort-controller@3.1.8
+  - @smithy/protocol-http@4.1.7
+  - @smithy/querystring-builder@3.0.10
+
+## 3.3.0
+
+### Minor Changes
+
+- cd1929b: vitest compatibility
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/abort-controller@3.1.7
+  - @smithy/protocol-http@4.1.6
+  - @smithy/querystring-builder@3.0.9
+
+## 3.2.5
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/abort-controller@3.1.6
+  - @smithy/protocol-http@4.1.5
+  - @smithy/querystring-builder@3.0.8
+
+## 3.2.4
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/abort-controller@3.1.5
+  - @smithy/protocol-http@4.1.4
+  - @smithy/querystring-builder@3.0.7
+
+## 3.2.3
+
+### Patch Changes
+
+- 08fbedf: remove brackets from hostname
+
+## 3.2.2
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/abort-controller@3.1.4
+  - @smithy/protocol-http@4.1.3
+  - @smithy/querystring-builder@3.0.6
+
+## 3.2.1
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/abort-controller@3.1.3
+  - @smithy/protocol-http@4.1.2
+  - @smithy/querystring-builder@3.0.5
+
+## 3.2.0
+
+### Minor Changes
+
+- c86a02c: defer socket event listeners for node:http
+
+### Patch Changes
+
+- 5510e83: call socket operations if socket is present in deferred listeners
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/abort-controller@3.1.2
+  - @smithy/protocol-http@4.1.1
+  - @smithy/querystring-builder@3.0.4
+
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+
+## 3.1.2
+
+### Patch Changes
+
+- f31cc5f: remove abort signal event listeners after request completion
+
 ## 3.1.1
 
 ### Patch Changes

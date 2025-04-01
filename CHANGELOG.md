@@ -1,5 +1,96 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.27.0 (2025-03-04)
+
+### Features
+- Support MultiSelect List in OperationContextParams ([#1536](https://github.com/smithy-lang/smithy-typescript/pull/1536))
+- Support MultiSelect Flatten in OperationContextParams ([#1537](https://github.com/smithy-lang/smithy-typescript/pull/1537))
+- Upgrade smithy version to 1.53.0 ([#1538](https://github.com/smithy-lang/smithy-typescript/pull/1538))
+- Upgrade smithy version to 1.54.0 ([#1540](https://github.com/smithy-lang/smithy-typescript/pull/1540))
+
+### Bug Fixes
+- Fixed union member serialization in CBOR ([#1526](https://github.com/smithy-lang/smithy-typescript/pull/1526))
+- Fixed allocation of strings starting with underscore and other cases ([#1527](https://github.com/smithy-lang/smithy-typescript/pull/1527))
+
+### Documentation
+- Moved description block before deprecated tag ([#1516](https://github.com/smithy-lang/smithy-typescript/pull/1516))
+
+## 0.26.0 (2025-01-22)
+
+### Features
+- Dropped support for Node.js 16 ([#1487](https://github.com/smithy-lang/smithy-typescript/pull/1487))
+- Upgraded smithyGradleVersion to 1.2.0 ([#1499](https://github.com/smithy-lang/smithy-typescript/pull/1499))
+- Passed client configuration to loadNodeConfig calls ([#1471](https://github.com/smithy-lang/smithy-typescript/pull/1471))
+- Removed String extension in LazyJsonString ([#1468](https://github.com/smithy-lang/smithy-typescript/pull/1468))
+- Upgraded vitest to 2.1.8 ([#1496](https://github.com/smithy-lang/smithy-typescript/pull/1496))
+
+### Bug Fixes
+- Fixed code generation issue for operationContextParam ([#1475](https://github.com/smithy-lang/smithy-typescript/pull/1475))
+- Resolved obj and array JS literals from JMESPath types for waiters ([#1462](https://github.com/smithy-lang/smithy-typescript/pull/1462))
+
+## 0.25.0 (2024-11-18)
+
+### Features
+- Upgraded smithyVersion to 1.52.0 ([#1434](https://github.com/smithy-lang/smithy-typescript/pull/1434))
+- Added default accepts=application/cbor header for Smithy RPC v2 CBOR protocol ([#1427](https://github.com/smithy-lang/smithy-typescript/pull/1427))
+- Added `| undefined` for optional type properties to support `exactOptionalPropertyTypes` ([#1448](https://github.com/smithy-lang/smithy-typescript/pull/1448))
+
+### Bug Fixes
+- Added uuid types import when adding uuid import ([#1428](https://github.com/smithy-lang/smithy-typescript/pull/1428))
+
+
+## 0.24.0 (2024-09-30)
+
+### Features
+
+* Use spread operator for Command endpoint params only when necessary ([#1396](https://github.com/smithy-lang/smithy-typescript/pull/1396))
+* Improve IDE type navigation assistance for command classes ([#1373](https://github.com/smithy-lang/smithy-typescript/pull/1373))
+
+### Bug Fixes
+
+* Allow empty string field values for headers ([#1412](https://github.com/smithy-lang/smithy-typescript/pull/1412))
+
+## 0.23.0 (2024-09-09)
+
+### Features
+
+- codegen: Added Smithy RPCv2 CBOR protocol generator ([#1280](https://github.com/smithy-lang/smithy-typescript/pull/1280))
+
+- codegen: Added support for string array parameters in endpoints ([#1376](https://github.com/smithy-lang/smithy-typescript/pull/1376))
+
+- codegen: Added support for operation context params in endpoints ([#1379](https://github.com/smithy-lang/smithy-typescript/pull/1379))
+
+### Bug Fixes
+
+- Added logic to resolve the service specific endpoint once per client instance instead of for each request ([#1382](https://github.com/smithy-lang/smithy-typescript/pull/1382))
+
+- Fixed a bug that prevented a concrete client type (e.g., `S3Client`) to be converted to a `NodeJsClient` ([#1389](https://github.com/smithy-lang/smithy-typescript/pull/1389))
+
+
+### Documentation
+
+## 0.22.0 (2024-08-06)
+
+### Features
+
+- codegen: Enabled the new identity and auth behavior by default and add a legacy auth mode ([#1352](https://github.com/smithy-lang/smithy-typescript/pull/1352))
+
+- codegen: Added logic to skip the application of the `CustomEndpoints` plugin for models using Endpoints-2.0 ([#1337](https://github.com/smithy-lang/smithy-typescript/pull/1337))
+
+- codegen: Added automatic default idempotency tokens in headers for requests when a token is not explicitly provided ([#1327](https://github.com/smithy-lang/smithy-typescript/pull/1327))
+
+- codegen: Added a set of built-in integration plugins to code-generator ([#1321](https://github.com/smithy-lang/smithy-typescript/pull/1321))
+
+### Bug Fixes
+
+- codegen: Fixed inconsistent ordering issue when writing client params during code-generation ([#1355](https://github.com/smithy-lang/smithy-typescript/pull/1355))
+
+- codegen: Fixed incorrect usage of string templates when generating commands ([#1354](https://github.com/smithy-lang/smithy-typescript/pull/1354))
+
+- codegen: Fixed serialization of `:event-type` in event-streams where the member target-id was being used instead of the member name ([#1349](https://github.com/smithy-lang/smithy-typescript/pull/1349))
+
+- codegen: Fixed issue where content-type was being set when input body was empty ([#1304](https://github.com/smithy-lang/smithy-typescript/pull/1304))
+
 ## 0.21.1 (2024-06-05)
 
 ### Features
@@ -108,7 +199,7 @@
 * Update to generate enum Record keys when target is enum ([#1037](https://github.com/awslabs/smithy-typescript/pull/1037))
 * Removed "| string" and "| number" from enum targeted members ([#1028](https://github.com/awslabs/smithy-typescript/pull/1003))
 * Added `-p` for `mkdir` in `build-generated-test-packages` ([#1010](https://github.com/awslabs/smithy-typescript/pull/1003))
-* Added logging for `buildAndCopyToNodeModules()` ([#1003](https://github.com/awslabs/smithy-typescript/pull/1003)) 
+* Added logging for `buildAndCopyToNodeModules()` ([#1003](https://github.com/awslabs/smithy-typescript/pull/1003))
 * Reorganized models in `smithy-typescript-codegen-test` ([#995](https://github.com/awslabs/smithy-typescript/pull/995))
 * Updated to export empty model index if no `model_*` files exist ([#996](https://github.com/awslabs/smithy-typescript/pull/996))
 * Read service specific endpoints for environment or config ([#1014](https://github.com/awslabs/smithy-typescript/pull/1014))

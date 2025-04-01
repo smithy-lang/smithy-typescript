@@ -24,6 +24,9 @@ export interface EndpointsInputConfig {
   useDualstackEndpoint?: boolean | Provider<boolean>;
 }
 
+/**
+ * @internal
+ */
 interface PreviouslyResolved {
   regionInfoProvider: RegionInfoProvider;
   urlParser: UrlParser;
@@ -55,21 +58,20 @@ export interface EndpointsResolvedConfig extends Required<EndpointsInputConfig> 
 /**
  * @internal
  *
- * @deprecated endpoints rulesets use @smithy/middleware-endpoint resolveEndpointConfig.
+ * @deprecated endpoints rulesets use \@smithy/middleware-endpoint resolveEndpointConfig.
  * All generated clients should migrate to Endpoints 2.0 endpointRuleSet traits.
  */
 export const resolveEndpointsConfig = <T>(
   input: T & EndpointsInputConfig & PreviouslyResolved
 ): T & EndpointsResolvedConfig => {
   const useDualstackEndpoint = normalizeProvider(input.useDualstackEndpoint ?? false);
-  const { endpoint, useFipsEndpoint, urlParser } = input;
-  return {
-    ...input,
-    tls: input.tls ?? true,
+  const { endpoint, useFipsEndpoint, urlParser, tls } = input;
+  return Object.assign(input, {
+    tls: tls ?? true,
     endpoint: endpoint
       ? normalizeProvider(typeof endpoint === "string" ? urlParser(endpoint) : endpoint)
       : () => getEndpointFromRegion({ ...input, useDualstackEndpoint, useFipsEndpoint }),
     isCustomEndpoint: !!endpoint,
     useDualstackEndpoint,
-  };
+  });
 };

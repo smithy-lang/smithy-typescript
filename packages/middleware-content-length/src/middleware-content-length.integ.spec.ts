@@ -1,5 +1,7 @@
-import { requireRequestsFrom } from "@smithy/util-test";
+import { describe, expect, test as it } from "vitest";
 import { Weather } from "weather";
+
+import { requireRequestsFrom } from "../../../private/util-test/src/index";
 
 describe("middleware-content-length", () => {
   describe(Weather.name, () => {
@@ -28,8 +30,6 @@ describe("middleware-content-length", () => {
           "content-length": /2/,
         },
       });
-
-      console.log(client.middlewareStack);
 
       await client.createCity({
         name: "MyCity",

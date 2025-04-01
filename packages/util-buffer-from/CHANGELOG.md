@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/is-array-buffer@4.0.0
+
 ## 3.0.0
 
 ### Major Changes

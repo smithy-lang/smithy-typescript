@@ -1,4 +1,4 @@
-import type { Client, PaginationConfiguration, Paginator } from "@smithy/types";
+import type { Client, Command, PaginationConfiguration, Paginator } from "@smithy/types";
 
 /**
  * @internal
@@ -7,9 +7,12 @@ const makePagedClientRequest = async <ClientType extends Client<any, any, any>, 
   CommandCtor: any,
   client: ClientType,
   input: InputType,
+  withCommand: (command: Command<any, any, any, any, any>) => typeof command | undefined = (_) => _,
   ...args: any[]
 ): Promise<OutputType> => {
-  return await client.send(new CommandCtor(input), ...args);
+  let command = new CommandCtor(input);
+  command = withCommand(command) ?? command;
+  return await client.send(command, ...args);
 };
 
 /**
@@ -33,17 +36,25 @@ export function createPaginator<
     input: InputType,
     ...additionalArguments: any[]
   ): Paginator<OutputType> {
-    let token: any = config.startingToken || undefined;
+    const _input = input as any;
+    // for legacy reasons this coalescing order is inverted from that of pageSize.
+    let token: any = config.startingToken ?? _input[inputTokenName];
     let hasNext = true;
     let page: OutputType;
 
     while (hasNext) {
-      (input as any)[inputTokenName] = token;
+      _input[inputTokenName] = token;
       if (pageSizeTokenName) {
-        (input as any)[pageSizeTokenName] = (input as any)[pageSizeTokenName] ?? config.pageSize;
+        _input[pageSizeTokenName] = _input[pageSizeTokenName] ?? config.pageSize;
       }
       if (config.client instanceof ClientCtor) {
-        page = await makePagedClientRequest(CommandCtor, config.client, input, ...additionalArguments);
+        page = await makePagedClientRequest(
+          CommandCtor,
+          config.client,
+          input,
+          config.withCommand,
+          ...additionalArguments
+        );
       } else {
         throw new Error(`Invalid client, expected instance of ${ClientCtor.name}`);
       }
@@ -52,7 +63,6 @@ export function createPaginator<
       token = get(page, outputTokenName);
       hasNext = !!(token && (!config.stopOnSameToken || token !== prevToken));
     }
-    // @ts-ignore
     return undefined;
   };
 }

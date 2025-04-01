@@ -43,9 +43,19 @@ final class PackageJsonGenerator {
     ) {
         // Write the package.json file.
         InputStream resource = PackageJsonGenerator.class.getResourceAsStream("base-package.json");
-        ObjectNode node = Node.parse(IoUtils.toUtf8String(resource))
-                        .expectObjectNode()
-                        .merge(settings.getPackageJson());
+
+        ObjectNode userSuppliedPackageJson = settings.getPackageJson();
+        ObjectNode defaultPackageJson = Node.parse(IoUtils.toUtf8String(resource))
+            .expectObjectNode();
+
+        ObjectNode mergedScripts = defaultPackageJson.expectObjectMember("scripts")
+            .merge(
+                userSuppliedPackageJson.getObjectMember("scripts")
+                    .orElse(ObjectNode.builder().build())
+            );
+
+        ObjectNode node = defaultPackageJson.merge(userSuppliedPackageJson)
+            .withMember("scripts", mergedScripts);
 
         // Merge TypeScript dependencies into the package.json file.
         for (Map.Entry<String, Map<String, SymbolDependency>> depEntry : dependencies.entrySet()) {
@@ -61,7 +71,7 @@ final class PackageJsonGenerator {
         ObjectNode devDeps = node.getObjectMember("devDependencies").orElse(Node.objectNode());
         if (devDeps.containsMember(TypeScriptDependency.VITEST.packageName)) {
             ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
-            scripts = scripts.withMember("test", "vitest run --passWithNoTests");
+            scripts = scripts.withMember("test", "yarn g:vitest run --passWithNoTests");
             node = node.withMember("scripts", scripts);
 
             manifest.writeFile(VITEST_CONFIG_FILENAME, IoUtils.toUtf8String(

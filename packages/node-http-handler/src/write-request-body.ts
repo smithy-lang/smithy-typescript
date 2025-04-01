@@ -3,14 +3,16 @@ import { ClientRequest } from "http";
 import { ClientHttp2Stream } from "http2";
 import { Readable } from "stream";
 
-const MIN_WAIT_TIME = 1000;
+import { timing } from "./timing";
+
+const MIN_WAIT_TIME = 6_000;
 
 /**
  * This resolves when writeBody has been called.
  *
  * @param httpRequest - opened Node.js request.
  * @param request - container with the request body.
- * @param maxContinueTimeoutMs - maximum time to wait for the continue event. Minimum of 1000ms.
+ * @param maxContinueTimeoutMs - time to wait for the continue event.
  */
 export async function writeRequestBody(
   httpRequest: ClientRequest | ClientHttp2Stream,
@@ -21,32 +23,46 @@ export async function writeRequestBody(
   const expect = headers["Expect"] || headers["expect"];
 
   let timeoutId = -1;
-  let hasError = false;
+  let sendBody = true;
 
   if (expect === "100-continue") {
-    await Promise.race<void>([
+    sendBody = await Promise.race<boolean>([
       new Promise((resolve) => {
-        timeoutId = Number(setTimeout(resolve, Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
+        // If this resolves first (wins the race), it means that at least MIN_WAIT_TIME ms
+        // elapsed and no continue, response, or error has happened.
+        // The high default timeout is to give the server ample time to respond.
+        // This is an unusual situation, and indicates the server may not be S3 actual
+        // and did not correctly implement 100-continue event handling.
+        // Strictly speaking, we should perhaps keep waiting up to the request timeout
+        // and then throw an error, but we resolve true to allow the server to deal
+        // with the request body.
+        timeoutId = Number(timing.setTimeout(() => resolve(true), Math.max(MIN_WAIT_TIME, maxContinueTimeoutMs)));
       }),
       new Promise((resolve) => {
         httpRequest.on("continue", () => {
-          clearTimeout(timeoutId);
-          resolve();
+          timing.clearTimeout(timeoutId);
+          resolve(true);
+        });
+        httpRequest.on("response", () => {
+          // if this handler is called, then response is
+          // already received and there is no point in
+          // sending body or waiting
+          timing.clearTimeout(timeoutId);
+          resolve(false);
         });
         httpRequest.on("error", () => {
-          hasError = true;
-          clearTimeout(timeoutId);
+          timing.clearTimeout(timeoutId);
           // this handler does not reject with the error
           // because there is already an error listener
           // on the request in node-http-handler
           // and node-http2-handler.
-          resolve();
+          resolve(false);
         });
       }),
     ]);
   }
 
-  if (!hasError) {
+  if (sendBody) {
     writeBody(httpRequest, request.body);
   }
 }

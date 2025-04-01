@@ -15,10 +15,15 @@
 
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
@@ -27,6 +32,7 @@ import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
+import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.BooleanNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -36,6 +42,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriorityConfig;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -57,8 +64,10 @@ public final class TypeScriptSettings {
     private static final String PRIVATE = "private";
     private static final String PACKAGE_MANAGER = "packageManager";
     private static final String CREATE_DEFAULT_README = "createDefaultReadme";
-    private static final String EXPERIMENTAL_IDENTITY_AND_AUTH = "experimentalIdentityAndAuth";
+    private static final String USE_LEGACY_AUTH = "useLegacyAuth";
     private static final String GENERATE_TYPEDOC = "generateTypeDoc";
+    private static final String SERVICE_PROTOCOL_PRIORITY = "serviceProtocolPriority";
+    private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
 
     private String packageName;
     private String packageDescription = "";
@@ -75,8 +84,9 @@ public final class TypeScriptSettings {
         RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
     private boolean createDefaultReadme = false;
-    private boolean experimentalIdentityAndAuth = false;
+    private boolean useLegacyAuth = false;
     private boolean generateTypeDoc = false;
+    private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -110,8 +120,8 @@ public final class TypeScriptSettings {
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
         settings.setCreateDefaultReadme(
                 config.getBooleanMember(CREATE_DEFAULT_README).map(BooleanNode::getValue).orElse(false));
-        settings.setExperimentalIdentityAndAuth(
-                config.getBooleanMemberOrDefault(EXPERIMENTAL_IDENTITY_AND_AUTH, false));
+        settings.useLegacyAuth(
+                config.getBooleanMemberOrDefault(USE_LEGACY_AUTH, false));
         settings.setGenerateTypeDoc(
                 config.getBooleanMember(GENERATE_TYPEDOC).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
@@ -128,6 +138,9 @@ public final class TypeScriptSettings {
                 .orElse(RequiredMemberMode.NULLABLE));
 
         settings.setPluginSettings(config);
+
+        settings.readProtocolPriorityConfiguration(config);
+
         return settings;
     }
 
@@ -360,28 +373,27 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Returns whether to use experimental identity and auth.
+     * Returns whether to use legacy auth integrations.
      *
-     * @return if experimental identity and auth should used. Default: false
+     * @return if legacy auth should used. Default: false
      */
-    public boolean getExperimentalIdentityAndAuth() {
-        return experimentalIdentityAndAuth;
+    public boolean useLegacyAuth() {
+        return useLegacyAuth;
     }
 
     /**
-     * Sets whether experimental identity and auth should be used.
+     * Sets whether legacy auth should be used.
      *
-     * @param experimentalIdentityAndAuth whether experimental identity and auth should be used.
+     * @param useLegacyAuth whether legacy auth should be used.
      */
-    public void setExperimentalIdentityAndAuth(boolean experimentalIdentityAndAuth) {
-        if (experimentalIdentityAndAuth) {
+    public void useLegacyAuth(boolean useLegacyAuth) {
+        if (useLegacyAuth) {
             LOGGER.warning("""
-                Experimental identity and auth is in development, and is subject to \
-                breaking changes. Behavior may NOT have the same feature parity as \
-                non-experimental behavior. This setting is also subject to removal \
-                when the feature is completed.""");
+                Legacy auth is considered deprecated and is no longer in development,
+                and should only be used for backward compatibility concerns. Consider
+                migrating to the default identity and auth behavior.""");
         }
-        this.experimentalIdentityAndAuth = experimentalIdentityAndAuth;
+        this.useLegacyAuth = useLegacyAuth;
     }
 
     /**
@@ -451,8 +463,13 @@ public final class TypeScriptSettings {
                     + "generate in smithy-build.json to generate this service.");
         }
 
-        return resolvedProtocols.stream()
-                .filter(supportedProtocols::contains)
+        List<ShapeId> protocolPriority = this.protocolPriorityConfig.getProtocolPriority(service.toShapeId());
+        List<ShapeId> protocolPriorityList = protocolPriority != null && !protocolPriority.isEmpty()
+            ? protocolPriority
+            : new ArrayList<>(supportedProtocols);
+
+        return protocolPriorityList.stream()
+                .filter(resolvedProtocols::contains)
                 .findFirst()
                 .orElseThrow(() -> new UnresolvableProtocolException(String.format(
                         "The %s service supports the following unsupported protocols %s. The following protocol "
@@ -484,13 +501,24 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * @return config container for service and/or default protocol selection priority overrides.
+     */
+    public ProtocolPriorityConfig getProtocolPriority() {
+        return protocolPriorityConfig;
+    }
+
+    public void setProtocolPriority(ProtocolPriorityConfig protocolPriorityConfig) {
+        this.protocolPriorityConfig = protocolPriorityConfig;
+    }
+
+    /**
      * An enum indicating the type of artifact the code generator will produce.
      */
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                              CREATE_DEFAULT_README, EXPERIMENTAL_IDENTITY_AND_AUTH, GENERATE_TYPEDOC)),
+                              CREATE_DEFAULT_README, USE_LEGACY_AUTH, GENERATE_TYPEDOC)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                               SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
@@ -530,7 +558,7 @@ public final class TypeScriptSettings {
         NULLABLE("nullable"),
 
         /**
-         * This will dissallow members marked as {@link RequiredTrait} to be {@code undefined}.
+         * This will disallow members marked as {@link RequiredTrait} to be {@code undefined}.
          * Use this mode with CAUTION because it comes with certain risks. When a server drops
          * {@link RequiredTrait} from an output shape (and it is replaced with {@link DefaultTrait}
          * as defined by the spec), if the server does not always serialize a value,
@@ -586,5 +614,53 @@ public final class TypeScriptSettings {
             }
             throw new CodegenException(String.format("Unsupported package manager: %s", s));
         }
+    }
+
+    /**
+     * Reads serviceProtocolPriority and defaultProtocolPriority configuration fields.
+     * {
+     *     serviceProtocolPriority: {
+     *         "namespace#Service": ["namespace#Protocol1", "namespace#Protocol2"]
+     *     },
+     *     defaultProtocolPriority: ["namespace#Protocol"]
+     * }
+     */
+    private void readProtocolPriorityConfiguration(ObjectNode config) {
+        Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations = new HashMap<>();
+        List<ShapeId> customDefaultPriority = new LinkedList<>();
+        try {
+            Optional<ObjectNode> protocolPriorityNode = config.getObjectMember(SERVICE_PROTOCOL_PRIORITY);
+            if (protocolPriorityNode.isPresent()) {
+                ObjectNode objectNode = protocolPriorityNode.get();
+                objectNode.getMembers().forEach((StringNode k, Node v) -> {
+                    ShapeId serviceShapeId = ShapeId.from(k.getValue());
+                    List<ShapeId> protocolList = v.asArrayNode().get().getElementsAs(
+                        e -> ShapeId.from(e.asStringNode().get().getValue())
+                    );
+                    serviceProtocolPriorityCustomizations.put(
+                        serviceShapeId,
+                        protocolList
+                    );
+                });
+            }
+            Optional<ArrayNode> defaultProtocolPriorityOpt = config.getArrayMember(DEFAULT_PROTOCOL_PRIORITY);
+            if (defaultProtocolPriorityOpt.isPresent()) {
+                ArrayNode defaultProtocolPriorityStringArr = defaultProtocolPriorityOpt.get();
+                customDefaultPriority.addAll(
+                    defaultProtocolPriorityStringArr.getElementsAs(
+                        e -> ShapeId.from(e.asStringNode().get().getValue())
+                    )
+                );
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                "Error while parsing serviceProtocolPriority or defaultProtocolPriority configuration fields",
+                e
+            );
+        }
+        protocolPriorityConfig = new ProtocolPriorityConfig(
+            serviceProtocolPriorityCustomizations,
+            customDefaultPriority.isEmpty() ? null : customDefaultPriority
+        );
     }
 }

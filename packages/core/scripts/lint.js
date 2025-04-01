@@ -28,9 +28,11 @@ for (const submodule of submodules) {
       };
       fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
     }
-    if (!pkgJson.files.includes(`./${submodule}.js`)) {
+    if (!pkgJson.files.includes(`./${submodule}.js`) || !pkgJson.files.includes(`./${submodule}.d.ts`)) {
       pkgJson.files.push(`./${submodule}.js`);
+      pkgJson.files.push(`./${submodule}.d.ts`);
       errors.push(`package.json files array missing ${submodule}.js compatibility redirect file.`);
+      pkgJson.files = [...new Set(pkgJson.files)].sort();
       fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
     }
     // tsconfig metadata.
@@ -54,6 +56,23 @@ for (const submodule of submodules) {
  * This is a compatibility redirect for contexts that do not understand package.json exports field.
  */
 module.exports = require("./dist-cjs/submodules/${submodule}/index.js");
+`
+      );
+    }
+    // compatibility types file.
+    const compatibilityTypesFile = path.join(root, `${submodule}.d.ts`);
+    if (!fs.existsSync(compatibilityTypesFile)) {
+      errors.push(`${submodule} is missing compatibility types file in the package root folder.`);
+      fs.writeFileSync(
+        compatibilityTypesFile,
+        `
+/**
+ * Do not edit:
+ * This is a compatibility redirect for contexts that do not understand package.json exports field.
+ */
+declare module "@smithy/core/${submodule}" {
+  export * from "@smithy/core/dist-types/submodules/${submodule}/index.d";
+}
 `
       );
     }
@@ -90,6 +109,19 @@ const walk = require("../../../scripts/utils/walk");
             .pop()} crosses submodule boundaries. Use @scope/package/submodule import instead.`
         );
       }
+    }
+
+    const subModuleImports = [
+      ...new Set(
+        (sourceCode.toString().match(/(from |import\()"\@smithy\/core\/(.*?)";/g) || []).map(
+          (_) => _.match(/@smithy\/core\/(.*?)"/)[1]
+        )
+      ),
+    ];
+    const ownModule = item.match(/src\/submodules\/(.*?)\//)?.[1];
+
+    if (subModuleImports.includes(ownModule)) {
+      errors.push(`self-referencing submodule import found in ${item}`);
     }
   }
 })().then(() => {

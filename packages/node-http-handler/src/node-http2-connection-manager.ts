@@ -5,6 +5,9 @@ import http2, { ClientHttp2Session } from "http2";
 
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
 
+/**
+ * @public
+ */
 export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2Session> {
   constructor(config: ConnectionManagerConfiguration) {
     this.config = config;
@@ -109,7 +112,7 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
   }
 
   public setMaxConcurrentStreams(maxConcurrentStreams: number) {
-    if (this.config.maxConcurrency && this.config.maxConcurrency <= 0) {
+    if (maxConcurrentStreams && maxConcurrentStreams <= 0) {
       throw new RangeError("maxConcurrentStreams must be greater than zero.");
     }
     this.config.maxConcurrency = maxConcurrentStreams;

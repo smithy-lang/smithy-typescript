@@ -2,6 +2,7 @@
 import type { IncomingMessage } from "node:http";
 
 import type { Client } from "../client";
+import type { CommandIO } from "../command";
 import type { HttpHandlerOptions } from "../http";
 import type { MetadataBearer } from "../response";
 import type { SdkStream } from "../serde";
@@ -87,7 +88,7 @@ interface MyClient extends Client<MyInput, MyOutput, MyConfig> {
 {
   interface NodeJsMyClient extends NodeJsClient<MyClient> {}
   const mockClient = null as unknown as NodeJsMyClient;
-  const sendCall = () => mockClient.send(null as any, { abortSignal: null as any });
+  const sendCall = () => mockClient.send(null as unknown as CommandIO<MyInput, MyOutput>, { abortSignal: null as any });
 
   type A = Awaited<ReturnType<typeof sendCall>>;
   type B = Omit<MyOutput, "body"> & { body?: SdkStream<IncomingMessage> };

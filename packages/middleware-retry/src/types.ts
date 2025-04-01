@@ -5,6 +5,9 @@ import { SdkError } from "@smithy/types";
  * already attempted, the HTTP status code, and the error received (if any).
  *
  * @param error - The error encountered.
+ *
+ * @deprecated
+ * @internal
  */
 export interface RetryDecider {
   (error: SdkError): boolean;
@@ -15,6 +18,9 @@ export interface RetryDecider {
  *
  * @param delayBase - The base delay (in milliseconds).
  * @param attempts - The number of times the action has already been tried.
+ *
+ * @deprecated
+ * @internal
  */
 export interface DelayDecider {
   (delayBase: number, attempts: number): number;
@@ -22,6 +28,8 @@ export interface DelayDecider {
 
 /**
  * Interface that specifies the retry quota behavior.
+ * @deprecated
+ * @internal
  */
 export interface RetryQuota {
   /**
@@ -41,6 +49,10 @@ export interface RetryQuota {
   releaseRetryTokens: (releaseCapacityAmount?: number) => void;
 }
 
+/**
+ * @deprecated
+ * @internal
+ */
 export interface RateLimiter {
   /**
    * If there is sufficient capacity (tokens) available, it immediately returns.

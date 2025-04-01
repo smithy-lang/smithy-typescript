@@ -30,7 +30,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 /**
  * Add config and middleware to support a service with the @httpApiKeyAuth trait.
  *
- * This is the existing control behavior for `experimentalIdentityAndAuth`.
+ * This is legacy auth behavior, and is no longer in development.
  */
 @SmithyInternalApi
 public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
@@ -38,11 +38,11 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     public static final String INTEGRATION_NAME = "HttpApiKeyAuth";
 
     /**
-     * Integration should only be used if `experimentalIdentityAndAuth` flag is false.
+     * Integration should be used only if the `useLegacyAuth` flag is true.
      */
     @Override
     public boolean matchesSettings(TypeScriptSettings settings) {
-        return !settings.getExperimentalIdentityAndAuth();
+        return settings.useLegacyAuth();
     }
 
     /**
@@ -123,7 +123,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         }
 
         String noTouchNoticePrefix = "// Please do not touch this file. It's generated from a template in:\n"
-                + "// https://github.com/awslabs/smithy-typescript/blob/main/smithy-typescript-codegen/"
+                + "// https://github.com/smithy-lang/smithy-typescript/blob/main/smithy-typescript-codegen/"
                 + "src/main/resources/software/amazon/smithy/aws/typescript/codegen/integration/";
 
         // Write the middleware source.

@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { mergeConfigFiles } from "./mergeConfigFiles";
 
 describe(mergeConfigFiles.name, () => {

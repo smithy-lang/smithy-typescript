@@ -1,4 +1,4 @@
-# <img alt="Smithy" src="https://github.com/smithy-lang/smithy/blob/main/docs/_static/favicon.png?raw=true" width="28"> Smithy TypeScript
+# <img alt="Smithy" src="https://github.com/smithy-lang/smithy/blob/main/docs/_static/smithy-anvil.svg?raw=true" width="32"> Smithy TypeScript
 
 > **WARNING: Smithy TypeScript is currently in [Developer Preview](https://aws.amazon.com/blogs/devops/smithy-server-and-client-generator-for-typescript). All interfaces and supported JavaScript platforms are subject to change.**
 
@@ -6,7 +6,7 @@
 
 For Client SDK code generation, the `typescript-client-codegen` plugin provides a framework for generating extensible TypeScript clients that can support multiple JavaScript platforms, including Node.js, Browser, and React-Native. See [the section on generating a client to see how to get started](#generating-a-client), or [the `typescript-client-codegen` documentation](#client-sdk-code-generation-typescript-client-codegen-plugin).
 
-> Note: Node.js support includes versions >= 16, and is subject to change.
+> Note: Node.js support includes versions >= 18, and is subject to change.
 
 For Server SDK code generation, the `typescript-server-codegen` plugin provides a framework for generating server scaffolding at a higher level of abstraction and with type safety. More documentation can be found at in [the `typescript-server-codegen` documentation](#server-sdk-code-generation-typescript-server-codegen-plugin), or [smithy.io](https://smithy.io/2.0/ts-ssdk/index.html).
 
@@ -37,27 +37,25 @@ smithy-typescript-example-client/
 └── smithy-build.json
 ```
 
-To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`: 
+To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`:
 
 ```json
 // smithy-build.json
 {
-    "version": "1.0",
-    "sources": ["models"],
-    // Add the Smithy TypeScript code generator dependency
-    "maven": {
-        "dependencies": [
-            "software.amazon.smithy.typescript:smithy-typescript-codegen:0.21.1"
-        ]
-    },
-    "plugins": {
-        // Add the Smithy TypeScript client plugin
-        "typescript-client-codegen": {
-            // Minimal configuration: add package name and version
-            "package": "@smithy/typescript-example-client",
-            "packageVersion": "0.0.1"
-        }
+  "version": "1.0",
+  "sources": ["models"],
+  // Add the Smithy TypeScript code generator dependency
+  "maven": {
+    "dependencies": ["software.amazon.smithy.typescript:smithy-typescript-codegen:0.27.0"]
+  },
+  "plugins": {
+    // Add the Smithy TypeScript client plugin
+    "typescript-client-codegen": {
+      // Minimal configuration: add package name and version
+      "package": "@smithy/typescript-example-client",
+      "packageVersion": "0.0.1"
     }
+  }
 }
 ```
 
@@ -102,21 +100,21 @@ smithy-typescript-example-client-gradle/
 └── smithy-build.json
 ```
 
-To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`: 
+To add a minimal `typescript-client-codegen` plugin, add the following to `smithy-build.json`:
 
 ```json
 // smithy-build.json
 {
-    "version": "1.0",
-    "sources": ["models"],
-    "plugins": {
-        // Add the Smithy TypeScript client plugin
-        "typescript-client-codegen": {
-            // Minimal configuration: add package name and version
-            "package": "@smithy/typescript-example-client",
-            "packageVersion": "0.0.1"
-        }
+  "version": "1.0",
+  "sources": ["models"],
+  "plugins": {
+    // Add the Smithy TypeScript client plugin
+    "typescript-client-codegen": {
+      // Minimal configuration: add package name and version
+      "package": "@smithy/typescript-example-client",
+      "packageVersion": "0.0.1"
     }
+  }
 }
 ```
 
@@ -141,7 +139,7 @@ dependencies {
     smithyCli("software.amazon.smithy:smithy-cli:$smithyVersion")
 
     // Add the Smithy TypeScript code generator dependency
-    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.21.1")
+    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.27.0")
 
     // Uncomment below to add various smithy dependencies (see full list of smithy dependencies in https://github.com/awslabs/smithy)
     // implementation("software.amazon.smithy:smithy-model:$smithyVersion")
@@ -185,30 +183,30 @@ By default, the Smithy TypeScript code generators provide the code generation fr
 
 [`TypeScriptSettings`](smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/TypeScriptSettings.java) contains all of the settings enabled from `smithy-build.json` and helper methods and types. The up-to-date list of top-level properties enabled for `typescript-client-codegen` can be found in `TypeScriptSettings.ArtifactType.CLIENT`.
 
-|Setting|Required|Description|
-|---|---|---|
-|`package`|Yes|Name of the package in `package.json`.|
-|`packageVersion`|Yes|Version of the package in `package.json`.|
-|`packageDescription`|No|Description of the package in `package.json`. The default value is `${package} client`|
-|`packageJson`|No|Custom `package.json` properties that will be merged with the base `package.json`. The default value is an empty object.|
-|`packageManager`|No|Configured package manager for the package. The default value is `yarn`.|
-|`service`|No|The Shape ID of the service to generate a client for. If not provided, the code generator will attempt to infer the service Shape ID. If there is exactly 1 service found in the model, then the service is used as the inferred Shape ID. If no services are found, then code generation fails. If more than 1 service is found, then code generation fails.|
-|`protocol`|No|The Shape ID of the protocol used to generate serialization and deserialization. If not provided, the code generator will attempt to resolve the highest priority service protocol supported in code generation (registered through `TypeScriptIntegration`). If no protocols are found, code generation will use serialization and deserialization error stubs.|
-|`private`|No|Whether the package is `private` in `package.json`. The default value is `false`.|
-|`requiredMemberMode`|No|**NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.|
-|`createDefaultReadme`|No|Whether to generate a default `README.md` for the package. The default value is `false`.|
-|`experimentalIdentityAndAuth`|No|Experimental feature that standardizes identity and auth integrations to match the Smithy specification (see [Authentication Traits](https://smithy.io/2.0/spec/authentication-traits.html)). See [the experimental features section for more details](CONTRIBUTING.md#experimental-features).|
+| Setting                   | Required | Description                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package`                 | Yes      | Name of the package in `package.json`.                                                                                                                                                                                                                                                                                                                           |
+| `packageVersion`          | Yes      | Version of the package in `package.json`.                                                                                                                                                                                                                                                                                                                        |
+| `packageDescription`      | No       | Description of the package in `package.json`. The default value is `${package} client`                                                                                                                                                                                                                                                                           |
+| `packageJson`             | No       | Custom `package.json` properties that will be merged with the base `package.json`. The default value is an empty object.                                                                                                                                                                                                                                         |
+| `packageManager`          | No       | Configured package manager for the package. The default value is `yarn`.                                                                                                                                                                                                                                                                                         |
+| `service`                 | No       | The Shape ID of the service to generate a client for. If not provided, the code generator will attempt to infer the service Shape ID. If there is exactly 1 service found in the model, then the service is used as the inferred Shape ID. If no services are found, then code generation fails. If more than 1 service is found, then code generation fails.    |
+| `protocol`                | No       | The Shape ID of the protocol used to generate serialization and deserialization. If not provided, the code generator will attempt to resolve the highest priority service protocol supported in code generation (registered through `TypeScriptIntegration`). If no protocols are found, code generation will use serialization and deserialization error stubs. |
+| `private`                 | No       | Whether the package is `private` in `package.json`. The default value is `false`.                                                                                                                                                                                                                                                                                |
+| `requiredMemberMode`      | No       | **NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.                                                                                                     |
+| `createDefaultReadme`     | No       | Whether to generate a default `README.md` for the package. The default value is `false`.                                                                                                                                                                                                                                                                         |
+| `useLegacyAuth`           | No       | **NOT RECOMMENDED, AVAILABLE ONLY FOR BACKWARD COMPATIBILITY CONCERNS.** Flag that enables using legacy auth. When in doubt, use the default identity and auth behavior (not configuring `useLegacyAuth`) as the golden path.                                                                                                                                    |
+| `serviceProtocolPriority` | No       | Map of service `ShapeId` strings to lists of protocol `ShapeId` strings. Used to override protocol selection behavior.                                                                                                                                                                                                                                           |
+| `defaultProtocolPriority` | No       | List of protocol `ShapeId` strings. Lower precedence than `serviceProtocolPriority` but applies to all services.                                                                                                                                                                                                                                                 |
 
 #### `typescript-client-codegen` plugin artifacts
 
 Smithy TypeScript clients are extensible (see [the AWS blog post on the middleware stack](https://aws.amazon.com/blogs/developer/middleware-stack-modular-aws-sdk-js/)), robust, and support multiple JavaScript platforms. The main components of a client are the following (`$SERVICE` is the name of a Smithy service, `$OPERATION` is the name of a Smithy operation, `$N` is a number starting from 0):
 
 - Client classes: A standalone tree-shakeable client defined in `src/$SERVICEClient.ts` and an aggregated client defined in `src/$SERVICE.ts`. The client classes are the entry point to calling a service, defining the input configuration of the service and adding any service-level middleware.
+
   ```typescript
-  import {
-    $SERVICEClient,
-    $SERVICE
-  } from "..."; // example client package
+  import { $SERVICEClient, $SERVICE } from "..."; // example client package
 
   const individualClient = new $SERVICEClient({
     // Input configuration with type hints
@@ -218,31 +216,28 @@ Smithy TypeScript clients are extensible (see [the AWS blog post on the middlewa
     // Input configuration with type hints
   });
   ```
+
 - Command classes: Individual commands defined in `src/commands/$OPERATIONCommand.ts`. These classes include operation-level middleware and additional values to the client resolved configuration through the middleware context.
+
   ```typescript
-  import {
-    $SERVICEClient,
-    $OPERATIONCommand,
-    $OPERATIONCommandOutput
-  } from "..."; // example client package
+  import { $SERVICEClient, $OPERATIONCommand, $OPERATIONCommandOutput } from "..."; // example client package
 
   const individualClient = new $SERVICEClient({
     // Input configuration with type hints
   });
 
-  const response: Promise<$OPERATIONCommandOutput> = individualClient.send(new $OPERATIONCommand({
-    // Operation input with type hints
-    // Operations can also be called callback style or with HandlerOptions
-  }));
+  const response: Promise<$OPERATIONCommandOutput> = individualClient.send(
+    new $OPERATIONCommand({
+      // Operation input with type hints
+      // Operations can also be called callback style or with HandlerOptions
+    })
+  );
   ```
+
 - Models: Types and interfaces exported from `models/index.ts`, found individually in `models/model_$N.ts`, and errors including a base `$SERVICEServicexception.ts`.
+
   ```typescript
-  import {
-    $SERVICEClient,
-    $SERVICEServiceException,
-    $OPERATIONCommand,
-    $OPERATIONCommandOutput
-  } from "..."; // example client package
+  import { $SERVICEClient, $SERVICEServiceException, $OPERATIONCommand, $OPERATIONCommandOutput } from "..."; // example client package
 
   const individualClient = new $SERVICEClient({
     // Input configuration with type hints
@@ -259,7 +254,9 @@ Smithy TypeScript clients are extensible (see [the AWS blog post on the middlewa
     throw error;
   }
   ```
+
 - Runtime Configurations: Populated default values for a client input configuration for different platforms, currently supporting Node.js, Browser, and React-Native. All of these have a shared runtime configuration that is overwritten with more specific platform values. Not every client input configuration needs a default value, but it is best practice to provide a reasonable default. For example, the `extensions` property defaults to an empty array when no runtime extensions are specified.
+
   ```text
   Least-specific
 
@@ -277,6 +274,7 @@ Smithy TypeScript clients are extensible (see [the AWS blog post on the middlewa
 
   Most-specific (overrides values from parent)
   ```
+
 - Runtime Extensions: Interfaces to implement extensions enabling alternative default values to the runtime configuration. See [the section on customizing TypeScript Client Configuration for more details](#typescript-client-configuration).
 - Package Configuration files: `package.json` and TypeScript configuration files for different platforms.
 
@@ -313,7 +311,7 @@ Smithy TypeScript provides default code generation implementations for generatin
 
 For Smithy TypeScript clients, the main implementations not provided are [protocol generators](#protocol-generator-implementations) and [handling endpoint resolution](#handling-endpoint-resolution) (see [the TypeScript code generation section](#typescript-code-generation)).
 
-> If there are items missing from this section, feel free to [create an issue](https://github.com/awslabs/smithy-typescript/issues/new).
+> If there are items missing from this section, feel free to [create an issue](https://github.com/smithy-lang/smithy-typescript/issues/new).
 
 ##### Protocol generator implementations
 
@@ -322,12 +320,13 @@ Protocols define how operation inputs and outputs are serialized and deserialize
 Once a `ProtocolGenerator` is implemented, the implementation can be registered through a `TypeScriptIntegration`:
 
 - `TypeScriptIntegration` with `ProtocolGenerator` implementation:
+
   ```java
   // src/main/java/typescript/example/client/gradle/ExampleClientProtocolGeneratorIntegration.java
   package typescript.example.client.gradle;
-  
+
   // ...
-  
+
   public class ExampleClientProtocolGeneratorIntegration implements TypeScriptIntegration {
       // ProtocolGenerator implementation is inline for brevity, but should be in its
       // own file
@@ -346,6 +345,7 @@ Once a `ProtocolGenerator` is implemented, the implementation can be registered 
       }
   }
   ```
+
 - Registering the `TypeScriptIntegration`:
   ```java
   // src/main/resources/META-INF/services/software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration
@@ -363,12 +363,13 @@ Endpoint resolution is not implemented by default due to the inherent complexity
 Smithy TypeScript has the `CustomEndpoints` configuration which can be used to add the `endpoint` property to the client configuration, and the `TypeScriptIntegration::getRuntimeConfigWriters()` method can be used to provide a default endpoint:
 
 - `TypeScriptIntegration` implementation:
+
   ```java
   // src/main/java/typescript/example/client/gradle/ExampleClientEndpointResolutionIntegration.java
   package typescript.example.client.gradle;
-  
+
   // ...
-  
+
   public class ExampleClientEndpointResolutionIntegration implements TypeScriptIntegration {
       @Override
       public List<RuntimeClientPlugin> getClientPlugins() {
@@ -401,6 +402,7 @@ Smithy TypeScript has the `CustomEndpoints` configuration which can be used to a
       }
   }
   ```
+
 - Registering the `TypeScriptIntegration`:
   ```java
   // src/main/resources/META-INF/services/software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration
@@ -410,9 +412,7 @@ Smithy TypeScript has the `CustomEndpoints` configuration which can be used to a
 Customers can then pass in an endpoint to the client configuration:
 
 ```typescript
-import {
-  $SERVICEClient,
-} from "..."; // example client package
+import { $SERVICEClient } from "..."; // example client package
 
 // Without providing the endpoint, a "No valid endpoint provider available." error will be thrown
 const individualClient = new $SERVICEClient({
@@ -439,19 +439,19 @@ For documentation of `typescript-server-codegen` artifacts and implementation, s
 
 [`TypeScriptSettings`](smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/TypeScriptSettings.java) contains all of the settings enabled from `smithy-build.json` and helper methods and types. The up-to-date list of top-level properties enabled for `typescript-server-codegen` can be found in `TypeScriptSettings.ArtifactType.SSDK`.
 
-|Setting|Required|Description|
-|---|---|---|
-|`package`|Yes|Name of the package in `package.json`.|
-|`packageVersion`|Yes|Version of the package in `package.json`.|
-|`packageDescription`|No|Description of the package in `package.json`. The default value is `${package} server`.|
-|`packageJson`|No|Custom `package.json`properties that will be merged with the base `package.json`. The default value is an empty object.|
-|`packageManager`|No|Configured package manager for the package. The default value is `yarn`.|
-|`service`|No|The Shape ID of the service to generate a client for. If not provided, the code generator will attempt to infer the service Shape ID. If there is exactly 1 service found in the model, then the service is used as the inferred Shape ID. If no services are found, then code generation fails. If more than 1 service is found, then code generation fails.|
-|`protocol`|No|The Shape ID of the protocol used to generate serialization and deserialization. If not provided, the code generator will attempt to resolve the highest priority service protocol supported in code generation (registered through `TypeScriptIntegration`). If no protocols are found, code generation will use serialization and deserialization error stubs.|
-|`private`|No|Whether the package is `private` in `package.json`. The default value is `false`.|
-|`requiredMemberMode`|No|**NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.|
-|`createDefaultReadme`|No|Whether to generate a default `README.md` for the package. The default value is `false`.|
-|`disableDefaultValidation`|No|Whether or not default validation is disabled. See [the documentation for Smithy TypeScript SSDK validation](https://smithy.io/2.0/ts-ssdk/validation.html) to learn more. The default value is `false`.|
+| Setting                    | Required | Description                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package`                  | Yes      | Name of the package in `package.json`.                                                                                                                                                                                                                                                                                                                           |
+| `packageVersion`           | Yes      | Version of the package in `package.json`.                                                                                                                                                                                                                                                                                                                        |
+| `packageDescription`       | No       | Description of the package in `package.json`. The default value is `${package} server`.                                                                                                                                                                                                                                                                          |
+| `packageJson`              | No       | Custom `package.json`properties that will be merged with the base `package.json`. The default value is an empty object.                                                                                                                                                                                                                                          |
+| `packageManager`           | No       | Configured package manager for the package. The default value is `yarn`.                                                                                                                                                                                                                                                                                         |
+| `service`                  | No       | The Shape ID of the service to generate a client for. If not provided, the code generator will attempt to infer the service Shape ID. If there is exactly 1 service found in the model, then the service is used as the inferred Shape ID. If no services are found, then code generation fails. If more than 1 service is found, then code generation fails.    |
+| `protocol`                 | No       | The Shape ID of the protocol used to generate serialization and deserialization. If not provided, the code generator will attempt to resolve the highest priority service protocol supported in code generation (registered through `TypeScriptIntegration`). If no protocols are found, code generation will use serialization and deserialization error stubs. |
+| `private`                  | No       | Whether the package is `private` in `package.json`. The default value is `false`.                                                                                                                                                                                                                                                                                |
+| `requiredMemberMode`       | No       | **NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.                                                                                                     |
+| `createDefaultReadme`      | No       | Whether to generate a default `README.md` for the package. The default value is `false`.                                                                                                                                                                                                                                                                         |
+| `disableDefaultValidation` | No       | Whether or not default validation is disabled. See [the documentation for Smithy TypeScript SSDK validation](https://smithy.io/2.0/ts-ssdk/validation.html) to learn more. The default value is `false`.                                                                                                                                                         |
 
 ### Adding customizations to Smithy TypeScript
 
@@ -502,7 +502,7 @@ Once the Java libary is built, the library can be [consumed as a third-party pac
 
 The easiest way to see how the individual methods on `TypeScriptIntegration` (and by extension `SmithyIntegration`) are used in the code generation process is by searching by usage at a given Smithy TypeScript version, as method usages are subject to change.
 
-> Note: if an existing integration point does not exist on `TypeScriptIntegration` or `SmithyIntegration`, check if [the `RuntimeClientPlugin` abstraction](smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/integration/RuntimeClientPlugin.java) has an integration point. If not, [create a feature request](https://github.com/awslabs/smithy-typescript/issues/new) with the incompatible use case.
+> Note: if an existing integration point does not exist on `TypeScriptIntegration` or `SmithyIntegration`, check if [the `RuntimeClientPlugin` abstraction](smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/integration/RuntimeClientPlugin.java) has an integration point. If not, [create a feature request](https://github.com/smithy-lang/smithy-typescript/issues/new) with the incompatible use case.
 
 > Note: Although the `TypeScriptIntegration` interface is maintained with backward compatibility in mind, the interface may be subject to breaking changes as it is annotated with `@SmithyUnstableApi`. Methods may also have additional individual annotations that should be noted (e.g. `@SmithyInternalApi`).
 
@@ -580,7 +580,7 @@ Then, update the `gradle.properties` property `smithyVersion` in the Smithy Type
 If using local Smithy TypeScript changes, build the `software.amazon.smithy.typescript.*` packages and publish them to a Maven Local Repository:
 
 ```shell
-git clone https://github.com/awslabs/smithy-typescript.git
+git clone https://github.com/smithy-lang/smithy-typescript.git
 cd smithy-typescript
 # Make intended changes, e.g. bumping the codegen artifact version
 ./gradlew publishToMavenLocal
@@ -630,4 +630,3 @@ Many Gradle issues can be fixed by stopping the Gradle daemon by running `./grad
 ## License
 
 This library is licensed under the Apache 2.0 License.
-

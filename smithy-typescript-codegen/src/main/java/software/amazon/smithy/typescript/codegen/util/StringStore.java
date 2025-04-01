@@ -5,6 +5,7 @@
 
 package software.amazon.smithy.typescript.codegen.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -77,7 +78,9 @@ public final class StringStore {
      * Prefers the uppercase or word-starting letters.
      */
     private String allocateVariable(String literal) {
-        String[] sections = literal.split("[-_\\s]");
+        String[] sections = Arrays.stream(literal.split("[-_\\s]"))
+            .filter(s -> !s.isEmpty())
+            .toArray(String[]::new);
         StringBuilder v = new StringBuilder("_");
         Queue<Character> deconfliction = new LinkedList<>();
         if (sections.length > 1) {

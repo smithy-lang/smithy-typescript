@@ -1,5 +1,338 @@
 # Change Log
 
+## 0.3.45
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/middleware-endpoint@4.1.0
+  - @smithy/middleware-retry@4.1.0
+  - @smithy/protocol-http@5.1.0
+  - @smithy/types@4.2.0
+  - @smithy/signature-v4@5.0.2
+  - @smithy/middleware-serde@4.0.3
+  - @smithy/util-middleware@4.0.2
+
+## 0.3.44
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.0.6
+- @smithy/middleware-retry@4.0.7
+
+## 0.3.43
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.0.5
+- @smithy/middleware-retry@4.0.6
+
+## 0.3.42
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.0.4
+- @smithy/middleware-retry@4.0.5
+
+## 0.3.41
+
+### Patch Changes
+
+- Updated dependencies [f5d0bac]
+  - @smithy/middleware-serde@4.0.2
+  - @smithy/middleware-endpoint@4.0.3
+  - @smithy/middleware-retry@4.0.4
+
+## 0.3.40
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.0.2
+- @smithy/middleware-retry@4.0.3
+
+## 0.3.39
+
+### Patch Changes
+
+- @smithy/middleware-retry@4.0.2
+
+## 0.3.38
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/middleware-endpoint@4.0.1
+  - @smithy/middleware-retry@4.0.1
+  - @smithy/middleware-serde@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/signature-v4@5.0.1
+  - @smithy/util-middleware@4.0.1
+
+## 0.3.37
+
+### Patch Changes
+
+- 20d99be: major version bump for dropping node16 support
+- Updated dependencies [20d99be]
+  - @smithy/middleware-endpoint@4.0.0
+  - @smithy/middleware-retry@4.0.0
+  - @smithy/util-middleware@4.0.0
+  - @smithy/signature-v4@5.0.0
+  - @smithy/middleware-serde@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+
+## 0.3.36
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.34
+- @smithy/middleware-endpoint@3.2.8
+
+## 0.3.35
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.33
+
+## 0.3.34
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.2.7
+- @smithy/middleware-retry@3.0.32
+
+## 0.3.33
+
+### Patch Changes
+
+- Updated dependencies [e27d42d]
+  - @smithy/middleware-endpoint@3.2.6
+  - @smithy/middleware-retry@3.0.31
+
+## 0.3.32
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.30
+
+## 0.3.31
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/middleware-retry@3.0.29
+  - @smithy/middleware-endpoint@3.2.5
+  - @smithy/middleware-serde@3.0.11
+  - @smithy/protocol-http@4.1.8
+  - @smithy/signature-v4@4.2.4
+  - @smithy/util-middleware@3.0.11
+
+## 0.3.30
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.2.4
+- @smithy/middleware-retry@3.0.28
+
+## 0.3.29
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/middleware-endpoint@3.2.3
+  - @smithy/middleware-retry@3.0.27
+  - @smithy/middleware-serde@3.0.10
+  - @smithy/protocol-http@4.1.7
+  - @smithy/signature-v4@4.2.3
+  - @smithy/util-middleware@3.0.10
+
+## 0.3.28
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/middleware-endpoint@3.2.2
+  - @smithy/middleware-retry@3.0.26
+  - @smithy/middleware-serde@3.0.9
+  - @smithy/protocol-http@4.1.6
+  - @smithy/signature-v4@4.2.2
+  - @smithy/util-middleware@3.0.9
+
+## 0.3.27
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.2.1
+- @smithy/middleware-retry@3.0.25
+
+## 0.3.26
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+- Updated dependencies [d07b0ab]
+- Updated dependencies [d07b0ab]
+  - @smithy/types@3.6.0
+  - @smithy/middleware-endpoint@3.2.0
+  - @smithy/middleware-retry@3.0.24
+  - @smithy/middleware-serde@3.0.8
+  - @smithy/protocol-http@4.1.5
+  - @smithy/signature-v4@4.2.1
+  - @smithy/util-middleware@3.0.8
+
+## 0.3.25
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.23
+
+## 0.3.24
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/signature-v4@4.2.0
+  - @smithy/types@3.5.0
+  - @smithy/middleware-endpoint@3.1.4
+  - @smithy/middleware-retry@3.0.22
+  - @smithy/middleware-serde@3.0.7
+  - @smithy/protocol-http@4.1.4
+  - @smithy/util-middleware@3.0.7
+
+## 0.3.23
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.21
+
+## 0.3.22
+
+### Patch Changes
+
+- Updated dependencies [806cc7f]
+  - @smithy/signature-v4@4.1.4
+  - @smithy/middleware-retry@3.0.20
+
+## 0.3.21
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.19
+
+## 0.3.20
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/middleware-endpoint@3.1.3
+  - @smithy/middleware-retry@3.0.18
+  - @smithy/middleware-serde@3.0.6
+  - @smithy/protocol-http@4.1.3
+  - @smithy/signature-v4@4.1.3
+  - @smithy/util-middleware@3.0.6
+
+## 0.3.19
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/middleware-endpoint@3.1.2
+  - @smithy/middleware-retry@3.0.17
+  - @smithy/middleware-serde@3.0.5
+  - @smithy/protocol-http@4.1.2
+  - @smithy/signature-v4@4.1.2
+  - @smithy/util-middleware@3.0.5
+
+## 0.3.18
+
+### Patch Changes
+
+- Updated dependencies [c8c53ae]
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/middleware-endpoint@3.1.1
+  - @smithy/types@3.4.0
+  - @smithy/middleware-retry@3.0.16
+  - @smithy/middleware-serde@3.0.4
+  - @smithy/protocol-http@4.1.1
+  - @smithy/signature-v4@4.1.1
+  - @smithy/util-middleware@3.0.4
+
+## 0.3.17
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.15
+
+## 0.3.16
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.14
+
+## 0.3.15
+
+### Patch Changes
+
+- a40e1e9: set identity&auth SRA active by default
+
+## 0.3.14
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.13
+
+## 0.3.13
+
+### Patch Changes
+
+- 86862ea: switch to static HttpRequest clone method
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/signature-v4@4.1.0
+  - @smithy/middleware-retry@3.0.12
+  - @smithy/middleware-serde@3.0.3
+
+## 0.3.12
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.11
+
+## 0.3.11
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+- Updated dependencies [ae8bf5c]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/signature-v4@4.0.0
+  - @smithy/middleware-retry@3.0.10
+  - @smithy/middleware-serde@3.0.3
+
+## 0.3.10
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+- @smithy/middleware-retry@3.0.9
+
+## 0.3.9
+
+### Patch Changes
+
+- @smithy/middleware-retry@3.0.8
+
 ## 0.3.8
 
 ### Patch Changes

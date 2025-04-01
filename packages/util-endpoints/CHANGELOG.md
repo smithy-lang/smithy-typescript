@@ -1,5 +1,110 @@
 # Change Log
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/node-config-provider@4.0.2
+
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/node-config-provider@4.0.1
+
+## 3.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/types@4.0.0
+
+## 2.1.7
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/node-config-provider@3.1.12
+
+## 2.1.6
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/node-config-provider@3.1.11
+
+## 2.1.5
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/node-config-provider@3.1.10
+
+## 2.1.4
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/node-config-provider@3.1.9
+
+## 2.1.3
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/node-config-provider@3.1.8
+
+## 2.1.2
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/node-config-provider@3.1.7
+
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/node-config-provider@3.1.6
+
+## 2.1.0
+
+### Minor Changes
+
+- 1ff575c: add endpoint ruleset cache
+
+### Patch Changes
+
+- 77db9e7: Do not take protocol and port from custom Endpoint
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/node-config-provider@3.1.5
+
+## 2.0.5
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+
 ## 2.0.4
 
 ### Patch Changes

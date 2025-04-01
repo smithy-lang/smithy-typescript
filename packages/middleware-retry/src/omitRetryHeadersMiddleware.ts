@@ -9,6 +9,9 @@ import {
 } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 
+/**
+ * @internal
+ */
 export const omitRetryHeadersMiddleware =
   () =>
   <Output extends MetadataBearer = MetadataBearer>(next: FinalizeHandler<any, Output>): FinalizeHandler<any, Output> =>
@@ -21,6 +24,9 @@ export const omitRetryHeadersMiddleware =
     return next(args);
   };
 
+/**
+ * @internal
+ */
 export const omitRetryHeadersMiddlewareOptions: RelativeMiddlewareOptions = {
   name: "omitRetryHeadersMiddleware",
   tags: ["RETRY", "HEADERS", "OMIT_RETRY_HEADERS"],
@@ -29,8 +35,13 @@ export const omitRetryHeadersMiddlewareOptions: RelativeMiddlewareOptions = {
   override: true,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getOmitRetryHeadersPlugin = (options: unknown): Pluggable<any, any> => ({
+/**
+ * @internal
+ */
+export const getOmitRetryHeadersPlugin = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  options: unknown
+): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
     clientStack.addRelativeTo(omitRetryHeadersMiddleware(), omitRetryHeadersMiddlewareOptions);
   },

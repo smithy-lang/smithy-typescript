@@ -3,6 +3,7 @@ import {
   DeserializeHandlerArguments,
   DeserializeHandlerOutput,
   DeserializeMiddleware,
+  HandlerExecutionContext,
   ResponseDeserializer,
   SerdeContext,
   SerdeFunctions,
@@ -16,7 +17,7 @@ export const deserializerMiddleware =
     options: SerdeFunctions,
     deserializer: ResponseDeserializer<any, any, CommandSerdeContext>
   ): DeserializeMiddleware<Input, Output> =>
-  (next: DeserializeHandler<Input, Output>): DeserializeHandler<Input, Output> =>
+  (next: DeserializeHandler<Input, Output>, context: HandlerExecutionContext): DeserializeHandler<Input, Output> =>
   async (args: DeserializeHandlerArguments<Input>): Promise<DeserializeHandlerOutput<Output>> => {
     const { response } = await next(args);
     try {
@@ -41,7 +42,16 @@ export const deserializerMiddleware =
       if (!("$metadata" in error)) {
         // only apply this to non-ServiceException.
         const hint = `Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object.`;
-        error.message += "\n  " + hint;
+        try {
+          error.message += "\n  " + hint;
+        } catch (e) {
+          // Error with an unwritable message (strict mode getter with no setter).
+          if (!context.logger || context.logger?.constructor?.name === "NoOpLogger") {
+            console.warn(hint);
+          } else {
+            context.logger?.warn?.(hint);
+          }
+        }
 
         if (typeof error.$responseBodyText !== "undefined") {
           // if $responseBodyText was collected by the error parser, assign it to

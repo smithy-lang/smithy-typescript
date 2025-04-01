@@ -1,5 +1,17 @@
 # Change Log
 
+## 5.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+## 4.0.0
+
+### Major Changes
+
+- c257049: replace FileReader with Blob.arrayBuffer() where possible
+
 ## 3.0.0
 
 ### Major Changes

@@ -1,5 +1,232 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- e917e61: enforce singular config object during client instantiation
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/fetch-http-handler@5.0.2
+  - @smithy/node-http-handler@4.0.4
+
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [54d2416]
+- Updated dependencies [fba050c]
+  - @smithy/node-http-handler@4.0.3
+
+## 4.1.1
+
+### Patch Changes
+
+- efedb20: handle case of empty upstream
+
+## 4.1.0
+
+### Minor Changes
+
+- d1d1f72: utility for buffering stream chunks
+
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [fbd06eb]
+  - @smithy/node-http-handler@4.0.2
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/fetch-http-handler@5.0.1
+  - @smithy/node-http-handler@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/fetch-http-handler@5.0.0
+  - @smithy/node-http-handler@4.0.0
+  - @smithy/util-buffer-from@4.0.0
+  - @smithy/util-base64@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/types@4.0.0
+  - @smithy/util-hex-encoding@4.0.0
+
+## 3.3.4
+
+### Patch Changes
+
+- Updated dependencies [1dd6ace]
+  - @smithy/fetch-http-handler@4.1.3
+
+## 3.3.3
+
+### Patch Changes
+
+- Updated dependencies [5e73108]
+  - @smithy/node-http-handler@3.3.3
+
+## 3.3.2
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+- Updated dependencies [f4e1a45]
+- Updated dependencies [a257792]
+  - @smithy/types@3.7.2
+  - @smithy/node-http-handler@3.3.2
+  - @smithy/fetch-http-handler@4.1.2
+
+## 3.3.1
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/fetch-http-handler@4.1.1
+  - @smithy/node-http-handler@3.3.1
+
+## 3.3.0
+
+### Minor Changes
+
+- cd1929b: vitest compatibility
+
+### Patch Changes
+
+- c8d257b: allow Blob in node.js splitStream
+- Updated dependencies [cd1929b]
+  - @smithy/fetch-http-handler@4.1.0
+  - @smithy/node-http-handler@3.3.0
+  - @smithy/types@3.7.0
+
+## 3.2.1
+
+### Patch Changes
+
+- ccdd49f: add bundler metadata for ChecksumStream file
+
+## 3.2.0
+
+### Minor Changes
+
+- f4e0bd9: create checksum stream adapter
+
+### Patch Changes
+
+- Updated dependencies [c257049]
+- Updated dependencies [84bec05]
+  - @smithy/fetch-http-handler@4.0.0
+  - @smithy/types@3.6.0
+  - @smithy/node-http-handler@3.2.5
+
+## 3.1.9
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/fetch-http-handler@3.2.9
+  - @smithy/node-http-handler@3.2.4
+
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [0d5ab1d]
+  - @smithy/fetch-http-handler@3.2.8
+
+## 3.1.7
+
+### Patch Changes
+
+- Updated dependencies [08fbedf]
+  - @smithy/node-http-handler@3.2.3
+
+## 3.1.6
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/fetch-http-handler@3.2.7
+  - @smithy/node-http-handler@3.2.2
+
+## 3.1.5
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/fetch-http-handler@3.2.6
+  - @smithy/types@3.4.1
+  - @smithy/node-http-handler@3.2.1
+
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [c86a02c]
+- Updated dependencies [5510e83]
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/node-http-handler@3.2.0
+  - @smithy/types@3.4.0
+  - @smithy/fetch-http-handler@3.2.5
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [3ea4789]
+  - @smithy/fetch-http-handler@3.2.4
+
+## 3.1.2
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.3
+- @smithy/node-http-handler@3.1.4
+
+## 3.1.1
+
+### Patch Changes
+
+- 1cfe243: avoid compilation of global ReadableStream with type parameter
+
+## 3.1.0
+
+### Minor Changes
+
+- 7cd258f: add splitStream and headStream utilities
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.2
+- @smithy/node-http-handler@3.1.3
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [f31cc5f]
+  - @smithy/fetch-http-handler@3.2.1
+  - @smithy/node-http-handler@3.1.2
+
 ## 3.0.5
 
 ### Patch Changes

@@ -16,6 +16,7 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,6 +44,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
+import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -102,15 +104,21 @@ public class EventStreamGenerator {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         TreeSet<UnionShape> eventUnionsToSerialize = new TreeSet<>();
-        TreeSet<StructureShape> eventShapesToMarshall = new TreeSet<>();
+        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall = new TreeSet<>(
+            (a, b) -> Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo)
+        );
+
         for (OperationShape operation : operations) {
             if (hasEventStreamInput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamInputShape(context, operation);
                 eventUnionsToSerialize.add(eventsUnion);
-                Set<StructureShape> eventShapes = eventsUnion.members().stream()
-                        .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
-                        .collect(Collectors.toSet());
-                eventShapes.forEach(eventShapesToMarshall::add);
+                eventsUnion.members()
+                    .forEach(member -> {
+                        eventShapesToMarshall.add(Pair.of(
+                            member.getMemberName(),
+                            model.expectShape(member.getTarget()).asStructureShape().get()
+                        ));
+                    });
             }
         }
 
@@ -118,14 +126,16 @@ public class EventStreamGenerator {
             generateEventStreamSerializer(context, eventsUnion);
         });
         SerdeElisionIndex serdeElisionIndex = SerdeElisionIndex.of(model);
-        eventShapesToMarshall.forEach(event -> {
+        eventShapesToMarshall.forEach(memberNameAndEvent -> {
             generateEventMarshaller(
                 context,
-                event,
+                memberNameAndEvent.getLeft(),
+                memberNameAndEvent.getRight(),
                 documentContentType,
                 serializeInputEventDocumentPayload,
                 documentShapesToSerialize,
-                serdeElisionIndex);
+                serdeElisionIndex
+            );
         });
     }
 
@@ -155,6 +165,7 @@ public class EventStreamGenerator {
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         TreeSet<UnionShape> eventUnionsToDeserialize = new TreeSet<>();
         TreeSet<StructureShape> eventShapesToUnmarshall = new TreeSet<>();
+
         for (OperationShape operation : operations) {
             if (hasEventStreamOutput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
@@ -237,6 +248,7 @@ public class EventStreamGenerator {
 
     public void generateEventMarshaller(
         GenerationContext context,
+        String memberName,
         StructureShape event,
         String documentContentType,
         Runnable serializeInputEventDocumentPayload,
@@ -253,7 +265,7 @@ public class EventStreamGenerator {
                 + "): __Message => {", "}", methodName, symbol, () -> {
             writer.openBlock("const headers: __MessageHeaders = {", "}", () -> {
                 //fix headers required by event stream
-                writer.write("\":event-type\": { type: \"string\", value: $S },", symbol.getName());
+                writer.write("\":event-type\": { type: \"string\", value: $S },", memberName);
                 writer.write("\":message-type\": { type: \"string\", value: \"event\" },");
                 writeEventContentTypeHeader(context, event, documentContentType);
             });

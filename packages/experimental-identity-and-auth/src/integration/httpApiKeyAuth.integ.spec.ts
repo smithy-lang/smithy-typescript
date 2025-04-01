@@ -4,10 +4,12 @@ import {
   OnlyHttpApiKeyAuthOptionalCommand,
   SameAsServiceCommand,
 } from "@smithy/identity-and-auth-http-api-key-auth-service";
-import { requireRequestsFrom } from "@smithy/util-test";
+import { describe, expect, test as it } from "vitest";
+
+import { requireRequestsFrom } from "../../../../private/util-test/src/index";
 
 describe("@httpApiKeyAuth integration tests", () => {
-  // TODO(experimentalIdentityAndAuth): should match `HttpApiKeyAuthService` `@httpApiKeyAuth` trait
+  // Match `HttpApiKeyAuthService` `@httpApiKeyAuth` trait
   const MOCK_API_KEY_NAME = "Authorization";
   const MOCK_API_KEY_SCHEME = "ApiKey";
   const MOCK_API_KEY = "APIKEY_123";

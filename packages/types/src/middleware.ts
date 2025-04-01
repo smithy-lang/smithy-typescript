@@ -1,7 +1,10 @@
-import { AuthScheme, HttpAuthDefinition } from "./auth/auth";
-import { EndpointV2 } from "./endpoint";
-import { Logger } from "./logger";
-import { UserAgent } from "./util";
+import type { AuthScheme, HttpAuthDefinition } from "./auth/auth";
+import type { SelectedHttpAuthScheme } from "./auth/HttpAuthScheme";
+import type { Command } from "./command";
+import type { EndpointV2 } from "./endpoint";
+import type { SmithyFeatures } from "./feature-ids";
+import type { Logger } from "./logger";
+import type { UserAgent } from "./util";
 
 /**
  * @public
@@ -554,6 +557,7 @@ export interface HandlerExecutionContext {
   currentAuthConfig?: HttpAuthDefinition;
 
   /**
+   * @deprecated do not extend this field, it is a carryover from AWS SDKs.
    * Used by DynamoDbDocumentClient.
    */
   dynamoDbDocumentClientOptions?: Partial<{
@@ -563,10 +567,30 @@ export interface HandlerExecutionContext {
 
   /**
    * @internal
-   * Context for Smithy properties
+   * Context for Smithy properties.
    */
-  [SMITHY_CONTEXT_KEY]?: Record<string, unknown>;
+  [SMITHY_CONTEXT_KEY]?: {
+    service?: string;
+    operation?: string;
+    commandInstance?: Command<any, any, any, any, any>;
+    selectedHttpAuthScheme?: SelectedHttpAuthScheme;
+    features?: SmithyFeatures;
+    /**
+     * @deprecated
+     * Do not assign arbitrary members to the Smithy Context,
+     * fields should be explicitly declared here to avoid collisions.
+     */
+    [key: string]: unknown;
+  };
 
+  /**
+   * @deprecated
+   * Do not assign arbitrary members to the context, since
+   * they can interfere with existing functionality.
+   *
+   * Additional members should instead be declared on the SMITHY_CONTEXT_KEY
+   * or other reserved keys.
+   */
   [key: string]: any;
 }
 

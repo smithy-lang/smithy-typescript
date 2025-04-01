@@ -41,6 +41,7 @@ import software.amazon.smithy.typescript.codegen.sections.ClientConfigCodeSectio
 import software.amazon.smithy.typescript.codegen.sections.ClientConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.ClientDestroyCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.ClientPropertiesCodeSection;
+import software.amazon.smithy.typescript.codegen.util.ClientWriterConsumer;
 import software.amazon.smithy.utils.OptionalUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -63,13 +64,13 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
     private final ApplicationProtocol applicationProtocol;
 
     ServiceBareBonesClientGenerator(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
-            List<TypeScriptIntegration> integrations,
-            List<RuntimeClientPlugin> runtimePlugins,
-            ApplicationProtocol applicationProtocol
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer,
+        List<TypeScriptIntegration> integrations,
+        List<RuntimeClientPlugin> runtimePlugins,
+        ApplicationProtocol applicationProtocol
     ) {
         this.settings = settings;
         this.model = model;
@@ -374,8 +375,11 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 .build());
 
             int configVariable = 0;
+            String initialConfigVar = generateConfigVariable(configVariable);
             writer.write("let $L = __getRuntimeConfig(configuration || {});",
-                    generateConfigVariable(configVariable));
+                initialConfigVar);
+            writer.write("super($L as any);", initialConfigVar);
+            writer.write("this.initConfig = $L;", initialConfigVar);
 
             if (service.hasTrait(EndpointRuleSetTrait.class)) {
                 configVariable++;
@@ -428,7 +432,6 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 generateConfigVariable(configVariable),
                 generateConfigVariable(configVariable - 1));
 
-            writer.write("super($L);", generateConfigVariable(configVariable));
             writer.write("this.config = $L;", generateConfigVariable(configVariable));
 
             // Add runtime plugins that contain middleware to the middleware stack
@@ -438,10 +441,6 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     // Construct additional parameters string
                     Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
                             model, service, null);
-                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                    String additionalParamsString = additionalParameters.isEmpty()
-                            ? ""
-                            : ", { " + String.join(", ", additionalParameters) + " }";
 
                     // Construct writer context
                     Map<String, Object> symbolMap = new HashMap<>();
@@ -453,11 +452,39 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     }
                     writer.pushState();
                     writer.putContext(symbolMap);
-                    writer.write("this.middlewareStack.use($pluginFn:T(this.config" + additionalParamsString + "));");
+                    writer.openBlock("this.middlewareStack.use($pluginFn:T(this.config", "));", () -> {
+                        List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+                        Map<String, ClientWriterConsumer> clientAddParamsWriterConsumers =
+                            plugin.getClientAddParamsWriterConsumers();
+
+                        if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
+                            return;
+                        }
+
+                        writer.openBlock(", {", " }", () -> {
+                            // caution: using String.join instead of templating
+                            // because additionalParameters may contain Smithy syntax.
+                            if (!additionalParameters.isEmpty()) {
+                                writer.writeInline(String.join(", ", additionalParameters) + ", ");
+                            }
+                            clientAddParamsWriterConsumers.forEach((key, consumer) -> {
+                                writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
+                                    consumer.accept(w, ClientBodyExtraCodeSection.builder()
+                                        .settings(settings)
+                                        .model(model)
+                                        .service(service)
+                                        .symbolProvider(symbolProvider)
+                                        .integrations(integrations)
+                                        .runtimeClientPlugins(runtimePlugins)
+                                        .applicationProtocol(applicationProtocol)
+                                        .build());
+                                }));
+                            });
+                        });
+                    });
                     writer.popState();
                 });
             }
-
             writer.popState();
         });
     }

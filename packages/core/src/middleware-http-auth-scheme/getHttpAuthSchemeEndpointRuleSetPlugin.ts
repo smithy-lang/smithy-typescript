@@ -1,4 +1,3 @@
-import { endpointMiddlewareOptions } from "@smithy/middleware-endpoint";
 import {
   HandlerExecutionContext,
   HttpAuthSchemeParameters,
@@ -20,7 +19,7 @@ export const httpAuthSchemeEndpointRuleSetMiddlewareOptions: SerializeHandlerOpt
   name: "httpAuthSchemeMiddleware",
   override: true,
   relation: "before",
-  toMiddleware: endpointMiddlewareOptions.name!,
+  toMiddleware: "endpointV2Middleware",
 };
 
 /**

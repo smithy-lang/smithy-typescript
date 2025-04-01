@@ -1,5 +1,326 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 02ef79c: add numeric value container for serde
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/protocol-http@5.1.0
+  - @smithy/util-stream@4.2.0
+  - @smithy/types@4.2.0
+  - @smithy/middleware-serde@4.0.3
+  - @smithy/util-middleware@4.0.2
+
+## 3.1.5
+
+### Patch Changes
+
+- @smithy/util-stream@4.1.2
+
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [efedb20]
+  - @smithy/util-stream@4.1.1
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [d1d1f72]
+  - @smithy/util-stream@4.1.0
+
+## 3.1.2
+
+### Patch Changes
+
+- Updated dependencies [f5d0bac]
+  - @smithy/middleware-serde@4.0.2
+
+## 3.1.1
+
+### Patch Changes
+
+- @smithy/util-stream@4.0.2
+
+## 3.1.0
+
+### Minor Changes
+
+- 2aff9df: Added middleware support to pagination
+- 000b2ae: allow paginator token fallback to be specified by operation input
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/middleware-serde@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/util-middleware@4.0.1
+  - @smithy/util-stream@4.0.1
+
+## 3.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/util-middleware@4.0.0
+  - @smithy/util-stream@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/middleware-serde@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+  - @smithy/util-body-length-browser@4.0.0
+
+## 2.5.7
+
+### Patch Changes
+
+- @smithy/util-stream@3.3.4
+
+## 2.5.6
+
+### Patch Changes
+
+- @smithy/util-stream@3.3.3
+
+## 2.5.5
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/middleware-serde@3.0.11
+  - @smithy/protocol-http@4.1.8
+  - @smithy/util-middleware@3.0.11
+  - @smithy/util-stream@3.3.2
+
+## 2.5.4
+
+### Patch Changes
+
+- 9c40f7b: make CBOR tags more distinct in JS
+
+## 2.5.3
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/middleware-serde@3.0.10
+  - @smithy/protocol-http@4.1.7
+  - @smithy/util-middleware@3.0.10
+  - @smithy/util-stream@3.3.1
+
+## 2.5.2
+
+### Patch Changes
+
+- c6ef519: avoid self referencing submodule import
+- Updated dependencies [c8d257b]
+- Updated dependencies [cd1929b]
+  - @smithy/util-stream@3.3.0
+  - @smithy/types@3.7.0
+  - @smithy/middleware-serde@3.0.9
+  - @smithy/protocol-http@4.1.6
+  - @smithy/util-middleware@3.0.9
+
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [ccdd49f]
+  - @smithy/util-stream@3.2.1
+
+## 2.5.0
+
+### Minor Changes
+
+- 84bec05: add feature identification map to smithy context
+- d07b0ab: feature detection for custom endpoint and gzip
+
+### Patch Changes
+
+- d07b0ab: reorganize smithy/core to be upstream of smithy/smithy-client
+- Updated dependencies [f4e0bd9]
+- Updated dependencies [84bec05]
+  - @smithy/util-stream@3.2.0
+  - @smithy/types@3.6.0
+  - @smithy/middleware-serde@3.0.8
+  - @smithy/protocol-http@4.1.5
+  - @smithy/util-middleware@3.0.8
+
+## 2.4.8
+
+### Patch Changes
+
+- Updated dependencies [75e0125]
+  - @smithy/smithy-client@3.4.0
+  - @smithy/middleware-retry@3.0.23
+
+## 2.4.7
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/middleware-endpoint@3.1.4
+  - @smithy/middleware-retry@3.0.22
+  - @smithy/middleware-serde@3.0.7
+  - @smithy/protocol-http@4.1.4
+  - @smithy/smithy-client@3.3.6
+  - @smithy/util-middleware@3.0.7
+
+## 2.4.6
+
+### Patch Changes
+
+- 18dd957: add compatibility types redirect
+- Updated dependencies [64600d8]
+  - @smithy/smithy-client@3.3.5
+  - @smithy/middleware-retry@3.0.21
+
+## 2.4.5
+
+### Patch Changes
+
+- @smithy/smithy-client@3.3.4
+- @smithy/middleware-retry@3.0.20
+
+## 2.4.4
+
+### Patch Changes
+
+- @smithy/smithy-client@3.3.3
+- @smithy/middleware-retry@3.0.19
+
+## 2.4.3
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/middleware-endpoint@3.1.3
+  - @smithy/middleware-retry@3.0.18
+  - @smithy/middleware-serde@3.0.6
+  - @smithy/protocol-http@4.1.3
+  - @smithy/smithy-client@3.3.2
+  - @smithy/util-middleware@3.0.6
+
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/middleware-endpoint@3.1.2
+  - @smithy/middleware-retry@3.0.17
+  - @smithy/middleware-serde@3.0.5
+  - @smithy/protocol-http@4.1.2
+  - @smithy/smithy-client@3.3.1
+  - @smithy/util-middleware@3.0.5
+
+## 2.4.1
+
+### Patch Changes
+
+- Updated dependencies [c8c53ae]
+- Updated dependencies [2dad138]
+- Updated dependencies [d8df7bf]
+- Updated dependencies [9f3f2f5]
+  - @smithy/middleware-endpoint@3.1.1
+  - @smithy/types@3.4.0
+  - @smithy/smithy-client@3.3.0
+  - @smithy/middleware-retry@3.0.16
+  - @smithy/middleware-serde@3.0.4
+  - @smithy/protocol-http@4.1.1
+  - @smithy/util-middleware@3.0.4
+
+## 2.4.0
+
+### Minor Changes
+
+- 5865b65: cbor (de)serializer for JS
+
+### Patch Changes
+
+- Updated dependencies [5865b65]
+  - @smithy/smithy-client@3.2.0
+  - @smithy/middleware-retry@3.0.15
+
+## 2.3.2
+
+### Patch Changes
+
+- Updated dependencies [670553a]
+  - @smithy/smithy-client@3.1.12
+  - @smithy/middleware-retry@3.0.14
+
+## 2.3.1
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.11
+- @smithy/middleware-retry@3.0.13
+
+## 2.3.0
+
+### Minor Changes
+
+- 86862ea: switch to static HttpRequest clone method
+
+### Patch Changes
+
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/smithy-client@3.1.10
+  - @smithy/middleware-retry@3.0.12
+  - @smithy/middleware-serde@3.0.3
+
+## 2.2.8
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.9
+- @smithy/middleware-retry@3.0.11
+
+## 2.2.7
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/middleware-retry@3.0.10
+  - @smithy/smithy-client@3.1.8
+  - @smithy/middleware-serde@3.0.3
+
+## 2.2.6
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+- @smithy/smithy-client@3.1.7
+- @smithy/middleware-retry@3.0.9
+
+## 2.2.5
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.6
+- @smithy/middleware-retry@3.0.8
+
 ## 2.2.4
 
 ### Patch Changes

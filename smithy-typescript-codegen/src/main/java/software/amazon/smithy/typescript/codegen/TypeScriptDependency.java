@@ -45,7 +45,7 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", true),
-    TYPES_NODE("devDependencies", "@types/node", "^16.18.96", true),
+    TYPES_NODE("devDependencies", "@types/node", "^18.19.69", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", true),
     MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", true),
@@ -79,6 +79,7 @@ public enum TypeScriptDependency implements Dependency {
 
     NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", false),
 
+    UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
     UUID("dependencies", "uuid", "^9.0.1", false),
 
     // Conditionally added when httpChecksumRequired trait exists
@@ -113,7 +114,7 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_QUERYSTRING_BUILDER("dependencies", "@smithy/querystring-builder", false),
 
     // Conditionally added when XML parser needs to be used.
-    XML_PARSER("dependencies", "fast-xml-parser", "4.2.5", false),
+    XML_PARSER("dependencies", "fast-xml-parser", "4.4.1", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.
@@ -124,13 +125,12 @@ public enum TypeScriptDependency implements Dependency {
     // Conditionally added when @aws.auth#sigv4 is used
     SIGNATURE_V4("dependencies", "@smithy/signature-v4", false),
 
-    // feat(experimentalIdentityAndAuth): Conditionally added dependencies for `experimentalIdentityAndAuth`.
     // This package should never have a major version, and should only use minor and patch versions in development.
     // Exports are located between @smithy/types and @smithy/core
     @Deprecated EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
 
     // Conditionally added when specs have been generated.
-    VITEST("devDependencies", "vitest", "^0.33.0", false),
+    VITEST("devDependencies", "vitest", "2.1.8", false),
 
     // Conditionally added when `generateTypeDoc` is true.
     TYPEDOC("devDependencies", "typedoc", "0.23.23", false),

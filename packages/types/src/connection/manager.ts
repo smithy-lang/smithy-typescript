@@ -1,6 +1,9 @@
 import { RequestContext } from "../transfer";
 import { ConnectConfiguration } from "./config";
 
+/**
+ * @public
+ */
 export interface ConnectionManagerConfiguration {
   /**
    * Maximum number of allowed concurrent requests per connection.
@@ -13,6 +16,9 @@ export interface ConnectionManagerConfiguration {
   disableConcurrency?: boolean;
 }
 
+/**
+ * @public
+ */
 export interface ConnectionManager<T> {
   /**
    * Retrieves a connection from the connection pool if available,

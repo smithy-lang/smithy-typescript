@@ -1,5 +1,6 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import { HeaderBag } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import { ALWAYS_UNSIGNABLE_HEADERS } from "./constants";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";

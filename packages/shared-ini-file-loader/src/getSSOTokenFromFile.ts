@@ -7,6 +7,7 @@ const { readFile } = fsPromises;
 
 /**
  * Cached SSO token retrieved from SSO login flow.
+ * @public
  */
 export interface SSOToken {
   /**
@@ -53,6 +54,7 @@ export interface SSOToken {
 }
 
 /**
+ * @internal
  * @param id - can be either a start URL or the SSO session name.
  * Returns the SSO token from the file system.
  */

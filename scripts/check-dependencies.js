@@ -63,7 +63,7 @@ const node_libraries = [
         ...new Set(
           [...(contents.toString().match(/(from |import\()"(.*?)";/g) || [])]
             .map((_) => _.replace(/from "/g, "").replace(/";$/, ""))
-            .filter((_) => !_.startsWith(".") && !node_libraries.includes(_))
+            .filter((_) => !_.startsWith(".") && !node_libraries.includes(_) && !_.startsWith("node:"))
         )
       );
 

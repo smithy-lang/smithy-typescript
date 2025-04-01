@@ -3,8 +3,26 @@ import { HeaderBag, HttpMessage, HttpRequest as IHttpRequest, QueryParameterBag,
 
 type HttpRequestOptions = Partial<HttpMessage> & Partial<URI> & { method?: string };
 
+/**
+ * Use the distinct IHttpRequest interface from \@smithy/types instead.
+ * This should not be used due to
+ * overlapping with the concrete class' name.
+ *
+ * This is not marked deprecated since that would mark the concrete class
+ * deprecated as well.
+ *
+ * @internal
+ */
 export interface HttpRequest extends IHttpRequest {}
 
+/**
+ * @public
+ */
+export { IHttpRequest };
+
+/**
+ * @public
+ */
 export class HttpRequest implements HttpMessage, URI {
   public method: string;
   public protocol: string;
@@ -18,7 +36,7 @@ export class HttpRequest implements HttpMessage, URI {
   public fragment?: string;
   public body?: any;
 
-  constructor(options: HttpRequestOptions) {
+  public constructor(options: HttpRequestOptions) {
     this.method = options.method || "GET";
     this.hostname = options.hostname || "localhost";
     this.port = options.port;
@@ -36,9 +54,31 @@ export class HttpRequest implements HttpMessage, URI {
     this.fragment = options.fragment;
   }
 
-  static isInstance(request: unknown): request is HttpRequest {
-    //determine if request is a valid httpRequest
-    if (!request) return false;
+  /**
+   * Note: this does not deep-clone the body.
+   */
+  public static clone(request: IHttpRequest) {
+    const cloned = new HttpRequest({
+      ...request,
+      headers: { ...request.headers },
+    });
+    if (cloned.query) {
+      cloned.query = cloneQuery(cloned.query);
+    }
+    return cloned;
+  }
+
+  /**
+   * This method only actually asserts that request is the interface {@link IHttpRequest},
+   * and not necessarily this concrete class. Left in place for API stability.
+   *
+   * Do not call instance methods on the input of this function, and
+   * do not assume it has the HttpRequest prototype.
+   */
+  public static isInstance(request: unknown): request is HttpRequest {
+    if (!request) {
+      return false;
+    }
     const req: any = request;
     return (
       "method" in req &&
@@ -50,13 +90,13 @@ export class HttpRequest implements HttpMessage, URI {
     );
   }
 
-  clone(): HttpRequest {
-    const cloned = new HttpRequest({
-      ...this,
-      headers: { ...this.headers },
-    });
-    if (cloned.query) cloned.query = cloneQuery(cloned.query);
-    return cloned;
+  /**
+   * @deprecated use static HttpRequest.clone(request) instead. It's not safe to call
+   * this method because {@link HttpRequest.isInstance} incorrectly
+   * asserts that IHttpRequest (interface) objects are of type HttpRequest (class).
+   */
+  public clone(): HttpRequest {
+    return HttpRequest.clone(this);
   }
 }
 

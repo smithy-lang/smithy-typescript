@@ -1,10 +1,12 @@
 import { StreamCollector } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
-//reference: https://snack.expo.io/r1JCSWRGU
-export const streamCollector: StreamCollector = (stream: Blob | ReadableStream): Promise<Uint8Array> => {
-  if (typeof Blob === "function" && stream instanceof Blob) {
-    return collectBlob(stream);
+export const streamCollector: StreamCollector = async (stream: Blob | ReadableStream): Promise<Uint8Array> => {
+  if ((typeof Blob === "function" && stream instanceof Blob) || stream.constructor?.name === "Blob") {
+    if (Blob.prototype.arrayBuffer !== undefined) {
+      return new Uint8Array(await (stream as Blob).arrayBuffer());
+    }
+    return collectBlob(stream as Blob);
   }
 
   return collectStream(stream as ReadableStream);

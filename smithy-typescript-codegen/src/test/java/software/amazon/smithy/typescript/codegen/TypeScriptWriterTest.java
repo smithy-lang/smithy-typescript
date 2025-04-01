@@ -65,4 +65,16 @@ public class TypeScriptWriterTest {
     public void addsFormatterForSymbolReferences() {
         // TODO
     }
+
+    @Test
+    public void addImportSubmodule() {
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+        writer.addImportSubmodule("symbol", "__symbol", () -> "@smithy/core", "/submodule");
+        String result = writer.toString();
+
+        assertThat(result.trim(), equalTo("""
+            %simport { symbol as __symbol } from "@smithy/core/submodule";
+            """.formatted(CODEGEN_INDICATOR).trim()));
+    }
 }

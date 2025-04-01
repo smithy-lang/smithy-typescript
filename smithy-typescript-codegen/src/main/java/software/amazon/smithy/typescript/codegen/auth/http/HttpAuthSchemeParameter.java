@@ -14,7 +14,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 /**
  * Definition of an HttpAuthSchemeParameter.
  *
- * Currently this is used to generate the the HttpAuthSchemeParameters interface in `experimentalIdentityAndAuth`.
+ * Currently this is used to generate the the HttpAuthSchemeParameters interface.
  *
  * @param name name of the auth scheme parameter
  * @param type writer for the type of the auth scheme parameter

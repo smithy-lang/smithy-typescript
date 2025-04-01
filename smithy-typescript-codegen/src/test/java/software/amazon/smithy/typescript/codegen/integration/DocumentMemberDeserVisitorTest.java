@@ -98,7 +98,7 @@ public class DocumentMemberDeserVisitorTest {
                 {StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")", source},
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                    "new __LazyJsonString(" + DATA_SOURCE + ")",
+                    "__LazyJsonString.from(" + DATA_SOURCE + ")",
                     source
                 },
                 {BlobShape.builder().id(id).build(), "context.base64Decoder(" + DATA_SOURCE + ")", source},

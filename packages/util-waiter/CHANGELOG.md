@@ -1,5 +1,111 @@
 # Change Log
 
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/abort-controller@4.0.2
+
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/abort-controller@4.0.1
+
+## 4.0.1
+
+### Patch Changes
+
+- a147146: fix range validation in waiters
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/abort-controller@4.0.0
+  - @smithy/types@4.0.0
+
+## 3.2.0
+
+### Minor Changes
+
+- 8950c05: record observed responses in waiter results
+
+## 3.1.10
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/abort-controller@3.1.9
+
+## 3.1.9
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/abort-controller@3.1.8
+
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/abort-controller@3.1.7
+
+## 3.1.7
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/abort-controller@3.1.6
+
+## 3.1.6
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/abort-controller@3.1.5
+
+## 3.1.5
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/abort-controller@3.1.4
+
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/abort-controller@3.1.3
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/abort-controller@3.1.2
+
 ## 3.1.2
 
 ### Patch Changes

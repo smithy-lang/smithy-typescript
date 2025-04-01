@@ -1,5 +1,343 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- e917e61: enforce singular config object during client instantiation
+
+### Patch Changes
+
+- Updated dependencies [02ef79c]
+- Updated dependencies [e917e61]
+  - @smithy/core@3.2.0
+  - @smithy/middleware-endpoint@4.1.0
+  - @smithy/protocol-http@5.1.0
+  - @smithy/util-stream@4.2.0
+  - @smithy/types@4.2.0
+  - @smithy/middleware-stack@4.0.2
+
+## 4.1.6
+
+### Patch Changes
+
+- @smithy/util-stream@4.1.2
+- @smithy/core@3.1.5
+- @smithy/middleware-endpoint@4.0.6
+
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [efedb20]
+  - @smithy/util-stream@4.1.1
+  - @smithy/core@3.1.4
+  - @smithy/middleware-endpoint@4.0.5
+
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [d1d1f72]
+  - @smithy/util-stream@4.1.0
+  - @smithy/core@3.1.3
+  - @smithy/middleware-endpoint@4.0.4
+
+## 4.1.3
+
+### Patch Changes
+
+- @smithy/core@3.1.2
+- @smithy/middleware-endpoint@4.0.3
+
+## 4.1.2
+
+### Patch Changes
+
+- @smithy/util-stream@4.0.2
+- @smithy/core@3.1.1
+- @smithy/middleware-endpoint@4.0.2
+
+## 4.1.1
+
+### Patch Changes
+
+- e87f2b3: prototype chain fallback for service exception
+
+## 4.1.0
+
+### Minor Changes
+
+- 292c134: adds support for instanceof operator for ServiceException class
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/core@3.1.0
+  - @smithy/middleware-endpoint@4.0.1
+  - @smithy/middleware-stack@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/util-stream@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/middleware-endpoint@4.0.0
+  - @smithy/util-stream@4.0.0
+  - @smithy/core@3.0.0
+  - @smithy/middleware-stack@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+
+## 3.7.0
+
+### Minor Changes
+
+- a0e71d5: fix(smithy-client): remove support for instanceof operator
+
+### Patch Changes
+
+- @smithy/util-stream@3.3.4
+- @smithy/core@2.5.7
+- @smithy/middleware-endpoint@3.2.8
+
+## 3.6.0
+
+### Minor Changes
+
+- 23129d9: feat: type check helper method to to know if something is an instance of the ServiceException class
+
+## 3.5.2
+
+### Patch Changes
+
+- @smithy/util-stream@3.3.3
+- @smithy/core@2.5.6
+- @smithy/middleware-endpoint@3.2.7
+
+## 3.5.1
+
+### Patch Changes
+
+- 7f17426: fix new operator typing for LazyJsonString
+- Updated dependencies [e27d42d]
+  - @smithy/middleware-endpoint@3.2.6
+
+## 3.5.0
+
+### Minor Changes
+
+- 70275bd: remove String extension in LazyJsonString
+
+## 3.4.6
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/core@2.5.5
+  - @smithy/middleware-endpoint@3.2.5
+  - @smithy/middleware-stack@3.0.11
+  - @smithy/protocol-http@4.1.8
+  - @smithy/util-stream@3.3.2
+
+## 3.4.5
+
+### Patch Changes
+
+- Updated dependencies [9c40f7b]
+  - @smithy/core@2.5.4
+  - @smithy/middleware-endpoint@3.2.4
+
+## 3.4.4
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/core@2.5.3
+  - @smithy/middleware-endpoint@3.2.3
+  - @smithy/middleware-stack@3.0.10
+  - @smithy/protocol-http@4.1.7
+  - @smithy/util-stream@3.3.1
+
+## 3.4.3
+
+### Patch Changes
+
+- Updated dependencies [c8d257b]
+- Updated dependencies [c6ef519]
+- Updated dependencies [cd1929b]
+  - @smithy/util-stream@3.3.0
+  - @smithy/core@2.5.2
+  - @smithy/types@3.7.0
+  - @smithy/middleware-endpoint@3.2.2
+  - @smithy/middleware-stack@3.0.9
+  - @smithy/protocol-http@4.1.6
+
+## 3.4.2
+
+### Patch Changes
+
+- Updated dependencies [ccdd49f]
+  - @smithy/util-stream@3.2.1
+  - @smithy/core@2.5.1
+  - @smithy/middleware-endpoint@3.2.1
+
+## 3.4.1
+
+### Patch Changes
+
+- d07b0ab: reorganize smithy/core to be upstream of smithy/smithy-client
+- Updated dependencies [f4e0bd9]
+- Updated dependencies [84bec05]
+- Updated dependencies [d07b0ab]
+- Updated dependencies [d07b0ab]
+  - @smithy/util-stream@3.2.0
+  - @smithy/types@3.6.0
+  - @smithy/core@2.5.0
+  - @smithy/middleware-endpoint@3.2.0
+  - @smithy/middleware-stack@3.0.8
+  - @smithy/protocol-http@4.1.5
+
+## 3.4.0
+
+### Minor Changes
+
+- 75e0125: add quoteHeader function
+
+## 3.3.6
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/middleware-endpoint@3.1.4
+  - @smithy/middleware-stack@3.0.7
+  - @smithy/protocol-http@4.1.4
+  - @smithy/util-stream@3.1.9
+
+## 3.3.5
+
+### Patch Changes
+
+- 64600d8: serialize empty strings and collections in headers
+
+## 3.3.4
+
+### Patch Changes
+
+- @smithy/util-stream@3.1.8
+
+## 3.3.3
+
+### Patch Changes
+
+- @smithy/util-stream@3.1.7
+
+## 3.3.2
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/middleware-endpoint@3.1.3
+  - @smithy/middleware-stack@3.0.6
+  - @smithy/protocol-http@4.1.3
+  - @smithy/util-stream@3.1.6
+
+## 3.3.1
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/util-stream@3.1.5
+  - @smithy/middleware-endpoint@3.1.2
+  - @smithy/middleware-stack@3.0.5
+  - @smithy/protocol-http@4.1.2
+
+## 3.3.0
+
+### Minor Changes
+
+- d8df7bf: add client handler caching
+
+### Patch Changes
+
+- Updated dependencies [c8c53ae]
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/middleware-endpoint@3.1.1
+  - @smithy/types@3.4.0
+  - @smithy/util-stream@3.1.4
+  - @smithy/middleware-stack@3.0.4
+  - @smithy/protocol-http@4.1.1
+
+## 3.2.0
+
+### Minor Changes
+
+- 5865b65: handle timestamp cbor tag
+
+## 3.1.12
+
+### Patch Changes
+
+- 670553a: add command instance ref to smithy context
+
+## 3.1.11
+
+### Patch Changes
+
+- @smithy/util-stream@3.1.3
+
+## 3.1.10
+
+### Patch Changes
+
+- Updated dependencies [4a40961]
+- Updated dependencies [86862ea]
+  - @smithy/middleware-endpoint@3.1.0
+  - @smithy/protocol-http@4.1.0
+  - @smithy/util-stream@3.1.2
+
+## 3.1.9
+
+### Patch Changes
+
+- Updated dependencies [1cfe243]
+  - @smithy/util-stream@3.1.1
+
+## 3.1.8
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+- Updated dependencies [7cd258f]
+  - @smithy/protocol-http@4.0.4
+  - @smithy/util-stream@3.1.0
+
+## 3.1.7
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@3.0.5
+
+## 3.1.6
+
+### Patch Changes
+
+- @smithy/util-stream@3.0.6
+
 ## 3.1.5
 
 ### Patch Changes

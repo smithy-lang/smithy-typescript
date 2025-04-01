@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-test",
-  "version": "0.2.4",
+  "version": "0.2.8",
   "private": true,
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -21,7 +21,7 @@
     "tslib": "^2.6.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "concurrently": "7.0.0",

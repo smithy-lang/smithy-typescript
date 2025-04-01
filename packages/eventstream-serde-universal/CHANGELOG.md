@@ -1,5 +1,105 @@
 # Change Log
 
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/eventstream-codec@4.0.2
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/eventstream-codec@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/eventstream-codec@4.0.0
+  - @smithy/types@4.0.0
+
+## 3.0.13
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/eventstream-codec@3.1.10
+
+## 3.0.12
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/eventstream-codec@3.1.9
+
+## 3.0.11
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/eventstream-codec@3.1.8
+
+## 3.0.10
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/eventstream-codec@3.1.7
+
+## 3.0.9
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/eventstream-codec@3.1.6
+
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/eventstream-codec@3.1.5
+
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/eventstream-codec@3.1.4
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/eventstream-codec@3.1.3
+
+## 3.0.5
+
+### Patch Changes
+
+- b352cc1: exclude test code from artifact
+
 ## 3.0.4
 
 ### Patch Changes

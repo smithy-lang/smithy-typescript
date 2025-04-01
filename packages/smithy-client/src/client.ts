@@ -3,6 +3,7 @@ import {
   Client as IClient,
   Command,
   FetchHttpHandlerOptions,
+  Handler,
   MetadataBearer,
   MiddlewareStack,
   NodeHttpHandlerOptions,
@@ -24,6 +25,22 @@ export interface SmithyConfiguration<HandlerOptions> {
    * @internal
    */
   readonly apiVersion: string;
+  /**
+   * @public
+   *
+   * Default false.
+   *
+   * When true, the client will only resolve the middleware stack once per
+   * Command class. This means modifying the middlewareStack of the
+   * command or client after requests have been made will not be
+   * recognized.
+   *
+   * Calling client.destroy() also clears this cache.
+   *
+   * Enable this only if needing the additional time saved (0-1ms per request)
+   * and not needing middleware modifications between requests.
+   */
+  cacheMiddleware?: boolean;
 }
 
 /**
@@ -32,6 +49,7 @@ export interface SmithyConfiguration<HandlerOptions> {
 export type SmithyResolvedConfiguration<HandlerOptions> = {
   requestHandler: RequestHandler<any, any, HandlerOptions>;
   readonly apiVersion: string;
+  cacheMiddleware?: boolean;
 };
 
 /**
@@ -45,10 +63,23 @@ export class Client<
 > implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration>
 {
   public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>();
-  readonly config: ResolvedClientConfiguration;
-  constructor(config: ResolvedClientConfiguration) {
-    this.config = config;
-  }
+
+  /**
+   * Holds an object reference to the initial configuration object.
+   * Used to check that the config resolver stack does not create
+   * dangling instances of an intermediate form of the configuration object.
+   *
+   * @internal
+   */
+  public initConfig?: object;
+
+  /**
+   * May be used to cache the resolved handler function for a Command class.
+   */
+  private handlers?: WeakMap<Function, Handler<any, any>> | undefined;
+
+  constructor(public readonly config: ResolvedClientConfiguration) {}
+
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
     options?: HandlerOptions
@@ -69,7 +100,28 @@ export class Client<
   ): Promise<OutputType> | void {
     const options = typeof optionsOrCb !== "function" ? optionsOrCb : undefined;
     const callback = typeof optionsOrCb === "function" ? (optionsOrCb as (err: any, data?: OutputType) => void) : cb;
-    const handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
+
+    const useHandlerCache = options === undefined && this.config.cacheMiddleware === true;
+
+    let handler: Handler<any, any>;
+
+    if (useHandlerCache) {
+      if (!this.handlers) {
+        this.handlers = new WeakMap();
+      }
+      const handlers = this.handlers!;
+
+      if (handlers.has(command.constructor)) {
+        handler = handlers.get(command.constructor)!;
+      } else {
+        handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
+        handlers.set(command.constructor, handler);
+      }
+    } else {
+      delete this.handlers;
+      handler = command.resolveMiddleware(this.middlewareStack as any, this.config, options);
+    }
+
     if (callback) {
       handler(command)
         .then(
@@ -87,6 +139,7 @@ export class Client<
   }
 
   destroy() {
-    if (this.config.requestHandler.destroy) this.config.requestHandler.destroy();
+    this.config?.requestHandler?.destroy?.();
+    delete this.handlers;
   }
 }

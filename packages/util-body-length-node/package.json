@@ -1,7 +1,7 @@
 {
   "name": "@smithy/util-body-length-node",
   "description": "Determines the length of a request body in node.js",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline util-body-length-node",
@@ -11,11 +11,12 @@
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
-    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "yarn g:jest"
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
+    "test": "yarn g:vitest run",
+    "test:watch": "yarn g:vitest watch"
   },
   "devDependencies": {
-    "@types/node": "^16.18.96",
+    "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "rimraf": "3.0.2",
@@ -33,7 +34,7 @@
     "tslib": "^2.6.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "typesVersions": {
     "<4.0": {
@@ -45,10 +46,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-body-length-node",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-body-length-node",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-body-length-node"
   },
   "typedoc": {

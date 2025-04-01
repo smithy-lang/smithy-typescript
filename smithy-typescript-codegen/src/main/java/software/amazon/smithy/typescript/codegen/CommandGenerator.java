@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -38,6 +39,7 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -47,8 +49,11 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.ExamplesTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
+import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.typescript.codegen.documentation.DocumentationExampleGenerator;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -56,7 +61,10 @@ import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
+import software.amazon.smithy.typescript.codegen.sections.PreCommandClassCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
+import software.amazon.smithy.typescript.codegen.util.CommandWriterConsumer;
+import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -130,11 +138,13 @@ final class CommandGenerator implements Runnable {
         String name = symbol.getName();
 
         StringBuilder additionalDocs = new StringBuilder()
-                .append("\n")
-                .append(getCommandExample(
-                        serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
-                .append("\n")
-                .append(getThrownExceptions());
+            .append("\n")
+            .append(getCommandExample(
+                    serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
+            .append("\n")
+            .append(getThrownExceptions())
+            .append("\n")
+            .append(getCuratedExamples(name));
 
         boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
 
@@ -154,6 +164,17 @@ final class CommandGenerator implements Runnable {
             );
         }
 
+        // Section of items like TypeScript @ts-ignore
+        writer.injectSection(PreCommandClassCodeSection.builder()
+            .settings(settings)
+            .model(model)
+            .service(service)
+            .operation(operation)
+            .symbolProvider(symbolProvider)
+            .runtimeClientPlugins(runtimePlugins)
+            .protocolGenerator(protocolGenerator)
+            .applicationProtocol(applicationProtocol)
+            .build());
         writer.openBlock(
             "export class $L extends $$Command.classBuilder<$T, $T, $L, ServiceInputTypes, ServiceOutputTypes>()",
             ".build() {", // class open bracket.
@@ -196,35 +217,154 @@ final class CommandGenerator implements Runnable {
             .protocolGenerator(protocolGenerator)
             .applicationProtocol(applicationProtocol)
             .build());
+
+        {
+            // This block places the most commonly sought type definitions
+            // closer to the command definition, for navigation assistance
+            // in IDEs.
+            Shape operationInputShape = model.expectShape(operation.getInputShape());
+            Symbol baseInput = symbolProvider.toSymbol(operationInputShape);
+            Shape operationOutputShape = model.expectShape(operation.getOutputShape());
+            Symbol baseOutput = symbolProvider.toSymbol(operationOutputShape);
+
+            writer.write("/** @internal type navigation helper, not in runtime. */");
+            writer.openBlock("declare protected static __types: {", "};", () -> {
+                String baseInputStr = operationInputShape.getAllMembers().isEmpty()
+                    ? "{}"
+                    : baseInput.getName();
+                String baseOutputStr = operationOutputShape.getAllMembers().isEmpty()
+                    ? "{}"
+                    : baseOutput.getName();
+                writer.write("""
+                api: {
+                    input: $L;
+                    output: $L;
+                };""", baseInputStr, baseOutputStr);
+                writer.write("""
+                sdk: {
+                    input: $T;
+                    output: $T;
+                };""", inputType, outputType);
+            });
+        }
+
         writer.write("}"); // class close bracket.
     }
 
-    private String getCommandExample(String serviceName, String configName, String commandName, String commandInput,
-            String commandOutput) {
+    private String getCommandExample(
+            String serviceName, String configName, String commandName,
+            String commandInput, String commandOutput
+    ) {
         String packageName = settings.getPackageName();
-        return "@example\n"
-                + "Use a bare-bones client and the command you need to make an API call.\n"
-                + "```javascript\n"
-                + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
-                        packageName)
-                + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
-                        packageName)
-                + String.format("const client = new %s(config);%n", serviceName)
-                + String.format("const input = %s%n",
-                        StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getInputShape()).get(), model, false, true))
-                + String.format("const command = new %s(input);%n", commandName)
-                + "const response = await client.send(command);\n"
-                + String.format("%s%n",
-                        StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getOutputShape()).get(), model, true, false))
-                + "\n```\n"
-                + "\n"
-                + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
-                + String.format("@returns {@link %s}%n", commandOutput)
-                + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
-                + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
-                + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+        String exampleDoc = "@example\n"
+            + "Use a bare-bones client and the command you need to make an API call.\n"
+            + "```javascript\n"
+            + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
+                    packageName)
+            + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
+                    packageName)
+            + String.format("const client = new %s(config);%n", serviceName)
+            + String.format("const input = %s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                            model.getShape(operation.getInputShape()).get(), model, false, true))
+            + String.format("const command = new %s(input);%n", commandName)
+            + "const response = await client.send(command);"
+            + getStreamingBlobOutputAddendum()
+            + "\n"
+            + String.format("%s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                            model.getShape(operation.getOutputShape()).get(), model, true, false))
+            + "\n```\n"
+            + "\n"
+            + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
+            + String.format("@returns {@link %s}%n", commandOutput)
+            + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
+            + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
+            + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+
+        return exampleDoc;
+    }
+
+    /**
+     * Handwritten examples from the operation ExamplesTrait.
+     */
+    private String getCuratedExamples(String commandName) {
+        String exampleDoc = "";
+        if (operation.getTrait(ExamplesTrait.class).isPresent()) {
+            List<ExamplesTrait.Example> examples = operation.getTrait(ExamplesTrait.class).get().getExamples();
+            StringBuilder buffer = new StringBuilder();
+
+            for (ExamplesTrait.Example example : examples) {
+                ObjectNode input = example.getInput();
+                Optional<ObjectNode> output = example.getOutput();
+                buffer
+                    .append("\n")
+                    .append(String.format("@example %s%n", example.getTitle()))
+                    .append("```javascript\n")
+                    .append(String.format("// %s%n", example.getDocumentation().orElse("")))
+                    .append("""
+                    const input = %s;
+                    const command = new %s(input);
+                    const response = await client.send(command);%s
+                    /* response is
+                    %s
+                    */
+                    """.formatted(
+                        DocumentationExampleGenerator.inputToJavaScriptObject(input),
+                        commandName,
+                        getStreamingBlobOutputAddendum(),
+                        DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
+                    ))
+                    .append("```")
+                    .append("\n");
+            }
+
+            exampleDoc +=  buffer.toString();
+        }
+        return exampleDoc;
+    }
+
+    /**
+     * @param operation - to query.
+     * @return member name of the streaming blob http payload, or empty string.
+     */
+    private String getStreamingBlobOutputMember(OperationShape operation) {
+        return (model.expectShape(operation.getOutputShape()))
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(memberShape -> {
+                Shape target = model.expectShape(memberShape.getTarget());
+                return target.isBlobShape() && (
+                    target.hasTrait(StreamingTrait.class)
+                        || memberShape.hasTrait(StreamingTrait.class)
+                );
+            })
+            .map(MemberShape::getMemberName)
+            .findFirst()
+            .orElse("");
+    }
+
+    /**
+     * @return e.g. appendable "const bytes = await response.Body.transformToByteArray();".
+     */
+    private String getStreamingBlobOutputAddendum() {
+        String streamingBlobAddendum = "";
+        String streamingBlobMemberName = getStreamingBlobOutputMember(operation);
+        if (!streamingBlobMemberName.isEmpty()) {
+            String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
+            streamingBlobAddendum = """
+                    \n// consume or destroy the stream to free the socket.
+                    const bytes = await %s.transformToByteArray();
+                    // const str = await %s.transformToString();
+                    // %s.destroy(); // only applicable to Node.js Readable streams.
+                    """.formatted(
+                propAccess,
+                propAccess,
+                propAccess
+            );
+        }
+        return streamingBlobAddendum;
     }
 
     private String getThrownExceptions() {
@@ -256,34 +396,52 @@ final class CommandGenerator implements Runnable {
         if (!service.hasTrait(EndpointRuleSetTrait.class)) {
             return;
         }
+
+        writer.addImport(
+            "commonParams", null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
+        );
+
+        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
+        Map<String, String> staticContextParamValues = parameterFinder.getStaticContextParamValues(operation);
+        Map<String, String> contextParams = parameterFinder.getContextParams(
+            model.getShape(operation.getInputShape()).get()
+        );
+        Map<String, String> operationContextParamValues = parameterFinder.getOperationContextParamValues(operation);
+
+        if (staticContextParamValues.isEmpty() && contextParams.isEmpty() && operationContextParamValues.isEmpty()) {
+            writer.write(".ep(commonParams)");
+            return;
+        }
+
         writer.write(".ep({")
             .indent();
         {
-            writer.addImport(
-                "commonParams", null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
-            );
-
             writer.write("...commonParams,");
-
-            RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
             Set<String> paramNames = new HashSet<>();
 
-            parameterFinder.getStaticContextParamValues(operation).forEach((name, value) -> {
+            staticContextParamValues.forEach((name, value) -> {
                 paramNames.add(name);
                 writer.write(
                     "$L: { type: \"staticContextParams\", value: $L },",
                     name, value);
             });
 
-            Shape operationInput = model.getShape(operation.getInputShape()).get();
-            parameterFinder.getContextParams(operationInput).forEach((name, type) -> {
+            contextParams.forEach((name, memberName) -> {
                 if (!paramNames.contains(name)) {
                     writer.write(
                         "$L: { type: \"contextParams\", name: \"$L\" },",
-                        name, name);
+                        name, memberName);
                 }
                 paramNames.add(name);
+            });
+
+            operationContextParamValues.forEach((name, jmesPathForInputInJs) -> {
+                writer.write(
+                    """
+                    $L: { type: \"operationContextParams\", get: (input?: any) => $L },
+                    """,
+                    name, jmesPathForInputInJs);
             });
         }
         writer.write("})")
@@ -459,10 +617,7 @@ final class CommandGenerator implements Runnable {
                 // Construct additional parameters string
                 Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
                         model, service, operation);
-                List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                String additionalParamsString = additionalParameters.isEmpty()
-                        ? ""
-                        : ", { " + String.join(", ", additionalParameters) + " }";
+
 
                 // Construct writer context
                 Map<String, Object> symbolMap = new HashMap<>();
@@ -474,7 +629,33 @@ final class CommandGenerator implements Runnable {
                 }
                 writer.pushState();
                 writer.putContext(symbolMap);
-                writer.write("$pluginFn:T(config" + additionalParamsString + "),");
+                writer.openBlock("$pluginFn:T(config", "),", () -> {
+                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+                    Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
+                        plugin.getOperationAddParamsWriterConsumers();
+                    if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
+                        return;
+                    }
+                    writer.openBlock(", { ", " }", () -> {
+                        // caution: using String.join instead of templating
+                        // because additionalParameters may contain Smithy syntax.
+                        if (!additionalParameters.isEmpty()) {
+                            writer.writeInline(String.join(", ", additionalParameters) + ", ");
+                        }
+                        clientAddParamsWriterConsumers.forEach((key, consumer) -> {
+                            writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
+                                consumer.accept(w, CommandConstructorCodeSection.builder()
+                                    .settings(settings)
+                                    .model(model)
+                                    .service(service)
+                                    .symbolProvider(symbolProvider)
+                                    .runtimeClientPlugins(runtimePlugins)
+                                    .applicationProtocol(applicationProtocol)
+                                    .build());
+                            }));
+                        });
+                    });
+                });
                 writer.popState();
             });
         }

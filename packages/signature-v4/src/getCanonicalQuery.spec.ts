@@ -1,4 +1,5 @@
 import { HttpRequest } from "@smithy/protocol-http";
+import { describe, expect, test as it } from "vitest";
 
 import { getCanonicalQuery } from "./getCanonicalQuery";
 
@@ -35,6 +36,17 @@ describe("getCanonicalQuery", () => {
         })
       )
     ).toBe("baz=quux&fizz=buzz&foo=bar");
+  });
+
+  it("should sort query keys alphabetically after URI-encode", () => {
+    expect(
+      getCanonicalQuery(
+        new HttpRequest({
+          ...httpRequestOptions,
+          query: { A: "65", "[": "91", a: "97", "{": "123" },
+        })
+      )
+    ).toBe("%5B=91&%7B=123&A=65&a=97");
   });
 
   it("should URI-encode keys and values", () => {

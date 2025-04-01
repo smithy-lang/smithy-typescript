@@ -1,6 +1,7 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import { FinalizeHandlerArguments, MiddlewareStack } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   getOmitRetryHeadersPlugin,
@@ -10,12 +11,12 @@ import {
 
 describe("getOmitRetryHeadersPlugin", () => {
   const mockClientStack = {
-    add: jest.fn(),
-    addRelativeTo: jest.fn(),
+    add: vi.fn(),
+    addRelativeTo: vi.fn(),
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`adds omitRetryHeadersMiddleware`, () => {
@@ -27,11 +28,11 @@ describe("getOmitRetryHeadersPlugin", () => {
 
 describe("omitRetryHeadersMiddleware", () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("remove retry headers", async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     const args = {
       request: new HttpRequest({
         headers: {

@@ -81,7 +81,7 @@ public class StructureGeneratorTest {
                 "export class Err extends __BaseException {\n"
                         + "  readonly name: \"Err\" = \"Err\";\n"
                         + "  readonly $fault: \"client\" = \"client\";\n"
-                        + "  foo?: string;\n"
+                        + "  foo?: string | undefined;\n"
                         + "  /**\n"
                         + "   * @internal\n"
                         + "   */\n"
@@ -525,7 +525,7 @@ public class StructureGeneratorTest {
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));
-        assertThat(output, containsString("foo?: string;"));
+        assertThat(output, containsString("foo?: string | undefined;"));
     }
 
     private StructureShape createNonErrorStructure() {

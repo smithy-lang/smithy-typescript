@@ -30,7 +30,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
-          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.JS_TEAM_ROLE_TO_ASSUME }}
           role-session-name: SmithyTypeScriptGitHubRelease
           audience: sts.amazonaws.com
       - name: Commit
@@ -46,9 +46,9 @@ jobs:
         id: token
         if: steps.commit.outcome == 'success'
         run: |
-          aws configure --profile token set role_arn ${{ secrets.TOKEN_ROLE }}
+          aws configure --profile token set role_arn ${{ secrets.JS_TEAM_TOKEN_ROLE }}
           aws configure --profile token set credential_source Environment
-          npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=SMITHY_PUBLISH_npmToken --query SecretString --output text --profile token)
+          npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=smithy-typescript-npm-token --query SecretString --output text --profile token)
           echo "::add-mask::$npm_token"
           echo "NPM_TOKEN=$npm_token" >> $GITHUB_ENV
       - name: Stage Release

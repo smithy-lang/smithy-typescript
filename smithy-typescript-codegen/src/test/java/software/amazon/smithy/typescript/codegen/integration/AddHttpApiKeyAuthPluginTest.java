@@ -32,20 +32,20 @@ public class AddHttpApiKeyAuthPluginTest {
     @Test
     public void httpApiKeyAuthClientOnService() {
         testInjects("http-api-key-auth-trait.smithy",
-                ", { in: 'header', name: 'Authorization', scheme: 'ApiKey' }");
+                "in: 'header', name: 'Authorization', scheme: 'ApiKey'");
     }
 
     @Test
     public void httpApiKeyAuthClientOnOperation() {
         testInjects("http-api-key-auth-trait-on-operation.smithy",
-                ", { in: 'header', name: 'Authorization', scheme: 'ApiKey' }");
+                "in: 'header', name: 'Authorization', scheme: 'ApiKey'");
     }
 
     // This should be identical to the httpApiKeyAuthClient test except for the parameters provided
     // to the middleware.
     @Test
     public void httpApiKeyAuthClientNoScheme() {
-        testInjects("http-api-key-auth-trait-no-scheme.smithy", ", { in: 'header', name: 'Authorization' }");
+        testInjects("http-api-key-auth-trait-no-scheme.smithy", "in: 'header', name: 'Authorization'");
     }
 
     private void testInjects(String filename, String extra) {
@@ -60,8 +60,10 @@ public class AddHttpApiKeyAuthPluginTest {
         // Ensure that the GetFoo operation imports the middleware and uses it with all the options.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
                 containsString("from \"../middleware/HttpApiKeyAuth\""));
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get(),
-                containsString("getHttpApiKeyAuthPlugin(config" + extra + ")"));
+
+        String generatedGetFooCommand = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts").get();
+        assertThat(generatedGetFooCommand, containsString("getHttpApiKeyAuthPlugin(config"));
+        assertThat(generatedGetFooCommand, containsString(extra));
 
         // Ensure that the GetBar operation does not import the middleware or use it.
         assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetBarCommand.ts").get(),
@@ -93,6 +95,7 @@ public class AddHttpApiKeyAuthPluginTest {
                         .withMember("service", Node.from("smithy.example#Example"))
                         .withMember("package", Node.from("example"))
                         .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("useLegacyAuth", Node.from(true))
                         .build())
                 .build();
 

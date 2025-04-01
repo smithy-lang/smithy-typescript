@@ -18,7 +18,7 @@ package software.amazon.smithy.typescript.codegen;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,6 +102,11 @@ final class DirectedTypeScriptCodegen
             });
         });
 
+        directive.integrations().forEach(integration -> {
+            LOGGER.info(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
+            integration.mutateClientPlugins(runtimePlugins);
+        });
+
         ProtocolGenerator protocolGenerator = resolveProtocolGenerator(
                 directive.integrations(),
                 directive.model(),
@@ -131,7 +136,9 @@ final class DirectedTypeScriptCodegen
             TypeScriptSettings settings
     ) {
         // Collect all of the supported protocol generators.
-        Map<ShapeId, ProtocolGenerator> generators = new HashMap<>();
+        // Preserve insertion order as default priority order.
+        Map<ShapeId, ProtocolGenerator> generators = new LinkedHashMap<>();
+
         for (TypeScriptIntegration integration : integrations) {
             for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
                 generators.put(generator.getProtocol(), generator);
@@ -236,9 +243,7 @@ final class DirectedTypeScriptCodegen
         delegator.useShapeWriter(service, writer -> new ServiceBareBonesClientGenerator(
                 settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
 
-        if (directive.settings().getExperimentalIdentityAndAuth()) {
-            // feat(experimentalIdentityAndAuth): allow configuring custom HttpAuthSchemeProviderGenerator
-            LOGGER.fine("experimentalIdentityAndAuth: Generating auth scheme resolver");
+        if (!directive.settings().useLegacyAuth()) {
             new HttpAuthSchemeProviderGenerator(
                 delegator,
                 settings,

@@ -28,6 +28,39 @@ jobs:
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
 
+  protocol-tests:
+    runs-on: ${{ matrix.os }}
+    name: Protocol Tests
+    strategy:
+      matrix:
+        java: [17]
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "yarn"
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'corretto'
+
+      - name: clean and build
+        run: ./gradlew clean build -Plog-tests
+      - name: Install dependencies
+        run: |
+          yarn
+          yarn turbo telemetry disable
+      - name: Build packages
+        run: node ./scripts/retry -- yarn build
+      - name: Run protocol tests
+        run: node ./scripts/retry -- yarn test:protocols
+
   lint-typescript:
     runs-on: ubuntu-latest
     name: TypeScript Lint
@@ -35,7 +68,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: "yarn"
       - name: Install dependencies
         run: yarn
@@ -49,7 +82,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [16, 18, 20, 22]
+        node: [18, 20, 22]
 
     steps:
       - uses: actions/checkout@v4
@@ -64,15 +97,17 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
       - name: Install dependencies
-        run: yarn
+        run: |
+          yarn
+          yarn turbo telemetry disable
       - name: Build packages
-        run: yarn build
+        run: node ./scripts/retry -- yarn build
       - name: Run unit tests
-        run: yarn test
+        run: node ./scripts/retry -- yarn test
       - name: Run integration tests
         run: |
           yarn config set enableImmutableInstalls false
-          yarn test:integration
+          node ./scripts/retry -- yarn test:integration
 
   ensure-typescript-formatted:
     runs-on: ubuntu-latest
@@ -81,7 +116,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: "yarn"
       - name: Install dependencies
         run: yarn
@@ -105,7 +140,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: "yarn"
       - name: Install
         run: yarn

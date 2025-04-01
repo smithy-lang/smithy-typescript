@@ -24,6 +24,9 @@ import { RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
 import { asSdkError } from "./util";
 
+/**
+ * @internal
+ */
 export const retryMiddleware =
   (options: RetryResolvedConfig) =>
   <Output extends MetadataBearer = MetadataBearer>(
@@ -116,6 +119,9 @@ const getRetryErrorType = (error: SdkError): RetryErrorType => {
   return "CLIENT_ERROR";
 };
 
+/**
+ * @internal
+ */
 export const retryMiddlewareOptions: FinalizeRequestHandlerOptions & AbsoluteLocation = {
   name: "retryMiddleware",
   tags: ["RETRY"],
@@ -124,12 +130,18 @@ export const retryMiddlewareOptions: FinalizeRequestHandlerOptions & AbsoluteLoc
   override: true,
 };
 
+/**
+ * @internal
+ */
 export const getRetryPlugin = (options: RetryResolvedConfig): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {
     clientStack.add(retryMiddleware(options), retryMiddlewareOptions);
   },
 });
 
+/**
+ * @internal
+ */
 export const getRetryAfterHint = (response: unknown): Date | undefined => {
   if (!HttpResponse.isInstance(response)) return;
 

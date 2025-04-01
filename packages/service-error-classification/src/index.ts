@@ -31,11 +31,12 @@ export const isThrottlingError = (error: SdkError) =>
  * cause where the NodeHttpHandler does not decorate the Error with
  * the name "TimeoutError" to be checked by the TRANSIENT_ERROR_CODES condition.
  */
-export const isTransientError = (error: SdkError) =>
+export const isTransientError = (error: SdkError, depth = 0): boolean =>
   isClockSkewCorrectedError(error) ||
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
-  TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0);
+  TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
+  (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1));
 
 export const isServerError = (error: SdkError) => {
   if (error.$metadata?.httpStatusCode !== undefined) {

@@ -1,19 +1,20 @@
 import { HttpRequest } from "@smithy/protocol-http";
 import { ChecksumConstructor } from "@smithy/types";
+import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { applyMd5BodyChecksumMiddleware } from "./applyMd5BodyChecksumMiddleware";
 
 describe("applyMd5BodyChecksumMiddleware", () => {
-  const mockEncoder = jest.fn().mockReturnValue("encoded");
-  const mockHashUpdate = jest.fn();
-  const mockHashDigest = jest.fn().mockReturnValue(new Uint8Array(0));
-  const mockHashReset = jest.fn();
+  const mockEncoder = vi.fn().mockReturnValue("encoded");
+  const mockHashUpdate = vi.fn();
+  const mockHashDigest = vi.fn().mockReturnValue(new Uint8Array(0));
+  const mockHashReset = vi.fn();
   const MockHash: ChecksumConstructor = class {} as any;
   MockHash.prototype.update = mockHashUpdate;
   MockHash.prototype.digest = mockHashDigest;
   MockHash.prototype.reset = mockHashReset;
 
-  const next = jest.fn();
+  const next = vi.fn();
 
   class ExoticStream {}
 
@@ -72,6 +73,27 @@ describe("applyMd5BodyChecksumMiddleware", () => {
       expect(mockHashUpdate.mock.calls.length).toBe(0);
       expect(mockHashDigest.mock.calls.length).toBe(0);
       expect(mockEncoder.mock.calls.length).toBe(0);
+    });
+
+    it("should clone the request when applying the checksum", async () => {
+      const handler = applyMd5BodyChecksumMiddleware({
+        md5: MockHash,
+        base64Encoder: mockEncoder,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        streamHasher: async (stream: ExoticStream) => new Uint8Array(5),
+      })(next, {} as any);
+
+      await handler({
+        input: {},
+        request: new HttpRequest({
+          body: body,
+        }),
+      });
+
+      expect(next.mock.calls.length).toBe(1);
+      const { request } = next.mock.calls[0][0];
+      // Assert that non-enumerable properties like the method `clone()` are preserved.
+      expect(request.clone).toBeDefined();
     });
   }
 

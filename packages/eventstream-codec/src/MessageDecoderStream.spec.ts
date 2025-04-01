@@ -1,4 +1,5 @@
 import { Message } from "@smithy/types";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { MessageDecoderStream } from "./MessageDecoderStream";
 
@@ -15,11 +16,11 @@ describe("MessageDecoderStream", () => {
     };
 
     const messageDecoderMock = {
-      decode: jest.fn().mockReturnValueOnce(message1).mockReturnValueOnce(message2),
-      feed: jest.fn(),
-      endOfStream: jest.fn(),
-      getMessage: jest.fn(),
-      getAvailableMessages: jest.fn(),
+      decode: vi.fn().mockReturnValueOnce(message1).mockReturnValueOnce(message2),
+      feed: vi.fn(),
+      endOfStream: vi.fn(),
+      getMessage: vi.fn(),
+      getAvailableMessages: vi.fn(),
     };
 
     const inputStream = async function* () {

@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/util-base64@4.0.0
+
+## 3.0.1
+
+### Patch Changes
+
+- c257049: replace FileReader with Blob.arrayBuffer() where possible
+
 ## 3.0.0
 
 ### Major Changes

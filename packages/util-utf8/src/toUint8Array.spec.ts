@@ -1,3 +1,5 @@
+import { describe, expect, test as it } from "vitest";
+
 import { toUint8Array } from "./toUint8Array";
 
 describe("toUint8Array", () => {

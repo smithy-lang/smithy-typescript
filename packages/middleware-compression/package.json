@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-compression",
-  "version": "3.0.4",
+  "version": "4.1.0",
   "description": "Middleware and Plugin for request compression.",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
@@ -10,11 +10,13 @@
     "build:types:downlevel": "rimraf dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
-    "test": "yarn g:jest"
+    "test": "yarn g:vitest run",
+    "test:watch": "yarn g:vitest watch"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/is-array-buffer": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
@@ -33,7 +35,7 @@
   },
   "types": "./dist-types/index.d.ts",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "typesVersions": {
     "<4.0": {
@@ -56,10 +58,10 @@
     "./dist-es/compressString": "./dist-es/compressString.browser"
   },
   "react-native": {},
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/middleware-compression",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-compression",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/middleware-compression"
   },
   "publishConfig": {

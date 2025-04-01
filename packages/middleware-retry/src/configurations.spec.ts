@@ -1,5 +1,7 @@
+import type { Provider } from "@smithy/types";
 import { normalizeProvider } from "@smithy/util-middleware";
 import { AdaptiveRetryStrategy, DEFAULT_MAX_ATTEMPTS, StandardRetryStrategy } from "@smithy/util-retry";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   CONFIG_MAX_ATTEMPTS,
@@ -8,20 +10,27 @@ import {
   resolveRetryConfig,
 } from "./configurations";
 
-jest.mock("@smithy/util-middleware");
-jest.mock("@smithy/util-retry");
+vi.mock("@smithy/util-middleware");
+vi.mock("@smithy/util-retry");
 
 describe(resolveRetryConfig.name, () => {
-  const retryMode = jest.fn() as any;
+  const retryMode = vi.fn() as any;
 
   beforeEach(() => {
-    (normalizeProvider as jest.Mock).mockImplementation((input) =>
-      typeof input === "function" ? input : () => Promise.resolve(input)
+    vi.mocked(normalizeProvider).mockImplementation((input) =>
+      typeof input === "function" ? (input as Provider<unknown>) : () => Promise.resolve(input)
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+  });
+
+  it("maintains object custody", () => {
+    const input = {
+      retryMode: "STANDARD",
+    };
+    expect(resolveRetryConfig(input)).toBe(input);
   });
 
   describe("maxAttempts", () => {
@@ -37,15 +46,15 @@ describe(resolveRetryConfig.name, () => {
   });
 
   describe("retryStrategy", () => {
-    it("passes retryStrategy if present", () => {
+    it("passes retryStrategy if present", async () => {
       const mockRetryStrategy = {
-        retry: jest.fn(),
+        retry: vi.fn(),
       };
       const { retryStrategy } = resolveRetryConfig({
         retryMode,
         retryStrategy: mockRetryStrategy,
       });
-      expect(retryStrategy()).resolves.toEqual(mockRetryStrategy);
+      expect(await retryStrategy()).toEqual(mockRetryStrategy);
     });
 
     describe("creates RetryStrategy if retryStrategy not present", () => {
@@ -57,9 +66,9 @@ describe(resolveRetryConfig.name, () => {
               it(`when maxAttempts=${maxAttempts}`, async () => {
                 const { retryStrategy } = resolveRetryConfig({ maxAttempts, retryMode });
                 await retryStrategy();
-                expect(StandardRetryStrategy as jest.Mock).toHaveBeenCalledTimes(1);
-                expect(AdaptiveRetryStrategy as jest.Mock).not.toHaveBeenCalled();
-                const output = await (StandardRetryStrategy as jest.Mock).mock.calls[0][0]();
+                expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
+                expect(vi.mocked(AdaptiveRetryStrategy)).not.toHaveBeenCalled();
+                const output = await vi.mocked(StandardRetryStrategy).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -76,9 +85,9 @@ describe(resolveRetryConfig.name, () => {
                 const { retryStrategy } = resolveRetryConfig({ maxAttempts, retryMode });
                 await retryStrategy();
                 expect(retryMode).toHaveBeenCalledTimes(1);
-                expect(StandardRetryStrategy as jest.Mock).toHaveBeenCalledTimes(1);
-                expect(AdaptiveRetryStrategy as jest.Mock).not.toHaveBeenCalled();
-                const output = await (StandardRetryStrategy as jest.Mock).mock.calls[0][0]();
+                expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
+                expect(vi.mocked(AdaptiveRetryStrategy)).not.toHaveBeenCalled();
+                const output = await vi.mocked(StandardRetryStrategy).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -94,9 +103,9 @@ describe(resolveRetryConfig.name, () => {
               it(`when maxAttempts=${maxAttempts}`, async () => {
                 const { retryStrategy } = resolveRetryConfig({ maxAttempts, retryMode });
                 await retryStrategy();
-                expect(StandardRetryStrategy as jest.Mock).not.toHaveBeenCalled();
-                expect(AdaptiveRetryStrategy as jest.Mock).toHaveBeenCalledTimes(1);
-                const output = await (AdaptiveRetryStrategy as jest.Mock).mock.calls[0][0]();
+                expect(vi.mocked(StandardRetryStrategy)).not.toHaveBeenCalled();
+                expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
+                const output = await vi.mocked(AdaptiveRetryStrategy).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -113,9 +122,9 @@ describe(resolveRetryConfig.name, () => {
                 const { retryStrategy } = resolveRetryConfig({ maxAttempts, retryMode });
                 await retryStrategy();
                 expect(retryMode).toHaveBeenCalledTimes(1);
-                expect(StandardRetryStrategy as jest.Mock).not.toHaveBeenCalled();
-                expect(AdaptiveRetryStrategy as jest.Mock).toHaveBeenCalledTimes(1);
-                const output = await (AdaptiveRetryStrategy as jest.Mock).mock.calls[0][0]();
+                expect(vi.mocked(StandardRetryStrategy)).not.toHaveBeenCalled();
+                expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
+                const output = await vi.mocked(AdaptiveRetryStrategy).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -140,7 +149,7 @@ describe(resolveRetryConfig.name, () => {
       it(`should throw if if value of env ${ENV_MAX_ATTEMPTS} is not a number`, () => {
         const value = "not a number";
         const env = { [ENV_MAX_ATTEMPTS]: value };
-        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.environmentVariableSelector(env)).toThrow("");
+        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.environmentVariableSelector(env)).toThrow();
       });
     });
 
@@ -158,7 +167,7 @@ describe(resolveRetryConfig.name, () => {
       it(`should throw if shared INI files entry ${CONFIG_MAX_ATTEMPTS} is not a number`, () => {
         const value = "not a number";
         const profile = { [CONFIG_MAX_ATTEMPTS]: value };
-        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.configFileSelector(profile)).toThrow("");
+        expect(() => NODE_MAX_ATTEMPT_CONFIG_OPTIONS.configFileSelector(profile)).toThrow();
       });
     });
 

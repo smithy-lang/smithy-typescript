@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "projections": {
+    "smithy-rpcv2-cbor": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@smithy/smithy-rpcv2-cbor",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "Smithy team",
+              "url": "https://smithy.io/"
+            },
+            "scripts": {
+              "merged": "echo \"this is merged from user configuration.\""
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true,
+          "experimentalIdentityAndAuth": false
+        }
+      }
+    }
+  }
+}

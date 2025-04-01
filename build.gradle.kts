@@ -28,7 +28,7 @@ plugins {
 
 allprojects {
     group = "software.amazon.smithy.typescript"
-    version = "0.21.1"
+    version = "0.27.0"
 }
 
 // The root project doesn't produce a JAR.
@@ -73,6 +73,7 @@ subprojects {
             testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
             testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
             testImplementation("org.hamcrest:hamcrest:2.2")
+            testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
         }
 
         // Reusable license copySpec
@@ -194,6 +195,13 @@ subprojects {
             tasks.test {
                 testLogging {
                     events("passed", "skipped", "failed")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
+            }
+        } else {
+            tasks.test {
+                testLogging {
+                    events("failed")
                     exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
                 }
             }

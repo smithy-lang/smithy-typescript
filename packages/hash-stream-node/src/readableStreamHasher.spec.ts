@@ -1,20 +1,21 @@
 import { Hash } from "@smithy/types";
 import { Readable, Writable } from "stream";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { HashCalculator } from "./HashCalculator";
 import { readableStreamHasher } from "./readableStreamHasher";
 
-jest.mock("./HashCalculator");
+vi.mock("./HashCalculator");
 
 describe(readableStreamHasher.name, () => {
-  const mockDigest = jest.fn();
-  const mockHashCtor = jest.fn().mockImplementation(() => ({
-    update: jest.fn(),
+  const mockDigest = vi.fn();
+  const mockHashCtor = vi.fn().mockImplementation(() => ({
+    update: vi.fn(),
     digest: mockDigest,
   }));
 
-  const mockHashCalculatorWrite = jest.fn();
-  const mockHashCalculatorEnd = jest.fn();
+  const mockHashCalculatorWrite = vi.fn();
+  const mockHashCalculatorEnd = vi.fn();
 
   const mockHash = new Uint8Array(Buffer.from("mockHash"));
 
@@ -39,14 +40,14 @@ describe(readableStreamHasher.name, () => {
   }
 
   beforeEach(() => {
-    (HashCalculator as unknown as jest.Mock).mockImplementation(
+    (HashCalculator as unknown as any).mockImplementation(
       (hash) => new MockHashCalculator(hash, mockHashCalculatorWrite, mockHashCalculatorEnd)
     );
     mockDigest.mockResolvedValue(mockHash);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("computes hash for a readable stream", async () => {
@@ -112,7 +113,7 @@ describe(readableStreamHasher.name, () => {
       mockHashCalculatorWrite,
       mockHashCalculatorEnd
     );
-    (HashCalculator as unknown as jest.Mock).mockImplementation(() => mockHashCalculator);
+    (HashCalculator as unknown as any).mockImplementation(() => mockHashCalculator);
 
     const readableStream = new Readable({
       read: () => {},

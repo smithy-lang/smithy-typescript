@@ -1,13 +1,14 @@
 import { chain, fromStatic, memoize } from "@smithy/property-provider";
 import { Profile } from "@smithy/types";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";
 import { fromSharedConfigFiles, SharedConfigInit } from "./fromSharedConfigFiles";
 
-jest.mock("./fromEnv");
-jest.mock("./fromSharedConfigFiles");
-jest.mock("@smithy/property-provider");
+vi.mock("./fromEnv");
+vi.mock("./fromSharedConfigFiles");
+vi.mock("@smithy/property-provider");
 
 describe("loadConfig", () => {
   const configuration: SharedConfigInit = {
@@ -15,16 +16,16 @@ describe("loadConfig", () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("passes fromEnv(), fromSharedConfigFiles() and fromStatic() to chain", () => {
     const mockFromEnvReturn = "mockFromEnvReturn";
-    (fromEnv as jest.Mock).mockReturnValueOnce(mockFromEnvReturn);
+    vi.mocked(fromEnv).mockReturnValueOnce(mockFromEnvReturn);
     const mockFromSharedConfigFilesReturn = "mockFromSharedConfigFilesReturn";
-    (fromSharedConfigFiles as jest.Mock).mockReturnValueOnce(mockFromSharedConfigFilesReturn);
+    vi.mocked(fromSharedConfigFiles).mockReturnValueOnce(mockFromSharedConfigFilesReturn);
     const mockFromStatic = "mockFromStatic";
-    (fromStatic as jest.Mock).mockReturnValueOnce(mockFromStatic);
+    vi.mocked(fromStatic).mockReturnValueOnce(mockFromStatic);
     // Using Record<string, string | undefined> instead of NodeJS.ProcessEnv, in order to not get type errors in non node environments
     const envVarSelector = (env: Record<string, string | undefined>) => env["AWS_CONFIG_FOO"];
     const configKey = (profile: Profile) => profile["aws_config_foo"];
@@ -49,7 +50,7 @@ describe("loadConfig", () => {
 
   it("passes output of chain to memoize", () => {
     const mockChainReturn = "mockChainReturn";
-    (chain as jest.Mock).mockReturnValueOnce(mockChainReturn);
+    vi.mocked(chain).mockReturnValueOnce(mockChainReturn);
     loadConfig({} as any);
     expect(chain).toHaveBeenCalledTimes(1);
     expect(memoize).toHaveBeenCalledTimes(1);
@@ -58,7 +59,7 @@ describe("loadConfig", () => {
 
   it("returns output memoize", () => {
     const mockMemoizeReturn = "mockMemoizeReturn";
-    (memoize as jest.Mock).mockReturnValueOnce(mockMemoizeReturn);
+    vi.mocked(memoize).mockReturnValueOnce(mockMemoizeReturn);
     expect(loadConfig({} as any)).toEqual(mockMemoizeReturn);
   });
 });

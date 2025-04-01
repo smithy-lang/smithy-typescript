@@ -1,4 +1,10 @@
+import { Blob as BlobPolyfill } from "buffer";
+import { describe, expect, test as it } from "vitest";
+
 import { blobReader } from "./index";
+
+// jsdom inaccurate Blob https://github.com/jsdom/jsdom/issues/2555.
+global.Blob = BlobPolyfill as any;
 
 describe("blobReader", () => {
   it("reads an entire blob", async () => {

@@ -1,10 +1,19 @@
+import { afterEach, describe, expect, test as it, vi } from "vitest";
+
 import { resolveEventStreamSerdeConfig } from "./EventStreamSerdeConfig";
 
 describe("resolveEventStreamSerdeConfig", () => {
-  const eventStreamSerdeProvider = jest.fn();
+  const eventStreamSerdeProvider = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+  });
+
+  it("maintains object custody", () => {
+    const input = {
+      eventStreamSerdeProvider: vi.fn(),
+    };
+    expect(resolveEventStreamSerdeConfig(input)).toBe(input);
   });
 
   it("sets value returned by eventStreamSerdeProvider", () => {

@@ -3,13 +3,15 @@ import { buildQueryString } from "@smithy/querystring-builder";
 import type { FetchHttpHandlerOptions } from "@smithy/types";
 import { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
+import { createRequest } from "./create-request";
 import { requestTimeout } from "./request-timeout";
 
 declare let AbortController: any;
 
+/**
+ * @public
+ */
 export { FetchHttpHandlerOptions };
-
-type FetchHttpHandlerConfig = FetchHttpHandlerOptions;
 
 /**
  * @internal
@@ -22,7 +24,7 @@ export const keepAliveSupport = {
 /**
  * @internal
  */
-type AdditionalRequestParameters = {
+export type AdditionalRequestParameters = {
   // This is required in Node.js when Request has a body, and does nothing in the browser.
   // Duplex: half means the request is fully transmitted before attempting to process the response.
   // As of writing this is the only accepted value in https://fetch.spec.whatwg.org/.
@@ -34,9 +36,9 @@ type AdditionalRequestParameters = {
  *
  * HttpHandler implementation using browsers' `fetch` global function.
  */
-export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
-  private config?: FetchHttpHandlerConfig;
-  private configProvider: Promise<FetchHttpHandlerConfig>;
+export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
+  private config?: FetchHttpHandlerOptions;
+  private configProvider: Promise<FetchHttpHandlerOptions>;
 
   /**
    * @returns the input if it is an HttpHandler of any class,
@@ -50,7 +52,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       return instanceOrOptions as HttpHandler<any>;
     }
     // input is ctor options or undefined.
-    return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerConfig);
+    return new FetchHttpHandler(instanceOrOptions as FetchHttpHandlerOptions);
   }
 
   constructor(options?: FetchHttpHandlerOptions | Provider<FetchHttpHandlerOptions | void>) {
@@ -62,7 +64,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     }
     if (keepAliveSupport.supported === undefined) {
       keepAliveSupport.supported = Boolean(
-        typeof Request !== "undefined" && "keepalive" in new Request("https://[::1]")
+        typeof Request !== "undefined" && "keepalive" in createRequest("https://[::1]")
       );
     }
   }
@@ -113,6 +115,12 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       method: method,
       credentials,
     };
+    // cache property is not supported in workerd runtime
+    // TODO: can we feature detect support for cache and not set this property when not supported?
+    if (this.config?.cache) {
+      requestOptions.cache = this.config.cache;
+    }
+
     if (body) {
       requestOptions.duplex = "half";
     }
@@ -127,7 +135,13 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
       requestOptions.keepalive = keepAlive;
     }
 
-    const fetchRequest = new Request(url, requestOptions);
+    if (typeof this.config.requestInit === "function") {
+      Object.assign(requestOptions, this.config.requestInit(request));
+    }
+
+    let removeSignalEventListener = () => {};
+
+    const fetchRequest = createRequest(url, requestOptions);
     const raceOfPromises = [
       fetch(fetchRequest).then((response) => {
         const fetchHeaders: any = response.headers;
@@ -173,7 +187,9 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
           };
           if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
             // preferred.
-            (abortSignal as AbortSignal).addEventListener("abort", onAbort);
+            const signal = abortSignal as AbortSignal;
+            signal.addEventListener("abort", onAbort, { once: true });
+            removeSignalEventListener = () => signal.removeEventListener("abort", onAbort);
           } else {
             // backwards compatibility
             abortSignal.onabort = onAbort;
@@ -181,10 +197,10 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
         })
       );
     }
-    return Promise.race(raceOfPromises);
+    return Promise.race(raceOfPromises).finally(removeSignalEventListener);
   }
 
-  updateHttpClientConfig(key: keyof FetchHttpHandlerConfig, value: FetchHttpHandlerConfig[typeof key]): void {
+  updateHttpClientConfig(key: keyof FetchHttpHandlerOptions, value: FetchHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
       (config as Record<typeof key, typeof value>)[key] = value;
@@ -192,7 +208,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerConfig> {
     });
   }
 
-  httpHandlerConfigs(): FetchHttpHandlerConfig {
+  httpHandlerConfigs(): FetchHttpHandlerOptions {
     return this.config ?? {};
   }
 }

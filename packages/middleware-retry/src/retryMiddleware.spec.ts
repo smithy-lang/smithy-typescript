@@ -3,36 +3,37 @@ import { isServerError, isThrottlingError, isTransientError } from "@smithy/serv
 import { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { v4 } from "uuid";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "./retryMiddleware";
 
-jest.mock("@smithy/service-error-classification");
-jest.mock("@smithy/protocol-http");
-jest.mock("uuid");
+vi.mock("@smithy/service-error-classification");
+vi.mock("@smithy/protocol-http");
+vi.mock("uuid");
 
 describe(getRetryPlugin.name, () => {
   const mockClientStack = {
-    add: jest.fn(),
+    add: vi.fn(),
   };
   const mockRetryStrategy = {
     mode: "mock",
-    retry: jest.fn(),
+    retry: vi.fn(),
   };
   beforeEach(() => {
-    (isThrottlingError as jest.Mock).mockReturnValue(false);
-    (isTransientError as jest.Mock).mockReturnValue(false);
-    (isServerError as jest.Mock).mockReturnValue(false);
-    (HttpRequest as unknown as jest.Mock).mockReturnValue({
-      isInstance: jest.fn().mockReturnValue(false),
+    vi.mocked(isThrottlingError).mockReturnValue(false);
+    vi.mocked(isTransientError).mockReturnValue(false);
+    vi.mocked(isServerError).mockReturnValue(false);
+    (HttpRequest as unknown as any).mockReturnValue({
+      isInstance: vi.fn().mockReturnValue(false),
     });
-    (HttpResponse as unknown as jest.Mock).mockReturnValue({
-      isInstance: jest.fn().mockReturnValue(false),
+    (HttpResponse as unknown as any).mockReturnValue({
+      isInstance: vi.fn().mockReturnValue(false),
     });
-    (v4 as jest.Mock).mockReturnValue("42");
+    vi.mocked(v4).mockReturnValue("42");
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("adds retryMiddleware", () => {
@@ -40,7 +41,7 @@ describe(getRetryPlugin.name, () => {
       it(`when maxAttempts=${maxAttempts}`, () => {
         getRetryPlugin({
           maxAttempts: () => Promise.resolve(maxAttempts),
-          retryStrategy: jest.fn().mockResolvedValue(mockRetryStrategy),
+          retryStrategy: vi.fn().mockResolvedValue(mockRetryStrategy),
         }).applyToStack(mockClientStack as unknown as MiddlewareStack<any, any>);
         expect(mockClientStack.add).toHaveBeenCalledTimes(1);
         expect(mockClientStack.add.mock.calls[0][1]).toEqual(retryMiddlewareOptions);
@@ -52,16 +53,16 @@ describe(getRetryPlugin.name, () => {
 describe(retryMiddleware.name, () => {
   const maxAttempts = 2;
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe("RetryStrategy", () => {
     const mockRetryStrategy = {
       mode: "mock",
-      retry: jest.fn(),
+      retry: vi.fn(),
     };
 
     it("calls retryStrategy.retry with next and args", async () => {
-      const next = jest.fn();
+      const next = vi.fn();
       const args = {
         request: { headers: {} },
       };
@@ -69,7 +70,7 @@ describe(retryMiddleware.name, () => {
 
       await retryMiddleware({
         maxAttempts: () => Promise.resolve(maxAttempts),
-        retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
       })(
         next,
         context
@@ -95,9 +96,9 @@ describe(retryMiddleware.name, () => {
     };
     const mockRetryStrategy = {
       mode: "mock",
-      acquireInitialRetryToken: jest.fn().mockResolvedValue(mockRetryToken),
-      refreshRetryTokenForRetry: jest.fn().mockResolvedValue(mockRetryToken),
-      recordSuccess: jest.fn(),
+      acquireInitialRetryToken: vi.fn().mockResolvedValue(mockRetryToken),
+      refreshRetryTokenForRetry: vi.fn().mockResolvedValue(mockRetryToken),
+      recordSuccess: vi.fn(),
     };
     const mockResponse = "mockResponse";
     const mockSuccess = {
@@ -117,10 +118,10 @@ describe(retryMiddleware.name, () => {
     };
 
     it("calls acquireInitialRetryToken and records success when next succeeds", async () => {
-      const next = jest.fn().mockResolvedValueOnce(mockSuccess);
+      const next = vi.fn().mockResolvedValueOnce(mockSuccess);
       const { output } = await retryMiddleware({
         maxAttempts: () => Promise.resolve(maxAttempts),
-        retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
       })(
         next,
         context
@@ -135,22 +136,22 @@ describe(retryMiddleware.name, () => {
     describe("throws when token cannot be refreshed", () => {
       it("throw last request error", async () => {
         const requestError = new Error("mockRequestError");
-        (isThrottlingError as jest.Mock).mockReturnValue(true);
-        const next = jest.fn().mockRejectedValue(requestError);
+        vi.mocked(isThrottlingError).mockReturnValue(true);
+        const next = vi.fn().mockRejectedValue(requestError);
         const errorInfo = {
           error: requestError,
           errorType: "THROTTLING",
         };
         const mockRetryStrategy = {
           mode: "mock",
-          acquireInitialRetryToken: jest.fn().mockResolvedValue(mockRetryToken),
-          refreshRetryTokenForRetry: jest.fn().mockRejectedValue(new Error("Cannot refresh token")),
-          recordSuccess: jest.fn(),
+          acquireInitialRetryToken: vi.fn().mockResolvedValue(mockRetryToken),
+          refreshRetryTokenForRetry: vi.fn().mockRejectedValue(new Error("Cannot refresh token")),
+          recordSuccess: vi.fn(),
         };
         try {
           await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -170,15 +171,15 @@ describe(retryMiddleware.name, () => {
     describe("calls acquireInitialRetryToken and refreshes retry token", () => {
       const mockError = new Error("mockError");
       it("sets throttling error type", async () => {
-        (isThrottlingError as jest.Mock).mockReturnValue(true);
-        const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
+        vi.mocked(isThrottlingError).mockReturnValue(true);
+        const next = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
           error: mockError,
           errorType: "THROTTLING",
         };
         const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
-          retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
           next,
           context
@@ -191,16 +192,16 @@ describe(retryMiddleware.name, () => {
         expect(output.$metadata.totalRetryDelay).toBeDefined();
       });
       it("sets transient error type", async () => {
-        (isTransientError as jest.Mock).mockReturnValue(true);
-        (isThrottlingError as jest.Mock).mockReturnValue(false);
-        const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
+        vi.mocked(isTransientError).mockReturnValue(true);
+        vi.mocked(isThrottlingError).mockReturnValue(false);
+        const next = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
           error: mockError,
           errorType: "TRANSIENT",
         };
         const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
-          retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
           next,
           context
@@ -213,17 +214,17 @@ describe(retryMiddleware.name, () => {
         expect(output.$metadata.totalRetryDelay).toBeDefined();
       });
       it("sets server error type", async () => {
-        (isServerError as jest.Mock).mockReturnValue(true);
-        (isTransientError as jest.Mock).mockReturnValue(false);
-        (isThrottlingError as jest.Mock).mockReturnValue(false);
-        const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
+        vi.mocked(isServerError).mockReturnValue(true);
+        vi.mocked(isTransientError).mockReturnValue(false);
+        vi.mocked(isThrottlingError).mockReturnValue(false);
+        const next = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
           error: mockError,
           errorType: "SERVER_ERROR",
         };
         const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
-          retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
           next,
           context
@@ -236,17 +237,17 @@ describe(retryMiddleware.name, () => {
         expect(output.$metadata.totalRetryDelay).toBeDefined();
       });
       it("sets client error type", async () => {
-        (isServerError as jest.Mock).mockReturnValue(false);
-        (isTransientError as jest.Mock).mockReturnValue(false);
-        (isThrottlingError as jest.Mock).mockReturnValue(false);
-        const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
+        vi.mocked(isServerError).mockReturnValue(false);
+        vi.mocked(isTransientError).mockReturnValue(false);
+        vi.mocked(isThrottlingError).mockReturnValue(false);
+        const next = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
         const errorInfo = {
           error: mockError,
           errorType: "CLIENT_ERROR",
         };
         const { output } = await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
-          retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
           next,
           context
@@ -262,20 +263,20 @@ describe(retryMiddleware.name, () => {
       describe("when retry-after is not set", () => {
         it("should not set retryAfter in errorInfo", async () => {
           const { isInstance } = HttpResponse;
-          (isInstance as unknown as jest.Mock).mockReturnValue(true);
+          (isInstance as unknown as any).mockReturnValue(true);
           Object.defineProperty(mockError, "$response", {
             value: {
               headers: { ["other-header"]: "foo" },
             },
           });
-          const next = jest.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
+          const next = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValueOnce(mockSuccess);
           const errorInfo = {
             error: mockError,
             errorType: "CLIENT_ERROR",
           };
           const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -293,7 +294,7 @@ describe(retryMiddleware.name, () => {
         const now = Date.now();
         const retryAfterDate = new Date(now + 3000);
         const { isInstance } = HttpResponse;
-        (isInstance as unknown as jest.Mock).mockReturnValue(true);
+        (isInstance as unknown as any).mockReturnValue(true);
         const errorInfo = {
           error: mockError,
           errorType: "CLIENT_ERROR",
@@ -301,10 +302,10 @@ describe(retryMiddleware.name, () => {
         };
         it("parses retry-after from date string", async () => {
           const error = getErrorWithValues(retryAfterDate.toISOString());
-          const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
+          const next = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -318,10 +319,10 @@ describe(retryMiddleware.name, () => {
         });
         it("parses retry-after from seconds", async () => {
           const error = getErrorWithValues(retryAfterDate.getTime() / 1000);
-          const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
+          const next = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -335,10 +336,10 @@ describe(retryMiddleware.name, () => {
         });
         it("parses retry-after from Retry-After header name", async () => {
           const error = getErrorWithValues(retryAfterDate.toISOString(), "Retry-After");
-          const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
+          const next = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           const { output } = await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -350,17 +351,17 @@ describe(retryMiddleware.name, () => {
           expect(output.$metadata.attempts).toBe(2);
           expect(output.$metadata.totalRetryDelay).toBeDefined();
         });
-        (isInstance as unknown as jest.Mock).mockReturnValue(false);
+        (isInstance as unknown as any).mockReturnValue(false);
       });
     });
 
     describe("retry headers", () => {
       describe("not added if HttpRequest.isInstance returns false", () => {
         it(`retry informational header: ${INVOCATION_ID_HEADER}`, async () => {
-          const next = jest.fn().mockResolvedValueOnce(mockSuccess);
+          const next = vi.fn().mockResolvedValueOnce(mockSuccess);
           await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -370,10 +371,10 @@ describe(retryMiddleware.name, () => {
         });
       });
       it(`header for each attempt as ${REQUEST_HEADER}`, async () => {
-        const next = jest.fn().mockResolvedValueOnce(mockSuccess);
+        const next = vi.fn().mockResolvedValueOnce(mockSuccess);
         await retryMiddleware({
           maxAttempts: () => Promise.resolve(maxAttempts),
-          retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
         })(
           next,
           context
@@ -387,12 +388,12 @@ describe(retryMiddleware.name, () => {
           const retryAfterDate = new Date(Date.now() + 3000);
           const error = getErrorWithValues(retryAfterDate.toISOString());
           const { isInstance } = HttpRequest;
-          (isInstance as unknown as jest.Mock).mockReturnValue(true);
-          (isThrottlingError as jest.Mock).mockReturnValue(true);
-          const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
+          (isInstance as unknown as any).mockReturnValue(true);
+          vi.mocked(isThrottlingError).mockReturnValue(true);
+          const next = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context
@@ -405,12 +406,12 @@ describe(retryMiddleware.name, () => {
           const retryAfterDate = new Date(Date.now() + 3000);
           const error = getErrorWithValues(retryAfterDate.toISOString());
           const { isInstance } = HttpRequest;
-          (isInstance as unknown as jest.Mock).mockReturnValue(true);
-          (isThrottlingError as jest.Mock).mockReturnValue(true);
-          const next = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
+          (isInstance as unknown as any).mockReturnValue(true);
+          vi.mocked(isThrottlingError).mockReturnValue(true);
+          const next = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(mockSuccess);
           await retryMiddleware({
             maxAttempts: () => Promise.resolve(maxAttempts),
-            retryStrategy: jest.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+            retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
           })(
             next,
             context

@@ -191,7 +191,7 @@ public class SymbolProviderTest {
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
 
-        assertThat(memberSymbol.getName(), equalTo("__LazyJsonString | string"));
+        assertThat(memberSymbol.getName(), equalTo("__AutomaticJsonStringConversion | string"));
     }
 
     @Test

@@ -1,9 +1,11 @@
+import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
+
 import { Readable } from "stream";
 import { createGzip } from "zlib";
 
 import { compressStream } from "./compressStream";
 
-jest.mock("zlib");
+vi.mock("zlib");
 
 describe(compressStream.name, () => {
   const getGenerator = (chunks: string[]) =>
@@ -14,16 +16,16 @@ describe(compressStream.name, () => {
     };
 
   const testInputStream = Readable.from(getGenerator(["input"])());
-  const mockGzipFn = jest.fn();
+  const mockGzipFn = vi.fn();
   const testOutputStream = Readable.from(getGenerator(["input", "gzipped"])());
 
   beforeEach(() => {
-    (createGzip as jest.Mock).mockReturnValue(mockGzipFn);
-    testInputStream.pipe = jest.fn().mockReturnValue(testOutputStream);
+    (vi.mocked(createGzip)).mockReturnValue(mockGzipFn);
+    testInputStream.pipe = vi.fn().mockReturnValue(testOutputStream);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should compress a readable stream using gzip", async () => {
@@ -40,7 +42,7 @@ describe(compressStream.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    (createGzip as jest.Mock).mockImplementationOnce(() => {
+    (vi.mocked(createGzip)).mockImplementationOnce(() => {
       throw compressionError;
     });
 

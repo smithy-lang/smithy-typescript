@@ -1,5 +1,310 @@
 # Change Log
 
+## 4.0.8
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/config-resolver@4.1.0
+  - @smithy/smithy-client@4.2.0
+  - @smithy/types@4.2.0
+  - @smithy/credential-provider-imds@4.0.2
+  - @smithy/node-config-provider@4.0.2
+  - @smithy/property-provider@4.0.2
+
+## 4.0.7
+
+### Patch Changes
+
+- @smithy/smithy-client@4.1.6
+
+## 4.0.6
+
+### Patch Changes
+
+- @smithy/smithy-client@4.1.5
+
+## 4.0.5
+
+### Patch Changes
+
+- @smithy/smithy-client@4.1.4
+
+## 4.0.4
+
+### Patch Changes
+
+- @smithy/smithy-client@4.1.3
+
+## 4.0.3
+
+### Patch Changes
+
+- @smithy/smithy-client@4.1.2
+
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [e87f2b3]
+  - @smithy/smithy-client@4.1.1
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+- Updated dependencies [292c134]
+  - @smithy/types@4.1.0
+  - @smithy/smithy-client@4.1.0
+  - @smithy/config-resolver@4.0.1
+  - @smithy/credential-provider-imds@4.0.1
+  - @smithy/node-config-provider@4.0.1
+  - @smithy/property-provider@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/credential-provider-imds@4.0.0
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/config-resolver@4.0.0
+  - @smithy/smithy-client@4.0.0
+  - @smithy/property-provider@4.0.0
+  - @smithy/types@4.0.0
+
+## 3.0.34
+
+### Patch Changes
+
+- Updated dependencies [a0e71d5]
+  - @smithy/smithy-client@3.7.0
+
+## 3.0.33
+
+### Patch Changes
+
+- Updated dependencies [23129d9]
+  - @smithy/smithy-client@3.6.0
+
+## 3.0.32
+
+### Patch Changes
+
+- @smithy/smithy-client@3.5.2
+
+## 3.0.31
+
+### Patch Changes
+
+- Updated dependencies [7f17426]
+  - @smithy/smithy-client@3.5.1
+
+## 3.0.30
+
+### Patch Changes
+
+- Updated dependencies [70275bd]
+  - @smithy/smithy-client@3.5.0
+
+## 3.0.29
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/config-resolver@3.0.13
+  - @smithy/credential-provider-imds@3.2.8
+  - @smithy/node-config-provider@3.1.12
+  - @smithy/property-provider@3.1.11
+  - @smithy/smithy-client@3.4.6
+
+## 3.0.28
+
+### Patch Changes
+
+- @smithy/smithy-client@3.4.5
+
+## 3.0.27
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/config-resolver@3.0.12
+  - @smithy/credential-provider-imds@3.2.7
+  - @smithy/node-config-provider@3.1.11
+  - @smithy/property-provider@3.1.10
+  - @smithy/smithy-client@3.4.4
+
+## 3.0.26
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/smithy-client@3.4.3
+  - @smithy/config-resolver@3.0.11
+  - @smithy/credential-provider-imds@3.2.6
+  - @smithy/node-config-provider@3.1.10
+  - @smithy/property-provider@3.1.9
+
+## 3.0.25
+
+### Patch Changes
+
+- @smithy/smithy-client@3.4.2
+
+## 3.0.24
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+- Updated dependencies [d07b0ab]
+  - @smithy/types@3.6.0
+  - @smithy/smithy-client@3.4.1
+  - @smithy/config-resolver@3.0.10
+  - @smithy/credential-provider-imds@3.2.5
+  - @smithy/node-config-provider@3.1.9
+  - @smithy/property-provider@3.1.8
+
+## 3.0.23
+
+### Patch Changes
+
+- Updated dependencies [75e0125]
+  - @smithy/smithy-client@3.4.0
+
+## 3.0.22
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/config-resolver@3.0.9
+  - @smithy/credential-provider-imds@3.2.4
+  - @smithy/node-config-provider@3.1.8
+  - @smithy/property-provider@3.1.7
+  - @smithy/smithy-client@3.3.6
+
+## 3.0.21
+
+### Patch Changes
+
+- Updated dependencies [64600d8]
+  - @smithy/smithy-client@3.3.5
+
+## 3.0.20
+
+### Patch Changes
+
+- @smithy/smithy-client@3.3.4
+
+## 3.0.19
+
+### Patch Changes
+
+- @smithy/smithy-client@3.3.3
+
+## 3.0.18
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/config-resolver@3.0.8
+  - @smithy/credential-provider-imds@3.2.3
+  - @smithy/node-config-provider@3.1.7
+  - @smithy/property-provider@3.1.6
+  - @smithy/smithy-client@3.3.2
+
+## 3.0.17
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/config-resolver@3.0.7
+  - @smithy/credential-provider-imds@3.2.2
+  - @smithy/node-config-provider@3.1.6
+  - @smithy/property-provider@3.1.5
+  - @smithy/smithy-client@3.3.1
+
+## 3.0.16
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [d8df7bf]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/smithy-client@3.3.0
+  - @smithy/config-resolver@3.0.6
+  - @smithy/credential-provider-imds@3.2.1
+  - @smithy/node-config-provider@3.1.5
+  - @smithy/property-provider@3.1.4
+
+## 3.0.15
+
+### Patch Changes
+
+- Updated dependencies [5865b65]
+  - @smithy/smithy-client@3.2.0
+
+## 3.0.14
+
+### Patch Changes
+
+- Updated dependencies [670553a]
+  - @smithy/smithy-client@3.1.12
+
+## 3.0.13
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.11
+
+## 3.0.12
+
+### Patch Changes
+
+- Updated dependencies [3d72b04]
+  - @smithy/credential-provider-imds@3.2.0
+  - @smithy/smithy-client@3.1.10
+
+## 3.0.11
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.9
+
+## 3.0.10
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.8
+
+## 3.0.9
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+- @smithy/smithy-client@3.1.7
+- @smithy/config-resolver@3.0.5
+- @smithy/credential-provider-imds@3.1.4
+
+## 3.0.8
+
+### Patch Changes
+
+- @smithy/smithy-client@3.1.6
+
 ## 3.0.7
 
 ### Patch Changes

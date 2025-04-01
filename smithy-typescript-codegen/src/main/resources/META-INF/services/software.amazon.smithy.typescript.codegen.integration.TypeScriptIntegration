@@ -1,3 +1,4 @@
+software.amazon.smithy.typescript.codegen.integration.AddBuiltinPlugins
 software.amazon.smithy.typescript.codegen.integration.AddClientRuntimeConfig
 software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency
 software.amazon.smithy.typescript.codegen.integration.AddChecksumRequiredDependency
@@ -13,3 +14,4 @@ software.amazon.smithy.typescript.codegen.integration.AddBaseServiceExceptionCla
 software.amazon.smithy.typescript.codegen.integration.AddSdkStreamMixinDependency
 software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator
 software.amazon.smithy.typescript.codegen.integration.AddCompressionDependency
+software.amazon.smithy.typescript.codegen.protocols.AddProtocols

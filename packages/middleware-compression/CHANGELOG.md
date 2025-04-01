@@ -1,5 +1,226 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- e917e61: enforce singular config object during client instantiation
+
+### Patch Changes
+
+- Updated dependencies [02ef79c]
+- Updated dependencies [e917e61]
+  - @smithy/core@3.2.0
+  - @smithy/protocol-http@5.1.0
+  - @smithy/types@4.2.0
+  - @smithy/node-config-provider@4.0.2
+  - @smithy/util-middleware@4.0.2
+
+## 4.0.6
+
+### Patch Changes
+
+- @smithy/core@3.1.5
+
+## 4.0.5
+
+### Patch Changes
+
+- @smithy/core@3.1.4
+
+## 4.0.4
+
+### Patch Changes
+
+- @smithy/core@3.1.3
+
+## 4.0.3
+
+### Patch Changes
+
+- @smithy/core@3.1.2
+
+## 4.0.2
+
+### Patch Changes
+
+- @smithy/core@3.1.1
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/core@3.1.0
+  - @smithy/node-config-provider@4.0.1
+  - @smithy/protocol-http@5.0.1
+  - @smithy/util-middleware@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/util-config-provider@4.0.0
+  - @smithy/util-middleware@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/core@3.0.0
+  - @smithy/is-array-buffer@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+
+## 3.1.7
+
+### Patch Changes
+
+- @smithy/core@2.5.7
+
+## 3.1.6
+
+### Patch Changes
+
+- @smithy/core@2.5.6
+
+## 3.1.5
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/core@2.5.5
+  - @smithy/node-config-provider@3.1.12
+  - @smithy/protocol-http@4.1.8
+  - @smithy/util-middleware@3.0.11
+
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [9c40f7b]
+  - @smithy/core@2.5.4
+
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/core@2.5.3
+  - @smithy/node-config-provider@3.1.11
+  - @smithy/protocol-http@4.1.7
+  - @smithy/util-middleware@3.0.10
+
+## 3.1.2
+
+### Patch Changes
+
+- Updated dependencies [c6ef519]
+- Updated dependencies [cd1929b]
+  - @smithy/core@2.5.2
+  - @smithy/types@3.7.0
+  - @smithy/node-config-provider@3.1.10
+  - @smithy/protocol-http@4.1.6
+  - @smithy/util-middleware@3.0.9
+
+## 3.1.1
+
+### Patch Changes
+
+- @smithy/core@2.5.1
+
+## 3.1.0
+
+### Minor Changes
+
+- d07b0ab: feature detection for custom endpoint and gzip
+
+### Patch Changes
+
+- d07b0ab: reorganize smithy/core to be upstream of smithy/smithy-client
+- Updated dependencies [84bec05]
+- Updated dependencies [d07b0ab]
+- Updated dependencies [d07b0ab]
+  - @smithy/types@3.6.0
+  - @smithy/core@2.5.0
+  - @smithy/node-config-provider@3.1.9
+  - @smithy/protocol-http@4.1.5
+  - @smithy/util-middleware@3.0.8
+
+## 3.0.12
+
+### Patch Changes
+
+- 75e0125: comma spacing
+
+## 3.0.11
+
+### Patch Changes
+
+- dfb0664: use lowercase headers
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/node-config-provider@3.1.8
+  - @smithy/protocol-http@4.1.4
+  - @smithy/util-middleware@3.0.7
+
+## 3.0.10
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/node-config-provider@3.1.7
+  - @smithy/protocol-http@4.1.3
+  - @smithy/util-middleware@3.0.6
+
+## 3.0.9
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/node-config-provider@3.1.6
+  - @smithy/protocol-http@4.1.2
+  - @smithy/util-middleware@3.0.5
+
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/node-config-provider@3.1.5
+  - @smithy/protocol-http@4.1.1
+  - @smithy/util-middleware@3.0.4
+
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [796567d]
+  - @smithy/protocol-http@4.0.4
+
+## 3.0.5
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+
 ## 3.0.4
 
 ### Patch Changes

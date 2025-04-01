@@ -1,5 +1,143 @@
 # Change Log
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/fetch-http-handler@5.0.2
+
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/fetch-http-handler@5.0.1
+
+## 3.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/fetch-http-handler@5.0.0
+  - @smithy/util-base64@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/types@4.0.0
+  - @smithy/util-hex-encoding@4.0.0
+
+## 2.2.20
+
+### Patch Changes
+
+- Updated dependencies [1dd6ace]
+  - @smithy/fetch-http-handler@4.1.3
+
+## 2.2.19
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/fetch-http-handler@4.1.2
+
+## 2.2.18
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/fetch-http-handler@4.1.1
+
+## 2.2.17
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/fetch-http-handler@4.1.0
+  - @smithy/types@3.7.0
+
+## 2.2.16
+
+### Patch Changes
+
+- Updated dependencies [c257049]
+- Updated dependencies [84bec05]
+  - @smithy/fetch-http-handler@4.0.0
+  - @smithy/types@3.6.0
+
+## 2.2.15
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/fetch-http-handler@3.2.9
+
+## 2.2.14
+
+### Patch Changes
+
+- Updated dependencies [0d5ab1d]
+  - @smithy/fetch-http-handler@3.2.8
+
+## 2.2.13
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/fetch-http-handler@3.2.7
+
+## 2.2.12
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/fetch-http-handler@3.2.6
+  - @smithy/types@3.4.1
+
+## 2.2.11
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/fetch-http-handler@3.2.5
+
+## 2.2.10
+
+### Patch Changes
+
+- Updated dependencies [3ea4789]
+  - @smithy/fetch-http-handler@3.2.4
+
+## 2.2.9
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.3
+
+## 2.2.8
+
+### Patch Changes
+
+- @smithy/fetch-http-handler@3.2.2
+
+## 2.2.7
+
+### Patch Changes
+
+- Updated dependencies [f31cc5f]
+  - @smithy/fetch-http-handler@3.2.1
+
 ## 2.2.6
 
 ### Patch Changes

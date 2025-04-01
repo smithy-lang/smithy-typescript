@@ -1,6 +1,7 @@
 import type { Agent as hAgent, AgentOptions as hAgentOptions } from "http";
 import type { Agent as hsAgent, AgentOptions as hsAgentOptions } from "https";
 
+import { HttpRequest as IHttpRequest } from "../http";
 import { Logger } from "../logger";
 
 /**
@@ -46,10 +47,11 @@ export interface NodeHttpHandlerOptions {
   socketAcquisitionWarningTimeout?: number;
 
   /**
-   * @deprecated Use {@link requestTimeout}
-   *
+   * This field is deprecated, and requestTimeout should be used instead.
    * The maximum time in milliseconds that a socket may remain idle before it
    * is closed.
+   *
+   * @deprecated Use {@link requestTimeout}
    */
   socketTimeout?: number;
 
@@ -97,4 +99,37 @@ export interface FetchHttpHandlerOptions {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
    */
   credentials?: "include" | "omit" | "same-origin" | undefined | string;
+
+  /**
+   * Cache settings for fetch.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
+   */
+  cache?: "default" | "force-cache" | "no-cache" | "no-store" | "only-if-cached" | "reload";
+
+  /**
+   * An optional function that produces additional RequestInit
+   * parameters for each httpRequest.
+   *
+   * This is applied last via merging with Object.assign() and overwrites other values
+   * set from other sources.
+   *
+   * @example
+   * ```js
+   * new Client({
+   *   requestHandler: {
+   *     requestInit(httpRequest) {
+   *       return { cache: "no-store" };
+   *     }
+   *   }
+   * });
+   * ```
+   */
+  requestInit?: (httpRequest: IHttpRequest) => RequestInit;
+}
+
+declare global {
+  /**
+   * interface merging stub.
+   */
+  interface RequestInit {}
 }

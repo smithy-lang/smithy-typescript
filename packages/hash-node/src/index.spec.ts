@@ -1,4 +1,5 @@
 import { fromArrayBuffer, fromString } from "@smithy/util-buffer-from";
+import { describe, expect, test as it } from "vitest";
 
 import { Hash } from "./";
 const hashVectors = require("hash-test-vectors");

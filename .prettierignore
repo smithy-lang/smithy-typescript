@@ -1,1 +1,8 @@
-dist/
+./packages/**/dist/*
+./packages/**/dist-types/*
+./packages/**/dist-es/*
+./packages/**/dist-cjs/*
+**/dist/*
+**/dist-types/*
+**/dist-es/*
+**/dist-cjs/*

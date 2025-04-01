@@ -3,7 +3,11 @@
     "baseUrl": ".",
     "declarationDir": "dist-types",
     "rootDir": "src",
-    "paths": {}
+    "paths": {
+      "@smithy/core/cbor": ["./src/submodules/cbor/index.ts"],
+      "@smithy/core/protocols": ["./src/submodules/protocols/index.ts"],
+      "@smithy/core/serde": ["./src/submodules/serde/index.ts"]
+    }
   },
   "extends": "../../tsconfig.types.json",
   "include": ["src/"]

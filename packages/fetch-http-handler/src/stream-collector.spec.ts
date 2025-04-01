@@ -1,36 +1,30 @@
+import { Blob as BlobPolyfill } from "buffer";
+import { describe, expect, test as it } from "vitest";
+
 import { streamCollector } from "./stream-collector";
 
-/**
- * Have to mock the FileReader behavior in IE, where
- * reader.result is null if reads an empty blob.
- */
+// jsdom inaccurate Blob https://github.com/jsdom/jsdom/issues/2555.
+global.Blob = BlobPolyfill as any;
+
 describe("streamCollector", () => {
-  let originalFileReader = (global as any).FileReader;
-  let originalBlob = (global as any).Blob;
-  beforeAll(() => {
-    originalFileReader = (global as any).FileReader;
-    originalBlob = (global as any).Blob;
-  });
-  afterAll(() => {
-    (global as any).FileReader = originalFileReader;
-    (global as any).Blob = originalBlob;
+  const blobAvailable = typeof Blob === "function";
+  const readableStreamAvailable = typeof ReadableStream === "function";
+
+  (blobAvailable ? it : it.skip)("collects Blob into bytearray", async () => {
+    const blobby = new Blob([new Uint8Array([1, 2]), new Uint8Array([3, 4])]);
+    const collected = await streamCollector(blobby);
+    expect(collected).toEqual(new Uint8Array([1, 2, 3, 4]));
   });
 
-  it("returns a Uint8Array when blob is empty and when FileReader data is null(in IE)", (done) => {
-    (global as any).FileReader = function FileReader() {
-      this.result = null; //In IE, FileReader.result is null after reading empty blob
-      this.readAsDataURL = jest.fn().mockImplementation(() => {
-        if (this.onloadend) {
-          this.readyState = 2;
-          this.onloadend();
-        }
-      });
-    };
-    (global as any).Blob = function Blob() {};
-    const dataPromise = streamCollector(new Blob());
-    dataPromise.then((data: any) => {
-      expect(data).toEqual(Uint8Array.from([]));
-      done();
+  (readableStreamAvailable ? it : it.skip)("collects ReadableStream into bytearray", async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new Uint8Array([1, 2]));
+        controller.enqueue(new Uint8Array([3, 4]));
+        controller.close();
+      },
     });
+    const collected = await streamCollector(stream);
+    expect(collected).toEqual(new Uint8Array([1, 2, 3, 4]));
   });
 });

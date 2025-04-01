@@ -1,5 +1,76 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- e917e61: enforce singular config object during client instantiation
+
+## 4.1.0
+
+### Minor Changes
+
+- 2aff9df: Added middleware support to pagination
+- 000b2ae: allow paginator token fallback to be specified by operation input
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+## 3.7.2
+
+### Patch Changes
+
+- b52b4e8: add support for error cause in transient error checks
+
+## 3.7.1
+
+### Patch Changes
+
+- fcd5ca8: prevent infinite recursion with NoUndefined and RecursiveRequired re: DocumentType
+
+## 3.7.0
+
+### Minor Changes
+
+- cd1929b: vitest compatibility
+
+## 3.6.0
+
+### Minor Changes
+
+- 84bec05: add feature identification map to smithy context
+
+## 3.5.0
+
+### Minor Changes
+
+- a4c1285: configurable hoisted headers
+
+## 3.4.2
+
+### Patch Changes
+
+- e7b438b: add interface stub for browser RequestInit type
+
+## 3.4.1
+
+### Patch Changes
+
+- cf9257e: add requestInit options to fetch
+
+## 3.4.0
+
+### Minor Changes
+
+- 2dad138: Add string array to EndpointParameters
+
+### Patch Changes
+
+- 9f3f2f5: fix type transforms
+
 ## 3.3.0
 
 ### Minor Changes

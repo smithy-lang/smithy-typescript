@@ -1,5 +1,141 @@
 # Change Log
 
+## 5.0.2
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/protocol-http@5.1.0
+  - @smithy/types@4.2.0
+  - @smithy/util-middleware@4.0.2
+
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/protocol-http@5.0.1
+  - @smithy/util-middleware@4.0.1
+
+## 5.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/util-middleware@4.0.0
+  - @smithy/util-utf8@4.0.0
+  - @smithy/is-array-buffer@4.0.0
+  - @smithy/protocol-http@5.0.0
+  - @smithy/types@4.0.0
+  - @smithy/util-hex-encoding@4.0.0
+  - @smithy/util-uri-escape@4.0.0
+
+## 4.2.4
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/protocol-http@4.1.8
+  - @smithy/util-middleware@3.0.11
+
+## 4.2.3
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/protocol-http@4.1.7
+  - @smithy/util-middleware@3.0.10
+
+## 4.2.2
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/protocol-http@4.1.6
+  - @smithy/util-middleware@3.0.9
+
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/protocol-http@4.1.5
+  - @smithy/util-middleware@3.0.8
+
+## 4.2.0
+
+### Minor Changes
+
+- a4c1285: configurable hoisted headers
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/protocol-http@4.1.4
+  - @smithy/util-middleware@3.0.7
+
+## 4.1.4
+
+### Patch Changes
+
+- 806cc7f: fix: sort query parameter keys after encoding
+
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/protocol-http@4.1.3
+  - @smithy/util-middleware@3.0.6
+
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/protocol-http@4.1.2
+  - @smithy/util-middleware@3.0.5
+
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/protocol-http@4.1.1
+  - @smithy/util-middleware@3.0.4
+
+## 4.1.0
+
+### Minor Changes
+
+- 86862ea: switch to static HttpRequest clone method
+
+### Patch Changes
+
+- Updated dependencies [86862ea]
+  - @smithy/protocol-http@4.1.0
+
+## 4.0.0
+
+### Major Changes
+
+- ae8bf5c: Make sha256 required parameter for SigV4 constructor
+
 ## 3.1.2
 
 ### Patch Changes

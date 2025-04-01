@@ -65,7 +65,7 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                                 TypeScriptDependency.NODE_CONFIG_PROVIDER);
                         writer.addImport("NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS", null,
                                 TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.write("loadNodeConfig(NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS)");
+                        writer.write("loadNodeConfig(NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS, config)");
                     },
                     "requestMinCompressionSizeBytes", writer -> {
                         writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
@@ -74,7 +74,7 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                                 TypeScriptDependency.NODE_CONFIG_PROVIDER);
                         writer.addImport("NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS", null,
                                 TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.write("loadNodeConfig(NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS)");
+                        writer.write("loadNodeConfig(NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS, config)");
                     }
                 );
             case BROWSER:

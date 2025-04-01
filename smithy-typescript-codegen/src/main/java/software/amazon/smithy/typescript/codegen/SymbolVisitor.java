@@ -300,8 +300,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         if (mediaTypeTrait.isPresent()) {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
-                Symbol.Builder builder = createSymbolBuilder(shape, "__LazyJsonString | string");
-                return addSmithyUseImport(builder, "LazyJsonString", "__LazyJsonString").build();
+                Symbol.Builder builder = createSymbolBuilder(shape, "__AutomaticJsonStringConversion | string");
+                return addSmithyUseImport(
+                    builder,
+                    "AutomaticJsonStringConversion",
+                    "__AutomaticJsonStringConversion"
+                ).build();
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
             }

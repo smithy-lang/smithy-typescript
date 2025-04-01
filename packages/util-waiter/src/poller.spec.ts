@@ -1,10 +1,11 @@
 import { AbortController } from "@smithy/abort-controller";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { runPolling } from "./poller";
 import { sleep } from "./utils/sleep";
 import { WaiterOptions, WaiterState } from "./waiter";
 
-jest.mock("./utils/sleep");
+vi.mock("./utils/sleep");
 
 describe(runPolling.name, () => {
   const config = {
@@ -16,11 +17,19 @@ describe(runPolling.name, () => {
   const input = "mockInput";
   const abortedState = {
     state: WaiterState.ABORTED,
+    observedResponses: {
+      "AbortController signal aborted.": 1,
+    },
   };
   const failureState = {
     state: WaiterState.FAILURE,
     reason: {
       mockedReason: "some-failure-value",
+    },
+    observedResponses: {
+      [JSON.stringify({
+        mockedReason: "some-failure-value",
+      })]: 1,
     },
   };
   const successState = {
@@ -28,29 +37,36 @@ describe(runPolling.name, () => {
     reason: {
       mockedReason: "some-success-value",
     },
+    observedResponses: {
+      [JSON.stringify({
+        mockedReason: "some-success-value",
+      })]: 1,
+    },
   };
   const retryState = {
     state: WaiterState.RETRY,
     reason: undefined,
+    observedResponses: {},
   };
   const timeoutState = {
     state: WaiterState.TIMEOUT,
+    observedResponses: {},
   };
 
   let mockAcceptorChecks;
 
   beforeEach(() => {
-    (sleep as jest.Mock).mockResolvedValueOnce("");
-    jest.spyOn(global.Math, "random").mockReturnValue(0.5);
+    vi.mocked(sleep).mockResolvedValueOnce("");
+    vi.spyOn(global.Math, "random").mockReturnValue(0.5);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(global.Math, "random").mockRestore();
+    vi.clearAllMocks();
+    vi.spyOn(global.Math, "random").mockRestore();
   });
 
   it("should returns state and reason in case of failure", async () => {
-    mockAcceptorChecks = jest.fn().mockResolvedValueOnce(failureState);
+    mockAcceptorChecks = vi.fn().mockResolvedValueOnce(failureState);
     await expect(runPolling(config, input, mockAcceptorChecks)).resolves.toStrictEqual(failureState);
 
     expect(mockAcceptorChecks).toHaveBeenCalled();
@@ -60,7 +76,7 @@ describe(runPolling.name, () => {
   });
 
   it("returns state and reason in case of success", async () => {
-    mockAcceptorChecks = jest.fn().mockResolvedValueOnce(successState);
+    mockAcceptorChecks = vi.fn().mockResolvedValueOnce(successState);
     await expect(runPolling(config, input, mockAcceptorChecks)).resolves.toStrictEqual(successState);
     expect(mockAcceptorChecks).toHaveBeenCalled();
     expect(mockAcceptorChecks).toHaveBeenCalledTimes(1);
@@ -69,7 +85,7 @@ describe(runPolling.name, () => {
   });
 
   it("sleeps as per exponentialBackoff in case of retry", async () => {
-    mockAcceptorChecks = jest
+    mockAcceptorChecks = vi
       .fn()
       .mockResolvedValueOnce(retryState)
       .mockResolvedValueOnce(retryState)
@@ -97,7 +113,7 @@ describe(runPolling.name, () => {
   it("resolves after the last attempt before reaching maxWaitTime ", async () => {
     let now = Date.now();
     const delay = 2;
-    const nowMock = jest
+    const nowMock = vi
       .spyOn(Date, "now")
       .mockReturnValueOnce(now) // 1st invoke for getting the time stamp to wait until
       .mockImplementation(() => {
@@ -112,7 +128,7 @@ describe(runPolling.name, () => {
       maxWaitTime: 5,
     };
 
-    mockAcceptorChecks = jest.fn().mockResolvedValue(retryState);
+    mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toStrictEqual(timeoutState);
     expect(sleep).toHaveBeenCalled();
     expect(sleep).toHaveBeenCalledTimes(2);
@@ -126,7 +142,7 @@ describe(runPolling.name, () => {
       abortController,
     };
 
-    mockAcceptorChecks = jest.fn().mockResolvedValue(retryState);
+    mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     abortController.abort();
     await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toStrictEqual(abortedState);
     expect(sleep).not.toHaveBeenCalled();

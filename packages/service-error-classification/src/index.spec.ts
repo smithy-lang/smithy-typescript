@@ -1,4 +1,5 @@
 import { RetryableTrait, SdkError } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import {
   CLOCK_SKEW_ERROR_CODES,
@@ -14,14 +15,16 @@ const checkForErrorType = (
     name?: string;
     httpStatusCode?: number;
     $retryable?: RetryableTrait;
+    cause?: Partial<Error>;
   },
   errorTypeResult: boolean
 ) => {
-  const { name, httpStatusCode, $retryable } = options;
+  const { name, httpStatusCode, $retryable, cause } = options;
   const error = Object.assign(new Error(), {
     name,
     $metadata: { httpStatusCode },
     $retryable,
+    cause,
   });
   expect(isErrorTypeFunc(error as SdkError)).toBe(errorTypeResult);
 };
@@ -126,6 +129,18 @@ describe("isTransientError", () => {
       break;
     }
   }
+
+  TRANSIENT_ERROR_CODES.forEach((name) => {
+    it(`should declare error with cause with the name "${name}" to be a Transient error`, () => {
+      checkForErrorType(isTransientError, { cause: { name } }, true);
+    });
+  });
+
+  it("should limit recursion to 10 depth", () => {
+    const error = { cause: null } as SdkError;
+    error.cause = error;
+    checkForErrorType(isTransientError, { cause: error }, false);
+  });
 });
 
 describe("isServerError", () => {

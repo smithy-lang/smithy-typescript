@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import software.amazon.smithy.model.node.BooleanNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -64,6 +65,9 @@ public class ParameterGenerator {
                 case "boolean":
                     tsParamType = "boolean";
                     break;
+                case "stringArray":
+                    tsParamType = "string[]";
+                    break;
                 default:
                     // required by linter
             }
@@ -101,6 +105,11 @@ public class ParameterGenerator {
             case "Boolean":
             case "boolean":
                 buffer += paramNode.expectBooleanMember("default").getValue() ? "true" : "false";
+                break;
+            case "stringArray":
+                buffer += paramNode.expectArrayMember("default").getElements().stream()
+                    .map(element -> element.expectStringNode().getValue())
+                    .collect(Collectors.joining("`, `", "[`", "`]"));
                 break;
             default:
                 throw new RuntimeException("Unhandled endpoint param type: " + type.getValue());

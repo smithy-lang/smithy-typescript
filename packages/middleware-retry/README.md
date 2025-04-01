@@ -5,7 +5,7 @@
 
 ## Usage
 
-See [@smithy/util-retry](https://github.com/awslabs/smithy-typescript/tree/main/packages/util-retry)
+See [@smithy/util-retry](https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-retry)
 for retry behavior and configuration.
 
 See also: [AWS Documentation: Retry behavior](https://docs.aws.amazon.com/sdkref/latest/guide/feature-retry-behavior.html).

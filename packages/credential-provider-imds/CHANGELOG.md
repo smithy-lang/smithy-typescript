@@ -1,5 +1,133 @@
 # Change Log
 
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [e917e61]
+  - @smithy/types@4.2.0
+  - @smithy/node-config-provider@4.0.2
+  - @smithy/property-provider@4.0.2
+  - @smithy/url-parser@4.0.2
+
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [2aff9df]
+- Updated dependencies [000b2ae]
+  - @smithy/types@4.1.0
+  - @smithy/node-config-provider@4.0.1
+  - @smithy/property-provider@4.0.1
+  - @smithy/url-parser@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+### Patch Changes
+
+- Updated dependencies [20d99be]
+  - @smithy/node-config-provider@4.0.0
+  - @smithy/property-provider@4.0.0
+  - @smithy/types@4.0.0
+  - @smithy/url-parser@4.0.0
+
+## 3.2.8
+
+### Patch Changes
+
+- Updated dependencies [b52b4e8]
+  - @smithy/types@3.7.2
+  - @smithy/node-config-provider@3.1.12
+  - @smithy/property-provider@3.1.11
+  - @smithy/url-parser@3.0.11
+
+## 3.2.7
+
+### Patch Changes
+
+- Updated dependencies [fcd5ca8]
+  - @smithy/types@3.7.1
+  - @smithy/node-config-provider@3.1.11
+  - @smithy/property-provider@3.1.10
+  - @smithy/url-parser@3.0.10
+
+## 3.2.6
+
+### Patch Changes
+
+- Updated dependencies [cd1929b]
+  - @smithy/types@3.7.0
+  - @smithy/node-config-provider@3.1.10
+  - @smithy/property-provider@3.1.9
+  - @smithy/url-parser@3.0.9
+
+## 3.2.5
+
+### Patch Changes
+
+- Updated dependencies [84bec05]
+  - @smithy/types@3.6.0
+  - @smithy/node-config-provider@3.1.9
+  - @smithy/property-provider@3.1.8
+  - @smithy/url-parser@3.0.8
+
+## 3.2.4
+
+### Patch Changes
+
+- Updated dependencies [a4c1285]
+  - @smithy/types@3.5.0
+  - @smithy/node-config-provider@3.1.8
+  - @smithy/property-provider@3.1.7
+  - @smithy/url-parser@3.0.7
+
+## 3.2.3
+
+### Patch Changes
+
+- Updated dependencies [e7b438b]
+  - @smithy/types@3.4.2
+  - @smithy/node-config-provider@3.1.7
+  - @smithy/property-provider@3.1.6
+  - @smithy/url-parser@3.0.6
+
+## 3.2.2
+
+### Patch Changes
+
+- Updated dependencies [cf9257e]
+  - @smithy/types@3.4.1
+  - @smithy/node-config-provider@3.1.6
+  - @smithy/property-provider@3.1.5
+  - @smithy/url-parser@3.0.5
+
+## 3.2.1
+
+### Patch Changes
+
+- Updated dependencies [2dad138]
+- Updated dependencies [9f3f2f5]
+  - @smithy/types@3.4.0
+  - @smithy/node-config-provider@3.1.5
+  - @smithy/property-provider@3.1.4
+  - @smithy/url-parser@3.0.4
+
+## 3.2.0
+
+### Minor Changes
+
+- 3d72b04: sources accountId from IMDS
+
+## 3.1.4
+
+### Patch Changes
+
+- @smithy/node-config-provider@3.1.4
+
 ## 3.1.3
 
 ### Patch Changes

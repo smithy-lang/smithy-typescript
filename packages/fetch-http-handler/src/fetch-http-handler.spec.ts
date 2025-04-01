@@ -1,39 +1,45 @@
 import { AbortController } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/protocol-http";
+import { afterAll, afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { FetchHttpHandler, keepAliveSupport } from "./fetch-http-handler";
 import { requestTimeout } from "./request-timeout";
 
-const mockRequest = jest.fn();
-let timeoutSpy: jest.SpyInstance<any>;
+const mockRequest = vi.fn();
+let timeoutSpy: any;
 
 (global as any).Request = mockRequest;
-(global as any).Headers = jest.fn();
+(global as any).Headers = vi.fn();
+const globalFetch = global.fetch;
 
-describe(FetchHttpHandler.name, () => {
+(typeof Blob === "function" ? describe : describe.skip)(FetchHttpHandler.name, () => {
   beforeEach(() => {
     (global as any).AbortController = void 0;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     if (timeoutSpy) {
       timeoutSpy.mockRestore();
     }
   });
 
+  afterAll(() => {
+    global.fetch = globalFetch;
+  });
+
   it("makes requests using fetch", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+      blob: vi.fn().mockResolvedValue(new Blob(["FOO"])),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
     const fetchHttpHandler = new FetchHttpHandler();
@@ -47,14 +53,14 @@ describe(FetchHttpHandler.name, () => {
   it("put HttpClientConfig", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+      blob: vi.fn().mockResolvedValue(new Blob(["FOO"])),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
     const fetchHttpHandler = new FetchHttpHandler();
@@ -68,14 +74,14 @@ describe(FetchHttpHandler.name, () => {
   it("update HttpClientConfig", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+      blob: vi.fn().mockResolvedValue(new Blob(["FOO"])),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
     const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 200 });
@@ -96,14 +102,14 @@ describe(FetchHttpHandler.name, () => {
     const mockResponse = {
       body: null,
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+      blob: vi.fn().mockResolvedValue(new Blob(["FOO"])),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
     const fetchHttpHandler = new FetchHttpHandler();
@@ -117,14 +123,14 @@ describe(FetchHttpHandler.name, () => {
   it("properly constructs url", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
 
@@ -151,10 +157,10 @@ describe(FetchHttpHandler.name, () => {
 
   it("will omit body if method is GET", async () => {
     const mockResponse = {
-      headers: { entries: jest.fn().mockReturnValue([]) },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      headers: { entries: vi.fn().mockReturnValue([]) },
+      blob: vi.fn().mockResolvedValue(new Blob()),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
 
@@ -176,10 +182,10 @@ describe(FetchHttpHandler.name, () => {
 
   it("will omit body if method is HEAD", async () => {
     const mockResponse = {
-      headers: { entries: jest.fn().mockReturnValue([]) },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      headers: { entries: vi.fn().mockReturnValue([]) },
+      blob: vi.fn().mockResolvedValue(new Blob()),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
 
@@ -202,14 +208,14 @@ describe(FetchHttpHandler.name, () => {
   it("will not make request if already aborted", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
     (global as any).fetch = mockFetch;
     const fetchHttpHandler = new FetchHttpHandler();
@@ -229,16 +235,16 @@ describe(FetchHttpHandler.name, () => {
   it("will pass abortSignal to fetch if supported", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     (global as any).fetch = mockFetch;
-    (global as any).AbortController = jest.fn();
+    (global as any).AbortController = vi.fn();
     const fetchHttpHandler = new FetchHttpHandler();
 
     await fetchHttpHandler.handle({} as any, {
@@ -255,17 +261,17 @@ describe(FetchHttpHandler.name, () => {
   it("will pass timeout to request timeout", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([
+        entries: vi.fn().mockReturnValue([
           ["foo", "bar"],
           ["bizz", "bazz"],
         ]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     (global as any).fetch = mockFetch;
 
-    timeoutSpy = jest.spyOn({ requestTimeout }, "requestTimeout");
+    timeoutSpy = vi.spyOn({ requestTimeout }, "requestTimeout");
     const fetchHttpHandler = new FetchHttpHandler({
       requestTimeout: 500,
     });
@@ -282,10 +288,10 @@ describe(FetchHttpHandler.name, () => {
       },
       blob: async () => new Blob(),
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     (global as any).fetch = mockFetch;
 
-    timeoutSpy = jest.spyOn({ requestTimeout }, "requestTimeout");
+    timeoutSpy = vi.spyOn({ requestTimeout }, "requestTimeout");
     const fetchHttpHandler = new FetchHttpHandler(async () => ({
       requestTimeout: 500,
     }));
@@ -296,7 +302,7 @@ describe(FetchHttpHandler.name, () => {
   });
 
   it("will throw timeout error it timeout finishes before request", async () => {
-    const mockFetch = jest.fn(() => {
+    const mockFetch = vi.fn(() => {
       return new Promise(() => {});
     });
     (global as any).fetch = mockFetch;
@@ -311,7 +317,7 @@ describe(FetchHttpHandler.name, () => {
   it("can be aborted before fetch completes", async () => {
     const abortController = new AbortController();
 
-    const mockFetch = jest.fn(() => {
+    const mockFetch = vi.fn(() => {
       return new Promise(() => {});
     });
     (global as any).fetch = mockFetch;
@@ -334,13 +340,13 @@ describe(FetchHttpHandler.name, () => {
   it("creates correct HTTPResponse object", async () => {
     const mockResponse = {
       headers: {
-        entries: jest.fn().mockReturnValue([["foo", "bar"]]),
+        entries: vi.fn().mockReturnValue([["foo", "bar"]]),
       },
-      blob: jest.fn().mockResolvedValue(new Blob(["FOO"])),
+      blob: vi.fn().mockResolvedValue(new Blob(["FOO"])),
       status: 200,
       statusText: "foo",
     };
-    const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse);
     (global as any).fetch = mockFetch;
 
     const fetchHttpHandler = new FetchHttpHandler();
@@ -357,10 +363,10 @@ describe(FetchHttpHandler.name, () => {
     "will pass credentials mode '%s' from a provider to a request",
     async (credentialsMode) => {
       const mockResponse = {
-        headers: { entries: jest.fn().mockReturnValue([]) },
-        blob: jest.fn().mockResolvedValue(new Blob()),
+        headers: { entries: vi.fn().mockReturnValue([]) },
+        blob: vi.fn().mockResolvedValue(new Blob()),
       };
-      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
 
       (global as any).fetch = mockFetch;
 
@@ -393,14 +399,14 @@ describe(FetchHttpHandler.name, () => {
     it("will pass keepalive as false by default to request if supported", async () => {
       const mockResponse = {
         headers: {
-          entries: jest.fn().mockReturnValue([
+          entries: vi.fn().mockReturnValue([
             ["foo", "bar"],
             ["bizz", "bazz"],
           ]),
         },
-        blob: jest.fn().mockResolvedValue(new Blob()),
+        blob: vi.fn().mockResolvedValue(new Blob()),
       };
-      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
       (global as any).fetch = mockFetch;
 
       const fetchHttpHandler = new FetchHttpHandler();
@@ -414,14 +420,14 @@ describe(FetchHttpHandler.name, () => {
     it("will pass keepalive to request if supported", async () => {
       const mockResponse = {
         headers: {
-          entries: jest.fn().mockReturnValue([
+          entries: vi.fn().mockReturnValue([
             ["foo", "bar"],
             ["bizz", "bazz"],
           ]),
         },
-        blob: jest.fn().mockResolvedValue(new Blob()),
+        blob: vi.fn().mockResolvedValue(new Blob()),
       };
-      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
       (global as any).fetch = mockFetch;
 
       const fetchHttpHandler = new FetchHttpHandler({ keepAlive: true });
@@ -435,14 +441,14 @@ describe(FetchHttpHandler.name, () => {
     it("will not have keepalive property in request if not supported", async () => {
       const mockResponse = {
         headers: {
-          entries: jest.fn().mockReturnValue([
+          entries: vi.fn().mockReturnValue([
             ["foo", "bar"],
             ["bizz", "bazz"],
           ]),
         },
-        blob: jest.fn().mockResolvedValue(new Blob()),
+        blob: vi.fn().mockResolvedValue(new Blob()),
       };
-      const mockFetch = jest.fn().mockResolvedValue(mockResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
       (global as any).fetch = mockFetch;
       mockRequest.mockImplementation(() => null);
 
@@ -454,19 +460,75 @@ describe(FetchHttpHandler.name, () => {
     });
   });
 
-  // The Blob implementation does not implement Blob.text, so we deal with it here.
-  async function blobToText(blob: Blob): Promise<string> {
-    const reader = new FileReader();
+  describe("custom requestInit", () => {
+    it("should allow setting cache requestInit", async () => {
+      const mockResponse = {
+        headers: {
+          entries() {
+            return [];
+          },
+        },
+        blob: vi.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
 
-    return new Promise((resolve) => {
-      // This fires after the blob has been read/loaded.
-      reader.addEventListener("loadend", (e) => {
-        const text = e.target!.result as string;
-        resolve(text);
+      const fetchHttpHandler = new FetchHttpHandler({
+        cache: "no-store",
       });
 
-      // Start reading the blob as text.
-      reader.readAsText(blob);
+      await fetchHttpHandler.handle({} as any, {});
+
+      expect(mockRequest.mock.calls[0][1].cache).toBe("no-store");
     });
+
+    it("should allow setting custom requestInit", async () => {
+      const mockResponse = {
+        headers: {
+          entries() {
+            return [];
+          },
+        },
+        blob: vi.fn().mockResolvedValue(new Blob()),
+      };
+      const mockFetch = vi.fn().mockResolvedValue(mockResponse);
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler({
+        requestInit(req) {
+          return {
+            referrer: "me",
+            cache: "reload",
+            headers: {
+              a: "a",
+              b: req.headers.b,
+            },
+          };
+        },
+      });
+
+      await fetchHttpHandler.handle(
+        {
+          headers: {
+            b: "b",
+          },
+        } as any,
+        {}
+      );
+
+      expect(mockRequest.mock.calls[0][1]).toEqual({
+        referrer: "me",
+        cache: "reload",
+        headers: {
+          a: "a",
+          b: "b",
+        },
+      });
+    });
+  });
+
+  // The Blob implementation does not implement Blob.text, so we deal with it here.
+  async function blobToText(blob: Blob): Promise<string> {
+    return blob.text();
   }
 });

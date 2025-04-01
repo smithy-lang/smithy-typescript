@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "test:integration": "yarn build-test-packages && turbo run test:integration",
+    "test:protocols": "make generate-protocol-tests test-protocols",
     "lint": "turbo run lint",
     "lint-fix": "turbo run lint -- --fix",
     "lint:pkgJson": "yarn lint:dependencies",
@@ -19,13 +20,12 @@
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",
     "release": "yarn changeset publish",
     "build-test-packages": "./gradlew clean build && node ./scripts/build-generated-test-packages",
-    "g:jest": "cd $INIT_CWD && jest",
-    "g:karma": "cd $INIT_CWD && karma",
-    "g:tsc": "cd $INIT_CWD && tsc"
+    "g:tsc": "cd $INIT_CWD && tsc",
+    "g:vitest": "cd $INIT_CWD && vitest"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript/tree/main"
+    "url": "https://github.com/smithy-lang/smithy-typescript/tree/main"
   },
   "author": "AWS Smithy Team",
   "license": "UNLICENSED",
@@ -38,35 +38,32 @@
     "@microsoft/api-extractor": "7.34.4",
     "@tsconfig/recommended": "1.0.2",
     "@types/jest": "28.1.3",
+    "@types/jsdom": "20.0.1",
     "@typescript-eslint/eslint-plugin": "7.8.0",
     "@typescript-eslint/parser": "7.8.0",
     "esbuild": "0.19.11",
     "eslint": "8.57.0",
     "eslint-plugin-simple-import-sort": "7.0.0",
     "eslint-plugin-tsdoc": "0.2.17",
+    "get-port": "^7.1.0",
+    "happy-dom": "14.12.3",
     "husky": "^4.2.3",
     "jest": "29.7.0",
-    "jest-environment-jsdom": "29.7.0",
-    "karma": "6.4.3",
-    "karma-chrome-launcher": "3.2.0",
-    "karma-firefox-launcher": "2.1.3",
-    "karma-jasmine": "5.1.0",
-    "karma-typescript": "5.5.4",
-    "karma-webpack": "5.0.1",
     "prettier": "3.2.5",
     "puppeteer": "^19.2.0",
     "ts-jest": "29.1.2",
-    "turbo": "latest",
+    "turbo": "2.3.3",
     "typescript": "~5.2.2",
-    "webpack": "5.91.0",
-    "yarn": "1.22.22"
+    "vitest": "2.1.8",
+    "webpack": "5.91.0"
   },
+  "overrides": {},
   "workspaces": [
     "packages/*",
     "smithy-typescript-ssdk-libs/*",
     "private/*"
   ],
-  "packageManager": "yarn@3.8.2",
+  "packageManager": "yarn@4.5.3",
   "husky": {
     "hooks": {
       "pre-commit": "yarn lint:dependencies && yarn lint:versions"

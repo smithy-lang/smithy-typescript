@@ -1,6 +1,7 @@
 import { MAXIMUM_RETRY_DELAY } from "@smithy/util-retry";
 
 /**
+ * @internal
  * Calculate a capped, fully-jittered exponential backoff time.
  */
 export const defaultDelayDecider = (delayBase: number, attempts: number) =>

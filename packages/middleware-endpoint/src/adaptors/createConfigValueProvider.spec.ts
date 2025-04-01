@@ -1,4 +1,5 @@
 import { Endpoint } from "@smithy/types";
+import { describe, expect, test as it } from "vitest";
 
 import { createConfigValueProvider } from "./createConfigValueProvider";
 
@@ -29,6 +30,17 @@ describe(createConfigValueProvider.name, () => {
       },
     };
     expect(await createConfigValueProvider("credentialScope", "CredentialScope", config)()).toEqual("cred-scope");
+  });
+
+  it("uses a special lookup for accountId", async () => {
+    const config = {
+      credentials: async () => {
+        return {
+          accountId: "123456789012",
+        };
+      },
+    };
+    expect(await createConfigValueProvider("accountId", "AccountId", config)()).toEqual("123456789012");
   });
 
   it("should normalize endpoint objects into URLs", async () => {

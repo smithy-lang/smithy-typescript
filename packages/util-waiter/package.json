@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-waiter",
-  "version": "3.1.2",
+  "version": "4.0.3",
   "description": "Shared utilities for client waiters for the AWS SDK",
   "dependencies": {
     "@smithy/abort-controller": "workspace:^",
@@ -16,8 +16,9 @@
     "stage-release": "rimraf ./.release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
-    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "yarn g:jest"
+    "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
+    "test": "yarn g:vitest run",
+    "test:watch": "yarn g:vitest watch"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
@@ -28,7 +29,7 @@
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "typesVersions": {
     "<4.0": {
@@ -40,10 +41,10 @@
   "files": [
     "dist-*/**"
   ],
-  "homepage": "https://github.com/awslabs/smithy-typescript/tree/main/packages/util-waiter",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-waiter",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awslabs/smithy-typescript.git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/util-waiter"
   },
   "devDependencies": {

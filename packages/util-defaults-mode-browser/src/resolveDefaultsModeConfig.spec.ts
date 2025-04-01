@@ -1,14 +1,12 @@
-/**
- * @jest-environment jsdom
- */
 import bowser from "bowser";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { DEFAULTS_MODE_OPTIONS } from "./constants";
 import { resolveDefaultsModeConfig } from "./resolveDefaultsModeConfig";
-jest.mock("bowser");
+vi.mock("bowser");
 
 describe("resolveDefaultsModeConfig", () => {
-  const uaSpy = jest.spyOn(window.navigator, "userAgent", "get").mockReturnValue("some UA");
+  const uaSpy = vi.spyOn(window.navigator, "userAgent", "get").mockReturnValue("some UA");
 
   afterEach(() => {
     uaSpy.mockClear();
@@ -24,17 +22,17 @@ describe("resolveDefaultsModeConfig", () => {
   });
 
   it("should resolve auto mode to mobile if platform is mobile", async () => {
-    (bowser.parse as jest.Mock).mockReturnValue({ platform: { type: "mobile" } });
+    (bowser.parse as any).mockReturnValue({ platform: { type: "mobile" } });
     expect(await resolveDefaultsModeConfig({ defaultsMode: () => Promise.resolve("auto") })()).toBe("mobile");
   });
 
   it("should resolve auto mode to mobile if platform is tablet", async () => {
-    (bowser.parse as jest.Mock).mockReturnValue({ platform: { type: "tablet" } });
+    (bowser.parse as any).mockReturnValue({ platform: { type: "tablet" } });
     expect(await resolveDefaultsModeConfig({ defaultsMode: () => Promise.resolve("auto") })()).toBe("mobile");
   });
 
   it("should resolve auto mode to standard if platform not mobile or tablet", async () => {
-    (bowser.parse as jest.Mock).mockReturnValue({ platform: { type: "desktop" } });
+    (bowser.parse as any).mockReturnValue({ platform: { type: "desktop" } });
     expect(await resolveDefaultsModeConfig({ defaultsMode: () => Promise.resolve("auto") })()).toBe("standard");
   });
 

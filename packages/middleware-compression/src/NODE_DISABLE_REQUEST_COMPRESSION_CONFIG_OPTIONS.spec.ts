@@ -1,3 +1,5 @@
+import { test as it, vi, afterEach, describe, expect } from "vitest";
+
 import { booleanSelector, SelectorType } from "@smithy/util-config-provider";
 
 import {
@@ -7,23 +9,23 @@ import {
   NODE_DISABLE_REQUEST_COMPRESSION_INI_NAME,
 } from "./NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS";
 
-jest.mock("@smithy/util-config-provider");
+vi.mock("@smithy/util-config-provider");
 
 describe("NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS", () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const test = (func: Function, obj: Record<string, string>, key: string, type: SelectorType) => {
     it.each([true, false, undefined])("returns %s", (output) => {
-      (booleanSelector as jest.Mock).mockReturnValueOnce(output);
+      (vi.mocked(booleanSelector)).mockReturnValueOnce(output);
       expect(func(obj)).toEqual(output);
       expect(booleanSelector).toBeCalledWith(obj, key, type);
     });
 
     it("throws error", () => {
       const mockError = new Error("error");
-      (booleanSelector as jest.Mock).mockImplementationOnce(() => {
+      (vi.mocked(booleanSelector)).mockImplementationOnce(() => {
         throw mockError;
       });
       expect(() => {

@@ -4,6 +4,10 @@ import type { ReadableStream as IReadableStream } from "stream/web";
 
 import { Collector } from "./collector";
 
+/**
+ * @internal
+ * Converts a stream to a byte array.
+ */
 export const streamCollector: StreamCollector = (stream: Readable | IReadableStream): Promise<Uint8Array> => {
   if (isReadableStreamInstance(stream)) {
     // Web stream API in Node.js

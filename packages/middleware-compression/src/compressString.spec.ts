@@ -1,3 +1,5 @@
+import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
+
 import { toUint8Array } from "@smithy/util-utf8";
 import { gzip } from "zlib";
 
@@ -6,21 +8,21 @@ import { compressString } from "./compressString";
 const compressionSuffix = "compressed";
 const compressionSeparator = ".";
 
-jest.mock("@smithy/util-utf8");
-jest.mock("util", () => ({ promisify: jest.fn().mockImplementation((fn) => fn) }));
-jest.mock("zlib", () => ({
-  gzip: jest.fn().mockImplementation((data) => [data, compressionSuffix].join(compressionSeparator)),
+vi.mock("@smithy/util-utf8");
+vi.mock("util", () => ({ promisify: vi.fn().mockImplementation((fn) => fn) }));
+vi.mock("zlib", () => ({
+  gzip: vi.fn().mockImplementation((data) => [data, compressionSuffix].join(compressionSeparator)),
 }));
 
 describe(compressString.name, () => {
   const testData = "test";
 
   beforeEach(() => {
-    (toUint8Array as jest.Mock).mockImplementation((data) => data);
+    (vi.mocked(toUint8Array)).mockImplementation((data) => data);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should compress data with gzip", async () => {
@@ -38,7 +40,7 @@ describe(compressString.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    ((gzip as unknown) as jest.Mock).mockImplementationOnce(() => {
+    ((gzip as unknown) as any).mockImplementationOnce(() => {
       throw compressionError;
     });
 

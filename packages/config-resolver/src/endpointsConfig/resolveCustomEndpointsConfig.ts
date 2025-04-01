@@ -13,6 +13,9 @@ export interface CustomEndpointsInputConfig extends EndpointsInputConfig {
   endpoint: string | Endpoint | Provider<Endpoint>;
 }
 
+/**
+ * @internal
+ */
 interface PreviouslyResolved {
   urlParser: UrlParser;
 }
@@ -34,12 +37,11 @@ export interface CustomEndpointsResolvedConfig extends EndpointsResolvedConfig {
 export const resolveCustomEndpointsConfig = <T>(
   input: T & CustomEndpointsInputConfig & PreviouslyResolved
 ): T & CustomEndpointsResolvedConfig => {
-  const { endpoint, urlParser } = input;
-  return {
-    ...input,
-    tls: input.tls ?? true,
+  const { tls, endpoint, urlParser, useDualstackEndpoint } = input;
+  return Object.assign(input, {
+    tls: tls ?? true,
     endpoint: normalizeProvider(typeof endpoint === "string" ? urlParser(endpoint) : endpoint),
     isCustomEndpoint: true,
-    useDualstackEndpoint: normalizeProvider(input.useDualstackEndpoint ?? false),
-  };
+    useDualstackEndpoint: normalizeProvider(useDualstackEndpoint ?? false),
+  } as CustomEndpointsResolvedConfig);
 };
