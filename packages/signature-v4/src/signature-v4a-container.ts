@@ -10,7 +10,7 @@ export type OptionalSigV4aSigner = {
    *
    * The true type is SignatureV4a from @smithy/signature-v4a.
    */
-  new (options: any): RequestSigner; 
+  new (options: any): RequestSigner;
 };
 
 /**
