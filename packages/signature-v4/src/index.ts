@@ -8,3 +8,4 @@ export { prepareRequest } from "./prepareRequest";
 export * from "./credentialDerivation";
 export { SignatureV4Init, SignatureV4CryptoInit, SignatureV4Base } from "./SignatureV4Base";
 export { hasHeader } from "./headerUtil";
+export * from "./signature-v4a-container"; 
