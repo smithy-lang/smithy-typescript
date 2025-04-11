@@ -1,5 +1,13 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.29.0 (2025-04-11)
+
+### Features
+- Upgraded smithy version to 1.55.0 ([#1560](https://github.com/smithy-lang/smithy-typescript/pull/1560))
+
+### Bug Fixes
+- Fixed bug with JMESPath flatten level codegen ([#1559](https://github.com/smithy-lang/smithy-typescript/pull/1559))
+
 ## 0.28.0 (2025-04-01)
 
 ### Bug Fixes
