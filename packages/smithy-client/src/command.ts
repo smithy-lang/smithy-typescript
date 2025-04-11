@@ -11,6 +11,8 @@ import type {
   Logger,
   MetadataBearer,
   MiddlewareStack as IMiddlewareStack,
+  Mutable,
+  OperationSchema,
   OptionalParameter,
   Pluggable,
   RequestHandler,
@@ -31,6 +33,7 @@ export abstract class Command<
 {
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
+  public readonly schema?: OperationSchema;
 
   /**
    * Factory for Command ClassBuilder.
@@ -131,6 +134,8 @@ class ClassBuilder<
   private _outputFilterSensitiveLog = (_: any) => _;
   private _serializer: (input: I, context: SerdeContext | any) => Promise<IHttpRequest> = null as any;
   private _deserializer: (output: IHttpResponse, context: SerdeContext | any) => Promise<O> = null as any;
+  private _operationSchema?: OperationSchema;
+
   /**
    * Optional init callback.
    */
@@ -212,6 +217,16 @@ class ClassBuilder<
     this._deserializer = deserializer;
     return this;
   }
+
+  /**
+   * Sets input/output schema for the operation.
+   */
+  public sc(operation: OperationSchema): ClassBuilder<I, O, C, SI, SO> {
+    this._operationSchema = operation;
+    this._smithyContext.operationSchema = operation;
+    return this;
+  }
+
   /**
    * @returns a Command class with the classBuilder properties.
    */
@@ -241,6 +256,7 @@ class ClassBuilder<
         super();
         this.input = input ?? ({} as unknown as I);
         closure._init(this);
+        (this as Mutable<typeof this>).schema = closure._operationSchema;
       }
 
       /**
