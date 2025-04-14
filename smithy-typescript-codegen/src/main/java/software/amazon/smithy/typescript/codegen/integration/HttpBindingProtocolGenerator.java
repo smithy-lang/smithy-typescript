@@ -1868,7 +1868,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             if (optionalContentType.isPresent() || operation.getInput().isPresent()) {
                 String contentType = optionalContentType.orElse(getDocumentContentType());
                 // If the operation accepts a content type, it must be either unset or the expected value.
-                writer.openBlock("if (contentType !== undefined && contentType !== $S) {", "};", contentType, () -> {
+                writer.openBlock("if (contentType !== undefined) {", "};", () -> {
                     writer.write("throw new __UnsupportedMediaTypeException();");
                 });
             } else {
