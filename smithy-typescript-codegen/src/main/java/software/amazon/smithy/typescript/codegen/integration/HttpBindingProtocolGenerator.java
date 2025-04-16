@@ -1861,15 +1861,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 TypeScriptDependency.SERVER_COMMON);
         Optional<String> optionalContentType = bindingIndex.determineRequestContentType(
                 operation, getDocumentContentType());
-        boolean hasInputWithMembers = operation.getInput()
-                .map(inputId -> context.getModel().getShape(inputId).get()
-                    .members().size() > 0)
-                .orElse(false);
         writer.write("const contentTypeHeaderKey: string | undefined = Object.keys(output.headers)"
                 + ".find(key => key.toLowerCase() === 'content-type');");
         writer.openBlock("if (contentTypeHeaderKey != null) {", "};", () -> {
             writer.write("const contentType = output.headers[contentTypeHeaderKey];");
-            if (optionalContentType.isPresent() || hasInputWithMembers) {
+            if (optionalContentType.isPresent() || HttpBindingIndex.of(context.getModel()).hasRequestBody(operation)) {
                 String contentType = optionalContentType.orElse(getDocumentContentType());
                 // If the operation accepts a content type, it must be either unset or the expected value.
                 writer.openBlock("if (contentType !== undefined && contentType !== $S) {", "};", contentType, () -> {
