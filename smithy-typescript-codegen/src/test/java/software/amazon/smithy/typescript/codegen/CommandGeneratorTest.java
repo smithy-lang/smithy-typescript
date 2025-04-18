@@ -3,6 +3,7 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -31,6 +32,18 @@ public class CommandGeneratorTest {
         testCommandCodegen(
             "output-structure.smithy",
             new String[] {".de("}
+        );
+    }
+
+    /**
+     * todo(schema) enable when switched over.
+     */
+    @Disabled
+    @Test
+    public void writesOperationSchemaRef() {
+        testCommandCodegen(
+            "output-structure.smithy",
+            new String[] {".sc("}
         );
     }
 
