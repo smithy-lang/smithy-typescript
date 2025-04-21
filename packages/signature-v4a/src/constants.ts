@@ -1,8 +1,16 @@
 import { REGION_SET_PARAM } from "@smithy/signature-v4";
 
+/**
+ * @internal
+ */
 export const REGION_HEADER = REGION_SET_PARAM.toLowerCase();
 
-// AWS SigV4a private signing key constants
+/**
+ * @internal
+ * 
+ * AWS SigV4a private signing key constants
+ * 
+ */
 export const ONE_AS_4_BYTES = [0x00, 0x00, 0x00, 0x01];
 export const TWOFIFTYSIX_AS_4_BYTES = [0x00, 0x00, 0x01, 0x00];
 export const N_MINUS_TWO = [

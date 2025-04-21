@@ -25,6 +25,9 @@ export const clearCredentialCache = (): void => {
   });
 };
 
+/**
+ * @internal
+ */
 export const getSigV4aSigningKey = async (
   sha256: ChecksumConstructor | HashConstructor,
   accessKey: string,

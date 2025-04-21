@@ -103,7 +103,7 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
     const canonicalRequest = this.createCanonicalRequest(request, canonicalHeaders, payloadHash);
     const stringToSign = await this.createStringToSign(longDate, scope, canonicalRequest, ALGORITHM_IDENTIFIER_V4A);
 
-    const signature = await this.GetSignature(pKey, stringToSign);
+    const signature = await this.getSignature(pKey, stringToSign);
 
     request.headers[AUTH_HEADER] =
       `${ALGORITHM_IDENTIFIER_V4A} ` +
@@ -120,7 +120,7 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
    * @param stringToSign String to sign using private key
    * @private
    */
-  private async GetSignature(privateKey: Uint8Array, stringToSign: string): Promise<string> {
+  private async getSignature(privateKey: Uint8Array, stringToSign: string): Promise<string> {
     // Create ECDSA and get key pair
     const ecdsa = new Ec("p256");
     const key = ecdsa.keyFromPrivate(privateKey);

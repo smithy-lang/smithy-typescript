@@ -42,6 +42,9 @@ import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
 import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
 
+/**
+ * @public
+ */
 export class SignatureV4
   extends SignatureV4Base
   implements RequestPresigner, RequestSigner, StringSigner, EventSigner, MessageSigner
