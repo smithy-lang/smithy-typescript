@@ -1,5 +1,25 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.29.0 (2025-04-11)
+
+### Features
+- Upgraded smithy version to 1.55.0 ([#1560](https://github.com/smithy-lang/smithy-typescript/pull/1560))
+
+### Bug Fixes
+- Fixed bug with JMESPath flatten level codegen ([#1559](https://github.com/smithy-lang/smithy-typescript/pull/1559))
+
+## 0.28.0 (2025-04-01)
+
+### Bug Fixes
+- Used backticks for example strings containing doublequotes ([#1556](https://github.com/smithy-lang/smithy-typescript/pull/1556))
+- Generated client.initConfig reference for tracking config object custody ([#1550](https://github.com/smithy-lang/smithy-typescript/pull/1550))
+- Used generic type for client config ([#1549](https://github.com/smithy-lang/smithy-typescript/pull/1549))
+- Allowed authscheme resolver to access client ref ([#1548](https://github.com/smithy-lang/smithy-typescript/pull/1548))
+
+### Documentation
+- Added doc examples to operations ([#1078](https://github.com/smithy-lang/smithy-typescript/pull/1078))
+- Replaced GitHub org from 'awslabs' to 'smithy-lang' ([#1545](https://github.com/smithy-lang/smithy-typescript/pull/1545))
+
 ## 0.27.0 (2025-03-04)
 
 ### Features

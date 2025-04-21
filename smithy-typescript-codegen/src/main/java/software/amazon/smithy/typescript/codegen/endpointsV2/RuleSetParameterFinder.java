@@ -296,7 +296,7 @@ public class RuleSetParameterFinder {
         return map;
     }
 
-    private String getJmesPathExpression(String separator, String value, String path) {
+    String getJmesPathExpression(String separator, String value, String path) {
         // Split JMESPath expression string on separator and add JavaScript equivalent.
         while (path.length() > 0) {
             if (path.startsWith("[") && !path.startsWith("[*]")) {
@@ -316,7 +316,7 @@ public class RuleSetParameterFinder {
                     value += getJmesPathExpression(separator, "obj", part) + ",";
                     if (commaIndex == -1) {
                         // Remove trailing comma and close bracket.
-                        value = value.substring(0, value.length() - 1) + "].filter((i) => i)";
+                        value = value.substring(0, value.length() - 1) + "].filter((i) => i))";
                         break;
                     }
                 }
