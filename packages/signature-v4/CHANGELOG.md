@@ -1,11 +1,5 @@
 # Change Log
 
-## 5.1.0
-
-### Minor Changes
-
-- eaa46d2: Adding Signature V4a implementation
-
 ## 5.0.2
 
 ### Patch Changes
