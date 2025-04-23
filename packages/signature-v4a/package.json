@@ -1,6 +1,6 @@
 {
   "name": "@smithy/signature-v4a",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Asymmetric addon for the @smithy/signature-v4 package",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
