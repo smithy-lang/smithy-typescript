@@ -1,5 +1,13 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.29.1 (2025-04-24)
+
+### Features
+- Created SignatureV4a JavaScript implementation ([#1319](https://github.com/smithy-lang/smithy-typescript/pull/1319))
+
+### Documentation
+- Fixed broken links for ts-ssdk related content ([#1568](https://github.com/smithy-lang/smithy-typescript/pull/1568))
+
 ## 0.29.0 (2025-04-11)
 
 ### Features
