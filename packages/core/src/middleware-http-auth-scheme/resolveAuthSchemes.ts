@@ -10,25 +10,27 @@ import { HttpAuthScheme } from "@smithy/types";
  */
 export const resolveAuthSchemes = (candidateAuthSchemes: HttpAuthScheme[], authSchemePreference: string[]) => {
   if (!authSchemePreference || authSchemePreference.length === 0) {
-    // reprioritize candidates based on user's preference
-    const preferredAuthSchemes = [];
+    return candidateAuthSchemes;
+  }
 
-    for (const preferredSchemeName of authSchemePreference) {
-      for (const candidateAuthScheme of candidateAuthSchemes) {
-        const candidateAuthSchemeName = candidateAuthScheme.schemeId.split("#")[1];
-        if (candidateAuthSchemeName === preferredSchemeName) {
-          preferredAuthSchemes.push(candidateAuthScheme);
-        }
-      }
-    }
+  // reprioritize candidates based on user's preference
+  const preferredAuthSchemes = [];
 
-    // add any remaining candidates that weren't in the preference list
+  for (const preferredSchemeName of authSchemePreference) {
     for (const candidateAuthScheme of candidateAuthSchemes) {
-      if (!preferredAuthSchemes.find(({ schemeId }) => schemeId === candidateAuthScheme.schemeId)) {
+      const candidateAuthSchemeName = candidateAuthScheme.schemeId.split("#")[1];
+      if (candidateAuthSchemeName === preferredSchemeName) {
         preferredAuthSchemes.push(candidateAuthScheme);
       }
     }
-  } else {
-    return candidateAuthSchemes;
   }
+
+  // add any remaining candidates that weren't in the preference list
+  for (const candidateAuthScheme of candidateAuthSchemes) {
+    if (!preferredAuthSchemes.find(({ schemeId }) => schemeId === candidateAuthScheme.schemeId)) {
+      preferredAuthSchemes.push(candidateAuthScheme);
+    }
+  }
+
+  return preferredAuthSchemes;
 };
