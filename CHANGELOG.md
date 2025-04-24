@@ -1,5 +1,10 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.29.1 (2025-04-24)
+
+### Chores
+- Bumped version to match release of smithy-aws-typescript-codegen
+
 ## 0.29.0 (2025-04-11)
 
 ### Features
