@@ -248,6 +248,15 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.write(" {");
         w.indent();
         w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+
+        w.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+        w.writeDocs("""
+            A comma-separated list of case-sensitive auth scheme names.
+            An auth scheme name is a fully qualified auth scheme ID with the namespace prefix trimmed.
+            For example, the auth scheme with ID aws.auth#sigv4 is named sigv4.
+            @public""");
+        w.write("authSchemePreference?: string[] | Provider<string[]>;\n");
+
         w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             Configuration of HttpAuthSchemes for a client which provides \
@@ -314,6 +323,15 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.write(" {");
         w.indent();
         w.addDependency(TypeScriptDependency.SMITHY_TYPES);
+
+        w.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+        w.writeDocs("""
+            A comma-separated list of case-sensitive auth scheme names.
+            An auth scheme name is a fully qualified auth scheme ID with the namespace prefix trimmed.
+            For example, the auth scheme with ID aws.auth#sigv4 is named sigv4.
+            @public""");
+        w.write("readonly authSchemePreference: Provider<string[]>;\n");
+
         w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             Configuration of HttpAuthSchemes for a client which provides \
@@ -421,6 +439,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         w.write("return Object.assign(");
         w.indent();
         w.write("$L, {", configName);
+        w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+        w.write("authSchemePreference: normalizeProvider(config.authSchemePreference ?? []),");
         for (ConfigField configField : configFields.values()) {
             if (configField.configFieldWriter().isPresent()) {
                 w.write("$L,", configField.name());
