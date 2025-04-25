@@ -1,11 +1,13 @@
 import {
   HandlerExecutionContext,
+  HttpAuthOption,
   HttpAuthScheme,
   HttpAuthSchemeId,
   HttpAuthSchemeParameters,
   HttpAuthSchemeParametersProvider,
   HttpAuthSchemeProvider,
   IdentityProviderConfig,
+  Provider,
   SelectedHttpAuthScheme,
   SerializeHandler,
   SerializeHandlerArguments,
@@ -15,10 +17,13 @@ import {
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
+import { resolveAuthSchemes } from "./resolveAuthSchemes";
+
 /**
  * @internal
  */
 export interface PreviouslyResolved<TParameters extends HttpAuthSchemeParameters> {
+  authSchemePreference: Provider<string[]>;
   httpAuthSchemes: HttpAuthScheme[];
   httpAuthSchemeProvider: HttpAuthSchemeProvider<TParameters>;
 }
@@ -52,12 +57,11 @@ interface HttpAuthSchemeMiddlewareHandlerExecutionContext extends HandlerExecuti
 
 /**
  * @internal
- * Later HttpAuthSchemes with the same HttpAuthSchemeId will overwrite previous ones.
  */
-function convertHttpAuthSchemesToMap(httpAuthSchemes: HttpAuthScheme[]): Map<HttpAuthSchemeId, HttpAuthScheme> {
+function convertHttpAuthOptionsToMap(httpAuthOptions: HttpAuthOption[]): Map<HttpAuthSchemeId, HttpAuthOption> {
   const map = new Map();
-  for (const scheme of httpAuthSchemes) {
-    map.set(scheme.schemeId, scheme);
+  for (const authOption of httpAuthOptions) {
+    map.set(authOption.schemeId, authOption);
   }
   return map;
 }
@@ -84,18 +88,20 @@ export const httpAuthSchemeMiddleware =
     const options = config.httpAuthSchemeProvider(
       await mwOptions.httpAuthSchemeParametersProvider(config, context as TContext, args.input)
     );
-    const authSchemes = convertHttpAuthSchemesToMap(config.httpAuthSchemes);
+    const optionsMap = convertHttpAuthOptionsToMap(options);
+
+    const authSchemePreference = await config.authSchemePreference();
+    const resolvedAuthSchemes = resolveAuthSchemes(config.httpAuthSchemes, authSchemePreference);
+    config.httpAuthSchemes = resolvedAuthSchemes;
+
     const smithyContext: HttpAuthSchemeMiddlewareSmithyContext = getSmithyContext(context);
     const failureReasons = [];
-    for (const option of options) {
-      const scheme = authSchemes.get(option.schemeId);
-      if (!scheme) {
-        failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` was not enabled for this service.`);
-        continue;
-      }
+
+    for (const scheme of resolvedAuthSchemes) {
+      const option = optionsMap.get(scheme.schemeId) as HttpAuthOption;
       const identityProvider = scheme.identityProvider(await mwOptions.identityProviderConfigProvider(config));
       if (!identityProvider) {
-        failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` did not have an IdentityProvider configured.`);
+        failureReasons.push(`HttpAuthScheme \`${scheme.schemeId}\` did not have an IdentityProvider configured.`);
         continue;
       }
       const { identityProperties = {}, signingProperties = {} } = option.propertiesExtractor?.(config, context) || {};

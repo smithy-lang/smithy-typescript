@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
 import { HttpAuthScheme } from "@smithy/types";
+import { describe, expect,it } from "vitest";
+
 import { resolveAuthSchemes } from "./resolveAuthSchemes";
 
 describe("resolveAuthSchemes", () => {

@@ -8,7 +8,10 @@ import { HttpAuthScheme } from "@smithy/types";
  * @param authSchemePreference list of auth schemes preferred by user.
  * @returns
  */
-export const resolveAuthSchemes = (candidateAuthSchemes: HttpAuthScheme[], authSchemePreference: string[]) => {
+export const resolveAuthSchemes = (
+  candidateAuthSchemes: HttpAuthScheme[],
+  authSchemePreference: string[]
+): HttpAuthScheme[] => {
   if (!authSchemePreference || authSchemePreference.length === 0) {
     return candidateAuthSchemes;
   }
