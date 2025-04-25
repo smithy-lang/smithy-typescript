@@ -90,7 +90,7 @@ export const httpAuthSchemeMiddleware =
     );
     const optionsMap = convertHttpAuthOptionsToMap(options);
 
-    const authSchemePreference = await config.authSchemePreference();
+    const authSchemePreference = config.authSchemePreference ? await config.authSchemePreference() : [];
     const resolvedAuthSchemes = resolveAuthSchemes(config.httpAuthSchemes, authSchemePreference);
     config.httpAuthSchemes = resolvedAuthSchemes;
 
