@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0
+
+### Minor Changes
+
+- 5896264: Resolve auth schemes based on the preference list
+
 ## 3.2.0
 
 ### Minor Changes
