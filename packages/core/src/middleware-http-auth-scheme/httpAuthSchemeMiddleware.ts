@@ -6,6 +6,7 @@ import {
   HttpAuthSchemeParametersProvider,
   HttpAuthSchemeProvider,
   IdentityProviderConfig,
+  Provider,
   SelectedHttpAuthScheme,
   SerializeHandler,
   SerializeHandlerArguments,
@@ -15,10 +16,13 @@ import {
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
+import { resolveAuthOptions } from "./resolveAuthOptions";
+
 /**
  * @internal
  */
 export interface PreviouslyResolved<TParameters extends HttpAuthSchemeParameters> {
+  authSchemePreference?: Provider<string[]>;
   httpAuthSchemes: HttpAuthScheme[];
   httpAuthSchemeProvider: HttpAuthSchemeProvider<TParameters>;
 }
@@ -84,10 +88,14 @@ export const httpAuthSchemeMiddleware =
     const options = config.httpAuthSchemeProvider(
       await mwOptions.httpAuthSchemeParametersProvider(config, context as TContext, args.input)
     );
+
+    const authSchemePreference = config.authSchemePreference ? await config.authSchemePreference() : [];
+    const resolvedOptions = resolveAuthOptions(options, authSchemePreference);
+
     const authSchemes = convertHttpAuthSchemesToMap(config.httpAuthSchemes);
     const smithyContext: HttpAuthSchemeMiddlewareSmithyContext = getSmithyContext(context);
     const failureReasons = [];
-    for (const option of options) {
+    for (const option of resolvedOptions) {
       const scheme = authSchemes.get(option.schemeId);
       if (!scheme) {
         failureReasons.push(`HttpAuthScheme \`${option.schemeId}\` was not enabled for this service.`);
