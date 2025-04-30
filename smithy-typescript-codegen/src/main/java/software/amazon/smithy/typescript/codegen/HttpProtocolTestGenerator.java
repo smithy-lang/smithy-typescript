@@ -234,6 +234,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.addDependency(TypeScriptDependency.PROTOCOL_HTTP);
             // Add the template to each generated test.
             writer.write(IoUtils.readUtf8Resource(getClass(), "protocol-test-stub.ts"));
+            writer.addImport("test", "it", TypeScriptDependency.VITEST);
+            writer.addImport("expect", null, TypeScriptDependency.VITEST);
         }
     }
 
@@ -466,7 +468,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
         writer.write("expect(r.statusCode).toBe($L);", responseDefinition.getCode());
         responseDefinition.getHeaders().forEach((header, value) -> {
             header = header.toLowerCase();
-            writer.write("expect(r.headers[$S]).toBeDefined();", header);
             writer.write("expect(r.headers[$S]).toBe($S);", header, value);
         });
         writer.write("");
@@ -484,11 +485,20 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpQueryAssertions(HttpRequestTestCase testCase) {
         testCase.getRequireQueryParams().forEach(requiredQueryParam ->
-                writer.write("expect(r.query[$S]).toBeDefined();", requiredQueryParam));
+            writer.write("""
+                expect(
+                  r.query[$1S],
+                  `Query key $1S should have been defined in $${JSON.stringify(r.query)}`
+                ).toBeDefined();""", requiredQueryParam)
+        );
         writer.write("");
 
         testCase.getForbidQueryParams().forEach(forbidQueryParam ->
-                writer.write("expect(r.query[$S]).toBeUndefined();", forbidQueryParam));
+            writer.write("""
+                expect(
+                  r.query[$1S],
+                  `Query key $1S should have been undefined in $${JSON.stringify(r.query)}`
+                ).toBeUndefined();""", forbidQueryParam));
         writer.write("");
 
         List<String> explicitQueryValues = testCase.getQueryParams();
@@ -506,17 +516,24 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpHeaderAssertions(HttpMessageTestCase testCase) {
         testCase.getRequireHeaders().forEach(requiredHeader -> {
-            writer.write("expect(r.headers[$S]).toBeDefined();", requiredHeader.toLowerCase());
+            writer.write("""
+                expect(
+                    r.headers[$1S],
+                    `Header key $1S should have been defined in $${JSON.stringify(r.headers)}`
+                ).toBeDefined();""", requiredHeader.toLowerCase());
         });
         writer.write("");
 
         testCase.getForbidHeaders().forEach(forbidHeader ->
-                writer.write("expect(r.headers[$S]).toBeUndefined();", forbidHeader.toLowerCase()));
+            writer.write("""
+            expect(
+              r.headers[$1S],
+              `Header key $1S should have been undefined in $${JSON.stringify(r.headers)}`
+            ).toBeUndefined();""", forbidHeader.toLowerCase()));
         writer.write("");
 
         testCase.getHeaders().forEach((header, value) -> {
             header = header.toLowerCase();
-            writer.write("expect(r.headers[$S]).toBeDefined();", header);
             writer.write("expect(r.headers[$S]).toBe($S);", header, value);
         });
         writer.write("");
@@ -524,7 +541,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpHostAssertion(HttpRequestTestCase testCase) {
         testCase.getResolvedHost().ifPresent(resolvedHost -> {
-            writer.write("expect(r.headers[\"host\"]).toBeDefined();");
             writer.write("expect(r.headers[\"host\"]).toBe($S);", resolvedHost);
             writer.write("");
         });
@@ -540,7 +556,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         }
 
         // Fast fail if we don't have a body.
-        writer.write("expect(r.body).toBeDefined();");
+        writer.write("expect(r.body, `Body was undefined.`).toBeDefined();");
 
         // Otherwise load a media type specific comparator and do a comparison.
         String comparatorInvoke = registerBodyComparatorStub(mediaType);
@@ -566,7 +582,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private void writeHttpBodyMessageAssertion(String messageRegex, String mediaType) {
         // Fast fail if we don't have a body.
-        writer.write("expect(r.body).toBeDefined();");
+        writer.write("expect(r.body, `Body was undefined`).toBeDefined();");
 
         // Otherwise load a media type specific matcher
         String comparatorInvoke = registerMessageRegexStub(mediaType);
@@ -825,7 +841,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private void writeResponseAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         writer.write("expect(r['$$metadata'].httpStatusCode).toBe($L);", testCase.getCode());
 
-        writeReponseParamAssertions(operationOrError, testCase);
+        writeResponseParamAssertions(operationOrError, testCase);
     }
 
     private void writeRequestParamAssertions(OperationShape operation, HttpRequestTestCase testCase) {
@@ -859,7 +875,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         }
     }
 
-    private void writeReponseParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
+    private void writeResponseParamAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
         ObjectNode params = testCase.getParams();
         if (!params.isEmpty()) {
             StructureShape testOutputShape;
@@ -917,7 +933,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         // Perform parameter comparisons.
         writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
-            writer.write("expect(r[param]).toBeDefined();");
+            writer.write("""
+            expect(
+                r[param],
+                `The output field $${param} should have been defined in $${JSON.stringify(r, null, 2)}`
+            ).toBeDefined();""");
             if (hasStreamingPayloadBlob) {
                 writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
                         writer.write("""
