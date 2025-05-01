@@ -953,8 +953,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     ) {
         TypeScriptWriter writer = context.getWriter();
 
-        List<HttpBinding> headers = bindingIndex.getRequestBindings(operation, Location.HEADER);
         List<HttpBinding> prefixHeaders = bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS);
+        List<HttpBinding> headers = bindingIndex.getRequestBindings(operation, Location.HEADER);
         boolean inputPresent = operation.getInput().isPresent();
 
         int normalHeaderCount = headers.size();
@@ -981,19 +981,19 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writeDefaultInputHeaders(context, operation);
 
         if (inputPresent) {
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : prefixHeaders) {
+                writePrefixHeaders(context, binding);
+            }
+        }
+
+        if (inputPresent) {
             for (HttpBinding binding : headers) {
                 writeNormalHeader(context, binding);
             }
         }
 
         flushHeadersBuffer(writer);
-
-        if (inputPresent) {
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : prefixHeaders) {
-                writePrefixHeaders(context, binding);
-            }
-        }
         writer.dedent();
         writer.write(closing);
     }
@@ -1081,13 +1081,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         String headerValue = getInputValue(context, binding.getLocation(),
                                 memberLocation + "![suffix]", binding.getMember(), target);
                         // Append the prefix to key.
-                        writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
+                        writer.write("acc = { ...{[`$L$${suffix.toLowerCase()}`]: $L}, ...acc };",
                                 binding.getLocationName().toLowerCase(Locale.US), headerValue);
                         writer.write("return acc;");
                     });
-            }
-        );
-    }
+                }
+            );
+        }
 
     private void writeResponseHeaders(
             GenerationContext context,
@@ -1103,16 +1103,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
 
+            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
+                writePrefixHeaders(context, binding);
+            }
+
+            // Handle assembling prefix headers.
             for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
                 writeNormalHeader(context, binding);
             }
 
             flushHeadersBuffer(writer);
-
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
-                writePrefixHeaders(context, binding);
-            }
         });
     }
 
@@ -2251,12 +2251,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBindingIndex bindingIndex,
             String outputName
     ) {
-        List<HttpBinding> headerBindings = bindingIndex.getResponseBindings(operationOrError, Location.HEADER);
-        readNormalHeaders(context, headerBindings, outputName);
-
         List<HttpBinding> prefixHeaderBindings =
                 bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS);
         readPrefixHeaders(context, prefixHeaderBindings, outputName);
+
+        List<HttpBinding> headerBindings = bindingIndex.getResponseBindings(operationOrError, Location.HEADER);
+        readNormalHeaders(context, headerBindings, outputName);
     }
 
     private void readRequestHeaders(
@@ -2265,12 +2265,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             HttpBindingIndex bindingIndex,
             String outputName
     ) {
-        List<HttpBinding> headerBindings = bindingIndex.getRequestBindings(operation, Location.HEADER);
-        readNormalHeaders(context, headerBindings, outputName);
-
         List<HttpBinding> prefixHeaderBindings =
                 bindingIndex.getRequestBindings(operation, Location.PREFIX_HEADERS);
         readPrefixHeaders(context, prefixHeaderBindings, outputName);
+
+        List<HttpBinding> headerBindings = bindingIndex.getRequestBindings(operation, Location.HEADER);
+        readNormalHeaders(context, headerBindings, outputName);
     }
 
     /**
@@ -2985,6 +2985,27 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     /**
      * Implement a return true if the protocol allows elision of serde functions.
+     *
+     * @return whether protocol implementation is compatible with serde elision.
+     */
+    protected boolean enableSerdeElision() {
+        return false;
+    }
+}
+ads.
+     */
+    protected abstract boolean requiresNumericEpochSecondsInPayload();
+
+    /**
+     * Implement a return true if the protocol allows elision of serde functions.
+     *
+     * @return whether protocol implementation is compatible with serde elision.
+     */
+    protected boolean enableSerdeElision() {
+        return false;
+    }
+}
+e if the protocol allows elision of serde functions.
      *
      * @return whether protocol implementation is compatible with serde elision.
      */
