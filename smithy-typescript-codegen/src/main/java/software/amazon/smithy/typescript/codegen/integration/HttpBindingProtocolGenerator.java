@@ -979,6 +979,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Only set the content type if one can be determined.
         writeContentTypeHeader(context, operation, true);
         writeDefaultInputHeaders(context, operation);
+        if (inputPresent) {
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : prefixHeaders) {
+                writePrefixHeaders(context, binding);
+            }
+        }
 
         if (inputPresent) {
             for (HttpBinding binding : headers) {
@@ -987,13 +993,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
 
         flushHeadersBuffer(writer);
-
-        if (inputPresent) {
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : prefixHeaders) {
-                writePrefixHeaders(context, binding);
-            }
-        }
         writer.dedent();
         writer.write(closing);
     }
@@ -1103,16 +1102,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
 
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
+                writePrefixHeaders(context, binding);
+            }
+
             for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
                 writeNormalHeader(context, binding);
             }
 
             flushHeadersBuffer(writer);
-
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
-                writePrefixHeaders(context, binding);
-            }
         });
     }
 
