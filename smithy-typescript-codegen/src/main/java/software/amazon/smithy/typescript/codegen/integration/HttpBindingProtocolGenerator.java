@@ -1079,13 +1079,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // Use a ! since we already validated the input member is defined above.
                         String headerValue = getInputValue(context, binding.getLocation(),
                                 memberLocation + "![suffix]", binding.getMember(), target);
-                        String headerKey = binding.getLocationName().toLowerCase(Locale.US) + "${suffix.toLowerCase()}";
-                        writer.write("const headerKey = `$L`;", headerKey);
-                        writer.write("if (!Object.keys(headers).some(key => {");
-                        writer.write("  return key.toLowerCase() === headerKey.toLowerCase();");
-                        writer.write("})) {");
-                        writer.write("  acc[headerKey] = $L;", headerValue);
-                        writer.write("}");
+                        // Append the prefix to key.
+                        writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
+                                binding.getLocationName().toLowerCase(Locale.US), headerValue);
                         writer.write("return acc;");
                     });
             }
