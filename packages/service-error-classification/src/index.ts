@@ -36,6 +36,7 @@ export const isTransientError = (error: SdkError, depth = 0): boolean =>
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
   TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
+  error instanceof TypeError ||
   (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1));
 
 export const isServerError = (error: SdkError) => {
