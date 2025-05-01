@@ -979,6 +979,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Only set the content type if one can be determined.
         writeContentTypeHeader(context, operation, true);
         writeDefaultInputHeaders(context, operation);
+        if (inputPresent) {
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : prefixHeaders) {
+                writePrefixHeaders(context, binding);
+            }
+        }
 
         if (inputPresent) {
             for (HttpBinding binding : headers) {
@@ -987,13 +993,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
 
         flushHeadersBuffer(writer);
-
-        if (inputPresent) {
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : prefixHeaders) {
-                writePrefixHeaders(context, binding);
-            }
-        }
         writer.dedent();
         writer.write(closing);
     }
@@ -1080,9 +1079,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // Use a ! since we already validated the input member is defined above.
                         String headerValue = getInputValue(context, binding.getLocation(),
                                 memberLocation + "![suffix]", binding.getMember(), target);
-                        // Append the prefix to key.
-                        writer.write("acc[`$L$${suffix.toLowerCase()}`] = $L;",
-                                binding.getLocationName().toLowerCase(Locale.US), headerValue);
+                        String headerKey = binding.getLocationName().toLowerCase(Locale.US) + "${suffix.toLowerCase()}";
+                        writer.write("const headerKey = `$L`;", headerKey);
+                        writer.write("if (!Object.keys(headers).some(key => {");
+                        writer.write("  return key.toLowerCase() === headerKey.toLowerCase();");
+                        writer.write("})) {");
+                        writer.write("  acc[headerKey] = $L;", headerValue);
+                        writer.write("}");
                         writer.write("return acc;");
                     });
             }
@@ -1103,16 +1106,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
 
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
+                writePrefixHeaders(context, binding);
+            }
+
             for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
                 writeNormalHeader(context, binding);
             }
 
             flushHeadersBuffer(writer);
-
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
-                writePrefixHeaders(context, binding);
-            }
         });
     }
 
