@@ -20,6 +20,28 @@ export const isClockSkewError = (error: SdkError) => CLOCK_SKEW_ERROR_CODES.incl
  */
 export const isClockSkewCorrectedError = (error: SdkError) => error.$metadata?.clockSkewCorrected;
 
+/**
+ *
+ * @internal
+ */
+export const isBrowserNetworkError = (error: SdkError) => {
+  const errorMessages = new Set([
+    "Failed to fetch", // Chrome
+    "NetworkError when attempting to fetch resource", // Firefox
+    "The Internet connection appears to be offline", // Safari 16
+    "Load failed", // Safari 17+
+    "Network request failed", // `cross-fetch`
+  ]);
+
+  const isValid = error && error instanceof TypeError;
+
+  if (!isValid) {
+    return false;
+  }
+
+  return errorMessages.has(error.message);
+};
+
 export const isThrottlingError = (error: SdkError) =>
   error.$metadata?.httpStatusCode === 429 ||
   THROTTLING_ERROR_CODES.includes(error.name) ||
@@ -36,7 +58,7 @@ export const isTransientError = (error: SdkError, depth = 0): boolean =>
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
   TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
-  error instanceof TypeError ||
+  isBrowserNetworkError(error) ||
   (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1));
 
 export const isServerError = (error: SdkError) => {
