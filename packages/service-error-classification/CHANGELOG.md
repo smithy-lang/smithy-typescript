@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.3
+
+### Patch Changes
+
+- 89bde09: add browser connection issues as transient errors to retry on
+
 ## 4.0.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/service-error-classification",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline service-error-classification",
