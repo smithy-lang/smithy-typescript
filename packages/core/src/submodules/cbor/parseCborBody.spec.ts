@@ -1,6 +1,6 @@
-import { buildHttpRpcRequest } from "./parseCborBody";
+import { describe, expect, test as it } from "vitest";
 
-import { describe, test as it, expect } from "vitest";
+import { buildHttpRpcRequest } from "./parseCborBody";
 
 describe("buildHttpRpcRequest", () => {
   it("should copy the input headers", async () => {
