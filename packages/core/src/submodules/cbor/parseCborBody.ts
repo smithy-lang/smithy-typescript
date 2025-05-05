@@ -100,7 +100,10 @@ export const buildHttpRpcRequest = async (
     port,
     method: "POST",
     path: basePath.endsWith("/") ? basePath.slice(0, -1) + path : basePath + path,
-    headers,
+    headers: {
+      // intentional copy.
+      ...headers,
+    },
   };
   if (resolvedHostname !== undefined) {
     contents.hostname = resolvedHostname;
