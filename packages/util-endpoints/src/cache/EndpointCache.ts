@@ -42,7 +42,7 @@ export class EndpointCache {
         let i = 0;
         while (true) {
           const { value, done } = keys.next();
-          this.data.delete(value);
+          this.data.delete(value as string);
           if (done || ++i > 10) {
             break;
           }
