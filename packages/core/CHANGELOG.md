@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.1
+
+### Patch Changes
+
+- 40ffcd5: copy input headers when building RPCv2 CBOR request
+
 ## 3.3.0
 
 ### Minor Changes
