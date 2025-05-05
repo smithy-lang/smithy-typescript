@@ -22,7 +22,7 @@ describe("SmithyMessageEncoderStream", () => {
       yield "second";
     };
 
-    const stream = new SmithyMessageEncoderStream<String>({
+    const stream = new SmithyMessageEncoderStream<string>({
       inputStream: inputStream(),
       serializer: serializer,
     });

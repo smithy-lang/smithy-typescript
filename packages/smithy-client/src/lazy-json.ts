@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-wrapper-object-types */
 /**
  * @public
  *
@@ -14,7 +15,6 @@ export type AutomaticJsonStringConversion = Parameters<typeof JSON.stringify>[0]
 
 /**
  * @internal
- *
  */
 export interface LazyJsonString extends String {
   /**

@@ -2,11 +2,11 @@
 import { strictParseByte, strictParseDouble, strictParseFloat32, strictParseShort } from "./parse-utils";
 
 // Build indexes outside so we allocate them once.
-const DAYS: Array<String> = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYS: Array<string> = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // These must be kept in order
 // prettier-ignore
-const MONTHS: Array<String> = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS: Array<string> = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /**
  * @internal
