@@ -36,7 +36,7 @@ const MOCK_CREDENTIALS = {
   secretAccessKey: "MOCK_SECRET_ACCESS_KEY_ID",
 };
 
-interface TestHttpHandlerConfig {}
+type TestHttpHandlerConfig = object;
 
 /**
  * Supplied to test clients to assert correct requests.
@@ -44,7 +44,7 @@ interface TestHttpHandlerConfig {}
  */
 export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
   private static WATCHER = Symbol("TestHttpHandler_WATCHER");
-  private originalSend?: Function;
+  private originalSend?: Client<any, any, any>["send"];
   private originalRequestHandler?: RequestHandler<any, any, any>;
   private client?: Client<any, any, any>;
   private assertions = 0;

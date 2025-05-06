@@ -24,12 +24,12 @@ describe("SmithyMessageDecoderStream", () => {
       yield message2;
     };
 
-    const stream = new SmithyMessageDecoderStream<String>({
+    const stream = new SmithyMessageDecoderStream<string>({
       messageStream: inputStream(),
       deserializer: deserializer,
     });
 
-    const messages: Array<String> = [];
+    const messages: Array<string> = [];
     for await (const str of stream) {
       messages.push(str);
     }

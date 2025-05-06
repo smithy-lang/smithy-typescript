@@ -29,7 +29,7 @@ beforeAll(async () => {
 
 let resToEnd: ServerResponse;
 
-function getRequest(options: RequestOptions & { body?: String }): Promise<[IncomingMessage, ServerResponse]> {
+function getRequest(options: RequestOptions & { body?: string }): Promise<[IncomingMessage, ServerResponse]> {
   return new Promise((resolve) => {
     promiseResolve = resolve;
     request({
