@@ -1,14 +1,14 @@
 import { chain, memoize } from "@smithy/property-provider";
 import { Provider } from "@smithy/types";
 
-import { fromEnv, GetterFromEnv } from "./fromEnv";
+import { ClientOptions, fromEnv, GetterFromEnv } from "./fromEnv";
 import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
 import { fromStatic, FromStaticConfig } from "./fromStatic";
 
 /**
  * @internal
  */
-export type LocalConfigOptions = SharedConfigInit;
+export type LocalConfigOptions = SharedConfigInit & ClientOptions;
 
 /**
  * @internal
@@ -39,7 +39,7 @@ export const loadConfig = <T = string>(
 ): Provider<T> =>
   memoize(
     chain(
-      fromEnv(environmentVariableSelector),
+      fromEnv(environmentVariableSelector, { signingName: configuration.signingName }),
       fromSharedConfigFiles(configFileSelector, configuration),
       fromStatic(defaultValue)
     )
