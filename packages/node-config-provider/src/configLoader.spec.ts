@@ -39,7 +39,7 @@ describe("loadConfig", () => {
       configuration
     );
     expect(fromEnv).toHaveBeenCalledTimes(1);
-    expect(fromEnv).toHaveBeenCalledWith(envVarSelector);
+    expect(fromEnv).toHaveBeenCalledWith(envVarSelector, undefined);
     expect(fromSharedConfigFiles).toHaveBeenCalledTimes(1);
     expect(fromSharedConfigFiles).toHaveBeenCalledWith(configKey, configuration);
     expect(fromStatic).toHaveBeenCalledTimes(1);
@@ -61,5 +61,27 @@ describe("loadConfig", () => {
     const mockMemoizeReturn = "mockMemoizeReturn";
     vi.mocked(memoize).mockReturnValueOnce(mockMemoizeReturn);
     expect(loadConfig({} as any)).toEqual(mockMemoizeReturn);
+  });
+
+  it("passes signingName in options object of fromEnv()", () => {
+    const configWithSigningName = {
+      ...configuration,
+      signingName: "signingName",
+    };
+    const envVarSelector = (env: Record<string, string | undefined>) => env["AWS_CONFIG_FOO"];
+    const configKey = (profile: Profile) => profile["aws_config_foo"];
+    const defaultValue = "foo-value";
+
+    loadConfig(
+      {
+        environmentVariableSelector: envVarSelector,
+        configFileSelector: configKey,
+        default: defaultValue,
+      },
+      configWithSigningName
+    );
+
+    expect(fromEnv).toHaveBeenCalledTimes(1);
+    expect(fromEnv).toHaveBeenCalledWith(envVarSelector, { signingName: configWithSigningName.signingName });
   });
 });
