@@ -1,5 +1,5 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { Provider } from "@smithy/types";
+import { Logger, Provider } from "@smithy/types";
 
 import { getSelectorName } from "./getSelectorName";
 
@@ -11,6 +11,11 @@ export interface EnvOptions {
    * The SigV4 service signing name.
    */
   signingName?: string;
+
+  /**
+   * For credential resolution trace logging.
+   */
+  logger?: Logger;
 }
 
 // Using Record<string, string | undefined> instead of NodeJS.ProcessEnv, in order to not get type errors in non node environments
@@ -31,7 +36,8 @@ export const fromEnv =
       return config as T;
     } catch (e) {
       throw new CredentialsProviderError(
-        e.message || `Not found in ENV: ${getSelectorName(envVarSelector.toString())}`
+        e.message || `Not found in ENV: ${getSelectorName(envVarSelector.toString())}`,
+        { logger: options?.logger }
       );
     }
   };
