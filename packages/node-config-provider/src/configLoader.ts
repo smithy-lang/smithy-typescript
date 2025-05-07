@@ -37,14 +37,8 @@ export const loadConfig = <T = string>(
   { environmentVariableSelector, configFileSelector, default: defaultValue }: LoadedConfigSelectors<T>,
   configuration: LocalConfigOptions = {}
 ): Provider<T> => {
-  const envOptions: EnvOptions = {};
-
-  if (configuration.signingName !== undefined) {
-    envOptions.signingName = configuration.signingName;
-  }
-  if (configuration.logger !== undefined) {
-    envOptions.logger = configuration.logger;
-  }
+  const { signingName, logger } = configuration;
+  const envOptions: EnvOptions = { signingName, logger };
 
   return memoize(
     chain(
