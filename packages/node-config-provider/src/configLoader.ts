@@ -37,7 +37,9 @@ export const loadConfig = <T = string>(
   { environmentVariableSelector, configFileSelector, default: defaultValue }: LoadedConfigSelectors<T>,
   configuration: LocalConfigOptions = {}
 ): Provider<T> => {
-  const envOptions = configuration.signingName ? { signingName: configuration.signingName } : undefined;
+  const { signingName, logger } = configuration;
+  const envOptions: EnvOptions = { signingName, logger };
+
   return memoize(
     chain(
       fromEnv(environmentVariableSelector, envOptions),

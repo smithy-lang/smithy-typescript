@@ -39,7 +39,7 @@ describe("loadConfig", () => {
       configuration
     );
     expect(fromEnv).toHaveBeenCalledTimes(1);
-    expect(fromEnv).toHaveBeenCalledWith(envVarSelector, undefined);
+    expect(fromEnv).toHaveBeenCalledWith(envVarSelector, {});
     expect(fromSharedConfigFiles).toHaveBeenCalledTimes(1);
     expect(fromSharedConfigFiles).toHaveBeenCalledWith(configKey, configuration);
     expect(fromStatic).toHaveBeenCalledTimes(1);
@@ -83,5 +83,27 @@ describe("loadConfig", () => {
 
     expect(fromEnv).toHaveBeenCalledTimes(1);
     expect(fromEnv).toHaveBeenCalledWith(envVarSelector, { signingName: configWithSigningName.signingName });
+  });
+
+  it("passes logger in options object of fromEnv()", () => {
+    const configWithSigningName = {
+      ...configuration,
+      logger: console,
+    };
+    const envVarSelector = (env: Record<string, string | undefined>) => env["AWS_CONFIG_FOO"];
+    const configKey = (profile: Profile) => profile["aws_config_foo"];
+    const defaultValue = "foo-value";
+
+    loadConfig(
+      {
+        environmentVariableSelector: envVarSelector,
+        configFileSelector: configKey,
+        default: defaultValue,
+      },
+      configWithSigningName
+    );
+
+    expect(fromEnv).toHaveBeenCalledTimes(1);
+    expect(fromEnv).toHaveBeenCalledWith(envVarSelector, { logger: configWithSigningName.logger });
   });
 });
