@@ -141,6 +141,8 @@ final class DirectedTypeScriptCodegen
 
         for (TypeScriptIntegration integration : integrations) {
             for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
+                // allow overrides of the same protocol ShapeId to change the order.
+                generators.remove(generator.getProtocol());
                 generators.put(generator.getProtocol(), generator);
             }
         }
