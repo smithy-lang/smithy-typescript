@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.30.0 (2025-05-08)
+
+### Features
+- Upgraded smithy version to 1.57.1 ([#1576](https://github.com/smithy-lang/smithy-typescript/pull/1576))
+- Added authSchemePreference client config ([#1567](https://github.com/smithy-lang/smithy-typescript/pull/1567))
+- test: improve generated protocol test assertion messages ([#1572](https://github.com/smithy-lang/smithy-typescript/pull/1572))
+
+### Bug Fixes
+- fix: allow overwriting a protocol's priority during protocol selection ([#1585](https://github.com/smithy-lang/smithy-typescript/pull/1585))
+
 ## 0.29.1 (2025-04-24)
 
 ### Chores
