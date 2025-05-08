@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [acefcf5]
+- Updated dependencies [9ff783b]
+  - @smithy/node-config-provider@4.1.0
+  - @smithy/smithy-client@4.2.3
+
 ## 4.1.3
 
 ### Patch Changes

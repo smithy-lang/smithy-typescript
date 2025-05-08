@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 9ff783b: Pass options with signing name to environment variable selector
+
+### Patch Changes
+
+- acefcf5: Pass logger to environment variable selector
+
 ## 4.0.2
 
 ### Patch Changes
