@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.1
+
+### Patch Changes
+
+- 9f8d075: Export Getters and their configs
+
 ## 4.1.0
 
 ### Minor Changes

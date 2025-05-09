@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [9f8d075]
+  - @smithy/node-config-provider@4.1.1
+
 ## 4.1.1
 
 ### Patch Changes
