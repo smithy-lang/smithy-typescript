@@ -66,7 +66,7 @@ export const deserializerMiddleware =
         try {
           // if the deserializer failed, then $metadata may still be set
           // by taking information from the response.
-          if (HttpResponse.isInstance(response) && typeof response.statusCode === "number") {
+          if (HttpResponse.isInstance(response)) {
             const { headers = {} } = response;
             const headerEntries = Object.entries(headers);
             (error as MetadataBearer).$metadata = {
