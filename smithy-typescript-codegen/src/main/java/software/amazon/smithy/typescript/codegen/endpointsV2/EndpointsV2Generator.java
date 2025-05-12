@@ -91,7 +91,7 @@ public final class EndpointsV2Generator implements Runnable {
         service = settings.getService(model);
         this.settings = settings;
         endpointRuleSetTrait = service.getTrait(EndpointRuleSetTrait.class)
-            .orElseThrow(() -> new RuntimeException("service missing EndpointRuleSetTrait"));
+            .orElseThrow(() -> new RuntimeException("service or model preprocessor missing EndpointRuleSetTrait"));
         ruleSetParameterFinder = new RuleSetParameterFinder(service);
     }
 

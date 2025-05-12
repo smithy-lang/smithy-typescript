@@ -1,3 +1,4 @@
+software.amazon.smithy.typescript.codegen.endpointsV2.AddDefaultEndpointRuleSet
 software.amazon.smithy.typescript.codegen.integration.AddBuiltinPlugins
 software.amazon.smithy.typescript.codegen.integration.AddClientRuntimeConfig
 software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency

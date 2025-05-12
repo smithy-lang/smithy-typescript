@@ -27,7 +27,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -109,9 +108,7 @@ final class IndexGenerator {
         writer.write("export * from \"./$L\";", normalizedClientName);
 
         // export endpoints config interface
-        if (service.hasTrait(EndpointRuleSetTrait.class)) {
-            writer.write("export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
-        }
+        writer.write("export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
 
         // Export Runtime Extension and Client ExtensionConfiguration interfaces
         writer.write("export type { RuntimeExtension } from \"./runtimeExtensions\";");

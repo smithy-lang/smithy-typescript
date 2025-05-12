@@ -32,7 +32,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -190,18 +189,20 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         if (!inputTypes.isEmpty()) {
             writer.indent();
             for (SymbolReference symbolReference : inputTypes) {
-                if (service.hasTrait(EndpointRuleSetTrait.class)
-                    && symbolReference.getAlias().equals("EndpointInputConfig")) {
+                if (symbolReference.getAlias().equals("EndpointInputConfig")) {
+                    writer.addImport(
+                        "EndpointParameters",
+                        null,
+                        EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
+                    );
                     writer.write("& $T<$L>", symbolReference, "EndpointParameters");
                 } else {
                     writer.write("& $T", symbolReference);
                 }
             }
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                writer.addImport("ClientInputEndpointParameters", null,
-                    EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-                writer.write("& ClientInputEndpointParameters");
-            }
+            writer.addImport("ClientInputEndpointParameters", null,
+                EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
+            writer.write("& ClientInputEndpointParameters");
             writer.dedent();
         }
 
@@ -223,18 +224,20 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             runtimePlugins.stream()
                     .flatMap(p -> OptionalUtils.stream(p.getResolvedConfig()))
                     .forEach(symbol -> {
-                        if (service.hasTrait(EndpointRuleSetTrait.class)
-                            && symbol.getAlias().equals("EndpointResolvedConfig")) {
+                        if (symbol.getAlias().equals("EndpointResolvedConfig")) {
+                            writer.addImport(
+                                "EndpointParameters",
+                                null,
+                                EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
+                            );
                             writer.write("& $T<$L>", symbol, "EndpointParameters");
                         } else {
                             writer.write("& $T", symbol);
                         }
                     });
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                writer.addImport("ClientResolvedEndpointParameters", null,
-                    EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-                writer.write("& ClientResolvedEndpointParameters");
-            }
+            writer.addImport("ClientResolvedEndpointParameters", null,
+                EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
+            writer.write("& ClientResolvedEndpointParameters");
             writer.dedent();
         }
 
@@ -381,15 +384,13 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             writer.write("super($L as any);", initialConfigVar);
             writer.write("this.initConfig = $L;", initialConfigVar);
 
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                configVariable++;
-                writer.addImport("resolveClientEndpointParameters", null,
-                    EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-                writer.write("let $L = $L($L);",
-                    generateConfigVariable(configVariable),
-                    "resolveClientEndpointParameters",
-                    generateConfigVariable(configVariable - 1));
-            }
+            configVariable++;
+            writer.addImport("resolveClientEndpointParameters", null,
+                EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
+            writer.write("let $L = $L($L);",
+                generateConfigVariable(configVariable),
+                "resolveClientEndpointParameters",
+                generateConfigVariable(configVariable - 1));
 
             // Add runtime plugin "resolve" method calls. These are invoked one
             // after the other until all of the runtime plugins have been called.

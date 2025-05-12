@@ -70,12 +70,6 @@ public final class ExampleWeatherCustomEndpointsRuntimeConfig implements TypeScr
             w.write("export * from \"./customEndpoints\";");
         });
 
-        codegenContext.writerDelegator().useFileWriter(getClientFile(codegenContext.settings().getService()), w -> {
-            if (codegenContext.settings().getService(codegenContext.model()).hasTrait(EndpointRuleSetTrait.ID)) {
-                w.addImport("EndpointParameters", null, EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-            }
-        });
-
         codegenContext.writerDelegator().useFileWriter(ADD_CUSTOM_ENDPOINTS_FILE, w -> {
             w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
