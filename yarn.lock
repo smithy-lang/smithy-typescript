@@ -2791,6 +2791,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
   dependencies:
+    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"
     concurrently: "npm:7.0.0"
