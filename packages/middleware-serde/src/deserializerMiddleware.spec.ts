@@ -1,3 +1,4 @@
+import { HttpResponse } from "@smithy/protocol-http";
 import { EndpointBearer, SerdeFunctions } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
@@ -38,6 +39,12 @@ describe("deserializerMiddleware", () => {
     response: {
       statusCode: 200,
       headers: {},
+    },
+    $metadata: {
+      httpStatusCode: 200,
+      requestId: undefined,
+      extendedRequestId: undefined,
+      cfId: undefined,
     },
   };
 
@@ -138,5 +145,67 @@ describe("deserializerMiddleware", () => {
       expect(e.message).toEqual("MockException");
       expect(e.$response.body).toEqual("oh no");
     }
+  });
+
+  describe("metadata", () => {
+    it("assigns metadata from the response in the event of a deserializer failure", async () => {
+      const midware = deserializerMiddleware(mockOptions, async () => {
+        JSON.parse(`this isn't JSON`);
+      });
+      const handler = midware(
+        async () => ({
+          response: new HttpResponse({
+            headers: {
+              "x-namespace-requestid": "requestid",
+              "x-namespace-id-2": "id2",
+              "x-namespace-cf-id": "cf",
+            },
+            statusCode: 503,
+          }),
+        }),
+        {}
+      );
+      try {
+        await handler(mockArgs);
+        fail("DeserializerMiddleware should throw");
+      } catch (e) {
+        expect(e.$metadata).toEqual({
+          httpStatusCode: 503,
+          requestId: "requestid",
+          extendedRequestId: "id2",
+          cfId: "cf",
+        });
+      }
+      expect.assertions(1);
+    });
+
+    it("assigns any available metadata from the response in the event of a deserializer failure", async () => {
+      const midware = deserializerMiddleware(mockOptions, async () => {
+        JSON.parse(`this isn't JSON`);
+      });
+      const handler = midware(
+        async () => ({
+          response: new HttpResponse({
+            statusCode: 301,
+            headers: {
+              "x-namespace-requestid": "requestid",
+            },
+          }),
+        }),
+        {}
+      );
+      try {
+        await handler(mockArgs);
+        fail("DeserializerMiddleware should throw");
+      } catch (e) {
+        expect(e.$metadata).toEqual({
+          httpStatusCode: 301,
+          requestId: "requestid",
+          extendedRequestId: undefined,
+          cfId: undefined,
+        });
+      }
+      expect.assertions(1);
+    });
   });
 });
