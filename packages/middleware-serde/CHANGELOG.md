@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.4
+
+### Patch Changes
+
+- 103535a: add response metadata to deserializer errors
+
 ## 4.0.3
 
 ### Patch Changes

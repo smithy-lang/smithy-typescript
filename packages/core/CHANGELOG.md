@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.3.2
+
+### Patch Changes
+
+- Updated dependencies [103535a]
+  - @smithy/middleware-serde@4.0.4
+
 ## 3.3.1
 
 ### Patch Changes
