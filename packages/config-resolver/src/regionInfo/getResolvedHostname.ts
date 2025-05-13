@@ -1,5 +1,6 @@
 /**
  * @internal
+ * @deprecated unused for endpointRuleSets.
  */
 export interface GetResolvedHostnameOptions {
   regionHostname?: string;
@@ -8,6 +9,7 @@ export interface GetResolvedHostnameOptions {
 
 /**
  * @internal
+ * @deprecated unused for endpointRuleSets.
  */
 export const getResolvedHostname = (
   resolvedRegion: string,
