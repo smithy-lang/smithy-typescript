@@ -14,7 +14,6 @@ import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -57,18 +56,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         );
         return List.of(
             RuntimeClientPlugin.builder()
-                .servicePredicate((m, s) -> s.hasTrait(EndpointRuleSetTrait.ID))
                 .withConventions(
                     TypeScriptDependency.SMITHY_CORE.dependency,
                     "HttpAuthSchemeEndpointRuleSet",
-                    Convention.HAS_MIDDLEWARE)
-                .withAdditionalClientParams(httpAuthSchemeParametersProvider)
-                .build(),
-            RuntimeClientPlugin.builder()
-                .servicePredicate((m, s) -> !s.hasTrait(EndpointRuleSetTrait.ID))
-                .withConventions(
-                    TypeScriptDependency.SMITHY_CORE.dependency,
-                    "HttpAuthScheme",
                     Convention.HAS_MIDDLEWARE)
                 .withAdditionalClientParams(httpAuthSchemeParametersProvider)
                 .build(),

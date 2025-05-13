@@ -49,7 +49,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.validation.ValidationEvent;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
@@ -333,10 +332,6 @@ final class DirectedTypeScriptCodegen
     }
 
     private void generateEndpointV2(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        if (!directive.shape().hasTrait(EndpointRuleSetTrait.class)) {
-            return;
-        }
-
         new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
     }
 

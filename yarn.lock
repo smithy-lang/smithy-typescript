@@ -3010,6 +3010,7 @@ __metadata:
     "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
     "@smithy/middleware-content-length": "workspace:^"
+    "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
@@ -3024,6 +3025,7 @@ __metadata:
     "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
+    "@smithy/util-endpoints": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
@@ -3186,7 +3188,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-endpoints@workspace:packages/util-endpoints":
+"@smithy/util-endpoints@workspace:^, @smithy/util-endpoints@workspace:packages/util-endpoints":
   version: 0.0.0-use.local
   resolution: "@smithy/util-endpoints@workspace:packages/util-endpoints"
   dependencies:

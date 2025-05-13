@@ -68,7 +68,6 @@ import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
@@ -767,20 +766,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> labelBindings = bindingIndex.getRequestBindings(operation, Location.LABEL);
 
-        final boolean useEndpointsV2 = context.getService().hasTrait(EndpointRuleSetTrait.class);
-        final Map<String, String> contextParams = useEndpointsV2
-            ? new RuleSetParameterFinder(context.getService())
-                .getContextParams(context.getModel().getShape(operation.getInputShape()).get())
-            : Collections.emptyMap();
+        final Map<String, String> contextParams = new RuleSetParameterFinder(context.getService())
+            .getContextParams(context.getModel().getShape(operation.getInputShape()).get());
 
         // Always write the bound path, but only the actual segments.
         writer.write("b.bp(\"$L\");",
                 "/" + trait.getUri().getSegments().stream()
                     .filter(segment -> {
-                        if (!useEndpointsV2) {
-                            // only applicable in Endpoints 2.0
-                            return true;
-                        }
                         String content = segment.getContent();
                         boolean isContextParam = contextParams.containsKey(content);
 

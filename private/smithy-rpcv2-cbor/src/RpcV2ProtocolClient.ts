@@ -33,15 +33,21 @@ import {
   SparseNullsOperationCommandInput,
   SparseNullsOperationCommandOutput,
 } from "./commands/SparseNullsOperationCommand";
+import {
+  ClientInputEndpointParameters,
+  ClientResolvedEndpointParameters,
+  EndpointParameters,
+  resolveClientEndpointParameters,
+} from "./endpoint/EndpointParameters";
 import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
 import { RuntimeExtension, RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
 import {
-  CustomEndpointsInputConfig,
-  CustomEndpointsResolvedConfig,
-  resolveCustomEndpointsConfig,
-} from "@smithy/config-resolver";
-import { DefaultIdentityProviderConfig, getHttpAuthSchemePlugin, getHttpSigningPlugin } from "@smithy/core";
+  DefaultIdentityProviderConfig,
+  getHttpAuthSchemeEndpointRuleSetPlugin,
+  getHttpSigningPlugin,
+} from "@smithy/core";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
+import { EndpointInputConfig, EndpointResolvedConfig, resolveEndpointConfig } from "@smithy/middleware-endpoint";
 import { RetryInputConfig, RetryResolvedConfig, getRetryPlugin, resolveRetryConfig } from "@smithy/middleware-retry";
 import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
@@ -205,9 +211,10 @@ export interface ClientDefaults extends Partial<__SmithyConfiguration<__HttpHand
  */
 export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>> &
   ClientDefaults &
-  CustomEndpointsInputConfig &
   RetryInputConfig &
-  HttpAuthSchemeInputConfig;
+  EndpointInputConfig<EndpointParameters> &
+  HttpAuthSchemeInputConfig &
+  ClientInputEndpointParameters;
 /**
  * @public
  *
@@ -221,9 +228,10 @@ export interface RpcV2ProtocolClientConfig extends RpcV2ProtocolClientConfigType
 export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions> &
   Required<ClientDefaults> &
   RuntimeExtensionsConfig &
-  CustomEndpointsResolvedConfig &
   RetryResolvedConfig &
-  HttpAuthSchemeResolvedConfig;
+  EndpointResolvedConfig<EndpointParameters> &
+  HttpAuthSchemeResolvedConfig &
+  ClientResolvedEndpointParameters;
 /**
  * @public
  *
@@ -249,15 +257,16 @@ export class RpcV2ProtocolClient extends __Client<
     let _config_0 = __getRuntimeConfig(configuration || {});
     super(_config_0 as any);
     this.initConfig = _config_0;
-    let _config_1 = resolveCustomEndpointsConfig(_config_0);
+    let _config_1 = resolveClientEndpointParameters(_config_0);
     let _config_2 = resolveRetryConfig(_config_1);
-    let _config_3 = resolveHttpAuthSchemeConfig(_config_2);
-    let _config_4 = resolveRuntimeExtensions(_config_3, configuration?.extensions || []);
-    this.config = _config_4;
+    let _config_3 = resolveEndpointConfig(_config_2);
+    let _config_4 = resolveHttpAuthSchemeConfig(_config_3);
+    let _config_5 = resolveRuntimeExtensions(_config_4, configuration?.extensions || []);
+    this.config = _config_5;
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));
     this.middlewareStack.use(
-      getHttpAuthSchemePlugin(this.config, {
+      getHttpAuthSchemeEndpointRuleSetPlugin(this.config, {
         httpAuthSchemeParametersProvider: defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
         identityProviderConfigProvider: async (config: RpcV2ProtocolClientResolvedConfig) =>
           new DefaultIdentityProviderConfig({}),

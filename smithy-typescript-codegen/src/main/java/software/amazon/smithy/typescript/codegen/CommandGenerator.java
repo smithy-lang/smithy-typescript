@@ -52,7 +52,6 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.ExamplesTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.documentation.DocumentationExampleGenerator;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
@@ -393,10 +392,6 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateEndpointParameterInstructionProvider() {
-        if (!service.hasTrait(EndpointRuleSetTrait.class)) {
-            return;
-        }
-
         writer.addImport(
             "commonParams", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
@@ -495,16 +490,14 @@ final class CommandGenerator implements Runnable {
             // Add serialization and deserialization plugin.
             writer.write("$T(config, this.serialize, this.deserialize),", serde);
             // EndpointsV2
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                writer.addImport(
-                    "getEndpointPlugin",
-                    null,
-                    TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
-                writer.write(
-                    """
-                    getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
-                );
-            }
+            writer.addImport(
+                "getEndpointPlugin",
+                null,
+                TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
+            writer.write(
+                """
+                getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
+            );
             // Add customizations.
             addCommandSpecificPlugins();
         }

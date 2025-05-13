@@ -56,7 +56,6 @@ export interface EndpointInputConfig<T extends EndpointParameters = EndpointPara
  */
 interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> {
   urlParser: UrlParser;
-  region: Provider<string>;
   endpointProvider: (params: T, context?: { logger?: Logger }) => EndpointV2;
   logger?: Logger;
   serviceId?: string;
