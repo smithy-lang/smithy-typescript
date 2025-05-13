@@ -1,5 +1,6 @@
 /**
  * @internal
+ * @deprecated unused for endpointRuleSets.
  */
 export interface GetResolvedSigningRegionOptions {
   regionRegex: string;
@@ -9,6 +10,7 @@ export interface GetResolvedSigningRegionOptions {
 
 /**
  * @internal
+ * @deprecated unused for endpointRuleSets.
  */
 export const getResolvedSigningRegion = (
   hostname: string,

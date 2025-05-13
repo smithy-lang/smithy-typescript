@@ -5,6 +5,7 @@ import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 
 /**
  * @public
+ * @deprecated see \@smithy/middleware-endpoint resolveEndpointConfig.
  */
 export interface EndpointsInputConfig {
   /**
@@ -26,6 +27,7 @@ export interface EndpointsInputConfig {
 
 /**
  * @internal
+ * @deprecated see \@smithy/middleware-endpoint resolveEndpointConfig.
  */
 interface PreviouslyResolved {
   regionInfoProvider: RegionInfoProvider;
@@ -36,6 +38,7 @@ interface PreviouslyResolved {
 
 /**
  * @internal
+ * @deprecated see \@smithy/middleware-endpoint resolveEndpointConfig.
  */
 export interface EndpointsResolvedConfig extends Required<EndpointsInputConfig> {
   /**

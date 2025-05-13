@@ -9,6 +9,7 @@ import { RegionHash } from "./RegionHash";
 
 /**
  * @internal
+ * @deprecated unused as of endpointsRuleSets.
  */
 export interface GetRegionInfoOptions {
   useFipsEndpoint?: boolean;
@@ -20,6 +21,7 @@ export interface GetRegionInfoOptions {
 
 /**
  * @internal
+ * @deprecated unused as of endpointsRuleSets.
  */
 export const getRegionInfo = (
   region: string,
