@@ -1,5 +1,6 @@
 import { Handler, MiddlewareStack } from "./middleware";
 import { MetadataBearer } from "./response";
+import { OperationSchema } from "./schema/schema";
 
 /**
  * @public
@@ -13,6 +14,8 @@ export interface Command<
 > extends CommandIO<InputType, OutputType> {
   readonly input: InputType;
   readonly middlewareStack: MiddlewareStack<InputType, OutputType>;
+  readonly schema?: OperationSchema;
+
   resolveMiddleware(
     stack: MiddlewareStack<ClientInput, ClientOutput>,
     configuration: ResolvedConfiguration,
