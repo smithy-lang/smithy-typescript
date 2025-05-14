@@ -1856,7 +1856,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + ".find(key => key.toLowerCase() === 'content-type');");
         writer.openBlock("if (contentTypeHeaderKey != null) {", "};", () -> {
             writer.write("const contentType = output.headers[contentTypeHeaderKey];");
-            if (optionalContentType.isPresent() || operation.getInput().isPresent()) {
+            if (optionalContentType.isPresent() || HttpBindingIndex.of(context.getModel()).hasRequestBody(operation)) {
                 String contentType = optionalContentType.orElse(getDocumentContentType());
                 // If the operation accepts a content type, it must be either unset or the expected value.
                 writer.openBlock("if (contentType !== undefined && contentType !== $S) {", "};", contentType, () -> {
