@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.6
+
+### Patch Changes
+
+- @smithy/core@3.3.3
+
 ## 4.1.5
 
 ### Patch Changes

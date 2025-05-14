@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.1.6
+
+### Patch Changes
+
+- 786dd3a: reduce usage of endpoints2.0 type adapter in public interfaces
+- Updated dependencies [786dd3a]
+  - @smithy/middleware-serde@4.0.5
+  - @smithy/core@3.3.3
+
 ## 4.1.5
 
 ### Patch Changes

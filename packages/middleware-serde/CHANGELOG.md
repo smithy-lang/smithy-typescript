@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.5
+
+### Patch Changes
+
+- 786dd3a: reduce usage of endpoints2.0 type adapter in public interfaces
+
 ## 4.0.4
 
 ### Patch Changes
