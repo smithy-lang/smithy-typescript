@@ -3,6 +3,12 @@ import type { ListSchema as IListSchema, SchemaRef, SchemaTraits } from "@smithy
 import { TypeRegistry } from "../TypeRegistry";
 import { Schema } from "./Schema";
 
+/**
+ * A schema with a single member schema.
+ * The deprecated Set type may be represented as a list.
+ *
+ * @public
+ */
 export class ListSchema extends Schema implements IListSchema {
   public constructor(
     public name: string,
@@ -13,6 +19,11 @@ export class ListSchema extends Schema implements IListSchema {
   }
 }
 
+/**
+ * Factory for ListSchema.
+ *
+ * @internal
+ */
 export function list(namespace: string, name: string, traits: SchemaTraits = {}, valueSchema: SchemaRef): ListSchema {
   const schema = new ListSchema(
     namespace + "#" + name,

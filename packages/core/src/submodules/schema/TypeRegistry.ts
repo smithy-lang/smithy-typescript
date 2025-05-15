@@ -28,7 +28,8 @@ export class TypeRegistry {
   }
 
   /**
-   * The active type registry's namespace is used.
+   * Adds the given schema to a type registry with the same namespace.
+   *
    * @param shapeId - to be registered.
    * @param schema - to be registered.
    */
@@ -50,6 +51,19 @@ export class TypeRegistry {
     return this.schemas.get(id)!;
   }
 
+  /**
+   * The smithy-typescript code generator generates a synthetic (i.e. unmodeled) base exception,
+   * because generated SDKs before the introduction of schemas have the notion of a ServiceBaseException, which
+   * is unique per service/model.
+   *
+   * This is generated under a unique prefix that is combined with the service namespace, and this
+   * method is used to retrieve it.
+   *
+   * The base exception synthetic schema is used when an error is returned by a service, but we cannot
+   * determine what existing schema to use to deserialize it.
+   *
+   * @returns the synthetic base exception of the service namespace associated with this registry instance.
+   */
   public getBaseException(): ErrorSchema | undefined {
     for (const [id, schema] of this.schemas.entries()) {
       if (id.startsWith("smithyts.client.synthetic.") && id.endsWith("ServiceException")) {
@@ -59,10 +73,17 @@ export class TypeRegistry {
     return undefined;
   }
 
-  public find(seeker: (schema: ISchema) => boolean) {
-    return [...this.schemas.values()].find(seeker);
+  /**
+   * @param predicate - criterion.
+   * @returns a schema in this registry matching the predicate.
+   */
+  public find(predicate: (schema: ISchema) => boolean) {
+    return [...this.schemas.values()].find(predicate);
   }
 
+  /**
+   * Unloads the current TypeRegistry.
+   */
   public destroy() {
     TypeRegistry.registries.delete(this.namespace);
     this.schemas.clear();

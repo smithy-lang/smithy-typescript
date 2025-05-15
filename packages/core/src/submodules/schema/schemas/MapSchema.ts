@@ -3,6 +3,10 @@ import type { MapSchema as IMapSchema, SchemaRef, SchemaTraits } from "@smithy/t
 import { TypeRegistry } from "../TypeRegistry";
 import { Schema } from "./Schema";
 
+/**
+ * A schema with a key schema and value schema.
+ * @public
+ */
 export class MapSchema extends Schema implements IMapSchema {
   public constructor(
     public name: string,
@@ -17,6 +21,10 @@ export class MapSchema extends Schema implements IMapSchema {
   }
 }
 
+/**
+ * Factory for MapSchema.
+ * @internal
+ */
 export function map(
   namespace: string,
   name: string,

@@ -195,11 +195,9 @@ export interface OperationSchema extends TraitsSchema {
 
 /**
  * Normalization wrapper for various schema data objects.
- * @internal
+ * @public
  */
-export interface NormalizedSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
+export interface NormalizedSchema {
   getSchema(): Schema;
   getName(): string | undefined;
   isMemberSchema(): boolean;
