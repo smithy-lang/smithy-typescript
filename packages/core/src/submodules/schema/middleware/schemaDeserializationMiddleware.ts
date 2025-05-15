@@ -2,39 +2,37 @@ import { HttpResponse } from "@smithy/protocol-http";
 import {
   DeserializeHandler,
   DeserializeHandlerArguments,
-  DeserializeHandlerOutput,
-  DeserializeMiddleware,
   HandlerExecutionContext,
   MetadataBearer,
-  ResponseDeserializer,
-  SerdeContext,
-  SerdeFunctions,
+  OperationSchema,
 } from "@smithy/types";
+import { getSmithyContext } from "@smithy/util-middleware";
+
+import { PreviouslyResolved } from "./schema-middleware-types";
 
 /**
  * @internal
- * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
-export const deserializerMiddleware =
-  <Input extends object = any, Output extends object = any, CommandSerdeContext extends SerdeContext = any>(
-    options: SerdeFunctions,
-    deserializer: ResponseDeserializer<any, any, CommandSerdeContext>
-  ): DeserializeMiddleware<Input, Output> =>
-  (next: DeserializeHandler<Input, Output>, context: HandlerExecutionContext): DeserializeHandler<Input, Output> =>
-  async (args: DeserializeHandlerArguments<Input>): Promise<DeserializeHandlerOutput<Output>> => {
+export const schemaDeserializationMiddleware =
+  <O>(config: PreviouslyResolved) =>
+  (next: DeserializeHandler<any, any>, context: HandlerExecutionContext) =>
+  async (args: DeserializeHandlerArguments<any>) => {
     const { response } = await next(args);
+    const { operationSchema } = getSmithyContext(context) as {
+      operationSchema: OperationSchema;
+    };
     try {
-      /**
-       * [options] is upgraded from SerdeFunctions to CommandSerdeContext,
-       * since the generated deserializer expects CommandSerdeContext.
-       *
-       * This is okay because options is from the same client's resolved config,
-       * and the deserializer doesn't need the `endpoint` field.
-       */
-      const parsed = await deserializer(response, options as CommandSerdeContext);
+      const parsed = await config.protocol.deserializeResponse(
+        operationSchema,
+        {
+          ...config,
+          ...context,
+        },
+        response
+      );
       return {
         response,
-        output: parsed as Output,
+        output: parsed as O,
       };
     } catch (error) {
       // For security reasons, the error response is not completely visible by default.

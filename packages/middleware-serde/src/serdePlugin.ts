@@ -16,6 +16,9 @@ import {
 import { deserializerMiddleware } from "./deserializerMiddleware";
 import { serializerMiddleware } from "./serializerMiddleware";
 
+/**
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
+ */
 export const deserializerMiddlewareOption: DeserializeHandlerOptions = {
   name: "deserializerMiddleware",
   step: "deserialize",
@@ -23,6 +26,9 @@ export const deserializerMiddlewareOption: DeserializeHandlerOptions = {
   override: true,
 };
 
+/**
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
+ */
 export const serializerMiddlewareOption: SerializeHandlerOptions = {
   name: "serializerMiddleware",
   step: "serialize",
@@ -46,7 +52,7 @@ export type V1OrV2Endpoint = {
 
 /**
  * @internal
- *
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
 export function getSerdePlugin<
   InputType extends object = any,
