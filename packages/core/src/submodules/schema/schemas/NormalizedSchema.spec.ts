@@ -1,12 +1,12 @@
+import { MemberSchema } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { list } from "./ListSchema";
 import { map } from "./MapSchema";
 import { NormalizedSchema } from "./NormalizedSchema";
-import { struct } from "./StructureSchema";
-import { sim } from "./SimpleSchema";
-import { MemberSchema } from "@smithy/types";
 import { SCHEMA } from "./sentinels";
+import { sim } from "./SimpleSchema";
+import { struct } from "./StructureSchema";
 
 describe(NormalizedSchema.name, () => {
   const [List, Map, Struct] = [list("ack", "List", { sparse: 1 }, 0), map("ack", "Map", 0, 0, 1), () => schema];

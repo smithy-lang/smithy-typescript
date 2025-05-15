@@ -3,6 +3,12 @@ import type { OperationSchema as IOperationSchema, SchemaRef, SchemaTraits } fro
 import { TypeRegistry } from "../TypeRegistry";
 import { Schema } from "./Schema";
 
+/**
+ * This is used as a reference container for the input/output pair of schema, and for trait
+ * detection on the operation that may affect client protocol logic.
+ *
+ * @public
+ */
 export class OperationSchema extends Schema implements IOperationSchema {
   public constructor(
     public name: string,
@@ -14,6 +20,10 @@ export class OperationSchema extends Schema implements IOperationSchema {
   }
 }
 
+/**
+ * Factory for OperationSchema.
+ * @internal
+ */
 export function op(
   namespace: string,
   name: string,

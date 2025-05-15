@@ -1,9 +1,10 @@
-import { describe, test as it, expect } from "vitest";
-import { TypeRegistry } from "./TypeRegistry";
+import { describe, expect, test as it } from "vitest";
+
+import { error } from "./schemas/ErrorSchema";
 import { list } from "./schemas/ListSchema";
 import { map } from "./schemas/MapSchema";
 import { struct } from "./schemas/StructureSchema";
-import { error } from "./schemas/ErrorSchema";
+import { TypeRegistry } from "./TypeRegistry";
 
 describe(TypeRegistry.name, () => {
   const [List, Map, Struct] = [list("ack", "List", { sparse: 1 }, 0), map("ack", "Map", 0, 0, 1), () => schema];
