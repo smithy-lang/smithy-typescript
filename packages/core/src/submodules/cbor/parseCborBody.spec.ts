@@ -1,6 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
-import { buildHttpRpcRequest } from "./parseCborBody";
+import { buildHttpRpcRequest, loadSmithyRpcV2CborErrorCode } from "./parseCborBody";
 
 describe("buildHttpRpcRequest", () => {
   it("should copy the input headers", async () => {
@@ -28,5 +28,17 @@ describe("buildHttpRpcRequest", () => {
 
     expect(request.headers).toEqual(headers);
     expect(request.headers).not.toBe(headers);
+  });
+});
+
+describe(loadSmithyRpcV2CborErrorCode.name, () => {
+  it("should read the code field case-insensitively", () => {
+    const code = loadSmithyRpcV2CborErrorCode(
+      { statusCode: 200, headers: {} },
+      {
+        cOdE: "OhNoException:Sender",
+      }
+    );
+    expect(code).toEqual("OhNoException");
   });
 });

@@ -69,8 +69,9 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
     return sanitizeErrorCode(data["__type"]);
   }
 
-  if (data.code !== undefined) {
-    return sanitizeErrorCode(data.code);
+  const codeKey = Object.keys(data).find((key) => key.toLowerCase() === "code");
+  if (codeKey && data[codeKey] !== undefined) {
+    return sanitizeErrorCode(data[codeKey]);
   }
 };
 
