@@ -52,6 +52,7 @@ import { request as hsRequest } from "https";
 describe("NodeHttpHandler", () => {
   describe("constructor and #handle", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
+    const randomSocketAcquisitionWarningTimeout = Math.round(Math.random() * 10000) + 1;
 
     beforeEach(() => {});
 
@@ -91,6 +92,20 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(option);
         await nodeHttpHandler.handle({} as any);
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent.maxSockets).toEqual(50);
+      });
+
+      it.each([
+        ["an options hash", { socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout }],
+        [
+          "a provider",
+          async () => ({
+            socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout,
+          }),
+        ],
+      ])("sets socketAcquisitionWarningTimeout correctly when input is %s", async (_, option) => {
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        const config = await (nodeHttpHandler as any).configProvider;
+        expect(config.socketAcquisitionWarningTimeout).toEqual(randomSocketAcquisitionWarningTimeout);
       });
 
       it.each([
