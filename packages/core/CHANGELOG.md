@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.4.0
+
+### Minor Changes
+
+- 06b0ce8: move serde functions from smithy-client to core/serde
+
+### Patch Changes
+
+- efb27ee: read code property of errors case-insensitively
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/middleware-serde@4.0.6
+  - @smithy/protocol-http@5.1.1
+  - @smithy/util-middleware@4.0.3
+  - @smithy/util-stream@4.2.1
+
 ## 3.3.3
 
 ### Patch Changes

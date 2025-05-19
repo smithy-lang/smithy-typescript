@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/eventstream-codec@4.0.3
+
 ## 4.0.2
 
 ### Patch Changes

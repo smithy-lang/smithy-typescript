@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 0547fab: add types for schemas
+
 ## 4.2.0
 
 ### Minor Changes

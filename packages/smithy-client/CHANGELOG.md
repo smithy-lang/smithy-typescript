@@ -1,5 +1,23 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 06b0ce8: move serde functions from smithy-client to core/serde
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+- Updated dependencies [efb27ee]
+- Updated dependencies [06b0ce8]
+  - @smithy/types@4.3.0
+  - @smithy/core@3.4.0
+  - @smithy/middleware-endpoint@4.1.7
+  - @smithy/middleware-stack@4.0.3
+  - @smithy/protocol-http@5.1.1
+  - @smithy/util-stream@4.2.1
+
 ## 4.2.6
 
 ### Patch Changes

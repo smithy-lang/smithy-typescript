@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/node-config-provider@4.1.2
+  - @smithy/util-middleware@4.0.3
+
 ## 4.1.2
 
 ### Patch Changes

@@ -1,5 +1,20 @@
 # Change Log
 
+## 4.1.7
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+- Updated dependencies [efb27ee]
+- Updated dependencies [06b0ce8]
+  - @smithy/types@4.3.0
+  - @smithy/core@3.4.0
+  - @smithy/middleware-serde@4.0.6
+  - @smithy/node-config-provider@4.1.2
+  - @smithy/shared-ini-file-loader@4.0.3
+  - @smithy/url-parser@4.0.3
+  - @smithy/util-middleware@4.0.3
+
 ## 4.1.6
 
 ### Patch Changes
