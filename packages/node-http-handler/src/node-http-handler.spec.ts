@@ -4,6 +4,7 @@ import https from "https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
+import { timing } from "./timing";
 
 vi.mock("http", async () => {
   const actual = (await vi.importActual("http")) as any;
@@ -103,9 +104,10 @@ describe("NodeHttpHandler", () => {
           }),
         ],
       ])("sets socketAcquisitionWarningTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(timing, "setTimeout");
         const nodeHttpHandler = new NodeHttpHandler(option);
-        const config = await (nodeHttpHandler as any).configProvider;
-        expect(config.socketAcquisitionWarningTimeout).toEqual(randomSocketAcquisitionWarningTimeout);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(timing.setTimeout).mock.calls[0][1]).toBe(randomSocketAcquisitionWarningTimeout);
       });
 
       it.each([
