@@ -15,6 +15,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -25,6 +26,11 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class StringStore {
+    /**
+     * Words are the component strings found within `camelCaseWords` or `header-dashed-words`.
+     */
+    private static final Pattern FIND_WORDS = Pattern.compile("(x-amz)|(-\\w{3,})|(^[a-z]{3,})|([A-Z][a-z]{2,})");
+
     // order doesn't matter for this map.
     private final Map<String, String> literalToVariable = new HashMap<>();
 
@@ -33,6 +39,8 @@ public final class StringStore {
 
     // controls incremental output.
     private final Set<String> writelog = new HashSet<>();
+
+    public StringStore() {}
 
     /**
      * @param literal - a literal string value.
@@ -44,6 +52,24 @@ public final class StringStore {
     }
 
     /**
+     * @param literal - a literal string value.
+     * @param preferredPrefix - a preferred rather than derived variable name.
+     * @return allocates the variable with the preferred prefix.
+     */
+    public String var(String literal, String preferredPrefix) {
+        Objects.requireNonNull(literal);
+        return literalToVariable.computeIfAbsent(literal, (String key) -> assignPreferredKey(key, preferredPrefix));
+    }
+
+    /**
+     * @param literal - query.
+     * @return whether the literal has already been assigned.
+     */
+    public boolean hasVar(String literal) {
+        return literalToVariable.containsKey(literal);
+    }
+
+    /**
      * Outputs the generated code for any constants that have been
      * allocated but not yet retrieved.
      */
@@ -51,13 +77,12 @@ public final class StringStore {
         StringBuilder sourceCode = new StringBuilder();
 
         for (Map.Entry<String, String> entry : variableToLiteral.entrySet()) {
-            String v = entry.getKey();
-            String l = entry.getValue();
-            if (writelog.add(v)) {
-                sourceCode.append(String.format("const %s = \"%s\";%n", v, l));
+            String variable = entry.getKey();
+            String literal = entry.getValue();
+            if (writelog.add(variable)) {
+                sourceCode.append(String.format("const %s = \"%s\";%n", variable, literal));
             }
         }
-
         return sourceCode.toString();
     }
 
@@ -71,6 +96,20 @@ public final class StringStore {
         String variable = allocateVariable(literal);
         variableToLiteral.put(variable, literal);
         return variable;
+    }
+
+    /**
+     * Allocates a variable name for a given string literal.
+     */
+    private String assignPreferredKey(String literal, String preferredPrefix) {
+        int numericSuffix = 0;
+        String candidate = preferredPrefix + numericSuffix;
+        while (variableToLiteral.containsKey(candidate)) {
+            numericSuffix += 1;
+            candidate = preferredPrefix + numericSuffix;
+        }
+        variableToLiteral.put(candidate, literal);
+        return candidate;
     }
 
     /**
