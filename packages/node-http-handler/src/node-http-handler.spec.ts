@@ -4,6 +4,7 @@ import https from "https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
+import { timing } from "./timing";
 
 vi.mock("http", async () => {
   const actual = (await vi.importActual("http")) as any;
@@ -52,6 +53,7 @@ import { request as hsRequest } from "https";
 describe("NodeHttpHandler", () => {
   describe("constructor and #handle", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
+    const randomSocketAcquisitionWarningTimeout = Math.round(Math.random() * 10000) + 1;
 
     beforeEach(() => {});
 
@@ -91,6 +93,21 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(option);
         await nodeHttpHandler.handle({} as any);
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent.maxSockets).toEqual(50);
+      });
+
+      it.each([
+        ["an options hash", { socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout }],
+        [
+          "a provider",
+          async () => ({
+            socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout,
+          }),
+        ],
+      ])("sets socketAcquisitionWarningTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(timing, "setTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(timing.setTimeout).mock.calls[0][1]).toBe(randomSocketAcquisitionWarningTimeout);
       });
 
       it.each([
