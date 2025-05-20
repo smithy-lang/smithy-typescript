@@ -155,7 +155,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           {
             name: "dummy",
             input: testCase.schema,
-            output: void 0,
+            output: "unit",
             traits: {},
           },
           testCase.input,
@@ -257,7 +257,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         const output = await protocol.deserializeResponse(
           {
             name: "dummy",
-            input: void 0,
+            input: "unit",
             output: testCase.schema,
             traits: {},
           },

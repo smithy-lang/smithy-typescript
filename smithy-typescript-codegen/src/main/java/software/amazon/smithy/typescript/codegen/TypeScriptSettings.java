@@ -43,6 +43,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriorityConfig;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -87,6 +88,7 @@ public final class TypeScriptSettings {
     private boolean useLegacyAuth = false;
     private boolean generateTypeDoc = false;
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
+    private boolean generateSchemas = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -140,6 +142,12 @@ public final class TypeScriptSettings {
         settings.setPluginSettings(config);
 
         settings.readProtocolPriorityConfiguration(config);
+
+        // Internal undocumented configuration used to control rollout of schemas.
+        // `true` will eventually be the only available option, and this should not be set by users.
+        settings.setGenerateSchemas(
+            config.getBooleanMemberOrDefault("generateSchemas", false)
+        );
 
         return settings;
     }
@@ -218,6 +226,22 @@ public final class TypeScriptSettings {
 
     public void setPackageVersion(String packageVersion) {
         this.packageVersion = packageVersion;
+    }
+
+    /**
+     * Internal API, do not use.
+     */
+    @SmithyInternalApi
+    public void setGenerateSchemas(boolean generateSchemas) {
+        this.generateSchemas = generateSchemas;
+    }
+
+    /**
+     * Internal API, do not use.
+     */
+    @SmithyInternalApi
+    public boolean generateSchemas() {
+        return generateSchemas;
     }
 
     /**
