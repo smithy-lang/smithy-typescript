@@ -5,7 +5,7 @@ import { ErrorSchema } from "./schemas/ErrorSchema";
 /**
  * A way to look up schema by their ShapeId values.
  *
- * @public
+ * @alpha
  */
 export class TypeRegistry {
   public static active: TypeRegistry | null = null;

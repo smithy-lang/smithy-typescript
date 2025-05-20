@@ -5,7 +5,7 @@ import { Schema } from "./Schema";
 
 /**
  * A schema with a key schema and value schema.
- * @public
+ * @alpha
  */
 export class MapSchema extends Schema implements IMapSchema {
   public constructor(

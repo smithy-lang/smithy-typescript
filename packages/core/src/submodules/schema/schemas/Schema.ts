@@ -3,7 +3,7 @@ import type { SchemaTraits, TraitsSchema } from "@smithy/types";
 /**
  * Abstract base for class-based Schema except NormalizedSchema.
  *
- * @public
+ * @alpha
  */
 export abstract class Schema implements TraitsSchema {
   protected constructor(

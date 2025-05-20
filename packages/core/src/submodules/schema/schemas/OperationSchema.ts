@@ -7,7 +7,7 @@ import { Schema } from "./Schema";
  * This is used as a reference container for the input/output pair of schema, and for trait
  * detection on the operation that may affect client protocol logic.
  *
- * @public
+ * @alpha
  */
 export class OperationSchema extends Schema implements IOperationSchema {
   public constructor(

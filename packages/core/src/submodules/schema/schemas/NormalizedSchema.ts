@@ -18,7 +18,7 @@ import { StructureSchema } from "./StructureSchema";
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
  * Presents a consistent interface for interacting with polymorphic schema representations.
  *
- * @public
+ * @alpha
  */
 export class NormalizedSchema implements INormalizedSchema {
   private readonly name: string;

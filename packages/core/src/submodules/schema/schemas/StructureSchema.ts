@@ -6,7 +6,7 @@ import { Schema } from "./Schema";
 /**
  * A structure schema has a known list of members. This is also used for unions.
  *
- * @public
+ * @alpha
  */
 export class StructureSchema extends Schema implements IStructureSchema {
   public members: Record<string, [SchemaRef, SchemaTraits]> = {};

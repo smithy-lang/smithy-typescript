@@ -17,7 +17,7 @@ import {
 
 /**
  * Schema sentinel runtime values.
- * @public
+ * @alpha
  */
 export const SCHEMA: {
   BLOB: BlobSchema;

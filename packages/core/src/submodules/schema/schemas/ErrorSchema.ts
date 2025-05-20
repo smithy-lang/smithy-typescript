@@ -9,7 +9,7 @@ import { StructureSchema } from "./StructureSchema";
  * and have an existing notion of a XYZServiceBaseException, the ErrorSchema differs from a StructureSchema
  * by additionally holding the class reference for the corresponding ServiceException class.
  *
- * @public
+ * @alpha
  */
 export class ErrorSchema extends StructureSchema {
   public constructor(

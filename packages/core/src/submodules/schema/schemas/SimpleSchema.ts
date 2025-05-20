@@ -7,7 +7,7 @@ import { Schema } from "./Schema";
  * Although numeric values exist for most simple schema, this class is used for cases where traits are
  * attached to those schema, since a single number cannot easily represent both a schema and its traits.
  *
- * @public
+ * @alpha
  */
 export class SimpleSchema extends Schema implements TraitsSchema {
   public constructor(

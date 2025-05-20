@@ -7,7 +7,7 @@ import { Schema } from "./Schema";
  * A schema with a single member schema.
  * The deprecated Set type may be represented as a list.
  *
- * @public
+ * @alpha
  */
 export class ListSchema extends Schema implements IListSchema {
   public constructor(
