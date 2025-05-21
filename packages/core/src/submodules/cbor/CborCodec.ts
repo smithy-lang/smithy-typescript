@@ -51,14 +51,18 @@ export class CborShapeSerializer implements ShapeSerializer {
       const ns = NormalizedSchema.of(schemaRef);
       const sparse = !!ns.getMergedTraits().sparse;
 
-      if (Array.isArray(_)) {
+      if (ns.isListSchema() && Array.isArray(_)) {
         if (!sparse) {
           return _.filter((item) => item != null);
         }
       } else if (_ && typeof _ === "object") {
-        if (!sparse || ns.isStructSchema()) {
+        const members = ns.getMemberSchemas();
+        const isStruct = ns.isStructSchema();
+        if (!sparse || isStruct) {
           for (const [k, v] of Object.entries(_)) {
-            if (v == null) {
+            const filteredOutByNonSparse = !sparse && v == null;
+            const filteredOutByUnrecognizedMember = isStruct && !(k in members);
+            if (filteredOutByNonSparse || filteredOutByUnrecognizedMember) {
               delete _[k];
             }
           }
@@ -157,12 +161,8 @@ export class CborShapeDeserializer implements ShapeDeserializer {
           }
         }
       } else if (ns.isStructSchema()) {
-        for (const key of Object.keys(value)) {
-          const targetSchema = ns.getMemberSchema(key);
-          if (targetSchema === undefined) {
-            continue;
-          }
-          newObject[key] = this.readValue(targetSchema, value[key]);
+        for (const [key, memberSchema] of ns.structIterator()) {
+          newObject[key] = this.readValue(memberSchema, value[key]);
         }
       }
       return newObject;

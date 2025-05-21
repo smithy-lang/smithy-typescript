@@ -110,7 +110,7 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     if (operationNs.getMergedTraits().endpoint) {
       let hostPrefix = operationNs.getMergedTraits().endpoint?.[0];
       if (typeof hostPrefix === "string") {
-        const hostLabelInputs = Object.entries(inputNs.getMemberSchemas()).filter(
+        const hostLabelInputs = [...inputNs.structIterator()].filter(
           ([, member]) => member.getMergedTraits().hostLabel
         );
         for (const [name] of hostLabelInputs) {
@@ -154,7 +154,7 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     const ns = NormalizedSchema.of(schema);
     const nonHttpBindingMembers = [] as string[];
 
-    for (const [memberName, memberSchema] of Object.entries(ns.getMemberSchemas())) {
+    for (const [memberName, memberSchema] of ns.structIterator()) {
       const memberTraits = memberSchema.getMemberTraits();
 
       if (memberTraits.httpPayload) {

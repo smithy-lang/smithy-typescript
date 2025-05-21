@@ -45,7 +45,7 @@ export const copyDocumentWithTransform = (
           newObject[key] = copyDocumentWithTransform(source[key], ns.getValueSchema(), transform);
         }
       } else if (ns.isStructSchema()) {
-        for (const [key, memberSchema] of Object.entries(ns.getMemberSchemas())) {
+        for (const [key, memberSchema] of ns.structIterator()) {
           newObject[key] = copyDocumentWithTransform(source[key], memberSchema, transform);
         }
       } else if (ns.isDocumentSchema()) {

@@ -173,6 +173,20 @@ describe(NormalizedSchema.name, () => {
     });
   });
 
+  describe("iteration", () => {
+    it("iterates over member schemas", () => {
+      const iteration = Array.from(ns.structIterator());
+      const entries = Object.entries(ns.getMemberSchemas());
+      for (let i = 0; i < iteration.length; i++) {
+        const [name, schema] = iteration[i];
+        const [entryName, entrySchema] = entries[i];
+        expect(name).toBe(entryName);
+        expect(schema.getMemberName()).toEqual(entrySchema.getMemberName());
+        expect(schema.getMergedTraits()).toEqual(entrySchema.getMergedTraits());
+      }
+    });
+  });
+
   describe("traits", () => {
     const member: MemberSchema = [sim("ack", "SimpleString", 0, { idempotencyToken: 1 }), 0b0000_0001];
     const ns = NormalizedSchema.of(member, "member_name");

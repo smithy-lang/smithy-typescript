@@ -371,6 +371,11 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   /**
+   * This can be used for checking the members as a hashmap.
+   * Prefer the structIterator method for iteration.
+   *
+   * This does NOT return list and map members, it is only for structures.
+   *
    * @returns a map of member names to member schemas (normalized).
    */
   public getMemberSchemas(): Record<string, NormalizedSchema> {
@@ -387,6 +392,22 @@ export class NormalizedSchema implements INormalizedSchema {
       return buffer;
     }
     return {};
+  }
+
+  /**
+   * Allows iteration over members of a structure schema.
+   * Each yield is a pair of the member name and member schema.
+   *
+   * This avoids the overhead of calling Object.entries(ns.getMemberSchemas()).
+   */
+  public *structIterator(): Generator<[string, NormalizedSchema], undefined, undefined> {
+    if (!this.isStructSchema()) {
+      throw new Error("@smithy/core/schema - cannot acquire structIterator on non-struct schema.");
+    }
+    const struct = this.getSchema() as StructureSchema;
+    for (let i = 0; i < struct.memberNames.length; ++i) {
+      yield [struct.memberNames[i], NormalizedSchema.memberFrom([struct.memberList[i], 0], struct.memberNames[i])];
+    }
   }
 
   /**
