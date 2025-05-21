@@ -15,6 +15,7 @@ import type { V1OrV2Endpoint } from "./serdePlugin";
 
 /**
  * @internal
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
 export const serializerMiddleware =
   <Input extends object = any, Output extends object = any, CommandSerdeContext extends SerdeContext = any>(
