@@ -8,7 +8,6 @@ import { ErrorSchema } from "./schemas/ErrorSchema";
  * @alpha
  */
 export class TypeRegistry {
-  public static active: TypeRegistry | null = null;
   public static readonly registries = new Map<string, TypeRegistry>();
 
   private constructor(
