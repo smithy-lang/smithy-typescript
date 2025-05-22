@@ -52,11 +52,11 @@ describe(evaluateConditions.name, () => {
 
     vi.mocked(evaluateCondition).mockReturnValueOnce({
       result: true,
-      toAssign: { name: mockCn1.assign, value: value1 },
+      toAssign: { name: mockCn1.assign!, value: value1 },
     });
     vi.mocked(evaluateCondition).mockReturnValueOnce({
       result: true,
-      toAssign: { name: mockCn2.assign, value: value2 },
+      toAssign: { name: mockCn2.assign!, value: value2 },
     });
 
     const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], { ...mockOptions });

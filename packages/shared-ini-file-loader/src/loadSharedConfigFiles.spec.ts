@@ -27,7 +27,7 @@ describe("loadSharedConfigFiles", () => {
   beforeEach(() => {
     vi.mocked(getConfigFilepath).mockReturnValue(mockConfigFilepath);
     vi.mocked(getCredentialsFilepath).mockReturnValue(mockCredsFilepath);
-    vi.mocked(parseIni).mockImplementation((args) => args);
+    vi.mocked(parseIni).mockImplementation((args: any) => args);
     vi.mocked(getConfigData).mockImplementation((args) => args);
     vi.mocked(slurpFile).mockImplementation((path) => Promise.resolve(path));
     vi.mocked(getHomeDir).mockReturnValue(mockHomeDir);

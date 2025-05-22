@@ -165,7 +165,7 @@ describe("fromSharedConfigFiles", () => {
     it.each(["foo", "default"])("returns config value from %s profile", (profile) => {
       vi.mocked(getProfileName).mockReturnValueOnce(profile);
       return expect(fromSharedConfigFiles(configGetter)()).resolves.toBe(
-        loadedConfigData.configFile[profile][CONFIG_KEY]
+        (loadedConfigData.configFile as Record<string, { config_key: string }>)[profile][CONFIG_KEY]
       );
     });
   });

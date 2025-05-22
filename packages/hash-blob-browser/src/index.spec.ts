@@ -7,7 +7,7 @@ describe("blobHasher", () => {
   const blob = new Blob(["test-string"]);
 
   class Hash {
-    public value: string;
+    public value: string = "";
     update(value: string) {
       this.value = value;
     }

@@ -1,8 +1,9 @@
 import { AbortController } from "@smithy/abort-controller";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { Mutable } from "@smithy/types";
 import { rejects } from "assert";
 import getPort, { portNumbers } from "get-port";
-import http2, { ClientHttp2Session, ClientHttp2Stream, constants, Http2Server, Http2Stream } from "http2";
+import http2, { ClientHttp2Session, ClientHttp2Stream, constants, Http2Server, Http2Session, Http2Stream } from "http2";
 import { Duplex } from "stream";
 import { promisify } from "util";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
@@ -23,7 +24,7 @@ describe(NodeHttp2Handler.name, () => {
   let port4: number = 0;
 
   let mockH2Server: any = undefined;
-  const mockH2Servers: Record<number, Http2Server> = {};
+  const mockH2Servers: Record<string, Http2Server> = {};
 
   let authority: string;
   const getMockReqOptions = () => ({
@@ -244,7 +245,7 @@ describe(NodeHttp2Handler.name, () => {
         // ...and validate that the mocked response is received
         const responseBody = await new Promise((resolve) => {
           const buffers: any[] = [];
-          resultReader.on("data", (chunk) => buffers.push(chunk));
+          resultReader.on("data", (chunk: any) => buffers.push(chunk));
           resultReader.on("close", () => {
             resolve(Buffer.concat(buffers).toString("utf8"));
           });
@@ -260,9 +261,9 @@ describe(NodeHttp2Handler.name, () => {
       });
 
       it.each([
-        ["destroy", 1],
-        ["close", 2],
-      ])("handles servers calling connections %s", async (func, portIndex) => {
+        ["destroy" as keyof Http2Session, 1],
+        ["close" as keyof Http2Session, 2],
+      ])("handles servers calling connections %s", async (func: keyof Http2Session, portIndex) => {
         const port = [port1, port2, port3, port4][portIndex];
         const mockH2Server4 = mockH2Servers[port];
         let establishedConnections = 0;
@@ -270,7 +271,7 @@ describe(NodeHttp2Handler.name, () => {
 
         mockH2Server4.on("stream", (request: Http2Stream) => {
           numRequests += 1;
-          request.session![func]();
+          (request.session as any)![func]();
         });
         mockH2Server4.on("connection", () => {
           establishedConnections += 1;
@@ -462,7 +463,7 @@ describe(NodeHttp2Handler.name, () => {
         ["object provider", async () => ({ sessionTimeout, disableConcurrentStreams: true })],
         ["static object", { sessionTimeout, disableConcurrentStreams: true }],
       ])("disableConcurrentStreams: true in constructor parameter of %s", async (_, options) => {
-        let session;
+        let session: any;
 
         nodeH2Handler = new NodeHttp2Handler(options);
 
@@ -474,9 +475,9 @@ describe(NodeHttp2Handler.name, () => {
         });
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-        expect(session.destroyed).toBe(false);
+        expect(session?.destroyed).toBe(false);
         await promisify(setTimeout)(sessionTimeout + 100);
-        expect(session.destroyed).toBe(true);
+        expect(session?.destroyed).toBe(true);
       });
     });
   });
@@ -528,7 +529,7 @@ describe(NodeHttp2Handler.name, () => {
     const fakeStream = new Duplex() as ClientHttp2Stream;
     const fakeRstCode = 1;
     // @ts-ignore: fake result code
-    fakeStream.rstCode = fakeRstCode;
+    (fakeStream as Mutable<typeof fakeStream>).rstCode = fakeRstCode;
     vi.spyOn(session, "request").mockImplementation(() => fakeStream);
     // @ts-ignore: access private property
     nodeH2Handler.connectionManager.sessionCache.set(authority, new NodeHttp2ConnectionPool([session]));

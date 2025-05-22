@@ -9,7 +9,7 @@ describe("slurpFile", () => {
   const getMockFileContents = (path: string, options = UTF8) => JSON.stringify({ path, options });
 
   beforeEach(() => {
-    (promises.readFile as any).mockImplementation(async (path, options) => {
+    (promises.readFile as any).mockImplementation(async (path: any, options: any) => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       return getMockFileContents(path, options);
     });

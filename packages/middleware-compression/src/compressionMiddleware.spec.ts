@@ -83,7 +83,7 @@ describe(compressionMiddleware.name, () => {
       });
 
       it("compresses streaming blob", async () => {
-        const mockCompressedStream = "compressed-stream";
+        const mockCompressedStream = "compressed-stream" as any;
         (vi.mocked(compressStream)).mockResolvedValueOnce(mockCompressedStream);
 
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
@@ -120,7 +120,7 @@ describe(compressionMiddleware.name, () => {
       });
 
       it("compresses body", async () => {
-        const mockCompressedBody = "compressed-body";
+        const mockCompressedBody = "compressed-body" as any;
         (vi.mocked(compressString)).mockResolvedValueOnce(mockCompressedBody);
 
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
@@ -141,7 +141,7 @@ describe(compressionMiddleware.name, () => {
       });
 
       it("appends algorithm to existing Content-Encoding header", async () => {
-        const mockCompressedBody = "compressed-body";
+        const mockCompressedBody = "compressed-body" as any;
         (vi.mocked(compressString)).mockResolvedValueOnce(mockCompressedBody);
 
         const mockExistingContentEncoding = "deflate";

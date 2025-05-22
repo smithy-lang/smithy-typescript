@@ -24,7 +24,7 @@ describe("staticStabilityProvider", () => {
           return {
             ...input,
             expiration: `Extending expiration count: ${extensionCount}`,
-          };
+          } as any;
         };
       })()
     );

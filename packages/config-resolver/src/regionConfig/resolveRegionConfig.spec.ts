@@ -54,8 +54,8 @@ describe("RegionConfig", () => {
   });
 
   describe("useFipsEndpoint", () => {
-    let mockRegionProvider;
-    let mockUseFipsEndpoint;
+    let mockRegionProvider: () => Promise<string>;
+    let mockUseFipsEndpoint: () => Promise<boolean>;
 
     beforeEach(() => {
       mockRegionProvider = vi.fn().mockResolvedValueOnce(Promise.resolve(mockRegion));

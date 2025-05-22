@@ -20,7 +20,7 @@ describe(compressStream.name, () => {
   const testOutputStream = Readable.from(getGenerator(["input", "gzipped"])());
 
   beforeEach(() => {
-    (vi.mocked(createGzip)).mockReturnValue(mockGzipFn);
+    (vi.mocked(createGzip)).mockReturnValue(mockGzipFn as any);
     testInputStream.pipe = vi.fn().mockReturnValue(testOutputStream);
   });
 

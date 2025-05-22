@@ -7,8 +7,8 @@
   "scripts": {
     "clean": "turbo run clean --force --parallel",
     "build": "turbo run build",
-    "test": "turbo run test",
-    "test:integration": "yarn build-test-packages && turbo run test:integration",
+    "test": "make test-unit",
+    "test:integration": "yarn build-test-packages && make test-integration",
     "test:protocols": "make generate-protocol-tests test-protocols",
     "lint": "turbo run lint",
     "lint-fix": "turbo run lint -- --fix",

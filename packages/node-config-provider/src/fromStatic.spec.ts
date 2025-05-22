@@ -8,7 +8,7 @@ vi.mock("@smithy/property-provider", () => ({
 }));
 
 describe("fromStatic", () => {
-  const value = "default";
+  const value = "default" as any;
   it("should convert static values to provider", async () => {
     vi.mocked(convertToProvider).mockReturnValue(value);
     fromStatic(value);

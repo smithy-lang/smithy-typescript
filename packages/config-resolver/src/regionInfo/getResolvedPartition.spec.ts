@@ -32,6 +32,6 @@ describe(getResolvedPartition.name, () => {
   });
 
   it("returns aws if partitionHash is empty", () => {
-    expect(getResolvedPartition(mockRegion, { partitionHash: undefined })).toBe("aws");
+    expect(getResolvedPartition(mockRegion, { partitionHash: undefined as any })).toBe("aws");
   });
 });

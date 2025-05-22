@@ -496,21 +496,34 @@ apply Weather @smithy.rules#endpointRuleSet({
     version: "1.3"
     parameters: {
         Region: { required: true, type: "String", documentation: "docs" }
+        endpoint: { required: false, type: "String", documentation: "docs" }
     }
     rules: [
         {
-            conditions: []
-            documentation: "base rule"
+            conditions: [
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
+                            ref: "endpoint"
+                        }
+                    ]
+                }
+            ]
             endpoint: {
-                url: "https://{Region}.amazonaws.com"
-                properties: {}
-                headers: {}
+                url: { ref: "endpoint" }
             }
             type: "endpoint"
+        }
+        {
+            conditions: []
+            error: "(default endpointRuleSet) endpoint is not set - you must configure an endpoint."
+            type: "error"
         }
     ]
 })
 
 apply Weather @smithy.rules#clientContextParams(
     Region: { type: "string", documentation: "docs" }
+    endpoint: { type: "string", documentation: "docs" }
 )

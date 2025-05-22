@@ -18,6 +18,21 @@ generate-protocol-tests:
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals)
 
+test-unit:
+	yarn g:vitest run -c vitest.config.ts
+
+test-browser:
+	yarn g:vitest run -c vitest.config.browser.ts
+
+# typecheck for test code.
+test-types:
+	npx tsc -p tsconfig.test.json
+
+test-integration:
+	make test-browser
+	yarn g:vitest run -c vitest.config.integ.ts
+	make test-types
+
 turbo-clean:
 	@read -p "Are you sure you want to delete your local cache? [y/N]: " ans && [ $${ans:-N} = y ]
 	@echo "\nDeleted cache folders: \n--------"

@@ -20,11 +20,11 @@ describe("loadConfig", () => {
   });
 
   it("passes fromEnv(), fromSharedConfigFiles() and fromStatic() to chain", () => {
-    const mockFromEnvReturn = "mockFromEnvReturn";
+    const mockFromEnvReturn = "mockFromEnvReturn" as any;
     vi.mocked(fromEnv).mockReturnValueOnce(mockFromEnvReturn);
-    const mockFromSharedConfigFilesReturn = "mockFromSharedConfigFilesReturn";
+    const mockFromSharedConfigFilesReturn = "mockFromSharedConfigFilesReturn" as any;
     vi.mocked(fromSharedConfigFiles).mockReturnValueOnce(mockFromSharedConfigFilesReturn);
-    const mockFromStatic = "mockFromStatic";
+    const mockFromStatic = "mockFromStatic" as any;
     vi.mocked(fromStatic).mockReturnValueOnce(mockFromStatic);
     // Using Record<string, string | undefined> instead of NodeJS.ProcessEnv, in order to not get type errors in non node environments
     const envVarSelector = (env: Record<string, string | undefined>) => env["AWS_CONFIG_FOO"];
@@ -49,7 +49,7 @@ describe("loadConfig", () => {
   });
 
   it("passes output of chain to memoize", () => {
-    const mockChainReturn = "mockChainReturn";
+    const mockChainReturn = "mockChainReturn" as any;
     vi.mocked(chain).mockReturnValueOnce(mockChainReturn);
     loadConfig({} as any);
     expect(chain).toHaveBeenCalledTimes(1);
@@ -58,7 +58,7 @@ describe("loadConfig", () => {
   });
 
   it("returns output memoize", () => {
-    const mockMemoizeReturn = "mockMemoizeReturn";
+    const mockMemoizeReturn = "mockMemoizeReturn" as any;
     vi.mocked(memoize).mockReturnValueOnce(mockMemoizeReturn);
     expect(loadConfig({} as any)).toEqual(mockMemoizeReturn);
   });

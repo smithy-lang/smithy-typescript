@@ -32,7 +32,7 @@ describe(getEndpointHeaders.name, () => {
 
   it.each([null, undefined, true, 1])(
     "should throw error if evaluated expression is not string: %s",
-    (notStringValue) => {
+    (notStringValue: any) => {
       const inputHeaderKey = "inputHeaderKey";
       const inputHeaderValue = "inputHeaderValue";
       const mockHeaders = { [inputHeaderKey]: [inputHeaderValue] };

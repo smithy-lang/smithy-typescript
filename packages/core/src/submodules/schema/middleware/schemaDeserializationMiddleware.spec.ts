@@ -85,7 +85,7 @@ describe(schemaDeserializationMiddleware.name, () => {
     expect(mockNext).toHaveBeenCalledWith(mockArgs);
     expect(mockDeserializer).toHaveBeenCalledTimes(1);
     expect(mockDeserializer).toHaveBeenCalledWith(
-      undefined as SchemaRef,
+      undefined as any as SchemaRef,
       {
         ...mockOptions,
         __smithy_context: {},

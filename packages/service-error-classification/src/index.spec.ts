@@ -137,7 +137,7 @@ describe("isTransientError", () => {
   });
 
   it("should limit recursion to 10 depth", () => {
-    const error = { cause: null } as SdkError;
+    const error = { cause: null } as unknown as SdkError;
     error.cause = error;
     checkForErrorType(isTransientError, { cause: error }, false);
   });

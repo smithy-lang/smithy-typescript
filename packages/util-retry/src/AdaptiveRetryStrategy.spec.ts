@@ -16,7 +16,7 @@ describe(AdaptiveRetryStrategy.name, () => {
   const mockDefaultRateLimiter = {
     getSendToken: vi.fn(),
     updateClientSendingRate: vi.fn(),
-  };
+  } as any;
   const mockRetryToken: StandardRetryToken = {
     getRetryCost: () => 1,
     getRetryCount: () => 1,
