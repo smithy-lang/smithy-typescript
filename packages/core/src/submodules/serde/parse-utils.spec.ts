@@ -22,6 +22,8 @@ import {
 } from "./parse-utils";
 import { expectBoolean, expectNumber, expectString } from "./parse-utils";
 
+logger.warn = () => {};
+
 describe("parseBoolean", () => {
   it('Returns true for "true"', () => {
     expect(parseBoolean("true")).toEqual(true);

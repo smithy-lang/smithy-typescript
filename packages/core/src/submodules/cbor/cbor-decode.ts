@@ -1,3 +1,4 @@
+import { NumericValue } from "@smithy/core/serde";
 import { toUtf8 } from "@smithy/util-utf8";
 
 import {
@@ -119,11 +120,33 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
         _offset = offset;
         return castBigInt(negativeInt);
       } else {
-        const value = decode(at + offset, to);
-        const valueOffset = _offset;
+        /* major === majorTag */
+        if (minor === 2 || minor === 3) {
+          const length = decodeCount(at + offset, to);
 
-        _offset = offset + valueOffset;
-        return tag({ tag: castBigInt(unsignedInt), value });
+          let b = BigInt(0);
+          const start = at + offset + _offset;
+          for (let i = start; i < start + length; ++i) {
+            b = (b << BigInt(8)) | BigInt(payload[i]);
+          }
+
+          _offset = offset + length;
+          return minor === 3 ? -b - BigInt(1) : b;
+        } else if (minor === 4) {
+          const decimalFraction = decode(at + offset, to);
+          const [exponent, mantissa] = decimalFraction;
+          const s = mantissa.toString();
+          const numericString = exponent === 0 ? s : s.slice(0, s.length + exponent) + "." + s.slice(exponent);
+
+          return new NumericValue(numericString, "bigDecimal");
+        } else {
+          const value = decode(at + offset, to);
+          const valueOffset = _offset;
+
+          _offset = offset + valueOffset;
+
+          return tag({ tag: castBigInt(unsignedInt), value });
+        }
       }
     case majorUtf8String:
     case majorMap:
