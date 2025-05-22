@@ -2449,6 +2449,7 @@ __metadata:
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/util-base64": "workspace:^"
     "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-stream": "workspace:^"
