@@ -13,7 +13,7 @@ describe(AdaptiveRetryStrategy.name, () => {
   const mockDefaultRateLimiter = {
     getSendToken: vi.fn(),
     updateClientSendingRate: vi.fn(),
-  };
+  } as any;
 
   beforeEach(() => {
     vi.mocked(DefaultRateLimiter).mockReturnValue(mockDefaultRateLimiter);
@@ -85,13 +85,13 @@ describe(AdaptiveRetryStrategy.name, () => {
 
     it("calls rateLimiter.getSendToken in beforeRequest", async () => {
       expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledTimes(0);
-      await mockedSuperRetry.mock.calls[0][2].beforeRequest();
+      await mockedSuperRetry.mock.calls[0][2]!.beforeRequest();
       expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledTimes(1);
     });
 
     it("calls rateLimiter.updateClientSendingRate in afterRequest", async () => {
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledTimes(0);
-      await mockedSuperRetry.mock.calls[0][2].afterRequest();
+      await mockedSuperRetry.mock.calls[0][2]!.afterRequest();
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledTimes(1);
     });
   });

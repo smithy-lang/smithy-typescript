@@ -64,8 +64,8 @@ describe("getCanonicalHeaders", () => {
       path: "/",
       headers: {
         ...headers,
-        foo: undefined,
-        bar: null,
+        foo: undefined as any,
+        bar: null as any,
       },
       hostname: "foo.us-east-1.amazonaws.com",
     });

@@ -13,7 +13,7 @@ describe(booleanSelector.name, () => {
     });
 
     it(`should return undefined if ${key} is not defined`, () => {
-      expect(booleanSelector(obj, key, SelectorType[selectorKey])).toBeUndefined();
+      expect(booleanSelector(obj, key, SelectorType[selectorKey as keyof typeof SelectorType])).toBeUndefined();
     });
 
     it.each([
@@ -21,12 +21,12 @@ describe(booleanSelector.name, () => {
       [false, "false"],
     ])(`should return boolean %s if ${key}="%s"`, (output, input) => {
       obj[key] = input;
-      expect(booleanSelector(obj, key, SelectorType[selectorKey])).toBe(output);
+      expect(booleanSelector(obj, key, SelectorType[selectorKey as keyof typeof SelectorType])).toBe(output);
     });
 
     it.each(["0", "1", "yes", "no", undefined, null, void 0, ""])(`should throw if ${key}=%s`, (input) => {
       obj[key] = input;
-      expect(() => booleanSelector(obj, key, SelectorType[selectorKey])).toThrow(
+      expect(() => booleanSelector(obj, key, SelectorType[selectorKey as keyof typeof SelectorType])).toThrow(
         `Cannot load ${selectorValue} "${key}". Expected "true" or "false", got ${obj[key]}.`
       );
     });

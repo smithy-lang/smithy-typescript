@@ -12,6 +12,6 @@ describe(isFipsRegion.name, () => {
   });
 
   it.each([undefined, null])("returns false for %s", (input) => {
-    expect(isFipsRegion(input)).toEqual(false);
+    expect(isFipsRegion(input as any)).toEqual(false);
   });
 });

@@ -18,7 +18,7 @@ describe(compressString.name, () => {
   const testData = "test";
 
   beforeEach(() => {
-    (vi.mocked(toUint8Array)).mockImplementation((data) => data);
+    (vi.mocked(toUint8Array)).mockImplementation((data: any) => data);
   });
 
   afterEach(() => {

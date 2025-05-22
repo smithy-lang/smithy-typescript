@@ -14,7 +14,7 @@ describe(getCompressionPlugin.name, () => {
   const middlewareConfig = { encodings: [] };
 
   it("applyToStack adds compressionMiddleware", () => {
-    const middlewareReturn = {};
+    const middlewareReturn = {} as any;
     (vi.mocked(compressionMiddleware)).mockReturnValueOnce(middlewareReturn);
 
     const plugin = getCompressionPlugin(config, middlewareConfig);

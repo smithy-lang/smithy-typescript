@@ -6,7 +6,7 @@ class BaseClient {
   send = vi.fn() as any;
 }
 class AggregatedClient extends BaseClient {
-  constructor(commands) {
+  constructor(commands: Record<string, any>) {
     super();
     createAggregatedClient(commands, AggregatedClient as any);
   }

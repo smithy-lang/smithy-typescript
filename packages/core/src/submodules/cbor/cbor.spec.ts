@@ -1,4 +1,5 @@
 import * as fs from "fs";
+// @ts-ignore
 import JSONbig from "json-bigint";
 import * as path from "path";
 import { describe, expect, test as it } from "vitest";
@@ -290,7 +291,7 @@ describe("cbor", () => {
       return scalar * sum * exponentScalar;
     }
 
-    function translateTestData(data: any) {
+    function translateTestData(data: any): any {
       const [type, value] = Object.entries(data)[0] as [string, any];
       switch (type) {
         case "null":

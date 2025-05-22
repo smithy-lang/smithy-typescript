@@ -13,7 +13,7 @@ describe(numberSelector.name, () => {
     });
 
     it(`should return undefined if ${key} is not defined`, () => {
-      expect(numberSelector(obj, key, SelectorType[selectorKey])).toBeUndefined();
+      expect(numberSelector(obj, key, SelectorType[selectorKey as keyof typeof SelectorType])).toBeUndefined();
     });
 
     it.each([
@@ -21,12 +21,12 @@ describe(numberSelector.name, () => {
       [1, "1"],
     ])(`should return number %s if ${key}="%s"`, (output, input) => {
       obj[key] = input;
-      expect(numberSelector(obj, key, SelectorType[selectorKey])).toBe(output);
+      expect(numberSelector(obj, key, SelectorType[selectorKey as keyof typeof SelectorType])).toBe(output);
     });
 
     it.each(["yes", "no", undefined, null, void 0, ""])(`should throw if ${key}=%s`, (input) => {
       obj[key] = input;
-      expect(() => numberSelector(obj, key, SelectorType[selectorKey])).toThrow(
+      expect(() => numberSelector(obj, key, SelectorType[selectorKey as keyof typeof SelectorType])).toThrow(
         new TypeError(`Cannot load ${selectorValue} '${key}'. Expected number, got '${obj[key]}'.`)
       );
     });

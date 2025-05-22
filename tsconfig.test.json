@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "noCheck": false,
+    "skipLibCheck": true
+  },
+  "extends": "./tsconfig.types.json",
+  "include": ["packages/**/*.spec.ts", "private/**/*.spec.ts"],
+  "exclude": [
+    "node_modules/",
+    "node_modules",
+    "vitest.*.ts"
+  ]
+}

@@ -17,7 +17,7 @@ describe(loadSsoSessionData.name, () => {
 
   beforeEach(() => {
     vi.mocked(getConfigFilepath).mockReturnValue(mockConfigFilepath);
-    vi.mocked(parseIni).mockImplementation((args) => args);
+    vi.mocked(parseIni).mockImplementation((args: any) => args);
     vi.mocked(getSsoSessionData).mockReturnValue(mockSsoSessionData);
     vi.mocked(slurpFile).mockImplementation((path) => Promise.resolve(path));
   });

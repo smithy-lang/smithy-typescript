@@ -75,9 +75,9 @@ describe("object mapping", () => {
           k: [[], void 0],
           l: [{}, void 0],
           m: [() => true, void 0],
-          n: [(val) => val === void 0, void 1],
+          n: [(val: any) => val === void 0, void 1],
           o: [() => true, () => void 0],
-          p: [(val) => val !== 1, () => 1], // value is not provided to filter fn when value provider is lazy
+          p: [(val: any) => val !== 1, () => 1], // value is not provided to filter fn when value provider is lazy
           q: 0,
           r: false,
           s: "",
@@ -114,17 +114,17 @@ describe("object mapping", () => {
         map({
           a: [, undefined],
           b: [, null],
-          c: [(_) => _ !== "", ""],
-          d: [(_) => _.length !== 0, []],
+          c: [(_: any) => _ !== "", ""],
+          d: [(_: any) => _.length !== 0, []],
           e: [0, 0],
           f: [false, false],
           g: ["", ""],
           h: [undefined, undefined],
           i: [null, null],
           j: [() => false, void 0],
-          k: [(val) => val !== void 0, void 0],
+          k: [(val: any) => val !== void 0, void 0],
           l: [() => false, () => void 0],
-          m: [(val) => val === 1, () => 1], // value is not provided to filter fn when value provider is lazy
+          m: [(val: any) => val === 1, () => 1], // value is not provided to filter fn when value provider is lazy
           n: [, () => undefined],
         })
       ).toEqual({});
@@ -148,14 +148,14 @@ describe("object mapping", () => {
         filteredDefault: [],
         supplier: [, () => "x"],
         filteredSupplier: [, () => "x"],
-        mapper: [, (_) => _ + "x"],
-        filteredMapper: [, (_) => _ + "x"],
-        filter: [(_) => _ === 42],
-        filteredFilter: [(_) => _ === 42],
+        mapper: [, (_: any) => _ + "x"],
+        filteredMapper: [, (_: any) => _ + "x"],
+        filter: [(_: any) => _ === 42],
+        filteredFilter: [(_: any) => _ === 42],
         sourceKey: [, , "SOURCE_KEY"],
-        sourceKey2: [, (_) => "mapped" + _, "SOURCE_KEY2"],
-        mapperOnly: (_) => _ + "Only",
-        filteredMapperOnly: (_) => _ + "Only",
+        sourceKey2: [, (_: any) => "mapped" + _, "SOURCE_KEY2"],
+        mapperOnly: (_: any) => _ + "Only",
+        filteredMapperOnly: (_: any) => _ + "Only",
       };
 
       expect(take(input, instructions)).toEqual(output);
@@ -182,8 +182,8 @@ describe("object mapping", () => {
         b: [1],
         c: [false, () => 1],
         d: [0, () => 1],
-        e: [(_) => _ == 1],
-        f: [(_) => _ == 2],
+        e: [(_: any) => _ == 1],
+        f: [(_: any) => _ == 2],
       };
 
       expect(take(input, instructions)).toEqual(output);
@@ -220,14 +220,14 @@ describe("object mapping", () => {
         filteredDefault: [],
         supplier: [, () => "x"],
         filteredSupplier: [, () => "x"],
-        mapper: [, (_) => _ + "x"],
-        filteredMapper: [, (_) => _ + "x"],
-        filter: [(_) => _ === 42],
-        filteredFilter: [(_) => _ === 42],
+        mapper: [, (_: any) => _ + "x"],
+        filteredMapper: [, (_: any) => _ + "x"],
+        filter: [(_: any) => _ === 42],
+        filteredFilter: [(_: any) => _ === 42],
         sourceKey: [, , "SOURCE_KEY"],
-        sourceKey2: [, (_) => "mapped" + _, "SOURCE_KEY2"],
-        mapperOnly: (_) => _ + "Only",
-        filteredMapperOnly: (_) => _ + "Only",
+        sourceKey2: [, (_: any) => "mapped" + _, "SOURCE_KEY2"],
+        mapperOnly: (_: any) => _ + "Only",
+        filteredMapperOnly: (_: any) => _ + "Only",
       };
 
       expect(take(input, instructions)).toEqual(output);

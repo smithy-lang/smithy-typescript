@@ -56,9 +56,9 @@ describe(getRegionInfo.name, () => {
   const getMockResolvedRegion = (regionCase: RegionCase): string =>
     regionCase !== RegionCase.ENDPOINT ? mockRegion : mockEndpointRegion;
 
-  const getMockResolvedPartitionOptions = (partitionHash) => ({ partitionHash });
+  const getMockResolvedPartitionOptions = (partitionHash: PartitionHash) => ({ partitionHash });
 
-  const getMockRegionInfoOptions = (regionHash, getResolvedPartitionOptions) => ({
+  const getMockRegionInfoOptions = (regionHash: RegionHash, getResolvedPartitionOptions: any) => ({
     ...getResolvedPartitionOptions,
     signingService: mockSigningService,
     regionHash,

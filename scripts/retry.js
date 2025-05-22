@@ -15,11 +15,13 @@ const [command, ...args] = process.argv.slice(process.argv.indexOf("--") + 1);
         stdio: "inherit",
         cwd: path.join(__dirname, ".."),
       });
-      break;
+      return;
     } catch (e) {
       console.error("Command exited non-zero:", command, ...args);
       console.error(e);
       console.log(`Starting attempt: ${attempt}`);
     }
   }
+
+  process.exit(1);
 })();

@@ -13,7 +13,7 @@ vi.mock("@smithy/url-parser");
 
 describe(getInstanceMetadataEndpoint.name, () => {
   let mockURL: string;
-  const mockEndpoint = { protocol: "http:", hostname: "localhost", port: "80" };
+  const mockEndpoint = { protocol: "http:", hostname: "localhost", port: 80, path: "" };
 
   beforeEach(() => {
     vi.mocked(parseUrl).mockReturnValue(mockEndpoint);

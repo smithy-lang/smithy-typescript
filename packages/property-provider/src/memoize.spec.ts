@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, Mock, test as it, vi } from "vitest";
 
 import { memoize } from "./memoize";
 
 describe("memoize", () => {
-  let provider: vi.Mock;
+  let provider: Mock;
   const mockReturn = "foo";
   const repeatTimes = 10;
 
@@ -70,8 +70,8 @@ describe("memoize", () => {
   });
 
   describe("refreshing memoization", () => {
-    let isExpired: vi.Mock;
-    let requiresRefresh: vi.Mock;
+    let isExpired: Mock;
+    let requiresRefresh: Mock;
 
     beforeEach(() => {
       isExpired = vi.fn().mockReturnValue(true);
