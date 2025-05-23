@@ -119,11 +119,25 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
         _offset = offset;
         return castBigInt(negativeInt);
       } else {
-        const value = decode(at + offset, to);
-        const valueOffset = _offset;
+        if (minor === 2 || minor === 3) {
+          const length = decodeCount(at + offset, to);
 
-        _offset = offset + valueOffset;
-        return tag({ tag: castBigInt(unsignedInt), value });
+          let b = BigInt(0);
+          const start = at + offset + _offset;
+          for (let i = start; i < start + length; ++i) {
+            b = (b << BigInt(8)) | BigInt(payload[i]);
+          }
+
+          _offset = offset + length;
+          return minor === 3 ? -b - BigInt(1) : b;
+        } else {
+          const value = decode(at + offset, to);
+          const valueOffset = _offset;
+
+          _offset = offset + valueOffset;
+
+          return tag({ tag: castBigInt(unsignedInt), value });
+        }
       }
     case majorUtf8String:
     case majorMap:
