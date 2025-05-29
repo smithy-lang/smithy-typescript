@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.1.8
+
+### Patch Changes
+
+- Updated dependencies [ae11e3a]
+- Updated dependencies [23812a9]
+  - @smithy/core@3.5.0
+
 ## 4.1.7
 
 ### Patch Changes

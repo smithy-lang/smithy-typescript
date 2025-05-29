@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.5.0
+
+### Minor Changes
+
+- ae11e3a: add schema classes
+- 23812a9: add cbor protocol (alpha)
+
+### Patch Changes
+
+- Updated dependencies [ae11e3a]
+  - @smithy/middleware-serde@4.0.7
+
 ## 3.4.0
 
 ### Minor Changes

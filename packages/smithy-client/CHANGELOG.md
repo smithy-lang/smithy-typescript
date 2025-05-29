@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 23812a9: add schema property to Command class
+
+### Patch Changes
+
+- Updated dependencies [ae11e3a]
+- Updated dependencies [23812a9]
+  - @smithy/core@3.5.0
+  - @smithy/middleware-endpoint@4.1.8
+
 ## 4.3.0
 
 ### Minor Changes
