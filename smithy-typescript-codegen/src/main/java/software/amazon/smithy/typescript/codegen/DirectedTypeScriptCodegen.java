@@ -54,6 +54,7 @@ import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generato
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerator;
 import software.amazon.smithy.typescript.codegen.validation.LongValidator;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.MapUtils;
@@ -111,9 +112,14 @@ final class DirectedTypeScriptCodegen
                 directive.model(),
                 directive.service(),
                 directive.settings());
+
         ApplicationProtocol applicationProtocol = protocolGenerator == null
                 ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
                 : protocolGenerator.getApplicationProtocol();
+
+        if (null != protocolGenerator) {
+            directive.settings().setProtocol(protocolGenerator.getProtocol());
+        }
 
         return TypeScriptCodegenContext.builder()
                 .model(directive.model())
@@ -280,6 +286,8 @@ final class DirectedTypeScriptCodegen
                 });
             }
         }
+
+        new SchemaGenerator(model, fileManifest, settings, symbolProvider).run();
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
             PaginationGenerator.writeIndex(model, service, fileManifest);

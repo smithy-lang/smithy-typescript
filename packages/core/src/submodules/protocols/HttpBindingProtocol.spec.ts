@@ -5,6 +5,7 @@ import {
   CodecSettings,
   HandlerExecutionContext,
   HttpResponse as IHttpResponse,
+  MetadataBearer,
   OperationSchema,
   ResponseMetadata,
   ShapeDeserializer,
@@ -64,7 +65,7 @@ describe(HttpBindingProtocol.name, () => {
     });
 
     const protocol = new StringRestProtocol();
-    const output = await protocol.deserializeResponse(
+    const output = (await protocol.deserializeResponse(
       op(
         "",
         "",
@@ -87,7 +88,7 @@ describe(HttpBindingProtocol.name, () => {
       ),
       {} as any,
       response
-    );
+    )) as Partial<MetadataBearer>;
     delete output.$metadata;
     expect(output).toEqual({
       timestampList: [new Date("2019-12-16T23:48:18.000Z"), new Date("2019-12-16T23:48:18.000Z")],
@@ -104,7 +105,7 @@ describe(HttpBindingProtocol.name, () => {
     });
 
     const protocol = new StringRestProtocol();
-    const output = await protocol.deserializeResponse(
+    const output = (await protocol.deserializeResponse(
       op(
         "",
         "",
@@ -127,7 +128,7 @@ describe(HttpBindingProtocol.name, () => {
       ),
       {} as any,
       response
-    );
+    )) as Partial<MetadataBearer>;
     delete output.$metadata;
     expect(output).toEqual({
       httpPrefixHeaders: {

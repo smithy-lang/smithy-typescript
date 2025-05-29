@@ -58,82 +58,82 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
 
     @Override
     public void addConfigInterfaceFields(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer
     ) {
         writer.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
         writer.addImport("Logger", "__Logger", TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("Value for how many times a request will be made at most in case of retry.")
-                .write("maxAttempts?: number | __Provider<number>;\n");
+            .write("maxAttempts?: number | __Provider<number>;\n");
         writer.writeDocs("""
                          Specifies which retry algorithm to use.
                          @see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-smithy-util-retry/Enum/RETRY_MODES/
                          """)
-                .write("retryMode?: string | __Provider<string>;\n");
+            .write("retryMode?: string | __Provider<string>;\n");
         writer.writeDocs("Optional logger for logging debug/info/warn/error.")
-                .write("logger?: __Logger;\n");
+            .write("logger?: __Logger;\n");
         writer.addRelativeImport("RuntimeExtension", null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
         writer.writeDocs("Optional extensions")
-                .write("extensions?: RuntimeExtension[];\n");
+            .write("extensions?: RuntimeExtension[];\n");
     }
 
     @Override
     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            LanguageTarget target
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        LanguageTarget target
     ) {
         switch (target) {
             case SHARED:
                 return MapUtils.of(
-                        "logger", writer -> {
-                            writer.addImport("NoOpLogger", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
-                            writer.write("new NoOpLogger()");
-                        }
+                    "logger", writer -> {
+                        writer.addImport("NoOpLogger", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+                        writer.write("new NoOpLogger()");
+                    }
                 );
             case BROWSER:
                 return MapUtils.of(
-                        "maxAttempts", writer -> {
-                            writer.addDependency(TypeScriptDependency.UTIL_RETRY);
-                            writer.addImport("DEFAULT_MAX_ATTEMPTS", null, TypeScriptDependency.UTIL_RETRY);
-                            writer.write("DEFAULT_MAX_ATTEMPTS");
-                        },
-                        "retryMode", writer -> {
-                            writer.addDependency(TypeScriptDependency.UTIL_RETRY);
-                            writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
-                            writer.write(
-                                    "(async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE)");
-                        }
+                    "maxAttempts", writer -> {
+                        writer.addDependency(TypeScriptDependency.UTIL_RETRY);
+                        writer.addImport("DEFAULT_MAX_ATTEMPTS", null, TypeScriptDependency.UTIL_RETRY);
+                        writer.write("DEFAULT_MAX_ATTEMPTS");
+                    },
+                    "retryMode", writer -> {
+                        writer.addDependency(TypeScriptDependency.UTIL_RETRY);
+                        writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
+                        writer.write(
+                                "(async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE)");
+                    }
                 );
             case NODE:
                 return MapUtils.of(
-                        "maxAttempts", writer -> {
-                            writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                            writer.addImport("loadConfig", "loadNodeConfig",
-                                    TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                            writer.addImport("NODE_MAX_ATTEMPT_CONFIG_OPTIONS", null,
-                                    TypeScriptDependency.MIDDLEWARE_RETRY);
-                            writer.write("loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config)");
-                        },
-                        "retryMode", writer -> {
-                            writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                            writer.addImport("loadConfig", "loadNodeConfig",
-                                    TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                            writer.addDependency(TypeScriptDependency.MIDDLEWARE_RETRY);
-                            writer.addImport("NODE_RETRY_MODE_CONFIG_OPTIONS", null,
-                                    TypeScriptDependency.MIDDLEWARE_RETRY);
-                            writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
-                            writer.openBlock("loadNodeConfig({", "}, config)", () -> {
-                                writer.write("...NODE_RETRY_MODE_CONFIG_OPTIONS,");
-                                writer.write("default: async () => "
-                                             + "(await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE,");
-                            });
-                        }
+                    "maxAttempts", writer -> {
+                        writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImport("loadConfig", "loadNodeConfig",
+                                TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImport("NODE_MAX_ATTEMPT_CONFIG_OPTIONS", null,
+                                TypeScriptDependency.MIDDLEWARE_RETRY);
+                        writer.write("loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config)");
+                    },
+                    "retryMode", writer -> {
+                        writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImport("loadConfig", "loadNodeConfig",
+                                TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addDependency(TypeScriptDependency.MIDDLEWARE_RETRY);
+                        writer.addImport("NODE_RETRY_MODE_CONFIG_OPTIONS", null,
+                                TypeScriptDependency.MIDDLEWARE_RETRY);
+                        writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
+                        writer.openBlock("loadNodeConfig({", "}, config)", () -> {
+                            writer.write("...NODE_RETRY_MODE_CONFIG_OPTIONS,");
+                            writer.write("default: async () => "
+                                         + "(await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE,");
+                        });
+                    }
                 );
         default:
                 return Collections.emptyMap();
