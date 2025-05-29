@@ -83,12 +83,13 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
     SchemaTraitFilterIndex(Model model) {
         Set<Shape> shapesWithTrait = model.getShapesWithTrait(ProtocolDefinitionTrait.class);
         for (Shape shape : shapesWithTrait) {
-            System.out.println("shape having authDef: " + shape.getId().getName());
+            // todo(schema) use protocol and authDefinition traits as the initial allowlist.
+            // System.out.println("shape having authDef: " + shape.getId().getName());
             shape.getTrait(ProtocolDefinitionTrait.class).ifPresent(protocolDefinitionTrait -> {
                 protocolDefinitionTrait.getTraits().forEach(traitShapeId -> {
                     Shape traitShape = model.expectShape(traitShapeId);
                     TraitDefinition traitDefinition = model.getTraitDefinition(traitShapeId).get();
-                    System.out.println("\t trait shape: " + traitShapeId.getName());
+                    // System.out.println("\t trait shape: " + traitShapeId.getName());
                 });
             });
         }
