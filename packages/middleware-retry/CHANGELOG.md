@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.1.10
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/node-config-provider@4.1.3
+  - @smithy/protocol-http@5.1.2
+  - @smithy/service-error-classification@4.0.5
+  - @smithy/smithy-client@4.4.1
+  - @smithy/util-middleware@4.0.4
+  - @smithy/util-retry@4.0.5
+
 ## 4.1.9
 
 ### Patch Changes

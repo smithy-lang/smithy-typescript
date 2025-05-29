@@ -1,5 +1,14 @@
 # Change Log
 
+## 5.1.2
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/protocol-http@5.1.2
+  - @smithy/util-middleware@4.0.4
+
 ## 5.1.1
 
 ### Patch Changes
