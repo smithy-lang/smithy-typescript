@@ -109,6 +109,24 @@ jobs:
           yarn config set enableImmutableInstalls false
           node ./scripts/retry -- yarn test:integration
 
+  extract-docs:
+    runs-on: smithy-typescript_ubuntu-latest_8-core
+    name: Extract Docs
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "yarn"
+      - name: Install dependencies
+        run: |
+          yarn
+          yarn turbo telemetry disable
+      - name: Build packages
+        run: node ./scripts/retry -- yarn build
+      - name: Run API Extractor
+        run: yarn extract:docs
+
   ensure-typescript-formatted:
     runs-on: ubuntu-latest
     name: Ensure TypeScript is formatted
