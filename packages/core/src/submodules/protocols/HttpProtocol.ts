@@ -147,7 +147,6 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     schema: Schema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: IHttpResponse,
-    headerBindings: Set<string>,
     dataObject: any
   ): Promise<string[]> {
     const deserializer = this.deserializer;
@@ -222,7 +221,7 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
       } else if (memberTraits.httpPrefixHeaders !== undefined) {
         dataObject[memberName] = {};
         for (const [header, value] of Object.entries(response.headers)) {
-          if (!headerBindings.has(header) && header.startsWith(memberTraits.httpPrefixHeaders)) {
+          if (header.startsWith(memberTraits.httpPrefixHeaders)) {
             dataObject[memberName][header.slice(memberTraits.httpPrefixHeaders.length)] = await deserializer.read(
               [memberSchema.getValueSchema(), { httpHeader: header }],
               value

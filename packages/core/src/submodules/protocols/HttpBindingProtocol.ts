@@ -207,15 +207,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       response.headers[header.toLowerCase()] = value;
     }
 
-    const headerBindings = new Set<string>(
-      Object.values(ns.getMemberSchemas())
-        .map((schema) => {
-          return schema.getMergedTraits().httpHeader;
-        })
-        .filter(Boolean) as string[]
-    );
-
-    const nonHttpBindingMembers = await this.deserializeHttpMessage(ns, context, response, headerBindings, dataObject);
+    const nonHttpBindingMembers = await this.deserializeHttpMessage(ns, context, response, dataObject);
 
     if (nonHttpBindingMembers.length) {
       const bytes: Uint8Array = await collectBody(response.body, context);
