@@ -185,6 +185,11 @@ describe(NormalizedSchema.name, () => {
         expect(schema.getMergedTraits()).toEqual(entrySchema.getMergedTraits());
       }
     });
+
+    it("can acquire structIterator on the unit schema type and its iteration is empty", () => {
+      const iteration = Array.from(NormalizedSchema.of("unit").structIterator());
+      expect(iteration.length).toBe(0);
+    });
   });
 
   describe("traits", () => {
