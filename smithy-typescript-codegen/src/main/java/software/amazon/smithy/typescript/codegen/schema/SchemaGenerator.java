@@ -275,7 +275,7 @@ public class SchemaGenerator implements Runnable {
         writer.write("""
                 export var $L = error($S, $S, 0, [], []""",
             serviceExceptionName,
-            "awssdkjs.synthetic." + namespace,
+            "smithy.ts.sdk.synthetic." + namespace,
             serviceExceptionName
         );
         writer.writeInline(",$L", exceptionCtorSymbolName);
