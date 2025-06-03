@@ -401,6 +401,9 @@ export class NormalizedSchema implements INormalizedSchema {
    * This avoids the overhead of calling Object.entries(ns.getMemberSchemas()).
    */
   public *structIterator(): Generator<[string, NormalizedSchema], undefined, undefined> {
+    if (this.isUnitSchema()) {
+      return;
+    }
     if (!this.isStructSchema()) {
       throw new Error("@smithy/core/schema - cannot acquire structIterator on non-struct schema.");
     }
