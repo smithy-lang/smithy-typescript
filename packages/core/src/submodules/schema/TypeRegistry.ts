@@ -65,7 +65,7 @@ export class TypeRegistry {
    */
   public getBaseException(): ErrorSchema | undefined {
     for (const [id, schema] of this.schemas.entries()) {
-      if (id.startsWith("smithyts.client.synthetic.") && id.endsWith("ServiceException")) {
+      if (id.startsWith("smithy.ts.sdk.synthetic.") && id.endsWith("ServiceException")) {
         return schema as ErrorSchema;
       }
     }
