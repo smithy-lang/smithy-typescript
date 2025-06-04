@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.5.2
+
+### Patch Changes
+
+- 4642e7e: allow http prefix header and header to read from same binding
+- 147ceed: use smithy synthetic namespace for base errors
+- ae8f1f4: allow struct iterator acquisition on unit schema
+
 ## 3.5.1
 
 ### Patch Changes
