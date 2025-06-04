@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.5.3
+
+### Patch Changes
+
+- 4a31774: allow old signature in protected method
+
 ## 3.5.2
 
 ### Patch Changes
