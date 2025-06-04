@@ -143,12 +143,36 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     };
   }
 
+  /**
+   * @deprecated use signature without headerBindings.
+   */
+  protected async deserializeHttpMessage(
+    schema: Schema,
+    context: HandlerExecutionContext & SerdeFunctions,
+    response: IHttpResponse,
+    headerBindings: Set<string>,
+    dataObject: any
+  ): Promise<string[]>;
   protected async deserializeHttpMessage(
     schema: Schema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: IHttpResponse,
     dataObject: any
+  ): Promise<string[]>;
+  protected async deserializeHttpMessage(
+    schema: Schema,
+    context: HandlerExecutionContext & SerdeFunctions,
+    response: IHttpResponse,
+    arg4: unknown,
+    arg5?: unknown
   ): Promise<string[]> {
+    let dataObject: any;
+    if (arg4 instanceof Set) {
+      dataObject = arg5;
+    } else {
+      dataObject = arg4;
+    }
+
     const deserializer = this.deserializer;
     const ns = NormalizedSchema.of(schema);
     const nonHttpBindingMembers = [] as string[];
