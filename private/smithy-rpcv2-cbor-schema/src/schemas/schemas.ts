@@ -1,7 +1,7 @@
-const _B = "Boolean";
-const _BL = "BooleanList";
-const _BLl = "BlobList";
-const _Bl = "Blob";
+const _B = "Blob";
+const _BL = "BlobList";
+const _BLo = "BooleanList";
+const _Bo = "Boolean";
 const _By = "Byte";
 const _CE = "ComplexError";
 const _CNED = "ComplexNestedErrorData";
@@ -342,7 +342,7 @@ export var SparseNullsOperationInputOutput = struct(
 export var StructureListMember = struct(n1, _SLM, 0, [_a, _b_], [0, 0]);
 export var GreetingStruct = struct(n2, _GS, 0, [_h], [0]);
 export var RpcV2ProtocolServiceException = error(
-  "awssdkjs.synthetic.smithy.protocoltests.rpcv2Cbor",
+  "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor",
   "RpcV2ProtocolServiceException",
   0,
   [],
