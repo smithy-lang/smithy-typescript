@@ -247,6 +247,42 @@ describe("NodeHttpHandler", () => {
     });
   });
 
+  describe("create", () => {
+    const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
+
+    it.each([
+      ["existing handler instance", new NodeHttpHandler()],
+      ["custom HttpHandler object", {
+        handle: vi.fn(),
+      } as any],
+    ])("returns the input handler when passed %s", (_, handler) => {
+      const result = NodeHttpHandler.create(handler);
+      expect(result).toBe(handler);
+    });
+
+    it.each([
+      ["undefined", undefined],
+      ["an empty options hash", {}],
+      ["empty provider", async () => undefined],
+    ])("creates new handler instance when input is %s", async (_, input) => {
+      const result = NodeHttpHandler.create(input);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+    });
+
+    it.each([
+      ["an options hash", { requestTimeout: randomRequestTimeout }],
+      ["a provider", async () => ({ requestTimeout: randomRequestTimeout })],
+    ])("creates new handler instance with config when input is %s", async (_, input) => {
+      const result = NodeHttpHandler.create(input);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+
+      // Verify configuration by calling handle
+      await result.handle({} as any);
+
+      expect(result.httpHandlerConfigs().requestTimeout).toBe(randomRequestTimeout);
+    });
+  });
+
   describe("#destroy", () => {
     it("should be callable and return nothing", () => {
       const nodeHttpHandler = new NodeHttpHandler();
