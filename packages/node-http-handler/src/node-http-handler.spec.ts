@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 import { NodeHttpHandler } from "./node-http-handler";
 import * as setConnectionTimeoutModule from "./set-connection-timeout";
+import * as setSocketTimeoutModule from "./set-socket-timeout";
 import { timing } from "./timing";
 
 vi.mock("http", async () => {
@@ -56,6 +57,7 @@ describe("NodeHttpHandler", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
     const randomSocketAcquisitionWarningTimeout = Math.round(Math.random() * 10000) + 1;
     const randomConnectionTimeout = Math.round(Math.random() * 10000) + 1;
+    const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
 
     beforeEach(() => {});
 
@@ -127,6 +129,21 @@ describe("NodeHttpHandler", () => {
         expect(vi.mocked(setConnectionTimeoutModule.setConnectionTimeout).mock.calls[0][2]).toBe(
           randomConnectionTimeout
         );
+      });
+
+      it.each([
+        ["an options hash", { requestTimeout: randomRequestTimeout }],
+        [
+          "a provider",
+          async () => ({
+            requestTimeout: randomRequestTimeout,
+          }),
+        ],
+      ])("sets requestTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(setSocketTimeoutModule, "setSocketTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(setSocketTimeoutModule.setSocketTimeout).mock.calls[0][2]).toBe(randomRequestTimeout);
       });
 
       it.each([
