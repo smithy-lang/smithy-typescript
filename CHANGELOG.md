@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.31.0 (2025-06-09)
+
+## Features
+- Upgraded smithy version to 1.58.0 ([#1616](https://github.com/smithy-lang/smithy-typescript/pull/1616))
+- Added schema code generation and related allow-list ([#1599](https://github.com/smithy-lang/smithy-typescript/pull/1599))
+
+### Chores
+- Updated synthetic error namespace ([#1611](https://github.com/smithy-lang/smithy-typescript/pull/1611))
+- Generated default endpoint ruleset to make code generation consistent for ruleset trait ([#1589](https://github.com/smithy-lang/smithy-typescript/pull/1589))
+
 ## 0.30.0 (2025-05-08)
 
 ### Features
