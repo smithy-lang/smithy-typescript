@@ -132,7 +132,8 @@ public class ParameterGenerator {
     public String toCodeString(boolean isClientContextParam) {
         String buffer = "";
         buffer += parameterName;
-        if (!required || hasDefault() || isClientContextParam) {
+        boolean optional = !required || hasDefault() || isClientContextParam;
+        if (optional) {
             buffer += "?";
         }
         buffer += ": ";
@@ -140,8 +141,12 @@ public class ParameterGenerator {
         if (parameterName.equals("endpoint") && isInputKey) {
             buffer += "string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;";
         } else {
-            if (isClientContextParam) {
-                buffer += (tsParamType + "|" + "Provider<" + tsParamType + ">") + ";";
+            if (optional) {
+                if (isClientContextParam) {
+                    buffer += (tsParamType + " | undefined | Provider<" + tsParamType + " | undefined>") + ";";
+                } else {
+                    buffer += tsParamType + " | undefined;";
+                }
             } else {
                 buffer += tsParamType + ";";
             }

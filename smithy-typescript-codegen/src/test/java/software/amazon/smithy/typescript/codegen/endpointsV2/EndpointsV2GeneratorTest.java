@@ -40,25 +40,30 @@ public class EndpointsV2GeneratorTest {
         String ruleset = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
 
         assertThat(ruleset, containsString(
-                "      },\n" +
-                "      \"Stage\": {\n" +
-                "        \"type\": \"String\",\n" +
-                "        \"required\": true,\n" +
-                "        \"default\": \"production\",\n" +
-                "      },\n"));
+            """
+                      },
+                      "Stage": {
+                        "type": "String",
+                        "required": true,
+                        "default": "production",
+                      },
+                """));
 
         String endpointParameters = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts").get();
 
         assertThat(endpointParameters, containsString(
-                "  return Object.assign(options, {\n" +
-                "    stage: options.stage ?? \"production\",\n" +
-                "    defaultSigningName: \"\",\n" +
-                "  });\n"));
+            """
+                  return Object.assign(options, {
+                    stage: options.stage ?? "production",
+                    defaultSigningName: "",
+                  });
+                """));
         assertThat(endpointParameters, containsString(
-                "export interface ClientInputEndpointParameters {\n" +
-                "  region?: string|Provider<string>;\n" +
-                "  stage?: string|Provider<string>;\n" +
-                "  endpoint?:"));
+            """
+                export interface ClientInputEndpointParameters {
+                  region?: string | undefined | Provider<string | undefined>;
+                  stage?: string | undefined | Provider<string | undefined>;
+                  endpoint?:"""));
     }
 
     private MockManifest testEndpoints(String filename) {
