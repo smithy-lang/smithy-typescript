@@ -2,6 +2,7 @@ import { SdkError } from "@smithy/types";
 
 import {
   CLOCK_SKEW_ERROR_CODES,
+  NODEJS_NETWORK_ERROR_CODES,
   NODEJS_TIMEOUT_ERROR_CODES,
   THROTTLING_ERROR_CODES,
   TRANSIENT_ERROR_CODES,
@@ -57,6 +58,7 @@ export const isTransientError = (error: SdkError, depth = 0): boolean =>
   isClockSkewCorrectedError(error) ||
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
+  NODEJS_NETWORK_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
   TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
   isBrowserNetworkError(error) ||
   (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1));
