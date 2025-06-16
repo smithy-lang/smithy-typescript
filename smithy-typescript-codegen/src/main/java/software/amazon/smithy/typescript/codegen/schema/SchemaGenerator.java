@@ -128,7 +128,6 @@ public class SchemaGenerator implements Runnable {
      */
     private void loadShapes(Shape shape) {
         String absoluteName = shape.getId().toString();
-        String name = shape.getId().getName();
 
         if (shape.isMemberShape()) {
             loadShapes(model.expectShape(shape.asMemberShape().get().getTarget()));
@@ -139,9 +138,6 @@ public class SchemaGenerator implements Runnable {
             return;
         }
 
-        if (!elision.isReferenceSchema(shape)) {
-            stringStore.var(name);
-        }
         loadShapesVisited.add(absoluteName);
 
         switch (shape.getType()) {

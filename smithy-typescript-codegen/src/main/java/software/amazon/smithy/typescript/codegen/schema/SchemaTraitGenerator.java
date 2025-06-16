@@ -98,16 +98,6 @@ public class SchemaTraitGenerator {
             return stringStore.var(strTrait.getValue());
         } else if (ANNOTATION_TRAITS.contains(trait.toShapeId()) && trait instanceof AnnotationTrait) {
             return ANNOTATION_TRAIT_VALUE;
-        } else if (trait instanceof HttpErrorTrait httpError) {
-            return Objects.toString(httpError.getCode());
-        } else if (trait instanceof HttpTrait httpTrait) {
-            return """
-                ["%s", "%s", %s]
-                """.formatted(
-                httpTrait.getMethod(),
-                httpTrait.getUri(),
-                httpTrait.getCode()
-            );
         } else if (DATA_TRAITS.contains(trait.toShapeId())) {
             if (trait instanceof EndpointTrait endpointTrait) {
                 return """
@@ -119,6 +109,16 @@ public class SchemaTraitGenerator {
                 """.formatted(
                     stringStore.var(xmlNamespaceTrait.getPrefix().orElse("")),
                     stringStore.var(xmlNamespaceTrait.getUri())
+                );
+            } else if (trait instanceof HttpErrorTrait httpError) {
+                return Objects.toString(httpError.getCode());
+            } else if (trait instanceof HttpTrait httpTrait) {
+                return """
+                ["%s", "%s", %s]
+                """.formatted(
+                    httpTrait.getMethod(),
+                    httpTrait.getUri(),
+                    httpTrait.getCode()
                 );
             }
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {

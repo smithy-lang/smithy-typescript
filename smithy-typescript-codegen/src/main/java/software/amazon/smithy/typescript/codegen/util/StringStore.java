@@ -38,7 +38,7 @@ public final class StringStore {
     private final TreeMap<String, String> variableToLiteral = new TreeMap<>();
 
     // controls incremental output.
-    private final Set<String> writelog = new HashSet<>();
+    private final Set<String> writeLog = new HashSet<>();
 
     public StringStore() {}
 
@@ -79,7 +79,7 @@ public final class StringStore {
         for (Map.Entry<String, String> entry : variableToLiteral.entrySet()) {
             String variable = entry.getKey();
             String literal = entry.getValue();
-            if (writelog.add(variable)) {
+            if (writeLog.add(variable)) {
                 sourceCode.append(String.format("const %s = \"%s\";%n", variable, literal));
             }
         }
