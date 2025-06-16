@@ -12,11 +12,19 @@ import { InstanceMetadataCredentials } from "./types";
 import { getInstanceMetadataEndpoint } from "./utils/getInstanceMetadataEndpoint";
 import { staticStabilityProvider } from "./utils/staticStabilityProvider";
 
-const IMDS_PATH = "/latest/meta-data/iam/security-credentials/";
-const IMDS_TOKEN_PATH = "/latest/api/token";
+const IMDS_LEGACY_PATH = "/latest/meta-data/iam/security-credentials/";
+const IMDS_EXTENDED_PATH = "/latest/meta-data/iam/security-credentials-extended/";
 const AWS_EC2_METADATA_V1_DISABLED = "AWS_EC2_METADATA_V1_DISABLED";
 const PROFILE_AWS_EC2_METADATA_V1_DISABLED = "ec2_metadata_v1_disabled";
+const IMDS_TOKEN_PATH = "/latest/api/token";
 const X_AWS_EC2_METADATA_TOKEN = "x-aws-ec2-metadata-token";
+
+// Environment variables and config keys
+
+const ENV_IMDS_DISABLED = "AWS_EC2_METADATA_DISABLED";                         
+const CONFIG_IMDS_DISABLED = "disable_ec2_metadata";                       
+const ENV_PROFILE_NAME = "AWS_EC2_INSTANCE_PROFILE_NAME";                 
+const CONFIG_PROFILE_NAME = "ec2_instance_profile_name";              
 
 /**
  * @internal
@@ -36,10 +44,12 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
   const { logger, profile } = init;
   const { timeout, maxRetries } = providerConfigFromInit(init);
 
+
   const getCredentials = async (maxRetries: number, options: RequestOptions) => {
     const isImdsV1Fallback = disableFetchToken || options.headers?.[X_AWS_EC2_METADATA_TOKEN] == null;
 
     if (isImdsV1Fallback) {
+      await checkIfImdsDisabled(profile, logger);
       let fallbackBlockedFromProfile = false;
       let fallbackBlockedFromProcessEnv = false;
 
@@ -84,20 +94,7 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
       }
     }
 
-    const imdsProfile = (
-      await retry<string>(async () => {
-        let profile: string;
-        try {
-          profile = await getProfile(options);
-        } catch (err) {
-          if (err.statusCode === 401) {
-            disableFetchToken = false;
-          }
-          throw err;
-        }
-        return profile;
-      }, maxRetries)
-    ).trim();
+    const imdsProfile = await getImdsProfileHelper(options, maxRetries, init, profile);
 
     return retry(async () => {
       let creds: AwsCredentialIdentity;
@@ -113,8 +110,10 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
     }, maxRetries);
   };
 
-  return async () => {
+
+  return async () => {   
     const endpoint = await getInstanceMetadataEndpoint();
+    await checkIfImdsDisabled(profile, logger);
     if (disableFetchToken) {
       logger?.debug("AWS SDK Instance Metadata", "using v1 fallback (no token fetch)");
       return getCredentials(maxRetries, { ...endpoint, timeout });
@@ -144,6 +143,55 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
   };
 };
 
+/**
+ * @internal
+ * Gets IMDS profile with proper error handling and retries
+ */
+const getImdsProfileHelper = async (
+  options: RequestOptions,
+  maxRetries: number,
+  init: RemoteProviderInit = {},
+  profile?: string
+): Promise<string> => {
+  let apiVersion: "unknown" | "extended" | "legacy" = "unknown";
+  let resolvedProfile: string | null = null;
+  
+  return retry<string>(async () => {
+    // First check if a profile name is configured
+    const configuredName = await getConfiguredProfileName(init, profile);
+    if (configuredName) {
+      return configuredName;
+    }
+    if (resolvedProfile) {
+      return resolvedProfile;
+    }
+    // If no configured name, fetch profile name from IMDS
+    try {
+      // Try extended API first
+      try {
+        const response = await httpRequest({...options, path: IMDS_EXTENDED_PATH});
+        resolvedProfile = response.toString().trim();
+        if (apiVersion === "unknown") {
+          apiVersion = "extended";
+        }
+        return resolvedProfile;
+      } catch (error) {
+        if (error?.statusCode === 404 && apiVersion === "unknown") {
+          apiVersion = "legacy";
+          const response = await httpRequest({...options, path: IMDS_LEGACY_PATH});
+          resolvedProfile = response.toString().trim();
+          return resolvedProfile;
+        } else {
+          throw error;
+        }
+      }
+    } catch (err) {
+      throw err;
+    }
+  }, maxRetries);
+};
+
+
 const getMetadataToken = async (options: RequestOptions) =>
   httpRequest({
     ...options,
@@ -154,23 +202,109 @@ const getMetadataToken = async (options: RequestOptions) =>
     },
   });
 
-const getProfile = async (options: RequestOptions) => (await httpRequest({ ...options, path: IMDS_PATH })).toString();
-
-const getCredentialsFromProfile = async (profile: string, options: RequestOptions, init: RemoteProviderInit) => {
-  const credentialsResponse = JSON.parse(
-    (
-      await httpRequest({
-        ...options,
-        path: IMDS_PATH + profile,
-      })
-    ).toString()
-  );
-
-  if (!isImdsCredentials(credentialsResponse)) {
-    throw new CredentialsProviderError("Invalid response received from instance metadata service.", {
-      logger: init.logger,
-    });
+/**
+ * @internal
+ * Checks if IMDS credential fetching is disabled through configuration
+ */
+const checkIfImdsDisabled = async (profile?: string, logger?: any): Promise<void> => {
+  // Load configuration in priority order
+  const disableImds = await loadConfig(
+    {
+      // Check environment variable
+      environmentVariableSelector: (env) => {
+        const envValue = env[ENV_IMDS_DISABLED];
+        return envValue === "true";
+      },
+      // Check config file
+      configFileSelector: (profile) => {
+        const profileValue = profile[CONFIG_IMDS_DISABLED];
+        return profileValue === "true";
+      },
+      default: false,
+    },
+    { profile }
+  )();
+  
+  // If IMDS is disabled, throw error
+  if (disableImds) {
+    throw new CredentialsProviderError("IMDS credential fetching is disabled", { logger });
   }
-
-  return fromImdsCredentials(credentialsResponse);
 };
+
+/**
+ * @internal
+ * Gets configured profile name from various sources
+ */
+const getConfiguredProfileName = async (init: RemoteProviderInit, profile?: string): Promise<string | null> => {
+  // Load configuration in priority order
+  const profileName = await loadConfig(
+    {
+      // Check environment variable
+      environmentVariableSelector: (env) => env[ENV_PROFILE_NAME],
+      // Check config file
+      configFileSelector: (profile) => profile[CONFIG_PROFILE_NAME],
+      default: null,
+    },
+    { profile }
+  )();
+  
+  // Check runtime config (highest priority)
+  const name = init.ec2InstanceProfileName || profileName;
+  
+  // Validate if name is provided but empty
+  if (typeof name === 'string' && name.trim() === "") {
+    throw new CredentialsProviderError("EC2 instance profile name cannot be empty");
+  }
+  
+  return name;
+};
+
+
+/**
+ * @internal
+ * Gets credentials from profile
+ */
+const getCredentialsFromProfile = async (profile: string, options: RequestOptions, init: RemoteProviderInit) => {
+  // Try extended API first
+  try {
+    return await getCredentialsFromPath(IMDS_EXTENDED_PATH + profile, options);
+  } catch (error) {
+    // If extended API returns 404, fall back to legacy API
+    if (error.statusCode === 404) {
+      try {
+        return await getCredentialsFromPath(IMDS_LEGACY_PATH + profile, options);
+      } catch (legacyError) {
+        if (legacyError.statusCode === 404 && init.ec2InstanceProfileName === undefined) {
+            // If legacy API also returns 404 and we're using a cached profile name,
+            // the profile might have changed - clear cache and retry
+            const resolvedProfile = null;
+            const newProfileName = await getImdsProfileHelper(options, init.maxRetries ?? 3, init, profile);
+            return getCredentialsFromProfile(newProfileName, options, init);
+          }
+        throw legacyError;
+      }
+    }
+    throw error;
+  }
+};
+
+/**
+ * @internal
+ * Gets credentials from specified IMDS path
+ */
+async function getCredentialsFromPath(path: string, options: RequestOptions) {
+  const response = await httpRequest({
+    ...options,
+    path,
+  });
+  
+  const credentialsResponse = JSON.parse(response.toString());
+  
+  // Validate response
+  if (!isImdsCredentials(credentialsResponse)) {
+    throw new CredentialsProviderError("Invalid response received from instance metadata service.");
+  }
+  
+  // Convert IMDS credentials format to standard format
+  return fromImdsCredentials(credentialsResponse);
+}
