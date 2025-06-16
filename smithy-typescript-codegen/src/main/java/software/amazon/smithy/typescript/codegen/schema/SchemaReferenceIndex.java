@@ -46,10 +46,12 @@ final class SchemaReferenceIndex implements KnowledgeIndex {
         }
         ShapeType type = targetShape.getType();
         switch (type) {
-            case BOOLEAN, STRING, BYTE, DOUBLE, FLOAT, INTEGER, LONG, SHORT, ENUM, INT_ENUM -> {
-                return false;
-            }
-            case TIMESTAMP, BLOB -> {
+            case STRING,
+                 BOOLEAN,
+                 BYTE, DOUBLE, FLOAT, SHORT, INTEGER, LONG,
+                 ENUM, INT_ENUM,
+                 BIG_INTEGER, BIG_DECIMAL,
+                 TIMESTAMP, BLOB, DOCUMENT -> {
                 return false;
             }
             case LIST, SET, MAP -> {
