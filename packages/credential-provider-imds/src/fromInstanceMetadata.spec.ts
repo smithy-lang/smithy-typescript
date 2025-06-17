@@ -1,6 +1,7 @@
 import { loadConfig } from "@smithy/node-config-provider";
 import { CredentialsProviderError } from "@smithy/property-provider";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
 import { checkIfImdsDisabled, fromInstanceMetadata } from "./fromInstanceMetadata";
 import * as fromInstanceMetadataModule from "./fromInstanceMetadata";
