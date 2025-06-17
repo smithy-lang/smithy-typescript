@@ -234,7 +234,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             this::writeErrorCodeParser,
             isErrorCodeInBody,
             this::getErrorBodyLocation,
-            this::getOperationErrors
+            this::getOperationErrors,
+            getErrorAliases(context, containedOperations)
         );
         deserializingErrorShapes.addAll(errorShapes);
     }
