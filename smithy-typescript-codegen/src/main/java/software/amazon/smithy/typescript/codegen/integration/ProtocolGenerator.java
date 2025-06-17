@@ -16,8 +16,10 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -319,6 +321,15 @@ public interface ProtocolGenerator {
             );
         }
         return errors;
+    }
+
+    /**
+     * @return map of fully qualified shape id to aliases and/or short names that should map to the same error.
+     */
+    default Map<String, TreeSet<String>> getErrorAliases(
+        GenerationContext context, Collection<OperationShape> operations
+    ) {
+        return Collections.emptyMap();
     }
 
     /**
