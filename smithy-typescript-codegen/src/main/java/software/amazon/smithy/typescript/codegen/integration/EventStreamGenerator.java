@@ -39,6 +39,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
+import software.amazon.smithy.model.traits.HttpPayloadTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -80,6 +81,26 @@ public class EventStreamGenerator {
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         EventStreamInfo eventStreamInfo = eventStreamIndex.getOutputInfo(operation).get();
         return eventStreamInfo.getEventStreamTarget().asUnionShape().get();
+    }
+
+    public static MemberShape getEventStreamMember(GenerationContext context, StructureShape struct) {
+        List<MemberShape> eventStreamMembers = struct.members()
+            .stream()
+            .filter(shape -> {
+                Shape target = context.getModel().expectShape(shape.getTarget());
+                boolean targetStreaming = target.hasTrait(StreamingTrait.class);
+                boolean targetUnion = target.isUnionShape();
+                boolean memberStreaming = shape.hasTrait(StreamingTrait.class);
+                boolean memberPayload = shape.hasTrait(HttpPayloadTrait.class);
+                return memberPayload && targetUnion && (targetStreaming || memberStreaming);
+            }).toList();
+
+        if (eventStreamMembers.isEmpty()) {
+            throw new CodegenException("No event stream member found in " + struct.getId().toString());
+        } else if (eventStreamMembers.size() > 1) {
+            throw new CodegenException("More than one event stream member in " + struct.getId().toString());
+        }
+        return eventStreamMembers.get(0);
     }
 
     /**
