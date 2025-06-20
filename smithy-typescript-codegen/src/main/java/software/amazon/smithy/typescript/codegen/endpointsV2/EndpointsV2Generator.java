@@ -132,7 +132,9 @@ public final class EndpointsV2Generator implements Runnable {
 
                 writer.write("");
                 writer.openBlock(
-                    "export type ClientResolvedEndpointParameters = ClientInputEndpointParameters & {",
+                    """
+                    export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
+                    """,
                     "};",
                     () -> {
                         writer.write("defaultSigningName: string;");
