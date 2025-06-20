@@ -119,7 +119,7 @@ export interface EventStreamMarshallerSerFn<StreamType> {
  * @public
  *
  * An interface which provides functions for serializing and deserializing binary event stream
- * to/from corresponsing modeled shape.
+ * to/from corresponding modeled shape.
  */
 export interface EventStreamMarshaller<StreamType = any> {
   deserialize: EventStreamMarshallerDeserFn<StreamType>;

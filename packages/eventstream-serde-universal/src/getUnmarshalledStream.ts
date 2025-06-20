@@ -61,9 +61,7 @@ export function getMessageUnmarshaller<T extends Record<string, any>>(
       const event = {
         [message.headers[":event-type"].value as string]: message,
       };
-      const deserialized = await deserializer(event);
-      if (deserialized.$unknown) return;
-      return deserialized;
+      return deserializer(event);
     } else {
       throw Error(`Unrecognizable event type: ${message.headers[":event-type"].value}`);
     }

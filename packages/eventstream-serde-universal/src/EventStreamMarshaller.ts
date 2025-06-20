@@ -14,11 +14,6 @@ import { getMessageUnmarshaller } from "./getUnmarshalledStream";
 /**
  * @internal
  */
-export interface EventStreamMarshaller extends IEventStreamMarshaller {}
-
-/**
- * @internal
- */
 export interface EventStreamMarshallerOptions {
   utf8Encoder: Encoder;
   utf8Decoder: Decoder;
@@ -27,7 +22,7 @@ export interface EventStreamMarshallerOptions {
 /**
  * @internal
  */
-export class EventStreamMarshaller {
+export class EventStreamMarshaller implements IEventStreamMarshaller {
   private readonly eventStreamCodec: EventStreamCodec;
   private readonly utfEncoder: Encoder;
 
@@ -41,11 +36,9 @@ export class EventStreamMarshaller {
     deserializer: (input: Record<string, Message>) => Promise<T>
   ): AsyncIterable<T> {
     const inputStream = getChunkedStream(body);
-    // @ts-expect-error Type 'SmithyMessageDecoderStream<Record<string, any>>' is not assignable to type 'AsyncIterable<T>'
-    return new SmithyMessageDecoderStream({
+    return new SmithyMessageDecoderStream<T>({
       messageStream: new MessageDecoderStream({ inputStream, decoder: this.eventStreamCodec }),
-      // @ts-expect-error Type 'T' is not assignable to type 'Record<string, any>'
-      deserializer: getMessageUnmarshaller(deserializer, this.utfEncoder),
+      deserializer: getMessageUnmarshaller<any>(deserializer, this.utfEncoder),
     });
   }
 
