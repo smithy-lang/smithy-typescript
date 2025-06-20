@@ -39,7 +39,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
-import software.amazon.smithy.model.traits.HttpPayloadTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -90,9 +89,7 @@ public class EventStreamGenerator {
                 Shape target = context.getModel().expectShape(shape.getTarget());
                 boolean targetStreaming = target.hasTrait(StreamingTrait.class);
                 boolean targetUnion = target.isUnionShape();
-                boolean memberStreaming = shape.hasTrait(StreamingTrait.class);
-                boolean memberPayload = shape.hasTrait(HttpPayloadTrait.class);
-                return memberPayload && targetUnion && (targetStreaming || memberStreaming);
+                return targetUnion && targetStreaming;
             }).toList();
 
         if (eventStreamMembers.isEmpty()) {
@@ -454,7 +451,7 @@ public class EventStreamGenerator {
                             });
                         });
                     });
-                    writer.write("return {$$unknown: output};");
+                    writer.write("return {$$unknown: event as any};");
                 });
             });
         });

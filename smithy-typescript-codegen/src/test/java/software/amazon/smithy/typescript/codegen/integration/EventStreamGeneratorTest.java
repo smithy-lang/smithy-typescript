@@ -35,8 +35,6 @@ class EventStreamGeneratorTest {
 
         when(streamingTarget1.hasTrait(StreamingTrait.class)).thenReturn(true);
         when(streamingTarget1.isUnionShape()).thenReturn(true);
-        when(eventStreamMember1.hasTrait(StreamingTrait.class)).thenReturn(false);
-        when(eventStreamMember1.hasTrait(HttpPayloadTrait.class)).thenReturn(true);
 
         MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
             context,
@@ -90,15 +88,11 @@ class EventStreamGeneratorTest {
         when(model.expectShape(streamingMember1ShapeId)).thenReturn(streamingTarget1);
         when(streamingTarget1.hasTrait(StreamingTrait.class)).thenReturn(true);
         when(streamingTarget1.isUnionShape()).thenReturn(true);
-        when(eventStreamMember1.hasTrait(StreamingTrait.class)).thenReturn(false);
-        when(eventStreamMember1.hasTrait(HttpPayloadTrait.class)).thenReturn(true);
 
         when(eventStreamMember2.getTarget()).thenReturn(streamingMember2ShapeId);
         when(model.expectShape(streamingMember2ShapeId)).thenReturn(streamingTarget2);
         when(streamingTarget2.hasTrait(StreamingTrait.class)).thenReturn(true);
         when(streamingTarget2.isUnionShape()).thenReturn(true);
-        when(eventStreamMember2.hasTrait(StreamingTrait.class)).thenReturn(false);
-        when(eventStreamMember2.hasTrait(HttpPayloadTrait.class)).thenReturn(true);
 
         try {
             MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
