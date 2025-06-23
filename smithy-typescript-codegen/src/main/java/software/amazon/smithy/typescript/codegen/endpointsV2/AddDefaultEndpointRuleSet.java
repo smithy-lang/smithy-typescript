@@ -74,6 +74,8 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
             """))
         .build();
 
+    private boolean usesDefaultEndpointRuleset = false;
+
     @Override
     public List<String> runAfter() {
         return List.of(AddBuiltinPlugins.class.getCanonicalName());
@@ -81,11 +83,25 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
 
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
+        RuntimeClientPlugin endpointConfigResolver = RuntimeClientPlugin.builder()
+            .withConventions(
+                TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
+            .build();
+
+        if (usesDefaultEndpointRuleset) {
+            return List.of(
+                endpointConfigResolver,
+                RuntimeClientPlugin.builder()
+                    .withConventions(
+                        TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency,
+                        "EndpointRequired",
+                        HAS_CONFIG
+                    )
+                    .build()
+            );
+        }
         return List.of(
-            RuntimeClientPlugin.builder()
-                .withConventions(
-                    TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
-                .build()
+            endpointConfigResolver
         );
     }
 
@@ -95,6 +111,7 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
 
         model.getServiceShapes().forEach(serviceShape -> {
             if (!serviceShape.hasTrait(EndpointRuleSetTrait.class)) {
+                usesDefaultEndpointRuleset = true;
                 modelBuilder.removeShape(serviceShape.toShapeId());
                 modelBuilder.addShape(serviceShape.toBuilder()
                     .addTrait(DEFAULT_RULESET)

@@ -48,7 +48,14 @@ import {
 } from "@smithy/core";
 import { getSchemaSerdePlugin } from "@smithy/core/schema";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
-import { EndpointInputConfig, EndpointResolvedConfig, resolveEndpointConfig } from "@smithy/middleware-endpoint";
+import {
+  EndpointInputConfig,
+  EndpointRequiredInputConfig,
+  EndpointRequiredResolvedConfig,
+  EndpointResolvedConfig,
+  resolveEndpointConfig,
+  resolveEndpointRequiredConfig,
+} from "@smithy/middleware-endpoint";
 import { RetryInputConfig, RetryResolvedConfig, getRetryPlugin, resolveRetryConfig } from "@smithy/middleware-retry";
 import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
@@ -227,6 +234,7 @@ export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__Http
   ClientDefaults &
   RetryInputConfig &
   EndpointInputConfig<EndpointParameters> &
+  EndpointRequiredInputConfig &
   HttpAuthSchemeInputConfig &
   ClientInputEndpointParameters;
 /**
@@ -244,6 +252,7 @@ export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguratio
   RuntimeExtensionsConfig &
   RetryResolvedConfig &
   EndpointResolvedConfig<EndpointParameters> &
+  EndpointRequiredResolvedConfig &
   HttpAuthSchemeResolvedConfig &
   ClientResolvedEndpointParameters;
 /**
@@ -274,9 +283,10 @@ export class RpcV2ProtocolClient extends __Client<
     let _config_1 = resolveClientEndpointParameters(_config_0);
     let _config_2 = resolveRetryConfig(_config_1);
     let _config_3 = resolveEndpointConfig(_config_2);
-    let _config_4 = resolveHttpAuthSchemeConfig(_config_3);
-    let _config_5 = resolveRuntimeExtensions(_config_4, configuration?.extensions || []);
-    this.config = _config_5;
+    let _config_4 = resolveEndpointRequiredConfig(_config_3);
+    let _config_5 = resolveHttpAuthSchemeConfig(_config_4);
+    let _config_6 = resolveRuntimeExtensions(_config_5, configuration?.extensions || []);
+    this.config = _config_6;
     this.middlewareStack.use(getSchemaSerdePlugin(this.config));
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));
