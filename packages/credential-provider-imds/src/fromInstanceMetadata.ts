@@ -190,7 +190,7 @@ export const getImdsProfile = async (
   }, maxRetries);
 };
 
-const getMetadataToken = async (options: RequestOptions) =>
+export const getMetadataToken = async (options: RequestOptions) =>
   httpRequest({
     ...options,
     path: IMDS_TOKEN_PATH,
