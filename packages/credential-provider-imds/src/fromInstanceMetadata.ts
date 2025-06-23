@@ -169,24 +169,24 @@ export const getImdsProfile = async (
     if (resolvedProfile) {
       return resolvedProfile;
     }
-      // Try extended API first
-      try {
-        const response = await httpRequest({ ...options, path: IMDS_EXTENDED_PATH });
-        resolvedProfile = response.toString().trim();
-        if (apiVersion === "unknown") {
-          apiVersion = "extended";
-        }
-        return resolvedProfile;
-      } catch (error) {
-        if (error?.statusCode === 404 && apiVersion === "unknown") {
-          apiVersion = "legacy";
-          const response = await httpRequest({ ...options, path: IMDS_LEGACY_PATH });
-          resolvedProfile = response.toString().trim();
-          return resolvedProfile;
-        } else {
-          throw error;
-        }
+    // Try extended API first
+    try {
+      const response = await httpRequest({ ...options, path: IMDS_EXTENDED_PATH });
+      resolvedProfile = response.toString().trim();
+      if (apiVersion === "unknown") {
+        apiVersion = "extended";
       }
+      return resolvedProfile;
+    } catch (error) {
+      if (error?.statusCode === 404 && apiVersion === "unknown") {
+        apiVersion = "legacy";
+        const response = await httpRequest({ ...options, path: IMDS_LEGACY_PATH });
+        resolvedProfile = response.toString().trim();
+        return resolvedProfile;
+      } else {
+        throw error;
+      }
+    }
   }, maxRetries);
 };
 

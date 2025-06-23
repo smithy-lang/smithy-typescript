@@ -1,7 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { afterEach, beforeEach, describe, expect, test as it} from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it } from "vitest";
 
-import { fromInstanceMetadata,getMetadataToken } from "./fromInstanceMetadata"; 
+import { fromInstanceMetadata, getMetadataToken } from "./fromInstanceMetadata";
 
 describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   const originalEnv = { ...process.env };
@@ -9,7 +9,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
 
   beforeEach(async () => {
     process.env = { ...originalEnv };
-    
+
     // Check IMDS availability
     try {
       const testProvider = fromInstanceMetadata({ timeout: 1000, maxRetries: 0 });
@@ -25,17 +25,16 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   });
 
   it("should fetch metadata token successfully", async () => {
-  
     if (!imdsAvailable) {
       return;
     }
     const options = {
-      path: "/latest/api/token",  
+      path: "/latest/api/token",
       method: "PUT",
-      timeout: 1000,   
+      timeout: 1000,
       headers: {
-      "x-aws-ec2-metadata-token-ttl-seconds": "21600",
-      },           
+        "x-aws-ec2-metadata-token-ttl-seconds": "21600",
+      },
     };
     const token = await getMetadataToken(options);
     expect(token).toBeDefined();
@@ -44,32 +43,30 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   });
 
   it("retrieves credentials with account ID on allowlisted instances only)", async () => {
+    if (!imdsAvailable) return;
 
-  if (!imdsAvailable)
-    return;
-    
     const provider = fromInstanceMetadata({ timeout: 1000, maxRetries: 2 });
     const credentials = await provider();
 
-  expect(credentials).toHaveProperty("accessKeyId");
-  expect(credentials).toHaveProperty("secretAccessKey");
-  expect(typeof credentials.accessKeyId).toBe("string");
-  expect(typeof credentials.secretAccessKey).toBe("string");
+    expect(credentials).toHaveProperty("accessKeyId");
+    expect(credentials).toHaveProperty("secretAccessKey");
+    expect(typeof credentials.accessKeyId).toBe("string");
+    expect(typeof credentials.secretAccessKey).toBe("string");
 
-  if (!credentials.accountId) {
-    console.log("Skipping account ID test not an allowlisted instance");
-    return;
-  }
+    if (!credentials.accountId) {
+      console.log("Skipping account ID test not an allowlisted instance");
+      return;
+    }
 
-  expect(credentials.accountId).toBeDefined();
-  expect(typeof credentials.accountId).toBe("string");
+    expect(credentials.accountId).toBeDefined();
+    expect(typeof credentials.accountId).toBe("string");
 
-  console.log("IMDSv2 Credentials with Account ID:", {
-    accessKeyId: credentials.accessKeyId,
-    sessionToken: credentials.sessionToken?.slice(0, 10) + "...",
-    accountId: credentials.accountId,
+    console.log("IMDSv2 Credentials with Account ID:", {
+      accessKeyId: credentials.accessKeyId,
+      sessionToken: credentials.sessionToken?.slice(0, 10) + "...",
+      accountId: credentials.accountId,
+    });
   });
-});
 
   it("IMDS access disabled via AWS_EC2_METADATA_DISABLED", async () => {
     process.env.AWS_EC2_METADATA_DISABLED = "true";
@@ -88,13 +85,11 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   });
 
   it("Uses configured profile name from env", async () => {
+    if (!imdsAvailable) return;
 
-    if (!imdsAvailable)
-      return;
-    
     process.env.AWS_EC2_INSTANCE_PROFILE_NAME = "foo-profile";
     const provider = fromInstanceMetadata({ timeout: 1000 });
-    
+
     try {
       const credentials = await provider();
       expect(credentials).toHaveProperty("accessKeyId");
@@ -106,9 +101,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   });
 
   it("Multiple calls return stable results", async () => {
-    
-    if (!imdsAvailable)
-      return;
+    if (!imdsAvailable) return;
 
     const provider = fromInstanceMetadata({ timeout: 1000 });
     const creds1 = await provider();
@@ -121,12 +114,10 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
     console.log("Stable credentials returned across calls.");
   });
 
- it("should timeout as expected when a request exceeds the specified duration", async () => {
-    if (!imdsAvailable)
-      return;
+  it("should timeout as expected when a request exceeds the specified duration", async () => {
+    if (!imdsAvailable) return;
     const provider = fromInstanceMetadata({ timeout: 1 });
 
     await expect(provider()).rejects.toThrow(/timeout|timed out|TimeoutError/i);
   });
-
 });

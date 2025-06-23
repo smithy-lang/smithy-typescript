@@ -3,7 +3,12 @@ import { CredentialsProviderError } from "@smithy/property-provider";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
-import { fromInstanceMetadata,getConfiguredProfileName, getImdsProfile, throwIfImdsTurnedOff } from "./fromInstanceMetadata";
+import {
+  fromInstanceMetadata,
+  getConfiguredProfileName,
+  getImdsProfile,
+  throwIfImdsTurnedOff,
+} from "./fromInstanceMetadata";
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
 import { providerConfigFromInit } from "./remoteProvider/RemoteProviderInit";
@@ -66,7 +71,7 @@ describe("fromInstanceMetadata", () => {
     vi.mocked(staticStabilityProvider).mockImplementation((input) => input);
     vi.mocked(getInstanceMetadataEndpoint).mockResolvedValue({ hostname } as any);
     vi.mocked(loadConfig).mockReturnValue(() => Promise.resolve(false));
-    vi.spyOn({throwIfImdsTurnedOff}, "throwIfImdsTurnedOff").mockResolvedValue(undefined);
+    vi.spyOn({ throwIfImdsTurnedOff }, "throwIfImdsTurnedOff").mockResolvedValue(undefined);
     (isImdsCredentials as unknown as any).mockReturnValue(true);
     vi.mocked(providerConfigFromInit).mockReturnValue({
       timeout: mockTimeout,
@@ -79,16 +84,16 @@ describe("fromInstanceMetadata", () => {
   });
 
   it("returns no credentials when AWS_EC2_METADATA_DISABLED=true", async () => {
-  vi.mocked(loadConfig).mockImplementation(({ environmentVariableSelector, configFileSelector }) => {
-    if (environmentVariableSelector && environmentVariableSelector({ AWS_EC2_METADATA_DISABLED: "true" })) {
-      return () => Promise.resolve(true);
-    }
-    if (configFileSelector && configFileSelector({ imds_disabled: "true" })) {
-      return () => Promise.resolve(true);
-    }
-    return () => Promise.resolve(false);
-  });
-    vi.spyOn({throwIfImdsTurnedOff},"throwIfImdsTurnedOff").mockRejectedValueOnce(
+    vi.mocked(loadConfig).mockImplementation(({ environmentVariableSelector, configFileSelector }) => {
+      if (environmentVariableSelector && environmentVariableSelector({ AWS_EC2_METADATA_DISABLED: "true" })) {
+        return () => Promise.resolve(true);
+      }
+      if (configFileSelector && configFileSelector({ imds_disabled: "true" })) {
+        return () => Promise.resolve(true);
+      }
+      return () => Promise.resolve(false);
+    });
+    vi.spyOn({ throwIfImdsTurnedOff }, "throwIfImdsTurnedOff").mockRejectedValueOnce(
       new CredentialsProviderError("IMDS credential fetching is disabled")
     );
     const provider = fromInstanceMetadata({});
@@ -172,7 +177,7 @@ describe("fromInstanceMetadata", () => {
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
-     vi.spyOn({throwIfImdsTurnedOff}, "throwIfImdsTurnedOff").mockResolvedValue();
+    vi.spyOn({ throwIfImdsTurnedOff }, "throwIfImdsTurnedOff").mockResolvedValue();
 
     await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
     expect(httpRequest).toHaveBeenNthCalledWith(3, {
@@ -298,9 +303,9 @@ describe("fromInstanceMetadata", () => {
 
     it("uses ec2InstanceProfileName from init if provided", async () => {
       const profileName = "profile-from-init";
-      const options = { hostname } ;
+      const options = { hostname };
 
-      vi.spyOn({getConfiguredProfileName}, "getConfiguredProfileName").mockResolvedValueOnce(profileName);
+      vi.spyOn({ getConfiguredProfileName }, "getConfiguredProfileName").mockResolvedValueOnce(profileName);
 
       const credentials = await getImdsProfile(options, mockMaxRetries, {
         ec2InstanceProfileName: profileName,
