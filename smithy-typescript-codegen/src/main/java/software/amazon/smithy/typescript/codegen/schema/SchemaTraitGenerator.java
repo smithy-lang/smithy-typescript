@@ -14,6 +14,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.EventHeaderTrait;
 import software.amazon.smithy.model.traits.EventPayloadTrait;
 import software.amazon.smithy.model.traits.HostLabelTrait;
+import software.amazon.smithy.model.traits.HttpChecksumRequiredTrait;
 import software.amazon.smithy.model.traits.HttpErrorTrait;
 import software.amazon.smithy.model.traits.HttpHeaderTrait;
 import software.amazon.smithy.model.traits.HttpLabelTrait;
@@ -60,6 +61,7 @@ public class SchemaTraitGenerator {
         HttpPayloadTrait.ID,
         HttpQueryParamsTrait.ID,
         HttpResponseCodeTrait.ID,
+        HttpChecksumRequiredTrait.ID,
         HostLabelTrait.ID,
         SparseTrait.ID,
         SensitiveTrait.ID,
@@ -124,7 +126,17 @@ public class SchemaTraitGenerator {
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {
             return SchemaTraitExtension.INSTANCE.render(trait);
         }
+
+        if (trait instanceof StringTrait stringTrait) {
+            return """
+            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */ "
+                + stringStore.var(stringTrait.getValue());
+        } else if (trait instanceof AnnotationTrait) {
+            return """
+            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */ "
+                + ANNOTATION_TRAIT_VALUE;
+        }
         return """
-            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */";
+            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */ void 0";
     }
 }
