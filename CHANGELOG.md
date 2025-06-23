@@ -11,7 +11,6 @@
 ### Chores
 - Omitting the endpoint polymorphs from resolved config types ([#1626](https://github.com/smithy-lang/smithy-typescript/pull/1626))
 - Allowed protocol generators to declare error aliases ([#1622](https://github.com/smithy-lang/smithy-typescript/pull/1622))
-- Filtered seed schema trait with auth and protocol definition traits ([#1620](https://github.com/smithy-lang/smithy-typescript/pull/1620))
 - Allowed endpoint params to be explicitly undefined if not required ([#1618](https://github.com/smithy-lang/smithy-typescript/pull/1618))
 
 ## 0.31.0 (2025-06-09)
