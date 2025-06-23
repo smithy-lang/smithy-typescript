@@ -1,5 +1,19 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.31.1 (2025-06-23)
+
+### Bug Fixes
+- use undefined placeholder for unhandled trait ([#1629](https://github.com/smithy-lang/smithy-typescript/pull/1629))
+- Added EndpointRequired config resolver to replace CustomEndpoint ([#1628](https://github.com/smithy-lang/smithy-typescript/pull/1628))
+- Corrected criteria for event stream member detection ([#1624](https://github.com/smithy-lang/smithy-typescript/pull/1624))
+- Located event stream member more carefully ([#1623](https://github.com/smithy-lang/smithy-typescript/pull/1623))
+
+### Chores
+- Omitting the endpoint polymorphs from resolved config types ([#1626](https://github.com/smithy-lang/smithy-typescript/pull/1626))
+- Allowed protocol generators to declare error aliases ([#1622](https://github.com/smithy-lang/smithy-typescript/pull/1622))
+- Filtered seed schema trait with auth and protocol definition traits ([#1620](https://github.com/smithy-lang/smithy-typescript/pull/1620))
+- Allowed endpoint params to be explicitly undefined if not required ([#1618](https://github.com/smithy-lang/smithy-typescript/pull/1618))
+
 ## 0.31.0 (2025-06-09)
 
 ## Features
