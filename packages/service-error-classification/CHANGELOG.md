@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.6
+
+### Patch Changes
+
+- c8d5bb2: Treat Node.js network errors as transient
+
 ## 4.0.5
 
 ### Patch Changes

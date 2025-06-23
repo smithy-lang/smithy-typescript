@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.12
+
+### Patch Changes
+
+- 22a286e: add resolveEndpointRequiredConfig resolver
+
 ## 4.1.11
 
 ### Patch Changes
