@@ -211,11 +211,17 @@ export const throwIfImdsTurnedOff = async (profile?: string, logger?: any): Prom
       // Check environment variable
       environmentVariableSelector: (env) => {
         const envValue = env[ENV_IMDS_DISABLED];
+        if (envValue === undefined) {
+          return undefined;
+        }
         return envValue === "true";
       },
       // Check config file
       configFileSelector: (profile) => {
         const profileValue = profile[CONFIG_IMDS_DISABLED];
+        if (profileValue === undefined) {
+          return undefined;
+        }
         return profileValue === "true";
       },
       default: false,

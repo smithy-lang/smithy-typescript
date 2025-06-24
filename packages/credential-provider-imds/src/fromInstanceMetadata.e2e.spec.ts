@@ -8,7 +8,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   let imdsAvailable = false;
 
   beforeEach(async () => {
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnv, AWS_EC2_INSTANCE_PROFILE_NAME: "foo-profile" };
 
     // Check IMDS availability
     try {
@@ -87,7 +87,6 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   it("Uses configured profile name from env", async () => {
     if (!imdsAvailable) return;
 
-    process.env.AWS_EC2_INSTANCE_PROFILE_NAME = "foo-profile";
     const provider = fromInstanceMetadata({ timeout: 1000 });
 
     try {
