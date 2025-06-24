@@ -49,6 +49,10 @@ export class NumericValue {
     }
   }
 
+  public toString() {
+    return this.string;
+  }
+
   public [Symbol.hasInstance](object: unknown) {
     if (!object || typeof object !== "object") {
       return false;
@@ -65,6 +69,6 @@ export class NumericValue {
  * Serde shortcut.
  * @internal
  */
-export function nv(string: string): NumericValue {
-  return new NumericValue(string, "bigDecimal");
+export function nv(input: string | unknown): NumericValue {
+  return new NumericValue(String(input), "bigDecimal");
 }

@@ -184,14 +184,28 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
         return dataSource;
     }
 
+    /**
+     * This should not be called, since big number serde is handled by format
+     * specific visitors.
+     */
     @Override
     public String bigIntegerShape(BigIntegerShape shape) {
-        return serializeFromBigJs();
+        if (context.getSettings() != null && context.getSettings().getBigNumberMode().equals("big.js")) {
+            return serializeFromBigJs();
+        }
+        return "String(" + dataSource + ")";
     }
 
+    /**
+     * This should not be called, since big number serde is handled by format
+     * specific visitors.
+     */
     @Override
     public String bigDecimalShape(BigDecimalShape shape) {
-        return serializeFromBigJs();
+        if (context.getSettings() != null && context.getSettings().getBigNumberMode().equals("big.js")) {
+            return serializeFromBigJs();
+        }
+        return "String(" + dataSource + ")";
     }
 
     private String serializeFromBigJs() {
