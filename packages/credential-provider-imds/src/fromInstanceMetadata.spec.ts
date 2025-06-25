@@ -266,7 +266,7 @@ describe("fromInstanceMetadata", () => {
       .mockResolvedValueOnce("." as any);
     vi.mocked(retry).mockImplementation((fn: any) => fn());
 
-    await expect(fromInstanceMetadata()()).rejects.toThrow("Unexpected token");
+    await expect(fromInstanceMetadata()()).rejects.toThrow("Failed to parse JSON from instance metadata service.");
     expect(retry).toHaveBeenCalledTimes(2);
     expect(httpRequest).toHaveBeenCalledTimes(3);
     expect(fromImdsCredentials).not.toHaveBeenCalled();

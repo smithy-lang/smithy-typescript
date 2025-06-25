@@ -24,10 +24,8 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
     process.env = { ...originalEnv };
   });
 
-  it("should fetch metadata token successfully", async () => {
-    if (!imdsAvailable) {
-      return;
-    }
+  const test = imdsAvailable ? it : it.skip;
+  test("should fetch metadata token successfully", async () => {
     const options = {
       path: "/latest/api/token",
       method: "PUT",
@@ -42,7 +40,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
     expect(token.length).toBeGreaterThan(0);
   });
 
-  it("retrieves credentials with account ID on allowlisted instances only)", async () => {
+  it("retrieves credentials successfully", async () => {
     if (!imdsAvailable) return;
 
     const provider = fromInstanceMetadata({ timeout: 1000, maxRetries: 2 });
@@ -52,10 +50,16 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
     expect(credentials).toHaveProperty("secretAccessKey");
     expect(typeof credentials.accessKeyId).toBe("string");
     expect(typeof credentials.secretAccessKey).toBe("string");
+  });
+
+  it("retrieves credentials with account ID on allowlisted instances", async () => {
+    if (!imdsAvailable) return;
+
+    const provider = fromInstanceMetadata({ timeout: 1000, maxRetries: 2 });
+    const credentials = await provider();
 
     if (!credentials.accountId) {
-      console.log("Skipping account ID test not an allowlisted instance");
-      return;
+      it.skip("account ID test skipped - not an allowlisted instance", () => {});
     }
 
     expect(credentials.accountId).toBeDefined();
