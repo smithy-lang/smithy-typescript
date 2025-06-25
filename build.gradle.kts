@@ -280,7 +280,7 @@ jreleaser {
     deploy {
         maven {
             mavenCentral {
-                create("maven-central") {
+                sonatype {
                     active = Active.ALWAYS
                     url = "https://central.sonatype.com/api/v1/publisher"
                     stagingRepositories.add("${rootProject.buildDir}/staging")
