@@ -1,3 +1,4 @@
+import { NumericValue } from "@smithy/core/serde";
 import * as fs from "fs";
 // @ts-ignore
 import JSONbig from "json-bigint";
@@ -88,12 +89,12 @@ describe("cbor", () => {
     {
       name: "negative float",
       data: -3015135.135135135,
-      cbor: allocByteArray([0b111_11011, +193, +71, +0, +239, +145, +76, +27, +173]),
+      cbor: allocByteArray([0b111_11011, 193, 71, 0, 239, 145, 76, 27, 173]),
     },
     {
       name: "positive float",
       data: 3015135.135135135,
-      cbor: allocByteArray([0b111_11011, +65, +71, +0, +239, +145, +76, +27, +173]),
+      cbor: allocByteArray([0b111_11011, 65, 71, 0, 239, 145, 76, 27, 173]),
     },
     {
       name: "various numbers",
@@ -214,6 +215,18 @@ describe("cbor", () => {
         65, 109, 110, 101, 115, 116, 101, 100, 32, 105, 116, 101, 109, 32, 66,
       ]),
     },
+    {
+      name: "object containing big numbers",
+      data: {
+        map: {
+          items: [BigInt(1e80)],
+        },
+      },
+      cbor: allocByteArray([
+        161, 99, 109, 97, 112, 161, 101, 105, 116, 101, 109, 115, 129, 194, 88, 34, 3, 95, 157, 234, 62, 31, 107, 224,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      ]),
+    },
   ];
 
   const toBytes = (hex: string) => {
@@ -226,6 +239,72 @@ describe("cbor", () => {
   };
 
   describe("locally curated scenarios", () => {
+    it("should round-trip bigInteger to major 6 with tag 2", () => {
+      const bigInt = BigInt("1267650600228229401496703205376");
+      const serialized = cbor.serialize(bigInt);
+
+      const major = serialized[0] >> 5;
+      expect(major).toEqual(0b110); // 6
+
+      const tag = serialized[0] & 0b11111;
+      expect(tag).toEqual(0b010); // 2
+
+      const byteStringCount = serialized[1];
+      expect(byteStringCount).toEqual(0b010_01101); // major 2, 13 bytes
+
+      const byteString = serialized.slice(2);
+      expect(byteString).toEqual(allocByteArray([0b000_10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+
+      const deserialized = cbor.deserialize(serialized);
+      expect(deserialized).toEqual(bigInt);
+    });
+
+    it("should round-trip negative bigInteger to major 6 with tag 3", () => {
+      const bigInt = BigInt("-1267650600228229401496703205377");
+      const serialized = cbor.serialize(bigInt);
+
+      const major = serialized[0] >> 5;
+      expect(major).toEqual(0b110); // 6
+
+      const tag = serialized[0] & 0b11111;
+      expect(tag).toEqual(0b011); // 3
+
+      const byteStringCount = serialized[1];
+      expect(byteStringCount).toEqual(0b010_01101); // major 2, 13 bytes
+
+      const byteString = serialized.slice(2);
+      expect(byteString).toEqual(allocByteArray([0b000_10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+
+      const deserialized = cbor.deserialize(serialized);
+      expect(deserialized).toEqual(bigInt);
+    });
+
+    it("should round-trip NumericValue to major 6 with tag 4", () => {
+      for (const bigDecimal of [
+        "10000000000000000000000054.321",
+        "1000000000000000000000000000000000054.134134321",
+        "100000000000000000000000000000000000054.0000000000000001",
+        "100000000000000000000000000000000000054.00510351095130000",
+        "-10000000000000000000000054.321",
+        "-1000000000000000000000000000000000054.134134321",
+        "-100000000000000000000000000000000000054.0000000000000001",
+        "-100000000000000000000000000000000000054.00510351095130000",
+      ]) {
+        const nv = new NumericValue(bigDecimal, "bigDecimal");
+        const serialized = cbor.serialize(nv);
+
+        const major = serialized[0] >> 5;
+        expect(major).toEqual(0b110); // 6
+
+        const tag = serialized[0] & 0b11111;
+        expect(tag).toEqual(0b0100); // 4
+
+        const deserialized = cbor.deserialize(serialized);
+        expect(deserialized).toEqual(nv);
+        expect(deserialized.string).toEqual(nv.string);
+      }
+    });
+
     it("should throw an error if serializing a tag with missing properties", () => {
       expect(() =>
         cbor.serialize({

@@ -88,6 +88,7 @@ public final class TypeScriptSettings {
     private boolean useLegacyAuth = false;
     private boolean generateTypeDoc = false;
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
+    private String bigNumberMode = "native";
     private boolean generateSchemas = false;
 
     @Deprecated
@@ -140,8 +141,10 @@ public final class TypeScriptSettings {
                 .orElse(RequiredMemberMode.NULLABLE));
 
         settings.setPluginSettings(config);
-
         settings.readProtocolPriorityConfiguration(config);
+        settings.setBigNumberMode(
+            config.getStringMemberOrDefault("bigNumberMode", "native")
+        );
 
         // Internal undocumented configuration used to control rollout of schemas.
         // `true` will eventually be the only available option, and this should not be set by users.
@@ -226,6 +229,21 @@ public final class TypeScriptSettings {
 
     public void setPackageVersion(String packageVersion) {
         this.packageVersion = packageVersion;
+    }
+
+    /**
+     * @return whether to use native (BigInt + NumericValue) or big.js for BigInteger/BigDecimal.
+     */
+    public String getBigNumberMode() {
+        return bigNumberMode;
+    }
+
+    public void setBigNumberMode(String mode) {
+        if (!mode.equals("big.js") && !mode.equals("native")) {
+            throw new IllegalArgumentException("""
+                bigNumberMode must be one of ["native", "big.js"]""");
+        }
+        this.bigNumberMode = mode;
     }
 
     /**

@@ -54,6 +54,27 @@
           "generateSchemas": true
         }
       }
+    },
+    "my-local-model": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["org.xyz.v1#XYZService"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "org.xyz.v1#XYZService",
+          "package": "xyz",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "private": true
+          },
+          "bigNumberMode": "native"
+        }
+      }
     }
   }
 }
