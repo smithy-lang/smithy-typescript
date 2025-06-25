@@ -84,7 +84,7 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
         context.getWriter().addImportSubmodule(
             "nv", "__nv", TypeScriptDependency.SMITHY_CORE, "/serde"
         );
-        return "__nv(_)";
+        return "__nv(" + dataSource + ")";
     }
 
     /**
