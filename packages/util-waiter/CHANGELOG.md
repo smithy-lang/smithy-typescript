@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.6
+
+### Patch Changes
+
+- a197074: clean up waiters' abort signal listener
+
 ## 4.0.5
 
 ### Patch Changes

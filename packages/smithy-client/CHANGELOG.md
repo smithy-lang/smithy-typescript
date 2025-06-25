@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.4.5
+
+### Patch Changes
+
+- Updated dependencies [10a0534]
+  - @smithy/core@3.6.0
+  - @smithy/middleware-endpoint@4.1.13
+
 ## 4.4.4
 
 ### Patch Changes

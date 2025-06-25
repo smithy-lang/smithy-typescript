@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.6.0
+
+### Minor Changes
+
+- 10a0534: support BigInt in cbor
+
 ## 3.5.3
 
 ### Patch Changes
