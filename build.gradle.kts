@@ -23,7 +23,7 @@ plugins {
     checkstyle
     jacoco
     id("com.github.spotbugs") version "6.0.8"
-    id("org.jreleaser") version "1.9.0"
+    id("org.jreleaser") version "1.18.0"
 }
 
 allprojects {
@@ -280,8 +280,8 @@ jreleaser {
     deploy {
         maven {
             mavenCentral {
-                sonatype {
-                    active = Active.ALWAYS
+                create("maven-central") {
+                    active = 'ACTIVE.ALWAYS'
                     url = "https://central.sonatype.com/api/v1/publisher"
                     stagingRepositories.add("${rootProject.buildDir}/staging")
                 }
