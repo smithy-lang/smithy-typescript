@@ -23,7 +23,7 @@ plugins {
     checkstyle
     jacoco
     id("com.github.spotbugs") version "6.0.8"
-    id("org.jreleaser") version "1.9.0"
+    id("org.jreleaser") version "1.18.0"
 }
 
 allprojects {
@@ -279,13 +279,10 @@ jreleaser {
     // https://jreleaser.org/guide/latest/examples/maven/maven-central.html#_gradle
     deploy {
         maven {
-            nexus2 {
+            mavenCentral {
                 create("maven-central") {
                     active = Active.ALWAYS
-                    url = "https://aws.oss.sonatype.org/service/local"
-                    snapshotUrl = "https://aws.oss.sonatype.org/content/repositories/snapshots"
-                    closeRepository.set(true)
-                    releaseRepository.set(true)
+                    url = "https://central.sonatype.com/api/v1/publisher"
                     stagingRepositories.add("${rootProject.buildDir}/staging")
                 }
             }
