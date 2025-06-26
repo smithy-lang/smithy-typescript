@@ -1,5 +1,10 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.32.0 (2025-06-26)
+
+### Features
+- BigIntger and BigDecimal numeric support for Smithy RPCv2 CBOR protocol ([#1603](https://github.com/smithy-lang/smithy-typescript/pull/1603))
+
 ## 0.31.1 (2025-06-23)
 
 ### Bug Fixes
