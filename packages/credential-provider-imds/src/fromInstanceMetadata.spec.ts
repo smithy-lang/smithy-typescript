@@ -5,13 +5,12 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
 import {
   fromInstanceMetadata,
-  getConfiguredProfileName,
+  getEc2InstanceProfileName,
   getImdsProfile,
   throwIfImdsTurnedOff,
 } from "./fromInstanceMetadata";
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
-import { providerConfigFromInit } from "./remoteProvider/RemoteProviderInit";
 import { retry } from "./remoteProvider/retry";
 import { getInstanceMetadataEndpoint } from "./utils/getInstanceMetadataEndpoint";
 import { staticStabilityProvider } from "./utils/staticStabilityProvider";
@@ -73,10 +72,6 @@ describe("fromInstanceMetadata", () => {
     vi.mocked(loadConfig).mockReturnValue(() => Promise.resolve(false));
     vi.spyOn({ throwIfImdsTurnedOff }, "throwIfImdsTurnedOff").mockResolvedValue(undefined);
     (isImdsCredentials as unknown as any).mockReturnValue(true);
-    vi.mocked(providerConfigFromInit).mockReturnValue({
-      timeout: mockTimeout,
-      maxRetries: mockMaxRetries,
-    });
   });
 
   afterEach(() => {
@@ -98,31 +93,36 @@ describe("fromInstanceMetadata", () => {
     );
     const provider = fromInstanceMetadata({});
 
-    await expect(provider()).rejects.toEqual(new CredentialsProviderError("IMDS credential fetching is disabled"));
+    await expect(provider()).rejects.toEqual(new CredentialsProviderError("IMDS credential fetching is disabled", {}));
     expect(httpRequest).not.toHaveBeenCalled();
   });
 
   it("returns valid credentials with account ID when ec2InstanceProfileName is provided", async () => {
-    const profileName = "my-profile-0002";
+    const ec2InstanceProfileName = "my-profile-0002";
 
     vi.mocked(httpRequest)
+      .mockImplementation(((...args: any[]) => {
+        console.log(...args);
+        return mockToken;
+      }) as any)
       .mockResolvedValueOnce(mockToken as any)
+      .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any)
       .mockResolvedValueOnce(JSON.stringify(mockImdsCreds) as any);
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
 
-    const credentials = await fromInstanceMetadata({ ec2InstanceProfileName: profileName })();
+    const credentials = await fromInstanceMetadata({ ec2InstanceProfileName: ec2InstanceProfileName })();
 
     expect(credentials).toEqual(mockCreds);
     expect(credentials.accountId).toBe(mockCreds.accountId);
 
-    expect(httpRequest).toHaveBeenCalledTimes(2);
     expect(httpRequest).toHaveBeenNthCalledWith(1, mockTokenRequestOptions);
     expect(httpRequest).toHaveBeenNthCalledWith(2, {
       ...mockProfileRequestOptions,
-      path: `${mockProfileRequestOptions.path}${profileName}`,
+      path: `${mockProfileRequestOptions.path}${ec2InstanceProfileName}`,
     });
+    expect(httpRequest).toHaveBeenCalledTimes(2);
   });
 
   it("returns valid credentials with account ID when profile is discovered from IMDS", async () => {
@@ -177,41 +177,12 @@ describe("fromInstanceMetadata", () => {
 
     vi.mocked(retry).mockImplementation((fn: any) => fn());
     vi.mocked(fromImdsCredentials).mockReturnValue(mockCreds);
-    vi.spyOn({ throwIfImdsTurnedOff }, "throwIfImdsTurnedOff").mockResolvedValue();
 
     await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
     expect(httpRequest).toHaveBeenNthCalledWith(3, {
       ...mockProfileRequestOptions,
       path: `${mockProfileRequestOptions.path}${mockProfile}`,
     });
-  });
-
-  it("passes {} to providerConfigFromInit if init not defined", async () => {
-    vi.mocked(retry).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
-    vi.mocked(loadConfig).mockReturnValueOnce(() => Promise.resolve(false));
-
-    await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
-    expect(providerConfigFromInit).toHaveBeenCalledTimes(1);
-    expect(providerConfigFromInit).toHaveBeenCalledWith({});
-  });
-
-  it("passes init to providerConfigFromInit", async () => {
-    vi.mocked(retry).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
-    vi.mocked(loadConfig).mockReturnValueOnce(() => Promise.resolve(false));
-
-    const init = { maxRetries: 5, timeout: 1213 };
-    await expect(fromInstanceMetadata(init)()).resolves.toEqual(mockCreds);
-    expect(providerConfigFromInit).toHaveBeenCalledTimes(1);
-    expect(providerConfigFromInit).toHaveBeenCalledWith(init);
-  });
-
-  it("passes maxRetries returned from providerConfigFromInit to retry", async () => {
-    vi.mocked(retry).mockResolvedValueOnce(mockProfile).mockResolvedValueOnce(mockCreds);
-
-    await expect(fromInstanceMetadata()()).resolves.toEqual(mockCreds);
-    expect(retry).toHaveBeenCalledTimes(2);
-    expect(vi.mocked(retry).mock.calls[0][1]).toBe(mockMaxRetries);
-    expect(vi.mocked(retry).mock.calls[1][1]).toBe(mockMaxRetries);
   });
 
   it("throws CredentialsProviderError if credentials returned are incorrect", async () => {
@@ -305,9 +276,13 @@ describe("fromInstanceMetadata", () => {
       const profileName = "profile-from-init";
       const options = { hostname };
 
-      vi.spyOn({ getConfiguredProfileName }, "getConfiguredProfileName").mockResolvedValueOnce(profileName);
+      vi.spyOn(
+        { getConfiguredProfileName: getEc2InstanceProfileName },
+        "getConfiguredProfileName"
+      ).mockResolvedValueOnce(profileName);
 
-      const credentials = await getImdsProfile(options, mockMaxRetries, {
+      const credentials = await getImdsProfile(options, {
+        maxRetries: mockMaxRetries,
         ec2InstanceProfileName: profileName,
       });
 
@@ -321,7 +296,7 @@ describe("fromInstanceMetadata", () => {
 
       vi.mocked(loadConfig).mockReturnValue(() => Promise.resolve(envProfileName));
 
-      const credentials = await getImdsProfile(options, mockMaxRetries, {});
+      const credentials = await getImdsProfile(options, { maxRetries: mockMaxRetries });
 
       expect(credentials).toBe(envProfileName);
       expect(httpRequest).not.toHaveBeenCalled();
@@ -334,7 +309,7 @@ describe("fromInstanceMetadata", () => {
 
       vi.mocked(loadConfig).mockReturnValue(() => Promise.resolve(configProfileName));
 
-      let credentials = await getImdsProfile(options, mockMaxRetries, {});
+      let credentials = await getImdsProfile(options, { maxRetries: mockMaxRetries });
       expect(credentials).toBe(configProfileName);
       expect(httpRequest).not.toHaveBeenCalled();
 
@@ -343,7 +318,7 @@ describe("fromInstanceMetadata", () => {
         .mockRejectedValueOnce(Object.assign(new Error(), { statusCode: 404 }))
         .mockResolvedValueOnce(legacyProfileName as any);
 
-      credentials = await getImdsProfile(options, mockMaxRetries, {});
+      credentials = await getImdsProfile(options, { maxRetries: mockMaxRetries });
       expect(credentials).toBe(legacyProfileName);
       expect(httpRequest).toHaveBeenCalledTimes(2);
       expect(httpRequest).toHaveBeenNthCalledWith(1, {

@@ -11,7 +11,8 @@ import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMet
  * the recently expired credentials. This mitigates impact when clients using
  * refreshable credentials are unable to retrieve updates.
  *
- * @param provider Credential provider
+ * @param provider - credential provider.
+ * @param options - logger container.
  * @returns A credential provider that supports static stability
  */
 export const staticStabilityProvider = (
