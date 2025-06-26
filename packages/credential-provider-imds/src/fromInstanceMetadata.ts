@@ -53,32 +53,31 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
       let fallbackBlockedFromProcessEnv = false;
 
       const _ec2MetadataV1Disabled =
-        ec2MetadataV1Disabled !== undefined
-          ? ec2MetadataV1Disabled
-          : await loadConfig(
-              {
-                environmentVariableSelector: (env) => {
-                  const envValue = env[AWS_EC2_METADATA_V1_DISABLED];
-                  if (envValue === undefined) {
-                    return undefined;
-                  }
-                  fallbackBlockedFromProcessEnv = !!envValue && envValue !== "false";
-                  return fallbackBlockedFromProcessEnv;
-                },
-                configFileSelector: (profile) => {
-                  const profileValue = profile[PROFILE_AWS_EC2_METADATA_V1_DISABLED];
-                  if (profileValue === undefined) {
-                    return undefined;
-                  }
-                  fallbackBlockedFromProfile = !!profileValue && profileValue !== "false";
-                  return fallbackBlockedFromProfile;
-                },
-                default: false,
-              },
-              {
-                profile,
+        ec2MetadataV1Disabled ??
+        (await loadConfig(
+          {
+            environmentVariableSelector: (env) => {
+              const envValue = env[AWS_EC2_METADATA_V1_DISABLED];
+              if (envValue === undefined) {
+                return undefined;
               }
-            )();
+              fallbackBlockedFromProcessEnv = !!envValue && envValue !== "false";
+              return fallbackBlockedFromProcessEnv;
+            },
+            configFileSelector: (profile) => {
+              const profileValue = profile[PROFILE_AWS_EC2_METADATA_V1_DISABLED];
+              if (profileValue === undefined) {
+                return undefined;
+              }
+              fallbackBlockedFromProfile = !!profileValue && profileValue !== "false";
+              return fallbackBlockedFromProfile;
+            },
+            default: false,
+          },
+          {
+            profile,
+          }
+        )());
 
       if (_ec2MetadataV1Disabled) {
         const causes: string[] = [];
@@ -123,7 +122,7 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
     } else {
       let token: string;
       try {
-        token = (await getMetadataToken({ ...endpoint, timeout })).toString();
+        token = await getMetadataToken({ ...endpoint, timeout });
       } catch (error) {
         if (error?.statusCode === 400) {
           throw Object.assign(error, {
@@ -181,15 +180,20 @@ export const getImdsProfile = async (options: RequestOptions, init: RemoteProvid
   }, init.maxRetries ?? DEFAULT_MAX_RETRIES);
 };
 
-export const getMetadataToken = async (options: RequestOptions) =>
-  httpRequest({
-    ...options,
-    path: IMDS_TOKEN_PATH,
-    method: "PUT",
-    headers: {
-      "x-aws-ec2-metadata-token-ttl-seconds": "21600",
-    },
-  });
+/**
+ * @internal
+ */
+export const getMetadataToken = async (options: RequestOptions): Promise<string> =>
+  (
+    await httpRequest({
+      ...options,
+      path: IMDS_TOKEN_PATH,
+      method: "PUT",
+      headers: {
+        "x-aws-ec2-metadata-token-ttl-seconds": "21600",
+      },
+    })
+  ).toString();
 
 /**
  * Checks if IMDS credential fetching is disabled through configuration
@@ -260,10 +264,6 @@ export const getEc2InstanceProfileName = async (init: RemoteProviderInit): Promi
 
 /**
  * Gets credentials from profile.
- *
- * @param imdsProfile - todo: how is this different from init.profile?
- * @param options
- * @param init
  *
  * @internal
  */

@@ -1,17 +1,18 @@
 import { afterEach, beforeEach, describe, expect, test as it } from "vitest";
 
 import { fromInstanceMetadata, getMetadataToken } from "./fromInstanceMetadata";
+import { getInstanceMetadataEndpoint } from "./utils/getInstanceMetadataEndpoint";
 
 describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   const originalEnv = { ...process.env };
   let imdsAvailable = false;
 
   beforeEach(async () => {
-    process.env = { ...originalEnv, AWS_EC2_INSTANCE_PROFILE_NAME: "foo-profile" };
+    process.env = { ...originalEnv };
 
     // Check IMDS availability
     try {
-      const testProvider = fromInstanceMetadata({ timeout: 1000, maxRetries: 0 });
+      const testProvider = fromInstanceMetadata({ timeout: 9000 });
       await testProvider();
       imdsAvailable = true;
     } catch (err) {
@@ -28,15 +29,8 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
       return context.skip();
     }
 
-    const options = {
-      path: "/latest/api/token",
-      method: "PUT",
-      timeout: 1000,
-      headers: {
-        "x-aws-ec2-metadata-token-ttl-seconds": "21600",
-      },
-    };
-    const token = await getMetadataToken(options);
+    const endpoint = await getInstanceMetadataEndpoint();
+    const token = await getMetadataToken(endpoint);
     expect(token).toBeDefined();
     expect(typeof token).toBe("string");
     expect(token.length).toBeGreaterThan(0);
@@ -47,7 +41,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
       return context.skip();
     }
 
-    const provider = fromInstanceMetadata({ timeout: 1000, maxRetries: 2 });
+    const provider = fromInstanceMetadata();
     const credentials = await provider();
 
     expect(credentials).toHaveProperty("accessKeyId");
@@ -61,7 +55,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
       return context.skip();
     }
 
-    const provider = fromInstanceMetadata({ timeout: 1000, maxRetries: 2 });
+    const provider = fromInstanceMetadata();
     const credentials = await provider();
 
     if (!credentials.accountId) {
@@ -75,7 +69,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   it("IMDS access disabled via AWS_EC2_METADATA_DISABLED", async () => {
     process.env.AWS_EC2_METADATA_DISABLED = "true";
 
-    const provider = fromInstanceMetadata({ timeout: 1000 });
+    const provider = fromInstanceMetadata();
 
     await expect(provider()).rejects.toThrow("IMDS credential fetching is disabled");
   });
@@ -83,7 +77,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
   it("Empty configured profile name should throw error", async () => {
     process.env.AWS_EC2_INSTANCE_PROFILE_NAME = "   ";
 
-    const provider = fromInstanceMetadata({ timeout: 1000 });
+    const provider = fromInstanceMetadata();
 
     await expect(provider()).rejects.toThrow();
   });
@@ -93,7 +87,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
       return context.skip();
     }
 
-    const provider = fromInstanceMetadata({ timeout: 1000 });
+    const provider = fromInstanceMetadata();
 
     try {
       const credentials = await provider();
@@ -108,7 +102,7 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
       return context.skip();
     }
 
-    const provider = fromInstanceMetadata({ timeout: 1000 });
+    const provider = fromInstanceMetadata();
     const creds1 = await provider();
     const creds2 = await provider();
 
@@ -117,7 +111,11 @@ describe("fromInstanceMetadata (Live EC2 E2E Tests)", () => {
     expect(creds1.accessKeyId).toBe(creds2.accessKeyId);
   });
 
-  it("should timeout as expected when a request exceeds the specified duration", async (context) => {
+  /**
+   * The IMDS may respond too quickly to test this,
+   * even with 1ms timeout.
+   */
+  it.skip("should timeout as expected when a request exceeds the specified duration", async (context) => {
     if (!imdsAvailable) {
       return context.skip();
     }
