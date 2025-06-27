@@ -48,7 +48,7 @@ import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
- * Evnetstream code generator.
+ * Event stream code generator.
  */
 @SmithyUnstableApi
 public class EventStreamGenerator {
