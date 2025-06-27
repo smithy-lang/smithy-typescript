@@ -73,7 +73,10 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
     // Do nothing. TLS and HTTP/2 connection pooling is handled by the browser.
   }
 
-  async handle(request: HttpRequest, { abortSignal, requestTimeout }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(
+    request: HttpRequest,
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+  ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
     }

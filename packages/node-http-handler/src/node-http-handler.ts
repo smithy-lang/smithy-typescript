@@ -152,7 +152,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     this.config?.httpsAgent?.destroy();
   }
 
-  async handle(request: HttpRequest, { abortSignal, requestTimeout }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(
+    request: HttpRequest,
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+  ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
     }

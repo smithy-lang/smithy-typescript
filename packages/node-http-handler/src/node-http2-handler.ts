@@ -87,7 +87,10 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
     this.connectionManager.destroy();
   }
 
-  async handle(request: HttpRequest, { abortSignal, requestTimeout }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(
+    request: HttpRequest,
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+  ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
       this.connectionManager.setDisableConcurrentStreams(this.config.disableConcurrentStreams || false);
