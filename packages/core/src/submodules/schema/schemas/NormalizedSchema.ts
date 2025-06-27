@@ -21,6 +21,9 @@ import { StructureSchema } from "./StructureSchema";
  * @alpha
  */
 export class NormalizedSchema implements INormalizedSchema {
+  public static symbol = Symbol.for("@smithy/core/schema::NormalizedSchema");
+  protected symbol = NormalizedSchema.symbol;
+
   private readonly name: string;
   private readonly traits: SchemaTraits;
 
@@ -84,9 +87,20 @@ export class NormalizedSchema implements INormalizedSchema {
 
     if (this._isMemberSchema && !memberName) {
       throw new Error(
-        `@smithy/core/schema - NormalizedSchema member schema ${this.getName(true)} must initialize with memberName argument.`
+        `@smithy/core/schema - NormalizedSchema member schema ${this.getName(
+          true
+        )} must initialize with memberName argument.`
       );
     }
+  }
+
+  public static [Symbol.hasInstance](lhs: unknown): lhs is NormalizedSchema {
+    const isPrototype = NormalizedSchema.prototype.isPrototypeOf(lhs as any);
+    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
+      const ns = lhs as NormalizedSchema;
+      return ns.symbol === NormalizedSchema.symbol;
+    }
+    return isPrototype;
   }
 
   /**

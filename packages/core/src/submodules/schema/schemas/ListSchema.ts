@@ -10,12 +10,24 @@ import { Schema } from "./Schema";
  * @alpha
  */
 export class ListSchema extends Schema implements IListSchema {
+  public static symbol = Symbol.for("@smithy/core/schema::ListSchema");
+  protected symbol = ListSchema.symbol;
+
   public constructor(
     public name: string,
     public traits: SchemaTraits,
     public valueSchema: SchemaRef
   ) {
     super(name, traits);
+  }
+
+  public static [Symbol.hasInstance](lhs: unknown): lhs is ListSchema {
+    const isPrototype = ListSchema.prototype.isPrototypeOf(lhs as any);
+    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
+      const list = lhs as ListSchema;
+      return list.symbol === ListSchema.symbol;
+    }
+    return isPrototype;
   }
 }
 

@@ -9,6 +9,9 @@ import { Schema } from "./Schema";
  * @alpha
  */
 export class StructureSchema extends Schema implements IStructureSchema {
+  public static symbol = Symbol.for("@smithy/core/schema::StructureSchema");
+  protected symbol = StructureSchema.symbol;
+
   public members: Record<string, [SchemaRef, SchemaTraits]> = {};
 
   public constructor(
@@ -23,6 +26,15 @@ export class StructureSchema extends Schema implements IStructureSchema {
         ? (memberList[i] as MemberSchema)
         : [memberList[i], 0];
     }
+  }
+
+  public static [Symbol.hasInstance](lhs: unknown): lhs is StructureSchema {
+    const isPrototype = StructureSchema.prototype.isPrototypeOf(lhs as any);
+    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
+      const struct = lhs as StructureSchema;
+      return struct.symbol === StructureSchema.symbol;
+    }
+    return isPrototype;
   }
 }
 

@@ -70,11 +70,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       ...input,
     };
 
-    for (const memberName of Object.keys(_input)) {
-      const memberNs = ns.getMemberSchema(memberName);
-      if (memberNs === undefined) {
-        continue;
-      }
+    for (const [memberName, memberNs] of ns.structIterator()) {
       const memberTraits = memberNs.getMergedTraits();
       const inputMember = (_input as any)[memberName] as any;
 
