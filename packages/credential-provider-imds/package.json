@@ -15,7 +15,9 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "yarn g:vitest run",
-    "test:watch": "yarn g:vitest watch"
+    "test:e2e": "yarn g:vitest run -c vitest.config.e2e.ts --mode development",
+    "test:watch": "yarn g:vitest watch",
+    "test:e2e:watch": "yarn g:vitest watch -c vitest.config.e2e.ts"
   },
   "keywords": [
     "aws",
