@@ -24,9 +24,12 @@ import { HttpProtocol } from "./HttpProtocol";
 export abstract class HttpBindingProtocol extends HttpProtocol {
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,
-    input: Input,
+    _input: Input,
     context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
   ): Promise<IHttpRequest> {
+    const input: any = {
+      ...(_input ?? {}),
+    };
     const serializer = this.serializer;
     const query = {} as Record<string, string | string[]>;
     const headers = {} as Record<string, string>;
@@ -66,13 +69,13 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       }
     }
 
-    const _input: any = {
-      ...input,
-    };
-
     for (const [memberName, memberNs] of ns.structIterator()) {
-      const memberTraits = memberNs.getMergedTraits();
-      const inputMember = (_input as any)[memberName] as any;
+      const memberTraits = memberNs.getMergedTraits() ?? {};
+      const inputMemberValue = input[memberName];
+
+      if (inputMemberValue == null) {
+        continue;
+      }
 
       if (memberTraits.httpPayload) {
         const isStreaming = memberNs.isStreaming();
@@ -83,15 +86,16 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
             throw new Error("serialization of event streams is not yet implemented");
           } else {
             // streaming blob body
-            payload = inputMember;
+            payload = inputMemberValue;
           }
         } else {
           // structural/document body
-          serializer.write(memberNs, inputMember);
+          serializer.write(memberNs, inputMemberValue);
           payload = serializer.flush();
         }
+        delete input[memberName];
       } else if (memberTraits.httpLabel) {
-        serializer.write(memberNs, inputMember);
+        serializer.write(memberNs, inputMemberValue);
         const replacement = serializer.flush() as string;
         if (request.path.includes(`{${memberName}+}`)) {
           request.path = request.path.replace(
@@ -101,28 +105,28 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         } else if (request.path.includes(`{${memberName}}`)) {
           request.path = request.path.replace(`{${memberName}}`, extendedEncodeURIComponent(replacement));
         }
-        delete _input[memberName];
+        delete input[memberName];
       } else if (memberTraits.httpHeader) {
-        serializer.write(memberNs, inputMember);
+        serializer.write(memberNs, inputMemberValue);
         headers[memberTraits.httpHeader.toLowerCase() as string] = String(serializer.flush());
-        delete _input[memberName];
+        delete input[memberName];
       } else if (typeof memberTraits.httpPrefixHeaders === "string") {
-        for (const [key, val] of Object.entries(inputMember)) {
+        for (const [key, val] of Object.entries(inputMemberValue)) {
           const amalgam = memberTraits.httpPrefixHeaders + key;
           serializer.write([memberNs.getValueSchema(), { httpHeader: amalgam }], val);
           headers[amalgam.toLowerCase()] = serializer.flush() as string;
         }
-        delete _input[memberName];
+        delete input[memberName];
       } else if (memberTraits.httpQuery || memberTraits.httpQueryParams) {
-        this.serializeQuery(memberNs, inputMember, query);
-        delete _input[memberName];
+        this.serializeQuery(memberNs, inputMemberValue, query);
+        delete input[memberName];
       } else {
         hasNonHttpBindingMember = true;
       }
     }
 
     if (hasNonHttpBindingMember && input) {
-      serializer.write(schema, _input);
+      serializer.write(schema, input);
       payload = serializer.flush() as Uint8Array;
     }
 
