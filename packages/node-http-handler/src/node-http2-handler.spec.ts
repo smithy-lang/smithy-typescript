@@ -565,6 +565,48 @@ describe(NodeHttp2Handler.name, () => {
     );
   });
 
+  describe("per-request requestTimeout", () => {
+    it("should use per-request timeout over handler config timeout", async () => {
+      const nodeH2Handler = new NodeHttp2Handler({ requestTimeout: 5000 });
+      
+      const mockH2Server = mockH2Servers[port1];
+      mockH2Server.removeAllListeners("request");
+      mockH2Server.on("request", () => {
+        // don't respond - let it timeout
+      });
+      
+      const mockRequest = new HttpRequest(getMockReqOptions());
+
+      const start = Date.now();
+      await expect(
+        nodeH2Handler.handle(mockRequest, { requestTimeout: 100 })
+      ).rejects.toHaveProperty("name", "TimeoutError");
+      
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThan(200);
+    });
+
+    it("should fall back to handler config timeout when per-request timeout not provided", async () => {
+      const nodeH2Handler = new NodeHttp2Handler({ requestTimeout: 100 });
+      
+      const mockH2Server = mockH2Servers[port1];
+      mockH2Server.removeAllListeners("request");
+      mockH2Server.on("request", () => {
+      });
+      
+      const mockRequest = new HttpRequest(getMockReqOptions());
+
+      const start = Date.now();
+      await expect(
+        nodeH2Handler.handle(mockRequest, {})
+      ).rejects.toHaveProperty("name", "TimeoutError");
+      
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThan(200);
+    });
+  });
+
+
   describe.each([
     ["object provider", async () => ({ disableConcurrentStreams: true })],
     ["static object", { disableConcurrentStreams: true }],

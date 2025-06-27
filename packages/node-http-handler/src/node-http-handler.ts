@@ -152,7 +152,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     this.config?.httpsAgent?.destroy();
   }
 
-  async handle(request: HttpRequest, { abortSignal }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(request: HttpRequest, { abortSignal, requestTimeout }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
     }
@@ -281,8 +281,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // Defer registration of socket event listeners if the connection and request timeouts
       // are longer than a few seconds. This avoids slowing down faster operations.
+      const effectiveRequestTimeout = requestTimeout ?? this.config.requestTimeout;
       timeouts.push(setConnectionTimeout(req, reject, this.config.connectionTimeout));
-      timeouts.push(setSocketTimeout(req, reject, this.config.requestTimeout));
+      timeouts.push(setSocketTimeout(req, reject, effectiveRequestTimeout));
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;
@@ -297,7 +298,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         );
       }
 
-      writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch((e) => {
+      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout).catch((e) => {
         timeouts.forEach(timing.clearTimeout);
         return _reject(e);
       });
