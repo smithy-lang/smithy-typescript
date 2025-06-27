@@ -12,6 +12,9 @@ import { StructureSchema } from "./StructureSchema";
  * @alpha
  */
 export class ErrorSchema extends StructureSchema {
+  public static symbol = Symbol.for("@smithy/core/schema::ErrorSchema");
+  protected symbol = ErrorSchema.symbol;
+
   public constructor(
     public name: string,
     public traits: SchemaTraits,
@@ -23,6 +26,15 @@ export class ErrorSchema extends StructureSchema {
     public ctor: any
   ) {
     super(name, traits, memberNames, memberList);
+  }
+
+  public static [Symbol.hasInstance](lhs: unknown): lhs is ErrorSchema {
+    const isPrototype = ErrorSchema.prototype.isPrototypeOf(lhs as any);
+    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
+      const err = lhs as ErrorSchema;
+      return err.symbol === ErrorSchema.symbol;
+    }
+    return isPrototype;
   }
 }
 

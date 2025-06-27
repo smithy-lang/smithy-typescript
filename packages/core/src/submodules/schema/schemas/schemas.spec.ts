@@ -49,6 +49,12 @@ describe("schemas", () => {
       expect(error("ack", "Error", 0, [], [], Error)).toEqual(schema);
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
+
+    it("has an instanceOf operator", () => {
+      const object = { ...schema };
+      expect(ErrorSchema.prototype.isPrototypeOf(object)).toBe(false);
+      expect(object).toBeInstanceOf(ErrorSchema);
+    });
   });
   describe(ListSchema.name, () => {
     const schema = new ListSchema("ack#List", 0, 0);
@@ -61,6 +67,11 @@ describe("schemas", () => {
     it("has a factory and the factory registers the schema", () => {
       expect(list("ack", "List", 0, 0)).toEqual(schema);
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
+    });
+    it("has an instanceOf operator", () => {
+      const object = { ...schema };
+      expect(ListSchema.prototype.isPrototypeOf(object)).toBe(false);
+      expect(object).toBeInstanceOf(ListSchema);
     });
   });
   describe(MapSchema.name, () => {
@@ -75,6 +86,11 @@ describe("schemas", () => {
     it("has a factory and the factory registers the schema", () => {
       expect(map("ack", "Map", 0, 0, 1)).toEqual(schema);
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
+    });
+    it("has an instanceOf operator", () => {
+      const object = { ...schema };
+      expect(MapSchema.prototype.isPrototypeOf(object)).toBe(false);
+      expect(object).toBeInstanceOf(MapSchema);
     });
   });
   describe(OperationSchema.name, () => {
@@ -119,6 +135,11 @@ describe("schemas", () => {
       expect(sim("ack", "Simple", 0, 0)).toEqual(schema);
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
+    it("has an instanceOf operator", () => {
+      const object = { ...schema };
+      expect(SimpleSchema.prototype.isPrototypeOf(object)).toBe(false);
+      expect(object).toBeInstanceOf(SimpleSchema);
+    });
   });
   describe(StructureSchema.name, () => {
     const schema = new StructureSchema("ack#Structure", 0, ["a", "b", "c"], [0, 1, 2]);
@@ -135,6 +156,11 @@ describe("schemas", () => {
     it("has a factory and the factory registers the schema", () => {
       expect(struct("ack", "Structure", 0, ["a", "b", "c"], [0, 1, 2])).toEqual(schema);
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
+    });
+    it("has an instanceOf operator", () => {
+      const object = { ...schema };
+      expect(StructureSchema.prototype.isPrototypeOf(object)).toBe(false);
+      expect(object).toBeInstanceOf(StructureSchema);
     });
   });
 });

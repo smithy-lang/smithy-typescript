@@ -10,12 +10,24 @@ import { Schema } from "./Schema";
  * @alpha
  */
 export class SimpleSchema extends Schema implements TraitsSchema {
+  public static symbol = Symbol.for("@smithy/core/schema::SimpleSchema");
+  protected symbol = SimpleSchema.symbol;
+
   public constructor(
     public name: string,
     public schemaRef: SchemaRef,
     public traits: SchemaTraits
   ) {
     super(name, traits);
+  }
+
+  public static [Symbol.hasInstance](lhs: unknown): lhs is SimpleSchema {
+    const isPrototype = SimpleSchema.prototype.isPrototypeOf(lhs as any);
+    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
+      const sim = lhs as SimpleSchema;
+      return sim.symbol === SimpleSchema.symbol;
+    }
+    return isPrototype;
   }
 }
 
