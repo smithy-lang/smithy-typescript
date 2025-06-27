@@ -296,7 +296,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       });
 
       const options1 = { requestTimeout: 100 };
-      const options2 = {};
+      const options2: { requestTimeout?: number } = {};
 
       const effectiveTimeout1 = options1.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
       const effectiveTimeout2 = options2.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
