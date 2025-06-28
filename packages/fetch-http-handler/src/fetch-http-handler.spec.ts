@@ -301,6 +301,37 @@ const globalFetch = global.fetch;
     expect(mockFetch.mock.calls.length).toBe(1);
   });
 
+  describe("per-request requestTimeout", () => {
+    it("should use per-request timeout over handler config timeout", async () => {
+      const mockFetch = vi.fn(() => new Promise(() => {})); // never resolve
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 5000 });
+
+      const start = Date.now();
+      await expect(fetchHttpHandler.handle({} as any, { requestTimeout: 50 })).rejects.toHaveProperty(
+        "name",
+        "TimeoutError"
+      );
+
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThan(100); // should timeout quickly
+    });
+
+    it("should fall back to handler config timeout when per-request timeout not provided", async () => {
+      const mockFetch = vi.fn(() => new Promise(() => {}));
+      (global as any).fetch = mockFetch;
+
+      const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 50 });
+
+      const start = Date.now();
+      await expect(fetchHttpHandler.handle({} as any, {})).rejects.toHaveProperty("name", "TimeoutError");
+
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThan(100);
+    });
+  });
+
   it("will throw timeout error it timeout finishes before request", async () => {
     const mockFetch = vi.fn(() => {
       return new Promise(() => {});
