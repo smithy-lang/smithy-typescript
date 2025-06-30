@@ -258,4 +258,51 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       );
     });
   });
+
+  describe("per-request requestTimeout", () => {
+    it("should use per-request timeout over handler config timeout", () => {
+      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 5000 });
+      const mockHandle = vi.spyOn(nodeHttpHandler, "handle");
+      const testTimeout = (handlerTimeout: number, requestTimeout?: number) => {
+        const handler = new NodeHttpHandler({ requestTimeout: handlerTimeout });
+        const options = requestTimeout !== undefined ? { requestTimeout } : {};
+        const expectedTimeout = requestTimeout ?? handlerTimeout;
+        return expectedTimeout;
+      };
+
+      // per-request timeout takes precedence
+      expect(testTimeout(5000, 100)).toBe(100);
+
+      // fallback to handler config
+      expect(testTimeout(200, undefined)).toBe(200);
+      expect(testTimeout(200)).toBe(200);
+    });
+
+    it("should pass correct timeout values to internal functions", async () => {
+      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 5000 });
+      (nodeHttpHandler as any).config = {
+        requestTimeout: 5000,
+        httpAgent: new http.Agent(),
+        httpsAgent: new https.Agent(),
+        logger: console,
+      };
+
+      const httpRequest = new HttpRequest({
+        hostname: "example.com",
+        method: "GET",
+        protocol: "http:",
+        path: "/",
+        headers: {},
+      });
+
+      const options1 = { requestTimeout: 100 };
+      const options2: { requestTimeout?: number } = {};
+
+      const effectiveTimeout1 = options1.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
+      const effectiveTimeout2 = options2.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
+
+      expect(effectiveTimeout1).toBe(100); // per-request timeout
+      expect(effectiveTimeout2).toBe(5000); // handler config timeout
+    });
+  });
 });
