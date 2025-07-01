@@ -5,7 +5,7 @@ import { parse } from "url";
 
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
-import { providerConfigFromInit, RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
+import { DEFAULT_MAX_RETRIES, DEFAULT_TIMEOUT, RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
 import { retry } from "./remoteProvider/retry";
 
 /**
@@ -28,7 +28,7 @@ export const ENV_CMDS_AUTH_TOKEN = "AWS_CONTAINER_AUTHORIZATION_TOKEN";
  * Container Metadata Service
  */
 export const fromContainerMetadata = (init: RemoteProviderInit = {}): AwsCredentialIdentityProvider => {
-  const { timeout, maxRetries } = providerConfigFromInit(init);
+  const { timeout = DEFAULT_TIMEOUT, maxRetries = DEFAULT_MAX_RETRIES } = init;
   return () =>
     retry(async () => {
       const requestOptions = await getCmdsUri({ logger: init.logger });
