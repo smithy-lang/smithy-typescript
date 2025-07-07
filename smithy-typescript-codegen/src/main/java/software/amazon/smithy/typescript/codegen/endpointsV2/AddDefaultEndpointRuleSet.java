@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
@@ -109,15 +110,14 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
     public Model preprocessModel(Model model, TypeScriptSettings settings) {
         Model.Builder modelBuilder = model.toBuilder();
 
-        model.getServiceShapes().forEach(serviceShape -> {
-            if (!serviceShape.hasTrait(EndpointRuleSetTrait.class)) {
-                usesDefaultEndpointRuleset = true;
-                modelBuilder.removeShape(serviceShape.toShapeId());
-                modelBuilder.addShape(serviceShape.toBuilder()
-                    .addTrait(DEFAULT_RULESET)
-                    .build());
-            }
-        });
+        ServiceShape serviceShape = settings.getService(model);
+        if (!serviceShape.hasTrait(EndpointRuleSetTrait.class)) {
+            usesDefaultEndpointRuleset = true;
+            modelBuilder.removeShape(serviceShape.toShapeId());
+            modelBuilder.addShape(serviceShape.toBuilder()
+                .addTrait(DEFAULT_RULESET)
+                .build());
+        }
 
         return modelBuilder.build();
     }

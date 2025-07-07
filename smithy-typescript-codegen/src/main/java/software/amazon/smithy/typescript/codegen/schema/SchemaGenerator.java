@@ -259,7 +259,7 @@ public class SchemaGenerator implements Runnable {
     private void writeBaseError() {
         String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
         String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
-        String namespace = model.getServiceShapes().stream().findFirst().get().getId().getNamespace();
+        String namespace = settings.getService(model).getId().getNamespace();
 
         String exceptionCtorSymbolName = "__" + serviceExceptionName;
         writer.addImportSubmodule("error", "error", TypeScriptDependency.SMITHY_CORE, "/schema");
