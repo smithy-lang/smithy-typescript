@@ -38,7 +38,7 @@ export const getEndpointFromInstructions = async <
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
   context?: HandlerExecutionContext
 ): Promise<EndpointV2> => {
-  if (!clientConfig.endpoint) {
+  if (!clientConfig.isCustomEndpoint) {
     let endpointFromConfig: string | undefined;
 
     // This field is guaranteed by the type indicated by the config resolver, but is new
