@@ -1,6 +1,6 @@
 {
   "name": "@smithy/fetch-http-handler",
-  "version": "5.0.4",
+  "version": "5.1.0",
   "description": "Provides a way to make requests",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",

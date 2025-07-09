@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- c4e923a: per-request timeouts support
+
 ## 4.0.6
 
 ### Patch Changes

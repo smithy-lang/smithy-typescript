@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.1.14
+
+### Patch Changes
+
+- 3ecb1f4: return undefined for endpointParam "endpoint" if isCustomEndpoint is false
+- Updated dependencies [d105c97]
+  - @smithy/core@3.7.0
+
 ## 4.1.13
 
 ### Patch Changes

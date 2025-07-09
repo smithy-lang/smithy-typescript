@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.7.0
+
+### Minor Changes
+
+- d105c97: add instanceof overrides for schema classes
+
+### Patch Changes
+
+- @smithy/util-stream@4.2.3
+
 ## 3.6.0
 
 ### Minor Changes

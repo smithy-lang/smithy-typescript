@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-stream-node",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline util-stream-node",
