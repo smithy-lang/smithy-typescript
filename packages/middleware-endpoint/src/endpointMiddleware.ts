@@ -39,7 +39,7 @@ export const endpointMiddleware = <T extends EndpointParameters>({
       context: HandlerExecutionContext
     ): SerializeHandler<any, Output> =>
     async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
-      if (config.endpoint) {
+      if (config.isCustomEndpoint) {
         setFeature(context, "ENDPOINT_OVERRIDE", "N");
       }
 

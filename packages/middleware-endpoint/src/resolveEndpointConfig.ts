@@ -64,7 +64,7 @@ interface PreviouslyResolved<T extends EndpointParameters = EndpointParameters> 
 /**
  * @internal
  *
- * This supercedes the similarly named EndpointsResolvedConfig (no parametric types)
+ * This supersedes the similarly named EndpointsResolvedConfig (no parametric types)
  * from resolveEndpointsConfig.ts in \@smithy/config-resolver.
  */
 export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointParameters> {
@@ -85,8 +85,11 @@ export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointP
 
   /**
    * Whether the endpoint is specified by caller.
+   * This should be used over checking the existence of `endpoint`, since
+   * that may have been set by other means, such as the default regional
+   * endpoint provider function.
+   *
    * @internal
-   * @deprecated
    */
   isCustomEndpoint?: boolean;
 
