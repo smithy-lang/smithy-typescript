@@ -1,5 +1,14 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.33.0 (2025-07-10)
+
+### Features
+- Upgraded smithy version to 1.60.3 ([#1640](https://github.com/smithy-lang/smithy-typescript/pull/1640))
+- Upgraded fast-xml-parser to 5.2.5 ([#1641](https://github.com/smithy-lang/smithy-typescript/pull/1641))
+
+### Bug Fixes
+- Avoided using model.getServiceShapes() for endpoint generation ([#1642](https://github.com/smithy-lang/smithy-typescript/pull/1642))
+
 ## 0.32.0 (2025-06-26)
 
 ### Features
