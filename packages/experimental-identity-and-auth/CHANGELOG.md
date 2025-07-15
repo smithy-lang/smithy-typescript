@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.3.62
+
+### Patch Changes
+
+- Updated dependencies [bccb1b9]
+  - @smithy/middleware-endpoint@4.1.15
+  - @smithy/middleware-retry@4.1.16
+
 ## 0.3.61
 
 ### Patch Changes

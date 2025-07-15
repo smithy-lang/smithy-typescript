@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.23
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.7
+
 ## 4.0.22
 
 ### Patch Changes

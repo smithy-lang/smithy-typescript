@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.15
+
+### Patch Changes
+
+- bccb1b9: fix resolving file/env configured endpoint
+
 ## 4.1.14
 
 ### Patch Changes
