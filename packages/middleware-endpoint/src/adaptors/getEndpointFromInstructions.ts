@@ -52,6 +52,7 @@ export const getEndpointFromInstructions = async <
 
     if (endpointFromConfig) {
       clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig!));
+      clientConfig.isCustomEndpoint = true;
     }
   }
 
