@@ -21,11 +21,11 @@
   "types": "./dist-types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist-types/index.d.ts",
       "module": "./dist-es/index.js",
       "node": "./dist-cjs/index.js",
       "import": "./dist-es/index.js",
-      "require": "./dist-cjs/index.js",
-      "types": "./dist-types/index.d.ts"
+      "require": "./dist-cjs/index.js"
     },
     "./package.json": {
       "module": "./package.json",
@@ -34,32 +34,32 @@
       "require": "./package.json"
     },
     "./cbor": {
+      "types": "./dist-types/submodules/cbor/index.d.ts",
       "module": "./dist-es/submodules/cbor/index.js",
       "node": "./dist-cjs/submodules/cbor/index.js",
       "import": "./dist-es/submodules/cbor/index.js",
-      "require": "./dist-cjs/submodules/cbor/index.js",
-      "types": "./dist-types/submodules/cbor/index.d.ts"
+      "require": "./dist-cjs/submodules/cbor/index.js"
     },
     "./protocols": {
+      "types": "./dist-types/submodules/protocols/index.d.ts",
       "module": "./dist-es/submodules/protocols/index.js",
       "node": "./dist-cjs/submodules/protocols/index.js",
       "import": "./dist-es/submodules/protocols/index.js",
-      "require": "./dist-cjs/submodules/protocols/index.js",
-      "types": "./dist-types/submodules/protocols/index.d.ts"
+      "require": "./dist-cjs/submodules/protocols/index.js"
     },
     "./serde": {
+      "types": "./dist-types/submodules/serde/index.d.ts",
       "module": "./dist-es/submodules/serde/index.js",
       "node": "./dist-cjs/submodules/serde/index.js",
       "import": "./dist-es/submodules/serde/index.js",
-      "require": "./dist-cjs/submodules/serde/index.js",
-      "types": "./dist-types/submodules/serde/index.d.ts"
+      "require": "./dist-cjs/submodules/serde/index.js"
     },
     "./schema": {
+      "types": "./dist-types/submodules/schema/index.d.ts",
       "module": "./dist-es/submodules/schema/index.js",
       "node": "./dist-cjs/submodules/schema/index.js",
       "import": "./dist-es/submodules/schema/index.js",
-      "require": "./dist-cjs/submodules/schema/index.js",
-      "types": "./dist-types/submodules/schema/index.d.ts"
+      "require": "./dist-cjs/submodules/schema/index.js"
     }
   },
   "author": {
