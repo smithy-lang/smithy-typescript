@@ -20,11 +20,11 @@ for (const submodule of submodules) {
     if (!pkgJson.exports[`./${submodule}`]) {
       errors.push(`${submodule} submodule is missing exports statement in package.json`);
       pkgJson.exports[`./${submodule}`] = {
+        types: `./dist-types/submodules/${submodule}/index.d.ts`,
         module: `./dist-es/submodules/${submodule}/index.js`,
         node: `./dist-cjs/submodules/${submodule}/index.js`,
         import: `./dist-es/submodules/${submodule}/index.js`,
         require: `./dist-cjs/submodules/${submodule}/index.js`,
-        types: `./dist-types/submodules/${submodule}/index.d.ts`,
       };
       fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
     }
