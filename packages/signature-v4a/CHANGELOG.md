@@ -1,5 +1,11 @@
 # @smithy/signature-v4a
 
+## 3.0.4
+
+### Patch Changes
+
+- bb7975e: set sideEffects bundler metadata
+
 ## 3.0.3
 
 ### Patch Changes

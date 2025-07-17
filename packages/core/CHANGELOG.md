@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.7.1
+
+### Patch Changes
+
+- 312801c: increase priority of types conditional exports
+- bb7975e: set sideEffects bundler metadata
+
 ## 3.7.0
 
 ### Minor Changes
