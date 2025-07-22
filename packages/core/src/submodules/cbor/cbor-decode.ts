@@ -1,4 +1,4 @@
-import { NumericValue } from "@smithy/core/serde";
+import { nv } from "@smithy/core/serde";
 import { toUtf8 } from "@smithy/util-utf8";
 
 import {
@@ -129,22 +129,44 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
           for (let i = start; i < start + length; ++i) {
             b = (b << BigInt(8)) | BigInt(payload[i]);
           }
-
-          _offset = offset + length;
+          // the new offset is the sum of:
+          // 1. the local major offset (1)
+          // 2. the offset of the decoded count of the bigInteger
+          // 3. the length of the data bytes of the bigInteger
+          _offset = offset + _offset + length;
           return minor === 3 ? -b - BigInt(1) : b;
         } else if (minor === 4) {
           const decimalFraction = decode(at + offset, to);
           const [exponent, mantissa] = decimalFraction;
-          const s = mantissa.toString();
-          const numericString = exponent === 0 ? s : s.slice(0, s.length + exponent) + "." + s.slice(exponent);
+          const normalizer = mantissa < 0 ? -1 : 1;
+          const mantissaStr = "0".repeat(Math.abs(exponent) + 1) + String(BigInt(normalizer) * BigInt(mantissa));
 
-          return new NumericValue(numericString, "bigDecimal");
+          let numericString: string;
+          const sign = mantissa < 0 ? "-" : "";
+
+          numericString =
+            exponent === 0
+              ? mantissaStr
+              : mantissaStr.slice(0, mantissaStr.length + exponent) + "." + mantissaStr.slice(exponent);
+          numericString = numericString.replace(/^0+/g, "");
+          if (numericString === "") {
+            numericString = "0";
+          }
+          if (numericString[0] === ".") {
+            numericString = "0" + numericString;
+          }
+          numericString = sign + numericString;
+
+          // the new offset is the sum of:
+          // 1. the local major offset (1)
+          // 2. the offset of the decoded exponent mantissa pair
+          _offset = offset + _offset;
+          return nv(numericString);
         } else {
           const value = decode(at + offset, to);
           const valueOffset = _offset;
 
           _offset = offset + valueOffset;
-
           return tag({ tag: castBigInt(unsignedInt), value });
         }
       }
