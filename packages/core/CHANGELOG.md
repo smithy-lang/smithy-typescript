@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.7.2
+
+### Patch Changes
+
+- f4dcba0: fix offset calculation when decoding bigInteger in CBOR
+
 ## 3.7.1
 
 ### Patch Changes
