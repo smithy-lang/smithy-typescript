@@ -53,15 +53,19 @@ export class NumericValue {
     return this.string;
   }
 
-  public [Symbol.hasInstance](object: unknown) {
+  public static [Symbol.hasInstance](object: unknown) {
     if (!object || typeof object !== "object") {
       return false;
     }
     const _nv = object as NumericValue;
+    const prototypeMatch = NumericValue.prototype.isPrototypeOf(object.constructor?.prototype);
+    if (prototypeMatch) {
+      return prototypeMatch;
+    }
     if (typeof _nv.string === "string" && typeof _nv.type === "string" && _nv.constructor?.name === "NumericValue") {
       return true;
     }
-    return false;
+    return prototypeMatch;
   }
 }
 
