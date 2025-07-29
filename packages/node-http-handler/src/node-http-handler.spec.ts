@@ -252,9 +252,12 @@ describe("NodeHttpHandler", () => {
 
     it.each([
       ["existing handler instance", new NodeHttpHandler()],
-      ["custom HttpHandler object", {
-        handle: vi.fn(),
-      } as any],
+      [
+        "custom HttpHandler object",
+        {
+          handle: vi.fn(),
+        } as any,
+      ],
     ])("returns the input handler when passed %s", (_, handler) => {
       const result = NodeHttpHandler.create(handler);
       expect(result).toBe(handler);
