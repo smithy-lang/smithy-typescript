@@ -4,6 +4,8 @@ import https from "https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
+import * as setConnectionTimeoutModule from "./set-connection-timeout";
+import * as setSocketTimeoutModule from "./set-socket-timeout";
 import { timing } from "./timing";
 
 vi.mock("http", async () => {
@@ -54,6 +56,8 @@ describe("NodeHttpHandler", () => {
   describe("constructor and #handle", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
     const randomSocketAcquisitionWarningTimeout = Math.round(Math.random() * 10000) + 1;
+    const randomConnectionTimeout = Math.round(Math.random() * 10000) + 1;
+    const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
 
     beforeEach(() => {});
 
@@ -108,6 +112,38 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(option);
         await nodeHttpHandler.handle({} as any);
         expect(vi.mocked(timing.setTimeout).mock.calls[0][1]).toBe(randomSocketAcquisitionWarningTimeout);
+      });
+
+      it.each([
+        ["an options hash", { connectionTimeout: randomConnectionTimeout }],
+        [
+          "a provider",
+          async () => ({
+            connectionTimeout: randomConnectionTimeout,
+          }),
+        ],
+      ])("sets connectionTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(setConnectionTimeoutModule, "setConnectionTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(setConnectionTimeoutModule.setConnectionTimeout).mock.calls[0][2]).toBe(
+          randomConnectionTimeout
+        );
+      });
+
+      it.each([
+        ["an options hash", { requestTimeout: randomRequestTimeout }],
+        [
+          "a provider",
+          async () => ({
+            requestTimeout: randomRequestTimeout,
+          }),
+        ],
+      ])("sets requestTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(setSocketTimeoutModule, "setSocketTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(setSocketTimeoutModule.setSocketTimeout).mock.calls[0][2]).toBe(randomRequestTimeout);
       });
 
       it.each([
@@ -208,6 +244,45 @@ describe("NodeHttpHandler", () => {
         await nodeHttpHandler.handle(httpRequest as any);
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.host).toEqual("host");
       });
+    });
+  });
+
+  describe("create", () => {
+    const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
+
+    it.each([
+      ["existing handler instance", new NodeHttpHandler()],
+      [
+        "custom HttpHandler object",
+        {
+          handle: vi.fn(),
+        } as any,
+      ],
+    ])("returns the input handler when passed %s", (_, handler) => {
+      const result = NodeHttpHandler.create(handler);
+      expect(result).toBe(handler);
+    });
+
+    it.each([
+      ["undefined", undefined],
+      ["an empty options hash", {}],
+      ["empty provider", async () => undefined],
+    ])("creates new handler instance when input is %s", async (_, input) => {
+      const result = NodeHttpHandler.create(input);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+    });
+
+    it.each([
+      ["an options hash", { requestTimeout: randomRequestTimeout }],
+      ["a provider", async () => ({ requestTimeout: randomRequestTimeout })],
+    ])("creates new handler instance with config when input is %s", async (_, input) => {
+      const result = NodeHttpHandler.create(input);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+
+      // Verify configuration by calling handle
+      await result.handle({} as any);
+
+      expect(result.httpHandlerConfigs().requestTimeout).toBe(randomRequestTimeout);
     });
   });
 
