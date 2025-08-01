@@ -54,6 +54,7 @@ import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generato
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerator;
 import software.amazon.smithy.typescript.codegen.validation.LongValidator;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
@@ -194,6 +195,9 @@ final class DirectedTypeScriptCodegen
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         SymbolProvider symbolProvider = directive.symbolProvider();
         if (protocolGenerator != null) {
+            if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+                return;
+            }
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + service.getId());
             String fileName = Paths.get(CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
                     ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts").toString();

@@ -25,6 +25,7 @@ public abstract class SchemaGenerationAllowlist {
         ALLOWED.add("smithy.protocoltests.rpcv2Cbor#RpcV2Protocol");
     }
 
+    @Deprecated
     public static boolean allows(String serviceShapeId, TypeScriptSettings settings) {
         return ALLOWED.contains(serviceShapeId) && settings.generateSchemas();
     }
