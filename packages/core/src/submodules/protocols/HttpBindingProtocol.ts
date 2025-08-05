@@ -293,7 +293,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
                   [unionMember]: await deserializer.read(eventStreamSchema, event[unionMember].body),
                 };
               } else {
-                // this union convention is ignored by the event stream marshaller.
+                // todo(schema): This union convention is ignored by the event stream marshaller.
+                // todo(schema): This should be returned to the user instead.
+                // see "if (deserialized.$unknown) return;" in getUnmarshalledStream.ts
                 return {
                   $unknown: event,
                 };

@@ -60,45 +60,41 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
     private final Set<ShapeId> includedTraits = new HashSet<>(
         // (wrapped for mutability)
         SetUtils.of(
-            SparseTrait.ID,
+            SparseTrait.ID, // Shape serde
             // todo(schema) needs schema logger implementation
             SensitiveTrait.ID,
             // todo(schema) needs automatic generation by protocol serializer
             IdempotencyTokenTrait.ID,
-            JsonNameTrait.ID,
-            MediaTypeTrait.ID,
-            XmlAttributeTrait.ID,
-            XmlFlattenedTrait.ID,
-            XmlNameTrait.ID,
-            XmlNamespaceTrait.ID,
+            JsonNameTrait.ID, // Shape serde
+            MediaTypeTrait.ID, // JSON shape serde
+            XmlAttributeTrait.ID, // XML shape serde
+            XmlFlattenedTrait.ID, // XML shape serde
+            XmlNameTrait.ID, // XML shape serde
+            XmlNamespaceTrait.ID, // XML shape serde
+            StreamingTrait.ID, // HttpBindingProtocol handles streaming + payload members.
+            EndpointTrait.ID, // HttpProtocol
+            ErrorTrait.ID, // set by the ServiceException runtime classes.
+            RequiresLengthTrait.ID, // unhandled
+
             // todo(schema)
             EventHeaderTrait.ID,
             // todo(schema)
             EventPayloadTrait.ID,
-            StreamingTrait.ID,
-            RequiresLengthTrait.ID, // unhandled
-            EndpointTrait.ID,
+
             // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
             // but the actual HTTP response status code is used with no particular comparison
             // with the trait's error code.
             HttpErrorTrait.ID,
-            // handled by HTTP binding protocol base class.
+            // the following HTTP traits are handled by HTTP binding protocol base class.
+            HttpTrait.ID,
             HttpHeaderTrait.ID,
-            // handled by HTTP binding protocol base class.
             HttpQueryTrait.ID,
-            // handled by HTTP binding protocol base class.
             HttpLabelTrait.ID,
-            // handled by HTTP binding protocol base class.
             HttpPayloadTrait.ID,
-            // handled by HTTP binding protocol base class.
             HttpPrefixHeadersTrait.ID,
-            // handled by HTTP binding protocol base class.
             HttpQueryParamsTrait.ID,
-            // handled by HTTP binding protocol base class.
             HttpResponseCodeTrait.ID,
-            HostLabelTrait.ID,
-            ErrorTrait.ID,
-            HttpTrait.ID
+            HostLabelTrait.ID
         )
     );
     private final Map<Shape, Boolean> cache = new HashMap<>();

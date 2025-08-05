@@ -1,5 +1,4 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
-import { splitEvery, splitHeader } from "@smithy/core/serde";
+import { NormalizedSchema } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import {
   ClientProtocol,
@@ -7,7 +6,6 @@ import {
   Endpoint,
   EndpointBearer,
   EndpointV2,
-  EventStreamSerdeContext,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
@@ -19,9 +17,6 @@ import {
   ShapeDeserializer,
   ShapeSerializer,
 } from "@smithy/types";
-import { sdkStreamMixin } from "@smithy/util-stream";
-
-import { collectBody } from "./collect-stream-body";
 
 /**
  * Abstract base for HTTP-based client protocols.

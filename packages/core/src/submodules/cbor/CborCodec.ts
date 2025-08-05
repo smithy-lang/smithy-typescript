@@ -1,6 +1,6 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import { copyDocumentWithTransform, parseEpochTimestamp } from "@smithy/core/serde";
-import { Codec, Schema, SchemaRef, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
+import { parseEpochTimestamp } from "@smithy/core/serde";
+import { Codec, Schema, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 
 import { cbor } from "./cbor";
 import { dateToTag } from "./parseCborBody";
@@ -40,38 +40,80 @@ export class CborShapeSerializer implements ShapeSerializer {
   }
 
   public write(schema: Schema, value: unknown): void {
-    this.value = copyDocumentWithTransform(value, schema, (_: any, schemaRef: SchemaRef) => {
-      if (_ instanceof Date) {
-        return dateToTag(_);
-      }
-      if (_ instanceof Uint8Array) {
-        return _;
-      }
+    this.value = this.serialize(schema, value);
+  }
 
-      const ns = NormalizedSchema.of(schemaRef);
-      const sparse = !!ns.getMergedTraits().sparse;
+  /**
+   * Recursive serializer transform that copies and prepares the user input object
+   * for CBOR serialization.
+   */
+  public serialize(schema: Schema, source: unknown): any {
+    const ns = NormalizedSchema.of(schema);
 
-      if (ns.isListSchema() && Array.isArray(_)) {
-        if (!sparse) {
-          return _.filter((item) => item != null);
+    switch (typeof source) {
+      case "undefined":
+        return null;
+      case "boolean":
+      case "number":
+      case "string":
+      case "bigint":
+      case "symbol":
+        return source;
+      case "function":
+      case "object":
+        if (source === null) {
+          return null;
         }
-      } else if (_ && typeof _ === "object") {
-        const members = ns.getMemberSchemas();
-        const isStruct = ns.isStructSchema();
-        if (!sparse || isStruct) {
-          for (const [k, v] of Object.entries(_)) {
-            const filteredOutByNonSparse = !sparse && v == null;
-            const filteredOutByUnrecognizedMember = isStruct && !(k in members);
-            if (filteredOutByNonSparse || filteredOutByUnrecognizedMember) {
-              delete _[k];
+
+        const sourceObject = source as Record<string, unknown>;
+        const sparse = !!ns.getMergedTraits().sparse;
+
+        if (ns.isListSchema() && Array.isArray(sourceObject)) {
+          const newArray = [];
+          let i = 0;
+          for (const item of sourceObject) {
+            const value = this.serialize(ns.getValueSchema(), item);
+            if (value != null || sparse) {
+              newArray[i++] = value;
             }
           }
-          return _;
+          return newArray;
         }
-      }
-
-      return _;
-    });
+        if (sourceObject instanceof Uint8Array) {
+          const newBytes = new Uint8Array(sourceObject.byteLength);
+          newBytes.set(sourceObject, 0);
+          return newBytes;
+        }
+        if (sourceObject instanceof Date) {
+          return dateToTag(sourceObject);
+        }
+        const newObject = {} as any;
+        if (ns.isMapSchema()) {
+          for (const key of Object.keys(sourceObject)) {
+            const value = this.serialize(ns.getValueSchema(), sourceObject[key]);
+            if (value != null || sparse) {
+              newObject[key] = value;
+            }
+          }
+        } else if (ns.isStructSchema()) {
+          for (const [key, memberSchema] of ns.structIterator()) {
+            const value = this.serialize(memberSchema, sourceObject[key]);
+            if (value != null) {
+              newObject[key] = value;
+            }
+          }
+        } else if (ns.isDocumentSchema()) {
+          for (const key of Object.keys(sourceObject)) {
+            const value = this.serialize(ns.getValueSchema(), sourceObject[key]);
+            if (value != null) {
+              newObject[key] = value;
+            }
+          }
+        }
+        return newObject;
+      default:
+        return source;
+    }
   }
 
   public flush(): Uint8Array {
