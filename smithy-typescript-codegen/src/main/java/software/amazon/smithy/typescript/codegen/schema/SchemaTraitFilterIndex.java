@@ -61,7 +61,9 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
         // (wrapped for mutability)
         SetUtils.of(
             SparseTrait.ID,
+            // todo(schema) needs schema logger implementation
             SensitiveTrait.ID,
+            // todo(schema) needs automatic generation by protocol serializer
             IdempotencyTokenTrait.ID,
             JsonNameTrait.ID,
             MediaTypeTrait.ID,
@@ -69,18 +71,30 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
             XmlFlattenedTrait.ID,
             XmlNameTrait.ID,
             XmlNamespaceTrait.ID,
+            // todo(schema)
             EventHeaderTrait.ID,
+            // todo(schema)
             EventPayloadTrait.ID,
             StreamingTrait.ID,
-            RequiresLengthTrait.ID,
+            RequiresLengthTrait.ID, // unhandled
             EndpointTrait.ID,
+            // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
+            // but the actual HTTP response status code is used with no particular comparison
+            // with the trait's error code.
             HttpErrorTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpHeaderTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpQueryTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpLabelTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpPayloadTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpPrefixHeadersTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpQueryParamsTrait.ID,
+            // handled by HTTP binding protocol base class.
             HttpResponseCodeTrait.ID,
             HostLabelTrait.ID,
             ErrorTrait.ID,

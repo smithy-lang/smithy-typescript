@@ -144,7 +144,9 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
   }
 
   /**
-   * @deprecated use signature without headerBindings.
+   * For HTTP binding protocols, this method is overridden in {@link HttpBindingProtocol}.
+   *
+   * @deprecated only use this for HTTP binding protocols.
    */
   protected async deserializeHttpMessage(
     schema: Schema,
@@ -166,98 +168,13 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     arg4: unknown,
     arg5?: unknown
   ): Promise<string[]> {
-    let dataObject: any;
-    if (arg4 instanceof Set) {
-      dataObject = arg5;
-    } else {
-      dataObject = arg4;
-    }
-
-    const deserializer = this.deserializer;
-    const ns = NormalizedSchema.of(schema);
-    const nonHttpBindingMembers = [] as string[];
-
-    for (const [memberName, memberSchema] of ns.structIterator()) {
-      const memberTraits = memberSchema.getMemberTraits();
-
-      if (memberTraits.httpPayload) {
-        const isStreaming = memberSchema.isStreaming();
-        if (isStreaming) {
-          const isEventStream = memberSchema.isStructSchema();
-          if (isEventStream) {
-            // streaming event stream (union)
-            const context = this.serdeContext as unknown as EventStreamSerdeContext;
-            if (!context.eventStreamMarshaller) {
-              throw new Error("@smithy/core - HttpProtocol: eventStreamMarshaller missing in serdeContext.");
-            }
-            const memberSchemas = memberSchema.getMemberSchemas();
-            dataObject[memberName] = context.eventStreamMarshaller.deserialize(response.body, async (event) => {
-              const unionMember =
-                Object.keys(event).find((key) => {
-                  return key !== "__type";
-                }) ?? "";
-              if (unionMember in memberSchemas) {
-                const eventStreamSchema = memberSchemas[unionMember];
-                return {
-                  [unionMember]: await deserializer.read(eventStreamSchema, event[unionMember].body),
-                };
-              } else {
-                // this union convention is ignored by the event stream marshaller.
-                return {
-                  $unknown: event,
-                };
-              }
-            });
-          } else {
-            // streaming blob body
-            dataObject[memberName] = sdkStreamMixin(response.body);
-          }
-        } else if (response.body) {
-          const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
-          if (bytes.byteLength > 0) {
-            dataObject[memberName] = await deserializer.read(memberSchema, bytes);
-          }
-        }
-      } else if (memberTraits.httpHeader) {
-        const key = String(memberTraits.httpHeader).toLowerCase();
-        const value = response.headers[key];
-        if (null != value) {
-          if (memberSchema.isListSchema()) {
-            const headerListValueSchema = memberSchema.getValueSchema();
-            let sections: string[];
-            if (
-              headerListValueSchema.isTimestampSchema() &&
-              headerListValueSchema.getSchema() === SCHEMA.TIMESTAMP_DEFAULT
-            ) {
-              sections = splitEvery(value, ",", 2);
-            } else {
-              sections = splitHeader(value);
-            }
-            const list = [];
-            for (const section of sections) {
-              list.push(await deserializer.read([headerListValueSchema, { httpHeader: key }], section.trim()));
-            }
-            dataObject[memberName] = list;
-          } else {
-            dataObject[memberName] = await deserializer.read(memberSchema, value);
-          }
-        }
-      } else if (memberTraits.httpPrefixHeaders !== undefined) {
-        dataObject[memberName] = {};
-        for (const [header, value] of Object.entries(response.headers)) {
-          if (header.startsWith(memberTraits.httpPrefixHeaders)) {
-            dataObject[memberName][header.slice(memberTraits.httpPrefixHeaders.length)] = await deserializer.read(
-              [memberSchema.getValueSchema(), { httpHeader: header }],
-              value
-            );
-          }
-        }
-      } else if (memberTraits.httpResponseCode) {
-        dataObject[memberName] = response.statusCode;
-      } else {
-        nonHttpBindingMembers.push(memberName);
-      }
-    }
-    return nonHttpBindingMembers;
+    void schema;
+    void context;
+    void response;
+    void arg4;
+    void arg5;
+    // This method is preserved for backwards compatibility.
+    // It should remain unused.
+    return [];
   }
 }
