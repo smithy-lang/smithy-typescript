@@ -6,7 +6,7 @@ import { HttpProtocol } from "./HttpProtocol";
 import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 
 describe(HttpProtocol.name, () => {
-  it("can deserialize a prefix header binding and header binding from the same header", async () => {
+  it("ignores http bindings (only HttpBindingProtocol uses them)", async () => {
     type TestSignature = (
       schema: Schema,
       context: HandlerExecutionContext & SerdeFunctions,
@@ -46,10 +46,7 @@ describe(HttpProtocol.name, () => {
       dataObject
     );
     expect(dataObject).toEqual({
-      prefixHeaders: {
-        header: "header-value",
-      },
-      header: "header-value",
+      // headers were ignored
     });
   });
 });

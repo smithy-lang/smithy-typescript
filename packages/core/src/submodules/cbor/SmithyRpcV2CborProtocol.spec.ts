@@ -103,9 +103,9 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           0,
           ["mySparseList", "myRegularList", "mySparseMap", "myRegularMap"],
           [
-            [() => list("", "MyList", { sparse: 1 }, SCHEMA.NUMERIC), {}],
+            [() => list("", "MySparseList", { sparse: 1 }, SCHEMA.NUMERIC), {}],
             [() => list("", "MyList", {}, SCHEMA.NUMERIC), {}],
-            [() => map("", "MyMap", { sparse: 1 }, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
+            [() => map("", "MySparseMap", { sparse: 1 }, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
             [() => map("", "MyMap", {}, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
           ]
         ),

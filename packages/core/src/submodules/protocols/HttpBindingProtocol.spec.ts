@@ -1,4 +1,4 @@
-import { op, SCHEMA, struct } from "@smithy/core/schema";
+import { map, op, SCHEMA, struct } from "@smithy/core/schema";
 import { HttpResponse } from "@smithy/protocol-http";
 import {
   Codec,
@@ -8,6 +8,8 @@ import {
   MetadataBearer,
   OperationSchema,
   ResponseMetadata,
+  Schema,
+  SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
 } from "@smithy/types";
@@ -41,9 +43,11 @@ describe(HttpBindingProtocol.name, () => {
     public getShapeId(): string {
       throw new Error("Method not implemented.");
     }
+
     public getPayloadCodec(): Codec<any, any> {
       throw new Error("Method not implemented.");
     }
+
     protected handleError(
       operationSchema: OperationSchema,
       context: HandlerExecutionContext,
@@ -156,5 +160,54 @@ describe(HttpBindingProtocol.name, () => {
       } as any
     );
     expect(request.path).toEqual("/custom/Operation");
+  });
+
+  it("can deserialize a prefix header binding and header binding from the same header", async () => {
+    type TestSignature = (
+      schema: Schema,
+      context: HandlerExecutionContext & SerdeFunctions,
+      response: IHttpResponse,
+      dataObject: any
+    ) => Promise<string[]>;
+    const deserializeHttpMessage = ((StringRestProtocol.prototype as any).deserializeHttpMessage as TestSignature).bind(
+      {
+        deserializer: new FromStringShapeDeserializer({
+          httpBindings: true,
+          timestampFormat: {
+            useTrait: true,
+            default: SCHEMA.TIMESTAMP_EPOCH_SECONDS,
+          },
+        }),
+      }
+    );
+    const httpResponse: IHttpResponse = {
+      statusCode: 200,
+      headers: {
+        "my-header": "header-value",
+      },
+    };
+
+    const dataObject = {};
+    await deserializeHttpMessage(
+      struct(
+        "",
+        "Struct",
+        0,
+        ["prefixHeaders", "header"],
+        [
+          [map("", "Map", 0, 0, 0), { httpPrefixHeaders: "my-" }],
+          [0, { httpHeader: "my-header" }],
+        ]
+      ),
+      {} as any,
+      httpResponse,
+      dataObject
+    );
+    expect(dataObject).toEqual({
+      prefixHeaders: {
+        header: "header-value",
+      },
+      header: "header-value",
+    });
   });
 });

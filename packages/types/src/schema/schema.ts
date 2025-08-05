@@ -142,6 +142,7 @@ export type SchemaTraitsObject = {
   mediaType?: string;
   error?: "client" | "server";
 
+  streaming?: 1;
   [traitName: string]: unknown;
 };
 
