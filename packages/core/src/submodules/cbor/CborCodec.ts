@@ -1,6 +1,7 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import { copyDocumentWithTransform, parseEpochTimestamp } from "@smithy/core/serde";
-import { Codec, Schema, SchemaRef, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
+import { generateIdempotencyToken, parseEpochTimestamp } from "@smithy/core/serde";
+import { Codec, Schema, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
+import { fromBase64 } from "@smithy/util-base64";
 
 import { cbor } from "./cbor";
 import { dateToTag } from "./parseCborBody";
@@ -40,38 +41,80 @@ export class CborShapeSerializer implements ShapeSerializer {
   }
 
   public write(schema: Schema, value: unknown): void {
-    this.value = copyDocumentWithTransform(value, schema, (_: any, schemaRef: SchemaRef) => {
-      if (_ instanceof Date) {
-        return dateToTag(_);
-      }
-      if (_ instanceof Uint8Array) {
-        return _;
-      }
+    this.value = this.serialize(schema, value);
+  }
 
-      const ns = NormalizedSchema.of(schemaRef);
-      const sparse = !!ns.getMergedTraits().sparse;
+  /**
+   * Recursive serializer transform that copies and prepares the user input object
+   * for CBOR serialization.
+   */
+  public serialize(schema: Schema, source: unknown): any {
+    const ns = NormalizedSchema.of(schema);
 
-      if (ns.isListSchema() && Array.isArray(_)) {
-        if (!sparse) {
-          return _.filter((item) => item != null);
-        }
-      } else if (_ && typeof _ === "object") {
-        const members = ns.getMemberSchemas();
-        const isStruct = ns.isStructSchema();
-        if (!sparse || isStruct) {
-          for (const [k, v] of Object.entries(_)) {
-            const filteredOutByNonSparse = !sparse && v == null;
-            const filteredOutByUnrecognizedMember = isStruct && !(k in members);
-            if (filteredOutByNonSparse || filteredOutByUnrecognizedMember) {
-              delete _[k];
-            }
+    if (source == null) {
+      if (ns.isIdempotencyToken()) {
+        return generateIdempotencyToken();
+      }
+      return source as null | undefined;
+    }
+
+    if (ns.isBlobSchema()) {
+      if (typeof source === "string") {
+        return (this.serdeContext?.base64Decoder ?? fromBase64)(source);
+      }
+      return source as Uint8Array;
+    }
+
+    if (ns.isTimestampSchema()) {
+      if (typeof source === "number" || typeof source === "bigint") {
+        return dateToTag(new Date((Number(source) / 1000) | 0));
+      }
+      return dateToTag(source as Date);
+    }
+
+    if (typeof source === "function" || typeof source === "object") {
+      const sourceObject = source as Record<string, unknown>;
+
+      if (ns.isListSchema() && Array.isArray(sourceObject)) {
+        const sparse = !!ns.getMergedTraits().sparse;
+        const newArray = [];
+        let i = 0;
+        for (const item of sourceObject) {
+          const value = this.serialize(ns.getValueSchema(), item);
+          if (value != null || sparse) {
+            newArray[i++] = value;
           }
-          return _;
+        }
+        return newArray;
+      }
+      if (sourceObject instanceof Date) {
+        return dateToTag(sourceObject);
+      }
+      const newObject = {} as any;
+      if (ns.isMapSchema()) {
+        const sparse = !!ns.getMergedTraits().sparse;
+        for (const key of Object.keys(sourceObject)) {
+          const value = this.serialize(ns.getValueSchema(), sourceObject[key]);
+          if (value != null || sparse) {
+            newObject[key] = value;
+          }
+        }
+      } else if (ns.isStructSchema()) {
+        for (const [key, memberSchema] of ns.structIterator()) {
+          const value = this.serialize(memberSchema, sourceObject[key]);
+          if (value != null) {
+            newObject[key] = value;
+          }
+        }
+      } else if (ns.isDocumentSchema()) {
+        for (const key of Object.keys(sourceObject)) {
+          newObject[key] = this.serialize(ns.getValueSchema(), sourceObject[key]);
         }
       }
+      return newObject;
+    }
 
-      return _;
-    });
+    return source;
   }
 
   public flush(): Uint8Array {
@@ -98,16 +141,17 @@ export class CborShapeDeserializer implements ShapeDeserializer {
 
   private readValue(_schema: Schema, value: any): any {
     const ns = NormalizedSchema.of(_schema);
-    const schema = ns.getSchema();
 
-    if (typeof schema === "number") {
-      if (ns.isTimestampSchema()) {
-        // format is ignored.
-        return parseEpochTimestamp(value);
+    if (ns.isTimestampSchema() && typeof value === "number") {
+      // format is ignored.
+      return parseEpochTimestamp(value);
+    }
+
+    if (ns.isBlobSchema()) {
+      if (typeof value === "string") {
+        return (this.serdeContext?.base64Decoder ?? fromBase64)(value);
       }
-      if (ns.isBlobSchema()) {
-        return value;
-      }
+      return value as Uint8Array | undefined;
     }
 
     if (
@@ -134,14 +178,14 @@ export class CborShapeDeserializer implements ShapeDeserializer {
       }
 
       if (ns.isListSchema()) {
-        const newArray = [];
+        const newArray = [] as any[];
         const memberSchema = ns.getValueSchema();
-        const sparse = ns.isListSchema() && !!ns.getMergedTraits().sparse;
+        const sparse = !!ns.getMergedTraits().sparse;
 
         for (const item of value) {
-          newArray.push(this.readValue(memberSchema, item));
-          if (!sparse && newArray[newArray.length - 1] == null) {
-            newArray.pop();
+          const itemValue = this.readValue(memberSchema, item);
+          if (itemValue != null || sparse) {
+            newArray.push(itemValue);
           }
         }
         return newArray;
@@ -150,14 +194,13 @@ export class CborShapeDeserializer implements ShapeDeserializer {
       const newObject = {} as any;
 
       if (ns.isMapSchema()) {
-        const sparse = ns.getMergedTraits().sparse;
+        const sparse = !!ns.getMergedTraits().sparse;
         const targetSchema = ns.getValueSchema();
 
         for (const key of Object.keys(value)) {
-          newObject[key] = this.readValue(targetSchema, value[key]);
-
-          if (newObject[key] == null && !sparse) {
-            delete newObject[key];
+          const itemValue = this.readValue(targetSchema, value[key]);
+          if (itemValue != null || sparse) {
+            newObject[key] = itemValue;
           }
         }
       } else if (ns.isStructSchema()) {

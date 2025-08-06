@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.0.26
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/smithy-client@4.4.10
+  - @smithy/property-provider@4.0.5
+
 ## 4.0.25
 
 ### Patch Changes

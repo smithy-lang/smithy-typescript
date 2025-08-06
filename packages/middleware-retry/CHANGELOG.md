@@ -1,5 +1,19 @@
 # Change Log
 
+## 4.1.19
+
+### Patch Changes
+
+- fd00602: update uuid types version
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/smithy-client@4.4.10
+  - @smithy/node-config-provider@4.1.4
+  - @smithy/protocol-http@5.1.3
+  - @smithy/service-error-classification@4.0.7
+  - @smithy/util-middleware@4.0.5
+  - @smithy/util-retry@4.0.7
+
 ## 4.1.18
 
 ### Patch Changes

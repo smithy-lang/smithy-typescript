@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.2
+
+### Patch Changes
+
+- 64e033f: schema serde: http binding and cbor serializer refactoring
+
 ## 4.3.1
 
 ### Patch Changes

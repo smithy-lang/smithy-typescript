@@ -1,6 +1,6 @@
 {
   "name": "@smithy/types",
-  "version": "4.3.1",
+  "version": "4.3.2",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline types",

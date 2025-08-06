@@ -1,15 +1,19 @@
 import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import { splitEvery, splitHeader } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/protocol-http";
 import {
   Endpoint,
   EndpointBearer,
+  EventStreamSerdeContext,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
   MetadataBearer,
   OperationSchema,
+  Schema,
   SerdeFunctions,
 } from "@smithy/types";
+import { sdkStreamMixin } from "@smithy/util-stream";
 
 import { collectBody } from "./collect-stream-body";
 import { extendedEncodeURIComponent } from "./extended-encode-uri-component";
@@ -225,5 +229,128 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     };
 
     return output;
+  }
+
+  /**
+   * The base method ignores HTTP bindings.
+   *
+   * @deprecated (only this signature) use signature without headerBindings.
+   * @override
+   */
+  protected async deserializeHttpMessage(
+    schema: Schema,
+    context: HandlerExecutionContext & SerdeFunctions,
+    response: IHttpResponse,
+    headerBindings: Set<string>,
+    dataObject: any
+  ): Promise<string[]>;
+  protected async deserializeHttpMessage(
+    schema: Schema,
+    context: HandlerExecutionContext & SerdeFunctions,
+    response: IHttpResponse,
+    dataObject: any
+  ): Promise<string[]>;
+  protected async deserializeHttpMessage(
+    schema: Schema,
+    context: HandlerExecutionContext & SerdeFunctions,
+    response: IHttpResponse,
+    arg4: unknown,
+    arg5?: unknown
+  ): Promise<string[]> {
+    let dataObject: any;
+    if (arg4 instanceof Set) {
+      dataObject = arg5;
+    } else {
+      dataObject = arg4;
+    }
+
+    const deserializer = this.deserializer;
+    const ns = NormalizedSchema.of(schema);
+    const nonHttpBindingMembers = [] as string[];
+
+    for (const [memberName, memberSchema] of ns.structIterator()) {
+      const memberTraits = memberSchema.getMemberTraits();
+
+      if (memberTraits.httpPayload) {
+        const isStreaming = memberSchema.isStreaming();
+        if (isStreaming) {
+          const isEventStream = memberSchema.isStructSchema();
+          if (isEventStream) {
+            // streaming event stream (union)
+            const context = this.serdeContext as unknown as EventStreamSerdeContext;
+            if (!context.eventStreamMarshaller) {
+              throw new Error("@smithy/core - HttpProtocol: eventStreamMarshaller missing in serdeContext.");
+            }
+            const memberSchemas = memberSchema.getMemberSchemas();
+            dataObject[memberName] = context.eventStreamMarshaller.deserialize(response.body, async (event) => {
+              const unionMember =
+                Object.keys(event).find((key) => {
+                  return key !== "__type";
+                }) ?? "";
+              if (unionMember in memberSchemas) {
+                const eventStreamSchema = memberSchemas[unionMember];
+                return {
+                  [unionMember]: await deserializer.read(eventStreamSchema, event[unionMember].body),
+                };
+              } else {
+                // todo(schema): This union convention is ignored by the event stream marshaller.
+                // todo(schema): This should be returned to the user instead.
+                // see "if (deserialized.$unknown) return;" in getUnmarshalledStream.ts
+                return {
+                  $unknown: event,
+                };
+              }
+            });
+          } else {
+            // streaming blob body
+            dataObject[memberName] = sdkStreamMixin(response.body);
+          }
+        } else if (response.body) {
+          const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
+          if (bytes.byteLength > 0) {
+            dataObject[memberName] = await deserializer.read(memberSchema, bytes);
+          }
+        }
+      } else if (memberTraits.httpHeader) {
+        const key = String(memberTraits.httpHeader).toLowerCase();
+        const value = response.headers[key];
+        if (null != value) {
+          if (memberSchema.isListSchema()) {
+            const headerListValueSchema = memberSchema.getValueSchema();
+            let sections: string[];
+            if (
+              headerListValueSchema.isTimestampSchema() &&
+              headerListValueSchema.getSchema() === SCHEMA.TIMESTAMP_DEFAULT
+            ) {
+              sections = splitEvery(value, ",", 2);
+            } else {
+              sections = splitHeader(value);
+            }
+            const list = [];
+            for (const section of sections) {
+              list.push(await deserializer.read([headerListValueSchema, { httpHeader: key }], section.trim()));
+            }
+            dataObject[memberName] = list;
+          } else {
+            dataObject[memberName] = await deserializer.read(memberSchema, value);
+          }
+        }
+      } else if (memberTraits.httpPrefixHeaders !== undefined) {
+        dataObject[memberName] = {};
+        for (const [header, value] of Object.entries(response.headers)) {
+          if (header.startsWith(memberTraits.httpPrefixHeaders)) {
+            dataObject[memberName][header.slice(memberTraits.httpPrefixHeaders.length)] = await deserializer.read(
+              [memberSchema.getValueSchema(), { httpHeader: header }],
+              value
+            );
+          }
+        }
+      } else if (memberTraits.httpResponseCode) {
+        dataObject[memberName] = response.statusCode;
+      } else {
+        nonHttpBindingMembers.push(memberName);
+      }
+    }
+    return nonHttpBindingMembers;
   }
 }
