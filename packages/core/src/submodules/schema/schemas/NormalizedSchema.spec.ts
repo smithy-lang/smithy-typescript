@@ -214,4 +214,29 @@ describe(NormalizedSchema.name, () => {
       });
     });
   });
+
+  describe("idempotency token detection", () => {
+    const idempotencyTokenSchemas = [
+      NormalizedSchema.of(sim("", "StringWithTraits", 0, 0b0100)),
+      NormalizedSchema.of(sim("", "StringWithTraits", 0, { idempotencyToken: 1 })),
+    ];
+
+    const plainSchemas = [
+      NormalizedSchema.of(0),
+      NormalizedSchema.of(sim("", "StringWithTraits", 0, 0)),
+      NormalizedSchema.of(sim("", "StringWithTraits", 0, {})),
+    ];
+
+    it("has a consistent shortcut method for idempotencyToken detection", () => {
+      for (const schema of idempotencyTokenSchemas) {
+        expect(schema.isIdempotencyToken()).toBe(true);
+        expect(schema.getMergedTraits().idempotencyToken).toBe(1);
+      }
+
+      for (const schema of plainSchemas) {
+        expect(schema.isIdempotencyToken()).toBe(false);
+        expect(schema.getMergedTraits().idempotencyToken).toBe(undefined);
+      }
+    });
+  });
 });

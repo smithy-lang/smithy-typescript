@@ -274,6 +274,19 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   /**
+   * This is a shortcut to avoid calling `getMergedTraits().idempotencyToken` on every string.
+   * @returns whether the schema has the idempotencyToken trait.
+   */
+  public isIdempotencyToken(): boolean {
+    if (typeof this.traits === "number") {
+      return (this.traits & 0b0100) === 0b0100;
+    } else if (typeof this.traits === "object") {
+      return !!this.traits.idempotencyToken;
+    }
+    return false;
+  }
+
+  /**
    * @returns own traits merged with member traits, where member traits of the same trait key take priority.
    * This method is cached.
    */
