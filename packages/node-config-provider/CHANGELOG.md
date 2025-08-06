@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/property-provider@4.0.5
+  - @smithy/shared-ini-file-loader@4.0.5
+
 ## 4.1.3
 
 ### Patch Changes
