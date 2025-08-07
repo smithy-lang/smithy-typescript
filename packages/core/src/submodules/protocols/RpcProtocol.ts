@@ -1,6 +1,6 @@
 import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
 import { HttpRequest } from "@smithy/protocol-http";
-import {
+import type {
   Endpoint,
   EndpointBearer,
   HandlerExecutionContext,
@@ -56,8 +56,19 @@ export abstract class RpcProtocol extends HttpProtocol {
     };
 
     if (input) {
-      serializer.write(schema, _input);
-      payload = serializer.flush() as Uint8Array;
+      const eventStreamMember = ns.getEventStreamMember();
+
+      if (eventStreamMember) {
+        if (_input[eventStreamMember]) {
+          payload = this.serializeEventStream({
+            eventStream: _input[eventStreamMember],
+            unionSchema: ns.getMemberSchema(eventStreamMember),
+          });
+        }
+      } else {
+        serializer.write(schema, _input);
+        payload = serializer.flush() as Uint8Array;
+      }
     }
 
     request.headers = headers;
@@ -93,16 +104,21 @@ export abstract class RpcProtocol extends HttpProtocol {
       response.headers[header.toLowerCase()] = value;
     }
 
-    const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
-    if (bytes.byteLength > 0) {
-      Object.assign(dataObject, await deserializer.read(ns, bytes));
+    const eventStreamMember = ns.getEventStreamMember();
+    if (eventStreamMember) {
+      // todo(schema): assign other dataObject fields from initial-response.
+      dataObject[eventStreamMember] = this.deserializeEventStream({
+        response,
+        unionSchema: ns.getMemberSchema(eventStreamMember),
+      });
+    } else {
+      const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
+      if (bytes.byteLength > 0) {
+        Object.assign(dataObject, await deserializer.read(ns, bytes));
+      }
     }
 
-    const output: Output = {
-      $metadata: this.deserializeMetadata(response),
-      ...dataObject,
-    };
-
-    return output;
+    dataObject.$metadata = this.deserializeMetadata(response);
+    return dataObject;
   }
 }

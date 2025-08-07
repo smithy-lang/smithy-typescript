@@ -239,4 +239,39 @@ describe(NormalizedSchema.name, () => {
       }
     });
   });
+
+  describe("event stream detection", () => {
+    it("should retrieve the event stream member", () => {
+      const schema = struct(
+        "ns",
+        "StructureWithEventStream",
+        0,
+        ["A", "B", "C", "D", "EventStream"],
+        [0, 0, 0, 0, struct("ns", "Union", { streaming: 1 }, [], [])]
+      );
+      const ns = NormalizedSchema.of(schema);
+
+      expect(ns.getEventStreamMember()).toEqual("EventStream");
+    });
+
+    it("should return empty string if no event stream member is present", () => {
+      const schema = struct(
+        "ns",
+        "StructureWithEventStream",
+        0,
+        ["A", "B", "C", "D", "EventStream"],
+        [0, 0, 0, 0, struct("ns", "Union", 0, [], [])]
+      );
+      const ns = NormalizedSchema.of(schema);
+
+      expect(ns.getEventStreamMember()).toEqual("");
+    });
+
+    it("should not throw an exception if the NormalizedSchema is not a structure", () => {
+      const schema = 0;
+      const ns = NormalizedSchema.of(schema);
+
+      expect(ns.getEventStreamMember()).toEqual("");
+    });
+  });
 });

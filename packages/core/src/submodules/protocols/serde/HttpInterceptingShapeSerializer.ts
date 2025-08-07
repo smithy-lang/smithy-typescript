@@ -1,5 +1,5 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import { CodecSettings, Schema as ISchema, SerdeFunctions, ShapeSerializer } from "@smithy/types";
+import type { CodecSettings, Schema as ISchema, SerdeFunctions, ShapeSerializer } from "@smithy/types";
 
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
 

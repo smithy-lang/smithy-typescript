@@ -1,4 +1,4 @@
-import { SchemaRef } from "@smithy/types";
+import type { SchemaRef } from "@smithy/types";
 
 /**
  * @internal

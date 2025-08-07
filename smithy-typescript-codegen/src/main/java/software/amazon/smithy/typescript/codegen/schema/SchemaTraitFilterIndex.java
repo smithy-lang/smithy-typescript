@@ -63,7 +63,6 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
             SparseTrait.ID, // Shape serde
             // todo(schema) needs schema logger implementation
             SensitiveTrait.ID,
-            // todo(schema) needs automatic generation by protocol serializer
             IdempotencyTokenTrait.ID,
             JsonNameTrait.ID, // Shape serde
             MediaTypeTrait.ID, // JSON shape serde
@@ -76,9 +75,7 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
             ErrorTrait.ID, // set by the ServiceException runtime classes.
             RequiresLengthTrait.ID, // unhandled
 
-            // todo(schema)
             EventHeaderTrait.ID,
-            // todo(schema)
             EventPayloadTrait.ID,
 
             // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
