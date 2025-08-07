@@ -1,9 +1,9 @@
 import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
-import {
-  type TimestampDateTimeSchema,
-  type TimestampEpochSecondsSchema,
-  type TimestampHttpDateSchema,
+import type {
   CodecSettings,
+  TimestampDateTimeSchema,
+  TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
 } from "@smithy/types";
 
 /**

@@ -1,10 +1,9 @@
 import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
 import { splitEvery, splitHeader } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/protocol-http";
-import {
+import type {
   Endpoint,
   EndpointBearer,
-  EventStreamSerdeContext,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
@@ -86,8 +85,12 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         if (isStreaming) {
           const isEventStream = memberNs.isStructSchema();
           if (isEventStream) {
-            // todo(schema)
-            throw new Error("serialization of event streams is not yet implemented");
+            if (input[memberName]) {
+              payload = this.serializeEventStream({
+                eventStream: input[memberName],
+                unionSchema: memberNs,
+              });
+            }
           } else {
             // streaming blob body
             payload = inputMemberValue;
@@ -132,6 +135,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     if (hasNonHttpBindingMember && input) {
       serializer.write(schema, input);
       payload = serializer.flush() as Uint8Array;
+
+      // Due to Smithy validation, we can assume that the members with no HTTP
+      // bindings DO NOT contain an event stream.
     }
 
     request.headers = headers;
@@ -221,14 +227,12 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
           dataObject[member] = dataFromBody[member];
         }
       }
+      // Due to Smithy validation, we can assume that the members with no HTTP
+      // bindings DO NOT contain an event stream.
     }
 
-    const output: Output = {
-      $metadata: this.deserializeMetadata(response),
-      ...dataObject,
-    };
-
-    return output;
+    dataObject.$metadata = this.deserializeMetadata(response);
+    return dataObject;
   }
 
   /**
@@ -276,33 +280,13 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         if (isStreaming) {
           const isEventStream = memberSchema.isStructSchema();
           if (isEventStream) {
-            // streaming event stream (union)
-            const context = this.serdeContext as unknown as EventStreamSerdeContext;
-            if (!context.eventStreamMarshaller) {
-              throw new Error("@smithy/core - HttpProtocol: eventStreamMarshaller missing in serdeContext.");
-            }
-            const memberSchemas = memberSchema.getMemberSchemas();
-            dataObject[memberName] = context.eventStreamMarshaller.deserialize(response.body, async (event) => {
-              const unionMember =
-                Object.keys(event).find((key) => {
-                  return key !== "__type";
-                }) ?? "";
-              if (unionMember in memberSchemas) {
-                const eventStreamSchema = memberSchemas[unionMember];
-                return {
-                  [unionMember]: await deserializer.read(eventStreamSchema, event[unionMember].body),
-                };
-              } else {
-                // todo(schema): This union convention is ignored by the event stream marshaller.
-                // todo(schema): This should be returned to the user instead.
-                // see "if (deserialized.$unknown) return;" in getUnmarshalledStream.ts
-                return {
-                  $unknown: event,
-                };
-              }
+            // event stream (union)
+            dataObject[memberName] = this.deserializeEventStream({
+              response,
+              unionSchema: memberSchema,
             });
           } else {
-            // streaming blob body
+            // data stream (blob)
             dataObject[memberName] = sdkStreamMixin(response.body);
           }
         } else if (response.body) {

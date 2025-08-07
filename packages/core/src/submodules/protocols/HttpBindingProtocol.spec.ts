@@ -1,6 +1,6 @@
 import { map, op, SCHEMA, struct } from "@smithy/core/schema";
 import { HttpResponse } from "@smithy/protocol-http";
-import {
+import type {
   Codec,
   CodecSettings,
   HandlerExecutionContext,

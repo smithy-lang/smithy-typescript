@@ -1,6 +1,6 @@
 import { list, map, SCHEMA, struct } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { SchemaRef } from "@smithy/types";
+import type { SchemaRef } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { cbor } from "./cbor";

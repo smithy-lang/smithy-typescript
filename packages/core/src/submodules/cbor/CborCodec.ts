@@ -1,6 +1,6 @@
 import { NormalizedSchema } from "@smithy/core/schema";
 import { generateIdempotencyToken, parseEpochTimestamp } from "@smithy/core/serde";
-import { Codec, Schema, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
+import type { Codec, Schema, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
 import { cbor } from "./cbor";

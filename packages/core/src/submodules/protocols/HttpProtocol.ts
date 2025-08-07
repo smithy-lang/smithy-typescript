@@ -1,14 +1,20 @@
 import { NormalizedSchema } from "@smithy/core/schema";
+import { SCHEMA } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import {
+import type {
   ClientProtocol,
   Codec,
   Endpoint,
   EndpointBearer,
   EndpointV2,
+  EventStreamMarshaller,
+  EventStreamSerdeContext,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
+  Message as EventStreamMessage,
+  MessageHeaders,
+  MessageHeaderValue,
   MetadataBearer,
   OperationSchema,
   ResponseMetadata,
@@ -17,6 +23,7 @@ import {
   ShapeDeserializer,
   ShapeSerializer,
 } from "@smithy/types";
+import { fromUtf8 } from "@smithy/util-utf8";
 
 /**
  * Abstract base for HTTP-based client protocols.
@@ -139,6 +146,134 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
   }
 
   /**
+   * @returns a stream suitable for the HTTP body of a request.
+   */
+  protected serializeEventStream({
+    eventStream,
+    unionSchema,
+  }: {
+    eventStream: AsyncIterable<any>;
+    unionSchema: NormalizedSchema;
+  }): IHttpRequest["body"] {
+    const marshaller = this.getEventStreamMarshaller();
+    const memberSchemas = unionSchema.getMemberSchemas();
+
+    return marshaller.serialize(eventStream, (event: any): EventStreamMessage => {
+      const unionMember =
+        Object.keys(event).find((key) => {
+          return key !== "__type";
+        }) ?? "";
+      const eventStreamSchema = memberSchemas[unionMember] ?? NormalizedSchema.of(SCHEMA.DOCUMENT);
+
+      let messageSerialization: string | Uint8Array;
+      let eventType = unionMember;
+
+      if (eventStreamSchema.isStructSchema()) {
+        this.serializer.write(eventStreamSchema, event[unionMember]);
+        messageSerialization = this.serializer.flush();
+      } else {
+        // $unknown member
+        const [type, value] = event[unionMember];
+        eventType = type;
+        this.serializer.write(NormalizedSchema.of(SCHEMA.DOCUMENT), value);
+        messageSerialization = this.serializer.flush();
+      }
+
+      const body =
+        typeof messageSerialization === "string"
+          ? (this.serdeContext?.utf8Decoder ?? fromUtf8)(messageSerialization)
+          : messageSerialization;
+
+      const headers: MessageHeaders = {
+        ":event-type": { type: "string", value: eventType },
+        ":message-type": { type: "string", value: "event" },
+        ":content-type": { type: "string", value: this.getDefaultContentType() },
+      };
+
+      // additional trait-annotated event headers.
+      if (eventStreamSchema.isStructSchema()) {
+        for (const [memberName, memberSchema] of eventStreamSchema.structIterator()) {
+          const isHeader = !!memberSchema.getMergedTraits().eventHeader;
+          if (!isHeader) {
+            continue;
+          }
+          const value = event[memberName];
+          let type = "binary" as MessageHeaderValue["type"];
+          if (memberSchema.isNumericSchema()) {
+            if ((-2) ** 31 <= value && value <= 2 ** 31 - 1) {
+              type = "integer";
+            } else {
+              type = "long";
+            }
+          } else if (memberSchema.isTimestampSchema()) {
+            type = "timestamp";
+          } else if (memberSchema.isStringSchema()) {
+            type = "string";
+          } else if (memberSchema.isBooleanSchema()) {
+            type = "boolean";
+          }
+
+          if (isHeader && value != undefined) {
+            headers[memberName] = {
+              type,
+              value,
+            };
+          }
+        }
+      }
+
+      return {
+        headers,
+        body,
+      };
+    });
+  }
+
+  /**
+   * @returns the asyncIterable of the event stream.
+   */
+  protected deserializeEventStream({
+    response,
+    unionSchema,
+  }: {
+    response: IHttpResponse;
+    unionSchema: NormalizedSchema;
+  }): AsyncIterable<{ [key: string]: any; $unknown?: unknown }> {
+    const marshaller = this.getEventStreamMarshaller();
+    const memberSchemas = unionSchema.getMemberSchemas();
+
+    return marshaller.deserialize(response.body, async (event) => {
+      const unionMember =
+        Object.keys(event).find((key) => {
+          return key !== "__type";
+        }) ?? "";
+
+      if (unionMember in memberSchemas) {
+        const eventStreamSchema = memberSchemas[unionMember];
+        return {
+          [unionMember]: await this.deserializer.read(eventStreamSchema, event[unionMember].body),
+        };
+      } else {
+        // todo(schema): This union convention is ignored by the event stream marshaller.
+        // todo(schema): This should be returned to the user instead.
+        // see "if (deserialized.$unknown) return;" in getUnmarshalledStream.ts
+        return {
+          $unknown: event,
+        };
+      }
+    });
+  }
+
+  /**
+   * @returns content-type default header value for event stream events and other documents.
+   */
+  protected getDefaultContentType(): string {
+    throw new Error(
+      `@smithy/core/protocols - ${this.constructor.name} getDefaultContentType() implementation missing.`
+    );
+  }
+
+  /**
    * For HTTP binding protocols, this method is overridden in {@link HttpBindingProtocol}.
    *
    * @deprecated only use this for HTTP binding protocols.
@@ -171,5 +306,13 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     // This method is preserved for backwards compatibility.
     // It should remain unused.
     return [];
+  }
+
+  protected getEventStreamMarshaller(): EventStreamMarshaller {
+    const context = this.serdeContext as unknown as EventStreamSerdeContext;
+    if (!context.eventStreamMarshaller) {
+      throw new Error("@smithy/core - HttpProtocol: eventStreamMarshaller missing in serdeContext.");
+    }
+    return context.eventStreamMarshaller;
   }
 }

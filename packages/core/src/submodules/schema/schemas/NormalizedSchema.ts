@@ -422,6 +422,21 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   /**
+   * @returns member name of event stream or empty string indicating none exists or this
+   * isn't a structure schema.
+   */
+  public getEventStreamMember(): string {
+    if (this.isStructSchema()) {
+      for (const [memberName, memberSchema] of this.structIterator()) {
+        if (memberSchema.isStreaming() && memberSchema.isStructSchema()) {
+          return memberName;
+        }
+      }
+    }
+    return "";
+  }
+
+  /**
    * Allows iteration over members of a structure schema.
    * Each yield is a pair of the member name and member schema.
    *

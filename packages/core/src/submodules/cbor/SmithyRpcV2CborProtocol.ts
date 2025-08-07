@@ -43,9 +43,9 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
   ): Promise<IHttpRequest> {
     const request = await super.serializeRequest(operationSchema, input, context);
     Object.assign(request.headers, {
-      "content-type": "application/cbor",
+      "content-type": this.getDefaultContentType(),
       "smithy-protocol": "rpc-v2-cbor",
-      accept: "application/cbor",
+      accept: this.getDefaultContentType(),
     });
     if (deref(operationSchema.input) === "unit") {
       delete request.body;
@@ -112,5 +112,9 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     });
 
     throw exception;
+  }
+
+  protected getDefaultContentType(): string {
+    return "application/cbor";
   }
 }
