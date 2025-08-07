@@ -74,6 +74,7 @@ final class StructureGenerator implements Runnable {
     private final boolean includeValidation;
     private final RequiredMemberMode requiredMemberMode;
     private final SensitiveDataFinder sensitiveDataFinder;
+    private final boolean schemaMode;
 
     /**
      * sets 'includeValidation' to 'false' and requiredMemberMode
@@ -81,7 +82,7 @@ final class StructureGenerator implements Runnable {
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
         this(model, symbolProvider, writer, shape, false,
-                RequiredMemberMode.NULLABLE);
+                RequiredMemberMode.NULLABLE, false);
     }
 
     StructureGenerator(Model model,
@@ -89,7 +90,8 @@ final class StructureGenerator implements Runnable {
             TypeScriptWriter writer,
             StructureShape shape,
             boolean includeValidation,
-            RequiredMemberMode requiredMemberMode) {
+            RequiredMemberMode requiredMemberMode,
+            boolean schemaMode) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
@@ -97,6 +99,7 @@ final class StructureGenerator implements Runnable {
         this.includeValidation = includeValidation;
         this.requiredMemberMode = requiredMemberMode;
         sensitiveDataFinder = new SensitiveDataFinder(model);
+        this.schemaMode = schemaMode;
     }
 
     @Override
@@ -190,7 +193,7 @@ final class StructureGenerator implements Runnable {
         Symbol symbol = symbolProvider.toSymbol(shape);
         String objectParam = "obj";
 
-        if (sensitiveDataFinder.findsSensitiveDataIn(shape)) {
+        if (sensitiveDataFinder.findsSensitiveDataIn(shape) && !schemaMode) {
             writer.writeDocs("@internal");
             writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => ({", "})",
                     symbol.getName(),
