@@ -61,7 +61,6 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
         // (wrapped for mutability)
         SetUtils.of(
             SparseTrait.ID, // Shape serde
-            // todo(schema) needs schema logger implementation
             SensitiveTrait.ID,
             IdempotencyTokenTrait.ID,
             JsonNameTrait.ID, // Shape serde

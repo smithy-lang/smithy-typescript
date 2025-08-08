@@ -453,9 +453,10 @@ final class CommandGenerator implements Runnable {
 
     private void generateCommandMiddlewareResolver(String configType) {
         Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
+        boolean schemaMode = SchemaGenerationAllowlist.allows(service.getId(), settings);
 
         Function<StructureShape, String> getFilterFunctionName = input -> {
-            if (sensitiveDataFinder.findsSensitiveDataIn(input)) {
+            if (sensitiveDataFinder.findsSensitiveDataIn(input) && !schemaMode) {
                 Symbol inputSymbol = symbolProvider.toSymbol(input);
                 String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
                 writer.addRelativeImport(
@@ -496,7 +497,7 @@ final class CommandGenerator implements Runnable {
         );
         {
             // Add serialization and deserialization plugin.
-            if (!SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+            if (!schemaMode) {
                 writer.write("$T(config, this.serialize, this.deserialize),", serde);
             }
 
@@ -518,6 +519,8 @@ final class CommandGenerator implements Runnable {
             })"""
         ); // end middleware.
 
+        String filters = schemaMode ? "" : ".f($inputFilter:L, $outputFilter:L)";
+
         // context, filters
         writer.openBlock(
             """
@@ -525,8 +528,7 @@ final class CommandGenerator implements Runnable {
             """,
             """
             })
-            .n($client:S, $command:S)
-            .f($inputFilter:L, $outputFilter:L)""",
+            .n($client:S, $command:S)%s""".formatted(filters),
             () -> {
                 writer.pushState(SmithyContextCodeSection.builder()
                     .settings(settings)
