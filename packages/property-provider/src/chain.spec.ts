@@ -113,7 +113,7 @@ describe("chain", () => {
       await chain()();
       throw new Error("Should not get here");
     } catch (error) {
-      expect(error).toEqual(new Error("No providers in chain"));
+      expect(error).toEqual(new ProviderError("No providers in chain"));
     }
   });
 });
