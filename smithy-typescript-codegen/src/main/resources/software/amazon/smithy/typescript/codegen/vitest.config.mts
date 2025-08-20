@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 
 export default defineConfig({
   test: {
-    include: ['**/*.spec.ts'],
-    globals: true
+    include: ["**/*.spec.ts"],
+    globals: true,
   },
-})
+});
