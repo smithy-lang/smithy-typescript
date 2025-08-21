@@ -572,7 +572,7 @@ it("RpcV2CborDateTimeWithFractionalSeconds:Response", async () => {
 /**
  * Parses simple RpcV2 Cbor errors
  */
-it("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
+it.skip("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
   const client = new RpcV2ProtocolClient({
     ...clientParams,
     requestHandler: new ResponseDeserializationTestHandler(
@@ -619,7 +619,7 @@ it("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
 /**
  * Parses a complex error with no message member
  */
-it("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
+it.skip("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
   const client = new RpcV2ProtocolClient({
     ...clientParams,
     requestHandler: new ResponseDeserializationTestHandler(
@@ -666,7 +666,7 @@ it("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
   fail("Expected an exception to be thrown from response");
 });
 
-it("RpcV2CborEmptyComplexError:Error:GreetingWithErrors", async () => {
+it.skip("RpcV2CborEmptyComplexError:Error:GreetingWithErrors", async () => {
   const client = new RpcV2ProtocolClient({
     ...clientParams,
     requestHandler: new ResponseDeserializationTestHandler(

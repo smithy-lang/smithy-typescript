@@ -75,6 +75,14 @@ public final class SmithyProtocolUtils {
             return true;
         }
 
+        // TODO(cbor): enable test when it's working with vitest 3.x
+        if (settings.generateSchemas() &&
+            (testCase.getId().equals("RpcV2CborInvalidGreetingError") ||
+                testCase.getId().equals("RpcV2CborComplexError") ||
+                testCase.getId().equals("RpcV2CborEmptyComplexError"))) {
+            return true;
+        }
+
         return false;
     }
 
