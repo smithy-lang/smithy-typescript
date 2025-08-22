@@ -142,19 +142,21 @@ final class UnionGenerator implements Runnable {
     private final Map<String, String> variantMap;
     private final boolean includeValidation;
     private final SensitiveDataFinder sensitiveDataFinder;
+    private final boolean schemaMode;
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
      */
     UnionGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, UnionShape shape) {
-        this(model, symbolProvider, writer, shape, false);
+        this(model, symbolProvider, writer, shape, false, false);
     }
 
     UnionGenerator(Model model,
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
             UnionShape shape,
-            boolean includeValidation) {
+            boolean includeValidation,
+            boolean schemaMode) {
         this.shape = shape;
         this.symbol = symbolProvider.toSymbol(shape);
         this.model = model;
@@ -168,6 +170,7 @@ final class UnionGenerator implements Runnable {
             String variant = StringUtils.capitalize(symbolProvider.toMemberName(member)) + "Member";
             variantMap.put(member.getMemberName(), variant);
         }
+        this.schemaMode = schemaMode;
     }
 
     @Override
@@ -253,7 +256,7 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeFilterSensitiveLog(String namespace) {
-        if (sensitiveDataFinder.findsSensitiveDataIn(shape)) {
+        if (sensitiveDataFinder.findsSensitiveDataIn(shape) && !schemaMode) {
             String objectParam = "obj";
             writer.writeDocs("@internal");
             writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",

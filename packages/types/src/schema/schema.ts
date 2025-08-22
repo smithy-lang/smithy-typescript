@@ -143,6 +143,8 @@ export type SchemaTraitsObject = {
   error?: "client" | "server";
 
   streaming?: 1;
+  eventHeader?: 1;
+  eventPayload?: 1;
   [traitName: string]: unknown;
 };
 

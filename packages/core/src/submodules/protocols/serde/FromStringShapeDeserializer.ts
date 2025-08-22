@@ -7,7 +7,7 @@ import {
   parseRfc7231DateTime,
   splitHeader,
 } from "@smithy/core/serde";
-import { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
+import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
 

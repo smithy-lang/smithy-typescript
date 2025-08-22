@@ -1,6 +1,6 @@
 import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
 import { dateToUtcString, LazyJsonString, quoteHeader } from "@smithy/core/serde";
-import { CodecSettings, Schema, SerdeFunctions, ShapeSerializer } from "@smithy/types";
+import type { CodecSettings, Schema, SerdeFunctions, ShapeSerializer } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 
 import { determineTimestampFormat } from "./determineTimestampFormat";
@@ -31,7 +31,9 @@ export class ToStringShapeSerializer implements ShapeSerializer<string> {
         if (ns.isTimestampSchema()) {
           if (!(value instanceof Date)) {
             throw new Error(
-              `@smithy/core/protocols - received non-Date value ${value} when schema expected Date in ${ns.getName(true)}`
+              `@smithy/core/protocols - received non-Date value ${value} when schema expected Date in ${ns.getName(
+                true
+              )}`
             );
           }
           const format = determineTimestampFormat(ns, this.settings);

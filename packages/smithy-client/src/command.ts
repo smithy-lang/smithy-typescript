@@ -20,6 +20,8 @@ import type {
 } from "@smithy/types";
 import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 
+import { schemaLogFilter } from "./schemaLogFilter";
+
 /**
  * @public
  */
@@ -130,8 +132,8 @@ class ClassBuilder<
   private _clientName = "";
   private _additionalContext = {} as HandlerExecutionContext;
   private _smithyContext = {} as Record<string, unknown>;
-  private _inputFilterSensitiveLog = (_: any) => _;
-  private _outputFilterSensitiveLog = (_: any) => _;
+  private _inputFilterSensitiveLog: any = undefined;
+  private _outputFilterSensitiveLog: any = undefined;
   private _serializer: (input: I, context: SerdeContext | any) => Promise<IHttpRequest> = null as any;
   private _deserializer: (output: IHttpResponse, context: SerdeContext | any) => Promise<O> = null as any;
   private _operationSchema?: OperationSchema;
@@ -268,8 +270,12 @@ class ClassBuilder<
           middlewareFn: closure._middlewareFn,
           clientName: closure._clientName,
           commandName: closure._commandName,
-          inputFilterSensitiveLog: closure._inputFilterSensitiveLog,
-          outputFilterSensitiveLog: closure._outputFilterSensitiveLog,
+          inputFilterSensitiveLog:
+            closure._inputFilterSensitiveLog ??
+            (closure._operationSchema ? schemaLogFilter.bind(null, closure._operationSchema!.input) : (_) => _),
+          outputFilterSensitiveLog:
+            closure._outputFilterSensitiveLog ??
+            (closure._operationSchema ? schemaLogFilter.bind(null, closure._operationSchema!.output) : (_) => _),
           smithyContext: closure._smithyContext,
           additionalContext: closure._additionalContext,
         });

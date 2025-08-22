@@ -26,10 +26,10 @@ test-protocols:
 	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals)
 
 test-unit:
-	yarn g:vitest run -c vitest.config.ts
+	yarn g:vitest run -c vitest.config.mts
 
 test-browser:
-	yarn g:vitest run -c vitest.config.browser.ts
+	yarn g:vitest run -c vitest.config.browser.mts
 
 # typecheck for test code.
 test-types:
@@ -37,7 +37,7 @@ test-types:
 
 test-integration:
 	make test-browser
-	yarn g:vitest run -c vitest.config.integ.ts
+	yarn g:vitest run -c vitest.config.integ.mts
 	make test-types
 
 turbo-clean:

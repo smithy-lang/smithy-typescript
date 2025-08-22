@@ -364,12 +364,16 @@ final class DirectedTypeScriptCodegen
     public void generateStructure(GenerateStructureDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
-                    writer,
-                    directive.shape(),
-                    directive.settings().generateServerSdk(),
-                    directive.settings().getRequiredMemberMode()
+                directive.model(),
+                directive.symbolProvider(),
+                writer,
+                directive.shape(),
+                directive.settings().generateServerSdk(),
+                directive.settings().getRequiredMemberMode(),
+                SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
             );
             generator.run();
         });
@@ -379,12 +383,16 @@ final class DirectedTypeScriptCodegen
     public void generateError(GenerateErrorDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
-                    writer,
-                    directive.shape(),
-                    directive.settings().generateServerSdk(),
-                    directive.settings().getRequiredMemberMode()
+                directive.model(),
+                directive.symbolProvider(),
+                writer,
+                directive.shape(),
+                directive.settings().generateServerSdk(),
+                directive.settings().getRequiredMemberMode(),
+                SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
             );
             generator.run();
         });
@@ -394,11 +402,15 @@ final class DirectedTypeScriptCodegen
     public void generateUnion(GenerateUnionDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             UnionGenerator generator = new UnionGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
-                    writer,
-                    directive.shape(),
-                    directive.settings().generateServerSdk()
+                directive.model(),
+                directive.symbolProvider(),
+                writer,
+                directive.shape(),
+                directive.settings().generateServerSdk(),
+                SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
             );
             generator.run();
         });
