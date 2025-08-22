@@ -635,7 +635,8 @@ public final class TypeScriptSettings {
 
     public enum PackageManager {
         YARN("yarn"),
-        NPM("npm");
+        NPM("npm"),
+        PNPM("pnpm");
 
         private final String command;
 
@@ -653,6 +654,9 @@ public final class TypeScriptSettings {
             }
             if ("npm".equals(s)) {
                 return NPM;
+            }
+            if ("pnpm".equals(s)) {
+                return PNPM;
             }
             throw new CodegenException(String.format("Unsupported package manager: %s", s));
         }
