@@ -127,11 +127,7 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
                 boolean isUnaryCall = UnaryFunctionCall.check(valueExpression);
 
                 if (memberShape.hasTrait(IdempotencyTokenTrait.class)) {
-                    writer
-                        .addDependency(TypeScriptDependency.UUID_TYPES)
-                        .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
-
-                    writer.write("'$L': [true, _ => _ ?? generateIdempotencyToken()],", memberName);
+                    writer.write("'$L': [true, _ => _ ?? crypto.randomUUID()],", memberName);
                 } else {
                     if (valueProvider.equals("_ => _")) {
                         writer.write("'$1L': [],", memberName);
