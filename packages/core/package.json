@@ -60,6 +60,13 @@
       "node": "./dist-cjs/submodules/schema/index.js",
       "import": "./dist-es/submodules/schema/index.js",
       "require": "./dist-cjs/submodules/schema/index.js"
+    },
+    "./eventStreams": {
+      "types": "./dist-types/submodules/eventStreams/index.d.ts",
+      "module": "./dist-es/submodules/eventStreams/index.js",
+      "node": "./dist-cjs/submodules/eventStreams/index.js",
+      "import": "./dist-es/submodules/eventStreams/index.js",
+      "require": "./dist-cjs/submodules/eventStreams/index.js"
     }
   },
   "author": {
@@ -95,6 +102,8 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./eventStreams.d.ts",
+    "./eventStreams.js",
     "./protocols.d.ts",
     "./protocols.js",
     "./schema.d.ts",

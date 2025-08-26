@@ -1,5 +1,5 @@
+import type { EventStreamSerde } from "@smithy/core/eventStreams";
 import { NormalizedSchema } from "@smithy/core/schema";
-import { SCHEMA } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
   ClientProtocol,
@@ -12,9 +12,6 @@ import type {
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
-  Message as EventStreamMessage,
-  MessageHeaders,
-  MessageHeaderValue,
   MetadataBearer,
   OperationSchema,
   ResponseMetadata,
@@ -23,7 +20,6 @@ import type {
   ShapeDeserializer,
   ShapeSerializer,
 } from "@smithy/types";
-import { fromUtf8 } from "@smithy/util-utf8";
 
 /**
  * Abstract base for HTTP-based client protocols.
@@ -146,121 +142,64 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
   }
 
   /**
+   * @param eventStream - the iterable provided by the caller.
+   * @param requestSchema - the schema of the event stream container (struct).
+   * @param [initialRequest] - only provided if the initial-request is part of the event stream (RPC).
+   *
    * @returns a stream suitable for the HTTP body of a request.
    */
-  protected serializeEventStream({
+  protected async serializeEventStream({
     eventStream,
-    unionSchema,
+    requestSchema,
+    initialRequest,
   }: {
     eventStream: AsyncIterable<any>;
-    unionSchema: NormalizedSchema;
-  }): IHttpRequest["body"] {
-    const marshaller = this.getEventStreamMarshaller();
-    const memberSchemas = unionSchema.getMemberSchemas();
-
-    return marshaller.serialize(eventStream, (event: any): EventStreamMessage => {
-      const unionMember =
-        Object.keys(event).find((key) => {
-          return key !== "__type";
-        }) ?? "";
-      const eventStreamSchema = memberSchemas[unionMember] ?? NormalizedSchema.of(SCHEMA.DOCUMENT);
-
-      let messageSerialization: string | Uint8Array;
-      let eventType = unionMember;
-
-      if (eventStreamSchema.isStructSchema()) {
-        this.serializer.write(eventStreamSchema, event[unionMember]);
-        messageSerialization = this.serializer.flush();
-      } else {
-        // $unknown member
-        const [type, value] = event[unionMember];
-        eventType = type;
-        this.serializer.write(NormalizedSchema.of(SCHEMA.DOCUMENT), value);
-        messageSerialization = this.serializer.flush();
-      }
-
-      const body =
-        typeof messageSerialization === "string"
-          ? (this.serdeContext?.utf8Decoder ?? fromUtf8)(messageSerialization)
-          : messageSerialization;
-
-      const headers: MessageHeaders = {
-        ":event-type": { type: "string", value: eventType },
-        ":message-type": { type: "string", value: "event" },
-        ":content-type": { type: "string", value: this.getDefaultContentType() },
-      };
-
-      // additional trait-annotated event headers.
-      if (eventStreamSchema.isStructSchema()) {
-        for (const [memberName, memberSchema] of eventStreamSchema.structIterator()) {
-          const isHeader = !!memberSchema.getMergedTraits().eventHeader;
-          if (!isHeader) {
-            continue;
-          }
-          const value = event[memberName];
-          let type = "binary" as MessageHeaderValue["type"];
-          if (memberSchema.isNumericSchema()) {
-            if ((-2) ** 31 <= value && value <= 2 ** 31 - 1) {
-              type = "integer";
-            } else {
-              type = "long";
-            }
-          } else if (memberSchema.isTimestampSchema()) {
-            type = "timestamp";
-          } else if (memberSchema.isStringSchema()) {
-            type = "string";
-          } else if (memberSchema.isBooleanSchema()) {
-            type = "boolean";
-          }
-
-          if (isHeader && value != undefined) {
-            headers[memberName] = {
-              type,
-              value,
-            };
-          }
-        }
-      }
-
-      return {
-        headers,
-        body,
-      };
+    requestSchema: NormalizedSchema;
+    initialRequest?: any;
+  }): Promise<IHttpRequest["body"]> {
+    const eventStreamSerde = await this.loadEventStreamCapability();
+    return eventStreamSerde.serializeEventStream({
+      eventStream,
+      requestSchema,
+      initialRequest,
     });
   }
 
   /**
+   * @param response - http response from which to read the event stream.
+   * @param unionSchema - schema of the event stream container (struct).
+   * @param [initialResponseContainer] - provided and written to only if the initial response is part of the event stream (RPC).
+   *
    * @returns the asyncIterable of the event stream.
    */
-  protected deserializeEventStream({
+  protected async deserializeEventStream({
     response,
-    unionSchema,
+    responseSchema,
+    initialResponseContainer,
   }: {
     response: IHttpResponse;
-    unionSchema: NormalizedSchema;
-  }): AsyncIterable<{ [key: string]: any; $unknown?: unknown }> {
-    const marshaller = this.getEventStreamMarshaller();
-    const memberSchemas = unionSchema.getMemberSchemas();
+    responseSchema: NormalizedSchema;
+    initialResponseContainer?: any;
+  }): Promise<AsyncIterable<{ [key: string]: any; $unknown?: unknown }>> {
+    const eventStreamSerde = await this.loadEventStreamCapability();
+    return eventStreamSerde.deserializeEventStream({
+      response,
+      responseSchema,
+      initialResponseContainer,
+    });
+  }
 
-    return marshaller.deserialize(response.body, async (event) => {
-      const unionMember =
-        Object.keys(event).find((key) => {
-          return key !== "__type";
-        }) ?? "";
-
-      if (unionMember in memberSchemas) {
-        const eventStreamSchema = memberSchemas[unionMember];
-        return {
-          [unionMember]: await this.deserializer.read(eventStreamSchema, event[unionMember].body),
-        };
-      } else {
-        // todo(schema): This union convention is ignored by the event stream marshaller.
-        // todo(schema): This should be returned to the user instead.
-        // see "if (deserialized.$unknown) return;" in getUnmarshalledStream.ts
-        return {
-          $unknown: event,
-        };
-      }
+  /**
+   * Loads eventStream capability async (for chunking).
+   */
+  protected async loadEventStreamCapability(): Promise<EventStreamSerde> {
+    const { EventStreamSerde } = await import("@smithy/core/eventStreams");
+    return new EventStreamSerde({
+      marshaller: this.getEventStreamMarshaller(),
+      serializer: this.serializer,
+      deserializer: this.deserializer,
+      serdeContext: this.serdeContext,
+      defaultContentType: this.getDefaultContentType(),
     });
   }
 

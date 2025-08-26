@@ -7,7 +7,8 @@
       "@smithy/core/cbor": ["./src/submodules/cbor/index.ts"],
       "@smithy/core/protocols": ["./src/submodules/protocols/index.ts"],
       "@smithy/core/serde": ["./src/submodules/serde/index.ts"],
-      "@smithy/core/schema": ["./src/submodules/schema/index.ts"]
+      "@smithy/core/schema": ["./src/submodules/schema/index.ts"],
+      "@smithy/core/eventStreams": ["./src/submodules/eventStreams/index.ts"]
     }
   },
   "extends": "../../tsconfig.types.json",
