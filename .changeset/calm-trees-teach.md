@@ -1,5 +1,5 @@
 ---
-"@smithy/core": patch
+"@smithy/core": minor
 ---
 
 CBOR protocol error handling fallbacks

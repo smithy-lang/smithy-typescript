@@ -14,6 +14,7 @@ import { fromUtf8 } from "@smithy/util-utf8";
 
 /**
  * Separated module for async mixin of EventStream serde capability.
+ * This is used by the HttpProtocol base class from \@smithy/core/protocols.
  *
  * @alpha
  */
@@ -24,6 +25,9 @@ export class EventStreamSerde {
   private readonly serdeContext?: SerdeFunctions;
   private readonly defaultContentType: string;
 
+  /**
+   * Properties are injected by the HttpProtocol.
+   */
   public constructor({
     marshaller,
     serializer,
@@ -59,7 +63,7 @@ export class EventStreamSerde {
     eventStream: AsyncIterable<any>;
     requestSchema: NormalizedSchema;
     initialRequest?: any;
-  }): Promise<IHttpRequest["body"]> {
+  }): Promise<IHttpRequest["body"] | Uint8Array> {
     const marshaller = this.marshaller;
     const eventStreamMember = requestSchema.getEventStreamMember();
     const unionSchema = requestSchema.getMemberSchema(eventStreamMember);
@@ -176,7 +180,7 @@ export class EventStreamSerde {
    * @param unionSchema - schema of the event stream container (struct).
    * @param [initialResponseContainer] - provided and written to only if the initial response is part of the event stream (RPC).
    *
-   * @returns the asyncIterable of the event stream.
+   * @returns the asyncIterable of the event stream for the end-user.
    */
   public async deserializeEventStream({
     response,
