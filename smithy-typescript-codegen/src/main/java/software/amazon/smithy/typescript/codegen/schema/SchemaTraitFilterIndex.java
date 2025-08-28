@@ -74,8 +74,8 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
             ErrorTrait.ID, // set by the ServiceException runtime classes.
             RequiresLengthTrait.ID, // unhandled
 
-            EventHeaderTrait.ID, // @smithy/core/EventStreams::EventStreamSerde
-            EventPayloadTrait.ID, // @smithy/core/EventStreams::EventStreamSerde
+            EventHeaderTrait.ID, // @smithy/core/event-streams::EventStreamSerde
+            EventPayloadTrait.ID, // @smithy/core/event-streams::EventStreamSerde
 
             // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
             // but the actual HTTP response status code is used with no particular comparison

@@ -1,4 +1,4 @@
-import type { EventStreamSerde } from "@smithy/core/eventStreams";
+import type { EventStreamSerde } from "@smithy/core/event-streams";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
@@ -193,7 +193,7 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
    * Loads eventStream capability async (for chunking).
    */
   protected async loadEventStreamCapability(): Promise<EventStreamSerde> {
-    const { EventStreamSerde } = await import("@smithy/core/eventStreams");
+    const { EventStreamSerde } = await import("@smithy/core/event-streams");
     return new EventStreamSerde({
       marshaller: this.getEventStreamMarshaller(),
       serializer: this.serializer,

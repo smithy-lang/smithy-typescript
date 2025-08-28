@@ -288,7 +288,7 @@ export class EventStreamSerde {
           serializer.write(eventSchema, event[unionMember]);
         }
       } else {
-        throw new Error("@smithy/core/eventStreams - non-struct member not supported in event stream union.");
+        throw new Error("@smithy/core/event-streams - non-struct member not supported in event stream union.");
       }
     }
 
