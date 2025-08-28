@@ -1,6 +1,7 @@
 export * from "./collect-stream-body";
 export * from "./extended-encode-uri-component";
 export * from "./HttpBindingProtocol";
+export * from "./HttpProtocol";
 export * from "./RpcProtocol";
 export * from "./requestBuilder";
 export * from "./resolve-path";

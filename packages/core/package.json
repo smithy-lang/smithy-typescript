@@ -60,6 +60,13 @@
       "node": "./dist-cjs/submodules/schema/index.js",
       "import": "./dist-es/submodules/schema/index.js",
       "require": "./dist-cjs/submodules/schema/index.js"
+    },
+    "./event-streams": {
+      "types": "./dist-types/submodules/event-streams/index.d.ts",
+      "module": "./dist-es/submodules/event-streams/index.js",
+      "node": "./dist-cjs/submodules/event-streams/index.js",
+      "import": "./dist-es/submodules/event-streams/index.js",
+      "require": "./dist-cjs/submodules/event-streams/index.js"
     }
   },
   "author": {
@@ -95,6 +102,8 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./event-streams.d.ts",
+    "./event-streams.js",
     "./protocols.d.ts",
     "./protocols.js",
     "./schema.d.ts",
@@ -110,6 +119,7 @@
     "directory": "packages/core"
   },
   "devDependencies": {
+    "@smithy/eventstream-serde-node": "workspace:^",
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",

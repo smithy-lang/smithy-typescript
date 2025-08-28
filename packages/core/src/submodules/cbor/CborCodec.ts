@@ -139,7 +139,11 @@ export class CborShapeDeserializer implements ShapeDeserializer {
     return this.readValue(schema, data);
   }
 
-  private readValue(_schema: Schema, value: any): any {
+  /**
+   * Public because it's called by the protocol implementation to deserialize errors.
+   * @internal
+   */
+  public readValue(_schema: Schema, value: any): any {
     const ns = NormalizedSchema.of(_schema);
 
     if (ns.isTimestampSchema() && typeof value === "number") {

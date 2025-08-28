@@ -60,9 +60,18 @@ export abstract class RpcProtocol extends HttpProtocol {
 
       if (eventStreamMember) {
         if (_input[eventStreamMember]) {
-          payload = this.serializeEventStream({
+          const initialRequest = {} as any;
+          for (const [memberName, memberSchema] of ns.structIterator()) {
+            if (memberName !== eventStreamMember && _input[memberName]) {
+              serializer.write(memberSchema, _input[memberName]);
+              initialRequest[memberName] = serializer.flush();
+            }
+          }
+
+          payload = await this.serializeEventStream({
             eventStream: _input[eventStreamMember],
-            unionSchema: ns.getMemberSchema(eventStreamMember),
+            requestSchema: ns,
+            initialRequest,
           });
         }
       } else {
@@ -106,10 +115,10 @@ export abstract class RpcProtocol extends HttpProtocol {
 
     const eventStreamMember = ns.getEventStreamMember();
     if (eventStreamMember) {
-      // todo(schema): assign other dataObject fields from initial-response.
-      dataObject[eventStreamMember] = this.deserializeEventStream({
+      dataObject[eventStreamMember] = await this.deserializeEventStream({
         response,
-        unionSchema: ns.getMemberSchema(eventStreamMember),
+        responseSchema: ns,
+        initialResponseContainer: dataObject,
       });
     } else {
       const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);

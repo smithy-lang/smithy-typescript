@@ -85,14 +85,17 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         if (isStreaming) {
           const isEventStream = memberNs.isStructSchema();
           if (isEventStream) {
+            // event stream (union)
+            // initial-request is handled by other HTTP bindings.
+            // no additional handling is needed here.
             if (input[memberName]) {
-              payload = this.serializeEventStream({
+              payload = await this.serializeEventStream({
                 eventStream: input[memberName],
-                unionSchema: memberNs,
+                requestSchema: ns,
               });
             }
           } else {
-            // streaming blob body
+            // data stream (blob)
             payload = inputMemberValue;
           }
         } else {
@@ -281,9 +284,10 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
           const isEventStream = memberSchema.isStructSchema();
           if (isEventStream) {
             // event stream (union)
-            dataObject[memberName] = this.deserializeEventStream({
+            // initial-response is handled by other HTTP bindings.
+            dataObject[memberName] = await this.deserializeEventStream({
               response,
-              unionSchema: memberSchema,
+              responseSchema: ns,
             });
           } else {
             // data stream (blob)

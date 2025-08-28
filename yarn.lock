@@ -2474,6 +2474,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
+    "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -2555,7 +2556,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node":
+"@smithy/eventstream-serde-node@workspace:^, @smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node"
   dependencies:

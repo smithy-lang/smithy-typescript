@@ -1,5 +1,5 @@
 import { RpcProtocol } from "@smithy/core/protocols";
-import { deref, ErrorSchema, OperationSchema, TypeRegistry } from "@smithy/core/schema";
+import { deref, ErrorSchema, NormalizedSchema, OperationSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   EndpointBearer,
   HandlerExecutionContext,
@@ -87,31 +87,54 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     dataObject: any,
     metadata: ResponseMetadata
   ): Promise<never> {
-    const error = loadSmithyRpcV2CborErrorCode(response, dataObject) ?? "Unknown";
+    const errorName = loadSmithyRpcV2CborErrorCode(response, dataObject) ?? "Unknown";
 
     let namespace = this.options.defaultNamespace;
-    if (error.includes("#")) {
-      [namespace] = error.split("#");
+    if (errorName.includes("#")) {
+      [namespace] = errorName.split("#");
     }
 
-    const registry = TypeRegistry.for(namespace);
-    const errorSchema: ErrorSchema = registry.getSchema(error) as ErrorSchema;
-
-    if (!errorSchema) {
-      // TODO(schema) throw client base exception using the dataObject.
-      throw new Error("schema not found for " + error);
-    }
-
-    const message = dataObject.message ?? dataObject.Message ?? "Unknown";
-    const exception = new errorSchema.ctor(message);
-    Object.assign(exception, {
+    const errorMetadata = {
       $metadata: metadata,
       $response: response,
-      message,
-      ...dataObject,
-    });
+      $fault: response.statusCode <= 500 ? ("client" as const) : ("server" as const),
+    };
 
-    throw exception;
+    const registry = TypeRegistry.for(namespace);
+
+    let errorSchema: ErrorSchema;
+    try {
+      errorSchema = registry.getSchema(errorName) as ErrorSchema;
+    } catch (e) {
+      if (dataObject.Message) {
+        dataObject.message = dataObject.Message;
+      }
+      const baseExceptionSchema = TypeRegistry.for("smithy.ts.sdk.synthetic." + namespace).getBaseException();
+      if (baseExceptionSchema) {
+        const ErrorCtor = baseExceptionSchema.ctor;
+        throw Object.assign(new ErrorCtor({ name: errorName }), errorMetadata, dataObject);
+      }
+      throw Object.assign(new Error(errorName), errorMetadata, dataObject);
+    }
+
+    const ns = NormalizedSchema.of(errorSchema);
+    const message = dataObject.message ?? dataObject.Message ?? "Unknown";
+    const exception = new errorSchema.ctor(message);
+
+    const output = {} as any;
+    for (const [name, member] of ns.structIterator()) {
+      output[name] = this.deserializer.readValue(member, dataObject[name]);
+    }
+
+    throw Object.assign(
+      exception,
+      errorMetadata,
+      {
+        $fault: ns.getMergedTraits().error,
+        message,
+      },
+      output
+    );
   }
 
   protected getDefaultContentType(): string {

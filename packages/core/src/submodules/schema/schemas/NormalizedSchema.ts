@@ -374,6 +374,18 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   /**
+   * @param member - to query.
+   * @returns whether there is a memberSchema with the given member name. False if not a structure (or union).
+   */
+  public hasMemberSchema(member: string): boolean {
+    if (this.isStructSchema()) {
+      const struct = this.getSchema() as StructureSchema;
+      return member in struct.members;
+    }
+    return false;
+  }
+
+  /**
    * @returns the NormalizedSchema for the given member name. The returned instance will return true for `isMemberSchema()`
    * and will have the member name given.
    * @param member - which member to retrieve and wrap.
