@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.9.0
+
+### Minor Changes
+
+- ab4f33f: CBOR protocol error handling fallbacks
+- d79dc91: schema serde eventstreams implementation
+
 ## 3.8.0
 
 ### Minor Changes

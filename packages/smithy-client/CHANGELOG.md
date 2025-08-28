@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.5.0
+
+### Minor Changes
+
+- eb1ab40: default schema log filter
+
+### Patch Changes
+
+- Updated dependencies [ab4f33f]
+- Updated dependencies [d79dc91]
+  - @smithy/core@3.9.0
+  - @smithy/middleware-endpoint@4.1.19
+
 ## 4.4.10
 
 ### Patch Changes
