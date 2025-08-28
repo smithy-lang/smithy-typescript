@@ -173,6 +173,15 @@ describe(NormalizedSchema.name, () => {
     });
   });
 
+  it("can identify whether a member exists", () => {
+    expect(ns.hasMemberSchema("list")).toBe(true);
+    expect(ns.hasMemberSchema("map")).toBe(true);
+    expect(ns.hasMemberSchema("struct")).toBe(true);
+    expect(ns.hasMemberSchema("a")).toBe(false);
+    expect(ns.hasMemberSchema("b")).toBe(false);
+    expect(ns.hasMemberSchema("c")).toBe(false);
+  });
+
   describe("iteration", () => {
     it("iterates over member schemas", () => {
       const iteration = Array.from(ns.structIterator());

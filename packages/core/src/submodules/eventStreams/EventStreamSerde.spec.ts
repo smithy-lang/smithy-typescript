@@ -1,5 +1,5 @@
 import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
-import { NormalizedSchema, SCHEMA, struct } from "@smithy/core/schema";
+import { NormalizedSchema, SCHEMA, sim, struct } from "@smithy/core/schema";
 import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
 import { HttpResponse } from "@smithy/protocol-http";
 import { Message as EventMessage } from "@smithy/types";
@@ -42,9 +42,28 @@ describe(EventStreamSerde.name, () => {
       "ns",
       "EventStreamStructure",
       { streaming: 1 },
-      ["A", "B", "C"],
+      ["A", "B", "C", "Payload", "TextPayload", "CustomHeaders"],
       // D is omitted to represent an unknown event.
-      [struct("ns", "A", 0, ["name"], [0]), struct("ns", "B", 0, ["name"], [0]), struct("ns", "C", 0, ["name"], [0])]
+      [
+        struct("ns", "A", 0, ["name"], [0]),
+        struct("ns", "B", 0, ["name"], [0]),
+        struct("ns", "C", 0, ["name"], [0]),
+        struct(
+          "ns",
+          "Payload",
+          0,
+          ["payload"],
+          [sim("ns", "StreamingBlobPayload", SCHEMA.STREAMING_BLOB, { eventPayload: 1 })]
+        ),
+        struct("ns", "TextPayload", 0, ["payload"], [sim("ns", "TextPayload", SCHEMA.STRING, { eventPayload: 1 })]),
+        struct(
+          "ns",
+          "CustomHeaders",
+          0,
+          ["header1", "header2"],
+          [sim("ns", "EventHeader", 0, { eventHeader: 1 }), sim("ns", "EventHeader", 0, { eventHeader: 1 })]
+        ),
+      ]
     );
 
     const eventStreamContainerSchema = struct(
@@ -68,6 +87,9 @@ describe(EventStreamSerde.name, () => {
           yield { B: { name: "b" } };
           yield { C: { name: "c" } };
           yield { $unknown: ["D", { name: "d" }] };
+          yield { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } };
+          yield { TextPayload: { payload: "beep boop" } };
+          yield { CustomHeaders: { header1: "h1", header2: "h2" } };
         },
       };
 
@@ -103,6 +125,32 @@ describe(EventStreamSerde.name, () => {
             ":content-type": { type: "string", value: "application/cbor" },
           },
           body: { name: "d" },
+        },
+        {
+          headers: {
+            ":event-type": { type: "string", value: "Payload" },
+            ":message-type": { type: "string", value: "event" },
+            ":content-type": { type: "string", value: "application/octet-stream" },
+          },
+          body: new Uint8Array([0, 1, 2, 3, 4, 5, 6]),
+        },
+        {
+          headers: {
+            ":event-type": { type: "string", value: "TextPayload" },
+            ":message-type": { type: "string", value: "event" },
+            ":content-type": { type: "string", value: "text/plain" },
+          },
+          body: "beep boop",
+        },
+        {
+          headers: {
+            ":event-type": { type: "string", value: "CustomHeaders" },
+            ":message-type": { type: "string", value: "event" },
+            ":content-type": { type: "string", value: "application/cbor" },
+            header1: { type: "string", value: "h1" },
+            header2: { type: "string", value: "h2" },
+          },
+          body: {},
         },
       ];
 
@@ -188,6 +236,9 @@ describe(EventStreamSerde.name, () => {
           yield { B: { name: "b" } };
           yield { C: { name: "c" } };
           yield { D: { name: "d" } };
+          yield { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } };
+          yield { TextPayload: { payload: "boop beep" } };
+          yield { CustomHeaders: { header1: "h1", header2: "h2" } };
         },
       };
 
@@ -230,6 +281,9 @@ describe(EventStreamSerde.name, () => {
           { C: { name: `c` } },
           // todo(schema) getMessageUnmarshaller.ts must be patched to return unknown events.
           // $unknownEvent,
+          { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } },
+          { TextPayload: { payload: "boop beep" } },
+          { CustomHeaders: { header1: "h1", header2: "h2" } },
         ]);
       });
 
@@ -265,6 +319,9 @@ describe(EventStreamSerde.name, () => {
           { C: { name: `c` } },
           // todo(schema) getMessageUnmarshaller.ts must be patched to return unknown events.
           // $unknownEvent,
+          { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } },
+          { TextPayload: { payload: "boop beep" } },
+          { CustomHeaders: { header1: "h1", header2: "h2" } },
         ]);
 
         expect(initialResponseContainer).toEqual({

@@ -109,64 +109,18 @@ export class EventStreamSerde {
         Object.keys(event).find((key) => {
           return key !== "__type";
         }) ?? "";
-      const eventStreamSchema = memberSchemas[unionMember] ?? NormalizedSchema.of(SCHEMA.DOCUMENT);
-
-      let messageSerialization: string | Uint8Array;
-      let eventType = unionMember;
-
-      if (eventStreamSchema.isStructSchema()) {
-        serializer.write(eventStreamSchema, event[unionMember]);
-        messageSerialization = serializer.flush();
-      } else {
-        // $unknown member
-        const [type, value] = event[unionMember];
-        eventType = type;
-        serializer.write(NormalizedSchema.of(SCHEMA.DOCUMENT), value);
-        messageSerialization = serializer.flush();
-      }
-
-      const body =
-        typeof messageSerialization === "string"
-          ? (this.serdeContext?.utf8Decoder ?? fromUtf8)(messageSerialization)
-          : messageSerialization;
+      const { additionalHeaders, body, eventType, explicitPayloadContentType } = this.writeEventBody(
+        unionMember,
+        unionSchema,
+        event
+      );
 
       const headers: MessageHeaders = {
         ":event-type": { type: "string", value: eventType },
         ":message-type": { type: "string", value: "event" },
-        ":content-type": { type: "string", value: defaultContentType },
+        ":content-type": { type: "string", value: explicitPayloadContentType ?? defaultContentType },
+        ...additionalHeaders,
       };
-
-      // additional trait-annotated event headers.
-      if (eventStreamSchema.isStructSchema()) {
-        for (const [memberName, memberSchema] of eventStreamSchema.structIterator()) {
-          const isHeader = !!memberSchema.getMergedTraits().eventHeader;
-          if (!isHeader) {
-            continue;
-          }
-          const value = event[memberName];
-          let type = "binary" as MessageHeaderValue["type"];
-          if (memberSchema.isNumericSchema()) {
-            if ((-2) ** 31 <= value && value <= 2 ** 31 - 1) {
-              type = "integer";
-            } else {
-              type = "long";
-            }
-          } else if (memberSchema.isTimestampSchema()) {
-            type = "timestamp";
-          } else if (memberSchema.isStringSchema()) {
-            type = "string";
-          } else if (memberSchema.isBooleanSchema()) {
-            type = "boolean";
-          }
-
-          if (isHeader && value != undefined) {
-            headers[memberName] = {
-              type,
-              value,
-            };
-          }
-        }
-      }
 
       return {
         headers,
@@ -261,6 +215,95 @@ export class EventStreamSerde {
           yield value;
         }
       },
+    };
+  }
+
+  /**
+   * @param unionMember - member name within the structure that contains an event stream union.
+   * @param unionSchema - schema of the union.
+   * @param event
+   *
+   * @returns the event body (bytes) and event type (string).
+   */
+  private writeEventBody(unionMember: string, unionSchema: NormalizedSchema, event: any) {
+    const serializer = this.serializer;
+    let eventType = unionMember;
+    let explicitPayloadMember = null as null | string;
+    let explicitPayloadContentType: undefined | string;
+
+    const isKnownSchema = unionSchema.hasMemberSchema(unionMember);
+    const additionalHeaders: MessageHeaders = {};
+
+    if (!isKnownSchema) {
+      // $unknown member
+      const [type, value] = event[unionMember];
+      eventType = type;
+      serializer.write(SCHEMA.DOCUMENT, value);
+    } else {
+      const eventSchema = unionSchema.getMemberSchema(unionMember);
+
+      if (eventSchema.isStructSchema()) {
+        for (const [memberName, memberSchema] of eventSchema.structIterator()) {
+          const { eventHeader, eventPayload } = memberSchema.getMergedTraits();
+
+          if (eventPayload) {
+            explicitPayloadMember = memberName;
+            break;
+          } else if (eventHeader) {
+            const value = event[unionMember][memberName];
+            let type = "binary" as MessageHeaderValue["type"];
+            if (memberSchema.isNumericSchema()) {
+              if ((-2) ** 31 <= value && value <= 2 ** 31 - 1) {
+                type = "integer";
+              } else {
+                type = "long";
+              }
+            } else if (memberSchema.isTimestampSchema()) {
+              type = "timestamp";
+            } else if (memberSchema.isStringSchema()) {
+              type = "string";
+            } else if (memberSchema.isBooleanSchema()) {
+              type = "boolean";
+            }
+
+            if (value != null) {
+              additionalHeaders[memberName] = {
+                type,
+                value,
+              };
+              delete event[unionMember][memberName];
+            }
+          }
+        }
+
+        if (explicitPayloadMember !== null) {
+          const payloadSchema = eventSchema.getMemberSchema(explicitPayloadMember);
+          if (payloadSchema.isBlobSchema()) {
+            explicitPayloadContentType = "application/octet-stream";
+          } else if (payloadSchema.isStringSchema()) {
+            explicitPayloadContentType = "text/plain";
+          }
+          serializer.write(payloadSchema, event[unionMember][explicitPayloadMember]);
+        } else {
+          serializer.write(eventSchema, event[unionMember]);
+        }
+      } else {
+        throw new Error("@smithy/core/eventStreams - non-struct member not supported in event stream union.");
+      }
+    }
+
+    const messageSerialization: string | Uint8Array = serializer.flush();
+
+    const body =
+      typeof messageSerialization === "string"
+        ? (this.serdeContext?.utf8Decoder ?? fromUtf8)(messageSerialization)
+        : messageSerialization;
+
+    return {
+      body,
+      eventType,
+      explicitPayloadContentType,
+      additionalHeaders,
     };
   }
 }
