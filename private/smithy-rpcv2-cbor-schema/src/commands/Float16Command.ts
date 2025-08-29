@@ -2,7 +2,7 @@
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { Float16Output } from "../models/models_0";
-import { Float16 } from "../schemas/schemas";
+import { Float16 } from "../schemas/schemas_3_";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
