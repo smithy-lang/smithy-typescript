@@ -1,5 +1,6 @@
 // smithy-typescript generated code
-import { Unit, _NIO, n1 } from "./schemas_0";
+import { _NIO, n1 } from "./schemas_0";
+import { Unit } from "./schemas_1_Rpc";
 import { op } from "@smithy/core/schema";
 
 /* eslint no-var: 0 */

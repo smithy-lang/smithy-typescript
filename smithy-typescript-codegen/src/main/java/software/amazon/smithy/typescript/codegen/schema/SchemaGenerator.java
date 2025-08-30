@@ -49,13 +49,20 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public class SchemaGenerator implements Runnable {
     public static final String SCHEMAS_FOLDER = "schemas";
     private final SchemaReferenceIndex elision;
+    private final ShapeGroupingIndex treeOrganizer;
     private final TypeScriptSettings settings;
     private final SymbolProvider symbolProvider;
     private final Model model;
     private final FileManifest fileManifest;
     private final StringStore store = new StringStore();
+    /**
+     * Keyed by the schema group determined by the ShapeGroupingIndex.
+     */
     private final Map<String, TypeScriptWriter> writers = new HashMap<>();
 
+    /**
+     * Avoids infinite recursion when navigating shape graph.
+     */
     private final Set<String> loadShapesVisited = new HashSet<>();
 
     private final Set<StructureShape> structureShapes = new TreeSet<>();
@@ -65,9 +72,11 @@ public class SchemaGenerator implements Runnable {
     private final Set<OperationShape> operationShapes = new TreeSet<>();
     private final Set<Shape> simpleShapes = new TreeSet<>();
 
+    /**
+     * Used to deconflict schema variable names.
+     */
     private final Set<Shape> existsAsSchema = new HashSet<>();
     private final Set<Shape> requiresNamingDeconfliction = new HashSet<>();
-    private ShapeTreeOrganizer treeOrganizer;
 
     private final ReservedWords reservedWords = new ReservedWordsBuilder()
         .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
@@ -81,6 +90,7 @@ public class SchemaGenerator implements Runnable {
         elision = SchemaReferenceIndex.of(model);
         this.settings = settings;
         this.symbolProvider = symbolProvider;
+        treeOrganizer = ShapeGroupingIndex.of(model);
     }
 
     /**
@@ -88,7 +98,6 @@ public class SchemaGenerator implements Runnable {
      */
     @Override
     public void run() {
-        treeOrganizer = ShapeTreeOrganizer.forModel(model);
         for (ServiceShape service : model.getServiceShapes()) {
             if (!SchemaGenerationAllowlist.allows(service.getId(), settings)) {
                 return;
@@ -139,12 +148,26 @@ public class SchemaGenerator implements Runnable {
                 }
             }
         }
-
-        treeOrganizer.debug();
     }
 
+    /**
+     * @return writer corresponding to the file that will hold the shape's schema.
+     */
     private TypeScriptWriter getWriter(ShapeId shape) {
         return writers.computeIfAbsent(treeOrganizer.getGroup(shape), k -> {
+            TypeScriptWriter typeScriptWriter = new TypeScriptWriter("");
+            typeScriptWriter.write("""
+                /* eslint no-var: 0 */
+            """);
+            return typeScriptWriter;
+        });
+    }
+
+    /**
+     * @return writer corresponding to the base schemas file (schemas_0.ts).
+     */
+    private TypeScriptWriter getBaseWriter() {
+        return writers.computeIfAbsent("schemas_0", k -> {
             TypeScriptWriter typeScriptWriter = new TypeScriptWriter("");
             typeScriptWriter.write("""
                 /* eslint no-var: 0 */
@@ -213,6 +236,11 @@ public class SchemaGenerator implements Runnable {
         }
     }
 
+    /**
+     * Since we use the short names for schema objects, in rare cases there may be a
+     * naming conflict due to shapes with the same short name in different namespaces.
+     * These shapes will have their variable names deconflicted with a suffix.
+     */
     private void deconflictSchemaVarNames() {
         Set<String> observedShapeNames = new HashSet<>();
         for (Shape shape : existsAsSchema) {
@@ -236,6 +264,10 @@ public class SchemaGenerator implements Runnable {
         return symbolName;
     }
 
+    /**
+     * Writes the schema declaration for a simple shape.
+     * If it has no runtime traits, e.g. a plain string, nothing will be written.
+     */
     private void writeSimpleSchema(Shape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         if (elision.traits.hasSchemaTraits(shape)) {
@@ -288,8 +320,11 @@ public class SchemaGenerator implements Runnable {
         });
     }
 
+    /**
+     * Writes the synthetic base exception schema.
+     */
     private void writeBaseError() {
-        TypeScriptWriter writer = writers.get("schemas_0");
+        TypeScriptWriter writer = getBaseWriter();
 
         String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
         String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
@@ -474,6 +509,10 @@ public class SchemaGenerator implements Runnable {
         writeTraitsInContext(shape, shape);
     }
 
+    /**
+     * When the context is not the base group, then any StringStore variables
+     * are imported from the base group.
+     */
     private void writeTraitsInContext(Shape context, Shape shape) {
         TypeScriptWriter writer = getWriter(context.getId());
         boolean useImportedStrings = !treeOrganizer.isBaseGroup(context);
@@ -541,6 +580,10 @@ public class SchemaGenerator implements Runnable {
         return (isReference || hasTraits ? "() => " : "") + getShapeVariableName(shape);
     }
 
+    /**
+     * @return a sentinel value representing a preconfigured schema type.
+     * @throws IllegalArgumentException when no sentinel value exists, e.g. a non-simple schema was passed in.
+     */
     private String resolveSimpleSchema(Shape shape) {
         MemberShape memberShape = null;
         if (shape instanceof MemberShape ms) {
@@ -598,6 +641,14 @@ public class SchemaGenerator implements Runnable {
         throw new IllegalArgumentException("shape is not simple");
     }
 
+    /**
+     * For example, the number 5 represents a timestamp (Date-Time) schema with no other traits.
+     * For lists, the bit modifier 64 is applied, giving 64 | 5 for a list of timestamps.
+     * For further nested containers, bit masks can no longer be used, necessitating the `sim` simple schema
+     * wrapper: `sim("namespace", "ListOfLists", 64 | 5, {});`.
+     *
+     * @return the container bit modifier attached to the schema numeric value.
+     */
     private String resolveSimpleSchemaNestedContainer(Shape shape, TypeScriptWriter writer) {
         Shape contained;
         String factory;
@@ -645,6 +696,9 @@ public class SchemaGenerator implements Runnable {
         }
     }
 
+    /**
+     * Imports the shape's schema from another file if the context group differs from the shape group.
+     */
     private void checkImportSchema(Shape context, Shape shape) {
         String shapeGroup = treeOrganizer.getGroup(shape.getId());
         if (treeOrganizer.different(context, shape)) {
@@ -658,6 +712,9 @@ public class SchemaGenerator implements Runnable {
         return checkImportString(context, fullString, null);
     }
 
+    /**
+     * Imports a string variable from the base group if the context is not the base group.
+     */
     private String checkImportString(Shape context, String fullString, String prefix) {
         String var = prefix != null ? store.var(fullString, prefix) : store.var(fullString);
         if (!treeOrganizer.isBaseGroup(context)) {

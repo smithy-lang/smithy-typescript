@@ -1,5 +1,6 @@
 // smithy-typescript generated code
-import { Unit, _FS, _FSO, _d, n1 } from "./schemas_0";
+import { _FS, _FSO, _d, n1 } from "./schemas_0";
+import { Unit } from "./schemas_1_Rpc";
 import { op, struct } from "@smithy/core/schema";
 
 /* eslint no-var: 0 */

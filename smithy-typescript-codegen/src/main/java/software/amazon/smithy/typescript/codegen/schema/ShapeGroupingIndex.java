@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.KnowledgeIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -29,45 +30,89 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * E.g. used to create disjoint sets of schemas to assist with tree-shaking.
  */
 @SmithyInternalApi
-public class ShapeTreeOrganizer {
+public class ShapeGroupingIndex implements KnowledgeIndex {
     public static final String FILENAME_PREFIX = "schemas";
 
-    private static final Map<Model, ShapeTreeOrganizer> INSTANCES = new ConcurrentHashMap<>();
+    /**
+     * The maximum number of operations to place into one group (file).
+     */
+    public static final int MAX_OPERATIONS_GROUP_SIZE = 12;
+
+    /**
+     * Instances of this class for specific models.
+     */
+    private static final Map<Model, ShapeGroupingIndex> INSTANCES = new ConcurrentHashMap<>();
+
     /**
      * Shapes mapped to operations that use them.
      */
     private final Map<ShapeId, TreeSet<ShapeId>> shapeToOperationDependents = new HashMap<>();
+
     /**
      * Shapes mapped to the largest logical grouping of operations making use of the shape.
      */
     private final Map<ShapeId, TreeSet<ShapeId>> shapeToOperationalGroup = new HashMap<>();
+
     /**
      * Hashed combined operation names to their numeric group id.
      */
     private final Map<String, Integer> opGroups = new HashMap<>();
+
     /**
      * Combined operation names mapped to a readable group name.
      */
     private final Map<String, String> groupNames = new HashMap<>();
-    private int lastGroup = 0;
-    private Model model;
 
     /**
-     * todo: KnowledgeIndex?
+     * Last group assigned by increasing number.
      */
-    public static ShapeTreeOrganizer forModel(Model model) {
+    private int lastGroup = 0;
+
+    /**
+     * Contextual model.
+     */
+    private Model model;
+
+    public static ShapeGroupingIndex of(Model model) {
         return INSTANCES.computeIfAbsent(model, k -> {
-            ShapeTreeOrganizer shapeTreeOrganizer = new ShapeTreeOrganizer();
+            ShapeGroupingIndex shapeTreeOrganizer = new ShapeGroupingIndex();
             shapeTreeOrganizer.loadModel(model);
             return shapeTreeOrganizer;
         });
     }
 
     /**
-     * Set the context for this instance.
-     * todo: KnowledgeIndex?
+     * @return the group name (filename) of the schema group for the given shape.
      */
-    public void loadModel(Model model) {
+    public String getGroup(ShapeId id) {
+        if (!shapeToOperationalGroup.containsKey(id)) {
+            return getBaseGroup();
+        }
+        TreeSet<ShapeId> operations = shapeToOperationalGroup.get(id);
+        return hashOperationSet(operations);
+    }
+
+    /**
+     * @return whether shape is in the base group.
+     */
+    public boolean isBaseGroup(Shape shape) {
+        return getGroup(shape.getId()).equals(getBaseGroup());
+    }
+
+    /**
+     * @return whether two shapes are in different groups.
+     */
+    public boolean different(Shape a, Shape b) {
+        return !Objects.equals(
+            getGroup(a.getId()),
+            getGroup(b.getId())
+        );
+    }
+
+    /**
+     * Initialize for given model.
+     */
+    private void loadModel(Model model) {
         if (this.model != null) {
             throw new IllegalArgumentException("Model has already been loaded");
         }
@@ -82,12 +127,14 @@ public class ShapeTreeOrganizer {
         for (Map.Entry<ShapeId, TreeSet<ShapeId>> entry : shapeToOperationDependents.entrySet()) {
             ShapeId shapeId = entry.getKey();
             TreeSet<ShapeId> dependentOperations = entry.getValue();
+
             shapeToOperationalGroup.put(shapeId,
                 shapeToOperationDependents.values()
                     .stream()
+                    .filter(group -> group.size() < MAX_OPERATIONS_GROUP_SIZE)
                     .filter(group -> group.containsAll(dependentOperations))
                     .max(Comparator.comparing(TreeSet::size))
-                    .get()
+                    .orElse(dependentOperations)
             );
         }
 
@@ -97,32 +144,10 @@ public class ShapeTreeOrganizer {
     }
 
     /**
-     * @return the group name (filename) of the schema group for the given shape.
-     */
-    public String getGroup(ShapeId id) {
-        if (!shapeToOperationalGroup.containsKey(id)) {
-            return getBaseGroup();
-        }
-        TreeSet<ShapeId> operations = shapeToOperationalGroup.get(id);
-        return hashOperationSet(operations);
-    }
-
-    public boolean isBaseGroup(Shape shape) {
-        return getGroup(shape.getId()).equals(getBaseGroup());
-    }
-
-    public boolean different(Shape a, Shape b) {
-        return !Objects.equals(
-            getGroup(a.getId()),
-            getGroup(b.getId())
-        );
-    }
-
-    /**
      * @return a string hash identifying the group that this set of operations is assigned to.
      */
     private String hashOperationSet(TreeSet<ShapeId> operations) {
-        if (operations.size() > 5) {
+        if (operations.size() > MAX_OPERATIONS_GROUP_SIZE) {
             return getBaseGroup();
         }
         String key = joinOperationNames(operations);
@@ -140,8 +165,9 @@ public class ShapeTreeOrganizer {
     }
 
     /**
-     * Simplistically determines a name for the group of operations
+     * Determines a name for the group of operations
      * based on the most commonly observed name or structure.
+     * Uses "longest common phrase" algorithm.
      */
     private String nominateGroupName(TreeSet<ShapeId> operations) {
         if (operations.size() == 1) {
@@ -155,7 +181,7 @@ public class ShapeTreeOrganizer {
             .flatMap(operationName -> names.stream()
                 .filter(otherOperationName -> !otherOperationName.equals(operationName))
                 .flatMap(other -> {
-                    Set<String> nounPhrases = new HashSet<>();
+                    Set<String> wordPhrases = new HashSet<>();
 
                     // expensive, but cached.
                     for (int i = 0; i < operationName.length(); ++i) {
@@ -165,13 +191,13 @@ public class ShapeTreeOrganizer {
                             if (candidate.length() >= minLength && other.contains(candidate)) {
                                 boolean validNounPhrase = isValidNounPhrase(operationName, i, j);
                                 if (validNounPhrase) {
-                                    nounPhrases.add(candidate);
+                                    wordPhrases.add(candidate);
                                 }
                             }
                         }
                     }
 
-                    return nounPhrases.stream();
+                    return wordPhrases.stream();
                 })
             );
 
@@ -225,6 +251,10 @@ public class ShapeTreeOrganizer {
         });
     }
 
+    /**
+     * Registers knowledge of the shape in the context of an operation.
+     * Recurses on referenced shapes in the input shape.
+     */
     private void registerShapes(OperationShape op, Shape shape, Set<Shape> visited) {
         if (shape.isMemberShape()) {
             registerShapes(op, model.expectShape(shape.asMemberShape().get().getTarget()), visited);
@@ -246,19 +276,10 @@ public class ShapeTreeOrganizer {
         }
     }
 
+    /**
+     * Used to create a hash of a set of operations.
+     */
     private String joinOperationNames(TreeSet<ShapeId> operations) {
         return operations.stream().map(ShapeId::getName).collect(Collectors.joining(","));
-    }
-
-    void debug() {
-        shapeToOperationDependents.forEach((shapeId, operations) -> {
-            System.out.println(shapeId);
-            System.out.println("  " + getGroup(shapeId));
-            System.out.println(
-                "    operations: " + operations.stream()
-                    .map(ShapeId::getName).collect(Collectors.joining(", "))
-            );
-            System.out.println();
-        });
     }
 }
