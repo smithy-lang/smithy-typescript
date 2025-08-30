@@ -31,8 +31,10 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public class ShapeTreeOrganizer {
     public static final String FILENAME_PREFIX = "schemas";
+    public static final int MAX_OPERATIONS_GROUP_SIZE = 12;
 
     private static final Map<Model, ShapeTreeOrganizer> INSTANCES = new ConcurrentHashMap<>();
+
     /**
      * Shapes mapped to operations that use them.
      */
@@ -82,12 +84,14 @@ public class ShapeTreeOrganizer {
         for (Map.Entry<ShapeId, TreeSet<ShapeId>> entry : shapeToOperationDependents.entrySet()) {
             ShapeId shapeId = entry.getKey();
             TreeSet<ShapeId> dependentOperations = entry.getValue();
+
             shapeToOperationalGroup.put(shapeId,
                 shapeToOperationDependents.values()
                     .stream()
+                    .filter(group -> group.size() < MAX_OPERATIONS_GROUP_SIZE)
                     .filter(group -> group.containsAll(dependentOperations))
                     .max(Comparator.comparing(TreeSet::size))
-                    .get()
+                    .orElse(dependentOperations)
             );
         }
 
@@ -122,7 +126,7 @@ public class ShapeTreeOrganizer {
      * @return a string hash identifying the group that this set of operations is assigned to.
      */
     private String hashOperationSet(TreeSet<ShapeId> operations) {
-        if (operations.size() > 5) {
+        if (operations.size() > MAX_OPERATIONS_GROUP_SIZE) {
             return getBaseGroup();
         }
         String key = joinOperationNames(operations);

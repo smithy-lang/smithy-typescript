@@ -153,6 +153,16 @@ public class SchemaGenerator implements Runnable {
         });
     }
 
+    private TypeScriptWriter getBaseWriter() {
+        return writers.computeIfAbsent("schemas_0", k -> {
+            TypeScriptWriter typeScriptWriter = new TypeScriptWriter("");
+            typeScriptWriter.write("""
+                /* eslint no-var: 0 */
+            """);
+            return typeScriptWriter;
+        });
+    }
+
     /**
      * Identifies repeated strings among the schemas to use in StringStore.
      */
@@ -289,7 +299,7 @@ public class SchemaGenerator implements Runnable {
     }
 
     private void writeBaseError() {
-        TypeScriptWriter writer = writers.get("schemas_0");
+        TypeScriptWriter writer = getBaseWriter();
 
         String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
         String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
