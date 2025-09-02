@@ -58,11 +58,15 @@ export class NumericValue {
       return false;
     }
     const _nv = object as NumericValue;
-    const prototypeMatch = NumericValue.prototype.isPrototypeOf(object.constructor?.prototype);
+    const prototypeMatch = NumericValue.prototype.isPrototypeOf(object);
     if (prototypeMatch) {
       return prototypeMatch;
     }
-    if (typeof _nv.string === "string" && typeof _nv.type === "string" && _nv.constructor?.name === "NumericValue") {
+    if (
+      typeof _nv.string === "string" &&
+      typeof _nv.type === "string" &&
+      _nv.constructor?.name?.endsWith("NumericValue")
+    ) {
       return true;
     }
     return prototypeMatch;
