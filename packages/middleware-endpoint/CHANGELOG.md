@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.1.20
+
+### Patch Changes
+
+- Updated dependencies [29fad01]
+  - @smithy/core@3.9.1
+
 ## 4.1.19
 
 ### Patch Changes

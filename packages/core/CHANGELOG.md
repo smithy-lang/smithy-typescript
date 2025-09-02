@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.9.1
+
+### Patch Changes
+
+- 29fad01: fix NumericValue typecheck
+
 ## 3.9.0
 
 ### Minor Changes
