@@ -1,141 +1,133 @@
-const _CE = "ComplexError";
-const _CNED = "ComplexNestedErrorData";
-const _COD = "ClientOptionalDefaults";
-const _D = "Defaults";
-const _DSM = "DenseSetMap";
-const _DSMe = "DenseStructMap";
-const _EIO = "EmptyInputOutput";
-const _ES = "EmptyStructure";
-const _F = "Foo";
-const _FO = "Float16Output";
-const _FS = "FractionalSeconds";
-const _FSO = "FractionalSecondsOutput";
-const _Fl = "Float16";
-const _GS = "GreetingStruct";
-const _GWE = "GreetingWithErrors";
-const _GWEO = "GreetingWithErrorsOutput";
-const _IG = "InvalidGreeting";
-const _M = "Message";
-const _N = "Nested";
-const _NIO = "NoInputOutput";
-const _NSL = "NestedStringList";
-const _OIO = "OptionalInputOutput";
-const _OWD = "OperationWithDefaults";
-const _OWDI = "OperationWithDefaultsInput";
-const _OWDO = "OperationWithDefaultsOutput";
-const _RS = "RecursiveShapes";
-const _RSIO = "RecursiveShapesInputOutput";
-const _RSION = "RecursiveShapesInputOutputNested1";
-const _RSIONe = "RecursiveShapesInputOutputNested2";
-const _RVCDM = "RpcV2CborDenseMaps";
-const _RVCDMIO = "RpcV2CborDenseMapsInputOutput";
-const _RVCL = "RpcV2CborLists";
-const _RVCLIO = "RpcV2CborListInputOutput";
-const _RVCSM = "RpcV2CborSparseMaps";
-const _RVCSMIO = "RpcV2CborSparseMapsInputOutput";
-const _SBM = "SparseBooleanMap";
-const _SL = "StructureList";
-const _SLM = "StructureListMember";
-const _SNM = "SparseNumberMap";
-const _SNO = "SparseNullsOperation";
-const _SNOIO = "SparseNullsOperationInputOutput";
-const _SS = "SimpleStructure";
-const _SSL = "SparseStringList";
-const _SSM = "SparseSetMap";
-const _SSMp = "SparseStructMap";
-const _SSMpa = "SparseStringMap";
-const _SSP = "SimpleScalarProperties";
-const _SSS = "SimpleScalarStructure";
-const _TL = "TopLevel";
-const _VE = "ValidationException";
-const _VEF = "ValidationExceptionField";
-const _VEFL = "ValidationExceptionFieldList";
-const _a = "a";
-const _b = "bar";
-const _bL = "booleanList";
-const _bLl = "blobList";
-const _bV = "byteValue";
-const _bVl = "blobValue";
-const _b_ = "b";
-const _c = "client";
-const _cOD = "clientOptionalDefaults";
-const _d = "datetime";
-const _dB = "defaultBoolean";
-const _dBM = "denseBooleanMap";
-const _dBe = "defaultBlob";
-const _dBef = "defaultByte";
-const _dD = "defaultDouble";
-const _dE = "defaultEnum";
-const _dF = "defaultFloat";
-const _dI = "defaultInteger";
-const _dIE = "defaultIntEnum";
-const _dL = "defaultList";
-const _dLe = "defaultLong";
-const _dM = "defaultMap";
-const _dNM = "denseNumberMap";
-const _dS = "defaultString";
-const _dSM = "denseStructMap";
-const _dSMe = "denseStringMap";
-const _dSMen = "denseSetMap";
-const _dSe = "defaultShort";
-const _dT = "defaultTimestamp";
-const _dV = "doubleValue";
-const _de = "defaults";
-const _e = "error";
-const _eB = "emptyBlob";
-const _eL = "enumList";
-const _eS = "emptyString";
-const _f = "foo";
-const _fB = "falseBoolean";
-const _fBV = "falseBooleanValue";
-const _fL = "fieldList";
-const _fV = "floatValue";
-const _g = "greeting";
-const _h = "hi";
-const _iEL = "intEnumList";
-const _iL = "integerList";
-const _iV = "integerValue";
-const _lV = "longValue";
-const _m = "message";
-const _me = "member";
-const _n = "nested";
-const _nSL = "nestedStringList";
-const _oTLD = "otherTopLevelDefault";
-const _p = "path";
-const _rM = "recursiveMember";
-const _s = "sparse";
-const _sBM = "sparseBooleanMap";
-const _sL = "stringList";
-const _sLt = "structureList";
-const _sNM = "sparseNumberMap";
-const _sS = "stringSet";
-const _sSL = "sparseStringList";
-const _sSM = "sparseStructMap";
-const _sSMp = "sparseStringMap";
-const _sSMpa = "sparseSetMap";
-const _sV = "shortValue";
-const _sVt = "stringValue";
-const _tBV = "trueBooleanValue";
-const _tL = "timestampList";
-const _tLD = "topLevelDefault";
-const _v = "value";
-const _zB = "zeroByte";
-const _zD = "zeroDouble";
-const _zF = "zeroFloat";
-const _zI = "zeroInteger";
-const _zL = "zeroLong";
-const _zS = "zeroShort";
-const n0 = "smithy.framework";
-const n1 = "smithy.protocoltests.rpcv2Cbor";
-const n2 = "smithy.protocoltests.shared";
-
 // smithy-typescript generated code
-import { RpcV2ProtocolServiceException as __RpcV2ProtocolServiceException } from "../models/RpcV2ProtocolServiceException";
 import {
   ComplexError as __ComplexError,
   InvalidGreeting as __InvalidGreeting,
   ValidationException as __ValidationException,
 } from "../models/index";
+import {
+  _CE,
+  _CNED,
+  _COD,
+  _D,
+  _DSM,
+  _DSMe,
+  _F,
+  _GS,
+  _GWE,
+  _GWEO,
+  _IG,
+  _M,
+  _N,
+  _NSL,
+  _OIO,
+  _OWD,
+  _OWDI,
+  _OWDO,
+  _RS,
+  _RSIO,
+  _RSION,
+  _RSIONe,
+  _RVCDM,
+  _RVCDMIO,
+  _RVCL,
+  _RVCLIO,
+  _RVCSM,
+  _RVCSMIO,
+  _SBM,
+  _SL,
+  _SLM,
+  _SNM,
+  _SNO,
+  _SNOIO,
+  _SS,
+  _SSL,
+  _SSM,
+  _SSMp,
+  _SSMpa,
+  _SSP,
+  _SSS,
+  _TL,
+  _VE,
+  _VEF,
+  _VEFL,
+  _a,
+  _b,
+  _bL,
+  _bLl,
+  _bV,
+  _bVl,
+  _b_,
+  _c,
+  _cOD,
+  _dB,
+  _dBM,
+  _dBe,
+  _dBef,
+  _dD,
+  _dE,
+  _dF,
+  _dI,
+  _dIE,
+  _dL,
+  _dLe,
+  _dM,
+  _dNM,
+  _dS,
+  _dSM,
+  _dSMe,
+  _dSMen,
+  _dSe,
+  _dT,
+  _dV,
+  _de,
+  _e,
+  _eB,
+  _eL,
+  _eS,
+  _f,
+  _fB,
+  _fBV,
+  _fL,
+  _fV,
+  _g,
+  _h,
+  _iEL,
+  _iL,
+  _iV,
+  _lV,
+  _m,
+  _me,
+  _n,
+  _nSL,
+  _oTLD,
+  _p,
+  _rM,
+  _s,
+  _sBM,
+  _sL,
+  _sLt,
+  _sNM,
+  _sS,
+  _sSL,
+  _sSM,
+  _sSMp,
+  _sSMpa,
+  _sV,
+  _sVt,
+  _tBV,
+  _tL,
+  _tLD,
+  _v,
+  _zB,
+  _zD,
+  _zF,
+  _zI,
+  _zL,
+  _zS,
+  n0,
+  n1,
+  n2,
+} from "./schemas_0";
 import { error, list, map, op, struct } from "@smithy/core/schema";
 
 /* eslint no-var: 0 */
@@ -198,9 +190,6 @@ export var Defaults = struct(
   ],
   [0, 2, 64 | 0, 4, 21, 1, 1, 1, 1, 1, 1, 128 | 0, 0, 1, 0, 2, 21, 1, 1, 1, 1, 1, 1]
 );
-export var EmptyStructure = struct(n1, _ES, 0, [], []);
-export var Float16Output = struct(n1, _FO, 0, [_v], [1]);
-export var FractionalSecondsOutput = struct(n1, _FSO, 0, [_d], [5]);
 export var GreetingWithErrorsOutput = struct(n1, _GWEO, 0, [_g], [0]);
 export var InvalidGreeting = error(
   n1,
@@ -313,14 +302,6 @@ export var SparseNullsOperationInputOutput = struct(
 );
 export var StructureListMember = struct(n1, _SLM, 0, [_a, _b_], [0, 0]);
 export var GreetingStruct = struct(n2, _GS, 0, [_h], [0]);
-export var RpcV2ProtocolServiceException = error(
-  "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor",
-  "RpcV2ProtocolServiceException",
-  0,
-  [],
-  [],
-  __RpcV2ProtocolServiceException
-);
 export var ValidationExceptionFieldList = list(n0, _VEFL, 0, () => ValidationExceptionField);
 export var StructureList = list(n1, _SL, 0, () => StructureListMember);
 export var TestStringList = 64 | 0;
@@ -405,40 +386,12 @@ export var SparseStringMap = map(
   0,
   0
 );
-export var EmptyInputOutput = op(
-  n1,
-  _EIO,
-  0,
-  () => EmptyStructure,
-  () => EmptyStructure
-);
-export var Float16 = op(
-  n1,
-  _Fl,
-  0,
-  () => Unit,
-  () => Float16Output
-);
-export var FractionalSeconds = op(
-  n1,
-  _FS,
-  0,
-  () => Unit,
-  () => FractionalSecondsOutput
-);
 export var GreetingWithErrors = op(
   n1,
   _GWE,
   2,
   () => Unit,
   () => GreetingWithErrorsOutput
-);
-export var NoInputOutput = op(
-  n1,
-  _NIO,
-  0,
-  () => Unit,
-  () => Unit
 );
 export var OperationWithDefaults = op(
   n1,
