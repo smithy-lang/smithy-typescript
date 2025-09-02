@@ -5,6 +5,7 @@ import JSONbig from "json-bigint";
 import * as path from "path";
 import { describe, expect, test as it } from "vitest";
 
+import { printBytes } from "./byte-printer";
 import { cbor } from "./cbor";
 import { bytesToFloat16 } from "./cbor-decode";
 import { tagSymbol } from "./cbor-types";
@@ -286,7 +287,7 @@ describe("cbor", () => {
       expect(deserialized).toEqual(bigInt);
     });
 
-    it.skip("should round-trip NumericValue to major 6 with tag 4", () => {
+    it("should round-trip NumericValue to major 6 with tag 4", () => {
       for (const bigDecimal of [
         "10000000000000000000000054.321",
         "1000000000000000000000000000000000054.134134321",
@@ -310,6 +311,15 @@ describe("cbor", () => {
         expect(deserialized).toEqual(nv);
         expect(deserialized.string).toEqual(nv.string);
       }
+
+      const bigDecimal = nv("0");
+      expect(bigDecimal).toBeInstanceOf(NumericValue);
+      expect(printBytes(cbor.serialize(bigDecimal))).toEqual([
+        "110_00100 (6 - tag, 4)",
+        "100_00010 (4 - list, 2)",
+        "000_00000 (0 - Uint64, 0)",
+        "000_00000 (0 - Uint64, 0)",
+      ]);
     });
 
     it("should round-trip sequences of big numbers", () => {
