@@ -34,6 +34,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -107,7 +108,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             getDocumentContentType(),
             () -> {
                 TypeScriptWriter writer = context.getWriter();
-                writer.write("body = context.utf8Decoder(body);");
+                serializeEventStreamBodyToBytes(writer);
             },
             serializingDocumentShapes
         );
@@ -604,6 +605,17 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      */
     protected String getErrorBodyLocation(GenerationContext context, String outputLocation) {
         return outputLocation;
+    }
+
+    /**
+     * Allows RPC protocols to designate how to convert the body into bytes.
+     *
+     * @deprecated superseded by schema-serde.
+     */
+    @Deprecated
+    @SmithyInternalApi
+    protected void serializeEventStreamBodyToBytes(TypeScriptWriter writer) {
+        writer.write("body = context.utf8Decoder(JSON.stringify(body));");
     }
 
     /**
