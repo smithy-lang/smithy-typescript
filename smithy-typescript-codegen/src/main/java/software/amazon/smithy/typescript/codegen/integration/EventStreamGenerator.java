@@ -387,7 +387,7 @@ public class EventStreamGenerator {
                     writer.write("body = input.$L;", payloadMemberName);
                 } else if (payloadShape instanceof StringShape) {
                     writer.write("body = context.utf8Decoder(input.$L);", payloadMemberName);
-                } else if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
+                } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
                     Symbol symbol = getSymbol(context, payloadShape);
                     String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
                     boolean mayElide = serdeElisionIndex.mayElide(payloadShape);
