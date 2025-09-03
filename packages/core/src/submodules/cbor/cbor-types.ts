@@ -64,7 +64,7 @@ export const extendedFloat64 = 27; // 0b11011
 
 export const minorIndefinite = 31; // 0b11111
 
-export function alloc(size: number) {
+export function alloc(size: number): Uint8Array {
   return typeof Buffer !== "undefined" ? Buffer.alloc(size) : new Uint8Array(size);
 }
 
