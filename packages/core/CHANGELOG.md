@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.9.2
+
+### Patch Changes
+
+- 06ac1f6: set explicit return type for cbor alloc
+
 ## 3.9.1
 
 ### Patch Changes
