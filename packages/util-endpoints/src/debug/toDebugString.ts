@@ -1,7 +1,7 @@
-import { EndpointParameters, EndpointV2 } from "@smithy/types";
+import type { EndpointParameters, EndpointV2 } from "@smithy/types";
 
-import { GetAttrValue } from "../lib";
-import { EndpointObject, FunctionObject, FunctionReturn } from "../types";
+import type { GetAttrValue } from "../lib";
+import type { EndpointObject, FunctionObject, FunctionReturn } from "../types";
 
 export function toDebugString(input: EndpointParameters): string;
 export function toDebugString(input: EndpointV2): string;

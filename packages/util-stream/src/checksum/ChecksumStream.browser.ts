@@ -1,4 +1,4 @@
-import { Checksum, Encoder } from "@smithy/types";
+import type { Checksum, Encoder } from "@smithy/types";
 
 /**
  * @internal

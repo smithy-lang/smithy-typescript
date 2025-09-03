@@ -1,5 +1,5 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import { QueryParameterBag } from "@smithy/types";
+import type { QueryParameterBag } from "@smithy/types";
 import { afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
 import { createRequest } from "./create-request";

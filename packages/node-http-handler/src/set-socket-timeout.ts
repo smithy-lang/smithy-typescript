@@ -1,4 +1,4 @@
-import { ClientRequest } from "http";
+import type { ClientRequest } from "http";
 
 import { DEFAULT_REQUEST_TIMEOUT } from "./node-http-handler";
 import { timing } from "./timing";

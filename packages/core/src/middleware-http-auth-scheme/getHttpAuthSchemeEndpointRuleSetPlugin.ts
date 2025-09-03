@@ -1,4 +1,4 @@
-import {
+import type {
   HandlerExecutionContext,
   HttpAuthSchemeParameters,
   HttpAuthSchemeParametersProvider,
@@ -8,7 +8,8 @@ import {
   SerializeHandlerOptions,
 } from "@smithy/types";
 
-import { httpAuthSchemeMiddleware, PreviouslyResolved } from "./httpAuthSchemeMiddleware";
+import type { PreviouslyResolved } from "./httpAuthSchemeMiddleware";
+import { httpAuthSchemeMiddleware } from "./httpAuthSchemeMiddleware";
 
 /**
  * @internal

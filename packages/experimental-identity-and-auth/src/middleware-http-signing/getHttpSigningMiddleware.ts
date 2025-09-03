@@ -1,5 +1,5 @@
 import { retryMiddlewareOptions } from "@smithy/middleware-retry";
-import { FinalizeRequestHandlerOptions, Pluggable, RelativeMiddlewareOptions } from "@smithy/types";
+import type { FinalizeRequestHandlerOptions, Pluggable, RelativeMiddlewareOptions } from "@smithy/types";
 
 import { httpSigningMiddleware } from "./httpSigningMiddleware";
 

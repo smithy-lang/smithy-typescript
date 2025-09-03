@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test as it } from "vitest";
 
-import { WaiterOptions } from "../waiter";
+import type { WaiterOptions } from "../waiter";
 import { validateWaiterOptions } from "./validate";
 
 describe(validateWaiterOptions.name, () => {

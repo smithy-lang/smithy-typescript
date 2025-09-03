@@ -1,7 +1,7 @@
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
-import { SdkError } from "@smithy/types";
-import { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider, RetryStrategy } from "@smithy/types";
+import type { SdkError } from "@smithy/types";
+import type { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider, RetryStrategy } from "@smithy/types";
 import {
   DEFAULT_MAX_ATTEMPTS,
   DEFAULT_RETRY_DELAY_BASE,
@@ -16,7 +16,7 @@ import { v4 } from "uuid";
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
 import { defaultRetryDecider } from "./retryDecider";
-import { DelayDecider, RetryDecider, RetryQuota } from "./types";
+import type { DelayDecider, RetryDecider, RetryQuota } from "./types";
 import { asSdkError } from "./util";
 
 /**

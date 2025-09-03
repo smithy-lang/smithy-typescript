@@ -1,4 +1,4 @@
-import { HttpRequest, Identity } from "@smithy/types";
+import type { HttpRequest, Identity } from "@smithy/types";
 
 /**
  * Interface to sign identity and signing properties.

@@ -1,4 +1,4 @@
-import { RuleSetRules } from "./TreeRuleObject";
+import type { RuleSetRules } from "./TreeRuleObject";
 
 /**
  * @public

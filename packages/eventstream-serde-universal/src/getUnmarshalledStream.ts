@@ -1,5 +1,5 @@
-import { EventStreamCodec } from "@smithy/eventstream-codec";
-import { Encoder, Message } from "@smithy/types";
+import type { EventStreamCodec } from "@smithy/eventstream-codec";
+import type { Encoder, Message } from "@smithy/types";
 
 /**
  * @internal

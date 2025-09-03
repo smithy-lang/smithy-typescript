@@ -1,4 +1,4 @@
-import { SdkError } from "./shapes";
+import type { SdkError } from "./shapes";
 
 /**
  * @public

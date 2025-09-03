@@ -1,9 +1,9 @@
 import { NumericValue } from "@smithy/core/serde";
 import { fromUtf8 } from "@smithy/util-utf8";
 
+import type { CborMajorType, Uint64 } from "./cbor-types";
 import {
   alloc,
-  CborMajorType,
   extendedFloat16,
   extendedFloat32,
   extendedFloat64,
@@ -19,7 +19,6 @@ import {
   specialNull,
   specialTrue,
   tagSymbol,
-  Uint64,
 } from "./cbor-types";
 
 const USE_BUFFER = typeof Buffer !== "undefined";

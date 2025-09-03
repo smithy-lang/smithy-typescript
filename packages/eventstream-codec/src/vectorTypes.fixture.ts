@@ -1,4 +1,4 @@
-import { Message } from "./Message";
+import type { Message } from "./Message";
 
 export interface NegativeTestVector {
   expectation: "failure";

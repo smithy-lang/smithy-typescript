@@ -1,8 +1,11 @@
-import { HeaderBag, HttpResponse, NodeJsRuntimeBlobTypes } from "@smithy/types";
+import type { HeaderBag, HttpResponse, NodeJsRuntimeBlobTypes } from "@smithy/types";
 import { readFileSync } from "fs";
-import { createServer as createHttpServer, IncomingMessage, Server as HttpServer, ServerResponse } from "http";
-import { createServer as createHttp2Server, Http2Server } from "http2";
-import { createServer as createHttpsServer, Server as HttpsServer } from "https";
+import type { IncomingMessage, Server as HttpServer, ServerResponse } from "http";
+import { createServer as createHttpServer } from "http";
+import type { Http2Server } from "http2";
+import { createServer as createHttp2Server } from "http2";
+import type { Server as HttpsServer } from "https";
+import { createServer as createHttpsServer } from "https";
 import { join } from "path";
 import { Readable } from "stream";
 

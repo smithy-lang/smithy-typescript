@@ -1,4 +1,4 @@
-import { ClientRequest } from "http";
+import type { ClientRequest } from "http";
 
 import { timing } from "./timing";
 

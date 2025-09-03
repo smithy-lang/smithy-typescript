@@ -1,5 +1,5 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { Logger, Provider } from "@smithy/types";
+import type { Logger, Provider } from "@smithy/types";
 
 import { getSelectorName } from "./getSelectorName";
 

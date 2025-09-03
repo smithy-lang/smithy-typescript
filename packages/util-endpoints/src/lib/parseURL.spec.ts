@@ -1,4 +1,5 @@
-import { Endpoint, EndpointURL, EndpointURLScheme } from "@smithy/types";
+import type { Endpoint, EndpointURL } from "@smithy/types";
+import { EndpointURLScheme } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { parseURL } from "./parseURL";

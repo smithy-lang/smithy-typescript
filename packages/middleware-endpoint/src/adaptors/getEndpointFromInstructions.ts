@@ -1,8 +1,8 @@
-import { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
+import type { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
 
-import { EndpointResolvedConfig } from "../resolveEndpointConfig";
+import type { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";
-import { EndpointParameterInstructions } from "../types";
+import type { EndpointParameterInstructions } from "../types";
 import { createConfigValueProvider } from "./createConfigValueProvider";
 import { getEndpointFromConfig } from "./getEndpointFromConfig";
 import { toEndpointV1 } from "./toEndpointV1";

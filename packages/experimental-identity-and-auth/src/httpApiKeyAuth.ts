@@ -1,8 +1,8 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import { HttpRequest as IHttpRequest } from "@smithy/types";
+import type { HttpRequest as IHttpRequest } from "@smithy/types";
 
-import { ApiKeyIdentity } from "./apiKeyIdentity";
-import { HttpSigner } from "./HttpSigner";
+import type { ApiKeyIdentity } from "./apiKeyIdentity";
+import type { HttpSigner } from "./HttpSigner";
 
 /**
  * @internal

@@ -1,5 +1,5 @@
-import { EndpointObjectProperty } from "../endpoint";
-import { ConditionObject, Expression } from "./shared";
+import type { EndpointObjectProperty } from "../endpoint";
+import type { ConditionObject, Expression } from "./shared";
 
 /**
  * @public

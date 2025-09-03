@@ -1,4 +1,4 @@
-import { Endpoint, EndpointV2, Provider } from "@smithy/types";
+import type { Endpoint, EndpointV2, Provider } from "@smithy/types";
 
 /**
  * This is an additional config resolver layer for clients using the default

@@ -1,5 +1,5 @@
 import { HttpResponse } from "@smithy/protocol-http";
-import { EndpointBearer, SerdeFunctions } from "@smithy/types";
+import type { EndpointBearer, SerdeFunctions } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { deserializerMiddleware } from "./deserializerMiddleware";

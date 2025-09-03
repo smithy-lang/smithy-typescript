@@ -1,4 +1,4 @@
-import { EndpointVariantTag } from "./EndpointVariantTag";
+import type { EndpointVariantTag } from "./EndpointVariantTag";
 
 /**
  * Provides hostname information for specific host label.

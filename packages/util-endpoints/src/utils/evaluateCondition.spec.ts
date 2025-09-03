@@ -1,7 +1,8 @@
 import { describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
-import { EndpointError, EvaluateOptions } from "../types";
+import type { EvaluateOptions } from "../types";
+import { EndpointError } from "../types";
 import { callFunction } from "./callFunction";
 import { evaluateCondition } from "./evaluateCondition";
 

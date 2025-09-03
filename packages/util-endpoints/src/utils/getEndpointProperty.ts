@@ -1,6 +1,7 @@
-import { EndpointObjectProperty } from "@smithy/types";
+import type { EndpointObjectProperty } from "@smithy/types";
 
-import { EndpointError, EvaluateOptions } from "../types";
+import type { EvaluateOptions } from "../types";
+import { EndpointError } from "../types";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getEndpointProperties } from "./getEndpointProperties";
 

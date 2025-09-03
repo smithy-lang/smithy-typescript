@@ -1,4 +1,4 @@
-import { Logger, SharedConfigFiles } from "@smithy/types";
+import type { Logger, SharedConfigFiles } from "@smithy/types";
 import { join } from "path";
 
 import { getConfigData } from "./getConfigData";

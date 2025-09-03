@@ -1,5 +1,5 @@
-import { ChecksumConstructor } from "../checksum";
-import { HashConstructor } from "../crypto";
+import type { ChecksumConstructor } from "../checksum";
+import type { HashConstructor } from "../crypto";
 
 /**
  * @internal

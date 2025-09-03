@@ -1,5 +1,6 @@
-import { HttpHandler, HttpResponse } from "@smithy/protocol-http";
-import { HttpRequest as IHttpRequest } from "@smithy/types";
+import type { HttpHandler } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/protocol-http";
+import type { HttpRequest as IHttpRequest } from "@smithy/types";
 import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { fromUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";

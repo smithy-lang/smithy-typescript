@@ -1,4 +1,4 @@
-import { HeaderBag } from "@smithy/types";
+import type { HeaderBag } from "@smithy/types";
 
 export const hasHeader = (soughtHeader: string, headers: HeaderBag): boolean => {
   soughtHeader = soughtHeader.toLowerCase();

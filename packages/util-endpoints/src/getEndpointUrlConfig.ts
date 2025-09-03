@@ -1,5 +1,5 @@
-import { LoadedConfigSelectors } from "@smithy/node-config-provider";
-import { IniSection } from "@smithy/types";
+import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
+import type { IniSection } from "@smithy/types";
 
 const ENV_ENDPOINT_URL = "AWS_ENDPOINT_URL";
 const CONFIG_ENDPOINT_URL = "endpoint_url";

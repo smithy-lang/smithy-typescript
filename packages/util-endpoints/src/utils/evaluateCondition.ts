@@ -1,5 +1,6 @@
 import { debugId, toDebugString } from "../debug";
-import { ConditionObject, EndpointError, EvaluateOptions } from "../types";
+import type { ConditionObject, EvaluateOptions } from "../types";
+import { EndpointError } from "../types";
 import { callFunction } from "./callFunction";
 
 export const evaluateCondition = ({ assign, ...fnArgs }: ConditionObject, options: EvaluateOptions) => {

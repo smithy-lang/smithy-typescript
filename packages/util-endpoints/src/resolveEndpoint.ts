@@ -1,7 +1,8 @@
-import { EndpointV2 } from "@smithy/types";
+import type { EndpointV2 } from "@smithy/types";
 
 import { debugId, toDebugString } from "./debug";
-import { EndpointError, EndpointResolverOptions, RuleSetObject } from "./types";
+import type { EndpointResolverOptions, RuleSetObject } from "./types";
+import { EndpointError } from "./types";
 import { evaluateRules } from "./utils";
 
 /**

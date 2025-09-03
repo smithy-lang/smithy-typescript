@@ -1,4 +1,4 @@
-import { QueryParameterBag } from "./http";
+import type { QueryParameterBag } from "./http";
 
 /**
  * @internal

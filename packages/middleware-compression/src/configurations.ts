@@ -1,4 +1,4 @@
-import { BodyLengthCalculator, Provider } from "@smithy/types";
+import type { BodyLengthCalculator, Provider } from "@smithy/types";
 
 /**
  * @public

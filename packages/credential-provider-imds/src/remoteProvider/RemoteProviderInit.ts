@@ -1,4 +1,4 @@
-import { Logger } from "@smithy/types";
+import type { Logger } from "@smithy/types";
 
 /**
  * @internal

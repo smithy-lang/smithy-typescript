@@ -1,4 +1,4 @@
-import { EvaluateOptions, Expression, FunctionObject, FunctionReturn } from "../types";
+import type { EvaluateOptions, Expression, FunctionObject, FunctionReturn } from "../types";
 import { customEndpointFunctions } from "./customEndpointFunctions";
 import { endpointFunctions } from "./endpointFunctions";
 import { evaluateExpression } from "./evaluateExpression";

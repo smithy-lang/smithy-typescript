@@ -1,11 +1,11 @@
-import { HttpRequest } from "./http";
-import {
+import type { HttpRequest } from "./http";
+import type {
   FinalizeHandler,
   FinalizeHandlerArguments,
   FinalizeHandlerOutput,
   HandlerExecutionContext,
 } from "./middleware";
-import { MetadataBearer } from "./response";
+import type { MetadataBearer } from "./response";
 /**
  * @public
  *

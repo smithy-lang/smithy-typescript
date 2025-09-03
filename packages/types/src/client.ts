@@ -1,7 +1,7 @@
-import { Command } from "./command";
-import { MiddlewareStack } from "./middleware";
-import { MetadataBearer } from "./response";
-import { OptionalParameter } from "./util";
+import type { Command } from "./command";
+import type { MiddlewareStack } from "./middleware";
+import type { MetadataBearer } from "./response";
+import type { OptionalParameter } from "./util";
 
 /**
  * @public

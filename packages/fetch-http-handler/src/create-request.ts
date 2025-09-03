@@ -1,4 +1,4 @@
-import { AdditionalRequestParameters } from "./fetch-http-handler";
+import type { AdditionalRequestParameters } from "./fetch-http-handler";
 
 /**
  * @internal

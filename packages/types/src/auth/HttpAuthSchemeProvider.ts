@@ -1,5 +1,5 @@
-import { HandlerExecutionContext } from "../middleware";
-import { HttpAuthOption } from "./HttpAuthScheme";
+import type { HandlerExecutionContext } from "../middleware";
+import type { HttpAuthOption } from "./HttpAuthScheme";
 
 /**
  * @internal

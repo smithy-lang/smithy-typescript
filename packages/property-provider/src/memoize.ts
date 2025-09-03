@@ -1,4 +1,4 @@
-import { MemoizedProvider, Provider } from "@smithy/types";
+import type { MemoizedProvider, Provider } from "@smithy/types";
 
 interface MemoizeOverload {
   /**

@@ -1,4 +1,5 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import type { NormalizedSchema } from "@smithy/core/schema";
+import { SCHEMA } from "@smithy/core/schema";
 import type {
   CodecSettings,
   TimestampDateTimeSchema,

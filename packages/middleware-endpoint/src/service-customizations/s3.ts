@@ -1,4 +1,4 @@
-import { EndpointParameters } from "@smithy/types";
+import type { EndpointParameters } from "@smithy/types";
 
 /**
  * @internal

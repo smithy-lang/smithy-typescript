@@ -1,5 +1,5 @@
-import { StreamCollector } from "@smithy/types";
-import { Readable } from "stream";
+import type { StreamCollector } from "@smithy/types";
+import type { Readable } from "stream";
 import type { ReadableStream as IReadableStream } from "stream/web";
 
 import { Collector } from "./collector";

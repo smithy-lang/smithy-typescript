@@ -1,6 +1,7 @@
-import { SdkStreamMixin } from "@smithy/types";
+import type { SdkStreamMixin } from "@smithy/types";
 import { fromArrayBuffer } from "@smithy/util-buffer-from";
-import { PassThrough, Readable, Writable } from "stream";
+import type { Writable } from "stream";
+import { PassThrough, Readable } from "stream";
 import { afterAll, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { sdkStreamMixin } from "./sdk-stream-mixin";

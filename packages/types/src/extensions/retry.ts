@@ -1,5 +1,5 @@
-import { RetryStrategyV2 } from "../retry";
-import { Provider, RetryStrategy } from "../util";
+import type { RetryStrategyV2 } from "../retry";
+import type { Provider, RetryStrategy } from "../util";
 
 /**
  * A configuration interface with methods called by runtime extension

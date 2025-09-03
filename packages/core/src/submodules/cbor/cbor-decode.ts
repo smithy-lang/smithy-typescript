@@ -1,8 +1,7 @@
 import { nv } from "@smithy/core/serde";
 import { toUtf8 } from "@smithy/util-utf8";
 
-import {
-  alloc,
+import type {
   CborArgumentLength,
   CborArgumentLengthOffset,
   CborListType,
@@ -10,11 +9,17 @@ import {
   CborOffset,
   CborUnstructuredByteStringType,
   CborValueType,
+  Float32,
+  Uint8,
+  Uint32,
+  Uint64,
+} from "./cbor-types";
+import {
+  alloc,
   extendedFloat16,
   extendedFloat32,
   extendedFloat64,
   extendedOneByte,
-  Float32,
   majorList,
   majorMap,
   majorNegativeInt64,
@@ -28,9 +33,6 @@ import {
   specialTrue,
   specialUndefined,
   tag,
-  Uint8,
-  Uint32,
-  Uint64,
 } from "./cbor-types";
 
 const USE_TEXT_DECODER = typeof TextDecoder !== "undefined";

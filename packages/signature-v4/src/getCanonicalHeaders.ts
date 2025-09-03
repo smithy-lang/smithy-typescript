@@ -1,4 +1,4 @@
-import { HeaderBag, HttpRequest } from "@smithy/types";
+import type { HeaderBag, HttpRequest } from "@smithy/types";
 
 import { ALWAYS_UNSIGNABLE_HEADERS, PROXY_HEADER_PATTERN, SEC_HEADER_PATTERN } from "./constants";
 
