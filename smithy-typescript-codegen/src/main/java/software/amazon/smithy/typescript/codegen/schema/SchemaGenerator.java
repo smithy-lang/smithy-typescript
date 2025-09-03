@@ -49,7 +49,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public class SchemaGenerator implements Runnable {
     public static final String SCHEMAS_FOLDER = "schemas";
     private final SchemaReferenceIndex elision;
-    private final ShapeGroupingIndex treeOrganizer;
+    private final ShapeGroupingIndex groupingIndex;
     private final TypeScriptSettings settings;
     private final SymbolProvider symbolProvider;
     private final Model model;
@@ -90,7 +90,7 @@ public class SchemaGenerator implements Runnable {
         elision = SchemaReferenceIndex.of(model);
         this.settings = settings;
         this.symbolProvider = symbolProvider;
-        treeOrganizer = ShapeGroupingIndex.of(model);
+        groupingIndex = ShapeGroupingIndex.of(model);
     }
 
     /**
@@ -154,7 +154,7 @@ public class SchemaGenerator implements Runnable {
      * @return writer corresponding to the file that will hold the shape's schema.
      */
     private TypeScriptWriter getWriter(ShapeId shape) {
-        return writers.computeIfAbsent(treeOrganizer.getGroup(shape), k -> {
+        return writers.computeIfAbsent(groupingIndex.getGroup(shape), k -> {
             TypeScriptWriter typeScriptWriter = new TypeScriptWriter("");
             typeScriptWriter.write("""
                 /* eslint no-var: 0 */
@@ -277,7 +277,7 @@ public class SchemaGenerator implements Runnable {
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
-                resolveSimpleSchema(shape)
+                resolveSimpleSchema(shape, shape)
             );
             writeTraits(shape);
             writer.write(");");
@@ -515,7 +515,7 @@ public class SchemaGenerator implements Runnable {
      */
     private void writeTraitsInContext(Shape context, Shape shape) {
         TypeScriptWriter writer = getWriter(context.getId());
-        boolean useImportedStrings = !treeOrganizer.isBaseGroup(context);
+        boolean useImportedStrings = !groupingIndex.isBaseGroup(context);
 
         writer.write(
             new SchemaTraitWriter(
@@ -567,7 +567,7 @@ public class SchemaGenerator implements Runnable {
 
         if (!hasTraits) {
             try {
-                return resolveSimpleSchema(memberShape != null ? memberShape : shape);
+                return resolveSimpleSchema(context, memberShape != null ? memberShape : shape);
             } catch (IllegalArgumentException ignored) {
                 //
             }
@@ -584,7 +584,7 @@ public class SchemaGenerator implements Runnable {
      * @return a sentinel value representing a preconfigured schema type.
      * @throws IllegalArgumentException when no sentinel value exists, e.g. a non-simple schema was passed in.
      */
-    private String resolveSimpleSchema(Shape shape) {
+    private String resolveSimpleSchema(Shape context, Shape shape) {
         MemberShape memberShape = null;
         if (shape instanceof MemberShape ms) {
             memberShape = ms;
@@ -631,8 +631,8 @@ public class SchemaGenerator implements Runnable {
                 return "19";
             }
             case LIST, SET, MAP -> {
-                TypeScriptWriter writer = getWriter(shape.getId());
-                return resolveSimpleSchemaNestedContainer(shape, writer);
+                TypeScriptWriter writer = getWriter(context.getId());
+                return resolveSimpleSchemaNestedContainer(context, shape, writer);
             }
             default -> {
                 //
@@ -649,7 +649,7 @@ public class SchemaGenerator implements Runnable {
      *
      * @return the container bit modifier attached to the schema numeric value.
      */
-    private String resolveSimpleSchemaNestedContainer(Shape shape, TypeScriptWriter writer) {
+    private String resolveSimpleSchemaNestedContainer(Shape context, Shape shape, TypeScriptWriter writer) {
         Shape contained;
         String factory;
         String sentinel;
@@ -664,7 +664,7 @@ public class SchemaGenerator implements Runnable {
             case MAP -> {
                 contained = shape.asMapShape().get().getValue();
                 factory = "map";
-                keyMemberSchema = this.resolveSimpleSchema(shape.asMapShape().get().getKey()) + ", ";
+                keyMemberSchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getKey()) + ", ";
                 sentinel = "128";
             }
             default -> {
@@ -679,20 +679,20 @@ public class SchemaGenerator implements Runnable {
 
         if (contained.isListShape()) {
             writer.addImportSubmodule(factory, factory, TypeScriptDependency.SMITHY_CORE, "/schema");
-            String schemaVarName = checkImportString(shape, shape.getId().getName());
+            String schemaVarName = checkImportString(context, shape.getId().getName());
             return factory + "("
-                + checkImportString(shape, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
+                + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
                 + keyMemberSchema
-                + this.resolveSimpleSchema(contained) + ")";
+                + this.resolveSimpleSchema(context, contained) + ")";
         } else if (contained.isMapShape()) {
             writer.addImportSubmodule(factory, factory, TypeScriptDependency.SMITHY_CORE, "/schema");
-            String schemaVarName = checkImportString(shape, shape.getId().getName());
+            String schemaVarName = checkImportString(context, shape.getId().getName());
             return factory + "("
-                + checkImportString(shape, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
+                + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
                 + keyMemberSchema
-                + this.resolveSimpleSchema(contained) + ")";
+                + this.resolveSimpleSchema(context, contained) + ")";
         } else {
-            return sentinel + "|" + this.resolveSimpleSchema(contained);
+            return sentinel + "|" + this.resolveSimpleSchema(context, contained);
         }
     }
 
@@ -700,8 +700,8 @@ public class SchemaGenerator implements Runnable {
      * Imports the shape's schema from another file if the context group differs from the shape group.
      */
     private void checkImportSchema(Shape context, Shape shape) {
-        String shapeGroup = treeOrganizer.getGroup(shape.getId());
-        if (treeOrganizer.different(context, shape)) {
+        String shapeGroup = groupingIndex.getGroup(shape.getId());
+        if (groupingIndex.different(context, shape)) {
             getWriter(context.getId()).addRelativeImport(
                 getShapeVariableName(shape), null, Path.of("./", shapeGroup)
             );
@@ -717,7 +717,7 @@ public class SchemaGenerator implements Runnable {
      */
     private String checkImportString(Shape context, String fullString, String prefix) {
         String var = prefix != null ? store.var(fullString, prefix) : store.var(fullString);
-        if (!treeOrganizer.isBaseGroup(context)) {
+        if (!groupingIndex.isBaseGroup(context)) {
             getWriter(context.getId()).addRelativeImport(
                 var,
                 null,
