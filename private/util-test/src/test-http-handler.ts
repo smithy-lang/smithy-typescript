@@ -1,5 +1,5 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { Client, RequestHandler, RequestHandlerOutput } from "@smithy/types";
+import type { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { Client, RequestHandler, RequestHandlerOutput } from "@smithy/types";
 import { expect } from "vitest";
 
 /**

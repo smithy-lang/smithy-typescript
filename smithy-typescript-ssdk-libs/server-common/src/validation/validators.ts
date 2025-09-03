@@ -23,10 +23,9 @@ import type {
   PatternValidationFailure,
   RangeValidationFailure,
   UniqueItemsValidationFailure,
-  ValidationFailure} from ".";
-import {
-  RequiredValidationFailure
+  ValidationFailure,
 } from ".";
+import { RequiredValidationFailure } from ".";
 
 export class CompositeValidator<T> implements MultiConstraintValidator<T> {
   private readonly validators: SingleConstraintValidator<T, any>[];

@@ -19,11 +19,9 @@ import type {
   LengthValidationFailure,
   PatternValidationFailure,
   RangeValidationFailure,
-  UniqueItemsValidationFailure} from "./index";
-import {
-  generateValidationMessage,
-  RequiredValidationFailure
+  UniqueItemsValidationFailure,
 } from "./index";
+import { generateValidationMessage, RequiredValidationFailure } from "./index";
 
 describe("message formatting", () => {
   it("does not return very large inputs", () => {
