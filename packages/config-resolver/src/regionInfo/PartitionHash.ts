@@ -1,4 +1,4 @@
-import { EndpointVariant } from "./EndpointVariant";
+import type { EndpointVariant } from "./EndpointVariant";
 
 /**
  * The hash of partition with the information specific to that partition.

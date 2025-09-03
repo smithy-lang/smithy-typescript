@@ -1,4 +1,4 @@
-import { Checksum, SourceData } from "@smithy/types";
+import type { Checksum, SourceData } from "@smithy/types";
 import { fromUtf8 } from "@smithy/util-utf8";
 
 import { BLOCK_SIZE, DIGEST_LENGTH, INIT } from "./constants";

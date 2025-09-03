@@ -1,7 +1,7 @@
-import { EndpointV2 } from "@smithy/types";
+import type { EndpointV2 } from "@smithy/types";
 
 import { debugId, toDebugString } from "../debug";
-import { EndpointRuleObject, EvaluateOptions } from "../types";
+import type { EndpointRuleObject, EvaluateOptions } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { getEndpointHeaders } from "./getEndpointHeaders";
 import { getEndpointProperties } from "./getEndpointProperties";

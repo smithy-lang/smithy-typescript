@@ -1,4 +1,4 @@
-import { EndpointObjectProperties, EvaluateOptions } from "../types";
+import type { EndpointObjectProperties, EvaluateOptions } from "../types";
 import { getEndpointProperty } from "./getEndpointProperty";
 
 export const getEndpointProperties = (properties: EndpointObjectProperties, options: EvaluateOptions) =>

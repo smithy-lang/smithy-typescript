@@ -1,6 +1,5 @@
-import { test as it, vi, afterEach, describe, expect } from "vitest";
-
 import { numberSelector, SelectorType } from "@smithy/util-config-provider";
+import { afterEach, describe, expect,test as it, vi } from "vitest";
 
 import {
   DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES,

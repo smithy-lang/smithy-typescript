@@ -1,7 +1,9 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
-import { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
-import { ClientHttp2Session, constants } from "http2";
+import type { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
+import type { ClientHttp2Session } from "http2";
+import { constants } from "http2";
 
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";

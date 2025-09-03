@@ -1,10 +1,11 @@
 import { chain, fromStatic, memoize } from "@smithy/property-provider";
-import { Profile } from "@smithy/types";
+import type { Profile } from "@smithy/types";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";
-import { fromSharedConfigFiles, SharedConfigInit } from "./fromSharedConfigFiles";
+import type { SharedConfigInit } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
 
 vi.mock("./fromEnv");
 vi.mock("./fromSharedConfigFiles");

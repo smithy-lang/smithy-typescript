@@ -1,7 +1,7 @@
-import { Identity, IdentityProvider } from "../identity/identity";
-import { HandlerExecutionContext } from "../middleware";
-import { HttpSigner } from "./HttpSigner";
-import { IdentityProviderConfig } from "./IdentityProviderConfig";
+import type { Identity, IdentityProvider } from "../identity/identity";
+import type { HandlerExecutionContext } from "../middleware";
+import type { HttpSigner } from "./HttpSigner";
+import type { IdentityProviderConfig } from "./IdentityProviderConfig";
 
 /**
  * ID for {@link HttpAuthScheme}

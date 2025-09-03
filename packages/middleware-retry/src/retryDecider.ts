@@ -4,7 +4,7 @@ import {
   isThrottlingError,
   isTransientError,
 } from "@smithy/service-error-classification";
-import { SdkError } from "@smithy/types";
+import type { SdkError } from "@smithy/types";
 
 /**
  * @internal

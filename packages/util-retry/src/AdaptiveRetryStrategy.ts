@@ -1,9 +1,9 @@
-import { Provider, RetryErrorInfo, RetryStrategyV2, RetryToken, StandardRetryToken } from "@smithy/types";
+import type { Provider, RetryErrorInfo, RetryStrategyV2, RetryToken, StandardRetryToken } from "@smithy/types";
 
 import { RETRY_MODES } from "./config";
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
-import { RateLimiter } from "./types";
+import type { RateLimiter } from "./types";
 
 /**
  * @public

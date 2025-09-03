@@ -1,5 +1,5 @@
-import { Identity, IdentityProvider } from "../identity/identity";
-import { HttpAuthSchemeId } from "./HttpAuthScheme";
+import type { Identity, IdentityProvider } from "../identity/identity";
+import type { HttpAuthSchemeId } from "./HttpAuthScheme";
 
 /**
  * Interface to get an IdentityProvider for a specified HttpAuthScheme

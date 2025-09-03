@@ -1,6 +1,5 @@
-import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
-
 import { toUint8Array } from "@smithy/util-utf8";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 import { gzip } from "zlib";
 
 import { compressString } from "./compressString";

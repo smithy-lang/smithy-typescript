@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { EndpointError, EndpointRuleObject, ErrorRuleObject, TreeRuleObject } from "../types";
+import type { EndpointRuleObject, ErrorRuleObject, TreeRuleObject } from "../types";
+import { EndpointError } from "../types";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
 import { evaluateErrorRule } from "./evaluateErrorRule";
 import { evaluateRules } from "./evaluateRules";

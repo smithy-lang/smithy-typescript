@@ -1,4 +1,4 @@
-import { ConditionObject, Expression } from "./shared";
+import type { ConditionObject, Expression } from "./shared";
 
 /**
  * @public

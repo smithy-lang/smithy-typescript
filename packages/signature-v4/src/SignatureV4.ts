@@ -1,4 +1,4 @@
-import {
+import type {
   AwsCredentialIdentity,
   EventSigner,
   EventSigningArguments,
@@ -40,7 +40,8 @@ import { HeaderFormatter } from "./HeaderFormatter";
 import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
-import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
+import type { SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
+import { SignatureV4Base } from "./SignatureV4Base";
 
 /**
  * @public

@@ -1,6 +1,5 @@
-import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
-
 import { isArrayBuffer } from "@smithy/is-array-buffer";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { isStreaming } from "./isStreaming";
 

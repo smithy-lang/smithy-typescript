@@ -2,7 +2,7 @@ import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
 import { NormalizedSchema, SCHEMA, sim, struct } from "@smithy/core/schema";
 import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
 import { HttpResponse } from "@smithy/protocol-http";
-import { Message as EventMessage } from "@smithy/types";
+import type { Message as EventMessage } from "@smithy/types";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { describe, expect, test as it } from "vitest";
 

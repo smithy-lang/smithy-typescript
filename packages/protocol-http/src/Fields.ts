@@ -1,6 +1,6 @@
-import { FieldPosition } from "@smithy/types";
+import type { FieldPosition } from "@smithy/types";
 
-import { Field } from "./Field";
+import type { Field } from "./Field";
 
 export type FieldsOptions = { fields?: Field[]; encoding?: string };
 

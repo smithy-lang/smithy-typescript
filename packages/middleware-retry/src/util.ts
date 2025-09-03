@@ -1,4 +1,4 @@
-import { SdkError } from "@smithy/types";
+import type { SdkError } from "@smithy/types";
 
 export const asSdkError = (error: unknown): SdkError => {
   if (error instanceof Error) return error;

@@ -1,4 +1,4 @@
-import { HandlerExecutionContext } from "@smithy/types";
+import type { HandlerExecutionContext } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { setFeature } from "./setFeature";

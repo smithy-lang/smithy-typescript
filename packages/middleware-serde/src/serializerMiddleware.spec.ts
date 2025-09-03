@@ -1,4 +1,4 @@
-import { EndpointBearer, SerdeFunctions } from "@smithy/types";
+import type { EndpointBearer, SerdeFunctions } from "@smithy/types";
 import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { serializerMiddleware } from "./serializerMiddleware";

@@ -1,5 +1,5 @@
-import { ChecksumConfiguration } from "./checksum";
-import { RetryStrategyConfiguration } from "./retry";
+import type { ChecksumConfiguration } from "./checksum";
+import type { RetryStrategyConfiguration } from "./retry";
 
 /**
  * @internal

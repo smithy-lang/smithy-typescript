@@ -1,6 +1,6 @@
 import { error, list, map, op, SCHEMA, struct, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { ResponseMetadata, RetryableTrait, SchemaRef } from "@smithy/types";
+import type { ResponseMetadata, RetryableTrait, SchemaRef } from "@smithy/types";
 import { beforeEach, describe, expect, test as it } from "vitest";
 
 import { cbor } from "./cbor";

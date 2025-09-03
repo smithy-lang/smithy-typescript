@@ -1,4 +1,4 @@
-import { Message } from "./eventStream";
+import type { Message } from "./eventStream";
 
 /**
  * @public

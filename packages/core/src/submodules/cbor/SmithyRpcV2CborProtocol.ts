@@ -1,5 +1,6 @@
 import { RpcProtocol } from "@smithy/core/protocols";
-import { deref, ErrorSchema, NormalizedSchema, OperationSchema, TypeRegistry } from "@smithy/core/schema";
+import type { ErrorSchema, OperationSchema } from "@smithy/core/schema";
+import { deref, NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   EndpointBearer,
   HandlerExecutionContext,

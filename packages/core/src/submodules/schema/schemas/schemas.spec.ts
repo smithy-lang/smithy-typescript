@@ -1,4 +1,4 @@
-import { SchemaRef, SchemaTraits } from "@smithy/types";
+import type { SchemaRef, SchemaTraits } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { TypeRegistry } from "../TypeRegistry";

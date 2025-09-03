@@ -1,8 +1,8 @@
-import { EvaluateOptions } from "@smithy/types";
+import type { EvaluateOptions } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
-import { ConditionObject, EndpointRuleObject } from "../types";
+import type { ConditionObject, EndpointRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
 import { getEndpointHeaders } from "./getEndpointHeaders";

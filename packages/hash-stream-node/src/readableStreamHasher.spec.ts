@@ -1,4 +1,4 @@
-import { Hash } from "@smithy/types";
+import type { Hash } from "@smithy/types";
 import { Readable, Writable } from "stream";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 

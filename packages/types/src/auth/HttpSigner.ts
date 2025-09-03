@@ -1,5 +1,5 @@
-import { HttpRequest, HttpResponse } from "../http";
-import { Identity } from "../identity/identity";
+import type { HttpRequest, HttpResponse } from "../http";
+import type { Identity } from "../identity/identity";
 
 /**
  * @internal

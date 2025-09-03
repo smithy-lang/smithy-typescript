@@ -1,4 +1,4 @@
-import { Int64 } from "./Int64";
+import type { Int64 } from "./Int64";
 
 /**
  * An event stream message. The headers and body properties will always be

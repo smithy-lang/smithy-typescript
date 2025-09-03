@@ -1,4 +1,4 @@
-import { Readable } from "stream";
+import type { Readable } from "stream";
 
 import type { BlobOptionalType, ReadableStreamOptionalType } from "../externals-check/browser-externals-check";
 

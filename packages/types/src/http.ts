@@ -1,5 +1,5 @@
-import { AbortSignal as DeprecatedAbortSignal } from "./abort";
-import { URI } from "./uri";
+import type { AbortSignal as DeprecatedAbortSignal } from "./abort";
+import type { URI } from "./uri";
 
 /**
  * @public

@@ -1,4 +1,4 @@
-import { HttpAuthOption } from "@smithy/types";
+import type { HttpAuthOption } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
 import { resolveAuthOptions } from "./resolveAuthOptions";

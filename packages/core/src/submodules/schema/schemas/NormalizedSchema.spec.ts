@@ -1,4 +1,4 @@
-import { MemberSchema } from "@smithy/types";
+import type { MemberSchema } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { list } from "./ListSchema";

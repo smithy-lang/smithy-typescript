@@ -1,6 +1,6 @@
 import type { Schema as ISchema } from "@smithy/types";
 
-import { ErrorSchema } from "./schemas/ErrorSchema";
+import type { ErrorSchema } from "./schemas/ErrorSchema";
 
 /**
  * A way to look up schema by their ShapeId values.

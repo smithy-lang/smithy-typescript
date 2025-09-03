@@ -1,4 +1,4 @@
-import { StandardRetryToken } from "@smithy/types";
+import type { StandardRetryToken } from "@smithy/types";
 
 import { MAXIMUM_RETRY_DELAY } from "./constants";
 

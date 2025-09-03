@@ -1,5 +1,5 @@
 import { getAttr } from "../lib";
-import { EvaluateOptions } from "../types";
+import type { EvaluateOptions } from "../types";
 
 export const evaluateTemplate = (template: string, options: EvaluateOptions) => {
   const evaluatedTemplateArr: string[] = [];

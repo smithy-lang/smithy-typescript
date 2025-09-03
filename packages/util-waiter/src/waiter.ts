@@ -1,4 +1,4 @@
-import { WaiterConfiguration as WaiterConfiguration__ } from "@smithy/types";
+import type { WaiterConfiguration as WaiterConfiguration__ } from "@smithy/types";
 
 /**
  * @internal

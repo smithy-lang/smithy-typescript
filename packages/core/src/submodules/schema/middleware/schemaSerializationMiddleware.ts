@@ -1,4 +1,4 @@
-import {
+import type {
   Endpoint,
   EndpointBearer,
   HandlerExecutionContext,
@@ -9,7 +9,7 @@ import {
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
-import { PreviouslyResolved } from "./schema-middleware-types";
+import type { PreviouslyResolved } from "./schema-middleware-types";
 
 /**
  * @internal

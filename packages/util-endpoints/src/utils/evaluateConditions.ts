@@ -1,5 +1,5 @@
 import { debugId, toDebugString } from "../debug";
-import { ConditionObject, EvaluateOptions, FunctionReturn } from "../types";
+import type { ConditionObject, EvaluateOptions, FunctionReturn } from "../types";
 import { evaluateCondition } from "./evaluateCondition";
 
 export const evaluateConditions = (conditions: ConditionObject[] = [], options: EvaluateOptions) => {

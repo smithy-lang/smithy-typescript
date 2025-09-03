@@ -1,8 +1,10 @@
-import { Readable } from "stream";
+import type { Readable } from "stream";
 
 import { isReadableStream } from "../stream-type-check";
-import { ChecksumStream, ChecksumStreamInit } from "./ChecksumStream";
-import { createChecksumStream as createChecksumStreamWeb, ReadableStreamType } from "./createChecksumStream.browser";
+import type { ChecksumStreamInit } from "./ChecksumStream";
+import { ChecksumStream } from "./ChecksumStream";
+import type { ReadableStreamType } from "./createChecksumStream.browser";
+import { createChecksumStream as createChecksumStreamWeb } from "./createChecksumStream.browser";
 
 /**
  * @internal

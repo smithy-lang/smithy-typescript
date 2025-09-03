@@ -1,4 +1,5 @@
-import { ProviderError, ProviderErrorOptionsType } from "./ProviderError";
+import type { ProviderErrorOptionsType } from "./ProviderError";
+import { ProviderError } from "./ProviderError";
 
 /**
  * @public

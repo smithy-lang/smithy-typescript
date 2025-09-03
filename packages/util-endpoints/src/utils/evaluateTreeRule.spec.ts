@@ -1,6 +1,6 @@
 import { describe, expect, test as it, vi } from "vitest";
 
-import { TreeRuleObject } from "../types";
+import type { TreeRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateRules } from "./evaluateRules";
 import { evaluateTreeRule } from "./evaluateTreeRule";

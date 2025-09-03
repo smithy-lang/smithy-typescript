@@ -1,5 +1,5 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import { FinalizeHandlerArguments, MiddlewareStack } from "@smithy/types";
+import type { FinalizeHandlerArguments, MiddlewareStack } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 

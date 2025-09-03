@@ -1,4 +1,5 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import type { NormalizedSchema } from "@smithy/core/schema";
+import { SCHEMA } from "@smithy/core/schema";
 import type {
   EventStreamMarshaller,
   HttpRequest as IHttpRequest,

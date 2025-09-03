@@ -1,4 +1,4 @@
-import { SelectorType } from "./types";
+import type { SelectorType } from "./types";
 
 /**
  * Returns boolean value true/false for string value "true"/"false",

@@ -1,6 +1,6 @@
-import { Logger, Provider } from "@smithy/types";
+import type { Logger, Provider } from "@smithy/types";
 
-import { InstanceMetadataCredentials } from "../types";
+import type { InstanceMetadataCredentials } from "../types";
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
 
 /**

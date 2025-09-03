@@ -1,4 +1,4 @@
-import {
+import type {
   HandlerExecutionContext,
   SerializeHandler,
   SerializeHandlerArguments,
@@ -8,13 +8,13 @@ import {
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
-import { HttpAuthScheme, HttpAuthSchemeId, SelectedHttpAuthScheme } from "../HttpAuthScheme";
-import {
+import type { HttpAuthScheme, HttpAuthSchemeId, SelectedHttpAuthScheme } from "../HttpAuthScheme";
+import type {
   HttpAuthSchemeParameters,
   HttpAuthSchemeParametersProvider,
   HttpAuthSchemeProvider,
 } from "../HttpAuthSchemeProvider";
-import { IdentityProviderConfig } from "../IdentityProviderConfig";
+import type { IdentityProviderConfig } from "../IdentityProviderConfig";
 
 /**
  * @internal

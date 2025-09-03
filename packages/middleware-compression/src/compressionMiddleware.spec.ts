@@ -1,6 +1,5 @@
-import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
-
 import { HttpRequest } from "@smithy/protocol-http";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { compressionMiddleware } from "./compressionMiddleware";
 import { compressStream } from "./compressStream";

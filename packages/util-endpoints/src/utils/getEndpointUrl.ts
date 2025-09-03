@@ -1,4 +1,4 @@
-import { EvaluateOptions, Expression } from "../types";
+import type { EvaluateOptions, Expression } from "../types";
 import { EndpointError } from "../types";
 import { evaluateExpression } from "./evaluateExpression";
 

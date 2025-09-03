@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpRequest } from "@smithy/protocol-http";
-import {
+import type {
   ErrorHandler,
   FinalizeHandler,
   FinalizeHandlerArguments,

@@ -1,7 +1,8 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
-import { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
-import { afterEach, beforeEach, describe, expect, MockInstance, test as it, vi } from "vitest";
+import type { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
+import type { MockInstance } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   ALGORITHM_IDENTIFIER,

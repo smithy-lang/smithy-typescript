@@ -1,4 +1,4 @@
-import { SchemaRef } from "@smithy/types";
+import type { SchemaRef } from "@smithy/types";
 import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { schemaSerializationMiddleware } from "./schemaSerializationMiddleware";
