@@ -13,15 +13,16 @@
  *  permissions and limitations under the License.
  */
 
-import {
+import type {
   EnumValidationFailure,
-  generateValidationMessage,
   IntegerEnumValidationFailure,
   LengthValidationFailure,
   PatternValidationFailure,
   RangeValidationFailure,
-  RequiredValidationFailure,
-  UniqueItemsValidationFailure,
+  UniqueItemsValidationFailure} from "./index";
+import {
+  generateValidationMessage,
+  RequiredValidationFailure
 } from "./index";
 
 describe("message formatting", () => {

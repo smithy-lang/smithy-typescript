@@ -16,15 +16,16 @@
 import { RE2 } from "re2-wasm";
 
 import { findDuplicates } from "../unique";
-import {
+import type {
   EnumValidationFailure,
   IntegerEnumValidationFailure,
   LengthValidationFailure,
   PatternValidationFailure,
   RangeValidationFailure,
-  RequiredValidationFailure,
   UniqueItemsValidationFailure,
-  ValidationFailure,
+  ValidationFailure} from ".";
+import {
+  RequiredValidationFailure
 } from ".";
 
 export class CompositeValidator<T> implements MultiConstraintValidator<T> {
