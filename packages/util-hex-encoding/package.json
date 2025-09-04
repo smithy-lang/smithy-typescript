@@ -20,6 +20,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "dependencies": {

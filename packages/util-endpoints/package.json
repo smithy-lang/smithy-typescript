@@ -27,6 +27,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/types": "workspace:^",

@@ -22,6 +22,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/property-provider": "workspace:^",
     "@smithy/smithy-client": "workspace:^",
