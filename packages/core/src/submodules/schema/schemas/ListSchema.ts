@@ -1,6 +1,5 @@
 import type { ListSchema as IListSchema, SchemaRef, SchemaTraits } from "@smithy/types";
 
-import { TypeRegistry } from "../TypeRegistry";
 import { Schema } from "./Schema";
 
 /**
@@ -10,25 +9,11 @@ import { Schema } from "./Schema";
  * @alpha
  */
 export class ListSchema extends Schema implements IListSchema {
-  public static symbol = Symbol.for("@smithy/core/schema::ListSchema");
-  protected symbol = ListSchema.symbol;
-
-  public constructor(
-    public name: string,
-    public traits: SchemaTraits,
-    public valueSchema: SchemaRef
-  ) {
-    super(name, traits);
-  }
-
-  public static [Symbol.hasInstance](lhs: unknown): lhs is ListSchema {
-    const isPrototype = ListSchema.prototype.isPrototypeOf(lhs as any);
-    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
-      const list = lhs as ListSchema;
-      return list.symbol === ListSchema.symbol;
-    }
-    return isPrototype;
-  }
+  public static readonly symbol = Symbol.for("@smithy/lis");
+  public name!: string;
+  public traits!: SchemaTraits;
+  public valueSchema!: SchemaRef;
+  protected readonly symbol = ListSchema.symbol;
 }
 
 /**
@@ -36,12 +21,10 @@ export class ListSchema extends Schema implements IListSchema {
  *
  * @internal
  */
-export function list(namespace: string, name: string, traits: SchemaTraits = {}, valueSchema: SchemaRef): ListSchema {
-  const schema = new ListSchema(
-    namespace + "#" + name,
+export const list = (namespace: string, name: string, traits: SchemaTraits, valueSchema: SchemaRef): ListSchema =>
+  Schema.assign(new ListSchema(), {
+    name,
+    namespace,
     traits,
-    typeof valueSchema === "function" ? valueSchema() : valueSchema
-  );
-  TypeRegistry.for(namespace).register(name, schema);
-  return schema;
-}
+    valueSchema,
+  });

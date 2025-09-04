@@ -157,20 +157,15 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     if (traits.httpQueryParams) {
       for (const [key, val] of Object.entries(data)) {
         if (!(key in query)) {
-          this.serializeQuery(
-            NormalizedSchema.of([
-              ns.getValueSchema(),
-              {
-                // We pass on the traits to the sub-schema
-                // because we are still in the process of serializing the map itself.
-                ...traits,
-                httpQuery: key,
-                httpQueryParams: undefined,
-              },
-            ]),
-            val,
-            query
-          );
+          const valueSchema = ns.getValueSchema();
+          Object.assign(valueSchema.getMergedTraits(), {
+            // We pass on the traits to the sub-schema
+            // because we are still in the process of serializing the map itself.
+            ...traits,
+            httpQuery: key,
+            httpQueryParams: undefined,
+          });
+          this.serializeQuery(valueSchema, val, query);
         }
       }
       return;
@@ -305,6 +300,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         if (null != value) {
           if (memberSchema.isListSchema()) {
             const headerListValueSchema = memberSchema.getValueSchema();
+            headerListValueSchema.getMergedTraits().httpHeader = key;
             let sections: string[];
             if (
               headerListValueSchema.isTimestampSchema() &&
@@ -316,7 +312,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
             }
             const list = [];
             for (const section of sections) {
-              list.push(await deserializer.read([headerListValueSchema, { httpHeader: key }], section.trim()));
+              list.push(await deserializer.read(headerListValueSchema, section.trim()));
             }
             dataObject[memberName] = list;
           } else {
@@ -327,8 +323,10 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         dataObject[memberName] = {};
         for (const [header, value] of Object.entries(response.headers)) {
           if (header.startsWith(memberTraits.httpPrefixHeaders)) {
+            const valueSchema = memberSchema.getValueSchema();
+            valueSchema.getMergedTraits().httpHeader = header;
             dataObject[memberName][header.slice(memberTraits.httpPrefixHeaders.length)] = await deserializer.read(
-              [memberSchema.getValueSchema(), { httpHeader: header }],
+              valueSchema,
               value
             );
           }

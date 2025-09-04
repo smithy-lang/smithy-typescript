@@ -29,6 +29,7 @@ export function determineTimestampFormat(
   }
 
   const { httpLabel, httpPrefixHeaders, httpHeader, httpQuery } = ns.getMergedTraits();
+
   const bindingFormat = settings.httpBindings
     ? typeof httpPrefixHeaders === "string" || Boolean(httpHeader)
       ? SCHEMA.TIMESTAMP_HTTP_DATE

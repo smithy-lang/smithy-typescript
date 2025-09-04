@@ -1,6 +1,7 @@
 import type { SchemaRef, SchemaTraits } from "@smithy/types";
 
 import { TypeRegistry } from "../TypeRegistry";
+import { Schema } from "./Schema";
 import { StructureSchema } from "./StructureSchema";
 
 /**
@@ -12,30 +13,9 @@ import { StructureSchema } from "./StructureSchema";
  * @alpha
  */
 export class ErrorSchema extends StructureSchema {
-  public static symbol = Symbol.for("@smithy/core/schema::ErrorSchema");
-  protected symbol = ErrorSchema.symbol;
-
-  public constructor(
-    public name: string,
-    public traits: SchemaTraits,
-    public memberNames: string[],
-    public memberList: SchemaRef[],
-    /**
-     * Constructor for a modeled service exception class that extends Error.
-     */
-    public ctor: any
-  ) {
-    super(name, traits, memberNames, memberList);
-  }
-
-  public static [Symbol.hasInstance](lhs: unknown): lhs is ErrorSchema {
-    const isPrototype = ErrorSchema.prototype.isPrototypeOf(lhs as any);
-    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
-      const err = lhs as ErrorSchema;
-      return err.symbol === ErrorSchema.symbol;
-    }
-    return isPrototype;
-  }
+  public static readonly symbol = Symbol.for("@smithy/err");
+  public ctor!: any;
+  protected readonly symbol = ErrorSchema.symbol;
 }
 
 /**
@@ -50,15 +30,19 @@ export class ErrorSchema extends StructureSchema {
  * @param memberList - list of schemaRef corresponding to each
  * @param ctor - class reference for the existing Error extending class.
  */
-export function error(
+export const error = (
   namespace: string,
   name: string,
-  traits: SchemaTraits = {},
+  traits: SchemaTraits,
   memberNames: string[],
   memberList: SchemaRef[],
   ctor: any
-): ErrorSchema {
-  const schema = new ErrorSchema(namespace + "#" + name, traits, memberNames, memberList, ctor);
-  TypeRegistry.for(namespace).register(name, schema);
-  return schema;
-}
+): ErrorSchema =>
+  Schema.assign(new ErrorSchema(), {
+    name,
+    namespace,
+    traits,
+    memberNames,
+    memberList,
+    ctor,
+  });
