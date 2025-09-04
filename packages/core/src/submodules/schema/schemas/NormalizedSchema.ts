@@ -95,13 +95,18 @@ export class NormalizedSchema implements INormalizedSchema {
    * Static constructor that attempts to avoid wrapping a NormalizedSchema within another.
    */
   public static of(ref: SchemaRef): NormalizedSchema {
-    if (Array.isArray(ref)) {
-      // An aggregate schema must be initialized with members and the member retrieved through the aggregate
-      // container.
-      throw new Error("@smithy/core/schema - may not init member schema.");
-    }
     if (ref instanceof NormalizedSchema) {
       return ref;
+    }
+    if (Array.isArray(ref)) {
+      const [ns, traits] = ref;
+      if (ns instanceof NormalizedSchema) {
+        Object.assign(ns.getMergedTraits(), NormalizedSchema.translateTraits(traits));
+        return ns;
+      }
+      // An aggregate schema must be initialized with members and the member retrieved through the aggregate
+      // container.
+      throw new Error(`@smithy/core/schema - may not init unwrapped member schema=${JSON.stringify(ref, null, 2)}.`);
     }
     return new NormalizedSchema(ref);
   }
@@ -386,15 +391,17 @@ export class NormalizedSchema implements INormalizedSchema {
    *
    * This does NOT return list and map members, it is only for structures.
    *
-   * @deprecated use structIterator instead.
+   * @deprecated use (checked) structIterator instead.
    *
    * @returns a map of member names to member schemas (normalized).
    */
   public getMemberSchemas(): Record<string, NormalizedSchema> {
     const buffer = {} as any;
-    for (const [k, v] of this.structIterator()) {
-      buffer[k] = v;
-    }
+    try {
+      for (const [k, v] of this.structIterator()) {
+        buffer[k] = v;
+      }
+    } catch (ignored) {}
     return buffer;
   }
 

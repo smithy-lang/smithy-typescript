@@ -50,6 +50,7 @@ export type SchemaTraits = TraitBitVector | SchemaTraitsObject;
  * @public
  */
 export interface TraitsSchema {
+  namespace: string;
   name: string;
   traits: SchemaTraits;
 }
