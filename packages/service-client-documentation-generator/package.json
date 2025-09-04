@@ -21,6 +21,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "keywords": [
     "typedocplugin"
   ],

@@ -25,6 +25,7 @@
     "url": "https://smithy.io"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/middleware-endpoint": "workspace:^",
     "@smithy/middleware-retry": "workspace:^",

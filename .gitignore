@@ -40,6 +40,8 @@ smithy-typescript-codegen-test/bin/
 smithy-typescript-ssdk-codegen-test-utils/bin/
 smithy-typescript-codegen-test/example-weather-customizations/bin/
 
+testbed/bundlers/dist
+testbed/bundlers/dist-min
 **/node_modules/
 **/*.tsbuildinfo
 **/*.d.ts

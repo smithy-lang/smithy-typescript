@@ -20,6 +20,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/node-http-handler": "workspace:^",
     "@smithy/types": "workspace:^",

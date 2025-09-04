@@ -53,6 +53,7 @@
     "gzip"
   ],
   "license": "Apache-2.0",
+  "sideEffects": false,
   "browser": {
     "./dist-es/compressStream": "./dist-es/compressStream.browser",
     "./dist-es/compressString": "./dist-es/compressString.browser"

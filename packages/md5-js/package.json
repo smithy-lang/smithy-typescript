@@ -22,6 +22,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "devDependencies": {
     "@smithy/util-base64": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",

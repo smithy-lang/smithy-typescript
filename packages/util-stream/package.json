@@ -27,6 +27,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/fetch-http-handler": "workspace:^",
     "@smithy/node-http-handler": "workspace:^",
