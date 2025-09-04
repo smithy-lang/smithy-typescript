@@ -1,5 +1,11 @@
 # Change Log
 
+## 5.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
 ## 5.0.0
 
 ### Major Changes

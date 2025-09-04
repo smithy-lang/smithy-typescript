@@ -1,5 +1,20 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/chunked-blob-reader-native@4.1.0
+  - @smithy/chunked-blob-reader@5.1.0
+  - @smithy/types@4.4.0
+
 ## 4.0.5
 
 ### Patch Changes

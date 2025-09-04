@@ -1,5 +1,24 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/service-error-classification@4.1.0
+  - @smithy/node-config-provider@4.2.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/smithy-client@4.6.0
+  - @smithy/util-retry@4.1.0
+  - @smithy/types@4.4.0
+
 ## 4.1.22
 
 ### Patch Changes

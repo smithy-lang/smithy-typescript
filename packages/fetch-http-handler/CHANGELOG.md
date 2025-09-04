@@ -1,5 +1,21 @@
 # Change Log
 
+## 5.2.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/querystring-builder@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/types@4.4.0
+
 ## 5.1.1
 
 ### Patch Changes

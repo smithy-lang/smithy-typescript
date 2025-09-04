@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+
 ## 4.0.0
 
 ### Major Changes

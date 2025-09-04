@@ -1,5 +1,24 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/fetch-http-handler@5.2.0
+  - @smithy/node-http-handler@4.2.0
+  - @smithy/util-hex-encoding@4.1.0
+  - @smithy/util-buffer-from@4.1.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
 ## 4.2.4
 
 ### Patch Changes

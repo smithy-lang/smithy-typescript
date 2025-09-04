@@ -1,5 +1,25 @@
 # Change Log
 
+## 3.10.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/util-body-length-browser@4.1.0
+  - @smithy/middleware-serde@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/util-stream@4.3.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
 ## 3.9.2
 
 ### Patch Changes

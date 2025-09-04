@@ -1,5 +1,23 @@
 # Change Log
 
+## 4.6.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/middleware-endpoint@4.2.0
+  - @smithy/middleware-stack@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-stream@4.3.0
+  - @smithy/types@4.4.0
+  - @smithy/core@3.10.0
+
 ## 4.5.2
 
 ### Patch Changes
