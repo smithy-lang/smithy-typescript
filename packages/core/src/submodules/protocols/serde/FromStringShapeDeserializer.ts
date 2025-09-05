@@ -29,14 +29,18 @@ export class FromStringShapeDeserializer implements ShapeDeserializer<string> {
 
   public read(_schema: Schema, data: string): any {
     const ns = NormalizedSchema.of(_schema);
+
     if (ns.isListSchema()) {
       return splitHeader(data).map((item) => this.read(ns.getValueSchema(), item));
     }
+
     if (ns.isBlobSchema()) {
       return (this.serdeContext?.base64Decoder ?? fromBase64)(data);
     }
+
     if (ns.isTimestampSchema()) {
       const format = determineTimestampFormat(ns, this.settings);
+
       switch (format) {
         case SCHEMA.TIMESTAMP_DATE_TIME:
           return parseRfc3339DateTimeWithOffset(data);

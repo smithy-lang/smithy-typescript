@@ -50,6 +50,7 @@ export type SchemaTraits = TraitBitVector | SchemaTraitsObject;
  * @public
  */
 export interface TraitsSchema {
+  namespace: string;
   name: string;
   traits: SchemaTraits;
 }
@@ -155,7 +156,14 @@ export type SchemaTraitsObject = {
 export interface StructureSchema extends TraitsSchema {
   name: string;
   traits: SchemaTraits;
-  members: Record<string, [SchemaRef, SchemaTraits]>;
+  memberNames: string[];
+  memberList: SchemaRef[];
+
+  /**
+   * @deprecated structure member iteration will be linear on the memberNames and memberList arrays.
+   * It can be collected into a hashmap form on an ad-hoc basis, but will not initialize as such.
+   */
+  members?: Record<string, [SchemaRef, SchemaTraits]> | undefined;
 }
 
 /**
@@ -226,7 +234,7 @@ export interface NormalizedSchema {
    * For struct/union.
    */
   getMemberSchema(member: string): NormalizedSchema | undefined;
-  getMemberSchemas(): Record<string, NormalizedSchema>;
+  structIterator(): Generator<[string, NormalizedSchema], undefined, undefined>;
 }
 
 /**

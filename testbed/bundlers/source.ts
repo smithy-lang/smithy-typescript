@@ -1,1 +1,1 @@
-export { SmithyRpcV2CborProtocol } from "@smithy/core/cbor";
+export { NormalizedSchema, op, struct, error, list, map, sim } from "@smithy/core/schema";

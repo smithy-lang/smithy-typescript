@@ -34,10 +34,11 @@ describe("schemas", () => {
   });
 
   describe(ErrorSchema.name, () => {
-    const schema = new ErrorSchema("ack#Error", 0, [], [], Error);
+    const schema = error("ack", "Error", 0, [], [], Error);
 
     it("is a StructureSchema", () => {
       expect(schema).toBeInstanceOf(StructureSchema);
+      expect(schema).toBeInstanceOf(ErrorSchema);
     });
 
     it("additionally defines an error constructor", () => {
@@ -56,10 +57,12 @@ describe("schemas", () => {
       expect(object).toBeInstanceOf(ErrorSchema);
     });
   });
+
   describe(ListSchema.name, () => {
-    const schema = new ListSchema("ack#List", 0, 0);
+    const schema = list("ack", "List", 0, 0);
     it("is a Schema", () => {
       expect(schema).toBeInstanceOf(Schema);
+      expect(schema).toBeInstanceOf(ListSchema);
     });
     it("has a value schema", () => {
       expect(schema.valueSchema).toBe(0 as SchemaRef);
@@ -74,10 +77,12 @@ describe("schemas", () => {
       expect(object).toBeInstanceOf(ListSchema);
     });
   });
+
   describe(MapSchema.name, () => {
-    const schema = new MapSchema("ack#Map", 0, 0, 1);
+    const schema = map("ack", "Map", 0, 0, 1);
     it("is a Schema", () => {
       expect(schema).toBeInstanceOf(Schema);
+      expect(schema).toBeInstanceOf(MapSchema);
     });
     it("has a key and value schema", () => {
       expect(schema.keySchema).toBe(0 as SchemaRef);
@@ -93,10 +98,12 @@ describe("schemas", () => {
       expect(object).toBeInstanceOf(MapSchema);
     });
   });
+
   describe(OperationSchema.name, () => {
-    const schema = new OperationSchema("ack#Operation", 0, "unit", "unit");
+    const schema = op("ack", "Operation", 0, "unit", "unit");
     it("is a Schema", () => {
       expect(schema).toBeInstanceOf(Schema);
+      expect(schema).toBeInstanceOf(OperationSchema);
     });
     it("has an input and output schema", () => {
       expect(schema.input).toEqual("unit");
@@ -107,10 +114,14 @@ describe("schemas", () => {
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
   });
+
   describe(Schema.name, () => {
     const schema = new (class extends Schema {
+      protected symbol = Symbol();
       public constructor(name: string, traits: SchemaTraits) {
-        super(name, traits);
+        super();
+        this.name = name;
+        this.traits = traits;
       }
     })("ack#Abstract", {
       a: 0,
@@ -126,10 +137,12 @@ describe("schemas", () => {
       });
     });
   });
+
   describe(SimpleSchema.name, () => {
-    const schema = new SimpleSchema("ack#Simple", 0, 0);
+    const schema = sim("ack", "Simple", 0, 0);
     it("is a Schema", () => {
       expect(schema).toBeInstanceOf(Schema);
+      expect(schema).toBeInstanceOf(SimpleSchema);
     });
     it("has a factory and the factory registers the schema", () => {
       expect(sim("ack", "Simple", 0, 0)).toEqual(schema);
@@ -141,17 +154,17 @@ describe("schemas", () => {
       expect(object).toBeInstanceOf(SimpleSchema);
     });
   });
+
   describe(StructureSchema.name, () => {
-    const schema = new StructureSchema("ack#Structure", 0, ["a", "b", "c"], [0, 1, 2]);
+    const schema = struct("ack", "Structure", 0, ["a", "b", "c"], [0, 1, 2]);
     it("is a Schema", () => {
       expect(schema).toBeInstanceOf(Schema);
+      expect(schema).toBeInstanceOf(StructureSchema);
+      expect(schema).not.toBeInstanceOf(ErrorSchema);
     });
     it("has member schemas", () => {
-      expect(schema.members).toEqual({
-        a: [0 as SchemaRef, 0 as SchemaTraits],
-        b: [1 as SchemaRef, 0 as SchemaTraits],
-        c: [2 as SchemaRef, 0 as SchemaTraits],
-      });
+      expect(schema.memberNames).toEqual(["a", "b", "c"]);
+      expect(schema.memberList).toEqual([0, 1, 2]);
     });
     it("has a factory and the factory registers the schema", () => {
       expect(struct("ack", "Structure", 0, ["a", "b", "c"], [0, 1, 2])).toEqual(schema);

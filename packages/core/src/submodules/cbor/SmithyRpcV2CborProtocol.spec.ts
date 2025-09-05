@@ -153,6 +153,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         const protocol = new SmithyRpcV2CborProtocol({ defaultNamespace: "" });
         const httpRequest = await protocol.serializeRequest(
           {
+            namespace: "ns",
             name: "dummy",
             input: testCase.schema,
             output: "unit",
@@ -256,6 +257,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         });
         const output = await protocol.deserializeResponse(
           {
+            namespace: "ns",
             name: "dummy",
             input: "unit",
             output: testCase.schema,

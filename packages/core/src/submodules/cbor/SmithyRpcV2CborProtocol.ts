@@ -1,5 +1,5 @@
 import { RpcProtocol } from "@smithy/core/protocols";
-import type { ErrorSchema, OperationSchema } from "@smithy/core/schema";
+import type { ErrorSchema } from "@smithy/core/schema";
 import { deref, NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   EndpointBearer,
@@ -7,6 +7,7 @@ import type {
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
   MetadataBearer,
+  OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
 } from "@smithy/types";

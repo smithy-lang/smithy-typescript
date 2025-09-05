@@ -1,4 +1,4 @@
-import type { MemberSchema } from "@smithy/types";
+import type { MemberSchema, StructureSchema } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { list } from "./ListSchema";
@@ -12,8 +12,8 @@ describe(NormalizedSchema.name, () => {
   const [List, Map, Struct] = [list("ack", "List", { sparse: 1 }, 0), map("ack", "Map", 0, 0, 1), () => schema];
   const schema = struct("ack", "Structure", {}, ["list", "map", "struct"], [List, Map, Struct]);
 
-  const ns = new NormalizedSchema(() => schema);
-  const nsFromIndirect = NormalizedSchema.of([() => ns, 0]);
+  const ns = NormalizedSchema.of(schema);
+  const nsFromIndirect = NormalizedSchema.of(() => ns);
 
   it("has a static constructor", () => {
     expect(NormalizedSchema.of(ns)).toBeInstanceOf(NormalizedSchema);
@@ -105,7 +105,15 @@ describe(NormalizedSchema.name, () => {
       expect(NormalizedSchema.of(SCHEMA.BIG_INTEGER).isBigIntegerSchema()).toBe(true);
       expect(NormalizedSchema.of(SCHEMA.BIG_DECIMAL).isBigDecimalSchema()).toBe(true);
       expect(NormalizedSchema.of(SCHEMA.STREAMING_BLOB).isStreaming()).toBe(true);
-      expect(NormalizedSchema.of([ns, { streaming: 1 }]).isStreaming()).toBe(true);
+
+      const structWithStreamingMember = struct(
+        "ack",
+        "StructWithStreamingMember",
+        0,
+        ["m"],
+        [sim("ns", "blob", SCHEMA.BLOB, { streaming: 1 })]
+      );
+      expect(NormalizedSchema.of(structWithStreamingMember).getMemberSchema("m").isStreaming()).toBe(true);
     });
 
     describe("list member", () => {
@@ -184,8 +192,8 @@ describe(NormalizedSchema.name, () => {
 
   describe("iteration", () => {
     it("iterates over member schemas", () => {
-      const iteration = Array.from(ns.structIterator());
-      const entries = Object.entries(ns.getMemberSchemas());
+      const iteration = Array.from(ns.structIterator()) as [string, NormalizedSchema][];
+      const entries = Object.entries(ns.getMemberSchemas()) as [string, NormalizedSchema][];
       for (let i = 0; i < iteration.length; i++) {
         const [name, schema] = iteration[i];
         const [entryName, entrySchema] = entries[i];
@@ -203,7 +211,9 @@ describe(NormalizedSchema.name, () => {
 
   describe("traits", () => {
     const member: MemberSchema = [sim("ack", "SimpleString", 0, { idempotencyToken: 1 }), 0b0000_0001];
-    const ns = NormalizedSchema.of(member, "member_name");
+    const container: StructureSchema = struct("ack", "Container", 0, ["member_name"], [member, 0]);
+
+    const ns = NormalizedSchema.of(container).getMemberSchema("member_name");
 
     it("has merged traits", () => {
       expect(ns.getMergedTraits()).toEqual({
