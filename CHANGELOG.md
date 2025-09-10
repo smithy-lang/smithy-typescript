@@ -1,5 +1,11 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.34.1 (2025-09-10)
+
+### Bug Fixes
+
+- Fixed event stream serialization when the `@eventStreamPayload` member is a string ([#1674](https://github.com/smithy-lang/smithy-typescript/pull/1674))
+
 ## 0.34.0 (2025-07-30)
 
 ### Features
