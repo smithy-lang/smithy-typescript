@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+
 ## 4.1.0
 
 ### Minor Changes

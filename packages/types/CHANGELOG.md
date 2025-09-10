@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.5.0
+
+### Minor Changes
+
+- bb7c1c1: schema code size optimizations
+
 ## 4.4.0
 
 ### Minor Changes

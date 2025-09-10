@@ -1,5 +1,20 @@
 # Change Log
 
+## 3.11.0
+
+### Minor Changes
+
+- bb7c1c1: schema code size optimizations
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/middleware-serde@4.1.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/util-middleware@4.1.1
+  - @smithy/util-stream@4.3.1
+
 ## 3.10.0
 
 ### Minor Changes
