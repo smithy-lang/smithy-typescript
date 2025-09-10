@@ -1,4 +1,4 @@
-import { test as it, vi, describe, expect } from "vitest";
+import { describe, expect,test as it, vi } from "vitest";
 
 import { compressionMiddleware, compressionMiddlewareOptions } from "./compressionMiddleware";
 import { getCompressionPlugin } from "./getCompressionPlugin";

@@ -1,4 +1,4 @@
-import { HttpHandler } from "../httpHandler";
+import type { HttpHandler } from "../httpHandler";
 
 /**
  * @internal

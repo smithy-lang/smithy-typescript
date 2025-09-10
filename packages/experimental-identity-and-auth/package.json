@@ -1,6 +1,6 @@
 {
   "name": "@smithy/experimental-identity-and-auth",
-  "version": "0.3.65",
+  "version": "0.4.1",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline experimental-identity-and-auth",
@@ -25,6 +25,7 @@
     "url": "https://smithy.io"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/middleware-endpoint": "workspace:^",
     "@smithy/middleware-retry": "workspace:^",

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-import { Int64 as IInt64 } from "@smithy/types";
+import type { Int64 as IInt64 } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 
 export interface Int64 extends IInt64 {}

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/hash-blob-browser",
-  "version": "4.0.5",
+  "version": "4.1.1",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline hash-blob-browser",
@@ -22,6 +22,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/chunked-blob-reader": "workspace:^",
     "@smithy/chunked-blob-reader-native": "workspace:^",

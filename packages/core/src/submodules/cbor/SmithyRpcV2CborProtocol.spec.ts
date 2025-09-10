@@ -1,7 +1,7 @@
-import { list, map, SCHEMA, struct } from "@smithy/core/schema";
+import { error, list, map, op, SCHEMA, struct, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import type { SchemaRef } from "@smithy/types";
-import { describe, expect, test as it } from "vitest";
+import type { ResponseMetadata, RetryableTrait, SchemaRef } from "@smithy/types";
+import { beforeEach, describe, expect, test as it } from "vitest";
 
 import { cbor } from "./cbor";
 import { dateToTag } from "./parseCborBody";
@@ -153,6 +153,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         const protocol = new SmithyRpcV2CborProtocol({ defaultNamespace: "" });
         const httpRequest = await protocol.serializeRequest(
           {
+            namespace: "ns",
             name: "dummy",
             input: testCase.schema,
             output: "unit",
@@ -256,6 +257,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         });
         const output = await protocol.deserializeResponse(
           {
+            namespace: "ns",
             name: "dummy",
             input: "unit",
             output: testCase.schema,
@@ -272,5 +274,93 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         expect(output).toEqual(testCase.expected.output);
       });
     }
+  });
+
+  describe("error handling", () => {
+    const protocol = new SmithyRpcV2CborProtocol({ defaultNamespace: "ns" });
+
+    const operation = op(
+      "ns",
+      "OperationWithModeledException",
+      {},
+      struct("ns", "Input", 0, [], []),
+      struct("ns", "Output", 0, [], [])
+    );
+
+    const errorResponse = new HttpResponse({
+      statusCode: 400,
+      headers: {},
+      body: cbor.serialize({
+        __type: "ns#ModeledException",
+        modeledProperty: "oh no",
+      }),
+    });
+
+    const serdeContext = {};
+
+    class ServiceBaseException extends Error {
+      public readonly $fault: "client" | "server" = "client";
+      public $response?: HttpResponse;
+      public $retryable?: RetryableTrait;
+      public $metadata: ResponseMetadata = {
+        httpStatusCode: 400,
+      };
+    }
+
+    class ModeledExceptionCtor extends ServiceBaseException {
+      public modeledProperty: string = "";
+    }
+
+    beforeEach(() => {
+      TypeRegistry.for("ns").destroy();
+    });
+
+    it("should throw the schema error ctor if one exists", async () => {
+      // this is for modeled exceptions.
+
+      TypeRegistry.for("ns").register(
+        "ns#ModeledException",
+        error("ns", "ModeledException", 0, ["modeledProperty"], [0], ModeledExceptionCtor)
+      );
+      TypeRegistry.for("ns").register(
+        "smithy.ts.sdk.synthetic.ns#BaseServiceException",
+        error("smithy.ts.sdk.synthetic.ns", "BaseServiceException", 0, [], [], ServiceBaseException)
+      );
+
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);
+      } catch (e) {
+        expect(e).toBeInstanceOf(ModeledExceptionCtor);
+        expect((e as ModeledExceptionCtor).modeledProperty).toEqual("oh no");
+        expect(e).toBeInstanceOf(ServiceBaseException);
+      }
+      expect.assertions(3);
+    });
+
+    it("should throw a base error if available in the namespace, when no error schema is modeled", async () => {
+      // this is the expected fallback case for all generated clients.
+
+      TypeRegistry.for("ns").register(
+        "smithy.ts.sdk.synthetic.ns#BaseServiceException",
+        error("smithy.ts.sdk.synthetic.ns", "BaseServiceException", 0, [], [], ServiceBaseException)
+      );
+
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);
+      } catch (e) {
+        expect(e).toBeInstanceOf(ServiceBaseException);
+      }
+      expect.assertions(1);
+    });
+
+    it("should fall back to a generic JS Error as a last resort", async () => {
+      // this shouldn't happen, but in case the type registry is mutated incorrectly.
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect.assertions(1);
+    });
   });
 });

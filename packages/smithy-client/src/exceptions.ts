@@ -1,4 +1,4 @@
-import { HttpResponse, MetadataBearer, ResponseMetadata, RetryableTrait, SmithyException } from "@smithy/types";
+import type { HttpResponse, MetadataBearer, ResponseMetadata, RetryableTrait, SmithyException } from "@smithy/types";
 
 /**
  * The type of the exception class constructor parameter. The returned type contains the properties

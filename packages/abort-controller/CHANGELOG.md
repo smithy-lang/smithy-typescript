@@ -1,5 +1,24 @@
 # Change Log
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/types@4.4.0
+
 ## 4.0.5
 
 ### Patch Changes

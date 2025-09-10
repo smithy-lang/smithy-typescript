@@ -7,7 +7,7 @@ import type {
   SerializeHandlerOptions,
 } from "@smithy/types";
 
-import { PreviouslyResolved } from "./schema-middleware-types";
+import type { PreviouslyResolved } from "./schema-middleware-types";
 import { schemaDeserializationMiddleware } from "./schemaDeserializationMiddleware";
 import { schemaSerializationMiddleware } from "./schemaSerializationMiddleware";
 

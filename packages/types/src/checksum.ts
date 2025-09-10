@@ -1,4 +1,4 @@
-import { SourceData } from "./crypto";
+import type { SourceData } from "./crypto";
 
 /**
  * @public

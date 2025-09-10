@@ -64,7 +64,7 @@ describe(HttpBindingProtocol.name, () => {
     const response = new HttpResponse({
       statusCode: 200,
       headers: {
-        "x-timestamplist": "Mon, 16 Dec 2019 23:48:18 GMT, Mon, 16 Dec 2019 23:48:18 GMT",
+        "x-timestamplist": "Mon, 16 Nov 2019 23:48:18 GMT, Mon, 16 Dec 2019 23:48:18 GMT",
       },
     });
 
@@ -95,7 +95,7 @@ describe(HttpBindingProtocol.name, () => {
     )) as Partial<MetadataBearer>;
     delete output.$metadata;
     expect(output).toEqual({
-      timestampList: [new Date("2019-12-16T23:48:18.000Z"), new Date("2019-12-16T23:48:18.000Z")],
+      timestampList: [new Date("2019-11-16T23:48:18.000Z"), new Date("2019-12-16T23:48:18.000Z")],
     });
   });
 

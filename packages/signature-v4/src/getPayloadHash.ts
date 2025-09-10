@@ -1,5 +1,5 @@
 import { isArrayBuffer } from "@smithy/is-array-buffer";
-import { ChecksumConstructor, HashConstructor, HttpRequest } from "@smithy/types";
+import type { ChecksumConstructor, HashConstructor, HttpRequest } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUint8Array } from "@smithy/util-utf8";
 

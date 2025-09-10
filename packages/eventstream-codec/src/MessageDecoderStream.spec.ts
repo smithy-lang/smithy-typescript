@@ -1,4 +1,4 @@
-import { Message } from "@smithy/types";
+import type { Message } from "@smithy/types";
 import { describe, expect, test as it, vi } from "vitest";
 
 import { MessageDecoderStream } from "./MessageDecoderStream";

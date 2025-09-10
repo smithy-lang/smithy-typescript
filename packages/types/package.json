@@ -1,6 +1,6 @@
 {
   "name": "@smithy/types",
-  "version": "4.3.2",
+  "version": "4.5.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline types",
@@ -23,6 +23,7 @@
     "url": "https://smithy.io"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "tslib": "^2.6.2"
   },

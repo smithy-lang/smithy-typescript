@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
-import { ConditionObject, EvaluateOptions } from "../types";
+import type { ConditionObject, EvaluateOptions } from "../types";
 import { evaluateCondition } from "./evaluateCondition";
 import { evaluateConditions } from "./evaluateConditions";
 

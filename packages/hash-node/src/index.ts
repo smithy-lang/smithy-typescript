@@ -1,8 +1,10 @@
-import { Checksum, SourceData } from "@smithy/types";
-import { fromArrayBuffer, fromString, StringEncoding } from "@smithy/util-buffer-from";
+import type { Checksum, SourceData } from "@smithy/types";
+import type { StringEncoding } from "@smithy/util-buffer-from";
+import { fromArrayBuffer, fromString } from "@smithy/util-buffer-from";
 import { toUint8Array } from "@smithy/util-utf8";
 import { Buffer } from "buffer";
-import { createHash, createHmac, Hash as NodeHash, Hmac } from "crypto";
+import type { Hash as NodeHash, Hmac } from "crypto";
+import { createHash, createHmac } from "crypto";
 
 /**
  * @internal

@@ -1,5 +1,58 @@
 # Change Log
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/middleware-endpoint@4.2.1
+  - @smithy/middleware-retry@4.2.1
+  - @smithy/middleware-serde@4.1.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/signature-v4@5.2.1
+  - @smithy/util-middleware@4.1.1
+
+## 0.4.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/middleware-endpoint@4.2.0
+  - @smithy/middleware-retry@4.2.0
+  - @smithy/middleware-serde@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/signature-v4@5.2.0
+  - @smithy/types@4.4.0
+
+## 0.3.68
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.21
+- @smithy/middleware-retry@4.1.22
+
+## 0.3.67
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.20
+- @smithy/middleware-retry@4.1.21
+
+## 0.3.66
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.19
+- @smithy/middleware-retry@4.1.20
+
 ## 0.3.65
 
 ### Patch Changes

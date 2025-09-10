@@ -1,11 +1,11 @@
-import { RetryErrorInfo, StandardRetryToken } from "@smithy/types";
+import type { RetryErrorInfo, StandardRetryToken } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { RETRY_MODES } from "./config";
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
-import { RateLimiter } from "./types";
+import type { RateLimiter } from "./types";
 
 vi.mock("./StandardRetryStrategy");
 vi.mock("./DefaultRateLimiter");

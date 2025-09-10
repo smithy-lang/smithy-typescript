@@ -1,6 +1,5 @@
 import type { OperationSchema as IOperationSchema, SchemaRef, SchemaTraits } from "@smithy/types";
 
-import { TypeRegistry } from "../TypeRegistry";
 import { Schema } from "./Schema";
 
 /**
@@ -10,28 +9,29 @@ import { Schema } from "./Schema";
  * @alpha
  */
 export class OperationSchema extends Schema implements IOperationSchema {
-  public constructor(
-    public name: string,
-    public traits: SchemaTraits,
-    public input: SchemaRef,
-    public output: SchemaRef
-  ) {
-    super(name, traits);
-  }
+  public static readonly symbol = Symbol.for("@smithy/ope");
+  public name!: string;
+  public traits!: SchemaTraits;
+  public input!: SchemaRef;
+  public output!: SchemaRef;
+  protected readonly symbol = OperationSchema.symbol;
 }
 
 /**
  * Factory for OperationSchema.
  * @internal
  */
-export function op(
+export const op = (
   namespace: string,
   name: string,
-  traits: SchemaTraits = {},
+  traits: SchemaTraits,
   input: SchemaRef,
   output: SchemaRef
-): OperationSchema {
-  const schema = new OperationSchema(namespace + "#" + name, traits, input, output);
-  TypeRegistry.for(namespace).register(name, schema);
-  return schema;
-}
+): OperationSchema =>
+  Schema.assign(new OperationSchema(), {
+    name,
+    namespace,
+    traits,
+    input,
+    output,
+  });

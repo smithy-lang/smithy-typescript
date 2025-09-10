@@ -1,6 +1,7 @@
 import { describe, expect, test as it } from "vitest";
 
-import { decorateServiceException, ExceptionOptionType, ServiceException } from "./exceptions";
+import type { ExceptionOptionType } from "./exceptions";
+import { decorateServiceException, ServiceException } from "./exceptions";
 
 it("ServiceException extends from Error", () => {
   expect(

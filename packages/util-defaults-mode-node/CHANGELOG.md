@@ -1,5 +1,54 @@
 # Change Log
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/config-resolver@4.2.1
+  - @smithy/credential-provider-imds@4.1.1
+  - @smithy/node-config-provider@4.2.1
+  - @smithy/property-provider@4.1.1
+  - @smithy/smithy-client@4.6.1
+
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/credential-provider-imds@4.1.0
+  - @smithy/node-config-provider@4.2.0
+  - @smithy/property-provider@4.1.0
+  - @smithy/config-resolver@4.2.0
+  - @smithy/smithy-client@4.6.0
+  - @smithy/types@4.4.0
+
+## 4.0.29
+
+### Patch Changes
+
+- @smithy/smithy-client@4.5.2
+
+## 4.0.28
+
+### Patch Changes
+
+- @smithy/smithy-client@4.5.1
+
+## 4.0.27
+
+### Patch Changes
+
+- Updated dependencies [eb1ab40]
+  - @smithy/smithy-client@4.5.0
+
 ## 4.0.26
 
 ### Patch Changes

@@ -31,6 +31,9 @@ test-unit:
 test-browser:
 	yarn g:vitest run -c vitest.config.browser.mts
 
+test-bundlers:
+	(cd ./testbed/bundlers && make build test)
+
 # typecheck for test code.
 test-types:
 	npx tsc -p tsconfig.test.json

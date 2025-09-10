@@ -1,4 +1,4 @@
-import { SelectorType } from "./types";
+import type { SelectorType } from "./types";
 
 /**
  * Returns number value for string value, if the string is defined in obj[key].

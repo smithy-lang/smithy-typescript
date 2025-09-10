@@ -1,5 +1,33 @@
 # Change Log
 
+## 5.2.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/protocol-http@5.2.1
+  - @smithy/util-middleware@4.1.1
+
+## 5.2.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/util-hex-encoding@4.1.0
+  - @smithy/is-array-buffer@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/util-uri-escape@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
 ## 5.1.3
 
 ### Patch Changes

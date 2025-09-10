@@ -1,6 +1,7 @@
 import { ProviderError } from "@smithy/property-provider";
 import { Buffer } from "buffer";
-import { IncomingMessage, request, RequestOptions } from "http";
+import type { IncomingMessage, RequestOptions } from "http";
+import { request } from "http";
 
 /**
  * @internal

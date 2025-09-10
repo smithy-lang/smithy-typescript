@@ -1,3 +1,4 @@
+import type { SignatureV4CryptoInit, SignatureV4Init } from "@smithy/signature-v4";
 import {
   ALGORITHM_IDENTIFIER_V4A,
   AMZ_DATE_HEADER,
@@ -9,8 +10,8 @@ import { getCanonicalHeaders } from "@smithy/signature-v4";
 import { getPayloadHash } from "@smithy/signature-v4";
 import { hasHeader } from "@smithy/signature-v4";
 import { prepareRequest } from "@smithy/signature-v4";
-import { SignatureV4Base, SignatureV4CryptoInit, SignatureV4Init } from "@smithy/signature-v4";
-import { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
+import { SignatureV4Base } from "@smithy/signature-v4";
+import type { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUint8Array } from "@smithy/util-utf8";
 

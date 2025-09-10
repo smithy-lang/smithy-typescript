@@ -1,6 +1,5 @@
-import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
-
 import { Readable } from "stream";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 import { createGzip } from "zlib";
 
 import { compressStream } from "./compressStream";

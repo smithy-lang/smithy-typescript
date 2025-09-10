@@ -1,4 +1,4 @@
-import { HttpAuthOption } from "@smithy/types";
+import type { HttpAuthOption } from "@smithy/types";
 
 /**
  * Resolves list of auth options based on the supported ones, vs the preference list.

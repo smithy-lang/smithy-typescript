@@ -1,4 +1,4 @@
-import { AuthScheme } from "./auth/auth";
+import type { AuthScheme } from "./auth/auth";
 
 /**
  * @public

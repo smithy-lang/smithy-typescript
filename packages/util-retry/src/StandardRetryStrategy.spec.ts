@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { RetryErrorInfo, RetryErrorType } from "@smithy/types";
+import type { RetryErrorInfo, RetryErrorType } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { RETRY_MODES } from "./config";

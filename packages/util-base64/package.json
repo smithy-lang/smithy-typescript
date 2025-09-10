@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-base64",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "A Base64 <-> UInt8Array converter",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -22,6 +22,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/util-buffer-from": "workspace:^",
     "@smithy/util-utf8": "workspace:^",

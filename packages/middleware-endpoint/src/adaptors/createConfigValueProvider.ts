@@ -1,4 +1,4 @@
-import { Endpoint, EndpointV2 } from "@smithy/types";
+import type { Endpoint, EndpointV2 } from "@smithy/types";
 
 /**
  * Normalize some key of the client config to an async provider.

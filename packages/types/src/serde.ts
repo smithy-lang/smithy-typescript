@@ -1,7 +1,7 @@
-import { Endpoint } from "./http";
-import { ClientProtocol } from "./schema/schema";
-import { RequestHandler } from "./transfer";
-import { Decoder, Encoder, Provider } from "./util";
+import type { Endpoint } from "./http";
+import type { ClientProtocol } from "./schema/schema";
+import type { RequestHandler } from "./transfer";
+import type { Decoder, Encoder, Provider } from "./util";
 
 /**
  * @public

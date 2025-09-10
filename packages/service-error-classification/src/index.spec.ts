@@ -1,4 +1,4 @@
-import { RetryableTrait, SdkError } from "@smithy/types";
+import type { RetryableTrait, SdkError } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import {

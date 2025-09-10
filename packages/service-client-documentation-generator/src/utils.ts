@@ -1,5 +1,5 @@
 import { sep } from "path";
-import { Reflection } from "typedoc";
+import type { Reflection } from "typedoc";
 
 /**
  * @internal

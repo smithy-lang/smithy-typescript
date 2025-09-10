@@ -1,4 +1,4 @@
-import { Identity, IdentityProvider } from "@smithy/types";
+import type { Identity, IdentityProvider } from "@smithy/types";
 
 /**
  * @internal

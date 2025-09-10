@@ -1,6 +1,6 @@
 {
   "name": "@smithy/md5-js",
-  "version": "4.0.5",
+  "version": "4.1.1",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline md5-js",
@@ -22,6 +22,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "devDependencies": {
     "@smithy/util-base64": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",

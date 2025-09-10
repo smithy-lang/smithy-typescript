@@ -1,5 +1,25 @@
 # @smithy/signature-v4a
 
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/signature-v4@5.2.1
+
+## 3.0.6
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/util-hex-encoding@4.1.0
+  - @smithy/signature-v4@5.2.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
 ## 3.0.5
 
 ### Patch Changes

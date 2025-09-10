@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-endpoints",
-  "version": "3.0.7",
+  "version": "3.1.1",
   "description": "Utilities to help with endpoint resolution.",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -27,6 +27,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/types": "workspace:^",

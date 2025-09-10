@@ -1,7 +1,8 @@
 import { toBase64 } from "@smithy/util-base64";
 
 import { isReadableStream } from "../stream-type-check";
-import { ChecksumStream, ChecksumStreamInit } from "./ChecksumStream.browser";
+import type { ChecksumStreamInit } from "./ChecksumStream.browser";
+import { ChecksumStream } from "./ChecksumStream.browser";
 
 /**
  * @internal

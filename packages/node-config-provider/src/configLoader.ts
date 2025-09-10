@@ -1,9 +1,12 @@
 import { chain, memoize } from "@smithy/property-provider";
-import { Provider } from "@smithy/types";
+import type { Provider } from "@smithy/types";
 
-import { EnvOptions, fromEnv, GetterFromEnv } from "./fromEnv";
-import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
-import { fromStatic, FromStaticConfig } from "./fromStatic";
+import type { EnvOptions, GetterFromEnv } from "./fromEnv";
+import { fromEnv } from "./fromEnv";
+import type { GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
+import type { FromStaticConfig } from "./fromStatic";
+import { fromStatic } from "./fromStatic";
 
 /**
  * @internal

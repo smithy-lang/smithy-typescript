@@ -1,4 +1,4 @@
-import { EndpointARN, EndpointPartition, Logger } from "@smithy/types";
+import type { EndpointARN, EndpointPartition, Logger } from "@smithy/types";
 
 export type ReferenceObject = { ref: string };
 

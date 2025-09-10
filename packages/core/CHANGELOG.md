@@ -1,5 +1,59 @@
 # Change Log
 
+## 3.11.0
+
+### Minor Changes
+
+- bb7c1c1: schema code size optimizations
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/middleware-serde@4.1.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/util-middleware@4.1.1
+  - @smithy/util-stream@4.3.1
+
+## 3.10.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/util-body-length-browser@4.1.0
+  - @smithy/middleware-serde@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/util-stream@4.3.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
+## 3.9.2
+
+### Patch Changes
+
+- 06ac1f6: set explicit return type for cbor alloc
+
+## 3.9.1
+
+### Patch Changes
+
+- 29fad01: fix NumericValue typecheck
+
+## 3.9.0
+
+### Minor Changes
+
+- ab4f33f: CBOR protocol error handling fallbacks
+- d79dc91: schema serde eventstreams implementation
+
 ## 3.8.0
 
 ### Minor Changes

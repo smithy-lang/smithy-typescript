@@ -1,6 +1,6 @@
 import { normalizeProvider } from "@smithy/util-middleware";
 
-import { CompressionInputConfig, CompressionResolvedConfig } from "./configurations";
+import type { CompressionInputConfig, CompressionResolvedConfig } from "./configurations";
 
 /**
  * @internal

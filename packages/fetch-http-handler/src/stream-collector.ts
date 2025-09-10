@@ -1,4 +1,4 @@
-import { StreamCollector } from "@smithy/types";
+import type { StreamCollector } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
 export const streamCollector: StreamCollector = async (stream: Blob | ReadableStream): Promise<Uint8Array> => {

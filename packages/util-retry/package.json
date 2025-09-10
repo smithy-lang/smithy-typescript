@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-retry",
-  "version": "4.0.7",
+  "version": "4.1.1",
   "description": "Shared retry utilities to be used in middleware packages.",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -27,6 +27,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/service-error-classification": "workspace:^",
     "@smithy/types": "workspace:^",

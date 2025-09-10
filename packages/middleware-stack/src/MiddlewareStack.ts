@@ -1,4 +1,4 @@
-import {
+import type {
   AbsoluteLocation,
   DeserializeHandler,
   Handler,
@@ -13,7 +13,7 @@ import {
   Step,
 } from "@smithy/types";
 
-import { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewareEntry } from "./types";
+import type { AbsoluteMiddlewareEntry, MiddlewareEntry, Normalized, RelativeMiddlewareEntry } from "./types";
 
 const getAllAliases = (name: string | undefined, aliases: Array<string> | undefined) => {
   const _aliases = [];

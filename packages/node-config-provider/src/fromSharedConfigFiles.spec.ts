@@ -1,9 +1,10 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
-import { ParsedIniData, Profile } from "@smithy/types";
+import type { ParsedIniData, Profile } from "@smithy/types";
 import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { fromSharedConfigFiles, GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
+import type { GetterFromConfig, SharedConfigInit } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
 
 vi.mock("@smithy/shared-ini-file-loader", () => ({
   getProfileName: vi.fn(),

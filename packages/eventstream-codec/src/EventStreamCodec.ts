@@ -1,5 +1,5 @@
 import { Crc32 } from "@aws-crypto/crc32";
-import {
+import type {
   AvailableMessage,
   AvailableMessages,
   Message,
@@ -7,7 +7,7 @@ import {
   MessageEncoder,
   MessageHeaders,
 } from "@smithy/types";
-import { Decoder, Encoder } from "@smithy/types";
+import type { Decoder, Encoder } from "@smithy/types";
 
 import { HeaderMarshaller } from "./HeaderMarshaller";
 import { splitMessage } from "./splitMessage";

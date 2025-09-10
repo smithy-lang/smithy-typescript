@@ -9,7 +9,8 @@ import type {
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
 
 import { cbor } from "./cbor";
-import { tag, tagSymbol } from "./cbor-types";
+import type { tagSymbol } from "./cbor-types";
+import { tag } from "./cbor-types";
 
 /**
  * @internal
