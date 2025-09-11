@@ -306,23 +306,17 @@ final class CommandGenerator implements Runnable {
                 ObjectNode input = example.getInput();
                 Optional<ObjectNode> output = example.getOutput();
                 buffer
-                    .append("\n")
+                    .append("%n")
                     .append(String.format("@example %s%n", example.getTitle()))
-                    .append("```javascript\n")
+                    .append("```javascript%n")
                     .append(String.format("// %s%n", example.getDocumentation().orElse("")))
-                    .append("""
-                    const input = %s;
-                    const command = new %s(input);
-                    const response = await client.send(command);%s
-                    /* response is
-                    %s
-                    */
-                    """.formatted(
-                        DocumentationExampleGenerator.inputToJavaScriptObject(input),
-                        commandName,
-                        getStreamingBlobOutputAddendum(),
-                        DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
-                    ))
+                    .append(String.format("const input = %s;%n",
+                        DocumentationExampleGenerator.inputToJavaScriptObject(input)))
+                    .append(String.format("const command = new %s(input);%n", commandName))
+                    .append(String.format("const response = await client.send(command);%s%n",
+                        getStreamingBlobOutputAddendum()))
+                    .append(String.format("/* response is%n%s%n*/%n",
+                        DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))))
                     .append("```")
                     .append("\n");
             }
@@ -357,22 +351,17 @@ final class CommandGenerator implements Runnable {
      * @return e.g. appendable "const bytes = await response.Body.transformToByteArray();".
      */
     private String getStreamingBlobOutputAddendum() {
-        String streamingBlobAddendum = "";
+        StringBuilder buffer = new StringBuilder();
         String streamingBlobMemberName = getStreamingBlobOutputMember(operation);
         if (!streamingBlobMemberName.isEmpty()) {
             String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
-            streamingBlobAddendum = """
-                    \n// consume or destroy the stream to free the socket.
-                    const bytes = await %s.transformToByteArray();
-                    // const str = await %s.transformToString();
-                    // %s.destroy(); // only applicable to Node.js Readable streams.
-                    """.formatted(
-                propAccess,
-                propAccess,
-                propAccess
-            );
+            buffer
+                .append("%n// consume or destroy the stream to free the socket.%n")
+                .append(String.format("const bytes = await %s.transformToByteArray();%n", propAccess))
+                .append(String.format("// const str = await %s.transformToString();%n", propAccess))
+                .append(String.format("// %s.destroy(); // only applicable to Node.js Readable streams.%n", propAccess));
         }
-        return streamingBlobAddendum;
+        return buffer.toString();
     }
 
     private String getThrownExceptions() {
