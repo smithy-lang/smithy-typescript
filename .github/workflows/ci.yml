@@ -16,7 +16,7 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: gradle/actions/wrapper-validation@v4
 
       - name: Set up JDK ${{ matrix.java }}
@@ -38,7 +38,7 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: gradle/actions/wrapper-validation@v4
       - uses: actions/setup-node@v4
         with:
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     name: TypeScript Lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -87,7 +87,7 @@ jobs:
         node: [18, 20, 22]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -116,7 +116,7 @@ jobs:
     runs-on: smithy-typescript_ubuntu-latest_8-core
     name: Extract Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ensure TypeScript is formatted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -154,7 +154,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ensure TypeScript packages have changesets
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         # Include full git history needed for `yarn changeset status`
         with:
           ref: ${{github.event.pull_request.head.sha}}
