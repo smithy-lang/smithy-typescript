@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: gradle/actions/wrapper-validation@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: "yarn"
@@ -68,7 +68,7 @@ jobs:
     name: TypeScript Lint
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: "yarn"
@@ -88,7 +88,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
           cache: "yarn"
@@ -117,7 +117,7 @@ jobs:
     name: Extract Docs
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: "yarn"
@@ -135,7 +135,7 @@ jobs:
     name: Ensure TypeScript is formatted
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: "yarn"
@@ -159,7 +159,7 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.sha}}
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: "yarn"
