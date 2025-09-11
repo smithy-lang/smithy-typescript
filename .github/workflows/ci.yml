@@ -24,6 +24,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: 'corretto'
+          cache: gradle
 
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
