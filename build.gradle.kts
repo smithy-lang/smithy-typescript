@@ -22,8 +22,8 @@ plugins {
     signing
     checkstyle
     jacoco
-    id("com.github.spotbugs") version "6.0.8"
-    id("org.jreleaser") version "1.18.0"
+    id("com.github.spotbugs") version "6.3.0"
+    id("org.jreleaser") version "1.20.0"
 }
 
 allprojects {
@@ -69,11 +69,11 @@ subprojects {
 
         // Apply junit 5 and hamcrest test dependencies to all java projects.
         dependencies {
-            testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-            testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
+            testImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
+            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.13.4")
+            testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.4")
             testImplementation("org.hamcrest:hamcrest:2.2")
-            testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
+            testImplementation("org.mockito:mockito-junit-jupiter:5.19.0")
         }
 
         // Reusable license copySpec
