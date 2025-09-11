@@ -28,7 +28,7 @@ tasks["jar"].enabled = false
 
 tasks["smithyBuildJar"].enabled = false
 
-tasks.create<SmithyBuild>("buildSdk") {
+tasks.register<SmithyBuild>("buildSdk") {
     addRuntimeClasspath = true
 }
 

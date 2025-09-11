@@ -48,16 +48,21 @@ dependencies {
 sourceSets {
     main {
         resources {
-            setSrcDirs(listOf("src/main/resources", "$buildDir/generated/resources"))
+            setSrcDirs(listOf(
+                "src/main/resources",
+                layout.buildDirectory.dir("generated/resources").get().asFile
+            ))
         }
     }
 }
 
 tasks.register("set-dependency-versions") {
     doLast {
-        mkdir("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen")
-        val versionsFile =
-                file("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties")
+        mkdir(layout.buildDirectory.dir("generated/resources/software/amazon/smithy/typescript/codegen").get().asFile)
+        var versionsFile = layout.buildDirectory
+            .file("generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties")
+            .get()
+            .asFile
         versionsFile.printWriter().close()
 
         val roots = project.file("../packages").listFiles().toMutableList() + project.file("../smithy-typescript-ssdk-libs").listFiles().toList()
