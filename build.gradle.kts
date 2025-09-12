@@ -74,6 +74,7 @@ subprojects {
             testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.4")
             testImplementation("org.hamcrest:hamcrest:3.0")
             testImplementation("org.mockito:mockito-junit-jupiter:5.19.0")
+            testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         }
 
         // Reusable license copySpec
