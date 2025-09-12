@@ -124,11 +124,12 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 .stream()
                 .map(SymbolDependency::getPackageName)
                 .noneMatch(packageName::equals)) {
-                throw new CodegenException(String.format(
-                    "The import %s does not correspond to a registered dependency.%n" +
-                    "TypeScriptWriter::addDependency() is required before ::addImport().",
-                    from
-                ));
+                throw new CodegenException(
+                    """
+                    The import %s does not correspond to a registered dependency.
+                    TypeScriptWriter::addDependency() is required before ::addImport().
+                    """.formatted(from)
+                );
             }
         }
 

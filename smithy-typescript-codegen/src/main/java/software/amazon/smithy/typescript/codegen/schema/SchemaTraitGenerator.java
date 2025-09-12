@@ -102,16 +102,22 @@ public class SchemaTraitGenerator {
             return ANNOTATION_TRAIT_VALUE;
         } else if (DATA_TRAITS.contains(trait.toShapeId())) {
             if (trait instanceof EndpointTrait endpointTrait) {
-                return String.format("[\"%s\"]", endpointTrait.getHostPrefix());
+                return """
+                    ["%s"]
+                    """.formatted(endpointTrait.getHostPrefix());
             } else if (trait instanceof XmlNamespaceTrait xmlNamespaceTrait) {
-                return String.format("[%s, %s]",
+                return """
+                [%s, %s]
+                """.formatted(
                     stringStore.var(xmlNamespaceTrait.getPrefix().orElse("")),
                     stringStore.var(xmlNamespaceTrait.getUri())
                 );
             } else if (trait instanceof HttpErrorTrait httpError) {
                 return Objects.toString(httpError.getCode());
             } else if (trait instanceof HttpTrait httpTrait) {
-                return String.format("[\"%s\", \"%s\", %s]",
+                return """
+                ["%s", "%s", %s]
+                """.formatted(
                     httpTrait.getMethod(),
                     httpTrait.getUri(),
                     httpTrait.getCode()
