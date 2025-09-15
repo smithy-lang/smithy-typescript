@@ -271,6 +271,8 @@ final class CommandGenerator implements Runnable {
                     packageName)
             + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
                     packageName)
+            + String.format("// import type { %sConfig } from \"%s\";%n", serviceName, packageName)
+            + String.format("const config = {}; // type is %sConfig%n", serviceName)
             + String.format("const client = new %s(config);%n", serviceName)
             + String.format("const input = %s%n",
                     StructureExampleGenerator.generateStructuralHintDocumentation(

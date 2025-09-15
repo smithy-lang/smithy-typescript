@@ -39,6 +39,8 @@ export interface RpcV2CborListsCommandOutput extends RpcV2CborListInputOutput, _
  * ```javascript
  * import { RpcV2ProtocolClient, RpcV2CborListsCommand } from "@smithy/smithy-rpcv2-cbor"; // ES Modules import
  * // const { RpcV2ProtocolClient, RpcV2CborListsCommand } = require("@smithy/smithy-rpcv2-cbor"); // CommonJS import
+ * // import type { RpcV2ProtocolClientConfig } from "@smithy/smithy-rpcv2-cbor";
+ * const config = {}; // type is RpcV2ProtocolClientConfig
  * const client = new RpcV2ProtocolClient(config);
  * const input = { // RpcV2CborListInputOutput
  *   stringList: [ // StringList

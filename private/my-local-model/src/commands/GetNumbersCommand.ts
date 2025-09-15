@@ -34,6 +34,8 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  * ```javascript
  * import { XYZServiceClient, GetNumbersCommand } from "xyz"; // ES Modules import
  * // const { XYZServiceClient, GetNumbersCommand } = require("xyz"); // CommonJS import
+ * // import type { XYZServiceClientConfig } from "xyz";
+ * const config = {}; // type is XYZServiceClientConfig
  * const client = new XYZServiceClient(config);
  * const input = { // GetNumbersRequest
  *   bigDecimal: Number("bigdecimal"),
