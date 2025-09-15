@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.6.2
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.2.2
+
 ## 4.6.1
 
 ### Patch Changes

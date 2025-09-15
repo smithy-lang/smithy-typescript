@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.2.2
+
+### Patch Changes
+
+- @smithy/node-config-provider@4.2.2
+- @smithy/smithy-client@4.6.2
+
 ## 4.2.1
 
 ### Patch Changes

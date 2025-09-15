@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- 60f393e: add mock controls to file loader
+
 ## 4.1.1
 
 ### Patch Changes
