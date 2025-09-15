@@ -333,9 +333,9 @@ public class EventStreamGenerator {
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
             Shape target = model.expectShape(headerMember.getTarget());
-            writer.openBlock("if (input.$L) {", "}", memberName, () -> {
+            writer.openBlock("if (input.$L != null) {", "}", memberName, () -> {
                 writer.write("headers[$1S] = { type: $2S, value: input.$1L }", memberName,
-                        getEventHeaderType(headerMember));
+                        getEventHeaderType(target));
             });
         }
     }
@@ -356,7 +356,7 @@ public class EventStreamGenerator {
             case BLOB:
                 return "binary";
             default:
-                return "binary";
+                throw new IllegalArgumentException("Unsupported event header shape type: " + shape.getType());
         }
     }
 
