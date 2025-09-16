@@ -55,6 +55,7 @@ export const isThrottlingError = (error: SdkError) =>
  * the name "TimeoutError" to be checked by the TRANSIENT_ERROR_CODES condition.
  */
 export const isTransientError = (error: SdkError, depth = 0): boolean =>
+  isRetryableByTrait(error) ||
   isClockSkewCorrectedError(error) ||
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||

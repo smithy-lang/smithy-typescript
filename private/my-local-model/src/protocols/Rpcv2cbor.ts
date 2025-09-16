@@ -1,7 +1,14 @@
 // smithy-typescript generated code
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
 import { XYZServiceServiceException as __BaseException } from "../models/XYZServiceServiceException";
-import { GetNumbersRequest, GetNumbersResponse } from "../models/models_0";
+import {
+  CodedThrottlingError,
+  GetNumbersRequest,
+  GetNumbersResponse,
+  HaltError,
+  MysteryThrottlingError,
+  RetryableError,
+} from "../models/models_0";
 import {
   buildHttpRpcRequest,
   cbor,
@@ -12,7 +19,13 @@ import {
 } from "@smithy/core/cbor";
 import { nv as __nv } from "@smithy/core/serde";
 import { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
-import { _json, collectBody, take, withBaseException } from "@smithy/smithy-client";
+import {
+  decorateServiceException as __decorateServiceException,
+  _json,
+  collectBody,
+  take,
+  withBaseException,
+} from "@smithy/smithy-client";
 import {
   Endpoint as __Endpoint,
   HeaderBag as __HeaderBag,
@@ -64,12 +77,85 @@ const de_CommandError = async (output: __HttpResponse, context: __SerdeContext):
     body: await parseErrorBody(output.body, context),
   };
   const errorCode = loadSmithyRpcV2CborErrorCode(output, parsedOutput.body);
-  const parsedBody = parsedOutput.body;
-  return throwDefaultError({
-    output,
-    parsedBody,
-    errorCode,
-  }) as never;
+  switch (errorCode) {
+    case "CodedThrottlingError":
+    case "org.xyz.v1#CodedThrottlingError":
+      throw await de_CodedThrottlingErrorRes(parsedOutput, context);
+    case "HaltError":
+    case "org.xyz.v1#HaltError":
+      throw await de_HaltErrorRes(parsedOutput, context);
+    case "MysteryThrottlingError":
+    case "org.xyz.v1#MysteryThrottlingError":
+      throw await de_MysteryThrottlingErrorRes(parsedOutput, context);
+    case "RetryableError":
+    case "org.xyz.v1#RetryableError":
+      throw await de_RetryableErrorRes(parsedOutput, context);
+    default:
+      const parsedBody = parsedOutput.body;
+      return throwDefaultError({
+        output,
+        parsedBody,
+        errorCode,
+      }) as never;
+  }
+};
+
+/**
+ * deserializeRpcv2cborCodedThrottlingErrorRes
+ */
+const de_CodedThrottlingErrorRes = async (
+  parsedOutput: any,
+  context: __SerdeContext
+): Promise<CodedThrottlingError> => {
+  const body = parsedOutput.body;
+  const deserialized: any = _json(body);
+  const exception = new CodedThrottlingError({
+    $metadata: deserializeMetadata(parsedOutput),
+    ...deserialized,
+  });
+  return __decorateServiceException(exception, body);
+};
+
+/**
+ * deserializeRpcv2cborHaltErrorRes
+ */
+const de_HaltErrorRes = async (parsedOutput: any, context: __SerdeContext): Promise<HaltError> => {
+  const body = parsedOutput.body;
+  const deserialized: any = _json(body);
+  const exception = new HaltError({
+    $metadata: deserializeMetadata(parsedOutput),
+    ...deserialized,
+  });
+  return __decorateServiceException(exception, body);
+};
+
+/**
+ * deserializeRpcv2cborMysteryThrottlingErrorRes
+ */
+const de_MysteryThrottlingErrorRes = async (
+  parsedOutput: any,
+  context: __SerdeContext
+): Promise<MysteryThrottlingError> => {
+  const body = parsedOutput.body;
+  const deserialized: any = _json(body);
+  const exception = new MysteryThrottlingError({
+    $metadata: deserializeMetadata(parsedOutput),
+    ...deserialized,
+  });
+  return __decorateServiceException(exception, body);
+};
+
+/**
+ * deserializeRpcv2cborRetryableErrorRes
+ */
+const de_RetryableErrorRes = async (parsedOutput: any, context: __SerdeContext): Promise<RetryableError> => {
+  const body = parsedOutput.body;
+  const deserialized: any = _json(body);
+  const exception = new RetryableError({
+    $metadata: deserializeMetadata(parsedOutput),
+    ...deserialized,
+  });
+  return __decorateServiceException(exception, body);
 };
 
 /**
@@ -82,6 +168,8 @@ const se_GetNumbersRequest = (input: GetNumbersRequest, context: __SerdeContext)
   });
 };
 
+// de_CodedThrottlingError omitted.
+
 /**
  * deserializeRpcv2cborGetNumbersResponse
  */
@@ -91,6 +179,12 @@ const de_GetNumbersResponse = (output: any, context: __SerdeContext): GetNumbers
     bigInteger: [],
   }) as any;
 };
+
+// de_HaltError omitted.
+
+// de_MysteryThrottlingError omitted.
+
+// de_RetryableError omitted.
 
 const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
   httpStatusCode: output.statusCode,
