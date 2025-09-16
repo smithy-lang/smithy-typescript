@@ -9,7 +9,7 @@ import {
   TRANSIENT_ERROR_STATUS_CODES,
 } from "./constants";
 
-export const isRetryableByTrait = (error: SdkError) => error.$retryable !== undefined;
+export const isRetryableByTrait = (error: SdkError) => error?.$retryable !== undefined;
 
 /**
  * @deprecated use isClockSkewCorrectedError. This is only used in deprecated code.

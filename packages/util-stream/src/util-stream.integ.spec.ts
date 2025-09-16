@@ -12,7 +12,14 @@ import { requireRequestsFrom } from "../../../private/util-test/src/index";
 describe("util-stream", () => {
   describe(Weather.name, () => {
     it("should be uniform between string and Uint8Array payloads", async () => {
-      const client = new Weather({ endpoint: "https://foo.bar" });
+      const client = new Weather({
+        endpoint: "https://foo.bar",
+        region: "us-west-2",
+        credentials: {
+          accessKeyId: "INTEG",
+          secretAccessKey: "INTEG",
+        },
+      });
       requireRequestsFrom(client).toMatch({
         method: "POST",
         hostname: "foo.bar",
@@ -47,7 +54,14 @@ describe("util-stream", () => {
   });
 
   describe("blob helper integration", () => {
-    const client = new Weather({ endpoint: "https://foo.bar" });
+    const client = new Weather({
+      endpoint: "https://foo.bar",
+      region: "us-west-2",
+      credentials: {
+        accessKeyId: "INTEG",
+        secretAccessKey: "INTEG",
+      },
+    });
 
     requireRequestsFrom(client).toMatch({
       method: "POST",

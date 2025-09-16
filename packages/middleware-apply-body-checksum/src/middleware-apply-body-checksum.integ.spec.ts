@@ -6,7 +6,14 @@ import { requireRequestsFrom } from "../../../private/util-test/src/index";
 describe("middleware-apply-body-checksum", () => {
   describe(Weather.name, () => {
     it("should add body-checksum", async () => {
-      const client = new Weather({ endpoint: "https://foo.bar" });
+      const client = new Weather({
+        endpoint: "https://foo.bar",
+        region: "us-west-2",
+        credentials: {
+          accessKeyId: "INTEG",
+          secretAccessKey: "INTEG",
+        },
+      });
       requireRequestsFrom(client).toMatch({
         headers: {
           "content-md5": /^.{22}(==)?$/i,
