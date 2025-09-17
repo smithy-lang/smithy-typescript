@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.1.2
+
+### Patch Changes
+
+- 937ac5a: make $retryable-trait errors considered transient in StandardRetryStrategyV2
+
 ## 4.1.1
 
 ### Patch Changes
