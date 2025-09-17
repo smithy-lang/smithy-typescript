@@ -6,7 +6,14 @@ import { requireRequestsFrom } from "../../../private/util-test/src/index";
 describe("middleware-content-length", () => {
   describe(Weather.name, () => {
     it("should not add content-length if no body", async () => {
-      const client = new Weather({ endpoint: "https://foo.bar" });
+      const client = new Weather({
+        endpoint: "https://foo.bar",
+        region: "us-west-2",
+        credentials: {
+          accessKeyId: "INTEG",
+          secretAccessKey: "INTEG",
+        },
+      });
       requireRequestsFrom(client).toMatch({
         headers: {
           "content-length": /undefined/,
@@ -24,7 +31,14 @@ describe("middleware-content-length", () => {
     // This tests that content-length gets set to `2`, only where bodies are
     // sent in the request.
     it("should add content-length if body present", async () => {
-      const client = new Weather({ endpoint: "https://foo.bar" });
+      const client = new Weather({
+        endpoint: "https://foo.bar",
+        region: "us-west-2",
+        credentials: {
+          accessKeyId: "INTEG",
+          secretAccessKey: "INTEG",
+        },
+      });
       requireRequestsFrom(client).toMatch({
         headers: {
           "content-length": /2/,

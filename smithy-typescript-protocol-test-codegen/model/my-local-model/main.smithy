@@ -18,6 +18,10 @@ operation GetNumbers {
     input: GetNumbersRequest
     output: GetNumbersResponse
     errors: [
+        CodedThrottlingError,
+        MysteryThrottlingError,
+        RetryableError,
+        HaltError
     ]
 }
 
@@ -32,3 +36,19 @@ structure GetNumbersResponse {
     bigDecimal: BigDecimal
     bigInteger: BigInteger
 }
+
+@error("client")
+@retryable(throttling: true)
+@httpError(429)
+structure CodedThrottlingError {}
+
+@error("client")
+@retryable(throttling: true)
+structure MysteryThrottlingError {}
+
+@error("client")
+@retryable()
+structure RetryableError {}
+
+@error("client")
+structure HaltError {}

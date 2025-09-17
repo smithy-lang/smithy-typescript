@@ -56,6 +56,14 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  * @see {@link GetNumbersCommandOutput} for command's `response` shape.
  * @see {@link XYZServiceClientResolvedConfig | config} for XYZServiceClient's `config` shape.
  *
+ * @throws {@link CodedThrottlingError} (client fault)
+ *
+ * @throws {@link MysteryThrottlingError} (client fault)
+ *
+ * @throws {@link RetryableError} (client fault)
+ *
+ * @throws {@link HaltError} (client fault)
+ *
  * @throws {@link XYZServiceServiceException}
  * <p>Base exception class for all service exceptions from XYZService service.</p>
  *
