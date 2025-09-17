@@ -12,11 +12,11 @@ import { encode, resize, toUint8Array } from "./cbor-encode";
  * @see https://github.com/kriszyp/cbor-x
  */
 export const cbor = {
-  deserialize(payload: Uint8Array) {
+  deserialize(payload: Uint8Array): any {
     setPayload(payload);
     return decode(0, payload.length);
   },
-  serialize(input: any) {
+  serialize(input: any): Uint8Array {
     try {
       encode(input);
       return toUint8Array();
