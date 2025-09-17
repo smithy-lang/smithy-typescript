@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.11.1
+
+### Patch Changes
+
+- f8793be: prevent compilation from inserting Uint8Array type parameter
+- Updated dependencies [f8793be]
+  - @smithy/util-stream@4.3.2
+
 ## 3.11.0
 
 ### Minor Changes

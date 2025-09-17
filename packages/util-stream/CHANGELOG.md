@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.2
+
+### Patch Changes
+
+- f8793be: prevent compilation from inserting Uint8Array type parameter
+
 ## 4.3.1
 
 ### Patch Changes
