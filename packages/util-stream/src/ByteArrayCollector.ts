@@ -13,7 +13,7 @@ export class ByteArrayCollector {
     this.byteLength += byteArray.byteLength;
   }
 
-  public flush() {
+  public flush(): Uint8Array {
     if (this.byteArrays.length === 1) {
       const bytes = this.byteArrays[0];
       this.reset();
