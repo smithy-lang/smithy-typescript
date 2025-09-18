@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.35.0 (2025-09-18)
+
+### Features
+
+- `Command` class examples now generate with a reference to the `Client` constructor input type ([#1690](https://github.com/smithy-lang/smithy-typescript/pull/1690))
+
+### Bug Fixes
+
+- Fixed header type codegen for event streams ([#1694](https://github.com/smithy-lang/smithy-typescript/pull/1694))
+
 ## 0.34.1 (2025-09-10)
 
 ### Bug Fixes
