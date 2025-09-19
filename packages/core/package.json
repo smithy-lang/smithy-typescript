@@ -67,6 +67,13 @@
       "node": "./dist-cjs/submodules/event-streams/index.js",
       "import": "./dist-es/submodules/event-streams/index.js",
       "require": "./dist-cjs/submodules/event-streams/index.js"
+    },
+    "./uuid": {
+      "types": "./dist-types/submodules/uuid/index.d.ts",
+      "module": "./dist-es/submodules/uuid/index.js",
+      "node": "./dist-cjs/submodules/uuid/index.js",
+      "import": "./dist-es/submodules/uuid/index.js",
+      "require": "./dist-cjs/submodules/uuid/index.js"
     }
   },
   "author": {
@@ -110,6 +117,8 @@
     "./schema.js",
     "./serde.d.ts",
     "./serde.js",
+    "./uuid.d.ts",
+    "./uuid.js",
     "dist-*/**"
   ],
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/core",
@@ -127,6 +136,10 @@
     "rimraf": "3.0.2",
     "typedoc": "0.23.23"
   },
+  "browser": {
+    "./dist-es/submodules/uuid/randomUUID": "./dist-es/submodules/uuid/randomUUID.browser"
+  },
+  "react-native": {},
   "typedoc": {
     "entryPoint": "src/index.ts"
   },

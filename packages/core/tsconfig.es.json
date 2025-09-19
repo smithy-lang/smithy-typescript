@@ -9,7 +9,8 @@
       "@smithy/core/protocols": ["./src/submodules/protocols/index.ts"],
       "@smithy/core/serde": ["./src/submodules/serde/index.ts"],
       "@smithy/core/schema": ["./src/submodules/schema/index.ts"],
-      "@smithy/core/event-streams": ["./src/submodules/event-streams/index.ts"]
+      "@smithy/core/event-streams": ["./src/submodules/event-streams/index.ts"],
+      "@smithy/core/uuid": ["./src/submodules/uuid/index.ts"]
     }
   },
   "extends": "../../tsconfig.es.json",
