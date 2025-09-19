@@ -3283,6 +3283,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/uuid@workspace:packages/uuid":
+  version: 0.0.0-use.local
+  resolution: "@smithy/uuid@workspace:packages/uuid"
+  dependencies:
+    "@types/node": "npm:^18.11.9"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    rimraf: "npm:3.0.2"
+    tslib: "npm:^2.6.2"
+    typedoc: "npm:0.23.23"
+  languageName: unknown
+  linkType: soft
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
