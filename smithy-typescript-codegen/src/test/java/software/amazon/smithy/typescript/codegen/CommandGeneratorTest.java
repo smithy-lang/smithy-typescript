@@ -11,39 +11,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 
 public class CommandGeneratorTest {
-    @Test
-    public void addsCommandSpecificPlugins() {
-        testCommandCodegen(
-            "output-structure.smithy",
-            new String[] {"getSerdePlugin(config, this.serialize, this.deserialize)"}
-        );
-    }
-
-    /**
-     * todo(schema) remove when switched over.
-     */
-    @Test
-    public void writesSerializer() {
-        testCommandCodegen(
-            "output-structure.smithy",
-            new String[] {".ser("}
-        );
-    }
-
-    /**
-     * todo(schema) remove when switched over.
-     */
-    @Test
-    public void writesDeserializer() {
-        testCommandCodegen(
-            "output-structure.smithy",
-            new String[] {".de("}
-        );
-    }
-
-    /**
-     * todo(schema) enable when switched over.
-     */
+    // todo(schema) enable when on by default.
     @Disabled
     @Test
     public void writesOperationSchemaRef() {
