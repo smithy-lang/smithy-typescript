@@ -27,11 +27,11 @@ public abstract class SchemaGenerationAllowlist {
 
     @Deprecated
     public static boolean allows(String serviceShapeId, TypeScriptSettings settings) {
-        return ALLOWED.contains(serviceShapeId) && settings.generateSchemas();
+        return true;
     }
 
     public static boolean allows(ShapeId serviceShapeId, TypeScriptSettings settings) {
-        return ALLOWED.contains(serviceShapeId.toString()) && settings.generateSchemas();
+        return true;
     }
 
     public static void allow(String serviceShapeId) {
