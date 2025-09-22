@@ -7,4 +7,4 @@
 
 ## Usage
 
-You probably shouldn't, at least directly.
+This is an internal `@smithy` package. You should not install it as a direct dependency in your applications.
