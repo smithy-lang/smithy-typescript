@@ -27,9 +27,12 @@ describe("randomUUID", () => {
       v4 = (await import("./v4")).v4;
 
       // Simulate crypto.getRandomValues in test, as it's expected to be available
-      global.crypto = {
-        getRandomValues: getRandomValues,
-      } as any;
+      Object.defineProperty(global, "crypto", {
+        value: {
+          getRandomValues: getRandomValues,
+        },
+        configurable: true,
+      });
     });
 
     it("each generation is unique and matches regex", () => {
