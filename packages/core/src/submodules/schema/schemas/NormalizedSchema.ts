@@ -64,8 +64,9 @@ export class NormalizedSchema implements INormalizedSchema {
     }
 
     if (schema instanceof NormalizedSchema) {
+      const computedMemberTraits = this.memberTraits;
       Object.assign(this, schema);
-      this.memberTraits = Object.assign({}, schema.getMemberTraits(), this.getMemberTraits());
+      this.memberTraits = Object.assign({}, computedMemberTraits, schema.getMemberTraits(), this.getMemberTraits());
       this.normalizedTraits = void 0;
       this.memberName = memberName ?? schema.memberName;
       return;
@@ -255,10 +256,19 @@ export class NormalizedSchema implements INormalizedSchema {
    * @returns whether the schema has the idempotencyToken trait.
    */
   public isIdempotencyToken(): boolean {
-    if (typeof this.traits === "number") {
-      return (this.traits & 0b0100) === 0b0100;
-    } else if (typeof this.traits === "object") {
-      return !!this.traits.idempotencyToken;
+    if (this.normalizedTraits) {
+      return !!this.normalizedTraits.idempotencyToken;
+    }
+    for (const traits of [this.traits, this.memberTraits]) {
+      if (typeof traits === "number") {
+        if ((traits & 0b0100) === 0b0100) {
+          return true;
+        }
+      } else if (typeof traits === "object") {
+        if (!!traits.idempotencyToken) {
+          return true;
+        }
+      }
     }
     return false;
   }
