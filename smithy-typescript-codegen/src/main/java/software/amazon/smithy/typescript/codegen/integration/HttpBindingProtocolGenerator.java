@@ -873,13 +873,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Shape target = model.expectShape(binding.getMember().getTarget());
 
         boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
-        if (isIdempotencyToken) {
+        boolean isRequired = binding.getMember().isRequired();
+
+        String idempotencyComponent = "";
+        if (isIdempotencyToken && !isRequired) {
             writer
                 .addDependency(TypeScriptDependency.UUID_TYPES)
                 .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
+            idempotencyComponent = " ?? generateIdempotencyToken()";
         }
-        boolean isRequired = binding.getMember().isRequired();
-        String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
         String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
 
         String queryValue = getInputValue(
@@ -1004,17 +1006,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             binding.getMember(),
             target
         );
-        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
-        if (isIdempotencyToken) {
-            context.getWriter()
-                .addDependency(TypeScriptDependency.UUID_TYPES)
-                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
-        }
 
         boolean headerAssertion = headerValue.endsWith("!");
         String headerBaseValue = (headerAssertion
             ? headerValue.substring(0, headerValue.length() - 1)
             : headerValue);
+        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
 
         if (!Objects.equals(memberLocation + "!", headerValue)) {
             String defaultValue = "";
@@ -1022,6 +1019,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String s = headerBuffer.get(headerKey);
                 defaultValue = " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
+                context.getWriter()
+                    .addDependency(TypeScriptDependency.UUID_TYPES)
+                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
                 defaultValue = " ?? generateIdempotencyToken()";
             }
 
@@ -1046,6 +1046,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String s = headerBuffer.get(headerKey);
                 constructedHeaderValue += " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
+                context.getWriter()
+                    .addDependency(TypeScriptDependency.UUID_TYPES)
+                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
                 constructedHeaderValue += " ?? generateIdempotencyToken()";
             } else {
                 constructedHeaderValue = headerValue;
