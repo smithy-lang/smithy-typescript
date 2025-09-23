@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 97fe0d8: Replace 'uuid' with '@smithy/uuid'
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.4
+
 ## 4.2.4
 
 ### Patch Changes

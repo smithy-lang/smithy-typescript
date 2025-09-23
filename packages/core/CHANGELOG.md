@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.12.0
+
+### Minor Changes
+
+- 97fe0d8: Replace 'uuid' with '@smithy/uuid'
+
+### Patch Changes
+
+- 3eb73f3: fix detection of member idempotencyToken trait
+
 ## 3.11.1
 
 ### Patch Changes
