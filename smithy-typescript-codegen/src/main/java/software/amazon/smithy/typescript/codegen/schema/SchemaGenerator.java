@@ -103,12 +103,16 @@ public class SchemaGenerator implements Runnable {
                 return;
             }
             for (OperationShape operation : TopDownIndex.of(model).getContainedOperations(service)) {
-                operation.getInput().ifPresent(inputShape -> {
-                    loadShapes(model.expectShape(inputShape));
-                });
-                operation.getOutput().ifPresent(outputShape -> {
-                    loadShapes(model.expectShape(outputShape));
-                });
+                if (operation.getInput().isPresent()) {
+                    loadShapes(model.expectShape(operation.getInput().get()));
+                } else {
+                    loadShapes(model.expectShape(ShapeId.from("smithy.api#Unit")));
+                }
+                if (operation.getOutput().isPresent()) {
+                    loadShapes(model.expectShape(operation.getOutput().get()));
+                } else {
+                    loadShapes(model.expectShape(ShapeId.from("smithy.api#Unit")));
+                }
                 operation.getErrors().forEach(error -> {
                     loadShapes(model.expectShape(error));
                 });

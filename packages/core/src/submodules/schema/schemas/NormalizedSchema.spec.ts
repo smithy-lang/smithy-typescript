@@ -257,6 +257,18 @@ describe(NormalizedSchema.name, () => {
         expect(schema.getMergedTraits().idempotencyToken).toBe(undefined);
       }
     });
+
+    it("can understand members with the idempotencyToken trait", () => {
+      for (const schema of plainSchemas) {
+        expect(schema.isIdempotencyToken()).toBe(false);
+        expect(schema.getMergedTraits().idempotencyToken).toBe(undefined);
+
+        const structure = struct("", "StructureWithIdempotencyTokenMember", 0, ["token"], [[() => schema, 0b0100]]);
+        const ns = NormalizedSchema.of(structure).getMemberSchema("token");
+
+        expect(ns.isIdempotencyToken()).toBe(true);
+      }
+    });
   });
 
   describe("event stream detection", () => {
