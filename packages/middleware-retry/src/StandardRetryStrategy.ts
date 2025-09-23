@@ -11,7 +11,7 @@ import {
   RETRY_MODES,
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
-import { v4 } from "uuid";
+import { v4 } from "@smithy/uuid";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";

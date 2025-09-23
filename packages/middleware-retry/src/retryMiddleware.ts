@@ -18,7 +18,7 @@ import type {
   SdkError,
 } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
-import { v4 } from "uuid";
+import { v4 } from "@smithy/uuid";
 
 import type { RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
