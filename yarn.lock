@@ -2329,15 +2329,14 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-stream": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
+    "@smithy/uuid": "workspace:^"
     "@types/node": "npm:^18.11.9"
-    "@types/uuid": "npm:^9.0.1"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     json-bigint: "npm:^1.0.0"
     rimraf: "npm:3.0.2"
     tslib: "npm:^2.6.2"
     typedoc: "npm:0.23.23"
-    uuid: "npm:^9.0.1"
   languageName: unknown
   linkType: soft
 
@@ -2655,13 +2654,12 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-test": "workspace:^"
-    "@types/uuid": "npm:^9.0.1"
+    "@smithy/uuid": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:3.0.2"
     tslib: "npm:^2.6.2"
     typedoc: "npm:0.23.23"
-    uuid: "npm:^9.0.1"
   languageName: unknown
   linkType: soft
 
@@ -3283,7 +3281,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/uuid@workspace:packages/uuid":
+"@smithy/uuid@workspace:^, @smithy/uuid@workspace:packages/uuid":
   version: 0.0.0-use.local
   resolution: "@smithy/uuid@workspace:packages/uuid"
   dependencies:
@@ -3560,13 +3558,6 @@ __metadata:
   version: 4.0.5
   resolution: "@types/tough-cookie@npm:4.0.5"
   checksum: 10c0/68c6921721a3dcb40451543db2174a145ef915bc8bcbe7ad4e59194a0238e776e782b896c7a59f4b93ac6acefca9161fccb31d1ce3b3445cb6faa467297fb473
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:^9.0.1":
-  version: 9.0.8
-  resolution: "@types/uuid@npm:9.0.8"
-  checksum: 10c0/b411b93054cb1d4361919579ef3508a1f12bf15b5fdd97337d3d351bece6c921b52b6daeef89b62340fd73fd60da407878432a1af777f40648cbe53a01723489
   languageName: node
   linkType: hard
 
@@ -10783,15 +10774,6 @@ __metadata:
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
   checksum: 10c0/41a5bdd214df2f6c3ecf8622745e4a366c4adced864bc3c833739791aeeeb1838119af7daed4ba36428114b5c67dcda034a79c882e97e43c03e66a4dd7389942
-  languageName: node
-  linkType: hard
-
-"uuid@npm:^9.0.1":
-  version: 9.0.1
-  resolution: "uuid@npm:9.0.1"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 10c0/1607dd32ac7fc22f2d8f77051e6a64845c9bce5cd3dd8aa0070c074ec73e666a1f63c7b4e0f4bf2bc8b9d59dc85a15e17807446d9d2b17c8485fbc2147b27f9b
   languageName: node
   linkType: hard
 
