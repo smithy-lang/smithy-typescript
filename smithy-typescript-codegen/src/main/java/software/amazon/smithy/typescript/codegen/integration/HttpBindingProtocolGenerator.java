@@ -878,8 +878,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String idempotencyComponent = "";
         if (isIdempotencyToken && !isRequired) {
             writer
-                .addDependency(TypeScriptDependency.UUID_TYPES)
-                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
+                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
             idempotencyComponent = " ?? generateIdempotencyToken()";
         }
         String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
@@ -1020,8 +1019,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 defaultValue = " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
                 context.getWriter()
-                    .addDependency(TypeScriptDependency.UUID_TYPES)
-                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
+                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
                 defaultValue = " ?? generateIdempotencyToken()";
             }
 
@@ -1047,8 +1045,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 constructedHeaderValue += " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
                 context.getWriter()
-                    .addDependency(TypeScriptDependency.UUID_TYPES)
-                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
+                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
                 constructedHeaderValue += " ?? generateIdempotencyToken()";
             } else {
                 constructedHeaderValue = headerValue;

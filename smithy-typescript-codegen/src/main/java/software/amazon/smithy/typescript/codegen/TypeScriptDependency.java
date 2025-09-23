@@ -79,8 +79,9 @@ public enum TypeScriptDependency implements Dependency {
 
     NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", false),
 
-    UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
-    UUID("dependencies", "uuid", "^9.0.1", false),
+    @Deprecated UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
+    @Deprecated UUID("dependencies", "uuid", "^9.0.1", false),
+    SMITHY_UUID("dependencies", "@smithy/uuid", false),
 
     // Conditionally added when httpChecksumRequired trait exists
     MD5_BROWSER("dependencies", "@smithy/md5-js", false),
