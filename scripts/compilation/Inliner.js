@@ -20,7 +20,7 @@ module.exports = class Inliner {
     this.isLib = fs.existsSync(path.join(root, "lib", pkg));
     this.isClient = !this.isPackage && !this.isLib;
     this.isCore = pkg === "core";
-    this.reExportStubs = true;
+    this.reExportStubs = false;
     this.subfolder = this.isPackage ? "packages" : this.isLib ? "lib" : "clients";
     this.verbose = process.env.DEBUG || process.argv.includes("--debug");
 
