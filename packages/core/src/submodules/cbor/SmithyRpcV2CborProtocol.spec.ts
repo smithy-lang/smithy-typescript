@@ -1,3 +1,4 @@
+import type { ErrorSchema } from "@smithy/core/schema";
 import { error, list, map, op, SCHEMA, struct, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type { ResponseMetadata, RetryableTrait, SchemaRef } from "@smithy/types";
@@ -311,21 +312,24 @@ describe(SmithyRpcV2CborProtocol.name, () => {
       public modeledProperty: string = "";
     }
 
+    const ns = TypeRegistry.for("ns");
+    const synthetic = TypeRegistry.for("smithy.ts.sdk.synthetic.ns");
+
     beforeEach(() => {
-      TypeRegistry.for("ns").destroy();
+      ns.clear();
     });
+
+    const modeledExceptionSchema = error("ns", "ModeledException", 0, ["modeledProperty"], [0], null);
+    const baseServiceExceptionSchema = error("smithy.ts.sdk.synthetic.ns", "BaseServiceException", 0, [], [], null);
 
     it("should throw the schema error ctor if one exists", async () => {
       // this is for modeled exceptions.
 
-      TypeRegistry.for("ns").register(
-        "ns#ModeledException",
-        error("ns", "ModeledException", 0, ["modeledProperty"], [0], ModeledExceptionCtor)
-      );
-      TypeRegistry.for("ns").register(
-        "smithy.ts.sdk.synthetic.ns#BaseServiceException",
-        error("smithy.ts.sdk.synthetic.ns", "BaseServiceException", 0, [], [], ServiceBaseException)
-      );
+      ns.register(modeledExceptionSchema.getName(), modeledExceptionSchema);
+      ns.registerError(modeledExceptionSchema, ModeledExceptionCtor);
+
+      synthetic.register(baseServiceExceptionSchema.getName(), baseServiceExceptionSchema);
+      synthetic.registerError(baseServiceExceptionSchema, ServiceBaseException);
 
       try {
         await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);
@@ -340,10 +344,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
     it("should throw a base error if available in the namespace, when no error schema is modeled", async () => {
       // this is the expected fallback case for all generated clients.
 
-      TypeRegistry.for("ns").register(
-        "smithy.ts.sdk.synthetic.ns#BaseServiceException",
-        error("smithy.ts.sdk.synthetic.ns", "BaseServiceException", 0, [], [], ServiceBaseException)
-      );
+      synthetic.register(baseServiceExceptionSchema.getName(), baseServiceExceptionSchema);
+      synthetic.registerError(baseServiceExceptionSchema, ServiceBaseException);
 
       try {
         await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);

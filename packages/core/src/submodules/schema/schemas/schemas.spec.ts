@@ -34,20 +34,19 @@ describe("schemas", () => {
   });
 
   describe(ErrorSchema.name, () => {
-    const schema = error("ack", "Error", 0, [], [], Error);
+    const schema = error("ack", "Error", 0, [], []);
 
     it("is a StructureSchema", () => {
       expect(schema).toBeInstanceOf(StructureSchema);
       expect(schema).toBeInstanceOf(ErrorSchema);
     });
 
-    it("additionally defines an error constructor", () => {
-      expect(schema.ctor).toBeInstanceOf(Function);
-      expect(new schema.ctor()).toBeInstanceOf(schema.ctor);
+    it("deprecated reference to the error constructor", () => {
+      expect(schema.ctor).toBe(null);
     });
 
     it("has a factory and the factory registers the schema", () => {
-      expect(error("ack", "Error", 0, [], [], Error)).toEqual(schema);
+      expect(error("ack", "Error", 0, [], [])).toEqual(schema);
       expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
 
