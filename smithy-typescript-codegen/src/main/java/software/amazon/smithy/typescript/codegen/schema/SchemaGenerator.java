@@ -302,14 +302,20 @@ public class SchemaGenerator implements Runnable {
                 );
                 writer.openBlock("""
                 export var $L = error($L, $L,""",
-                    "",
+                    ", null);",
                     getShapeVariableName(shape),
                     checkImportString(shape, shape.getId().getNamespace(), "n"),
                     checkImportString(shape, shape.getId().getName()),
                     () -> doWithMembers(shape)
                 );
-                writer.writeInline(",$L", exceptionCtorSymbolName);
-                writer.write(");");
+                writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
+                writer.write("""
+                    TypeRegistry.for($L).registerError($L, $L);
+                    """,
+                    checkImportString(shape, shape.getId().getNamespace(), "n"),
+                    getShapeVariableName(shape),
+                    exceptionCtorSymbolName
+                );
             } else {
                 writer.addImportSubmodule("struct", "struct", TypeScriptDependency.SMITHY_CORE, "/schema");
                 writer.openBlock("""
@@ -335,20 +341,28 @@ public class SchemaGenerator implements Runnable {
         String namespace = settings.getService(model).getId().getNamespace();
 
         String exceptionCtorSymbolName = "__" + serviceExceptionName;
-        writer.addImportSubmodule("error", "error", TypeScriptDependency.SMITHY_CORE, "/schema");
+        writer.addImportSubmodule("error", null, TypeScriptDependency.SMITHY_CORE, "/schema");
         writer.addRelativeImport(
             serviceExceptionName,
             exceptionCtorSymbolName,
             Paths.get("..", "models", serviceExceptionName)
         );
+
+        String syntheticNamespace = store.var("smithy.ts.sdk.synthetic." + namespace);
         writer.write("""
-                export var $L = error($S, $S, 0, [], []""",
+                export var $L = error($L, $S, 0, [], [], null);""",
             serviceExceptionName,
-            "smithy.ts.sdk.synthetic." + namespace,
+            syntheticNamespace,
             serviceExceptionName
         );
-        writer.writeInline(",$L", exceptionCtorSymbolName);
-        writer.write(");");
+        writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
+        writer.write("""
+            TypeRegistry.for($L).registerError($L, $L);
+            """,
+            syntheticNamespace,
+            serviceExceptionName,
+            exceptionCtorSymbolName
+        );
     }
 
     private void writeUnionSchema(UnionShape shape) {

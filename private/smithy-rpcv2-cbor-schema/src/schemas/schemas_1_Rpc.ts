@@ -128,7 +128,7 @@ import {
   n1,
   n2,
 } from "./schemas_0";
-import { error, list, map, op, struct } from "@smithy/core/schema";
+import { TypeRegistry, error, list, map, op, struct } from "@smithy/core/schema";
 
 /* eslint no-var: 0 */
 
@@ -142,9 +142,10 @@ export var ValidationException = error(
   },
   [_m, _fL],
   [0, () => ValidationExceptionFieldList],
-
-  __ValidationException
+  null
 );
+TypeRegistry.for(n0).registerError(ValidationException, __ValidationException);
+
 export var ValidationExceptionField = struct(n0, _VEF, 0, [_p, _m], [0, 0]);
 export var ClientOptionalDefaults = struct(n1, _COD, 0, [_me], [1]);
 export var ComplexError = error(
@@ -155,9 +156,10 @@ export var ComplexError = error(
   },
   [_TL, _N],
   [0, () => ComplexNestedErrorData],
-
-  __ComplexError
+  null
 );
+TypeRegistry.for(n1).registerError(ComplexError, __ComplexError);
+
 export var ComplexNestedErrorData = struct(n1, _CNED, 0, [_F], [0]);
 export var Defaults = struct(
   n1,
@@ -199,9 +201,10 @@ export var InvalidGreeting = error(
   },
   [_M],
   [0],
-
-  __InvalidGreeting
+  null
 );
+TypeRegistry.for(n1).registerError(InvalidGreeting, __InvalidGreeting);
+
 export var OperationWithDefaultsInput = struct(
   n1,
   _OWDI,

@@ -105,6 +105,7 @@ export const _p = "path";
 export const _rM = "recursiveMember";
 export const _s = "sparse";
 export const _sBM = "sparseBooleanMap";
+export const _sC = "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor";
 export const _sL = "stringList";
 export const _sLt = "structureList";
 export const _sNM = "sparseNumberMap";
@@ -131,15 +132,9 @@ export const n2 = "smithy.protocoltests.shared";
 
 // smithy-typescript generated code
 import { RpcV2ProtocolServiceException as __RpcV2ProtocolServiceException } from "../models/RpcV2ProtocolServiceException";
-import { error } from "@smithy/core/schema";
+import { TypeRegistry, error } from "@smithy/core/schema";
 
 /* eslint no-var: 0 */
 
-export var RpcV2ProtocolServiceException = error(
-  "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor",
-  "RpcV2ProtocolServiceException",
-  0,
-  [],
-  [],
-  __RpcV2ProtocolServiceException
-);
+export var RpcV2ProtocolServiceException = error(_sC, "RpcV2ProtocolServiceException", 0, [], [], null);
+TypeRegistry.for(_sC).registerError(RpcV2ProtocolServiceException, __RpcV2ProtocolServiceException);
