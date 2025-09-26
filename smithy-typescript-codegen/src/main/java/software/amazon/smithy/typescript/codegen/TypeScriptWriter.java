@@ -227,8 +227,8 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                         String deprecationMessage = deprecatedTrait.getMessage()
                             .map(msg -> " " + msg) 
                             .orElse(" see description");
-                        String deprecationString = deprecatedTrait.getMessage().isPresent() ? "@deprecated" + deprecationMessage : "@deprecated"; 
-                        docs = docs + "\n\n" + deprecationString;
+                        String deprecationAnnotation = "@deprecated " + deprecationMessage; 
+                        docs = docs + "\n\n" + deprecationAnnotation;
                     }
                     docs = preprocessor.apply(docs);
                     docs = addReleaseTag(shape, docs);
