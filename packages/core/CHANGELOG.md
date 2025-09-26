@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.13.0
+
+### Minor Changes
+
+- 59e9952: separate error schema objects from error ctor
+
 ## 3.12.0
 
 ### Minor Changes
