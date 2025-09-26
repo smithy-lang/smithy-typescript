@@ -535,12 +535,12 @@ public class SchemaGenerator implements Runnable {
         TypeScriptWriter writer = getWriter(context.getId());
         boolean useImportedStrings = !groupingIndex.isBaseGroup(context);
 
-        writer.write(
-            new SchemaTraitWriter(
-                shape, elision,
-                useImportedStrings ? store.useSchemaWriter(writer) : store
-            ).toString()
-        );
+        String traitCode = new SchemaTraitWriter(
+            shape, elision,
+            useImportedStrings ? store.useSchemaWriter(writer) : store
+        ).toString();
+
+        writer.write(traitCode.replace("$", "$$"));
     }
 
     /**
