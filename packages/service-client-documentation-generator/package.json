@@ -1,6 +1,6 @@
 {
   "name": "@smithy/service-client-documentation-generator",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline service-client-documentation-generator",
@@ -21,6 +21,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "keywords": [
     "typedocplugin"
   ],

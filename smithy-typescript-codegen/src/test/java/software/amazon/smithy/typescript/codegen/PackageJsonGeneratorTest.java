@@ -130,7 +130,7 @@ class PackageJsonGeneratorTest {
         String configString = manifest.getFileString(PackageJsonGenerator.VITEST_CONFIG_FILENAME).get();
 
         assertThat(packageJson, containsString("\"test\": \"yarn g:vitest run --passWithNoTests\""));
-        assertThat(configString, containsString("include: ['**/*.spec.ts']"));
+        assertThat(configString, containsString("include: [\"**/*.spec.ts\"]"));
     }
 
     @Test

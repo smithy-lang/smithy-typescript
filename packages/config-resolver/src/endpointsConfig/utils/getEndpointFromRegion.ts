@@ -1,4 +1,4 @@
-import { Provider, RegionInfoProvider, UrlParser } from "@smithy/types";
+import type { Provider, RegionInfoProvider, UrlParser } from "@smithy/types";
 
 interface GetEndpointFromRegionOptions {
   region: Provider<string>;

@@ -1,4 +1,4 @@
-import { PaginationConfiguration } from "@smithy/types";
+import type { PaginationConfiguration } from "@smithy/types";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { createPaginator } from "./createPaginator";

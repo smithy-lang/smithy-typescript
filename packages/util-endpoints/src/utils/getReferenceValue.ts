@@ -1,4 +1,4 @@
-import { EvaluateOptions, ReferenceObject } from "../types";
+import type { EvaluateOptions, ReferenceObject } from "../types";
 
 export const getReferenceValue = ({ ref }: ReferenceObject, options: EvaluateOptions) => {
   const referenceRecord = {

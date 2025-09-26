@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 describe.skip("emitWarningIfUnsupportedVersion", () => {
-  let emitWarningIfUnsupportedVersion;
+  let emitWarningIfUnsupportedVersion: any;
   const emitWarning = process.emitWarning;
   const supportedVersion = "16.0.0";
 

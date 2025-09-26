@@ -1,7 +1,7 @@
+import { nv } from "@smithy/core/serde";
 import { toUtf8 } from "@smithy/util-utf8";
 
-import {
-  alloc,
+import type {
   CborArgumentLength,
   CborArgumentLengthOffset,
   CborListType,
@@ -9,11 +9,17 @@ import {
   CborOffset,
   CborUnstructuredByteStringType,
   CborValueType,
+  Float32,
+  Uint8,
+  Uint32,
+  Uint64,
+} from "./cbor-types";
+import {
+  alloc,
   extendedFloat16,
   extendedFloat32,
   extendedFloat64,
   extendedOneByte,
-  Float32,
   majorList,
   majorMap,
   majorNegativeInt64,
@@ -27,9 +33,6 @@ import {
   specialTrue,
   specialUndefined,
   tag,
-  Uint8,
-  Uint32,
-  Uint64,
 } from "./cbor-types";
 
 const USE_TEXT_DECODER = typeof TextDecoder !== "undefined";
@@ -119,11 +122,55 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
         _offset = offset;
         return castBigInt(negativeInt);
       } else {
-        const value = decode(at + offset, to);
-        const valueOffset = _offset;
+        /* major === majorTag */
+        if (minor === 2 || minor === 3) {
+          const length = decodeCount(at + offset, to);
 
-        _offset = offset + valueOffset;
-        return tag({ tag: castBigInt(unsignedInt), value });
+          let b = BigInt(0);
+          const start = at + offset + _offset;
+          for (let i = start; i < start + length; ++i) {
+            b = (b << BigInt(8)) | BigInt(payload[i]);
+          }
+          // the new offset is the sum of:
+          // 1. the local major offset (1)
+          // 2. the offset of the decoded count of the bigInteger
+          // 3. the length of the data bytes of the bigInteger
+          _offset = offset + _offset + length;
+          return minor === 3 ? -b - BigInt(1) : b;
+        } else if (minor === 4) {
+          const decimalFraction = decode(at + offset, to);
+          const [exponent, mantissa] = decimalFraction;
+          const normalizer = mantissa < 0 ? -1 : 1;
+          const mantissaStr = "0".repeat(Math.abs(exponent) + 1) + String(BigInt(normalizer) * BigInt(mantissa));
+
+          let numericString: string;
+          const sign = mantissa < 0 ? "-" : "";
+
+          numericString =
+            exponent === 0
+              ? mantissaStr
+              : mantissaStr.slice(0, mantissaStr.length + exponent) + "." + mantissaStr.slice(exponent);
+          numericString = numericString.replace(/^0+/g, "");
+          if (numericString === "") {
+            numericString = "0";
+          }
+          if (numericString[0] === ".") {
+            numericString = "0" + numericString;
+          }
+          numericString = sign + numericString;
+
+          // the new offset is the sum of:
+          // 1. the local major offset (1)
+          // 2. the offset of the decoded exponent mantissa pair
+          _offset = offset + _offset;
+          return nv(numericString);
+        } else {
+          const value = decode(at + offset, to);
+          const valueOffset = _offset;
+
+          _offset = offset + valueOffset;
+          return tag({ tag: castBigInt(unsignedInt), value });
+        }
       }
     case majorUtf8String:
     case majorMap:

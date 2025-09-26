@@ -5,8 +5,8 @@ import { getRegionInfo } from "./getRegionInfo";
 import { getResolvedHostname } from "./getResolvedHostname";
 import { getResolvedPartition } from "./getResolvedPartition";
 import { getResolvedSigningRegion } from "./getResolvedSigningRegion";
-import { PartitionHash } from "./PartitionHash";
-import { RegionHash } from "./RegionHash";
+import type { PartitionHash } from "./PartitionHash";
+import type { RegionHash } from "./RegionHash";
 
 vi.mock("./getHostnameFromVariants");
 vi.mock("./getResolvedHostname");
@@ -56,9 +56,9 @@ describe(getRegionInfo.name, () => {
   const getMockResolvedRegion = (regionCase: RegionCase): string =>
     regionCase !== RegionCase.ENDPOINT ? mockRegion : mockEndpointRegion;
 
-  const getMockResolvedPartitionOptions = (partitionHash) => ({ partitionHash });
+  const getMockResolvedPartitionOptions = (partitionHash: PartitionHash) => ({ partitionHash });
 
-  const getMockRegionInfoOptions = (regionHash, getResolvedPartitionOptions) => ({
+  const getMockRegionInfoOptions = (regionHash: RegionHash, getResolvedPartitionOptions: any) => ({
     ...getResolvedPartitionOptions,
     signingService: mockSigningService,
     regionHash,

@@ -1,6 +1,7 @@
-import { Checksum, Encoder } from "@smithy/types";
+import type { Checksum, Encoder } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
-import { Duplex, Readable } from "stream";
+import type { Readable } from "stream";
+import { Duplex } from "stream";
 
 /**
  * @internal

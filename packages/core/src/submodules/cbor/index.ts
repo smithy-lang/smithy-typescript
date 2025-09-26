@@ -1,3 +1,5 @@
 export { cbor } from "./cbor";
+export { tag, tagSymbol } from "./cbor-types";
 export * from "./parseCborBody";
-export { tagSymbol, tag } from "./cbor-types";
+export * from "./SmithyRpcV2CborProtocol";
+export * from "./CborCodec";

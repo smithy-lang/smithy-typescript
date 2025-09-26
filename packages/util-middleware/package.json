@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-middleware",
-  "version": "4.0.2",
+  "version": "4.1.1",
   "description": "Shared utilities for to be used in middleware packages.",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -26,6 +26,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"

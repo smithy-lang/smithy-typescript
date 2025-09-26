@@ -244,12 +244,25 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol bigIntegerShape(BigIntegerShape shape) {
-        // BigInt is not supported across all environments, use big.js instead.
+        if ("native".equals(settings.getBigNumberMode())) {
+            return createSymbolBuilder(shape, "bigint").build();
+        }
         return createBigJsSymbol(shape);
     }
 
     @Override
     public Symbol bigDecimalShape(BigDecimalShape shape) {
+        if ("native".equals(settings.getBigNumberMode())) {
+            return createSymbolBuilder(shape, "NumericValue", null)
+                .addReference(
+                    Symbol.builder()
+                        .addDependency(TypeScriptDependency.SMITHY_CORE)
+                        .name("NumericValue")
+                        .namespace("@smithy/core/serde", "/")
+                        .build()
+                )
+                .build();
+        }
         return createBigJsSymbol(shape);
     }
 

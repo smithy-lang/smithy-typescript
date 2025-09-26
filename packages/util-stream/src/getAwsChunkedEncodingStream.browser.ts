@@ -1,4 +1,4 @@
-import { GetAwsChunkedEncodingStream, GetAwsChunkedEncodingStreamOptions } from "@smithy/types";
+import type { GetAwsChunkedEncodingStream, GetAwsChunkedEncodingStreamOptions } from "@smithy/types";
 
 /**
  * @internal

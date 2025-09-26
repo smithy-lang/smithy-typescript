@@ -1,4 +1,4 @@
-import { Identity, IdentityProvider } from "../identity/identity";
+import type { Identity, IdentityProvider } from "../identity/identity";
 
 /**
  * @internal

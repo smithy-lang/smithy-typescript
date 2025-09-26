@@ -1,4 +1,4 @@
-import {
+import type {
   Endpoint,
   HandlerExecutionContext,
   Provider,
@@ -15,18 +15,21 @@ import type { V1OrV2Endpoint } from "./serdePlugin";
 
 /**
  * @internal
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
 export const serializerMiddleware =
   <Input extends object = any, Output extends object = any, CommandSerdeContext extends SerdeContext = any>(
-    options: V1OrV2Endpoint & SerdeFunctions,
+    options: SerdeFunctions,
     serializer: RequestSerializer<any, CommandSerdeContext>
   ): SerializeMiddleware<Input, Output> =>
   (next: SerializeHandler<Input, Output>, context: HandlerExecutionContext): SerializeHandler<Input, Output> =>
   async (args: SerializeHandlerArguments<Input>): Promise<SerializeHandlerOutput<Output>> => {
+    const endpointConfig = options as V1OrV2Endpoint;
+
     const endpoint: Provider<Endpoint> =
-      context.endpointV2?.url && options.urlParser
-        ? async () => options.urlParser!(context.endpointV2!.url as URL)
-        : options.endpoint!;
+      context.endpointV2?.url && endpointConfig.urlParser
+        ? async () => endpointConfig.urlParser!(context.endpointV2!.url as URL)
+        : endpointConfig.endpoint!;
 
     if (!endpoint) {
       throw new Error("No valid endpoint provider available.");

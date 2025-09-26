@@ -1,6 +1,6 @@
 {
   "name": "@smithy/core",
-  "version": "3.2.0",
+  "version": "3.12.0",
   "scripts": {
     "build": "yarn lint && concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline core",
@@ -11,8 +11,9 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "lint": "npx eslint -c ../../.eslintrc.js \"src/**/*.ts\" --fix && node ./scripts/lint",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "test": "yarn g:vitest run",
+    "extract:docs": "api-extractor run --local",
     "test:cbor:perf": "node ./scripts/cbor-perf.mjs",
+    "test": "yarn g:vitest run",
     "test:watch": "yarn g:vitest watch"
   },
   "main": "./dist-cjs/index.js",
@@ -20,11 +21,11 @@
   "types": "./dist-types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist-types/index.d.ts",
       "module": "./dist-es/index.js",
       "node": "./dist-cjs/index.js",
       "import": "./dist-es/index.js",
-      "require": "./dist-cjs/index.js",
-      "types": "./dist-types/index.d.ts"
+      "require": "./dist-cjs/index.js"
     },
     "./package.json": {
       "module": "./package.json",
@@ -33,25 +34,39 @@
       "require": "./package.json"
     },
     "./cbor": {
+      "types": "./dist-types/submodules/cbor/index.d.ts",
       "module": "./dist-es/submodules/cbor/index.js",
       "node": "./dist-cjs/submodules/cbor/index.js",
       "import": "./dist-es/submodules/cbor/index.js",
-      "require": "./dist-cjs/submodules/cbor/index.js",
-      "types": "./dist-types/submodules/cbor/index.d.ts"
+      "require": "./dist-cjs/submodules/cbor/index.js"
     },
     "./protocols": {
+      "types": "./dist-types/submodules/protocols/index.d.ts",
       "module": "./dist-es/submodules/protocols/index.js",
       "node": "./dist-cjs/submodules/protocols/index.js",
       "import": "./dist-es/submodules/protocols/index.js",
-      "require": "./dist-cjs/submodules/protocols/index.js",
-      "types": "./dist-types/submodules/protocols/index.d.ts"
+      "require": "./dist-cjs/submodules/protocols/index.js"
     },
     "./serde": {
+      "types": "./dist-types/submodules/serde/index.d.ts",
       "module": "./dist-es/submodules/serde/index.js",
       "node": "./dist-cjs/submodules/serde/index.js",
       "import": "./dist-es/submodules/serde/index.js",
-      "require": "./dist-cjs/submodules/serde/index.js",
-      "types": "./dist-types/submodules/serde/index.d.ts"
+      "require": "./dist-cjs/submodules/serde/index.js"
+    },
+    "./schema": {
+      "types": "./dist-types/submodules/schema/index.d.ts",
+      "module": "./dist-es/submodules/schema/index.js",
+      "node": "./dist-cjs/submodules/schema/index.js",
+      "import": "./dist-es/submodules/schema/index.js",
+      "require": "./dist-cjs/submodules/schema/index.js"
+    },
+    "./event-streams": {
+      "types": "./dist-types/submodules/event-streams/index.d.ts",
+      "module": "./dist-es/submodules/event-streams/index.js",
+      "node": "./dist-cjs/submodules/event-streams/index.js",
+      "import": "./dist-es/submodules/event-streams/index.js",
+      "require": "./dist-cjs/submodules/event-streams/index.js"
     }
   },
   "author": {
@@ -60,14 +75,17 @@
     "url": "https://smithy.io"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/middleware-serde": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
+    "@smithy/util-base64": "workspace:^",
     "@smithy/util-body-length-browser": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-stream": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
+    "@smithy/uuid": "workspace:^",
     "tslib": "^2.6.2"
   },
   "engines": {
@@ -83,8 +101,12 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./event-streams.d.ts",
+    "./event-streams.js",
     "./protocols.d.ts",
     "./protocols.js",
+    "./schema.d.ts",
+    "./schema.js",
     "./serde.d.ts",
     "./serde.js",
     "dist-*/**"
@@ -96,6 +118,7 @@
     "directory": "packages/core"
   },
   "devDependencies": {
+    "@smithy/eventstream-serde-node": "workspace:^",
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",

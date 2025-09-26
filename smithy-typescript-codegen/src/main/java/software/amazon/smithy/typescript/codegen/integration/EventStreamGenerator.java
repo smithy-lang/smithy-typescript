@@ -82,6 +82,24 @@ public class EventStreamGenerator {
         return eventStreamInfo.getEventStreamTarget().asUnionShape().get();
     }
 
+    public static MemberShape getEventStreamMember(GenerationContext context, StructureShape struct) {
+        List<MemberShape> eventStreamMembers = struct.members()
+            .stream()
+            .filter(shape -> {
+                Shape target = context.getModel().expectShape(shape.getTarget());
+                boolean targetStreaming = target.hasTrait(StreamingTrait.class);
+                boolean targetUnion = target.isUnionShape();
+                return targetUnion && targetStreaming;
+            }).toList();
+
+        if (eventStreamMembers.isEmpty()) {
+            throw new CodegenException("No event stream member found in " + struct.getId().toString());
+        } else if (eventStreamMembers.size() > 1) {
+            throw new CodegenException("More than one event stream member in " + struct.getId().toString());
+        }
+        return eventStreamMembers.get(0);
+    }
+
     /**
      * Generate eventstream serializers, and related serializers for events.
      * @param context Code generation context instance.
@@ -315,9 +333,9 @@ public class EventStreamGenerator {
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
             Shape target = model.expectShape(headerMember.getTarget());
-            writer.openBlock("if (input.$L) {", "}", memberName, () -> {
+            writer.openBlock("if (input.$L != null) {", "}", memberName, () -> {
                 writer.write("headers[$1S] = { type: $2S, value: input.$1L }", memberName,
-                        getEventHeaderType(headerMember));
+                        getEventHeaderType(target));
             });
         }
     }
@@ -338,7 +356,7 @@ public class EventStreamGenerator {
             case BLOB:
                 return "binary";
             default:
-                return "binary";
+                throw new IllegalArgumentException("Unsupported event header shape type: " + shape.getType());
         }
     }
 
@@ -369,7 +387,7 @@ public class EventStreamGenerator {
                     writer.write("body = input.$L;", payloadMemberName);
                 } else if (payloadShape instanceof StringShape) {
                     writer.write("body = context.utf8Decoder(input.$L);", payloadMemberName);
-                } else if (payloadShape instanceof BlobShape || payloadShape instanceof StringShape) {
+                } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
                     Symbol symbol = getSymbol(context, payloadShape);
                     String serFunctionName = ProtocolGenerator.getSerFunctionShortName(symbol);
                     boolean mayElide = serdeElisionIndex.mayElide(payloadShape);
@@ -433,7 +451,7 @@ public class EventStreamGenerator {
                             });
                         });
                     });
-                    writer.write("return {$$unknown: output};");
+                    writer.write("return {$$unknown: event as any};");
                 });
             });
         });

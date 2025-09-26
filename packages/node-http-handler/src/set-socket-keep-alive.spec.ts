@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { ClientRequest } from "http";
+import type { ClientRequest } from "http";
 import { Socket } from "net";
 import { beforeEach, describe, expect, test as it, vi } from "vitest";
 

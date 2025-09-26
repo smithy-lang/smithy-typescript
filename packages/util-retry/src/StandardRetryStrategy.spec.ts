@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { RetryErrorInfo, RetryErrorType } from "@smithy/types";
+import type { RetryErrorInfo, RetryErrorType } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { RETRY_MODES } from "./config";
@@ -15,6 +15,12 @@ describe(StandardRetryStrategy.name, () => {
   const mockRetryToken = {
     getRetryCount: () => 1,
     getRetryTokenCount: (errorInfo: any) => 1,
+    getRetryCost() {
+      return 0;
+    },
+    getRetryDelay() {
+      return 0;
+    },
   };
   const noRetryTokenAvailableError = new Error("No retry token available");
   const errorInfo = { errorType: "TRANSIENT" } as RetryErrorInfo;
@@ -59,6 +65,12 @@ describe(StandardRetryStrategy.name, () => {
       const mockRetryToken = {
         getRetryCount,
         hasRetryTokens,
+        getRetryCost() {
+          return 0;
+        },
+        getRetryDelay() {
+          return 0;
+        },
       };
       vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
@@ -71,6 +83,12 @@ describe(StandardRetryStrategy.name, () => {
       const mockRetryToken = {
         getRetryCount: () => 0,
         getRetryTokenCount: (errorInfo: any) => 1,
+        getRetryCost() {
+          return 0;
+        },
+        getRetryDelay() {
+          return 0;
+        },
       };
       vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(1);
@@ -87,6 +105,12 @@ describe(StandardRetryStrategy.name, () => {
       const mockRetryToken = {
         getRetryCount: () => 2,
         getRetryTokenCount: (errorInfo: any) => 1,
+        getRetryCost() {
+          return 0;
+        },
+        getRetryDelay() {
+          return 0;
+        },
       };
       vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(1));
@@ -103,6 +127,12 @@ describe(StandardRetryStrategy.name, () => {
       const mockRetryToken = {
         getRetryCount: () => 5,
         getRetryTokenCount: (errorInfo: any) => 1,
+        getRetryCost() {
+          return 0;
+        },
+        getRetryDelay() {
+          return 0;
+        },
       };
       vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(5));
@@ -120,6 +150,12 @@ describe(StandardRetryStrategy.name, () => {
         getRetryCount: () => 0,
         getRetryTokenCount: (errorInfo: any) => 1,
         hasRetryTokens: (errorType: RetryErrorType) => true,
+        getRetryCost() {
+          return 0;
+        },
+        getRetryDelay() {
+          return 0;
+        },
       };
       vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));

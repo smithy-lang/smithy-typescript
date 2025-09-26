@@ -1,5 +1,5 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import { HeaderBag } from "@smithy/types";
+import type { HeaderBag } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { ALWAYS_UNSIGNABLE_HEADERS } from "./constants";
@@ -64,8 +64,8 @@ describe("getCanonicalHeaders", () => {
       path: "/",
       headers: {
         ...headers,
-        foo: undefined,
-        bar: null,
+        foo: undefined as any,
+        bar: null as any,
       },
       hostname: "foo.us-east-1.amazonaws.com",
     });

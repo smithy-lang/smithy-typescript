@@ -1,4 +1,4 @@
-import { AbortController as DeprecatedAbortController } from "./abort";
+import type { AbortController as DeprecatedAbortController } from "./abort";
 
 /**
  * @public

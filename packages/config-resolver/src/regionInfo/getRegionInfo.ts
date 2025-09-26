@@ -1,14 +1,15 @@
-import { RegionInfo } from "@smithy/types";
+import type { RegionInfo } from "@smithy/types";
 
 import { getHostnameFromVariants } from "./getHostnameFromVariants";
 import { getResolvedHostname } from "./getResolvedHostname";
 import { getResolvedPartition } from "./getResolvedPartition";
 import { getResolvedSigningRegion } from "./getResolvedSigningRegion";
-import { PartitionHash } from "./PartitionHash";
-import { RegionHash } from "./RegionHash";
+import type { PartitionHash } from "./PartitionHash";
+import type { RegionHash } from "./RegionHash";
 
 /**
  * @internal
+ * @deprecated unused as of endpointsRuleSets.
  */
 export interface GetRegionInfoOptions {
   useFipsEndpoint?: boolean;
@@ -20,6 +21,7 @@ export interface GetRegionInfoOptions {
 
 /**
  * @internal
+ * @deprecated unused as of endpointsRuleSets.
  */
 export const getRegionInfo = (
   region: string,

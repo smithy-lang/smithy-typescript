@@ -1,5 +1,79 @@
 # Change Log
 
+## 4.2.2
+
+### Patch Changes
+
+- Updated dependencies [60f393e]
+  - @smithy/shared-ini-file-loader@4.2.0
+
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/property-provider@4.1.1
+  - @smithy/shared-ini-file-loader@4.1.1
+
+## 4.2.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/shared-ini-file-loader@4.1.0
+  - @smithy/property-provider@4.1.0
+  - @smithy/types@4.4.0
+
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/property-provider@4.0.5
+  - @smithy/shared-ini-file-loader@4.0.5
+
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/property-provider@4.0.4
+  - @smithy/shared-ini-file-loader@4.0.4
+
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/property-provider@4.0.3
+  - @smithy/shared-ini-file-loader@4.0.3
+
+## 4.1.1
+
+### Patch Changes
+
+- 9f8d075: Export Getters and their configs
+
+## 4.1.0
+
+### Minor Changes
+
+- 9ff783b: Pass options with signing name to environment variable selector
+
+### Patch Changes
+
+- acefcf5: Pass logger to environment variable selector
+
 ## 4.0.2
 
 ### Patch Changes

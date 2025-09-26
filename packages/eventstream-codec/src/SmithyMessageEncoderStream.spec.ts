@@ -1,4 +1,4 @@
-import { Message } from "@smithy/types";
+import type { Message } from "@smithy/types";
 import { describe, expect, test as it, vi } from "vitest";
 
 import { SmithyMessageEncoderStream } from "./SmithyMessageEncoderStream";
@@ -22,7 +22,7 @@ describe("SmithyMessageEncoderStream", () => {
       yield "second";
     };
 
-    const stream = new SmithyMessageEncoderStream<String>({
+    const stream = new SmithyMessageEncoderStream<string>({
       inputStream: inputStream(),
       serializer: serializer,
     });

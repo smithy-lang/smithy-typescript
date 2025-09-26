@@ -1,5 +1,64 @@
 # Change Log
 
+## 4.1.2
+
+### Patch Changes
+
+- 937ac5a: make $retryable-trait errors considered transient in StandardRetryStrategyV2
+
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/types@4.4.0
+
+## 4.0.7
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+
+## 4.0.6
+
+### Patch Changes
+
+- c8d5bb2: Treat Node.js network errors as transient
+
+## 4.0.5
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+
+## 4.0.4
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+
+## 4.0.3
+
+### Patch Changes
+
+- 89bde09: add browser connection issues as transient errors to retry on
+
 ## 4.0.2
 
 ### Patch Changes

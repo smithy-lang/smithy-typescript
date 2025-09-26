@@ -16,7 +16,7 @@ describe(getSSOTokenFilepath.name, () => {
   const mockSsoStartUrl = "mock_sso_start_url";
 
   beforeEach(() => {
-    vi.mocked(createHash).mockReturnValue({ update: mockUpdate });
+    vi.mocked(createHash).mockReturnValue({ update: mockUpdate } as any);
     vi.mocked(getHomeDir).mockReturnValue(mockHomeDir);
   });
 

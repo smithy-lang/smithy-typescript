@@ -1,5 +1,5 @@
 import { constructStack } from "@smithy/middleware-stack";
-import {
+import type {
   Client as IClient,
   Command,
   FetchHttpHandlerOptions,

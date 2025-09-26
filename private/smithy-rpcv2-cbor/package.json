@@ -10,7 +10,8 @@
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo || exit 0",
     "prepack": "yarn run clean && yarn run build",
-    "merged": "echo \"this is merged from user configuration.\""
+    "merged": "echo \"this is merged from user configuration.\"",
+    "test": "yarn g:vitest run --passWithNoTests"
   },
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",
@@ -26,6 +27,7 @@
     "@smithy/hash-node": "workspace:^",
     "@smithy/invalid-dependency": "workspace:^",
     "@smithy/middleware-content-length": "workspace:^",
+    "@smithy/middleware-endpoint": "workspace:^",
     "@smithy/middleware-retry": "workspace:^",
     "@smithy/middleware-serde": "workspace:^",
     "@smithy/middleware-stack": "workspace:^",
@@ -40,6 +42,7 @@
     "@smithy/util-body-length-node": "workspace:^",
     "@smithy/util-defaults-mode-browser": "workspace:^",
     "@smithy/util-defaults-mode-node": "workspace:^",
+    "@smithy/util-endpoints": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-retry": "workspace:^",
     "@smithy/util-utf8": "workspace:^",
@@ -51,7 +54,8 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "rimraf": "^3.0.0",
-    "typescript": "~5.2.2"
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18.0.0"

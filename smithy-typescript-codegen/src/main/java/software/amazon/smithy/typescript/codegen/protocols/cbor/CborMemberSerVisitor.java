@@ -5,6 +5,8 @@
 
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
+import software.amazon.smithy.model.shapes.BigDecimalShape;
+import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
@@ -61,6 +63,28 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
     @Override
     public String doubleShape(DoubleShape shape) {
         return dataSource;
+    }
+
+    /**
+     * Use bigint from JS.
+     */
+    @Override
+    public String bigIntegerShape(BigIntegerShape shape) {
+        if (context.getSettings().getBigNumberMode().equals("big.js")) {
+            return "BigInt(" + dataSource + ")";
+        }
+        return dataSource;
+    }
+
+    /**
+     * Use NumericValue from \@smithy/core/serde.
+     */
+    @Override
+    public String bigDecimalShape(BigDecimalShape shape) {
+        context.getWriter().addImportSubmodule(
+            "nv", "__nv", TypeScriptDependency.SMITHY_CORE, "/serde"
+        );
+        return "__nv(" + dataSource + ")";
     }
 
     /**

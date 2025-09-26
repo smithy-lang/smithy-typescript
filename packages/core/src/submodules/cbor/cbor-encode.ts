@@ -1,7 +1,9 @@
+import { NumericValue } from "@smithy/core/serde";
 import { fromUtf8 } from "@smithy/util-utf8";
 
+import type { CborMajorType, Uint64 } from "./cbor-types";
 import {
-  CborMajorType,
+  alloc,
   extendedFloat16,
   extendedFloat32,
   extendedFloat64,
@@ -17,9 +19,7 @@ import {
   specialNull,
   specialTrue,
   tagSymbol,
-  Uint64,
 } from "./cbor-types";
-import { alloc } from "./cbor-types";
 
 const USE_BUFFER = typeof Buffer !== "undefined";
 
@@ -152,10 +152,30 @@ export function encode(_input: any): void {
         data[cursor++] = (major << 5) | extendedFloat32;
         dataView.setUint32(cursor, n);
         cursor += 4;
-      } else {
+      } else if (value < BigInt("18446744073709551616")) {
         data[cursor++] = (major << 5) | extendedFloat64;
         dataView.setBigUint64(cursor, value);
         cursor += 8;
+      } else {
+        // refer to https://www.rfc-editor.org/rfc/rfc8949.html#name-bignums
+        const binaryBigInt = value.toString(2);
+        const bigIntBytes = new Uint8Array(Math.ceil(binaryBigInt.length / 8));
+        let b = value;
+        let i = 0;
+        while (bigIntBytes.byteLength - ++i >= 0) {
+          bigIntBytes[bigIntBytes.byteLength - i] = Number(b & BigInt(255));
+          b >>= BigInt(8);
+        }
+        ensureSpace(bigIntBytes.byteLength * 2);
+        data[cursor++] = nonNegative ? 0b110_00010 : 0b110_00011;
+
+        if (USE_BUFFER) {
+          encodeHeader(majorUnstructuredByteString, Buffer.byteLength(bigIntBytes));
+        } else {
+          encodeHeader(majorUnstructuredByteString, bigIntBytes.byteLength);
+        }
+        data.set(bigIntBytes, cursor);
+        cursor += bigIntBytes.byteLength;
       }
       continue;
     } else if (input === null) {
@@ -181,6 +201,18 @@ export function encode(_input: any): void {
       cursor += input.byteLength;
       continue;
     } else if (typeof input === "object") {
+      if (input instanceof NumericValue) {
+        const decimalIndex = input.string.indexOf(".");
+        const exponent = decimalIndex === -1 ? 0 : decimalIndex - input.string.length + 1;
+        const mantissa = BigInt(input.string.replace(".", ""));
+
+        data[cursor++] = 0b110_00100; // major 6, tag 4.
+
+        encodeStack.push(mantissa);
+        encodeStack.push(exponent);
+        encodeHeader(majorList, 2);
+        continue;
+      }
       if (input[tagSymbol]) {
         if ("tag" in input && "value" in input) {
           encodeStack.push(input.value);

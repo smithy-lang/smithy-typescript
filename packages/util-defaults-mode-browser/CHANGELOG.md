@@ -1,5 +1,184 @@
 # Change Log
 
+## 4.1.4
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.4
+
+## 4.1.3
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.3
+
+## 4.1.2
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.2
+
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/property-provider@4.1.1
+  - @smithy/smithy-client@4.6.1
+
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/property-provider@4.1.0
+  - @smithy/smithy-client@4.6.0
+  - @smithy/types@4.4.0
+
+## 4.0.29
+
+### Patch Changes
+
+- @smithy/smithy-client@4.5.2
+
+## 4.0.28
+
+### Patch Changes
+
+- @smithy/smithy-client@4.5.1
+
+## 4.0.27
+
+### Patch Changes
+
+- Updated dependencies [eb1ab40]
+  - @smithy/smithy-client@4.5.0
+
+## 4.0.26
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/smithy-client@4.4.10
+  - @smithy/property-provider@4.0.5
+
+## 4.0.25
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.9
+
+## 4.0.24
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.8
+
+## 4.0.23
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.7
+
+## 4.0.22
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.6
+
+## 4.0.21
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.5
+
+## 4.0.20
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.4
+
+## 4.0.19
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.3
+
+## 4.0.18
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.2
+
+## 4.0.17
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/property-provider@4.0.4
+  - @smithy/smithy-client@4.4.1
+
+## 4.0.16
+
+### Patch Changes
+
+- Updated dependencies [23812a9]
+  - @smithy/smithy-client@4.4.0
+
+## 4.0.15
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+- Updated dependencies [06b0ce8]
+  - @smithy/types@4.3.0
+  - @smithy/smithy-client@4.3.0
+  - @smithy/property-provider@4.0.3
+
+## 4.0.14
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.6
+
+## 4.0.13
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.5
+
+## 4.0.12
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.4
+
+## 4.0.11
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.3
+
+## 4.0.10
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.2
+
+## 4.0.9
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.1
+
 ## 4.0.8
 
 ### Patch Changes

@@ -13,9 +13,10 @@
  *  permissions and limitations under the License.
  */
 
-import { HeaderBag, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { QueryParameterBag } from "@smithy/types";
-import {
+import type { HeaderBag, HttpResponse } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
+import type { QueryParameterBag } from "@smithy/types";
+import type {
   APIGatewayProxyEvent,
   APIGatewayProxyEventHeaders,
   APIGatewayProxyEventMultiValueHeaders,

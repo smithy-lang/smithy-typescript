@@ -6,6 +6,8 @@
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import software.amazon.smithy.model.knowledge.HttpBinding;
+import software.amazon.smithy.model.shapes.BigDecimalShape;
+import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
@@ -41,6 +43,30 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
      */
     @Override
     public String blobShape(BlobShape shape) {
+        return dataSource;
+    }
+
+    /**
+     * Converted to bigint by the cbor codec.
+     */
+    @Override
+    public String bigIntegerShape(BigIntegerShape shape) {
+        if (context.getSettings().getBigNumberMode().equals("big.js")) {
+            context.getWriter().addImport("Big", "__Big", TypeScriptDependency.BIG_JS);
+            return "__Big(String(" + dataSource + "))";
+        }
+        return dataSource;
+    }
+
+    /**
+     * Converted to NumericValue by the cbor codec.
+     */
+    @Override
+    public String bigDecimalShape(BigDecimalShape shape) {
+        if (context.getSettings().getBigNumberMode().equals("big.js")) {
+            context.getWriter().addImport("Big", "__Big", TypeScriptDependency.BIG_JS);
+            return "__Big(String(" + dataSource + "))";
+        }
         return dataSource;
     }
 

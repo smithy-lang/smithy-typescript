@@ -1,7 +1,8 @@
-import { EndpointVariant } from "./EndpointVariant";
+import type { EndpointVariant } from "./EndpointVariant";
 
 /**
  * @internal
+ * @deprecated unused as of endpointsRuleSets.
  */
 export interface GetHostnameFromVariantsOptions {
   useFipsEndpoint: boolean;
@@ -10,6 +11,7 @@ export interface GetHostnameFromVariantsOptions {
 
 /**
  * @internal
+ * @deprecated unused as of endpointsRuleSets.
  */
 export const getHostnameFromVariants = (
   variants: EndpointVariant[] = [],

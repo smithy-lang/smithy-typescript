@@ -1,5 +1,253 @@
 # Change Log
 
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [97fe0d8]
+  - @smithy/middleware-retry@4.3.0
+  - @smithy/middleware-endpoint@4.2.4
+
+## 0.4.4
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.2.3
+- @smithy/middleware-retry@4.2.4
+
+## 0.4.3
+
+### Patch Changes
+
+- @smithy/middleware-retry@4.2.3
+
+## 0.4.2
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.2.2
+- @smithy/middleware-retry@4.2.2
+
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/middleware-endpoint@4.2.1
+  - @smithy/middleware-retry@4.2.1
+  - @smithy/middleware-serde@4.1.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/signature-v4@5.2.1
+  - @smithy/util-middleware@4.1.1
+
+## 0.4.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/middleware-endpoint@4.2.0
+  - @smithy/middleware-retry@4.2.0
+  - @smithy/middleware-serde@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/signature-v4@5.2.0
+  - @smithy/types@4.4.0
+
+## 0.3.68
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.21
+- @smithy/middleware-retry@4.1.22
+
+## 0.3.67
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.20
+- @smithy/middleware-retry@4.1.21
+
+## 0.3.66
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.19
+- @smithy/middleware-retry@4.1.20
+
+## 0.3.65
+
+### Patch Changes
+
+- Updated dependencies [fd00602]
+- Updated dependencies [64e033f]
+  - @smithy/middleware-retry@4.1.19
+  - @smithy/types@4.3.2
+  - @smithy/middleware-endpoint@4.1.18
+  - @smithy/middleware-serde@4.0.9
+  - @smithy/protocol-http@5.1.3
+  - @smithy/signature-v4@5.1.3
+  - @smithy/util-middleware@4.0.5
+
+## 0.3.64
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.17
+- @smithy/middleware-retry@4.1.18
+
+## 0.3.63
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.16
+- @smithy/middleware-retry@4.1.17
+
+## 0.3.62
+
+### Patch Changes
+
+- Updated dependencies [bccb1b9]
+  - @smithy/middleware-endpoint@4.1.15
+  - @smithy/middleware-retry@4.1.16
+
+## 0.3.61
+
+### Patch Changes
+
+- Updated dependencies [3ecb1f4]
+  - @smithy/middleware-endpoint@4.1.14
+  - @smithy/middleware-retry@4.1.15
+
+## 0.3.60
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.13
+- @smithy/middleware-retry@4.1.14
+
+## 0.3.59
+
+### Patch Changes
+
+- Updated dependencies [22a286e]
+  - @smithy/middleware-endpoint@4.1.12
+  - @smithy/middleware-retry@4.1.13
+
+## 0.3.58
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.11
+- @smithy/middleware-retry@4.1.12
+
+## 0.3.57
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.10
+- @smithy/middleware-retry@4.1.11
+
+## 0.3.56
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/middleware-endpoint@4.1.9
+  - @smithy/middleware-retry@4.1.10
+  - @smithy/middleware-serde@4.0.8
+  - @smithy/protocol-http@5.1.2
+  - @smithy/signature-v4@5.1.2
+  - @smithy/util-middleware@4.0.4
+
+## 0.3.55
+
+### Patch Changes
+
+- Updated dependencies [ae11e3a]
+  - @smithy/middleware-serde@4.0.7
+  - @smithy/middleware-endpoint@4.1.8
+  - @smithy/middleware-retry@4.1.9
+
+## 0.3.54
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/middleware-endpoint@4.1.7
+  - @smithy/middleware-retry@4.1.8
+  - @smithy/middleware-serde@4.0.6
+  - @smithy/protocol-http@5.1.1
+  - @smithy/signature-v4@5.1.1
+  - @smithy/util-middleware@4.0.3
+
+## 0.3.53
+
+### Patch Changes
+
+- Updated dependencies [786dd3a]
+  - @smithy/middleware-endpoint@4.1.6
+  - @smithy/middleware-serde@4.0.5
+  - @smithy/middleware-retry@4.1.7
+
+## 0.3.52
+
+### Patch Changes
+
+- Updated dependencies [103535a]
+  - @smithy/middleware-serde@4.0.4
+  - @smithy/middleware-endpoint@4.1.5
+  - @smithy/middleware-retry@4.1.6
+
+## 0.3.51
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.4
+- @smithy/middleware-retry@4.1.5
+
+## 0.3.50
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.3
+- @smithy/middleware-retry@4.1.4
+
+## 0.3.49
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.2
+- @smithy/middleware-retry@4.1.3
+
+## 0.3.48
+
+### Patch Changes
+
+- @smithy/middleware-retry@4.1.2
+
+## 0.3.47
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.1.1
+- @smithy/middleware-retry@4.1.1
+
+## 0.3.46
+
+### Patch Changes
+
+- Updated dependencies [e2a8b41]
+  - @smithy/signature-v4@5.1.0
+
 ## 0.3.45
 
 ### Patch Changes

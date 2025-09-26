@@ -1,5 +1,201 @@
 # Change Log
 
+## 3.12.0
+
+### Minor Changes
+
+- 97fe0d8: Replace 'uuid' with '@smithy/uuid'
+
+### Patch Changes
+
+- 3eb73f3: fix detection of member idempotencyToken trait
+
+## 3.11.1
+
+### Patch Changes
+
+- f8793be: prevent compilation from inserting Uint8Array type parameter
+- Updated dependencies [f8793be]
+  - @smithy/util-stream@4.3.2
+
+## 3.11.0
+
+### Minor Changes
+
+- bb7c1c1: schema code size optimizations
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/middleware-serde@4.1.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/util-middleware@4.1.1
+  - @smithy/util-stream@4.3.1
+
+## 3.10.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/util-body-length-browser@4.1.0
+  - @smithy/middleware-serde@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/util-stream@4.3.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
+## 3.9.2
+
+### Patch Changes
+
+- 06ac1f6: set explicit return type for cbor alloc
+
+## 3.9.1
+
+### Patch Changes
+
+- 29fad01: fix NumericValue typecheck
+
+## 3.9.0
+
+### Minor Changes
+
+- ab4f33f: CBOR protocol error handling fallbacks
+- d79dc91: schema serde eventstreams implementation
+
+## 3.8.0
+
+### Minor Changes
+
+- fd00602: handle idempotency token generation for CBOR protocol
+
+### Patch Changes
+
+- 64e033f: schema serde: http binding and cbor serializer refactoring
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/middleware-serde@4.0.9
+  - @smithy/protocol-http@5.1.3
+  - @smithy/util-middleware@4.0.5
+  - @smithy/util-stream@4.2.4
+
+## 3.7.2
+
+### Patch Changes
+
+- f4dcba0: fix offset calculation when decoding bigInteger in CBOR
+
+## 3.7.1
+
+### Patch Changes
+
+- 312801c: increase priority of types conditional exports
+- bb7975e: set sideEffects bundler metadata
+
+## 3.7.0
+
+### Minor Changes
+
+- d105c97: add instanceof overrides for schema classes
+
+### Patch Changes
+
+- @smithy/util-stream@4.2.3
+
+## 3.6.0
+
+### Minor Changes
+
+- 10a0534: support BigInt in cbor
+
+## 3.5.3
+
+### Patch Changes
+
+- 4a31774: allow old signature in protected method
+
+## 3.5.2
+
+### Patch Changes
+
+- 4642e7e: allow http prefix header and header to read from same binding
+- 147ceed: use smithy synthetic namespace for base errors
+- ae8f1f4: allow struct iterator acquisition on unit schema
+
+## 3.5.1
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/middleware-serde@4.0.8
+  - @smithy/protocol-http@5.1.2
+  - @smithy/util-middleware@4.0.4
+  - @smithy/util-stream@4.2.2
+
+## 3.5.0
+
+### Minor Changes
+
+- ae11e3a: add schema classes
+- 23812a9: add cbor protocol (alpha)
+
+### Patch Changes
+
+- Updated dependencies [ae11e3a]
+  - @smithy/middleware-serde@4.0.7
+
+## 3.4.0
+
+### Minor Changes
+
+- 06b0ce8: move serde functions from smithy-client to core/serde
+
+### Patch Changes
+
+- efb27ee: read code property of errors case-insensitively
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/middleware-serde@4.0.6
+  - @smithy/protocol-http@5.1.1
+  - @smithy/util-middleware@4.0.3
+  - @smithy/util-stream@4.2.1
+
+## 3.3.3
+
+### Patch Changes
+
+- Updated dependencies [786dd3a]
+  - @smithy/middleware-serde@4.0.5
+
+## 3.3.2
+
+### Patch Changes
+
+- Updated dependencies [103535a]
+  - @smithy/middleware-serde@4.0.4
+
+## 3.3.1
+
+### Patch Changes
+
+- 40ffcd5: copy input headers when building RPCv2 CBOR request
+
+## 3.3.0
+
+### Minor Changes
+
+- 5896264: Resolve auth schemes based on the preference list
+
 ## 3.2.0
 
 ### Minor Changes

@@ -20,7 +20,6 @@ import EventEmitter from "events";
 import { request } from "http";
 
 describe("httpRequest", () => {
-  let port: number;
   const hostname = "localhost";
   const path = "/";
 
@@ -53,7 +52,7 @@ describe("httpRequest", () => {
 
       mockResponse({ expectedResponse });
 
-      const response = await httpRequest({ hostname, path, port });
+      const response = await httpRequest({ hostname, path });
       expect(response.toString()).toStrictEqual(expectedResponse);
     });
 
@@ -62,7 +61,7 @@ describe("httpRequest", () => {
       const expectedResponse = "expectedResponse";
       mockResponse({ expectedResponse });
 
-      const response = await httpRequest({ hostname, path, port, method });
+      const response = await httpRequest({ hostname, path, method });
       expect(response.toString()).toStrictEqual(expectedResponse);
     });
 
@@ -71,7 +70,7 @@ describe("httpRequest", () => {
       const encapsulatedIPv6Hostname = "[::1]";
       mockResponse({ expectedResponse });
 
-      const response = await httpRequest({ hostname: encapsulatedIPv6Hostname, path, port });
+      const response = await httpRequest({ hostname: encapsulatedIPv6Hostname, path });
       expect(response.toString()).toStrictEqual(expectedResponse);
     });
   });
@@ -84,7 +83,7 @@ describe("httpRequest", () => {
           expectedResponse: "continue",
         });
 
-        await expect(httpRequest({ hostname, path, port })).rejects.toStrictEqual(
+        await expect(httpRequest({ hostname, path })).rejects.toStrictEqual(
           Object.assign(new ProviderError("Error response received from instance metadata service"), { statusCode })
         );
       });
@@ -102,7 +101,7 @@ describe("httpRequest", () => {
         return request;
       }) as any);
 
-      await expect(httpRequest({ hostname, path, port })).rejects.toStrictEqual(
+      await expect(httpRequest({ hostname, path })).rejects.toStrictEqual(
         new ProviderError("Unable to connect to instance metadata service")
       );
     });
@@ -131,7 +130,7 @@ describe("httpRequest", () => {
       return request;
     }) as any);
 
-    await expect(httpRequest({ hostname, path, port, timeout })).rejects.toStrictEqual(
+    await expect(httpRequest({ hostname, path, timeout })).rejects.toStrictEqual(
       new ProviderError("TimeoutError from instance metadata service")
     );
   });

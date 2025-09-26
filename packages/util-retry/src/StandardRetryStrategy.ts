@@ -1,4 +1,4 @@
-import { Provider, RetryErrorInfo, RetryErrorType, RetryStrategyV2, StandardRetryToken } from "@smithy/types";
+import type { Provider, RetryErrorInfo, RetryErrorType, RetryStrategyV2, StandardRetryToken } from "@smithy/types";
 
 import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
 import {

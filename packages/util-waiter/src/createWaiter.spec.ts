@@ -1,13 +1,12 @@
-import { AbortController } from "@smithy/abort-controller";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { WaiterOptions, WaiterState } from "./waiter";
+import { createWaiter } from "./createWaiter";
+import type { WaiterOptions } from "./waiter";
+import { WaiterState } from "./waiter";
 
 vi.mock("./utils/validate", () => ({
   validateWaiterOptions: vi.fn(),
 }));
-
-import { createWaiter } from "./createWaiter";
 
 describe("createWaiter", () => {
   beforeEach(() => {
@@ -56,7 +55,28 @@ describe("createWaiter", () => {
     expect(await statusPromise).toMatchObject(abortedState);
   });
 
-  it("should success when acceptor checker returns seccess", async () => {
+  it("should remove the event listener on the abort signal after the waiter resolves regardless of whether it has been invoked", async () => {
+    const abortController = new AbortController();
+    vi.spyOn(abortController.signal, "addEventListener");
+    vi.spyOn(abortController.signal, "removeEventListener");
+
+    const mockAcceptorChecks = vi.fn().mockResolvedValue(successState);
+    const statusPromise = createWaiter(
+      {
+        ...minimalWaiterConfig,
+        abortSignal: abortController.signal,
+        maxWaitTime: 20,
+      },
+      input,
+      mockAcceptorChecks
+    );
+    expect(abortController.signal.addEventListener).toHaveBeenCalledOnce();
+    vi.advanceTimersByTime(minimalWaiterConfig.minDelay * 1000);
+    expect(await statusPromise).toMatchObject(successState);
+    expect(abortController.signal.removeEventListener).toHaveBeenCalledOnce();
+  });
+
+  it("should succeed when acceptor checker returns success", async () => {
     const mockAcceptorChecks = vi.fn().mockResolvedValue(successState);
     const statusPromise = createWaiter(
       {

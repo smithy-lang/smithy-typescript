@@ -1,4 +1,5 @@
-import { EndpointError, EvaluateOptions, Expression, FunctionObject, ReferenceObject } from "../types";
+import type { EvaluateOptions, Expression, FunctionObject, ReferenceObject } from "../types";
+import { EndpointError } from "../types";
 import { callFunction } from "./callFunction";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getReferenceValue } from "./getReferenceValue";

@@ -1,9 +1,11 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
 import type { Logger, NodeHttpHandlerOptions } from "@smithy/types";
-import { HttpHandlerOptions, Provider } from "@smithy/types";
+import type { HttpHandlerOptions, Provider } from "@smithy/types";
 import { Agent as hAgent, request as hRequest } from "http";
-import { Agent as hsAgent, request as hsRequest, RequestOptions } from "https";
+import type { RequestOptions } from "https";
+import { Agent as hsAgent, request as hsRequest } from "https";
 
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";
@@ -152,7 +154,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     this.config?.httpsAgent?.destroy();
   }
 
-  async handle(request: HttpRequest, { abortSignal }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(
+    request: HttpRequest,
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+  ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
     }
@@ -281,8 +286,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // Defer registration of socket event listeners if the connection and request timeouts
       // are longer than a few seconds. This avoids slowing down faster operations.
+      const effectiveRequestTimeout = requestTimeout ?? this.config.requestTimeout;
       timeouts.push(setConnectionTimeout(req, reject, this.config.connectionTimeout));
-      timeouts.push(setSocketTimeout(req, reject, this.config.requestTimeout));
+      timeouts.push(setSocketTimeout(req, reject, effectiveRequestTimeout));
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;
@@ -297,7 +303,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         );
       }
 
-      writeRequestBodyPromise = writeRequestBody(req, request, this.config.requestTimeout).catch((e) => {
+      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout).catch((e) => {
         timeouts.forEach(timing.clearTimeout);
         return _reject(e);
       });

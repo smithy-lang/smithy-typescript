@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-retry",
-  "version": "4.0.2",
+  "version": "4.1.2",
   "description": "Shared retry utilities to be used in middleware packages.",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -16,7 +16,9 @@
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
     "extract:docs": "api-extractor run --local",
     "test": "yarn g:vitest run",
-    "test:watch": "yarn g:vitest watch"
+    "test:watch": "yarn g:vitest watch",
+    "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
+    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
   },
   "keywords": [
     "aws",
@@ -27,6 +29,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/service-error-classification": "workspace:^",
     "@smithy/types": "workspace:^",

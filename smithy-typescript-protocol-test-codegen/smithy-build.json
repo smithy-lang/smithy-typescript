@@ -24,8 +24,55 @@
             },
             "license": "Apache-2.0"
           },
+          "private": true
+        }
+      }
+    },
+    "smithy-rpcv2-cbor-schema": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@smithy/smithy-rpcv2-cbor-schema",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "Smithy team",
+              "url": "https://smithy.io/"
+            },
+            "scripts": {
+            },
+            "license": "Apache-2.0"
+          },
           "private": true,
-          "experimentalIdentityAndAuth": false
+          "generateSchemas": true
+        }
+      }
+    },
+    "my-local-model": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["org.xyz.v1#XYZService"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "org.xyz.v1#XYZService",
+          "package": "xyz",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "private": true
+          },
+          "bigNumberMode": "native"
         }
       }
     }

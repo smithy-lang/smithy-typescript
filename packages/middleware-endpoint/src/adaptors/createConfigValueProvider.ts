@@ -1,4 +1,4 @@
-import { Endpoint, EndpointV2 } from "@smithy/types";
+import type { Endpoint, EndpointV2 } from "@smithy/types";
 
 /**
  * Normalize some key of the client config to an async provider.
@@ -42,6 +42,9 @@ export const createConfigValueProvider = <Config extends Record<string, unknown>
 
   if (configKey === "endpoint" || canonicalEndpointParamKey === "endpoint") {
     return async () => {
+      if (config.isCustomEndpoint === false) {
+        return undefined;
+      }
       const endpoint = await configProvider();
       if (endpoint && typeof endpoint === "object") {
         if ("url" in endpoint) {

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,11 +35,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -48,19 +52,23 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.ExamplesTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
+import software.amazon.smithy.typescript.codegen.documentation.DocumentationExampleGenerator;
 import software.amazon.smithy.typescript.codegen.documentation.StructureExampleGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
+import software.amazon.smithy.typescript.codegen.schema.ShapeGroupingIndex;
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.PreCommandClassCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.SmithyContextCodeSection;
 import software.amazon.smithy.typescript.codegen.util.CommandWriterConsumer;
+import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -71,6 +79,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 final class CommandGenerator implements Runnable {
 
     static final String COMMANDS_FOLDER = "commands";
+    static final String SCHEMAS_FOLDER = "schemas";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -86,6 +95,9 @@ final class CommandGenerator implements Runnable {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
     private final SensitiveDataFinder sensitiveDataFinder;
+    private final ReservedWords reservedWords = new ReservedWordsBuilder()
+        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
+        .build();
 
     CommandGenerator(
             TypeScriptSettings settings,
@@ -134,11 +146,13 @@ final class CommandGenerator implements Runnable {
         String name = symbol.getName();
 
         StringBuilder additionalDocs = new StringBuilder()
-                .append("\n")
-                .append(getCommandExample(
-                        serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
-                .append("\n")
-                .append(getThrownExceptions());
+            .append("\n")
+            .append(getCommandExample(
+                    serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
+            .append("\n")
+            .append(getThrownExceptions())
+            .append("\n")
+            .append(getCuratedExamples(name));
 
         boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
 
@@ -245,33 +259,122 @@ final class CommandGenerator implements Runnable {
         writer.write("}"); // class close bracket.
     }
 
-    private String getCommandExample(String serviceName, String configName, String commandName, String commandInput,
-            String commandOutput) {
+    private String getCommandExample(
+            String serviceName, String configName, String commandName,
+            String commandInput, String commandOutput
+    ) {
         String packageName = settings.getPackageName();
-        return "@example\n"
-                + "Use a bare-bones client and the command you need to make an API call.\n"
-                + "```javascript\n"
-                + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
-                        packageName)
-                + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
-                        packageName)
-                + String.format("const client = new %s(config);%n", serviceName)
-                + String.format("const input = %s%n",
-                        StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getInputShape()).get(), model, false, true))
-                + String.format("const command = new %s(input);%n", commandName)
-                + "const response = await client.send(command);\n"
-                + getReadStreamExample()
-                + String.format("%s%n",
-                        StructureExampleGenerator.generateStructuralHintDocumentation(
-                                model.getShape(operation.getOutputShape()).get(), model, true, false))
-                + "\n```\n"
-                + "\n"
-                + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
-                + String.format("@returns {@link %s}%n", commandOutput)
-                + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
-                + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
-                + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+        String exampleDoc = "@example\n"
+            + "Use a bare-bones client and the command you need to make an API call.\n"
+            + "```javascript\n"
+            + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
+                    packageName)
+            + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
+                    packageName)
+            + String.format("// import type { %sConfig } from \"%s\";%n", serviceName, packageName)
+            + String.format("const config = {}; // type is %sConfig%n", serviceName)
+            + String.format("const client = new %s(config);%n", serviceName)
+            + String.format("const input = %s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                            model.getShape(operation.getInputShape()).get(), model, false, true))
+            + String.format("const command = new %s(input);%n", commandName)
+            + "const response = await client.send(command);"
+            + getStreamingBlobOutputAddendum()
+            + "\n"
+            + String.format("%s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                            model.getShape(operation.getOutputShape()).get(), model, true, false))
+            + "\n```\n"
+            + "\n"
+            + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
+            + String.format("@returns {@link %s}%n", commandOutput)
+            + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
+            + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
+            + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+
+        return exampleDoc;
+    }
+
+    /**
+     * Handwritten examples from the operation ExamplesTrait.
+     */
+    private String getCuratedExamples(String commandName) {
+        String exampleDoc = "";
+        if (operation.getTrait(ExamplesTrait.class).isPresent()) {
+            List<ExamplesTrait.Example> examples = operation.getTrait(ExamplesTrait.class).get().getExamples();
+            StringBuilder buffer = new StringBuilder();
+
+            for (ExamplesTrait.Example example : examples) {
+                ObjectNode input = example.getInput();
+                Optional<ObjectNode> output = example.getOutput();
+                buffer
+                    .append("\n")
+                    .append(String.format("@example %s%n", example.getTitle()))
+                    .append("```javascript\n")
+                    .append(String.format("// %s%n", example.getDocumentation().orElse("")))
+                    .append("""
+                    const input = %s;
+                    const command = new %s(input);
+                    const response = await client.send(command);%s
+                    /* response is
+                    %s
+                    */
+                    """.formatted(
+                        DocumentationExampleGenerator.inputToJavaScriptObject(input),
+                        commandName,
+                        getStreamingBlobOutputAddendum(),
+                        DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
+                    ))
+                    .append("```")
+                    .append("\n");
+            }
+
+            exampleDoc +=  buffer.toString();
+        }
+        return exampleDoc;
+    }
+
+    /**
+     * @param operation - to query.
+     * @return member name of the streaming blob http payload, or empty string.
+     */
+    private String getStreamingBlobOutputMember(OperationShape operation) {
+        return (model.expectShape(operation.getOutputShape()))
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(memberShape -> {
+                Shape target = model.expectShape(memberShape.getTarget());
+                return target.isBlobShape() && (
+                    target.hasTrait(StreamingTrait.class)
+                        || memberShape.hasTrait(StreamingTrait.class)
+                );
+            })
+            .map(MemberShape::getMemberName)
+            .findFirst()
+            .orElse("");
+    }
+
+    /**
+     * @return e.g. appendable "const bytes = await response.Body.transformToByteArray();".
+     */
+    private String getStreamingBlobOutputAddendum() {
+        String streamingBlobAddendum = "";
+        String streamingBlobMemberName = getStreamingBlobOutputMember(operation);
+        if (!streamingBlobMemberName.isEmpty()) {
+            String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
+            streamingBlobAddendum = """
+                    \n// consume or destroy the stream to free the socket.
+                    const bytes = await %s.transformToByteArray();
+                    // const str = await %s.transformToString();
+                    // %s.destroy(); // only applicable to Node.js Readable streams.
+                    """.formatted(
+                propAccess,
+                propAccess,
+                propAccess
+            );
+        }
+        return streamingBlobAddendum;
     }
 
     private String getReadStreamExample() {
@@ -324,10 +427,6 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateEndpointParameterInstructionProvider() {
-        if (!service.hasTrait(EndpointRuleSetTrait.class)) {
-            return;
-        }
-
         writer.addImport(
             "commonParams", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
@@ -370,7 +469,7 @@ final class CommandGenerator implements Runnable {
             operationContextParamValues.forEach((name, jmesPathForInputInJs) -> {
                 writer.write(
                     """
-                    $L: { type: \"operationContextParams\", get: (input?: any) => $L },
+                    $L: { type: "operationContextParams", get: (input?: any) => $L },
                     """,
                     name, jmesPathForInputInJs);
             });
@@ -381,9 +480,10 @@ final class CommandGenerator implements Runnable {
 
     private void generateCommandMiddlewareResolver(String configType) {
         Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
+        boolean schemaMode = SchemaGenerationAllowlist.allows(service.getId(), settings);
 
         Function<StructureShape, String> getFilterFunctionName = input -> {
-            if (sensitiveDataFinder.findsSensitiveDataIn(input)) {
+            if (sensitiveDataFinder.findsSensitiveDataIn(input) && !schemaMode) {
                 Symbol inputSymbol = symbolProvider.toSymbol(input);
                 String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
                 writer.addRelativeImport(
@@ -424,18 +524,19 @@ final class CommandGenerator implements Runnable {
         );
         {
             // Add serialization and deserialization plugin.
-            writer.write("$T(config, this.serialize, this.deserialize),", serde);
-            // EndpointsV2
-            if (service.hasTrait(EndpointRuleSetTrait.class)) {
-                writer.addImport(
-                    "getEndpointPlugin",
-                    null,
-                    TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
-                writer.write(
-                    """
-                    getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
-                );
+            if (!schemaMode) {
+                writer.write("$T(config, this.serialize, this.deserialize),", serde);
             }
+
+            // EndpointsV2
+            writer.addImport(
+                "getEndpointPlugin",
+                null,
+                TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
+            writer.write(
+                """
+                getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
+            );
             // Add customizations.
             addCommandSpecificPlugins();
         }
@@ -445,6 +546,8 @@ final class CommandGenerator implements Runnable {
             })"""
         ); // end middleware.
 
+        String filters = schemaMode ? "" : ".f($inputFilter:L, $outputFilter:L)";
+
         // context, filters
         writer.openBlock(
             """
@@ -452,8 +555,7 @@ final class CommandGenerator implements Runnable {
             """,
             """
             })
-            .n($client:S, $command:S)
-            .f($inputFilter:L, $outputFilter:L)""",
+            .n($client:S, $command:S)%s""".formatted(filters),
             () -> {
                 writer.pushState(SmithyContextCodeSection.builder()
                     .settings(settings)
@@ -592,10 +694,26 @@ final class CommandGenerator implements Runnable {
         }
     }
 
+    private void writeSchemaSerde() {
+        ShapeGroupingIndex shapeTree = ShapeGroupingIndex.of(model);
+        String operationSchema = reservedWords.escape(operation.getId().getName());
+        writer.addRelativeImport(operationSchema, null, Paths.get(
+            ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, shapeTree.getGroup(operation.getId())
+        ));
+        writer.write("""
+            .sc($L)""",
+            operationSchema
+        );
+    }
+
     private void writeSerde() {
-        writer
-            .write(".ser($L)", getSerdeDispatcher(true))
-            .write(".de($L)", getSerdeDispatcher(false));
+        if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+            writeSchemaSerde();
+        } else {
+            writer
+                .write(".ser($L)", getSerdeDispatcher(true))
+                .write(".de($L)", getSerdeDispatcher(false));
+        }
     }
 
     private String getSerdeDispatcher(boolean isInput) {
@@ -603,11 +721,11 @@ final class CommandGenerator implements Runnable {
             return "() => { throw new Error(\"No supported protocol was found\"); }";
         } else {
             String serdeFunctionName = isInput
-                    ? ProtocolGenerator.getSerFunctionShortName(symbol)
-                    : ProtocolGenerator.getDeserFunctionShortName(symbol);
+                ? ProtocolGenerator.getSerFunctionShortName(symbol)
+                : ProtocolGenerator.getDeserFunctionShortName(symbol);
             writer.addRelativeImport(serdeFunctionName, null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                            ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
+                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
             return serdeFunctionName;
         }
     }

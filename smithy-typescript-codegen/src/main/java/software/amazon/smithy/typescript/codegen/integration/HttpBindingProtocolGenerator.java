@@ -68,7 +68,6 @@ import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
@@ -534,7 +533,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             this::writeErrorCodeParser,
             isErrorCodeInBody,
             this::getErrorBodyLocation,
-            this::getOperationErrors
+            this::getOperationErrors,
+            getErrorAliases(context, containedOperations)
         );
         deserializingErrorShapes.addAll(errorShapes);
     }
@@ -767,20 +767,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         SymbolProvider symbolProvider = context.getSymbolProvider();
         List<HttpBinding> labelBindings = bindingIndex.getRequestBindings(operation, Location.LABEL);
 
-        final boolean useEndpointsV2 = context.getService().hasTrait(EndpointRuleSetTrait.class);
-        final Map<String, String> contextParams = useEndpointsV2
-            ? new RuleSetParameterFinder(context.getService())
-                .getContextParams(context.getModel().getShape(operation.getInputShape()).get())
-            : Collections.emptyMap();
+        final Map<String, String> contextParams = new RuleSetParameterFinder(context.getService())
+            .getContextParams(context.getModel().getShape(operation.getInputShape()).get());
 
         // Always write the bound path, but only the actual segments.
         writer.write("b.bp(\"$L\");",
                 "/" + trait.getUri().getSegments().stream()
                     .filter(segment -> {
-                        if (!useEndpointsV2) {
-                            // only applicable in Endpoints 2.0
-                            return true;
-                        }
                         String content = segment.getContent();
                         boolean isContextParam = contextParams.containsKey(content);
 
@@ -880,13 +873,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Shape target = model.expectShape(binding.getMember().getTarget());
 
         boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
-        if (isIdempotencyToken) {
-            writer
-                .addDependency(TypeScriptDependency.UUID_TYPES)
-                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
-        }
         boolean isRequired = binding.getMember().isRequired();
-        String idempotencyComponent = (isIdempotencyToken && !isRequired) ? " ?? generateIdempotencyToken()" : "";
+
+        String idempotencyComponent = "";
+        if (isIdempotencyToken && !isRequired) {
+            writer
+                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+            idempotencyComponent = " ?? generateIdempotencyToken()";
+        }
         String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
 
         String queryValue = getInputValue(
@@ -979,6 +973,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         // Only set the content type if one can be determined.
         writeContentTypeHeader(context, operation, true);
         writeDefaultInputHeaders(context, operation);
+        if (inputPresent) {
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : prefixHeaders) {
+                writePrefixHeaders(context, binding);
+            }
+        }
 
         if (inputPresent) {
             for (HttpBinding binding : headers) {
@@ -987,13 +987,6 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         }
 
         flushHeadersBuffer(writer);
-
-        if (inputPresent) {
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : prefixHeaders) {
-                writePrefixHeaders(context, binding);
-            }
-        }
         writer.dedent();
         writer.write(closing);
     }
@@ -1012,17 +1005,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             binding.getMember(),
             target
         );
-        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
-        if (isIdempotencyToken) {
-            context.getWriter()
-                .addDependency(TypeScriptDependency.UUID_TYPES)
-                .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.UUID);
-        }
 
         boolean headerAssertion = headerValue.endsWith("!");
         String headerBaseValue = (headerAssertion
             ? headerValue.substring(0, headerValue.length() - 1)
             : headerValue);
+        boolean isIdempotencyToken = binding.getMember().hasTrait(IdempotencyTokenTrait.class);
 
         if (!Objects.equals(memberLocation + "!", headerValue)) {
             String defaultValue = "";
@@ -1030,6 +1018,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String s = headerBuffer.get(headerKey);
                 defaultValue = " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
+                context.getWriter()
+                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
                 defaultValue = " ?? generateIdempotencyToken()";
             }
 
@@ -1054,6 +1044,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String s = headerBuffer.get(headerKey);
                 constructedHeaderValue += " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
+                context.getWriter()
+                    .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
                 constructedHeaderValue += " ?? generateIdempotencyToken()";
             } else {
                 constructedHeaderValue = headerValue;
@@ -1103,16 +1095,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             writeContentTypeHeader(context, operationOrError, false);
             injectExtraHeaders.run();
 
+            // Handle assembling prefix headers.
+            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
+                writePrefixHeaders(context, binding);
+            }
+
             for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.HEADER)) {
                 writeNormalHeader(context, binding);
             }
 
             flushHeadersBuffer(writer);
-
-            // Handle assembling prefix headers.
-            for (HttpBinding binding : bindingIndex.getResponseBindings(operationOrError, Location.PREFIX_HEADERS)) {
-                writePrefixHeaders(context, binding);
-            }
         });
     }
 

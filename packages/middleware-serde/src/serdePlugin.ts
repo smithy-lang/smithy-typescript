@@ -1,4 +1,4 @@
-import {
+import type {
   DeserializeHandlerOptions,
   Endpoint,
   MetadataBearer,
@@ -16,6 +16,9 @@ import {
 import { deserializerMiddleware } from "./deserializerMiddleware";
 import { serializerMiddleware } from "./serializerMiddleware";
 
+/**
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
+ */
 export const deserializerMiddlewareOption: DeserializeHandlerOptions = {
   name: "deserializerMiddleware",
   step: "deserialize",
@@ -23,6 +26,9 @@ export const deserializerMiddlewareOption: DeserializeHandlerOptions = {
   override: true,
 };
 
+/**
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
+ */
 export const serializerMiddlewareOption: SerializeHandlerOptions = {
   name: "serializerMiddleware",
   step: "serialize",
@@ -30,8 +36,12 @@ export const serializerMiddlewareOption: SerializeHandlerOptions = {
   override: true,
 };
 
-// Type the modifies the EndpointBearer to make it compatible with Endpoints 2.0 change.
-// Must be removed after all clients has been onboard the Endpoints 2.0
+/**
+ * Modifies the EndpointBearer to make it compatible with Endpoints 2.0 change.
+ *
+ * @internal
+ * @deprecated
+ */
 export type V1OrV2Endpoint = {
   // for v2
   urlParser?: UrlParser;
@@ -42,14 +52,14 @@ export type V1OrV2Endpoint = {
 
 /**
  * @internal
- *
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
 export function getSerdePlugin<
   InputType extends object = any,
   CommandSerdeContext extends SerdeContext = any,
   OutputType extends MetadataBearer = any,
 >(
-  config: V1OrV2Endpoint & SerdeFunctions,
+  config: SerdeFunctions,
   serializer: RequestSerializer<any, CommandSerdeContext>,
   deserializer: ResponseDeserializer<OutputType, any, CommandSerdeContext>
 ): Pluggable<InputType, OutputType> {

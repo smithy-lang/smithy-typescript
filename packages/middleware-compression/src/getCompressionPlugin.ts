@@ -1,11 +1,12 @@
-import { Pluggable } from "@smithy/types";
+import type { Pluggable } from "@smithy/types";
 
+import type {
+  CompressionMiddlewareConfig} from "./compressionMiddleware";
 import {
   compressionMiddleware,
-  CompressionMiddlewareConfig,
   compressionMiddlewareOptions,
 } from "./compressionMiddleware";
-import { CompressionPreviouslyResolved, CompressionResolvedConfig } from "./configurations";
+import type { CompressionPreviouslyResolved, CompressionResolvedConfig } from "./configurations";
 
 /**
  * @internal

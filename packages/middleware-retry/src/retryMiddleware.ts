@@ -1,7 +1,7 @@
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import { NoOpLogger } from "@smithy/smithy-client";
-import {
+import type {
   AbsoluteLocation,
   FinalizeHandler,
   FinalizeHandlerArguments,
@@ -18,9 +18,9 @@ import {
   SdkError,
 } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
-import { v4 } from "uuid";
+import { v4 } from "@smithy/uuid";
 
-import { RetryResolvedConfig } from "./configurations";
+import type { RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
 import { asSdkError } from "./util";
 

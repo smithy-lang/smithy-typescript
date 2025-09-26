@@ -1,6 +1,6 @@
-import { ChecksumConstructor } from "./checksum";
-import { HashConstructor, StreamHasher } from "./crypto";
-import { BodyLengthCalculator, Encoder } from "./util";
+import type { ChecksumConstructor } from "./checksum";
+import type { HashConstructor, StreamHasher } from "./crypto";
+import type { BodyLengthCalculator, Encoder } from "./util";
 
 /**
  * @public

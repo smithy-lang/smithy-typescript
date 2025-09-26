@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
-import { ConditionObject, EvaluateOptions } from "../types";
+import type { ConditionObject, EvaluateOptions } from "../types";
 import { evaluateCondition } from "./evaluateCondition";
 import { evaluateConditions } from "./evaluateConditions";
 
@@ -52,11 +52,11 @@ describe(evaluateConditions.name, () => {
 
     vi.mocked(evaluateCondition).mockReturnValueOnce({
       result: true,
-      toAssign: { name: mockCn1.assign, value: value1 },
+      toAssign: { name: mockCn1.assign!, value: value1 },
     });
     vi.mocked(evaluateCondition).mockReturnValueOnce({
       result: true,
-      toAssign: { name: mockCn2.assign, value: value2 },
+      toAssign: { name: mockCn2.assign!, value: value2 },
     });
 
     const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], { ...mockOptions });

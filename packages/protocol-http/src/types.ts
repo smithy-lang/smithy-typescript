@@ -1,4 +1,4 @@
-import {
+import type {
   FieldOptions as __FieldOptions,
   FieldPosition as __FieldPosition,
   HeaderBag as __HeaderBag,

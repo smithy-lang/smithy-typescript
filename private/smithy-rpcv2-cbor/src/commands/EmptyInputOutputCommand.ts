@@ -1,7 +1,9 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import { commonParams } from "../endpoint/EndpointParameters";
 import { EmptyStructure } from "../models/models_0";
 import { de_EmptyInputOutputCommand, se_EmptyInputOutputCommand } from "../protocols/Rpcv2cbor";
+import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -32,6 +34,8 @@ export interface EmptyInputOutputCommandOutput extends EmptyStructure, __Metadat
  * ```javascript
  * import { RpcV2ProtocolClient, EmptyInputOutputCommand } from "@smithy/smithy-rpcv2-cbor"; // ES Modules import
  * // const { RpcV2ProtocolClient, EmptyInputOutputCommand } = require("@smithy/smithy-rpcv2-cbor"); // CommonJS import
+ * // import type { RpcV2ProtocolClientConfig } from "@smithy/smithy-rpcv2-cbor";
+ * const config = {}; // type is RpcV2ProtocolClientConfig
  * const client = new RpcV2ProtocolClient(config);
  * const input = {};
  * const command = new EmptyInputOutputCommand(input);
@@ -49,6 +53,7 @@ export interface EmptyInputOutputCommandOutput extends EmptyStructure, __Metadat
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class EmptyInputOutputCommand extends $Command
   .classBuilder<
@@ -58,8 +63,12 @@ export class EmptyInputOutputCommand extends $Command
     ServiceInputTypes,
     ServiceOutputTypes
   >()
+  .ep(commonParams)
   .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getSerdePlugin(config, this.serialize, this.deserialize)];
+    return [
+      getSerdePlugin(config, this.serialize, this.deserialize),
+      getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+    ];
   })
   .s("RpcV2Protocol", "EmptyInputOutput", {})
   .n("RpcV2ProtocolClient", "EmptyInputOutputCommand")

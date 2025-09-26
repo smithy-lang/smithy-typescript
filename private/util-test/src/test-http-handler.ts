@@ -1,5 +1,5 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { Client, RequestHandler, RequestHandlerOutput } from "@smithy/types";
+import type { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { Client, HttpHandlerOptions, RequestHandler, RequestHandlerOutput } from "@smithy/types";
 import { expect } from "vitest";
 
 /**
@@ -29,59 +29,57 @@ export type HttpRequestMatcher = {
 };
 
 /**
- * @internal
- */
-const MOCK_CREDENTIALS = {
-  accessKeyId: "MOCK_ACCESS_KEY_ID",
-  secretAccessKey: "MOCK_SECRET_ACCESS_KEY_ID",
-};
-
-interface TestHttpHandlerConfig {}
-
-/**
  * Supplied to test clients to assert correct requests.
  * @internal
  */
-export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
+export class TestHttpHandler implements HttpHandler {
   private static WATCHER = Symbol("TestHttpHandler_WATCHER");
+
+  public readonly matchers: HttpRequestMatcher[];
+
   private originalSend?: Function;
   private originalRequestHandler?: RequestHandler<any, any, any>;
   private client?: Client<any, any, any>;
+  private responseQueue: HttpResponse[] = [];
   private assertions = 0;
 
-  public constructor(public readonly matcher: HttpRequestMatcher) {}
+  public constructor(...matchers: HttpRequestMatcher[]) {
+    this.matchers = matchers;
+    const RESERVED_ENVIRONMENT_VARIABLES = {
+      AWS_DEFAULT_REGION: 1,
+      AWS_REGION: 1,
+      AWS_PROFILE: 1,
+      AWS_ACCESS_KEY_ID: 1,
+      AWS_SECRET_ACCESS_KEY: 1,
+      AWS_SESSION_TOKEN: 1,
+      AWS_CREDENTIAL_EXPIRATION: 1,
+      AWS_CREDENTIAL_SCOPE: 1,
+      AWS_EC2_METADATA_DISABLED: 1,
+      AWS_WEB_IDENTITY_TOKEN_FILE: 1,
+      AWS_ROLE_ARN: 1,
+      AWS_CONTAINER_CREDENTIALS_FULL_URI: 1,
+      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: 1,
+      AWS_CONTAINER_AUTHORIZATION_TOKEN: 1,
+      AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE: 1,
+    };
+    for (const key in RESERVED_ENVIRONMENT_VARIABLES) {
+      delete process.env[key];
+    }
+    process.env.AWS_ACCESS_KEY_ID = "INTEGRATION_TEST_MOCK";
+    process.env.AWS_SECRET_ACCESS_KEY = "INTEGRATION_TEST_MOCK";
+  }
 
   /**
    * @param client - to watch for requests.
-   * @param matcher - optional override of this instance's matchers.
+   * @param matchers - optional override of this instance's matchers.
    *
    * Temporarily hooks the client.send call to check the outgoing request.
    */
-  public watch(client: Client<any, any, any>, matcher: HttpRequestMatcher = this.matcher) {
+  public watch(client: Client<any, any, any>): TestHttpHandler {
     this.client = client;
-    this.originalRequestHandler = client.config.originalRequestHandler;
-    // mock credentials to avoid default chain lookup.
-    client.config.credentials = async () => MOCK_CREDENTIALS;
-    client.config.credentialDefaultProvider = () => {
-      return async () => {
-        return MOCK_CREDENTIALS;
-      };
-    };
-    const signerProvider = client.config.signer;
-    if (typeof signerProvider === "function") {
-      client.config.signer = async () => {
-        const _signer = await signerProvider();
-        if (typeof _signer.credentialProvider === "function") {
-          // signer is instance of SignatureV4
-          _signer.credentialProvider = async () => {
-            return MOCK_CREDENTIALS;
-          };
-        }
-        return _signer;
-      };
-    }
+    this.originalRequestHandler = client.config.requestHandler;
 
-    client.config.requestHandler = new TestHttpHandler(matcher);
+    client.config.requestHandler = this;
     if (!(client as any)[TestHttpHandler.WATCHER]) {
       (client as any)[TestHttpHandler.WATCHER] = true;
       const originalSend = (this.originalSend = client.send as any);
@@ -94,14 +92,27 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
         });
       };
     }
+
+    return this;
+  }
+
+  /**
+   * @param httpResponses - to enqueue for mock responses.
+   */
+  public respondWith(...httpResponses: HttpResponse[]): TestHttpHandler {
+    this.responseQueue.push(...httpResponses);
+    return this;
   }
 
   /**
    * @throws TestHttpHandlerSuccess to indicate success (only way to control it).
    * @throws Error any other exception to indicate failure.
    */
-  public async handle(request: HttpRequest): Promise<RequestHandlerOutput<HttpResponse>> {
-    const m = this.matcher;
+  public async handle(
+    request: HttpRequest,
+    handlerOptions?: HttpHandlerOptions
+  ): Promise<RequestHandlerOutput<HttpResponse>> {
+    const m = this.matchers.length > 1 ? this.matchers.shift()! : this.matchers[0];
 
     if (m.log) {
       console.log(request);
@@ -111,14 +122,26 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
     this.check(m.hostname, request.hostname);
     this.check(m.port, request.port);
     this.check(m.path, request.path);
-    this.checkAll(m.query, request.query);
+    this.checkAll(m.query ?? {}, request.query, "query");
 
-    this.checkAll(m.headers, request.headers);
+    this.checkAll(m.headers ?? {}, request.headers, "header");
     this.check(m.body, request.body);
     this.check(m.method, request.method);
 
     if (this.assertions === 0) {
       throw new Error("Request handled with no assertions, empty matcher?");
+    }
+
+    if (this.responseQueue.length > 1) {
+      return {
+        response: this.responseQueue.shift()!,
+      };
+    } else {
+      if (this.responseQueue.length === 1) {
+        return {
+          response: this.responseQueue[0],
+        };
+      }
     }
 
     throw new TestHttpHandlerSuccess();
@@ -129,10 +152,9 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
     (this.client as any).send = this.originalSend as any;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateHttpClientConfig(key: keyof TestHttpHandlerConfig, value: TestHttpHandlerConfig[typeof key]): void {}
+  updateHttpClientConfig(key: never, value: never): void {}
 
-  httpHandlerConfigs(): TestHttpHandlerConfig {
+  httpHandlerConfigs() {
     return {};
   }
 
@@ -167,7 +189,11 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
     this.assertions++;
   }
 
-  private checkAll(matchers?: Record<string, Matcher> | Map<RegExp | string, Matcher>, observed?: any) {
+  private checkAll(
+    matchers: Record<string, Matcher> | Map<RegExp | string, Matcher>,
+    observed: any,
+    type: "header" | "query"
+  ) {
     if (matchers == null) {
       return;
     }
@@ -179,7 +205,11 @@ export class TestHttpHandler implements HttpHandler<TestHttpHandlerConfig> {
         if (key.startsWith("/") && key.endsWith("/")) {
           key = new RegExp(key);
         } else {
-          this.check(matcher, observed[key]);
+          const matchingValue =
+            type === "header"
+              ? observed[Object.keys(observed).find((k) => k.toLowerCase() === String(key).toLowerCase()) ?? ""]
+              : observed[key];
+          this.check(matcher, matchingValue);
         }
       }
       if (key instanceof RegExp) {
@@ -209,8 +239,8 @@ export class TestHttpHandlerSuccess extends Error {
  */
 export const requireRequestsFrom = (client: Client<any, any, any>) => {
   return {
-    toMatch(matcher: HttpRequestMatcher) {
-      return new TestHttpHandler(matcher).watch(client);
+    toMatch(...matchers: HttpRequestMatcher[]) {
+      return new TestHttpHandler(...matchers).watch(client);
     },
   };
 };

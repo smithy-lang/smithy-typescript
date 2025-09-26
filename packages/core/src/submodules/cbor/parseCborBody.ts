@@ -1,10 +1,16 @@
 import { collectBody } from "@smithy/core/protocols";
 import { HttpRequest as __HttpRequest } from "@smithy/protocol-http";
-import { HeaderBag as __HeaderBag, HttpResponse, SerdeContext as __SerdeContext, SerdeContext } from "@smithy/types";
+import type {
+  HeaderBag as __HeaderBag,
+  HttpResponse,
+  SerdeContext as __SerdeContext,
+  SerdeContext,
+} from "@smithy/types";
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
 
 import { cbor } from "./cbor";
-import { tag, tagSymbol } from "./cbor-types";
+import type { tagSymbol } from "./cbor-types";
+import { tag } from "./cbor-types";
 
 /**
  * @internal
@@ -69,8 +75,9 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
     return sanitizeErrorCode(data["__type"]);
   }
 
-  if (data.code !== undefined) {
-    return sanitizeErrorCode(data.code);
+  const codeKey = Object.keys(data).find((key) => key.toLowerCase() === "code");
+  if (codeKey && data[codeKey] !== undefined) {
+    return sanitizeErrorCode(data[codeKey]);
   }
 };
 
@@ -100,7 +107,10 @@ export const buildHttpRpcRequest = async (
     port,
     method: "POST",
     path: basePath.endsWith("/") ? basePath.slice(0, -1) + path : basePath + path,
-    headers,
+    headers: {
+      // intentional copy.
+      ...headers,
+    },
   };
   if (resolvedHostname !== undefined) {
     contents.hostname = resolvedHostname;

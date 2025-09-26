@@ -1,5 +1,6 @@
-import { HttpHandler, HttpResponse } from "@smithy/protocol-http";
-import { HttpRequest as IHttpRequest } from "@smithy/types";
+import type { HttpHandler } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/protocol-http";
+import type { HttpRequest as IHttpRequest } from "@smithy/types";
 import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { fromUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";
@@ -11,7 +12,14 @@ import { requireRequestsFrom } from "../../../private/util-test/src/index";
 describe("util-stream", () => {
   describe(Weather.name, () => {
     it("should be uniform between string and Uint8Array payloads", async () => {
-      const client = new Weather({ endpoint: "https://foo.bar" });
+      const client = new Weather({
+        endpoint: "https://foo.bar",
+        region: "us-west-2",
+        credentials: {
+          accessKeyId: "INTEG",
+          secretAccessKey: "INTEG",
+        },
+      });
       requireRequestsFrom(client).toMatch({
         method: "POST",
         hostname: "foo.bar",
@@ -46,7 +54,14 @@ describe("util-stream", () => {
   });
 
   describe("blob helper integration", () => {
-    const client = new Weather({ endpoint: "https://foo.bar" });
+    const client = new Weather({
+      endpoint: "https://foo.bar",
+      region: "us-west-2",
+      credentials: {
+        accessKeyId: "INTEG",
+        secretAccessKey: "INTEG",
+      },
+    });
 
     requireRequestsFrom(client).toMatch({
       method: "POST",

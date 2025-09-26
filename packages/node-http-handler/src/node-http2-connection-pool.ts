@@ -1,5 +1,5 @@
-import { ConnectionPool } from "@smithy/types";
-import { ClientHttp2Session } from "http2";
+import type { ConnectionPool } from "@smithy/types";
+import type { ClientHttp2Session } from "http2";
 
 export class NodeHttp2ConnectionPool implements ConnectionPool<ClientHttp2Session> {
   private sessions: ClientHttp2Session[] = [];

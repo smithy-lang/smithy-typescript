@@ -1,5 +1,5 @@
 import { streamCollector } from "@smithy/fetch-http-handler";
-import { SdkStreamMixin } from "@smithy/types";
+import type { SdkStreamMixin } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { toHex } from "@smithy/util-hex-encoding";
 import { toUtf8 } from "@smithy/util-utf8";

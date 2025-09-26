@@ -1,7 +1,9 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
-import { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
-import { ClientHttp2Session, constants } from "http2";
+import type { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
+import type { ClientHttp2Session } from "http2";
+import { constants } from "http2";
 
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
@@ -87,7 +89,10 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
     this.connectionManager.destroy();
   }
 
-  async handle(request: HttpRequest, { abortSignal }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(
+    request: HttpRequest,
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+  ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
       this.connectionManager.setDisableConcurrentStreams(this.config.disableConcurrentStreams || false);
@@ -95,7 +100,8 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
         this.connectionManager.setMaxConcurrentStreams(this.config.maxConcurrentStreams);
       }
     }
-    const { requestTimeout, disableConcurrentStreams } = this.config;
+    const { requestTimeout: configRequestTimeout, disableConcurrentStreams } = this.config;
+    const effectiveRequestTimeout = requestTimeout ?? configRequestTimeout;
     return new Promise((_resolve, _reject) => {
       // It's redundant to track fulfilled because promises use the first resolution/rejection
       // but avoids generating unnecessary stack traces in the "close" event handler.
@@ -176,10 +182,10 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
         }
       });
 
-      if (requestTimeout) {
-        req.setTimeout(requestTimeout, () => {
+      if (effectiveRequestTimeout) {
+        req.setTimeout(effectiveRequestTimeout, () => {
           req.close();
-          const timeoutError = new Error(`Stream timed out because of no activity for ${requestTimeout} ms`);
+          const timeoutError = new Error(`Stream timed out because of no activity for ${effectiveRequestTimeout} ms`);
           timeoutError.name = "TimeoutError";
           rejectWithDestroy(timeoutError);
         });
@@ -227,7 +233,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
         }
       });
 
-      writeRequestBodyPromise = writeRequestBody(req, request, requestTimeout);
+      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout);
     });
   }
 

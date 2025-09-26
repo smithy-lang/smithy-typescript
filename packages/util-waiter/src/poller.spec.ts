@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 import { runPolling } from "./poller";
 import { sleep } from "./utils/sleep";
-import { WaiterOptions, WaiterState } from "./waiter";
+import type { WaiterOptions } from "./waiter";
+import { WaiterState } from "./waiter";
 
 vi.mock("./utils/sleep");
 

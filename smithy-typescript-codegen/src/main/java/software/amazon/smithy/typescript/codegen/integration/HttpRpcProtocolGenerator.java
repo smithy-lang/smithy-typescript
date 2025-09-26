@@ -18,7 +18,6 @@ package software.amazon.smithy.typescript.codegen.integration;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -35,6 +34,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
 import software.amazon.smithy.utils.OptionalUtils;
+import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -108,7 +108,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             getDocumentContentType(),
             () -> {
                 TypeScriptWriter writer = context.getWriter();
-                writer.write("body = context.utf8Decoder(body);");
+                serializeEventStreamBodyToBytes(writer);
             },
             serializingDocumentShapes
         );
@@ -234,7 +234,8 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             this::writeErrorCodeParser,
             isErrorCodeInBody,
             this::getErrorBodyLocation,
-            this::getOperationErrors
+            this::getOperationErrors,
+            getErrorAliases(context, containedOperations)
         );
         deserializingErrorShapes.addAll(errorShapes);
     }
@@ -358,12 +359,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             // Write the default `body` property.
             writer.write("let body: any;");
             if (EventStreamGenerator.hasEventStreamInput(context, operation)) {
-                // There must only one eventstream member in request structure.
-                MemberShape member = inputShape.members().stream().collect(Collectors.toList()).get(0);
-                Shape target = context.getModel().expectShape(member.getTarget());
+                MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
+                    context, inputShape
+                );
+                Shape target = context.getModel().expectShape(eventStreamMember.getTarget());
                 Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
                 String serFunctionName = ProtocolGenerator.getSerFunctionShortName(targetSymbol);
-                String memberName = member.getMemberName();
+                String memberName = eventStreamMember.getMemberName();
                 writer.write("body = $L(input.$L, context);", serFunctionName, memberName);
             } else {
                 // Track input shapes so their serializers may be generated.
@@ -539,12 +541,16 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                     // If there's an output present, we know it's a structure.
                     StructureShape outputShape = context.getModel().expectShape(outputId).asStructureShape().get();
                     if (EventStreamGenerator.hasEventStreamOutput(context, operation)) {
-                        // There must only one eventstream member in response structure.
-                        MemberShape member = outputShape.members().stream().collect(Collectors.toList()).get(0);
-                        Shape target = context.getModel().expectShape(member.getTarget());
+                        MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
+                            context, outputShape
+                        );
+                        Shape target = context.getModel().expectShape(eventStreamMember.getTarget());
                         Symbol targetSymbol = context.getSymbolProvider().toSymbol(target);
-                        writer.write("const contents = { $L: $L(output.body, context) };", member.getMemberName(),
-                                ProtocolGenerator.getDeserFunctionShortName(targetSymbol));
+                        writer.write(
+                            "const contents = { $L: $L(output.body, context) };",
+                            eventStreamMember.getMemberName(),
+                            ProtocolGenerator.getDeserFunctionShortName(targetSymbol)
+                        );
                     } else {
                         // We only need to load the body and prepare a contents object if there is a response.
                         writer.write("const data: any = await parseBody(output.body, context)");
@@ -599,6 +605,17 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      */
     protected String getErrorBodyLocation(GenerationContext context, String outputLocation) {
         return outputLocation;
+    }
+
+    /**
+     * Allows RPC protocols to designate how to convert the body into bytes.
+     *
+     * @deprecated superseded by schema-serde.
+     */
+    @Deprecated
+    @SmithyInternalApi
+    protected void serializeEventStreamBodyToBytes(TypeScriptWriter writer) {
+        writer.write("body = context.utf8Decoder(JSON.stringify(body));");
     }
 
     /**

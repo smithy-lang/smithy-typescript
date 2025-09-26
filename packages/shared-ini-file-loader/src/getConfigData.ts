@@ -1,4 +1,5 @@
-import { IniSectionType, ParsedIniData } from "@smithy/types";
+import type { ParsedIniData } from "@smithy/types";
+import { IniSectionType } from "@smithy/types";
 
 import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
 

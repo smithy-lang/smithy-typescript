@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { HttpRequest, Identity } from "@smithy/types";
+import type { HttpRequest, Identity } from "@smithy/types";
 
-import { HttpSigner } from "./HttpSigner";
+import type { HttpSigner } from "./HttpSigner";
 
 /**
  * Signer for the synthetic @smithy.api#noAuth auth scheme.

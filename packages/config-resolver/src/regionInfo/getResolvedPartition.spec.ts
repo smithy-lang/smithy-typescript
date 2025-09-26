@@ -1,7 +1,7 @@
 import { describe, expect, test as it } from "vitest";
 
 import { getResolvedPartition } from "./getResolvedPartition";
-import { PartitionHash } from "./PartitionHash";
+import type { PartitionHash } from "./PartitionHash";
 
 describe(getResolvedPartition.name, () => {
   const mockRegion = "mockRegion";
@@ -32,6 +32,6 @@ describe(getResolvedPartition.name, () => {
   });
 
   it("returns aws if partitionHash is empty", () => {
-    expect(getResolvedPartition(mockRegion, { partitionHash: undefined })).toBe("aws");
+    expect(getResolvedPartition(mockRegion, { partitionHash: undefined as any })).toBe("aws");
   });
 });

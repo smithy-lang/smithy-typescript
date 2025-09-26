@@ -1,4 +1,4 @@
-import { Logger } from "@smithy/types";
+import type { Logger } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getExtendedInstanceMetadataCredentials } from "./getExtendedInstanceMetadataCredentials";
@@ -24,7 +24,7 @@ describe("staticStabilityProvider", () => {
           return {
             ...input,
             expiration: `Extending expiration count: ${extensionCount}`,
-          };
+          } as any;
         };
       })()
     );

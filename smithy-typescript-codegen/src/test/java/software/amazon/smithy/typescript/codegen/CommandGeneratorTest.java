@@ -3,6 +3,7 @@ package software.amazon.smithy.typescript.codegen;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -10,50 +11,46 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 
 public class CommandGeneratorTest {
+    // todo(schema) enable when on by default.
+    @Disabled
     @Test
-    public void addsCommandSpecificPlugins() {
-        testCommmandCodegen(
+    public void writesOperationSchemaRef() {
+        testCommandCodegen(
             "output-structure.smithy",
-            new String[] {"getSerdePlugin(config, this.serialize, this.deserialize)"}
-        );
-    }
-
-    @Test
-    public void writesSerializer() {
-        testCommmandCodegen(
-            "output-structure.smithy",
-            new String[] {".ser("}
-        );
-    }
-
-    @Test
-    public void writesDeserializer() {
-        testCommmandCodegen(
-            "output-structure.smithy",
-            new String[] {".de("}
+            new String[] {".sc("}
         );
     }
 
     @Test
     public void writesOperationContextParamValues() {
-        testCommmandCodegen(
+        testCommandCodegen(
             "endpointsV2/endpoints-operation-context-params.smithy",
             new String[] {
-                "opContextParamIdentifier: { type: \"operationContextParams\", get: (input?: any) => input?.fooString }",
-                "opContextParamSubExpression: { type: \"operationContextParams\", get: (input?: any) => input?.fooObj?.bar }",
-                "opContextParamWildcardExpressionList: { type: \"operationContextParams\", get: (input?: any) => input?.fooList }",
-                "opContextParamWildcardExpressionListFlatten: { type: \"operationContextParams\", get: (input?: any) => input?.fooListList.flat() }",
-                "opContextParamWildcardExpressionListObj: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObj?.map((obj: any) => obj?.key) }",
-                "opContextParamWildcardExpressionListObjListFlatten: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObjList?.map((obj: any) => obj?.key).flat() }",
-                "opContextParamWildcardExpressionHash: { type: \"operationContextParams\", get: (input?: any) => Object.values(input?.fooObjObj ?? {}).map((obj: any) => obj?.bar) }",
-                "opContextParamMultiSelectList: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObjObj?.map((obj: any) => [obj?.fooObject?.bar,obj?.fooString].filter((i) => i)) }",
-                "opContextParamMultiSelectListFlatten: { type: \"operationContextParams\", get: (input?: any) => input?.fooListObjObj?.map((obj: any) => [obj?.fooList].filter((i) => i).flat()) }",
-                "opContextParamKeys: { type: \"operationContextParams\", get: (input?: any) => Object.keys(input?.fooKeys ?? {}) }",
+                """
+opContextParamIdentifier: { type: "operationContextParams", get: (input?: any) => input?.fooString }""",
+                """
+opContextParamSubExpression: { type: "operationContextParams", get: (input?: any) => input?.fooObj?.bar }""",
+                """
+opContextParamWildcardExpressionList: { type: "operationContextParams", get: (input?: any) => input?.fooList }""",
+                """
+opContextParamWildcardExpressionListFlatten: { type: "operationContextParams", get: (input?: any) => input?.fooListList.flat() }""",
+                """
+opContextParamWildcardExpressionListObj: { type: "operationContextParams", get: (input?: any) => input?.fooListObj?.map((obj: any) => obj?.key) }""",
+                """
+opContextParamWildcardExpressionListObjListFlatten: { type: "operationContextParams", get: (input?: any) => input?.fooListObjList?.map((obj: any) => obj?.key).flat() }""",
+                """
+opContextParamWildcardExpressionHash: { type: "operationContextParams", get: (input?: any) => Object.values(input?.fooObjObj ?? {}).map((obj: any) => obj?.bar) }""",
+                """
+opContextParamMultiSelectList: { type: "operationContextParams", get: (input?: any) => input?.fooListObjObj?.map((obj: any) => [obj?.fooObject?.bar,obj?.fooString].filter((i) => i)) }""",
+                """
+opContextParamMultiSelectListFlatten: { type: "operationContextParams", get: (input?: any) => input?.fooListObjObj?.map((obj: any) => [obj?.fooList].filter((i) => i)).flat() }""",
+                """
+opContextParamKeys: { type: "operationContextParams", get: (input?: any) => Object.keys(input?.fooKeys ?? {}) }""",
             }
         );
     }
 
-    private void testCommmandCodegen(String filename, String[] expectedTypeArray) {
+    private void testCommandCodegen(String filename, String[] expectedTypeArray) {
         MockManifest manifest = new MockManifest();
         PluginContext context = PluginContext.builder()
             .pluginClassLoader(getClass().getClassLoader())

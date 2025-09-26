@@ -1,5 +1,5 @@
 import { fromStatic as convertToProvider } from "@smithy/property-provider";
-import { Provider } from "@smithy/types";
+import type { Provider } from "@smithy/types";
 
 /**
  * @internal

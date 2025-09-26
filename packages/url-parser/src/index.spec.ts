@@ -1,4 +1,4 @@
-import { Endpoint } from "@smithy/types";
+import type { Endpoint } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { parseUrl } from ".";

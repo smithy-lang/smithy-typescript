@@ -1,4 +1,4 @@
-import {
+import type {
   EndpointObject as __EndpointObject,
   EndpointObjectHeaders as __EndpointObjectHeaders,
   EndpointObjectProperties as __EndpointObjectProperties,

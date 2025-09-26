@@ -1,4 +1,4 @@
-import { HttpResponse, ResponseMetadata } from "@smithy/types";
+import type { HttpResponse, ResponseMetadata } from "@smithy/types";
 
 import { decorateServiceException } from "./exceptions";
 

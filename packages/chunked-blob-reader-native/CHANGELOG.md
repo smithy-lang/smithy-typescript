@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- Updated dependencies [64cda93]
+  - @smithy/util-base64@4.1.0
+
 ## 4.0.0
 
 ### Major Changes

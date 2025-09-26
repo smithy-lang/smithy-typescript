@@ -1,5 +1,73 @@
 # Change Log
 
+## 4.1.2
+
+### Patch Changes
+
+- 937ac5a: make $retryable-trait errors considered transient in StandardRetryStrategyV2
+- Updated dependencies [937ac5a]
+  - @smithy/service-error-classification@4.1.2
+
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/service-error-classification@4.1.1
+
+## 4.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/service-error-classification@4.1.0
+  - @smithy/types@4.4.0
+
+## 4.0.7
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/service-error-classification@4.0.7
+
+## 4.0.6
+
+### Patch Changes
+
+- Updated dependencies [c8d5bb2]
+  - @smithy/service-error-classification@4.0.6
+
+## 4.0.5
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/service-error-classification@4.0.5
+
+## 4.0.4
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/service-error-classification@4.0.4
+
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [89bde09]
+  - @smithy/service-error-classification@4.0.3
+
 ## 4.0.2
 
 ### Patch Changes

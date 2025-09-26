@@ -1,8 +1,8 @@
-import { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
+import type { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
 
-import { EndpointResolvedConfig } from "../resolveEndpointConfig";
+import type { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";
-import { EndpointParameterInstructions } from "../types";
+import type { EndpointParameterInstructions } from "../types";
 import { createConfigValueProvider } from "./createConfigValueProvider";
 import { getEndpointFromConfig } from "./getEndpointFromConfig";
 import { toEndpointV1 } from "./toEndpointV1";
@@ -38,7 +38,7 @@ export const getEndpointFromInstructions = async <
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
   context?: HandlerExecutionContext
 ): Promise<EndpointV2> => {
-  if (!clientConfig.endpoint) {
+  if (!clientConfig.isCustomEndpoint) {
     let endpointFromConfig: string | undefined;
 
     // This field is guaranteed by the type indicated by the config resolver, but is new
@@ -52,6 +52,7 @@ export const getEndpointFromInstructions = async <
 
     if (endpointFromConfig) {
       clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig!));
+      clientConfig.isCustomEndpoint = true;
     }
   }
 

@@ -1,5 +1,235 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 97fe0d8: Replace 'uuid' with '@smithy/uuid'
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.4
+
+## 4.2.4
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.3
+
+## 4.2.3
+
+### Patch Changes
+
+- Updated dependencies [937ac5a]
+  - @smithy/service-error-classification@4.1.2
+  - @smithy/util-retry@4.1.2
+
+## 4.2.2
+
+### Patch Changes
+
+- @smithy/node-config-provider@4.2.2
+- @smithy/smithy-client@4.6.2
+
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/node-config-provider@4.2.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/service-error-classification@4.1.1
+  - @smithy/smithy-client@4.6.1
+  - @smithy/util-middleware@4.1.1
+  - @smithy/util-retry@4.1.1
+
+## 4.2.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/service-error-classification@4.1.0
+  - @smithy/node-config-provider@4.2.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/smithy-client@4.6.0
+  - @smithy/util-retry@4.1.0
+  - @smithy/types@4.4.0
+
+## 4.1.22
+
+### Patch Changes
+
+- @smithy/smithy-client@4.5.2
+
+## 4.1.21
+
+### Patch Changes
+
+- @smithy/smithy-client@4.5.1
+
+## 4.1.20
+
+### Patch Changes
+
+- Updated dependencies [eb1ab40]
+  - @smithy/smithy-client@4.5.0
+
+## 4.1.19
+
+### Patch Changes
+
+- fd00602: update uuid types version
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/smithy-client@4.4.10
+  - @smithy/node-config-provider@4.1.4
+  - @smithy/protocol-http@5.1.3
+  - @smithy/service-error-classification@4.0.7
+  - @smithy/util-middleware@4.0.5
+  - @smithy/util-retry@4.0.7
+
+## 4.1.18
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.9
+
+## 4.1.17
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.8
+
+## 4.1.16
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.7
+
+## 4.1.15
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.6
+
+## 4.1.14
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.5
+
+## 4.1.13
+
+### Patch Changes
+
+- Updated dependencies [c8d5bb2]
+  - @smithy/service-error-classification@4.0.6
+  - @smithy/util-retry@4.0.6
+  - @smithy/smithy-client@4.4.4
+
+## 4.1.12
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.3
+
+## 4.1.11
+
+### Patch Changes
+
+- @smithy/smithy-client@4.4.2
+
+## 4.1.10
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/node-config-provider@4.1.3
+  - @smithy/protocol-http@5.1.2
+  - @smithy/service-error-classification@4.0.5
+  - @smithy/smithy-client@4.4.1
+  - @smithy/util-middleware@4.0.4
+  - @smithy/util-retry@4.0.5
+
+## 4.1.9
+
+### Patch Changes
+
+- Updated dependencies [23812a9]
+  - @smithy/smithy-client@4.4.0
+
+## 4.1.8
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+- Updated dependencies [06b0ce8]
+  - @smithy/types@4.3.0
+  - @smithy/smithy-client@4.3.0
+  - @smithy/node-config-provider@4.1.2
+  - @smithy/protocol-http@5.1.1
+  - @smithy/service-error-classification@4.0.4
+  - @smithy/util-middleware@4.0.3
+  - @smithy/util-retry@4.0.4
+
+## 4.1.7
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.6
+
+## 4.1.6
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.5
+
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [9f8d075]
+  - @smithy/node-config-provider@4.1.1
+  - @smithy/smithy-client@4.2.4
+
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [acefcf5]
+- Updated dependencies [9ff783b]
+  - @smithy/node-config-provider@4.1.0
+  - @smithy/smithy-client@4.2.3
+
+## 4.1.3
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.2
+
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [89bde09]
+  - @smithy/service-error-classification@4.0.3
+  - @smithy/util-retry@4.0.3
+
+## 4.1.1
+
+### Patch Changes
+
+- @smithy/smithy-client@4.2.1
+
 ## 4.1.0
 
 ### Minor Changes

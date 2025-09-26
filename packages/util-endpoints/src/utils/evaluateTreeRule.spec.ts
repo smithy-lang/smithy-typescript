@@ -1,6 +1,6 @@
 import { describe, expect, test as it, vi } from "vitest";
 
-import { TreeRuleObject } from "../types";
+import type { TreeRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateRules } from "./evaluateRules";
 import { evaluateTreeRule } from "./evaluateTreeRule";
@@ -36,7 +36,7 @@ describe(evaluateTreeRule.name, () => {
     const mockEndpointUrl = new URL("http://example.com");
 
     vi.mocked(evaluateConditions).mockReturnValue({ result: true, referenceRecord: mockReferenceRecord });
-    vi.mocked(evaluateRules).mockReturnValue(mockEndpointUrl);
+    vi.mocked(evaluateRules).mockReturnValue(mockEndpointUrl as any);
 
     const result = evaluateTreeRule(mockTreeRule, mockOptions);
     expect(result).toBe(mockEndpointUrl);

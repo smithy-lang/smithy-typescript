@@ -1,5 +1,74 @@
 # Change Log
 
+## 4.3.2
+
+### Patch Changes
+
+- f8793be: prevent compilation from inserting Uint8Array type parameter
+
+## 4.3.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/fetch-http-handler@5.2.1
+  - @smithy/node-http-handler@4.2.1
+
+## 4.3.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/fetch-http-handler@5.2.0
+  - @smithy/node-http-handler@4.2.0
+  - @smithy/util-hex-encoding@4.1.0
+  - @smithy/util-buffer-from@4.1.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
+## 4.2.4
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/fetch-http-handler@5.1.1
+  - @smithy/node-http-handler@4.1.1
+
+## 4.2.3
+
+### Patch Changes
+
+- Updated dependencies [c4e923a]
+  - @smithy/fetch-http-handler@5.1.0
+  - @smithy/node-http-handler@4.1.0
+
+## 4.2.2
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/fetch-http-handler@5.0.4
+  - @smithy/node-http-handler@4.0.6
+
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/fetch-http-handler@5.0.3
+  - @smithy/node-http-handler@4.0.5
+
 ## 4.2.0
 
 ### Minor Changes

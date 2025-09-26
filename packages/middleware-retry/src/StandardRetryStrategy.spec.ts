@@ -7,21 +7,21 @@ import {
   RETRY_MODES,
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
-import { v4 } from "uuid";
+import { v4 } from "@smithy/uuid";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
 import { defaultRetryDecider } from "./retryDecider";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
-import { RetryQuota } from "./types";
+import type { RetryQuota } from "./types";
 
 vi.mock("@smithy/service-error-classification");
 vi.mock("./delayDecider");
 vi.mock("./retryDecider");
 vi.mock("./defaultRetryQuota");
 vi.mock("@smithy/protocol-http");
-vi.mock("uuid");
+vi.mock("@smithy/uuid");
 
 describe("defaultStrategy", () => {
   let next: any; // variable for next mock function in utility methods

@@ -1,5 +1,5 @@
 import { setFeature } from "@smithy/core";
-import {
+import type {
   AuthScheme,
   EndpointParameters,
   EndpointV2,
@@ -14,8 +14,8 @@ import {
 import { getSmithyContext } from "@smithy/util-middleware";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
-import { EndpointResolvedConfig } from "./resolveEndpointConfig";
-import { EndpointParameterInstructions } from "./types";
+import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
+import type { EndpointParameterInstructions } from "./types";
 
 /**
  * @internal
@@ -39,7 +39,7 @@ export const endpointMiddleware = <T extends EndpointParameters>({
       context: HandlerExecutionContext
     ): SerializeHandler<any, Output> =>
     async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
-      if (config.endpoint) {
+      if (config.isCustomEndpoint) {
         setFeature(context, "ENDPOINT_OVERRIDE", "N");
       }
 

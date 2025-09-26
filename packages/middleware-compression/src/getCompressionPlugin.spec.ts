@@ -1,4 +1,4 @@
-import { test as it, vi, describe, expect } from "vitest";
+import { describe, expect,test as it, vi } from "vitest";
 
 import { compressionMiddleware, compressionMiddlewareOptions } from "./compressionMiddleware";
 import { getCompressionPlugin } from "./getCompressionPlugin";
@@ -14,7 +14,7 @@ describe(getCompressionPlugin.name, () => {
   const middlewareConfig = { encodings: [] };
 
   it("applyToStack adds compressionMiddleware", () => {
-    const middlewareReturn = {};
+    const middlewareReturn = {} as any;
     (vi.mocked(compressionMiddleware)).mockReturnValueOnce(middlewareReturn);
 
     const plugin = getCompressionPlugin(config, middlewareConfig);

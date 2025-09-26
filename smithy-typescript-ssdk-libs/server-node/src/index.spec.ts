@@ -4,10 +4,11 @@
  */
 
 import { mkdtemp } from "fs/promises";
-import { createServer, IncomingMessage, request, RequestOptions, Server, ServerResponse } from "http";
+import type { IncomingMessage, RequestOptions, Server, ServerResponse } from "http";
+import { createServer, request } from "http";
 import * as os from "os";
 import * as path from "path";
-import { Readable } from "stream";
+import type { Readable } from "stream";
 
 import { convertRequest } from "./node";
 
@@ -29,7 +30,7 @@ beforeAll(async () => {
 
 let resToEnd: ServerResponse;
 
-function getRequest(options: RequestOptions & { body?: String }): Promise<[IncomingMessage, ServerResponse]> {
+function getRequest(options: RequestOptions & { body?: string }): Promise<[IncomingMessage, ServerResponse]> {
   return new Promise((resolve) => {
     promiseResolve = resolve;
     request({

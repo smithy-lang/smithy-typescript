@@ -13,9 +13,9 @@
  *  permissions and limitations under the License.
  */
 
-import { HttpRequest } from "@smithy/protocol-http";
+import type { HttpRequest } from "@smithy/protocol-http";
 
-import { Mux, ServiceCoordinate } from "..";
+import type { Mux, ServiceCoordinate } from "..";
 
 export interface PathLiteralSegment {
   type: "path_literal";

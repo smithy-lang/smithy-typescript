@@ -1,6 +1,5 @@
-import { test as it, vi, beforeEach, afterEach, describe, expect } from "vitest";
-
 import { Readable } from "stream";
+import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 import { createGzip } from "zlib";
 
 import { compressStream } from "./compressStream";
@@ -20,7 +19,7 @@ describe(compressStream.name, () => {
   const testOutputStream = Readable.from(getGenerator(["input", "gzipped"])());
 
   beforeEach(() => {
-    (vi.mocked(createGzip)).mockReturnValue(mockGzipFn);
+    (vi.mocked(createGzip)).mockReturnValue(mockGzipFn as any);
     testInputStream.pipe = vi.fn().mockReturnValue(testOutputStream);
   });
 

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/signature-v4",
-  "version": "5.0.2",
+  "version": "5.2.1",
   "description": "A standalone implementation of the AWS Signature V4 request signing algorithm",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -24,6 +24,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/is-array-buffer": "workspace:^",
     "@smithy/protocol-http": "workspace:^",

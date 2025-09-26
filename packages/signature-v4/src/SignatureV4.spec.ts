@@ -1,6 +1,7 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
-import { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
+import type { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
+import type { MockInstance } from "vitest";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
@@ -20,6 +21,7 @@ import {
 } from "./constants";
 import { SignatureV4 } from "./SignatureV4";
 import { iso8601 } from "./utilDate";
+import Spy = jasmine.Spy;
 
 const signerInit = {
   service: "foo",
@@ -834,11 +836,11 @@ describe("SignatureV4", () => {
   });
 
   describe("ambient Date usage", () => {
-    let dateSpy;
+    let dateSpy: MockInstance;
     const mockDate = new Date();
 
     beforeEach(() => {
-      dateSpy = vi.spyOn(global, "Date").mockImplementation(() => mockDate as unknown as string);
+      dateSpy = vi.spyOn(global, "Date").mockImplementation(() => mockDate as any);
     });
 
     afterEach(() => {

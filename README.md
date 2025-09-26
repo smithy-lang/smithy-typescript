@@ -8,7 +8,7 @@ For Client SDK code generation, the `typescript-client-codegen` plugin provides 
 
 > Note: Node.js support includes versions >= 18, and is subject to change.
 
-For Server SDK code generation, the `typescript-server-codegen` plugin provides a framework for generating server scaffolding at a higher level of abstraction and with type safety. More documentation can be found at in [the `typescript-server-codegen` documentation](#server-sdk-code-generation-typescript-server-codegen-plugin), or [smithy.io](https://smithy.io/2.0/ts-ssdk/index.html).
+For Server SDK code generation, the `typescript-server-codegen` plugin provides a framework for generating server scaffolding at a higher level of abstraction and with type safety. More documentation can be found at in [the `typescript-server-codegen` documentation](#server-sdk-code-generation-typescript-server-codegen-plugin), or [smithy.io](https://smithy.io/2.0/languages/typescript/ts-ssdk/index.html).
 
 ## Generating a client
 
@@ -46,7 +46,7 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
   "sources": ["models"],
   // Add the Smithy TypeScript code generator dependency
   "maven": {
-    "dependencies": ["software.amazon.smithy.typescript:smithy-typescript-codegen:0.27.0"]
+    "dependencies": ["software.amazon.smithy.typescript:smithy-typescript-codegen:0.35.0"]
   },
   "plugins": {
     // Add the Smithy TypeScript client plugin
@@ -139,7 +139,7 @@ dependencies {
     smithyCli("software.amazon.smithy:smithy-cli:$smithyVersion")
 
     // Add the Smithy TypeScript code generator dependency
-    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.27.0")
+    implementation("software.amazon.smithy.typescript:smithy-typescript-codegen:0.35.0")
 
     // Uncomment below to add various smithy dependencies (see full list of smithy dependencies in https://github.com/awslabs/smithy)
     // implementation("software.amazon.smithy:smithy-model:$smithyVersion")
@@ -194,6 +194,7 @@ By default, the Smithy TypeScript code generators provide the code generation fr
 | `protocol`                | No       | The Shape ID of the protocol used to generate serialization and deserialization. If not provided, the code generator will attempt to resolve the highest priority service protocol supported in code generation (registered through `TypeScriptIntegration`). If no protocols are found, code generation will use serialization and deserialization error stubs. |
 | `private`                 | No       | Whether the package is `private` in `package.json`. The default value is `false`.                                                                                                                                                                                                                                                                                |
 | `requiredMemberMode`      | No       | **NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.                                                                                                     |
+| `bigNumberMode`           | No       | use `"native"` to serialize and deserialize Smithy BigInteger and BigDecimal to `bigint` and `@smithy/core/serde`'s `NumericValue`. Otherwise, use `"big.js"` to serialize and deserialize with that numeric library.                                                                                                                                            |
 | `createDefaultReadme`     | No       | Whether to generate a default `README.md` for the package. The default value is `false`.                                                                                                                                                                                                                                                                         |
 | `useLegacyAuth`           | No       | **NOT RECOMMENDED, AVAILABLE ONLY FOR BACKWARD COMPATIBILITY CONCERNS.** Flag that enables using legacy auth. When in doubt, use the default identity and auth behavior (not configuring `useLegacyAuth`) as the golden path.                                                                                                                                    |
 | `serviceProtocolPriority` | No       | Map of service `ShapeId` strings to lists of protocol `ShapeId` strings. Used to override protocol selection behavior.                                                                                                                                                                                                                                           |
@@ -431,7 +432,7 @@ A generated client is a package that is ready to be published. After running `sm
 
 ### Server SDK code generation: `typescript-server-codegen` plugin
 
-For documentation of `typescript-server-codegen` artifacts and implementation, see [the Smithy TypeScript Server SDK walkthrough](https://smithy.io/2.0/ts-ssdk/index.html) and [Developer Preview announcement blog post](https://aws.amazon.com/blogs/devops/smithy-server-and-client-generator-for-typescript).
+For documentation of `typescript-server-codegen` artifacts and implementation, see [the Smithy TypeScript Server SDK walkthrough](https://smithy.io/2.0/languages/typescript/ts-ssdk/index.html) and [Developer Preview announcement blog post](https://aws.amazon.com/blogs/devops/smithy-server-and-client-generator-for-typescript).
 
 #### `typescript-server-codegen` plugin configuration
 
@@ -451,7 +452,7 @@ For documentation of `typescript-server-codegen` artifacts and implementation, s
 | `private`                  | No       | Whether the package is `private` in `package.json`. The default value is `false`.                                                                                                                                                                                                                                                                                |
 | `requiredMemberMode`       | No       | **NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.                                                                                                     |
 | `createDefaultReadme`      | No       | Whether to generate a default `README.md` for the package. The default value is `false`.                                                                                                                                                                                                                                                                         |
-| `disableDefaultValidation` | No       | Whether or not default validation is disabled. See [the documentation for Smithy TypeScript SSDK validation](https://smithy.io/2.0/ts-ssdk/validation.html) to learn more. The default value is `false`.                                                                                                                                                         |
+| `disableDefaultValidation` | No       | Whether or not default validation is disabled. See [the documentation for Smithy TypeScript SSDK validation](https://smithy.io/2.0/languages/typescript/ts-ssdk/validation.html) to learn more. The default value is `false`.                                                                                                                                    |
 
 ### Adding customizations to Smithy TypeScript
 

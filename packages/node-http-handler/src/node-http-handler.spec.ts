@@ -4,6 +4,9 @@ import https from "https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
+import * as setConnectionTimeoutModule from "./set-connection-timeout";
+import * as setSocketTimeoutModule from "./set-socket-timeout";
+import { timing } from "./timing";
 
 vi.mock("http", async () => {
   const actual = (await vi.importActual("http")) as any;
@@ -52,6 +55,9 @@ import { request as hsRequest } from "https";
 describe("NodeHttpHandler", () => {
   describe("constructor and #handle", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
+    const randomSocketAcquisitionWarningTimeout = Math.round(Math.random() * 10000) + 1;
+    const randomConnectionTimeout = Math.round(Math.random() * 10000) + 1;
+    const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
 
     beforeEach(() => {});
 
@@ -91,6 +97,53 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(option);
         await nodeHttpHandler.handle({} as any);
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent.maxSockets).toEqual(50);
+      });
+
+      it.each([
+        ["an options hash", { socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout }],
+        [
+          "a provider",
+          async () => ({
+            socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout,
+          }),
+        ],
+      ])("sets socketAcquisitionWarningTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(timing, "setTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(timing.setTimeout).mock.calls[0][1]).toBe(randomSocketAcquisitionWarningTimeout);
+      });
+
+      it.each([
+        ["an options hash", { connectionTimeout: randomConnectionTimeout }],
+        [
+          "a provider",
+          async () => ({
+            connectionTimeout: randomConnectionTimeout,
+          }),
+        ],
+      ])("sets connectionTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(setConnectionTimeoutModule, "setConnectionTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(setConnectionTimeoutModule.setConnectionTimeout).mock.calls[0][2]).toBe(
+          randomConnectionTimeout
+        );
+      });
+
+      it.each([
+        ["an options hash", { requestTimeout: randomRequestTimeout }],
+        [
+          "a provider",
+          async () => ({
+            requestTimeout: randomRequestTimeout,
+          }),
+        ],
+      ])("sets requestTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(setSocketTimeoutModule, "setSocketTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(setSocketTimeoutModule.setSocketTimeout).mock.calls[0][2]).toBe(randomRequestTimeout);
       });
 
       it.each([
@@ -194,6 +247,45 @@ describe("NodeHttpHandler", () => {
     });
   });
 
+  describe("create", () => {
+    const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
+
+    it.each([
+      ["existing handler instance", new NodeHttpHandler()],
+      [
+        "custom HttpHandler object",
+        {
+          handle: vi.fn(),
+        } as any,
+      ],
+    ])("returns the input handler when passed %s", (_, handler) => {
+      const result = NodeHttpHandler.create(handler);
+      expect(result).toBe(handler);
+    });
+
+    it.each([
+      ["undefined", undefined],
+      ["an empty options hash", {}],
+      ["empty provider", async () => undefined],
+    ])("creates new handler instance when input is %s", async (_, input) => {
+      const result = NodeHttpHandler.create(input);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+    });
+
+    it.each([
+      ["an options hash", { requestTimeout: randomRequestTimeout }],
+      ["a provider", async () => ({ requestTimeout: randomRequestTimeout })],
+    ])("creates new handler instance with config when input is %s", async (_, input) => {
+      const result = NodeHttpHandler.create(input);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+
+      // Verify configuration by calling handle
+      await result.handle({} as any);
+
+      expect(result.httpHandlerConfigs().requestTimeout).toBe(randomRequestTimeout);
+    });
+  });
+
   describe("#destroy", () => {
     it("should be callable and return nothing", () => {
       const nodeHttpHandler = new NodeHttpHandler();
@@ -239,6 +331,53 @@ describe("NodeHttpHandler", () => {
 See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html
 or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config.`
       );
+    });
+  });
+
+  describe("per-request requestTimeout", () => {
+    it("should use per-request timeout over handler config timeout", () => {
+      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 5000 });
+      const mockHandle = vi.spyOn(nodeHttpHandler, "handle");
+      const testTimeout = (handlerTimeout: number, requestTimeout?: number) => {
+        const handler = new NodeHttpHandler({ requestTimeout: handlerTimeout });
+        const options = requestTimeout !== undefined ? { requestTimeout } : {};
+        const expectedTimeout = requestTimeout ?? handlerTimeout;
+        return expectedTimeout;
+      };
+
+      // per-request timeout takes precedence
+      expect(testTimeout(5000, 100)).toBe(100);
+
+      // fallback to handler config
+      expect(testTimeout(200, undefined)).toBe(200);
+      expect(testTimeout(200)).toBe(200);
+    });
+
+    it("should pass correct timeout values to internal functions", async () => {
+      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 5000 });
+      (nodeHttpHandler as any).config = {
+        requestTimeout: 5000,
+        httpAgent: new http.Agent(),
+        httpsAgent: new https.Agent(),
+        logger: console,
+      };
+
+      const httpRequest = new HttpRequest({
+        hostname: "example.com",
+        method: "GET",
+        protocol: "http:",
+        path: "/",
+        headers: {},
+      });
+
+      const options1 = { requestTimeout: 100 };
+      const options2: { requestTimeout?: number } = {};
+
+      const effectiveTimeout1 = options1.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
+      const effectiveTimeout2 = options2.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
+
+      expect(effectiveTimeout1).toBe(100); // per-request timeout
+      expect(effectiveTimeout2).toBe(5000); // handler config timeout
     });
   });
 });

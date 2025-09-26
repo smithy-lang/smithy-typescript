@@ -1,5 +1,209 @@
 # Change Log
 
+## 4.2.4
+
+### Patch Changes
+
+- Updated dependencies [97fe0d8]
+- Updated dependencies [3eb73f3]
+  - @smithy/core@3.12.0
+
+## 4.2.3
+
+### Patch Changes
+
+- Updated dependencies [f8793be]
+  - @smithy/core@3.11.1
+
+## 4.2.2
+
+### Patch Changes
+
+- @smithy/node-config-provider@4.2.2
+
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/core@3.11.0
+  - @smithy/node-config-provider@4.2.1
+  - @smithy/protocol-http@5.2.1
+  - @smithy/util-middleware@4.1.1
+
+## 4.2.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/node-config-provider@4.2.0
+  - @smithy/util-config-provider@4.1.0
+  - @smithy/is-array-buffer@4.1.0
+  - @smithy/util-middleware@4.1.0
+  - @smithy/protocol-http@5.2.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+  - @smithy/core@3.10.0
+
+## 4.1.19
+
+### Patch Changes
+
+- Updated dependencies [06ac1f6]
+  - @smithy/core@3.9.2
+
+## 4.1.18
+
+### Patch Changes
+
+- Updated dependencies [29fad01]
+  - @smithy/core@3.9.1
+
+## 4.1.17
+
+### Patch Changes
+
+- Updated dependencies [ab4f33f]
+- Updated dependencies [d79dc91]
+  - @smithy/core@3.9.0
+
+## 4.1.16
+
+### Patch Changes
+
+- Updated dependencies [fd00602]
+- Updated dependencies [64e033f]
+  - @smithy/core@3.8.0
+  - @smithy/types@4.3.2
+  - @smithy/node-config-provider@4.1.4
+  - @smithy/protocol-http@5.1.3
+  - @smithy/util-middleware@4.0.5
+
+## 4.1.15
+
+### Patch Changes
+
+- Updated dependencies [f4dcba0]
+  - @smithy/core@3.7.2
+
+## 4.1.14
+
+### Patch Changes
+
+- Updated dependencies [312801c]
+- Updated dependencies [bb7975e]
+  - @smithy/core@3.7.1
+
+## 4.1.13
+
+### Patch Changes
+
+- Updated dependencies [d105c97]
+  - @smithy/core@3.7.0
+
+## 4.1.12
+
+### Patch Changes
+
+- Updated dependencies [10a0534]
+  - @smithy/core@3.6.0
+
+## 4.1.11
+
+### Patch Changes
+
+- Updated dependencies [4a31774]
+  - @smithy/core@3.5.3
+
+## 4.1.10
+
+### Patch Changes
+
+- Updated dependencies [4642e7e]
+- Updated dependencies [147ceed]
+- Updated dependencies [ae8f1f4]
+  - @smithy/core@3.5.2
+
+## 4.1.9
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/core@3.5.1
+  - @smithy/node-config-provider@4.1.3
+  - @smithy/protocol-http@5.1.2
+  - @smithy/util-middleware@4.0.4
+
+## 4.1.8
+
+### Patch Changes
+
+- Updated dependencies [ae11e3a]
+- Updated dependencies [23812a9]
+  - @smithy/core@3.5.0
+
+## 4.1.7
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+- Updated dependencies [efb27ee]
+- Updated dependencies [06b0ce8]
+  - @smithy/types@4.3.0
+  - @smithy/core@3.4.0
+  - @smithy/node-config-provider@4.1.2
+  - @smithy/protocol-http@5.1.1
+  - @smithy/util-middleware@4.0.3
+
+## 4.1.6
+
+### Patch Changes
+
+- @smithy/core@3.3.3
+
+## 4.1.5
+
+### Patch Changes
+
+- @smithy/core@3.3.2
+
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [9f8d075]
+  - @smithy/node-config-provider@4.1.1
+
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [acefcf5]
+- Updated dependencies [9ff783b]
+  - @smithy/node-config-provider@4.1.0
+
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [40ffcd5]
+  - @smithy/core@3.3.1
+
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [5896264]
+  - @smithy/core@3.3.0
+
 ## 4.1.0
 
 ### Minor Changes

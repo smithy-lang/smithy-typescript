@@ -1,4 +1,4 @@
-import { Message, MessageEncoder } from "@smithy/types";
+import type { Message, MessageEncoder } from "@smithy/types";
 
 /**
  * @internal
@@ -6,7 +6,7 @@ import { Message, MessageEncoder } from "@smithy/types";
 export interface MessageEncoderStreamOptions {
   messageStream: AsyncIterable<Message>;
   encoder: MessageEncoder;
-  includeEndFrame?: Boolean;
+  includeEndFrame?: boolean;
 }
 
 /**

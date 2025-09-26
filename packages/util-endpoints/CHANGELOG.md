@@ -1,5 +1,72 @@
 # Change Log
 
+## 3.1.2
+
+### Patch Changes
+
+- @smithy/node-config-provider@4.2.2
+
+## 3.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/node-config-provider@4.2.1
+
+## 3.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/node-config-provider@4.2.0
+  - @smithy/types@4.4.0
+
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/node-config-provider@4.1.4
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/node-config-provider@4.1.3
+
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/node-config-provider@4.1.2
+
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [9f8d075]
+  - @smithy/node-config-provider@4.1.1
+
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [acefcf5]
+- Updated dependencies [9ff783b]
+  - @smithy/node-config-provider@4.1.0
+
 ## 3.0.2
 
 ### Patch Changes

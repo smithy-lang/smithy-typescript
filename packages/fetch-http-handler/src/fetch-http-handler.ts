@@ -1,10 +1,11 @@
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
 import type { FetchHttpHandlerOptions } from "@smithy/types";
-import { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
+import type { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
 import { createRequest } from "./create-request";
-import { requestTimeout } from "./request-timeout";
+import { requestTimeout as requestTimeoutFn } from "./request-timeout";
 
 declare let AbortController: any;
 
@@ -73,11 +74,14 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
     // Do nothing. TLS and HTTP/2 connection pooling is handled by the browser.
   }
 
-  async handle(request: HttpRequest, { abortSignal }: HttpHandlerOptions = {}): Promise<{ response: HttpResponse }> {
+  async handle(
+    request: HttpRequest,
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+  ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
     }
-    const requestTimeoutInMs = this.config!.requestTimeout;
+    const requestTimeoutInMs = requestTimeout ?? this.config!.requestTimeout;
     const keepAlive = this.config!.keepAlive === true;
     const credentials = this.config!.credentials as RequestInit["credentials"];
 
@@ -175,7 +179,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
           }),
         };
       }),
-      requestTimeout(requestTimeoutInMs),
+      requestTimeoutFn(requestTimeoutInMs),
     ];
     if (abortSignal) {
       raceOfPromises.push(

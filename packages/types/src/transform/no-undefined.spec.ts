@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Client } from "../client";
-import { CommandIO } from "../command";
+import type { CommandIO } from "../command";
 import type { HttpHandlerOptions } from "../http";
 import type { MetadataBearer } from "../response";
-import { DocumentType } from "../shapes";
+import type { DocumentType } from "../shapes";
 import type { Exact } from "./exact";
 import type { AssertiveClient, NoUndefined, UncheckedClient } from "./no-undefined";
 

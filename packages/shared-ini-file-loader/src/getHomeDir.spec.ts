@@ -1,5 +1,6 @@
 import { homedir } from "os";
 import { sep } from "path";
+import type { Mock } from "vitest";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";
@@ -64,7 +65,7 @@ describe(getHomeDir.name, () => {
   });
 
   it("returns value from homedir fourth", () => {
-    const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
+    const processGeteuidSpy = (vi.spyOn(process, "geteuid") as Mock).mockReturnValue(mockUid);
     process.env = { ...process.env, HOME: undefined, USERPROFILE: undefined, HOMEPATH: undefined };
     expect(getHomeDir()).toEqual(mockHomeDir);
     expect(homedir).toHaveBeenCalledTimes(1);
@@ -88,7 +89,7 @@ describe(getHomeDir.name, () => {
 
     describe("when geteuid is available", () => {
       it.each([10, 100, 1000, 10000])("calls: %d ", async (num: number) => {
-        const processGeteuidSpy = vi.spyOn(process, "geteuid").mockReturnValue(mockUid);
+        const processGeteuidSpy = (vi.spyOn(process, "geteuid") as Mock).mockReturnValue(mockUid);
         expect(processGeteuidSpy).not.toHaveBeenCalled();
         await testSingleHomeDirCall(num);
         expect(processGeteuidSpy).toHaveBeenCalledTimes(num);
@@ -114,7 +115,7 @@ describe(getHomeDir.name, () => {
   describe("makes multiple homedir calls with based on UIDs", async () => {
     it.each([2, 10, 100])("calls: %d ", async (num: number) => {
       const { getHomeDir } = await import("./getHomeDir");
-      const processGeteuidSpy = vi.spyOn(process, "geteuid");
+      const processGeteuidSpy = vi.spyOn(process, "geteuid") as Mock;
       processGeteuidSpy.mockReturnValue(mockUid);
       for (let i = 0; i < num; i++) {
         processGeteuidSpy.mockReturnValueOnce(mockUid + i);

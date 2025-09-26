@@ -11,12 +11,16 @@ import type {
   Logger,
   MetadataBearer,
   MiddlewareStack as IMiddlewareStack,
+  Mutable,
+  OperationSchema,
   OptionalParameter,
   Pluggable,
   RequestHandler,
   SerdeContext,
 } from "@smithy/types";
 import { SMITHY_CONTEXT_KEY } from "@smithy/types";
+
+import { schemaLogFilter } from "./schemaLogFilter";
 
 /**
  * @public
@@ -31,6 +35,7 @@ export abstract class Command<
 {
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
+  public readonly schema?: OperationSchema;
 
   /**
    * Factory for Command ClassBuilder.
@@ -127,10 +132,12 @@ class ClassBuilder<
   private _clientName = "";
   private _additionalContext = {} as HandlerExecutionContext;
   private _smithyContext = {} as Record<string, unknown>;
-  private _inputFilterSensitiveLog = (_: any) => _;
-  private _outputFilterSensitiveLog = (_: any) => _;
+  private _inputFilterSensitiveLog: any = undefined;
+  private _outputFilterSensitiveLog: any = undefined;
   private _serializer: (input: I, context: SerdeContext | any) => Promise<IHttpRequest> = null as any;
   private _deserializer: (output: IHttpResponse, context: SerdeContext | any) => Promise<O> = null as any;
+  private _operationSchema?: OperationSchema;
+
   /**
    * Optional init callback.
    */
@@ -212,6 +219,16 @@ class ClassBuilder<
     this._deserializer = deserializer;
     return this;
   }
+
+  /**
+   * Sets input/output schema for the operation.
+   */
+  public sc(operation: OperationSchema): ClassBuilder<I, O, C, SI, SO> {
+    this._operationSchema = operation;
+    this._smithyContext.operationSchema = operation;
+    return this;
+  }
+
   /**
    * @returns a Command class with the classBuilder properties.
    */
@@ -241,6 +258,7 @@ class ClassBuilder<
         super();
         this.input = input ?? ({} as unknown as I);
         closure._init(this);
+        (this as Mutable<typeof this>).schema = closure._operationSchema;
       }
 
       /**
@@ -252,8 +270,12 @@ class ClassBuilder<
           middlewareFn: closure._middlewareFn,
           clientName: closure._clientName,
           commandName: closure._commandName,
-          inputFilterSensitiveLog: closure._inputFilterSensitiveLog,
-          outputFilterSensitiveLog: closure._outputFilterSensitiveLog,
+          inputFilterSensitiveLog:
+            closure._inputFilterSensitiveLog ??
+            (closure._operationSchema ? schemaLogFilter.bind(null, closure._operationSchema!.input) : (_) => _),
+          outputFilterSensitiveLog:
+            closure._outputFilterSensitiveLog ??
+            (closure._operationSchema ? schemaLogFilter.bind(null, closure._operationSchema!.output) : (_) => _),
           smithyContext: closure._smithyContext,
           additionalContext: closure._additionalContext,
         });

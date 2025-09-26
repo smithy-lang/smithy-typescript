@@ -1,7 +1,9 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import { commonParams } from "../endpoint/EndpointParameters";
 import { FractionalSecondsOutput } from "../models/models_0";
 import { de_FractionalSecondsCommand, se_FractionalSecondsCommand } from "../protocols/Rpcv2cbor";
+import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import { MetadataBearer as __MetadataBearer } from "@smithy/types";
@@ -32,6 +34,8 @@ export interface FractionalSecondsCommandOutput extends FractionalSecondsOutput,
  * ```javascript
  * import { RpcV2ProtocolClient, FractionalSecondsCommand } from "@smithy/smithy-rpcv2-cbor"; // ES Modules import
  * // const { RpcV2ProtocolClient, FractionalSecondsCommand } = require("@smithy/smithy-rpcv2-cbor"); // CommonJS import
+ * // import type { RpcV2ProtocolClientConfig } from "@smithy/smithy-rpcv2-cbor";
+ * const config = {}; // type is RpcV2ProtocolClientConfig
  * const client = new RpcV2ProtocolClient(config);
  * const input = {};
  * const command = new FractionalSecondsCommand(input);
@@ -51,6 +55,7 @@ export interface FractionalSecondsCommandOutput extends FractionalSecondsOutput,
  * @throws {@link RpcV2ProtocolServiceException}
  * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
  *
+ *
  */
 export class FractionalSecondsCommand extends $Command
   .classBuilder<
@@ -60,8 +65,12 @@ export class FractionalSecondsCommand extends $Command
     ServiceInputTypes,
     ServiceOutputTypes
   >()
+  .ep(commonParams)
   .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getSerdePlugin(config, this.serialize, this.deserialize)];
+    return [
+      getSerdePlugin(config, this.serialize, this.deserialize),
+      getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+    ];
   })
   .s("RpcV2Protocol", "FractionalSeconds", {})
   .n("RpcV2ProtocolClient", "FractionalSecondsCommand")

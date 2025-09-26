@@ -21,10 +21,19 @@ module.exports = {
     "prefer-rest-params": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
 
+    // intentional usage
+    "@typescript-eslint/no-empty-object-type": "off",
+    "@typescript-eslint/no-unsafe-function-type": "off",
+
+    // temporary until upgrading ESLint
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-require-imports": "off",
+
     /** Warnings */
     "@typescript-eslint/no-namespace": "warn",
 
     /** Errors */
     "simple-import-sort/imports": "error",
+    "@typescript-eslint/consistent-type-imports": "error",
   },
 };

@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { resolveEndpoint } from "./resolveEndpoint";
-import { EndpointError, EndpointParams, ParameterObject, RuleSetObject } from "./types";
+import type { EndpointParams, ParameterObject, RuleSetObject } from "./types";
+import { EndpointError } from "./types";
 import { evaluateRules } from "./utils";
 
 vi.mock("./utils");
@@ -20,7 +21,7 @@ describe(resolveEndpoint.name, () => {
     [paramWithDefaultKey]: "defaultParamValue",
   };
 
-  const mockRules = [];
+  const mockRules: any[] = [];
   const mockRuleSetParameters: Record<string, ParameterObject> = {
     [boolParamKey]: {
       type: "Boolean",

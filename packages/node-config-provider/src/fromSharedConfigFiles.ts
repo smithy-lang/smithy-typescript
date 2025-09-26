@@ -1,6 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
-import { getProfileName, loadSharedConfigFiles, SourceProfileInit } from "@smithy/shared-ini-file-loader";
-import { ParsedIniData, Profile, Provider } from "@smithy/types";
+import type { SourceProfileInit } from "@smithy/shared-ini-file-loader";
+import { getProfileName, loadSharedConfigFiles } from "@smithy/shared-ini-file-loader";
+import type { ParsedIniData, Profile, Provider } from "@smithy/types";
 
 import { getSelectorName } from "./getSelectorName";
 

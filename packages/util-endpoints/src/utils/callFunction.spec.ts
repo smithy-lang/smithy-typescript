@@ -33,8 +33,8 @@ describe(callFunction.name, () => {
     "stringEquals",
     "subsgtring",
     "urlEncode",
-  ])("calls built-in endpoint function %s", (builtIn) => {
-    endpointFunctions[builtIn] = vi.fn().mockReturnValue(mockReturn);
+  ] as Array<keyof typeof endpointFunctions>)("calls built-in endpoint function %s", (builtIn) => {
+    endpointFunctions[builtIn] = vi.fn().mockReturnValue(mockReturn) as any;
     const mockArg = "mockArg";
     const mockFn = { fn: builtIn, argv: [mockArg] };
 

@@ -49,12 +49,13 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.validation.ValidationEvent;
-import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerator;
 import software.amazon.smithy.typescript.codegen.validation.LongValidator;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.MapUtils;
@@ -112,9 +113,14 @@ final class DirectedTypeScriptCodegen
                 directive.model(),
                 directive.service(),
                 directive.settings());
+
         ApplicationProtocol applicationProtocol = protocolGenerator == null
                 ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
                 : protocolGenerator.getApplicationProtocol();
+
+        if (null != protocolGenerator) {
+            directive.settings().setProtocol(protocolGenerator.getProtocol());
+        }
 
         return TypeScriptCodegenContext.builder()
                 .model(directive.model())
@@ -141,6 +147,8 @@ final class DirectedTypeScriptCodegen
 
         for (TypeScriptIntegration integration : integrations) {
             for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
+                // allow overrides of the same protocol ShapeId to change the order.
+                generators.remove(generator.getProtocol());
                 generators.put(generator.getProtocol(), generator);
             }
         }
@@ -187,6 +195,9 @@ final class DirectedTypeScriptCodegen
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         SymbolProvider symbolProvider = directive.symbolProvider();
         if (protocolGenerator != null) {
+            if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+                return;
+            }
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + service.getId());
             String fileName = Paths.get(CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
                     ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts").toString();
@@ -280,6 +291,8 @@ final class DirectedTypeScriptCodegen
             }
         }
 
+        new SchemaGenerator(model, fileManifest, settings, symbolProvider).run();
+
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
             PaginationGenerator.writeIndex(model, service, fileManifest);
             delegator.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
@@ -331,10 +344,6 @@ final class DirectedTypeScriptCodegen
     }
 
     private void generateEndpointV2(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        if (!directive.shape().hasTrait(EndpointRuleSetTrait.class)) {
-            return;
-        }
-
         new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
     }
 
@@ -355,12 +364,16 @@ final class DirectedTypeScriptCodegen
     public void generateStructure(GenerateStructureDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
-                    writer,
-                    directive.shape(),
-                    directive.settings().generateServerSdk(),
-                    directive.settings().getRequiredMemberMode()
+                directive.model(),
+                directive.symbolProvider(),
+                writer,
+                directive.shape(),
+                directive.settings().generateServerSdk(),
+                directive.settings().getRequiredMemberMode(),
+                SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
             );
             generator.run();
         });
@@ -370,12 +383,16 @@ final class DirectedTypeScriptCodegen
     public void generateError(GenerateErrorDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             StructureGenerator generator = new StructureGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
-                    writer,
-                    directive.shape(),
-                    directive.settings().generateServerSdk(),
-                    directive.settings().getRequiredMemberMode()
+                directive.model(),
+                directive.symbolProvider(),
+                writer,
+                directive.shape(),
+                directive.settings().generateServerSdk(),
+                directive.settings().getRequiredMemberMode(),
+                SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
             );
             generator.run();
         });
@@ -385,11 +402,15 @@ final class DirectedTypeScriptCodegen
     public void generateUnion(GenerateUnionDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             UnionGenerator generator = new UnionGenerator(
-                    directive.model(),
-                    directive.symbolProvider(),
-                    writer,
-                    directive.shape(),
-                    directive.settings().generateServerSdk()
+                directive.model(),
+                directive.symbolProvider(),
+                writer,
+                directive.shape(),
+                directive.settings().generateServerSdk(),
+                SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
             );
             generator.run();
         });

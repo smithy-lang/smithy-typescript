@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-serde",
-  "version": "4.0.3",
+  "version": "4.1.1",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline middleware-serde",
@@ -12,9 +12,9 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "yarn g:vitest run",
-    "test:integration": "yarn g:vitest run -c vitest.config.integ.ts",
+    "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
     "test:watch": "yarn g:vitest watch",
-    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.ts"
+    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -24,7 +24,9 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
+    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },

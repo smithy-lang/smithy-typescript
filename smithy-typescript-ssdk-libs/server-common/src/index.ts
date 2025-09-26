@@ -19,10 +19,10 @@ export * from "./errors";
 export * from "./validation";
 export * from "./unique";
 
-import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { SerdeContext } from "@smithy/types";
+import type { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { SerdeContext } from "@smithy/types";
 
-import { ServiceException } from "./errors";
+import type { ServiceException } from "./errors";
 
 export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 

@@ -1,4 +1,4 @@
-import { Hash } from "@smithy/types";
+import type { Hash } from "@smithy/types";
 import { Readable, Writable } from "stream";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
@@ -22,8 +22,8 @@ describe(readableStreamHasher.name, () => {
   class MockHashCalculator extends Writable {
     constructor(
       public readonly hash: Hash,
-      public readonly mockWrite,
-      public readonly mockEnd
+      public readonly mockWrite: any,
+      public readonly mockEnd: any
     ) {
       super();
     }
@@ -41,7 +41,7 @@ describe(readableStreamHasher.name, () => {
 
   beforeEach(() => {
     (HashCalculator as unknown as any).mockImplementation(
-      (hash) => new MockHashCalculator(hash, mockHashCalculatorWrite, mockHashCalculatorEnd)
+      (hash: Hash) => new MockHashCalculator(hash, mockHashCalculatorWrite, mockHashCalculatorEnd)
     );
     mockDigest.mockResolvedValue(mockHash);
   });

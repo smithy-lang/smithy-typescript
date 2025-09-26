@@ -22,13 +22,13 @@ plugins {
     signing
     checkstyle
     jacoco
-    id("com.github.spotbugs") version "6.0.8"
-    id("org.jreleaser") version "1.9.0"
+    id("com.github.spotbugs") version "6.3.0"
+    id("org.jreleaser") version "1.20.0"
 }
 
 allprojects {
     group = "software.amazon.smithy.typescript"
-    version = "0.27.0"
+    version = "0.35.0"
 }
 
 // The root project doesn't produce a JAR.
@@ -69,11 +69,12 @@ subprojects {
 
         // Apply junit 5 and hamcrest test dependencies to all java projects.
         dependencies {
-            testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-            testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
-            testImplementation("org.hamcrest:hamcrest:2.2")
-            testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
+            testImplementation("org.junit.jupiter:junit-jupiter-api:5.13.4")
+            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.13.4")
+            testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.4")
+            testImplementation("org.hamcrest:hamcrest:3.0")
+            testImplementation("org.mockito:mockito-junit-jupiter:5.19.0")
+            testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         }
 
         // Reusable license copySpec
@@ -123,7 +124,7 @@ subprojects {
             repositories {
                 maven {
                     name = "stagingRepository"
-                    url = uri("${rootProject.buildDir}/staging")
+                    url = rootProject.layout.buildDirectory.dir("staging").get().asFile.toURI()
                 }
             }
 
@@ -221,7 +222,9 @@ subprojects {
             reports {
                 xml.required.set(false)
                 csv.required.set(false)
-                html.outputLocation.set(file("$buildDir/reports/jacoco"))
+                html.outputLocation.set(
+                    layout.buildDirectory.dir("reports/jacoco").get().asFile
+                )
             }
         }
 
@@ -279,14 +282,13 @@ jreleaser {
     // https://jreleaser.org/guide/latest/examples/maven/maven-central.html#_gradle
     deploy {
         maven {
-            nexus2 {
+            mavenCentral {
                 create("maven-central") {
                     active = Active.ALWAYS
-                    url = "https://aws.oss.sonatype.org/service/local"
-                    snapshotUrl = "https://aws.oss.sonatype.org/content/repositories/snapshots"
-                    closeRepository.set(true)
-                    releaseRepository.set(true)
-                    stagingRepositories.add("${rootProject.buildDir}/staging")
+                    url = "https://central.sonatype.com/api/v1/publisher"
+                    stagingRepositories.add(
+                        rootProject.layout.buildDirectory.dir("staging").get().asFile.absolutePath
+                    )
                 }
             }
         }

@@ -1,8 +1,10 @@
-import { RetryableTrait, SdkError } from "@smithy/types";
+import type { RetryableTrait, SdkError } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import {
   CLOCK_SKEW_ERROR_CODES,
+  NODEJS_NETWORK_ERROR_CODES,
+  NODEJS_TIMEOUT_ERROR_CODES,
   THROTTLING_ERROR_CODES,
   TRANSIENT_ERROR_CODES,
   TRANSIENT_ERROR_STATUS_CODES,
@@ -16,15 +18,17 @@ const checkForErrorType = (
     httpStatusCode?: number;
     $retryable?: RetryableTrait;
     cause?: Partial<Error>;
+    code?: string;
   },
   errorTypeResult: boolean
 ) => {
-  const { name, httpStatusCode, $retryable, cause } = options;
+  const { name, httpStatusCode, $retryable, cause, code } = options;
   const error = Object.assign(new Error(), {
     name,
     $metadata: { httpStatusCode },
     $retryable,
     cause,
+    code,
   });
   expect(isErrorTypeFunc(error as SdkError)).toBe(errorTypeResult);
 };
@@ -137,9 +141,21 @@ describe("isTransientError", () => {
   });
 
   it("should limit recursion to 10 depth", () => {
-    const error = { cause: null } as SdkError;
+    const error = { cause: null } as unknown as SdkError;
     error.cause = error;
     checkForErrorType(isTransientError, { cause: error }, false);
+  });
+
+  NODEJS_TIMEOUT_ERROR_CODES.forEach((code) => {
+    it(`should declare error with cause with the code "${code}" to be a Transient error`, () => {
+      checkForErrorType(isTransientError, { code }, true);
+    });
+  });
+
+  NODEJS_NETWORK_ERROR_CODES.forEach((code) => {
+    it(`should declare error with cause with the code "${code}" to be a Transient error`, () => {
+      checkForErrorType(isTransientError, { code }, true);
+    });
   });
 });
 

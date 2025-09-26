@@ -1,6 +1,6 @@
 {
   "name": "@smithy/fetch-http-handler",
-  "version": "5.0.2",
+  "version": "5.2.1",
   "description": "Provides a way to make requests",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
@@ -15,14 +15,15 @@
     "extract:docs": "api-extractor run --local",
     "test": "yarn g:vitest run && yarn test:browser",
     "test:watch": "yarn g:vitest watch",
-    "test:browser": "yarn g:vitest run -c vitest.config.browser.ts",
-    "test:browser:watch": "yarn g:vitest watch -c vitest.config.browser.ts"
+    "test:browser": "yarn g:vitest run -c vitest.config.browser.mts",
+    "test:browser:watch": "yarn g:vitest watch -c vitest.config.browser.mts"
   },
   "author": {
     "name": "AWS SDK for JavaScript Team",
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",

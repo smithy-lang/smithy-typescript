@@ -1,5 +1,5 @@
-import { HttpResponse } from "./http";
-import { MetadataBearer } from "./response";
+import type { HttpResponse } from "./http";
+import type { MetadataBearer } from "./response";
 
 /**
  * @public

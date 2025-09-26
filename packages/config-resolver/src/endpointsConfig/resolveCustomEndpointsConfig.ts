@@ -1,10 +1,11 @@
-import { Endpoint, Provider, UrlParser } from "@smithy/types";
+import type { Endpoint, Provider, UrlParser } from "@smithy/types";
 import { normalizeProvider } from "@smithy/util-middleware";
 
-import { EndpointsInputConfig, EndpointsResolvedConfig } from "./resolveEndpointsConfig";
+import type { EndpointsInputConfig, EndpointsResolvedConfig } from "./resolveEndpointsConfig";
 
 /**
  * @public
+ * @deprecated superseded by default endpointRuleSet generation.
  */
 export interface CustomEndpointsInputConfig extends EndpointsInputConfig {
   /**
@@ -15,6 +16,7 @@ export interface CustomEndpointsInputConfig extends EndpointsInputConfig {
 
 /**
  * @internal
+ * @deprecated superseded by default endpointRuleSet generation.
  */
 interface PreviouslyResolved {
   urlParser: UrlParser;
@@ -22,6 +24,7 @@ interface PreviouslyResolved {
 
 /**
  * @internal
+ * @deprecated superseded by default endpointRuleSet generation.
  */
 export interface CustomEndpointsResolvedConfig extends EndpointsResolvedConfig {
   /**
@@ -33,6 +36,8 @@ export interface CustomEndpointsResolvedConfig extends EndpointsResolvedConfig {
 
 /**
  * @internal
+ *
+ * @deprecated superseded by default endpointRuleSet generation.
  */
 export const resolveCustomEndpointsConfig = <T>(
   input: T & CustomEndpointsInputConfig & PreviouslyResolved

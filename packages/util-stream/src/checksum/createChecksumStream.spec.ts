@@ -1,4 +1,4 @@
-import { Checksum } from "@smithy/types";
+import type { Checksum } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
 import { Readable } from "stream";

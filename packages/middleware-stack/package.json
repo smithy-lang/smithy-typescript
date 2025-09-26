@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-stack",
-  "version": "4.0.2",
+  "version": "4.1.1",
   "description": "Provides a means for composing multiple middleware functions into a single handler",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
@@ -22,6 +22,7 @@
     "url": "https://aws.amazon.com/javascript/"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",

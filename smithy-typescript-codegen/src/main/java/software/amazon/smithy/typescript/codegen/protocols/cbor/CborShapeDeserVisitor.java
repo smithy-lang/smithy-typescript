@@ -204,6 +204,7 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
     }
 
     private boolean usesExpect(Shape shape) {
-        return shape.isStringShape() || shape.isBooleanShape() || shape instanceof NumberShape;
+        return shape.isStringShape() || shape.isBooleanShape()
+            || (shape instanceof NumberShape && !shape.isBigDecimalShape() && !shape.isBigIntegerShape());
     }
 }

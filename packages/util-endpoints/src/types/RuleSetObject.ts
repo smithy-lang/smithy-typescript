@@ -1,4 +1,4 @@
-import {
+import type {
   DeprecatedObject as __DeprecatedObject,
   ParameterObject as __ParameterObject,
   RuleSetObject as __RuleSetObject,

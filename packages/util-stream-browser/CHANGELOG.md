@@ -1,5 +1,61 @@
 # Change Log
 
+## 3.1.1
+
+### Patch Changes
+
+- Updated dependencies [bb7c1c1]
+  - @smithy/types@4.5.0
+  - @smithy/fetch-http-handler@5.2.1
+
+## 3.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+### Patch Changes
+
+- f884df7: enforce consistent-type-imports
+- Updated dependencies [64cda93]
+- Updated dependencies [f884df7]
+  - @smithy/fetch-http-handler@5.2.0
+  - @smithy/util-hex-encoding@4.1.0
+  - @smithy/util-base64@4.1.0
+  - @smithy/util-utf8@4.1.0
+  - @smithy/types@4.4.0
+
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [64e033f]
+  - @smithy/types@4.3.2
+  - @smithy/fetch-http-handler@5.1.1
+
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [c4e923a]
+  - @smithy/fetch-http-handler@5.1.0
+
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [358c1ff]
+  - @smithy/types@4.3.1
+  - @smithy/fetch-http-handler@5.0.4
+
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [0547fab]
+  - @smithy/types@4.3.0
+  - @smithy/fetch-http-handler@5.0.3
+
 ## 3.0.2
 
 ### Patch Changes

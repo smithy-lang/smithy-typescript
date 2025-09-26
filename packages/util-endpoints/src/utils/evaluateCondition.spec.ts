@@ -1,7 +1,8 @@
 import { describe, expect, test as it, vi } from "vitest";
 
 import { debugId, toDebugString } from "../debug";
-import { EndpointError, EvaluateOptions } from "../types";
+import type { EvaluateOptions } from "../types";
+import { EndpointError } from "../types";
 import { callFunction } from "./callFunction";
 import { evaluateCondition } from "./evaluateCondition";
 
@@ -33,7 +34,7 @@ describe(evaluateCondition.name, () => {
       [true, [true, 1, -1, "true", "false", ""]],
       [false, [false, 0, -0, null, undefined, NaN]],
     ])("returns %s for", (result, testCases) => {
-      it.each(testCases)(`value: '%s'`, (mockReturn) => {
+      it.each(testCases)(`value: '%s'`, (mockReturn: any) => {
         const mockLogger = {
           debug: vi.fn(),
           info: vi.fn(),

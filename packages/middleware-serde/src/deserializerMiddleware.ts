@@ -1,9 +1,11 @@
-import {
+import { HttpResponse } from "@smithy/protocol-http";
+import type {
   DeserializeHandler,
   DeserializeHandlerArguments,
   DeserializeHandlerOutput,
   DeserializeMiddleware,
   HandlerExecutionContext,
+  MetadataBearer,
   ResponseDeserializer,
   SerdeContext,
   SerdeFunctions,
@@ -11,6 +13,7 @@ import {
 
 /**
  * @internal
+ * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
 export const deserializerMiddleware =
   <Input extends object = any, Output extends object = any, CommandSerdeContext extends SerdeContext = any>(
@@ -60,8 +63,35 @@ export const deserializerMiddleware =
             error.$response.body = error.$responseBodyText;
           }
         }
+
+        try {
+          // if the deserializer failed, then $metadata may still be set
+          // by taking information from the response.
+          if (HttpResponse.isInstance(response)) {
+            const { headers = {} } = response;
+            const headerEntries = Object.entries(headers);
+            (error as MetadataBearer).$metadata = {
+              httpStatusCode: response.statusCode,
+              requestId: findHeader(/^x-[\w-]+-request-?id$/, headerEntries),
+              extendedRequestId: findHeader(/^x-[\w-]+-id-2$/, headerEntries),
+              cfId: findHeader(/^x-[\w-]+-cf-id$/, headerEntries),
+            };
+          }
+        } catch (e) {
+          // ignored, error object was not writable.
+        }
       }
 
       throw error;
     }
   };
+
+/**
+ * @internal
+ * @returns header value where key matches regex.
+ */
+const findHeader = (pattern: RegExp, headers: [string, string][]): string | undefined => {
+  return (headers.find(([k]) => {
+    return k.match(pattern);
+  }) || [void 0, void 1])[1];
+};

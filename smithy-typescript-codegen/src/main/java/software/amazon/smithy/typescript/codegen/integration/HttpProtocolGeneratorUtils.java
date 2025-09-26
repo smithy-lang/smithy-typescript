@@ -18,6 +18,7 @@ package software.amazon.smithy.typescript.codegen.integration;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -318,7 +319,8 @@ public final class HttpProtocolGeneratorUtils {
         Consumer<GenerationContext> errorCodeGenerator,
         boolean shouldParseErrorBody,
         BiFunction<GenerationContext, String, String> bodyErrorLocationModifier,
-        BiFunction<GenerationContext, List<OperationShape>, Map<String, ShapeId>> operationErrorsToShapes
+        BiFunction<GenerationContext, List<OperationShape>, Map<String, ShapeId>> operationErrorsToShapes,
+        Map<String, TreeSet<String>> errorAliases
     ) {
         TypeScriptWriter writer = context.getWriter();
         SymbolProvider symbolProvider = context.getSymbolProvider();
@@ -385,6 +387,11 @@ public final class HttpProtocolGeneratorUtils {
                         String outputParam = shouldParseErrorBody ? "parsedOutput" : "output";
                         writer.write("case $S:", name);
                         writer.write("case $S:", errorId.toString());
+                        for (String alias : errorAliases.getOrDefault(errorId.toString(), new TreeSet<>())) {
+                            if (!Objects.equals(name, alias) && !Objects.equals(errorId.toString(), alias)) {
+                                writer.write("case $S:", alias);
+                            }
+                        }
                         writer.indent()
                             .write("throw await $L($L, context);", errorDeserMethodName, outputParam)
                             .dedent();

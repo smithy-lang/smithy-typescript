@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { loadConfig } from "@smithy/node-config-provider";
-import { Endpoint } from "@smithy/types";
+import type { Endpoint } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
 
 import { Endpoint as InstanceMetadataEndpoint } from "../config/Endpoint";

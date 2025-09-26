@@ -1,6 +1,6 @@
 {
   "name": "@smithy/experimental-identity-and-auth",
-  "version": "0.3.45",
+  "version": "0.4.5",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline experimental-identity-and-auth",
@@ -12,9 +12,9 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
     "test": "yarn g:vitest run --passWithNoTests",
-    "test:integration": "yarn g:vitest run -c vitest.config.integ.ts",
+    "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
     "test:watch": "yarn g:vitest watch --passWithNoTests",
-    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.ts"
+    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -25,6 +25,7 @@
     "url": "https://smithy.io"
   },
   "license": "Apache-2.0",
+  "sideEffects": false,
   "dependencies": {
     "@smithy/middleware-endpoint": "workspace:^",
     "@smithy/middleware-retry": "workspace:^",

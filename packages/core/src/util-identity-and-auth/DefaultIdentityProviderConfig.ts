@@ -1,4 +1,4 @@
-import { HttpAuthSchemeId, Identity, IdentityProvider, IdentityProviderConfig } from "@smithy/types";
+import type { HttpAuthSchemeId, Identity, IdentityProvider, IdentityProviderConfig } from "@smithy/types";
 
 /**
  * Default implementation of IdentityProviderConfig

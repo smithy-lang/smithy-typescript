@@ -72,8 +72,8 @@ public class DocumentMemberSerVisitorTest {
 
         return ListUtils.of(new Object[][]{
                 {BooleanShape.builder().id(id).build(), DATA_SOURCE},
-                {BigDecimalShape.builder().id(id).build(), DATA_SOURCE + ".toJSON()"},
-                {BigIntegerShape.builder().id(id).build(), DATA_SOURCE + ".toJSON()"},
+                {BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
+                {BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
                 {ByteShape.builder().id(id).build(), DATA_SOURCE},
                 {DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
                 {FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
