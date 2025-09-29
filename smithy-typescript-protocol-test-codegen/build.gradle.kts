@@ -15,7 +15,8 @@ buildscript {
 }
 
 plugins {
-    id("software.amazon.smithy").version("0.6.0")
+    val smithyPluginVersion: String by project
+    id("software.amazon.smithy").version(smithyPluginVersion)
 }
 
 dependencies {
