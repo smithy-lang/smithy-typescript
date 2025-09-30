@@ -1,9 +1,9 @@
 {
   "name": "@smithy/service-client-documentation-generator",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
-    "build:cjs": "node ../../scripts/inline service-client-documentation-generator",
+    "build:cjs": "yarn g:tsc -p tsconfig.cjs.json",
     "build:es": "yarn g:tsc -p tsconfig.es.json",
     "build:types": "yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "rimraf dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",

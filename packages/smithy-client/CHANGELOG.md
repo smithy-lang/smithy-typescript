@@ -1,5 +1,21 @@
 # Change Log
 
+## 4.7.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/core@3.14.0
+  - @smithy/middleware-endpoint@4.3.0
+  - @smithy/middleware-stack@4.2.0
+  - @smithy/protocol-http@5.3.0
+  - @smithy/types@4.6.0
+  - @smithy/util-stream@4.4.0
+
 ## 4.6.5
 
 ### Patch Changes

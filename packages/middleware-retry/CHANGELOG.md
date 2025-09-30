@@ -1,5 +1,23 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/node-config-provider@4.3.0
+  - @smithy/protocol-http@5.3.0
+  - @smithy/service-error-classification@4.2.0
+  - @smithy/smithy-client@4.7.0
+  - @smithy/types@4.6.0
+  - @smithy/util-middleware@4.2.0
+  - @smithy/util-retry@4.2.0
+  - @smithy/uuid@1.1.0
+
 ## 4.3.1
 
 ### Patch Changes

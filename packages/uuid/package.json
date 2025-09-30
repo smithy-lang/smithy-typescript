@@ -1,6 +1,6 @@
 {
   "name": "@smithy/uuid",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Polyfill for generating UUID v4",
   "dependencies": {
     "tslib": "^2.6.2"
