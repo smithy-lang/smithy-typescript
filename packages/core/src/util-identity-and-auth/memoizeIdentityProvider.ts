@@ -3,8 +3,10 @@ import type { Identity, IdentityProvider } from "@smithy/types";
 /**
  * @internal
  */
-export const createIsIdentityExpiredFunction = (expirationMs: number) => (identity: Identity) =>
-  doesIdentityRequireRefresh(identity) && identity.expiration!.getTime() - Date.now() < expirationMs;
+export const createIsIdentityExpiredFunction = (expirationMs: number) =>
+  function isIdentityExpired(identity: Identity) {
+    return doesIdentityRequireRefresh(identity) && identity.expiration!.getTime() - Date.now() < expirationMs;
+  };
 
 /**
  * @internal
