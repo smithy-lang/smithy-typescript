@@ -294,7 +294,7 @@ public abstract class StructureExampleGenerator {
      * If a shape appears at too many depths it is truncated.
      * This handles the case of recursive shapes.
      */
-    private static class ShapeTracker {
+    private static final class ShapeTracker {
         private final Map<Shape, Set<Integer>> depths = new HashMap<>();
         private final Map<Shape, Integer> occurrences = new HashMap<>();
 

@@ -22,7 +22,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  *  properties from the trait or from {@code authParameters}.
  */
 @SmithyUnstableApi
-public final record HttpAuthOptionProperty(
+public record HttpAuthOptionProperty(
     String name,
     Type type,
     Function<Source, Consumer<TypeScriptWriter>> source
@@ -41,7 +41,7 @@ public final record HttpAuthOptionProperty(
         SIGNING
     }
 
-    public static final record Source(
+    public record Source(
         HttpAuthScheme httpAuthScheme,
         Trait trait
     ) implements ToSmithyBuilder<Source> {

@@ -57,6 +57,9 @@ sourceSets {
 }
 
 tasks.register("set-dependency-versions") {
+    val packagesDir = project.file("../packages")
+    var smithyTsSsdkLibs = project.file("../smithy-typescript-ssdk-libs")
+
     doLast {
         mkdir(layout.buildDirectory.dir("generated/resources/software/amazon/smithy/typescript/codegen").get().asFile)
         var versionsFile = layout.buildDirectory
@@ -65,7 +68,7 @@ tasks.register("set-dependency-versions") {
             .asFile
         versionsFile.printWriter().close()
 
-        val roots = project.file("../packages").listFiles().toMutableList() + project.file("../smithy-typescript-ssdk-libs").listFiles().toList()
+        val roots = packagesDir.listFiles().toMutableList() + smithyTsSsdkLibs.listFiles().toList()
         roots.forEach { packageDir ->
             val packageJsonFile = File(packageDir, "package.json")
             if (packageJsonFile.isFile()) {
