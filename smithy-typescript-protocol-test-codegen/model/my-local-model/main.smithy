@@ -7,8 +7,8 @@ use smithy.protocols#rpcv2Cbor
 @rpcv2Cbor
 @documentation("xyz interfaces")
 service XYZService {
-    version: "1.0",
-    operations : [
+    version: "1.0"
+    operations: [
         GetNumbers
     ]
 }
@@ -18,9 +18,9 @@ operation GetNumbers {
     input: GetNumbersRequest
     output: GetNumbersResponse
     errors: [
-        CodedThrottlingError,
-        MysteryThrottlingError,
-        RetryableError,
+        CodedThrottlingError
+        MysteryThrottlingError
+        RetryableError
         HaltError
     ]
 }
@@ -47,7 +47,7 @@ structure CodedThrottlingError {}
 structure MysteryThrottlingError {}
 
 @error("client")
-@retryable()
+@retryable
 structure RetryableError {}
 
 @error("client")
