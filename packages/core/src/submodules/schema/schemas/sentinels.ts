@@ -18,6 +18,8 @@ import type {
 /**
  * Schema sentinel runtime values.
  * @alpha
+ *
+ * @deprecated use inline numbers with type annotation to save space.
  */
 export const SCHEMA: {
   BLOB: BlobSchema;

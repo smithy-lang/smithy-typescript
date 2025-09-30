@@ -1,5 +1,4 @@
 import type { NormalizedSchema } from "@smithy/core/schema";
-import { SCHEMA } from "@smithy/core/schema";
 import type {
   CodecSettings,
   TimestampDateTimeSchema,
@@ -20,9 +19,9 @@ export function determineTimestampFormat(
   if (settings.timestampFormat.useTrait) {
     if (
       ns.isTimestampSchema() &&
-      (ns.getSchema() === SCHEMA.TIMESTAMP_DATE_TIME ||
-        ns.getSchema() === SCHEMA.TIMESTAMP_HTTP_DATE ||
-        ns.getSchema() === SCHEMA.TIMESTAMP_EPOCH_SECONDS)
+      (ns.getSchema() === (5 satisfies TimestampDateTimeSchema) ||
+        ns.getSchema() === (6 satisfies TimestampHttpDateSchema) ||
+        ns.getSchema() === (7 satisfies TimestampEpochSecondsSchema))
     ) {
       return ns.getSchema() as TimestampDateTimeSchema | TimestampHttpDateSchema | TimestampEpochSecondsSchema;
     }
@@ -32,9 +31,9 @@ export function determineTimestampFormat(
 
   const bindingFormat = settings.httpBindings
     ? typeof httpPrefixHeaders === "string" || Boolean(httpHeader)
-      ? SCHEMA.TIMESTAMP_HTTP_DATE
+      ? (6 satisfies TimestampHttpDateSchema)
       : Boolean(httpQuery) || Boolean(httpLabel)
-        ? SCHEMA.TIMESTAMP_DATE_TIME
+        ? (5 satisfies TimestampDateTimeSchema)
         : undefined
     : undefined;
 

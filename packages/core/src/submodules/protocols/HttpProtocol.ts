@@ -73,10 +73,10 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
       request.fragment = endpoint.url.hash || void 0;
       request.username = endpoint.url.username || void 0;
       request.password = endpoint.url.password || void 0;
+      if (!request.query) {
+        request.query = {};
+      }
       for (const [k, v] of endpoint.url.searchParams.entries()) {
-        if (!request.query) {
-          request.query = {};
-        }
         request.query[k] = v;
       }
       return request;

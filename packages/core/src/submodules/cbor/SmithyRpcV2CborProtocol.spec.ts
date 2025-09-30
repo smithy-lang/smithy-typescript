@@ -1,7 +1,16 @@
-import type { ErrorSchema } from "@smithy/core/schema";
 import { error, list, map, op, SCHEMA, struct, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import type { ResponseMetadata, RetryableTrait, SchemaRef } from "@smithy/types";
+import type {
+  BlobSchema,
+  BooleanSchema,
+  MapSchemaModifier,
+  NumericSchema,
+  ResponseMetadata,
+  RetryableTrait,
+  SchemaRef,
+  StringSchema,
+  TimestampDefaultSchema,
+} from "@smithy/types";
 import { beforeEach, describe, expect, test as it } from "vitest";
 
 import { cbor } from "./cbor";
@@ -29,8 +38,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           {},
           ["timestamp", "blob"],
           [
-            [SCHEMA.TIMESTAMP_DEFAULT, 0],
-            [SCHEMA.BLOB, 0],
+            [4 satisfies TimestampDefaultSchema, 0],
+            [21 satisfies BlobSchema, 0],
           ]
         ),
         input: {
@@ -56,11 +65,11 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           {},
           ["bool", "timestamp", "blob", "prefixHeaders", "searchParams"],
           [
-            [SCHEMA.BOOLEAN, { httpQuery: "bool" }],
-            [SCHEMA.TIMESTAMP_DEFAULT, { httpHeader: "timestamp" }],
-            [SCHEMA.BLOB, { httpHeader: "blob" }],
-            [SCHEMA.MAP_MODIFIER | SCHEMA.STRING, { httpPrefixHeaders: "anti-" }],
-            [SCHEMA.MAP_MODIFIER | SCHEMA.STRING, { httpQueryParams: 1 }],
+            [2 satisfies BooleanSchema, { httpQuery: "bool" }],
+            [4 satisfies TimestampDefaultSchema, { httpHeader: "timestamp" }],
+            [21 satisfies BlobSchema, { httpHeader: "blob" }],
+            [(128 satisfies MapSchemaModifier) | (0 satisfies StringSchema), { httpPrefixHeaders: "anti-" }],
+            [(128 satisfies MapSchemaModifier) | (0 satisfies StringSchema), { httpQueryParams: 1 }],
           ]
         ),
         input: {
@@ -104,10 +113,10 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           0,
           ["mySparseList", "myRegularList", "mySparseMap", "myRegularMap"],
           [
-            [() => list("", "MySparseList", { sparse: 1 }, SCHEMA.NUMERIC), {}],
-            [() => list("", "MyList", {}, SCHEMA.NUMERIC), {}],
-            [() => map("", "MySparseMap", { sparse: 1 }, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
-            [() => map("", "MyMap", {}, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
+            [() => list("", "MySparseList", { sparse: 1 }, 1 satisfies NumericSchema), {}],
+            [() => list("", "MyList", {}, 1 satisfies NumericSchema), {}],
+            [() => map("", "MySparseMap", { sparse: 1 }, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
+            [() => map("", "MyMap", {}, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
           ]
         ),
         input: {
@@ -207,10 +216,10 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           0,
           ["mySparseList", "myRegularList", "mySparseMap", "myRegularMap"],
           [
-            [() => list("", "MyList", { sparse: 1 }, SCHEMA.NUMERIC), {}],
-            [() => list("", "MyList", {}, SCHEMA.NUMERIC), {}],
-            [() => map("", "MyMap", { sparse: 1 }, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
-            [() => map("", "MyMap", {}, SCHEMA.STRING, SCHEMA.NUMERIC), {}],
+            [() => list("", "MyList", { sparse: 1 }, 1 satisfies NumericSchema), {}],
+            [() => list("", "MyList", {}, 1 satisfies NumericSchema), {}],
+            [() => map("", "MyMap", { sparse: 1 }, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
+            [() => map("", "MyMap", {}, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
           ]
         ),
         mockOutput: {

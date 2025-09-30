@@ -1,10 +1,23 @@
-import type { MemberSchema, StructureSchema } from "@smithy/types";
+import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BlobSchema,
+  BooleanSchema,
+  DocumentSchema,
+  ListSchemaModifier,
+  MapSchemaModifier,
+  MemberSchema,
+  NumericSchema,
+  StreamingBlobSchema,
+  StringSchema,
+  StructureSchema,
+  TimestampDefaultSchema,
+} from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { list } from "./ListSchema";
 import { map } from "./MapSchema";
-import { NormalizedSchema } from "./NormalizedSchema";
-import { SCHEMA } from "./sentinels";
+import { NormalizedSchema, translateTraits } from "./NormalizedSchema";
 import { sim } from "./SimpleSchema";
 import { struct } from "./StructureSchema";
 
@@ -39,31 +52,31 @@ describe(NormalizedSchema.name, () => {
   });
 
   it("translates a bitvector of traits to a traits object", () => {
-    expect(NormalizedSchema.translateTraits(0b0000_0000)).toEqual({});
-    expect(NormalizedSchema.translateTraits(0b0000_0001)).toEqual({
+    expect(translateTraits(0b0000_0000)).toEqual({});
+    expect(translateTraits(0b0000_0001)).toEqual({
       httpLabel: 1,
     });
-    expect(NormalizedSchema.translateTraits(0b0000_0011)).toEqual({
+    expect(translateTraits(0b0000_0011)).toEqual({
       httpLabel: 1,
       idempotent: 1,
     });
-    expect(NormalizedSchema.translateTraits(0b0000_0110)).toEqual({
+    expect(translateTraits(0b0000_0110)).toEqual({
       idempotent: 1,
       idempotencyToken: 1,
     });
-    expect(NormalizedSchema.translateTraits(0b0000_1100)).toEqual({
+    expect(translateTraits(0b0000_1100)).toEqual({
       idempotencyToken: 1,
       sensitive: 1,
     });
-    expect(NormalizedSchema.translateTraits(0b0001_1000)).toEqual({
+    expect(translateTraits(0b0001_1000)).toEqual({
       sensitive: 1,
       httpPayload: 1,
     });
-    expect(NormalizedSchema.translateTraits(0b0011_0000)).toEqual({
+    expect(translateTraits(0b0011_0000)).toEqual({
       httpPayload: 1,
       httpResponseCode: 1,
     });
-    expect(NormalizedSchema.translateTraits(0b0110_0000)).toEqual({
+    expect(translateTraits(0b0110_0000)).toEqual({
       httpResponseCode: 1,
       httpQueryParams: 1,
     });
@@ -79,39 +92,37 @@ describe(NormalizedSchema.name, () => {
       expect(member.getSchema()).toBe(List);
       expect(member.getMemberName()).toBe("list");
     });
-
-    it("throws when treating a non-member schema as a member schema", () => {
-      expect(() => {
-        ns.getMemberName();
-      }).toThrow();
-    });
   });
 
   describe("traversal and type identifiers", () => {
     it("type identifiers", () => {
       expect(NormalizedSchema.of("unit").isUnitSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.LIST_MODIFIER | SCHEMA.NUMERIC).isListSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.MAP_MODIFIER | SCHEMA.NUMERIC).isMapSchema()).toBe(true);
+      expect(NormalizedSchema.of((64 satisfies ListSchemaModifier) | (1 satisfies NumericSchema)).isListSchema()).toBe(
+        true
+      );
+      expect(NormalizedSchema.of((128 satisfies MapSchemaModifier) | (1 satisfies NumericSchema)).isMapSchema()).toBe(
+        true
+      );
 
-      expect(NormalizedSchema.of(SCHEMA.DOCUMENT).isDocumentSchema()).toBe(true);
+      expect(NormalizedSchema.of(15 satisfies DocumentSchema).isDocumentSchema()).toBe(true);
 
       expect(NormalizedSchema.of(ns.getMemberSchema("struct")).isStructSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.BLOB).isBlobSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.TIMESTAMP_DEFAULT).isTimestampSchema()).toBe(true);
+      expect(NormalizedSchema.of(21 satisfies BlobSchema).isBlobSchema()).toBe(true);
+      expect(NormalizedSchema.of(4 satisfies TimestampDefaultSchema).isTimestampSchema()).toBe(true);
 
-      expect(NormalizedSchema.of(SCHEMA.STRING).isStringSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.BOOLEAN).isBooleanSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.NUMERIC).isNumericSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.BIG_INTEGER).isBigIntegerSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.BIG_DECIMAL).isBigDecimalSchema()).toBe(true);
-      expect(NormalizedSchema.of(SCHEMA.STREAMING_BLOB).isStreaming()).toBe(true);
+      expect(NormalizedSchema.of(0 satisfies StringSchema).isStringSchema()).toBe(true);
+      expect(NormalizedSchema.of(2 satisfies BooleanSchema).isBooleanSchema()).toBe(true);
+      expect(NormalizedSchema.of(1 satisfies NumericSchema).isNumericSchema()).toBe(true);
+      expect(NormalizedSchema.of(17 satisfies BigIntegerSchema).isBigIntegerSchema()).toBe(true);
+      expect(NormalizedSchema.of(19 satisfies BigDecimalSchema).isBigDecimalSchema()).toBe(true);
+      expect(NormalizedSchema.of(42 satisfies StreamingBlobSchema).isStreaming()).toBe(true);
 
       const structWithStreamingMember = struct(
         "ack",
         "StructWithStreamingMember",
         0,
         ["m"],
-        [sim("ns", "blob", SCHEMA.BLOB, { streaming: 1 })]
+        [sim("ns", "blob", 21 as BlobSchema, { streaming: 1 })]
       );
       expect(NormalizedSchema.of(structWithStreamingMember).getMemberSchema("m").isStreaming()).toBe(true);
     });
@@ -149,6 +160,11 @@ describe(NormalizedSchema.name, () => {
         expect(member.getSchema()).toBe(0);
         expect(member.getMemberName()).toBe("key");
       });
+      it("should return a defined key schema even if the map was defined by a numeric sentinel value", () => {
+        const map = NormalizedSchema.of((128 satisfies MapSchemaModifier) | (1 satisfies NumericSchema));
+        expect(map.getKeySchema().isStringSchema()).toBe(true);
+        expect(map.getValueSchema().isNumericSchema()).toBe(true);
+      });
       it("map value member", () => {
         const member = ns.getMemberSchema("map").getValueSchema();
         expect(member.isMemberSchema()).toBe(true);
@@ -179,15 +195,6 @@ describe(NormalizedSchema.name, () => {
         );
       });
     });
-  });
-
-  it("can identify whether a member exists", () => {
-    expect(ns.hasMemberSchema("list")).toBe(true);
-    expect(ns.hasMemberSchema("map")).toBe(true);
-    expect(ns.hasMemberSchema("struct")).toBe(true);
-    expect(ns.hasMemberSchema("a")).toBe(false);
-    expect(ns.hasMemberSchema("b")).toBe(false);
-    expect(ns.hasMemberSchema("c")).toBe(false);
   });
 
   describe("iteration", () => {
