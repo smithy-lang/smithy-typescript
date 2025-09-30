@@ -28,7 +28,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * @param docs writer for the docs of the config field
  */
 @SmithyUnstableApi
-public final record ConfigField(
+public record ConfigField(
     String name,
     Type type,
     Symbol inputType,
