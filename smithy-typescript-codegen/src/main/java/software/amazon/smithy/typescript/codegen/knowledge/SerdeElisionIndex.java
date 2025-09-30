@@ -13,6 +13,7 @@ import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ToShapeId;
+import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.JsonNameTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
@@ -28,7 +29,7 @@ import software.amazon.smithy.utils.MapUtils;
  */
 public class SerdeElisionIndex implements KnowledgeIndex {
     private final Map<ShapeId, Boolean> elisionBinding = new HashMap<>();
-    private final Map<String, Class> mutatingTraits = MapUtils.of(
+    private final Map<String, Class<? extends Trait>> mutatingTraits = MapUtils.of(
             "jsonName", JsonNameTrait.class,
             "streaming", StreamingTrait.class,
             "mediaType", MediaTypeTrait.class,
@@ -58,7 +59,7 @@ public class SerdeElisionIndex implements KnowledgeIndex {
     }
 
     private boolean hasMutatingTraits(Shape shape, Model model) {
-        for (Map.Entry<String, Class> entry : mutatingTraits.entrySet()) {
+        for (Map.Entry<String, Class<? extends Trait>> entry : mutatingTraits.entrySet()) {
             if (shape.hasTrait(entry.getValue())) {
                 return true;
             }
