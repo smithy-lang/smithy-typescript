@@ -7,15 +7,14 @@ import { transformFromString, transformToString } from "./transforms";
 export class Uint8ArrayBlobAdapter extends Uint8Array {
   /**
    * @param source - such as a string or Stream.
+   * @param encoding - utf-8 or base64.
    * @returns a new Uint8ArrayBlobAdapter extending Uint8Array.
    */
   public static fromString(source: string, encoding = "utf-8"): Uint8ArrayBlobAdapter {
-    switch (typeof source) {
-      case "string":
-        return transformFromString(source, encoding);
-      default:
-        throw new Error(`Unsupported conversion from ${typeof source} to Uint8ArrayBlobAdapter.`);
+    if (typeof source === "string") {
+      return transformFromString(source, encoding);
     }
+    throw new Error(`Unsupported conversion from ${typeof source} to Uint8ArrayBlobAdapter.`);
   }
 
   /**
