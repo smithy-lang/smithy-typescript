@@ -1,6 +1,6 @@
 {
   "name": "@smithy/chunked-blob-reader",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline chunked-blob-reader",

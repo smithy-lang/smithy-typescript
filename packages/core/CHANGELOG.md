@@ -1,5 +1,24 @@
 # Change Log
 
+## 3.14.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/middleware-serde@4.2.0
+  - @smithy/protocol-http@5.3.0
+  - @smithy/types@4.6.0
+  - @smithy/util-base64@4.2.0
+  - @smithy/util-body-length-browser@4.2.0
+  - @smithy/util-middleware@4.2.0
+  - @smithy/util-stream@4.4.0
+  - @smithy/util-utf8@4.2.0
+  - @smithy/uuid@1.1.0
+
 ## 3.13.0
 
 ### Minor Changes

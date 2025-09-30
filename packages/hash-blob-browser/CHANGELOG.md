@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/chunked-blob-reader@5.2.0
+  - @smithy/chunked-blob-reader-native@4.2.0
+  - @smithy/types@4.6.0
+
 ## 4.1.1
 
 ### Patch Changes

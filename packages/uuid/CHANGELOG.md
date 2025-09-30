@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
 ## 1.0.0
 
 ### Major Changes

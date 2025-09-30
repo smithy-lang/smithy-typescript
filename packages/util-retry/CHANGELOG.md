@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/service-error-classification@4.2.0
+  - @smithy/types@4.6.0
+
 ## 4.1.2
 
 ### Patch Changes

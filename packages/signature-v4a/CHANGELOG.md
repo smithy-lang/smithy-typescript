@@ -1,5 +1,19 @@
 # @smithy/signature-v4a
 
+## 3.1.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/signature-v4@5.3.0
+  - @smithy/types@4.6.0
+  - @smithy/util-hex-encoding@4.2.0
+  - @smithy/util-utf8@4.2.0
+
 ## 3.0.7
 
 ### Patch Changes

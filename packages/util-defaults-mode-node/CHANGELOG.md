@@ -1,5 +1,21 @@
 # Change Log
 
+## 4.2.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/config-resolver@4.3.0
+  - @smithy/credential-provider-imds@4.2.0
+  - @smithy/node-config-provider@4.3.0
+  - @smithy/property-provider@4.2.0
+  - @smithy/smithy-client@4.7.0
+  - @smithy/types@4.6.0
+
 ## 4.1.5
 
 ### Patch Changes

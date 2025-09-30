@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-uri-escape",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline util-uri-escape",

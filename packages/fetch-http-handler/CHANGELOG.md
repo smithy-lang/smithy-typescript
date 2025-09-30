@@ -1,5 +1,19 @@
 # Change Log
 
+## 5.3.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/protocol-http@5.3.0
+  - @smithy/querystring-builder@4.2.0
+  - @smithy/types@4.6.0
+  - @smithy/util-base64@4.2.0
+
 ## 5.2.1
 
 ### Patch Changes

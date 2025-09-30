@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/property-provider@4.2.0
+  - @smithy/shared-ini-file-loader@4.3.0
+  - @smithy/types@4.6.0
+
 ## 4.2.2
 
 ### Patch Changes
