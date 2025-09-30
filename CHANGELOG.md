@@ -1,5 +1,12 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.36.0 (2025-09-30)
+
+### Features
+
+- Upgraded smithy version to 1.62.0 ([#1714](https://github.com/smithy-lang/smithy-typescript/pull/1714))
+- Replaced 'uuid' with '@smithy/uuid' ([#1706](https://github.com/smithy-lang/smithy-typescript/pull/1706))
+
 ## 0.35.0 (2025-09-18)
 
 ### Features
