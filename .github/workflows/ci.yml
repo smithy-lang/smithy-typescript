@@ -29,6 +29,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-write-only: true
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
@@ -59,6 +60,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-write-only: true
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
@@ -110,6 +112,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-write-only: true
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Install dependencies
         run: |
           yarn
