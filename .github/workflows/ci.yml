@@ -27,6 +27,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-write-only: true
 
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
@@ -55,6 +57,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-write-only: true
 
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
@@ -104,6 +108,8 @@ jobs:
           distribution: "corretto"
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-write-only: true
       - name: Install dependencies
         run: |
           yarn
