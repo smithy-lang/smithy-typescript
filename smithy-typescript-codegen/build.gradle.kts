@@ -96,3 +96,4 @@ tasks.register<SetDependencyVersionsTask>("set-dependency-versions") {
 }
 
 tasks["processResources"].dependsOn(tasks["set-dependency-versions"])
+tasks["sourcesJar"].dependsOn(tasks["set-dependency-versions"])
