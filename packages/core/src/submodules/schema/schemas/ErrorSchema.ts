@@ -1,6 +1,5 @@
 import type { SchemaRef, SchemaTraits } from "@smithy/types";
 
-import { TypeRegistry } from "../TypeRegistry";
 import { Schema } from "./Schema";
 import { StructureSchema } from "./StructureSchema";
 
@@ -14,6 +13,9 @@ import { StructureSchema } from "./StructureSchema";
  */
 export class ErrorSchema extends StructureSchema {
   public static readonly symbol = Symbol.for("@smithy/err");
+  /**
+   * @deprecated - field unused.
+   */
   public ctor!: any;
   protected readonly symbol = ErrorSchema.symbol;
 }
@@ -36,7 +38,10 @@ export const error = (
   traits: SchemaTraits,
   memberNames: string[],
   memberList: SchemaRef[],
-  ctor: any
+  /**
+   * @deprecated - field unused.
+   */
+  ctor?: any
 ): ErrorSchema =>
   Schema.assign(new ErrorSchema(), {
     name,
@@ -44,5 +49,5 @@ export const error = (
     traits,
     memberNames,
     memberList,
-    ctor,
+    ctor: null,
   });

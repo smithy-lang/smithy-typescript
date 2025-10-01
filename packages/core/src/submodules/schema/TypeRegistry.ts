@@ -12,7 +12,8 @@ export class TypeRegistry {
 
   private constructor(
     public readonly namespace: string,
-    private schemas: Map<string, ISchema> = new Map()
+    private schemas: Map<string, ISchema> = new Map(),
+    private exceptions: Map<ErrorSchema, any> = new Map()
   ) {}
 
   /**
@@ -34,8 +35,7 @@ export class TypeRegistry {
    */
   public register(shapeId: string, schema: ISchema) {
     const qualifiedName = this.normalizeShapeId(shapeId);
-    const registry = TypeRegistry.for(this.getNamespace(shapeId));
-    registry.schemas.set(qualifiedName, schema);
+    this.schemas.set(qualifiedName, schema);
   }
 
   /**
@@ -48,6 +48,21 @@ export class TypeRegistry {
       throw new Error(`@smithy/core/schema - schema not found for ${id}`);
     }
     return this.schemas.get(id)!;
+  }
+
+  /**
+   * Associates an error schema with its constructor.
+   */
+  public registerError(errorSchema: ErrorSchema, ctor: any) {
+    this.exceptions.set(errorSchema, ctor);
+  }
+
+  /**
+   * @param errorSchema - query.
+   * @returns Error constructor that extends the service's base exception.
+   */
+  public getErrorCtor(errorSchema: ErrorSchema): any {
+    return this.exceptions.get(errorSchema);
   }
 
   /**
@@ -83,9 +98,9 @@ export class TypeRegistry {
   /**
    * Unloads the current TypeRegistry.
    */
-  public destroy() {
-    TypeRegistry.registries.delete(this.namespace);
+  public clear() {
     this.schemas.clear();
+    this.exceptions.clear();
   }
 
   private normalizeShapeId(shapeId: string) {

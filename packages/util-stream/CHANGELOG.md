@@ -1,5 +1,28 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/fetch-http-handler@5.3.0
+  - @smithy/node-http-handler@4.3.0
+  - @smithy/types@4.6.0
+  - @smithy/util-base64@4.2.0
+  - @smithy/util-buffer-from@4.2.0
+  - @smithy/util-hex-encoding@4.2.0
+  - @smithy/util-utf8@4.2.0
+
+## 4.3.2
+
+### Patch Changes
+
+- f8793be: prevent compilation from inserting Uint8Array type parameter
+
 ## 4.3.1
 
 ### Patch Changes

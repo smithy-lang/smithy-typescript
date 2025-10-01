@@ -1,5 +1,28 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.36.0 (2025-09-30)
+
+### Features
+
+- Upgraded smithy version to 1.62.0 ([#1714](https://github.com/smithy-lang/smithy-typescript/pull/1714))
+- Replaced 'uuid' with '@smithy/uuid' ([#1706](https://github.com/smithy-lang/smithy-typescript/pull/1706))
+
+## 0.35.0 (2025-09-18)
+
+### Features
+
+- `Command` class examples now generate with a reference to the `Client` constructor input type ([#1690](https://github.com/smithy-lang/smithy-typescript/pull/1690))
+
+### Bug Fixes
+
+- Fixed header type codegen for event streams ([#1694](https://github.com/smithy-lang/smithy-typescript/pull/1694))
+
+## 0.34.1 (2025-09-10)
+
+### Bug Fixes
+
+- Fixed event stream serialization when the `@eventStreamPayload` member is a string ([#1674](https://github.com/smithy-lang/smithy-typescript/pull/1674))
+
 ## 0.34.0 (2025-07-30)
 
 ### Features

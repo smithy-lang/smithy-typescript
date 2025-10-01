@@ -1,3 +1,3 @@
-import { v4 as generateIdempotencyToken } from "uuid";
+import { v4 as generateIdempotencyToken } from "@smithy/uuid";
 
 export { generateIdempotencyToken };

@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/types@4.6.0
+
+## 4.2.0
+
+### Minor Changes
+
+- 60f393e: add mock controls to file loader
+
 ## 4.1.1
 
 ### Patch Changes

@@ -1,5 +1,48 @@
 # Change Log
 
+## 3.14.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/middleware-serde@4.2.0
+  - @smithy/protocol-http@5.3.0
+  - @smithy/types@4.6.0
+  - @smithy/util-base64@4.2.0
+  - @smithy/util-body-length-browser@4.2.0
+  - @smithy/util-middleware@4.2.0
+  - @smithy/util-stream@4.4.0
+  - @smithy/util-utf8@4.2.0
+  - @smithy/uuid@1.1.0
+
+## 3.13.0
+
+### Minor Changes
+
+- 59e9952: separate error schema objects from error ctor
+
+## 3.12.0
+
+### Minor Changes
+
+- 97fe0d8: Replace 'uuid' with '@smithy/uuid'
+
+### Patch Changes
+
+- 3eb73f3: fix detection of member idempotencyToken trait
+
+## 3.11.1
+
+### Patch Changes
+
+- f8793be: prevent compilation from inserting Uint8Array type parameter
+- Updated dependencies [f8793be]
+  - @smithy/util-stream@4.3.2
+
 ## 3.11.0
 
 ### Minor Changes

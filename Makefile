@@ -39,6 +39,7 @@ test-types:
 	npx tsc -p tsconfig.test.json
 
 test-integration:
+	node ./scripts/validation/no-generic-byte-arrays.js
 	make test-browser
 	yarn g:vitest run -c vitest.config.integ.mts
 	make test-types

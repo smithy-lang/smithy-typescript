@@ -111,17 +111,19 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
       if (dataObject.Message) {
         dataObject.message = dataObject.Message;
       }
-      const baseExceptionSchema = TypeRegistry.for("smithy.ts.sdk.synthetic." + namespace).getBaseException();
+      const synthetic = TypeRegistry.for("smithy.ts.sdk.synthetic." + namespace);
+      const baseExceptionSchema = synthetic.getBaseException();
       if (baseExceptionSchema) {
-        const ErrorCtor = baseExceptionSchema.ctor;
+        const ErrorCtor = synthetic.getErrorCtor(baseExceptionSchema);
         throw Object.assign(new ErrorCtor({ name: errorName }), errorMetadata, dataObject);
       }
       throw Object.assign(new Error(errorName), errorMetadata, dataObject);
     }
 
     const ns = NormalizedSchema.of(errorSchema);
+    const ErrorCtor = registry.getErrorCtor(errorSchema);
     const message = dataObject.message ?? dataObject.Message ?? "Unknown";
-    const exception = new errorSchema.ctor(message);
+    const exception = new ErrorCtor(message);
 
     const output = {} as any;
     for (const [name, member] of ns.structIterator()) {

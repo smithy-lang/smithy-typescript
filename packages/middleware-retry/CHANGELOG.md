@@ -1,5 +1,60 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/node-config-provider@4.3.0
+  - @smithy/protocol-http@5.3.0
+  - @smithy/service-error-classification@4.2.0
+  - @smithy/smithy-client@4.7.0
+  - @smithy/types@4.6.0
+  - @smithy/util-middleware@4.2.0
+  - @smithy/util-retry@4.2.0
+  - @smithy/uuid@1.1.0
+
+## 4.3.1
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.5
+
+## 4.3.0
+
+### Minor Changes
+
+- 97fe0d8: Replace 'uuid' with '@smithy/uuid'
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.4
+
+## 4.2.4
+
+### Patch Changes
+
+- @smithy/smithy-client@4.6.3
+
+## 4.2.3
+
+### Patch Changes
+
+- Updated dependencies [937ac5a]
+  - @smithy/service-error-classification@4.1.2
+  - @smithy/util-retry@4.1.2
+
+## 4.2.2
+
+### Patch Changes
+
+- @smithy/node-config-provider@4.2.2
+- @smithy/smithy-client@4.6.2
+
 ## 4.2.1
 
 ### Patch Changes

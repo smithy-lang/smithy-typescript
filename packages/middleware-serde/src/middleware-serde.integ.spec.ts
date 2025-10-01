@@ -6,7 +6,14 @@ import { requireRequestsFrom } from "../../../private/util-test/src/index";
 describe("middleware-serde", () => {
   describe(Weather.name, () => {
     it("should serialize TestProtocol", async () => {
-      const client = new Weather({ endpoint: "https://foo.bar" });
+      const client = new Weather({
+        endpoint: "https://foo.bar",
+        region: "us-west-2",
+        credentials: {
+          accessKeyId: "INTEG",
+          secretAccessKey: "INTEG",
+        },
+      });
       requireRequestsFrom(client).toMatch({
         method: "PUT",
         hostname: "foo.bar",

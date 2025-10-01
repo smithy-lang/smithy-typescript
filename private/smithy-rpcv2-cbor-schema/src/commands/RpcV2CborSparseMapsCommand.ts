@@ -33,6 +33,8 @@ export interface RpcV2CborSparseMapsCommandOutput extends RpcV2CborSparseMapsInp
  * ```javascript
  * import { RpcV2ProtocolClient, RpcV2CborSparseMapsCommand } from "@smithy/smithy-rpcv2-cbor-schema"; // ES Modules import
  * // const { RpcV2ProtocolClient, RpcV2CborSparseMapsCommand } = require("@smithy/smithy-rpcv2-cbor-schema"); // CommonJS import
+ * // import type { RpcV2ProtocolClientConfig } from "@smithy/smithy-rpcv2-cbor-schema";
+ * const config = {}; // type is RpcV2ProtocolClientConfig
  * const client = new RpcV2ProtocolClient(config);
  * const input = { // RpcV2CborSparseMapsInputOutput
  *   sparseStructMap: { // SparseStructMap

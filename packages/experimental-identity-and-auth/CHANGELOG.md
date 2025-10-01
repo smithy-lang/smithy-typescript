@@ -1,5 +1,57 @@
 # Change Log
 
+## 0.5.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+### Patch Changes
+
+- Updated dependencies [45ee67f]
+  - @smithy/middleware-endpoint@4.3.0
+  - @smithy/middleware-retry@4.4.0
+  - @smithy/middleware-serde@4.2.0
+  - @smithy/protocol-http@5.3.0
+  - @smithy/signature-v4@5.3.0
+  - @smithy/types@4.6.0
+  - @smithy/util-middleware@4.2.0
+
+## 0.4.6
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.2.5
+- @smithy/middleware-retry@4.3.1
+
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [97fe0d8]
+  - @smithy/middleware-retry@4.3.0
+  - @smithy/middleware-endpoint@4.2.4
+
+## 0.4.4
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.2.3
+- @smithy/middleware-retry@4.2.4
+
+## 0.4.3
+
+### Patch Changes
+
+- @smithy/middleware-retry@4.2.3
+
+## 0.4.2
+
+### Patch Changes
+
+- @smithy/middleware-endpoint@4.2.2
+- @smithy/middleware-retry@4.2.2
+
 ## 0.4.1
 
 ### Patch Changes

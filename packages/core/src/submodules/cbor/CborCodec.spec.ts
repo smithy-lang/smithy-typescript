@@ -30,16 +30,18 @@ describe(CborShapeSerializer.name, () => {
             "ns",
             "StructWithIdempotencyToken",
             0,
-            ["idempotencyToken", "plainString"],
-            [idempotencyTokenSchema, plainSchema]
+            ["idempotencyToken", "plainString", "memberTraitToken"],
+            [idempotencyTokenSchema, plainSchema, [() => plainSchema, 0b0100]]
           );
 
           serializer.write(objectSchema, {
             idempotencyToken: undefined,
             plainString: undefined,
+            memberTraitToken: undefined,
           });
           expect(cbor.deserialize(serializer.flush())).toMatchObject({
             idempotencyToken: UUID_V4,
+            memberTraitToken: UUID_V4,
           });
 
           serializer.write(objectSchema, {
@@ -49,6 +51,18 @@ describe(CborShapeSerializer.name, () => {
           expect(cbor.deserialize(serializer.flush())).toMatchObject({
             idempotencyToken: UUID_V4,
             plainString: /^abc$/,
+            memberTraitToken: UUID_V4,
+          });
+
+          serializer.write(objectSchema, {
+            idempotencyToken: "jrt",
+            plainString: "abc",
+            memberTraitToken: "qrf",
+          });
+          expect(cbor.deserialize(serializer.flush())).toMatchObject({
+            idempotencyToken: "jrt",
+            plainString: /^abc$/,
+            memberTraitToken: "qrf",
           });
         }
       }

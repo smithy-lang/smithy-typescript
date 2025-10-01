@@ -48,19 +48,32 @@ dependencies {
 sourceSets {
     main {
         resources {
-            setSrcDirs(listOf("src/main/resources", "$buildDir/generated/resources"))
+            setSrcDirs(listOf(
+                "src/main/resources",
+                layout.buildDirectory.dir("generated/resources").get().asFile
+            ))
         }
     }
 }
 
-tasks.register("set-dependency-versions") {
-    doLast {
-        mkdir("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen")
-        val versionsFile =
-                file("$buildDir/generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties")
-        versionsFile.printWriter().close()
-
-        val roots = project.file("../packages").listFiles().toMutableList() + project.file("../smithy-typescript-ssdk-libs").listFiles().toList()
+abstract class SetDependencyVersionsTask : DefaultTask() {
+    @get:InputDirectory
+    abstract val packagesDir: DirectoryProperty
+    
+    @get:InputDirectory
+    abstract val smithyTsSsdkLibs: DirectoryProperty
+    
+    @get:OutputFile
+    abstract val versionsFile: RegularFileProperty
+    
+    @TaskAction
+    fun execute() {
+        val outputFile = versionsFile.get().asFile
+        outputFile.parentFile.mkdirs()
+        outputFile.printWriter().close()
+        
+        val roots = packagesDir.get().asFile.listFiles().toMutableList() + 
+                   smithyTsSsdkLibs.get().asFile.listFiles().toList()
         roots.forEach { packageDir ->
             val packageJsonFile = File(packageDir, "package.json")
             if (packageJsonFile.isFile()) {
@@ -69,11 +82,18 @@ tasks.register("set-dependency-versions") {
                 val packageVersion = packageJson.expectStringMember("version").getValue()
                 val isPrivate = packageJson.getBooleanMemberOrDefault("private", false)
                 if (!isPrivate) {
-                    versionsFile.appendText("$packageName=$packageVersion\n")
+                    outputFile.appendText("$packageName=$packageVersion\n")
                 }
             }
         }
     }
 }
 
+tasks.register<SetDependencyVersionsTask>("set-dependency-versions") {
+    packagesDir.set(project.file("../packages"))
+    smithyTsSsdkLibs.set(project.file("../smithy-typescript-ssdk-libs"))
+    versionsFile.set(layout.buildDirectory.file("generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties"))
+}
+
 tasks["processResources"].dependsOn(tasks["set-dependency-versions"])
+tasks["sourcesJar"].dependsOn(tasks["set-dependency-versions"])
