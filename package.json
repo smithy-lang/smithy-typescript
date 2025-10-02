@@ -55,7 +55,7 @@
     "puppeteer": "^19.2.0",
     "rollup": "^4.52.2",
     "ts-jest": "29.1.2",
-    "turbo": "2.3.3",
+    "turbo": "2.5.8",
     "typescript": "~5.8.3",
     "vite": "^7.1.4",
     "vitest": "^3.2.4",
