@@ -7,7 +7,7 @@ export const alphabetByEncoding: Record<string, number> = Object.entries(chars).
   },
   {} as Record<string, number>
 );
-export const alphabetByValue: Array<string> = Object.keys(alphabetByEncoding);
+export const alphabetByValue: Array<string> = chars.split("");
 
 export const bitsPerLetter = 6;
 export const bitsPerByte = 8;

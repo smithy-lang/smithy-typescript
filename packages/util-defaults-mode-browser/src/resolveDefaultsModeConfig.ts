@@ -43,6 +43,20 @@ export const resolveDefaultsModeConfig = ({
   });
 
 /**
+ * @internal
+ */
+type NavigatorAugment = {
+  userAgentData?: {
+    mobile?: boolean;
+  };
+  connection?: {
+    effectiveType?: "4g" | string;
+    rtt?: number;
+    downlink?: number;
+  };
+};
+
+/**
  * The aim of the mobile detection function is not really to know whether the device is a mobile device.
  * This is emphasized in the modern guidance on browser detection that feature detection is correct
  * whereas UA "sniffing" is usually a mistake.
@@ -57,13 +71,19 @@ export const resolveDefaultsModeConfig = ({
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Browser_detection_using_the_user_agent
  */
 const useMobileConfiguration = (): boolean => {
-  const networkInformation = (window?.navigator as any)?.connection;
-  if (networkInformation?.effectiveType) {
+  const navigator = window?.navigator as (typeof window.navigator & NavigatorAugment) | undefined;
+  if (navigator?.connection) {
     // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/effectiveType
     // The maximum will report as 4g, regardless of 5g or further developments.
-    return networkInformation?.effectiveType !== "4g";
+    const { effectiveType, rtt, downlink } = navigator?.connection;
+    const slow = (typeof effectiveType === "string" && effectiveType !== "4g") || rtt > 100 || downlink < 10;
+    if (slow) {
+      return true;
+    }
   }
 
-  // without the networkInformation object, we use the touch feature detection as a proxy.
-  return typeof window?.navigator?.maxTouchPoints === "number" && window.navigator.maxTouchPoints > 1;
+  // without the networkInformation object, we use the userAgentData or touch feature detection as a proxy.
+  return (
+    navigator?.userAgentData?.mobile || (typeof navigator?.maxTouchPoints === "number" && navigator?.maxTouchPoints > 1)
+  );
 };
