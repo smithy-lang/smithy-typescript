@@ -17,7 +17,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * ResolveConfigFunction.
  */
 @SmithyUnstableApi
-public final record ResolveConfigFunction(
+public record ResolveConfigFunction(
     Symbol resolveConfigFunction,
     Symbol inputConfig,
     Symbol resolvedConfig,

@@ -21,7 +21,7 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * @param source writer for the value of the auth scheme parameter, typically from {@code context} or {@code config}
  */
 @SmithyUnstableApi
-public final record HttpAuthSchemeParameter(
+public record HttpAuthSchemeParameter(
     String name,
     Consumer<TypeScriptWriter> type,
     Consumer<TypeScriptWriter> source
