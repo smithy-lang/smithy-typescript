@@ -68,7 +68,7 @@
     "smithy-typescript-ssdk-libs/*",
     "private/*"
   ],
-  "packageManager": "yarn@4.5.3",
+  "packageManager": "yarn@4.10.3",
   "husky": {
     "hooks": {
       "pre-commit": "yarn lint:dependencies && yarn lint:versions"
