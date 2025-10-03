@@ -32,7 +32,7 @@ test-browser:
 	yarn g:vitest run -c vitest.config.browser.mts
 
 test-bundlers:
-	(cd ./testbed/bundlers && make build test)
+	(cd ./testbed/bundlers && make run)
 
 # typecheck for test code.
 test-types:
