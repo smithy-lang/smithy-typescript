@@ -1,5 +1,6 @@
 // smithy-typescript generated code
 import { Sha256 } from "@aws-crypto/sha256-browser";
+import { eventStreamSerdeProvider } from "@smithy/eventstream-serde-browser";
 import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
 import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/util-retry";
@@ -21,6 +22,7 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     runtime: "browser",
     defaultsMode,
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+    eventStreamSerdeProvider: config?.eventStreamSerdeProvider ?? eventStreamSerdeProvider,
     maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
     requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
     retryMode: config?.retryMode ?? (async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE),

@@ -6,6 +6,7 @@ import {
   resolveHttpAuthSchemeConfig,
 } from "./auth/httpAuthSchemeProvider";
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
+import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import {
   ClientInputEndpointParameters,
   ClientResolvedEndpointParameters,
@@ -19,6 +20,11 @@ import {
   getHttpAuthSchemeEndpointRuleSetPlugin,
   getHttpSigningPlugin,
 } from "@smithy/core";
+import {
+  EventStreamSerdeInputConfig,
+  EventStreamSerdeResolvedConfig,
+  resolveEventStreamSerdeConfig,
+} from "@smithy/eventstream-serde-config-resolver";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import {
   EndpointInputConfig,
@@ -42,6 +48,7 @@ import {
   ChecksumConstructor as __ChecksumConstructor,
   Decoder as __Decoder,
   Encoder as __Encoder,
+  EventStreamSerdeProvider as __EventStreamSerdeProvider,
   HashConstructor as __HashConstructor,
   HttpHandlerOptions as __HttpHandlerOptions,
   Logger as __Logger,
@@ -55,12 +62,12 @@ export { __Client };
 /**
  * @public
  */
-export type ServiceInputTypes = GetNumbersCommandInput;
+export type ServiceInputTypes = GetNumbersCommandInput | TradeEventStreamCommandInput;
 
 /**
  * @public
  */
-export type ServiceOutputTypes = GetNumbersCommandOutput;
+export type ServiceOutputTypes = GetNumbersCommandOutput | TradeEventStreamCommandOutput;
 
 /**
  * @public
@@ -155,6 +162,11 @@ export interface ClientDefaults extends Partial<__SmithyConfiguration<__HttpHand
   extensions?: RuntimeExtension[];
 
   /**
+   * The function that provides necessary utilities for generating and parsing event stream
+   */
+  eventStreamSerdeProvider?: __EventStreamSerdeProvider;
+
+  /**
    * The {@link @smithy/smithy-client#DefaultsMode} that will be used to determine how certain default configuration options are resolved in the SDK.
    */
   defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;
@@ -168,6 +180,7 @@ export type XYZServiceClientConfigType = Partial<__SmithyConfiguration<__HttpHan
   RetryInputConfig &
   EndpointInputConfig<EndpointParameters> &
   EndpointRequiredInputConfig &
+  EventStreamSerdeInputConfig &
   HttpAuthSchemeInputConfig &
   ClientInputEndpointParameters;
 /**
@@ -186,6 +199,7 @@ export type XYZServiceClientResolvedConfigType = __SmithyResolvedConfiguration<_
   RetryResolvedConfig &
   EndpointResolvedConfig<EndpointParameters> &
   EndpointRequiredResolvedConfig &
+  EventStreamSerdeResolvedConfig &
   HttpAuthSchemeResolvedConfig &
   ClientResolvedEndpointParameters;
 /**
@@ -218,9 +232,10 @@ export class XYZServiceClient extends __Client<
     let _config_2 = resolveRetryConfig(_config_1);
     let _config_3 = resolveEndpointConfig(_config_2);
     let _config_4 = resolveEndpointRequiredConfig(_config_3);
-    let _config_5 = resolveHttpAuthSchemeConfig(_config_4);
-    let _config_6 = resolveRuntimeExtensions(_config_5, configuration?.extensions || []);
-    this.config = _config_6;
+    let _config_5 = resolveEventStreamSerdeConfig(_config_4);
+    let _config_6 = resolveHttpAuthSchemeConfig(_config_5);
+    let _config_7 = resolveRuntimeExtensions(_config_6, configuration?.extensions || []);
+    this.config = _config_7;
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));
     this.middlewareStack.use(

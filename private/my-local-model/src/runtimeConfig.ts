@@ -1,4 +1,5 @@
 // smithy-typescript generated code
+import { eventStreamSerdeProvider } from "@smithy/eventstream-serde-node";
 import { Hash } from "@smithy/hash-node";
 import { NODE_MAX_ATTEMPT_CONFIG_OPTIONS, NODE_RETRY_MODE_CONFIG_OPTIONS } from "@smithy/middleware-retry";
 import { loadConfig as loadNodeConfig } from "@smithy/node-config-provider";
@@ -25,6 +26,7 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     runtime: "node",
     defaultsMode,
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+    eventStreamSerdeProvider: config?.eventStreamSerdeProvider ?? eventStreamSerdeProvider,
     maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
     requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
     retryMode:

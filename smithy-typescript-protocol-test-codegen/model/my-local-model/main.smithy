@@ -10,6 +10,7 @@ service XYZService {
     version: "1.0"
     operations: [
         GetNumbers
+        TradeEventStream
     ]
 }
 
@@ -52,3 +53,28 @@ structure RetryableError {}
 
 @error("client")
 structure HaltError {}
+
+operation TradeEventStream {
+    input: TradeEventStreamRequest
+    output: TradeEventStreamResponse
+}
+
+structure TradeEventStreamRequest {
+    eventStream: TradeEvents
+}
+
+structure TradeEventStreamResponse {
+    eventStream: TradeEvents
+}
+
+@streaming
+union TradeEvents {
+    alpha: Alpha
+    beta: Unit
+    gamma: Unit
+}
+
+structure Alpha {
+    id: String
+    timestamp: Timestamp
+}

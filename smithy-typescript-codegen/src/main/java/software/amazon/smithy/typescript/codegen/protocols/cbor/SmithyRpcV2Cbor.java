@@ -71,7 +71,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
                     "cbor", null,
                     TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
                 );
-                writer.write("body = cbor.encode(body);");
+                writer.write("body = cbor.serialize(body);");
             },
             serializingDocumentShapes
         );

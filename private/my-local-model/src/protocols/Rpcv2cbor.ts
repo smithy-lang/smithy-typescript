@@ -1,15 +1,20 @@
 // smithy-typescript generated code
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
+import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import { XYZServiceServiceException as __BaseException } from "../models/XYZServiceServiceException";
 import {
+  Alpha,
   CodedThrottlingError,
   GetNumbersRequest,
   GetNumbersResponse,
   HaltError,
   MysteryThrottlingError,
   RetryableError,
+  TradeEvents,
+  Unit,
 } from "../models/models_0";
 import {
+  dateToTag as __dateToTag,
   buildHttpRpcRequest,
   cbor,
   checkCborResponse as cr,
@@ -21,6 +26,9 @@ import { nv as __nv } from "@smithy/core/serde";
 import { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
 import {
   decorateServiceException as __decorateServiceException,
+  expectNonNull as __expectNonNull,
+  expectString as __expectString,
+  parseEpochTimestamp as __parseEpochTimestamp,
   _json,
   collectBody,
   take,
@@ -28,7 +36,10 @@ import {
 } from "@smithy/smithy-client";
 import {
   Endpoint as __Endpoint,
+  EventStreamSerdeContext as __EventStreamSerdeContext,
   HeaderBag as __HeaderBag,
+  Message as __Message,
+  MessageHeaders as __MessageHeaders,
   ResponseMetadata as __ResponseMetadata,
   SerdeContext as __SerdeContext,
 } from "@smithy/types";
@@ -47,6 +58,23 @@ export const se_GetNumbersCommand = async (
 };
 
 /**
+ * serializeRpcv2cborTradeEventStreamCommand
+ */
+export const se_TradeEventStreamCommand = async (
+  input: TradeEventStreamCommandInput,
+  context: __SerdeContext & __EventStreamSerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = { ...SHARED_HEADERS };
+  headers.accept = "application/vnd.amazon.eventstream";
+
+  headers["content-type"] = "application/vnd.amazon.eventstream";
+
+  let body: any;
+  body = se_TradeEvents(input.eventStream, context);
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/TradeEventStream", undefined, body);
+};
+
+/**
  * deserializeRpcv2cborGetNumbersCommand
  */
 export const de_GetNumbersCommand = async (
@@ -62,6 +90,26 @@ export const de_GetNumbersCommand = async (
   let contents: any = {};
   contents = de_GetNumbersResponse(data, context);
   const response: GetNumbersCommandOutput = {
+    $metadata: deserializeMetadata(output),
+    ...contents,
+  };
+  return response;
+};
+
+/**
+ * deserializeRpcv2cborTradeEventStreamCommand
+ */
+export const de_TradeEventStreamCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext & __EventStreamSerdeContext
+): Promise<TradeEventStreamCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const contents = { eventStream: de_TradeEvents(output.body, context) };
+  const response: TradeEventStreamCommandOutput = {
     $metadata: deserializeMetadata(output),
     ...contents,
   };
@@ -159,6 +207,89 @@ const de_RetryableErrorRes = async (parsedOutput: any, context: __SerdeContext):
 };
 
 /**
+ * serializeRpcv2cborTradeEvents
+ */
+const se_TradeEvents = (input: any, context: __SerdeContext & __EventStreamSerdeContext): any => {
+  const eventMarshallingVisitor = (event: any): __Message =>
+    TradeEvents.visit(event, {
+      alpha: (value) => se_Alpha_event(value, context),
+      beta: (value) => se_Unit_event(value, context),
+      gamma: (value) => se_Unit_event(value, context),
+      _: (value) => value as any,
+    });
+  return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);
+};
+const se_Alpha_event = (input: Alpha, context: __SerdeContext): __Message => {
+  const headers: __MessageHeaders = {
+    ":event-type": { type: "string", value: "alpha" },
+    ":message-type": { type: "string", value: "event" },
+    ":content-type": { type: "string", value: "application/cbor" },
+  };
+  let body = new Uint8Array();
+  body = se_Alpha(input, context);
+  body = cbor.serialize(body);
+  return { headers, body };
+};
+const se_Unit_event = (input: Unit, context: __SerdeContext): __Message => {
+  const headers: __MessageHeaders = {
+    ":event-type": { type: "string", value: "beta" },
+    ":message-type": { type: "string", value: "event" },
+    ":content-type": { type: "string", value: "application/cbor" },
+  };
+  let body = new Uint8Array();
+  body = _json(input);
+  body = cbor.serialize(body);
+  return { headers, body };
+};
+/**
+ * deserializeRpcv2cborTradeEvents
+ */
+const de_TradeEvents = (
+  output: any,
+  context: __SerdeContext & __EventStreamSerdeContext
+): AsyncIterable<TradeEvents> => {
+  return context.eventStreamMarshaller.deserialize(output, async (event) => {
+    if (event["alpha"] != null) {
+      return {
+        alpha: await de_Alpha_event(event["alpha"], context),
+      };
+    }
+    if (event["beta"] != null) {
+      return {
+        beta: await de_Unit_event(event["beta"], context),
+      };
+    }
+    if (event["gamma"] != null) {
+      return {
+        gamma: await de_Unit_event(event["gamma"], context),
+      };
+    }
+    return { $unknown: event as any };
+  });
+};
+const de_Alpha_event = async (output: any, context: __SerdeContext): Promise<Alpha> => {
+  const contents: Alpha = {} as any;
+  const data: any = await parseBody(output.body, context);
+  Object.assign(contents, de_Alpha(data, context));
+  return contents;
+};
+const de_Unit_event = async (output: any, context: __SerdeContext): Promise<Unit> => {
+  const contents: Unit = {} as any;
+  const data: any = await parseBody(output.body, context);
+  Object.assign(contents, _json(data));
+  return contents;
+};
+/**
+ * serializeRpcv2cborAlpha
+ */
+const se_Alpha = (input: Alpha, context: __SerdeContext): any => {
+  return take(input, {
+    id: [],
+    timestamp: __dateToTag,
+  });
+};
+
+/**
  * serializeRpcv2cborGetNumbersRequest
  */
 const se_GetNumbersRequest = (input: GetNumbersRequest, context: __SerdeContext): any => {
@@ -166,6 +297,18 @@ const se_GetNumbersRequest = (input: GetNumbersRequest, context: __SerdeContext)
     bigDecimal: __nv,
     bigInteger: [],
   });
+};
+
+// se_Unit omitted.
+
+/**
+ * deserializeRpcv2cborAlpha
+ */
+const de_Alpha = (output: any, context: __SerdeContext): Alpha => {
+  return take(output, {
+    id: __expectString,
+    timestamp: (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
+  }) as any;
 };
 
 // de_CodedThrottlingError omitted.
@@ -185,6 +328,8 @@ const de_GetNumbersResponse = (output: any, context: __SerdeContext): GetNumbers
 // de_MysteryThrottlingError omitted.
 
 // de_RetryableError omitted.
+
+// de_Unit omitted.
 
 const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
   httpStatusCode: output.statusCode,
