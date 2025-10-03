@@ -2581,7 +2581,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser":
+"@smithy/eventstream-serde-browser@workspace:^, @smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser"
   dependencies:
@@ -2595,7 +2595,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver":
+"@smithy/eventstream-serde-config-resolver@workspace:^, @smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver"
   dependencies:
@@ -11627,6 +11627,9 @@ __metadata:
     "@aws-sdk/types": "npm:latest"
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
+    "@smithy/eventstream-serde-browser": "workspace:^"
+    "@smithy/eventstream-serde-config-resolver": "workspace:^"
+    "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
