@@ -1,7 +1,6 @@
 import { memoize } from "@smithy/property-provider";
 import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/smithy-client";
 import type { Provider } from "@smithy/types";
-import bowser from "bowser";
 
 import { DEFAULTS_MODE_OPTIONS } from "./constants";
 
@@ -27,7 +26,7 @@ export const resolveDefaultsModeConfig = ({
     const mode = typeof defaultsMode === "function" ? await defaultsMode() : defaultsMode;
     switch (mode?.toLowerCase()) {
       case "auto":
-        return Promise.resolve(isMobileBrowser() ? "mobile" : "standard");
+        return Promise.resolve(useMobileConfiguration() ? "mobile" : "standard");
       case "mobile":
       case "in-region":
       case "cross-region":
@@ -43,12 +42,49 @@ export const resolveDefaultsModeConfig = ({
     }
   });
 
-const isMobileBrowser = (): boolean => {
-  const parsedUA =
-    typeof window !== "undefined" && window?.navigator?.userAgent
-      ? bowser.parse(window.navigator.userAgent)
-      : undefined;
-  const platform = parsedUA?.platform?.type;
-  // Reference: https://github.com/lancedikson/bowser/blob/master/src/constants.js#L86
-  return platform === "tablet" || platform === "mobile";
+/**
+ * @internal
+ */
+type NavigatorAugment = {
+  userAgentData?: {
+    mobile?: boolean;
+  };
+  connection?: {
+    effectiveType?: "4g" | string;
+    rtt?: number;
+    downlink?: number;
+  };
+};
+
+/**
+ * The aim of the mobile detection function is not really to know whether the device is a mobile device.
+ * This is emphasized in the modern guidance on browser detection that feature detection is correct
+ * whereas UA "sniffing" is usually a mistake.
+ *
+ * So then, the underlying reason we are trying to detect a mobile device is not for any particular device feature,
+ * but rather the implied network speed available to the program (we use it to set a default request timeout value).
+ *
+ * Therefore, it is better to use network speed related feature detection when available. This also saves
+ * 20kb (minified) from the bowser dependency we were using.
+ *
+ * @internal
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Browser_detection_using_the_user_agent
+ */
+const useMobileConfiguration = (): boolean => {
+  const navigator = window?.navigator as (typeof window.navigator & NavigatorAugment) | undefined;
+  if (navigator?.connection) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/effectiveType
+    // The maximum will report as 4g, regardless of 5g or further developments.
+    const { effectiveType, rtt, downlink } = navigator?.connection;
+    const slow =
+      (typeof effectiveType === "string" && effectiveType !== "4g") || Number(rtt) > 100 || Number(downlink) < 10;
+    if (slow) {
+      return true;
+    }
+  }
+
+  // without the networkInformation object, we use the userAgentData or touch feature detection as a proxy.
+  return (
+    navigator?.userAgentData?.mobile || (typeof navigator?.maxTouchPoints === "number" && navigator?.maxTouchPoints > 1)
+  );
 };

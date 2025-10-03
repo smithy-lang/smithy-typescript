@@ -3286,7 +3286,6 @@ __metadata:
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
-    bowser: "npm:^2.11.0"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:3.0.2"
@@ -4652,13 +4651,6 @@ __metadata:
   version: 4.12.1
   resolution: "bn.js@npm:4.12.1"
   checksum: 10c0/b7f37a0cd5e4b79142b6f4292d518b416be34ae55d6dd6b0f66f96550c8083a50ffbbf8bda8d0ab471158cb81aa74ea4ee58fe33c7802e4a30b13810e98df116
-  languageName: node
-  linkType: hard
-
-"bowser@npm:^2.11.0":
-  version: 2.11.0
-  resolution: "bowser@npm:2.11.0"
-  checksum: 10c0/04efeecc7927a9ec33c667fa0965dea19f4ac60b3fea60793c2e6cf06c1dcd2f7ae1dbc656f450c5f50783b1c75cf9dc173ba6f3b7db2feee01f8c4b793e1bd3
   languageName: node
   linkType: hard
 
