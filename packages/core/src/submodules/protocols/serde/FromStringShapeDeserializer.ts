@@ -1,10 +1,10 @@
 import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
 import {
+  _parseEpochTimestamp,
+  _parseRfc3339DateTimeWithOffset,
+  _parseRfc7231DateTime,
   LazyJsonString,
   NumericValue,
-  parseEpochTimestamp,
-  parseRfc3339DateTimeWithOffset,
-  parseRfc7231DateTime,
   splitHeader,
 } from "@smithy/core/serde";
 import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
@@ -43,11 +43,11 @@ export class FromStringShapeDeserializer implements ShapeDeserializer<string> {
 
       switch (format) {
         case SCHEMA.TIMESTAMP_DATE_TIME:
-          return parseRfc3339DateTimeWithOffset(data);
+          return _parseRfc3339DateTimeWithOffset(data);
         case SCHEMA.TIMESTAMP_HTTP_DATE:
-          return parseRfc7231DateTime(data);
+          return _parseRfc7231DateTime(data);
         case SCHEMA.TIMESTAMP_EPOCH_SECONDS:
-          return parseEpochTimestamp(data);
+          return _parseEpochTimestamp(data);
         default:
           console.warn("Missing timestamp format, parsing value with Date constructor:", data);
           return new Date(data as string | number);
