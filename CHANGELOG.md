@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.36.1 (2025-10-06)
+
+### Features
+
+- Added 'pnpm' to 'PackageManager' ([#1658](https://github.com/smithy-lang/smithy-typescript/pull/1658))
+
+### Bug Fixes
+
+- Fixed CBOR eventstream codegen ([#1731](https://github.com/smithy-lang/smithy-typescript/pull/1731))
+
 ## 0.36.0 (2025-09-30)
 
 ### Features
