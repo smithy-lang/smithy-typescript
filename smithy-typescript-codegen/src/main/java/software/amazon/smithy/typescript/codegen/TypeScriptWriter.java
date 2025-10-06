@@ -225,9 +225,8 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
                         String deprecationMessage = deprecatedTrait.getMessage()
-                            .map(msg -> " " + msg) 
-                            .orElse(" see description");
-                        String deprecationAnnotation = "@deprecated " + deprecationMessage; 
+                            .orElse("see description");
+                        String deprecationAnnotation = "@deprecated " + deprecationMessage;
                         docs = docs + "\n\n" + deprecationAnnotation;
                     }
                     docs = preprocessor.apply(docs);
