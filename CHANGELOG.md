@@ -5,6 +5,7 @@
 ### Features
 
 - Allow schema-serde toggle by protocol ([#1733](https://github.com/smithy-lang/smithy-typescript/pull/1733))
+- Added 'pnpm' to 'PackageManager' ([#1658](https://github.com/smithy-lang/smithy-typescript/pull/1658))
 
 ### Bug Fixes
 
