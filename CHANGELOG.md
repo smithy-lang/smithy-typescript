@@ -4,13 +4,11 @@
 
 ### Features
 
-- Allow schema-serde toggle by protocol ([#1733](https://github.com/smithy-lang/smithy-typescript/pull/1733))
 - Added 'pnpm' to 'PackageManager' ([#1658](https://github.com/smithy-lang/smithy-typescript/pull/1658))
 
 ### Bug Fixes
 
 - Fixed CBOR eventstream codegen ([#1731](https://github.com/smithy-lang/smithy-typescript/pull/1731))
-- Escape $ character in schema generation ([#1728](https://github.com/smithy-lang/smithy-typescript/pull/1728))
 
 ## 0.36.0 (2025-09-30)
 
