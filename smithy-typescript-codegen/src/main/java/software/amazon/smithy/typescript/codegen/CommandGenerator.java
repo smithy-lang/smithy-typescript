@@ -377,6 +377,30 @@ final class CommandGenerator implements Runnable {
         return streamingBlobAddendum;
     }
 
+    private String getReadStreamExample() {
+        String streamingBlobOutputMemberName = model.expectShape(operation.getOutputShape())
+            .asStructureShape().get()
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(ms -> {
+                Shape target = model.expectShape(ms.getTarget());
+                return target.isBlobShape()
+                    && (ms.hasTrait(StreamingTrait.class) || target.hasTrait(StreamingTrait.class));
+            })
+            .findFirst()
+            .map(MemberShape::getMemberName)
+            .orElse("");
+
+        if (!streamingBlobOutputMemberName.isEmpty()) {
+            return """
+                // Read the stream or discard it to free the socket.
+                const bytes = await response[`%s`].transformToByteArray();\n"""
+                .formatted(streamingBlobOutputMemberName);
+        }
+        return "";
+    }
+
     private String getThrownExceptions() {
         List<ShapeId> errors = operation.getErrors();
         StringBuilder buffer = new StringBuilder();
