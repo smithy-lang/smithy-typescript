@@ -84,11 +84,9 @@ describe(calculateBodyLength.name, () => {
 
     it("should handle stream created using fd.createReadStream", async () => {
       const fd = await fs.promises.open(__filename, "r");
-      if ((fd as any).createReadStream) {
-        const fdReadStream = (fd as any).createReadStream();
-        expect(calculateBodyLength(fdReadStream)).toEqual(fileSize);
-        fdReadStream.close();
-      }
+      const fdReadStream = fd.createReadStream();
+      expect(calculateBodyLength(fdReadStream)).toEqual(fileSize);
+      fdReadStream.close();
     });
   });
 
