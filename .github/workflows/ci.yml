@@ -32,6 +32,9 @@ jobs:
       - name: clean and build
         run: ./gradlew clean build -Plog-tests
 
+      - name: publish
+        run: ./gradlew publish
+
   protocol-tests:
     runs-on: ${{ matrix.os }}
     name: Protocol Tests
