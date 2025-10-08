@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.5.0
+
+### Minor Changes
+
+- 813c9a5: refactoring to reduce code size
+
+### Patch Changes
+
+- Updated dependencies [813c9a5]
+  - @smithy/util-base64@4.3.0
+  - @smithy/fetch-http-handler@5.3.1
+
 ## 4.4.0
 
 ### Minor Changes

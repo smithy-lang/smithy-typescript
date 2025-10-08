@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.15.0
+
+### Minor Changes
+
+- 813c9a5: refactoring to reduce code size
+
+### Patch Changes
+
+- Updated dependencies [813c9a5]
+  - @smithy/util-base64@4.3.0
+  - @smithy/util-stream@4.5.0
+
 ## 3.14.0
 
 ### Minor Changes

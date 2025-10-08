@@ -1,5 +1,12 @@
 # Change Log
 
+## 5.3.1
+
+### Patch Changes
+
+- Updated dependencies [813c9a5]
+  - @smithy/util-base64@4.3.0
+
 ## 5.3.0
 
 ### Minor Changes
