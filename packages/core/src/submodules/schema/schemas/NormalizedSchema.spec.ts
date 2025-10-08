@@ -17,9 +17,10 @@ import { describe, expect, test as it } from "vitest";
 
 import { list } from "./ListSchema";
 import { map } from "./MapSchema";
-import { NormalizedSchema, translateTraits } from "./NormalizedSchema";
+import { NormalizedSchema } from "./NormalizedSchema";
 import { sim } from "./SimpleSchema";
 import { struct } from "./StructureSchema";
+import { translateTraits } from "./translateTraits";
 
 describe(NormalizedSchema.name, () => {
   const [List, Map, Struct] = [list("ack", "List", { sparse: 1 }, 0), map("ack", "Map", 0, 0, 1), () => schema];
