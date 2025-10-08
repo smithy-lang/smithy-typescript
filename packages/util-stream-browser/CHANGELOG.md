@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.2.1
+
+### Patch Changes
+
+- Updated dependencies [813c9a5]
+  - @smithy/util-base64@4.3.0
+  - @smithy/fetch-http-handler@5.3.1
+
 ## 3.2.0
 
 ### Minor Changes

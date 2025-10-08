@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.2.1
+
+### Patch Changes
+
+- 300177f: restrict fs calls to fs.ReadStream instances
+
 ## 4.2.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 813c9a5: refactoring to reduce code size
+
 ## 4.2.0
 
 ### Minor Changes

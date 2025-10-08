@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- c1544be: remove bower from mobile device detection
+
+### Patch Changes
+
+- @smithy/smithy-client@4.7.1
+
 ## 4.2.0
 
 ### Minor Changes
