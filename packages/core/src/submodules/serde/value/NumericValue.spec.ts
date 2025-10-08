@@ -24,11 +24,8 @@ describe(NumericValue.name, () => {
       new NumericValue("0", "bigDecimal"),
       new NumericValue("-0.00", "bigDecimal"),
       {
-        string: "abcd",
+        string: "-.123",
         type: "bigDecimal",
-        constructor: {
-          name: "_NumericValue",
-        },
       },
       (() => {
         const x = {};
@@ -52,9 +49,6 @@ describe(NumericValue.name, () => {
       {
         string: "abcd",
         type: "bigDecimal",
-        constructor: {
-          name: "_NumericValue_",
-        },
       },
       (() => {
         const x = {};

@@ -7,32 +7,10 @@ import { list, ListSchema } from "./ListSchema";
 import { map, MapSchema } from "./MapSchema";
 import { op, OperationSchema } from "./OperationSchema";
 import { Schema } from "./Schema";
-import { SCHEMA } from "./sentinels";
 import { sim, SimpleSchema } from "./SimpleSchema";
 import { struct, StructureSchema } from "./StructureSchema";
 
 describe("schemas", () => {
-  describe("sentinels", () => {
-    it("should be constant", () => {
-      expect(SCHEMA).toEqual({
-        BLOB: 0b0001_0101, // 21
-        STREAMING_BLOB: 0b0010_1010, // 42
-        BOOLEAN: 0b0000_0010, // 2
-        STRING: 0b0000_0000, // 0
-        NUMERIC: 0b0000_0001, // 1
-        BIG_INTEGER: 0b0001_0001, // 17
-        BIG_DECIMAL: 0b0001_0011, // 19
-        DOCUMENT: 0b0000_1111, // 15
-        TIMESTAMP_DEFAULT: 0b0000_0100, // 4
-        TIMESTAMP_DATE_TIME: 0b0000_0101, // 5
-        TIMESTAMP_HTTP_DATE: 0b0000_0110, // 6
-        TIMESTAMP_EPOCH_SECONDS: 0b0000_0111, // 7
-        LIST_MODIFIER: 0b0100_0000, // 64
-        MAP_MODIFIER: 0b1000_0000, // 128
-      });
-    });
-  });
-
   describe(ErrorSchema.name, () => {
     const schema = error("ack", "Error", 0, [], []);
 

@@ -1,8 +1,14 @@
 import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
-import { NormalizedSchema, SCHEMA, sim, struct } from "@smithy/core/schema";
+import { NormalizedSchema, sim, struct } from "@smithy/core/schema";
 import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
 import { HttpResponse } from "@smithy/protocol-http";
-import type { Message as EventMessage } from "@smithy/types";
+import type {
+  BlobSchema,
+  Message as EventMessage,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampEpochSecondsSchema,
+} from "@smithy/types";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { describe, expect, test as it } from "vitest";
 
@@ -53,9 +59,15 @@ describe(EventStreamSerde.name, () => {
           "Payload",
           0,
           ["payload"],
-          [sim("ns", "StreamingBlobPayload", SCHEMA.STREAMING_BLOB, { eventPayload: 1 })]
+          [sim("ns", "StreamingBlobPayload", 42 satisfies StreamingBlobSchema, { eventPayload: 1 })]
         ),
-        struct("ns", "TextPayload", 0, ["payload"], [sim("ns", "TextPayload", SCHEMA.STRING, { eventPayload: 1 })]),
+        struct(
+          "ns",
+          "TextPayload",
+          0,
+          ["payload"],
+          [sim("ns", "TextPayload", 0 satisfies StringSchema, { eventPayload: 1 })]
+        ),
         struct(
           "ns",
           "CustomHeaders",
@@ -73,7 +85,7 @@ describe(EventStreamSerde.name, () => {
       // here the non-eventstream members form an initial-request
       // or initial-response when present.
       ["eventStreamMember", "dateMember", "blobMember"],
-      [eventStreamUnionSchema, SCHEMA.TIMESTAMP_EPOCH_SECONDS, SCHEMA.BLOB]
+      [eventStreamUnionSchema, 7 satisfies TimestampEpochSecondsSchema, 21 satisfies BlobSchema]
     );
 
     describe("serialization", () => {

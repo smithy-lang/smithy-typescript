@@ -1,10 +1,12 @@
-import { map, op, SCHEMA, struct } from "@smithy/core/schema";
+import { map, op, struct } from "@smithy/core/schema";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
   Codec,
   CodecSettings,
   HandlerExecutionContext,
   HttpResponse as IHttpResponse,
+  ListSchemaModifier,
+  MapSchemaModifier,
   MetadataBearer,
   OperationSchema,
   ResponseMetadata,
@@ -12,6 +14,9 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StringSchema,
+  TimestampDefaultSchema,
+  TimestampEpochSecondsSchema,
 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser/src";
 import { describe, expect, test as it } from "vitest";
@@ -32,7 +37,7 @@ describe(HttpBindingProtocol.name, () => {
       const settings: CodecSettings = {
         timestampFormat: {
           useTrait: true,
-          default: SCHEMA.TIMESTAMP_EPOCH_SECONDS,
+          default: 7 satisfies TimestampEpochSecondsSchema,
         },
         httpBindings: true,
       };
@@ -82,7 +87,7 @@ describe(HttpBindingProtocol.name, () => {
           ["timestampList"],
           [
             [
-              SCHEMA.LIST_MODIFIER | SCHEMA.TIMESTAMP_DEFAULT,
+              (64 satisfies ListSchemaModifier) | (4 satisfies TimestampDefaultSchema),
               {
                 httpHeader: "x-timestamplist",
               },
@@ -122,7 +127,7 @@ describe(HttpBindingProtocol.name, () => {
           ["httpPrefixHeaders"],
           [
             [
-              SCHEMA.MAP_MODIFIER | SCHEMA.STRING,
+              (128 satisfies MapSchemaModifier) | (0 satisfies StringSchema),
               {
                 httpPrefixHeaders: "",
               },
@@ -175,7 +180,7 @@ describe(HttpBindingProtocol.name, () => {
           httpBindings: true,
           timestampFormat: {
             useTrait: true,
-            default: SCHEMA.TIMESTAMP_EPOCH_SECONDS,
+            default: 7 satisfies TimestampEpochSecondsSchema,
           },
         }),
       }

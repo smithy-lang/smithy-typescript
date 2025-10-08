@@ -1,19 +1,33 @@
 import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BlobSchema,
+  BooleanSchema,
+  DocumentSchema,
+  ListSchemaModifier,
+  MapSchemaModifier,
   MemberSchema,
   NormalizedSchema as INormalizedSchema,
+  NumericSchema,
   Schema as ISchema,
   SchemaRef,
   SchemaTraits,
   SchemaTraitsObject,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampDefaultSchema,
+  TimestampEpochSecondsSchema,
+  UnitSchema,
 } from "@smithy/types";
+import type { IdempotencyTokenBitMask, TraitBitVector } from "@smithy/types/src/schema/traits";
 
 import { deref } from "../deref";
 import { ListSchema } from "./ListSchema";
 import { MapSchema } from "./MapSchema";
 import { Schema } from "./Schema";
-import { SCHEMA } from "./sentinels";
-import { SimpleSchema } from "./SimpleSchema";
+import type { SimpleSchema } from "./SimpleSchema";
 import { StructureSchema } from "./StructureSchema";
+import { translateTraits } from "./translateTraits";
 
 /**
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
@@ -22,6 +36,13 @@ import { StructureSchema } from "./StructureSchema";
  * @alpha
  */
 export class NormalizedSchema implements INormalizedSchema {
+  // ========================
+  //
+  // This class implementation may be a little bit code-golfed to save space.
+  // This class is core to all clients in schema-serde mode.
+  // For readability, add comments rather than code.
+  //
+  // ========================
   public static readonly symbol = Symbol.for("@smithy/nor");
   protected readonly symbol = NormalizedSchema.symbol;
 
@@ -39,7 +60,7 @@ export class NormalizedSchema implements INormalizedSchema {
    */
   private constructor(
     readonly ref: SchemaRef,
-    private memberName?: string
+    private readonly memberName?: string
   ) {
     const traitStack = [] as SchemaTraits[];
     let _ref = ref;
@@ -57,7 +78,7 @@ export class NormalizedSchema implements INormalizedSchema {
       this.memberTraits = {};
       for (let i = traitStack.length - 1; i >= 0; --i) {
         const traitSet = traitStack[i];
-        Object.assign(this.memberTraits, NormalizedSchema.translateTraits(traitSet));
+        Object.assign(this.memberTraits, translateTraits(traitSet));
       }
     } else {
       this.memberTraits = 0;
@@ -80,8 +101,7 @@ export class NormalizedSchema implements INormalizedSchema {
       this.traits = 0;
     }
 
-    this.name =
-      (this.schema instanceof Schema ? this.schema.getName?.() : void 0) ?? this.memberName ?? this.getSchemaName();
+    this.name = (this.schema instanceof Schema ? this.schema.getName?.() : void 0) ?? this.memberName ?? String(schema);
 
     if (this._isMemberSchema && !memberName) {
       throw new Error(`@smithy/core/schema - NormalizedSchema member init ${this.getName(true)} missing member name.`);
@@ -96,61 +116,31 @@ export class NormalizedSchema implements INormalizedSchema {
    * Static constructor that attempts to avoid wrapping a NormalizedSchema within another.
    */
   public static of(ref: SchemaRef): NormalizedSchema {
-    if (ref instanceof NormalizedSchema) {
-      return ref;
+    const sc = deref(ref);
+    if (sc instanceof NormalizedSchema) {
+      return sc;
     }
-    if (Array.isArray(ref)) {
-      const [ns, traits] = ref;
+    if (Array.isArray(sc)) {
+      const [ns, traits] = sc;
       if (ns instanceof NormalizedSchema) {
-        Object.assign(ns.getMergedTraits(), NormalizedSchema.translateTraits(traits));
+        Object.assign(ns.getMergedTraits(), translateTraits(traits));
         return ns;
       }
       // An aggregate schema must be initialized with members and the member retrieved through the aggregate
       // container.
       throw new Error(`@smithy/core/schema - may not init unwrapped member schema=${JSON.stringify(ref, null, 2)}.`);
     }
-    return new NormalizedSchema(ref);
-  }
-
-  /**
-   * @param indicator - numeric indicator for preset trait combination.
-   * @returns equivalent trait object.
-   */
-  public static translateTraits(indicator: SchemaTraits): SchemaTraitsObject {
-    if (typeof indicator === "object") {
-      return indicator;
-    }
-    indicator = indicator | 0;
-    const traits = {} as SchemaTraitsObject;
-    let i = 0;
-    for (const trait of [
-      "httpLabel",
-      "idempotent",
-      "idempotencyToken",
-      "sensitive",
-      "httpPayload",
-      "httpResponseCode",
-      "httpQueryParams",
-    ] as Array<keyof SchemaTraitsObject>) {
-      if (((indicator >> i++) & 1) === 1) {
-        traits[trait] = 1;
-      }
-    }
-    return traits;
+    return new NormalizedSchema(sc);
   }
 
   /**
    * @returns the underlying non-normalized schema.
    */
   public getSchema(): Exclude<ISchema, MemberSchema | INormalizedSchema> {
-    if (this.schema instanceof NormalizedSchema) {
-      Object.assign(this, { schema: this.schema.getSchema() });
-      return this.schema;
-    }
-    if (this.schema instanceof SimpleSchema) {
-      return deref(this.schema.schemaRef) as Exclude<ISchema, MemberSchema | INormalizedSchema>;
-    }
-    return deref(this.schema) as Exclude<ISchema, MemberSchema | INormalizedSchema>;
+    return deref((this.schema as SimpleSchema)?.schemaRef ?? this.schema) as Exclude<
+      ISchema,
+      MemberSchema | INormalizedSchema
+    >;
   }
 
   /**
@@ -158,23 +148,16 @@ export class NormalizedSchema implements INormalizedSchema {
    * @returns e.g. `MyShape` or `com.namespace#MyShape`.
    */
   public getName(withNamespace = false): string | undefined {
-    if (!withNamespace) {
-      if (this.name && this.name.includes("#")) {
-        return this.name.split("#")[1];
-      }
-    }
+    const { name } = this;
+    const short = !withNamespace && name && name.includes("#");
     // empty name should return as undefined
-    return this.name || undefined;
+    return short ? name.split("#")[1] : name || undefined;
   }
 
   /**
    * @returns the member name if the schema is a member schema.
-   * @throws Error when the schema isn't a member schema.
    */
   public getMemberName(): string {
-    if (!this.isMemberSchema()) {
-      throw new Error(`@smithy/core/schema - non-member schema: ${this.getName(true)}`);
-    }
     return this.memberName!;
   }
 
@@ -182,73 +165,73 @@ export class NormalizedSchema implements INormalizedSchema {
     return this._isMemberSchema;
   }
 
-  public isUnitSchema(): boolean {
-    return this.getSchema() === ("unit" as const);
-  }
-
   /**
    * boolean methods on this class help control flow in shape serialization and deserialization.
    */
   public isListSchema(): boolean {
-    const inner = this.getSchema();
-    if (typeof inner === "number") {
-      return inner >= SCHEMA.LIST_MODIFIER && inner < SCHEMA.MAP_MODIFIER;
-    }
-    return inner instanceof ListSchema;
+    const sc = this.getSchema();
+    return typeof sc === "number"
+      ? sc >= (64 satisfies ListSchemaModifier) && sc < (128 satisfies MapSchemaModifier)
+      : sc instanceof ListSchema;
   }
 
   public isMapSchema(): boolean {
-    const inner = this.getSchema();
-    if (typeof inner === "number") {
-      return inner >= SCHEMA.MAP_MODIFIER && inner <= 0b1111_1111;
-    }
-    return inner instanceof MapSchema;
+    const sc = this.getSchema();
+    return typeof sc === "number"
+      ? sc >= (128 satisfies MapSchemaModifier) && sc <= 0b1111_1111
+      : sc instanceof MapSchema;
   }
 
   public isStructSchema(): boolean {
-    const inner = this.getSchema();
-    return (inner !== null && typeof inner === "object" && "members" in inner) || inner instanceof StructureSchema;
+    const sc = this.getSchema();
+    return (sc !== null && typeof sc === "object" && "members" in sc) || sc instanceof StructureSchema;
   }
 
   public isBlobSchema(): boolean {
-    return this.getSchema() === SCHEMA.BLOB || this.getSchema() === SCHEMA.STREAMING_BLOB;
+    const sc = this.getSchema();
+    return sc === (21 satisfies BlobSchema) || sc === (42 satisfies StreamingBlobSchema);
   }
 
   public isTimestampSchema(): boolean {
-    const schema = this.getSchema();
-    return typeof schema === "number" && schema >= SCHEMA.TIMESTAMP_DEFAULT && schema <= SCHEMA.TIMESTAMP_EPOCH_SECONDS;
+    const sc = this.getSchema();
+    return (
+      typeof sc === "number" &&
+      sc >= (4 satisfies TimestampDefaultSchema) &&
+      sc <= (7 satisfies TimestampEpochSecondsSchema)
+    );
+  }
+
+  public isUnitSchema(): boolean {
+    return this.getSchema() === ("unit" satisfies UnitSchema);
   }
 
   public isDocumentSchema(): boolean {
-    return this.getSchema() === SCHEMA.DOCUMENT;
+    return this.getSchema() === (15 satisfies DocumentSchema);
   }
 
   public isStringSchema(): boolean {
-    return this.getSchema() === SCHEMA.STRING;
+    return this.getSchema() === (0 satisfies StringSchema);
   }
 
   public isBooleanSchema(): boolean {
-    return this.getSchema() === SCHEMA.BOOLEAN;
+    return this.getSchema() === (2 satisfies BooleanSchema);
   }
 
   public isNumericSchema(): boolean {
-    return this.getSchema() === SCHEMA.NUMERIC;
+    return this.getSchema() === (1 satisfies NumericSchema);
   }
 
   public isBigIntegerSchema(): boolean {
-    return this.getSchema() === SCHEMA.BIG_INTEGER;
+    return this.getSchema() === (17 satisfies BigIntegerSchema);
   }
 
   public isBigDecimalSchema(): boolean {
-    return this.getSchema() === SCHEMA.BIG_DECIMAL;
+    return this.getSchema() === (19 satisfies BigDecimalSchema);
   }
 
   public isStreaming(): boolean {
-    const streaming = !!this.getMergedTraits().streaming;
-    if (streaming) {
-      return true;
-    }
-    return this.getSchema() === SCHEMA.STREAMING_BLOB;
+    const { streaming } = this.getMergedTraits();
+    return !!streaming || this.getSchema() === (42 satisfies StreamingBlobSchema);
   }
 
   /**
@@ -256,21 +239,14 @@ export class NormalizedSchema implements INormalizedSchema {
    * @returns whether the schema has the idempotencyToken trait.
    */
   public isIdempotencyToken(): boolean {
-    if (this.normalizedTraits) {
-      return !!this.normalizedTraits.idempotencyToken;
-    }
-    for (const traits of [this.traits, this.memberTraits]) {
-      if (typeof traits === "number") {
-        if ((traits & 0b0100) === 0b0100) {
-          return true;
-        }
-      } else if (typeof traits === "object") {
-        if (!!traits.idempotencyToken) {
-          return true;
-        }
-      }
-    }
-    return false;
+    // it is ok to perform the & operation on a trait object,
+    // since its int32 representation is 0.
+    const match = (traits?: SchemaTraits) =>
+      ((traits as TraitBitVector) & (0b0100 satisfies IdempotencyTokenBitMask)) === 0b0100 ||
+      !!(traits as SchemaTraitsObject)?.idempotencyToken;
+
+    const { normalizedTraits, traits, memberTraits } = this;
+    return match(normalizedTraits) || match(traits) || match(memberTraits);
   }
 
   /**
@@ -291,7 +267,7 @@ export class NormalizedSchema implements INormalizedSchema {
    * @returns only the member traits. If the schema is not a member, this returns empty.
    */
   public getMemberTraits(): SchemaTraitsObject {
-    return NormalizedSchema.translateTraits(this.memberTraits);
+    return translateTraits(this.memberTraits);
   }
 
   /**
@@ -299,7 +275,7 @@ export class NormalizedSchema implements INormalizedSchema {
    * If there are any member traits they are excluded.
    */
   public getOwnTraits(): SchemaTraitsObject {
-    return NormalizedSchema.translateTraits(this.traits);
+    return translateTraits(this.traits);
   }
 
   /**
@@ -308,17 +284,15 @@ export class NormalizedSchema implements INormalizedSchema {
    * @throws Error if the schema is not a Map or Document.
    */
   public getKeySchema(): NormalizedSchema {
-    if (this.isDocumentSchema()) {
-      return this.memberFrom([SCHEMA.DOCUMENT, 0], "key");
-    }
-    if (!this.isMapSchema()) {
+    const [isDoc, isMap] = [this.isDocumentSchema(), this.isMapSchema()];
+    if (!isDoc && !isMap) {
       throw new Error(`@smithy/core/schema - cannot get key for non-map: ${this.getName(true)}`);
     }
     const schema = this.getSchema();
-    if (typeof schema === "number") {
-      return this.memberFrom([0b0011_1111 & schema, 0], "key");
-    }
-    return this.memberFrom([(schema as MapSchema).keySchema, 0], "key");
+    const memberSchema = isDoc
+      ? (15 satisfies DocumentSchema)
+      : (schema as MapSchema)?.keySchema ?? (0 satisfies StringSchema);
+    return member([memberSchema, 0], "key");
   }
 
   /**
@@ -328,71 +302,41 @@ export class NormalizedSchema implements INormalizedSchema {
    * @throws Error if the schema is not a Map, List, nor Document.
    */
   public getValueSchema(): NormalizedSchema {
-    const schema = this.getSchema();
-
-    if (typeof schema === "number") {
-      if (this.isMapSchema()) {
-        return this.memberFrom([0b0011_1111 & schema, 0], "value");
-      } else if (this.isListSchema()) {
-        return this.memberFrom([0b0011_1111 & schema, 0], "member");
-      }
+    const sc = this.getSchema();
+    const [isDoc, isMap, isList] = [this.isDocumentSchema(), this.isMapSchema(), this.isListSchema()];
+    const memberSchema =
+      typeof sc === "number"
+        ? 0b0011_1111 & sc
+        : sc && typeof sc === "object" && (isMap || isList)
+          ? ((sc as MapSchema | ListSchema).valueSchema as typeof sc)
+          : isDoc
+            ? (15 satisfies DocumentSchema)
+            : void 0;
+    if (memberSchema != null) {
+      return member([memberSchema, 0], isMap ? "value" : "member");
     }
-
-    if (schema && typeof schema === "object") {
-      if (this.isStructSchema()) {
-        throw new Error(`may not getValueSchema() on structure ${this.getName(true)}`);
-      }
-      const collection = schema as MapSchema | ListSchema;
-      if ("valueSchema" in collection) {
-        if (this.isMapSchema()) {
-          return this.memberFrom([collection.valueSchema, 0], "value");
-        } else if (this.isListSchema()) {
-          return this.memberFrom([collection.valueSchema, 0], "member");
-        }
-      }
-    }
-
-    if (this.isDocumentSchema()) {
-      return this.memberFrom([SCHEMA.DOCUMENT, 0], "value");
-    }
-
     throw new Error(`@smithy/core/schema - ${this.getName(true)} has no value member.`);
-  }
-
-  /**
-   * @param member - to query.
-   * @returns whether there is a memberSchema with the given member name. False if not a structure (or union).
-   */
-  public hasMemberSchema(member: string): boolean {
-    if (this.isStructSchema()) {
-      const struct = this.getSchema() as StructureSchema;
-      return struct.memberNames.includes(member);
-    }
-    return false;
   }
 
   /**
    * @returns the NormalizedSchema for the given member name. The returned instance will return true for `isMemberSchema()`
    * and will have the member name given.
-   * @param member - which member to retrieve and wrap.
+   * @param memberName - which member to retrieve and wrap.
    *
    * @throws Error if member does not exist or the schema is neither a document nor structure.
    * Note that errors are assumed to be structures and unions are considered structures for these purposes.
    */
-  public getMemberSchema(member: string): NormalizedSchema {
-    if (this.isStructSchema()) {
-      const struct = this.getSchema() as StructureSchema;
-      if (!struct.memberNames.includes(member)) {
-        throw new Error(`@smithy/core/schema - ${this.getName(true)} has no member=${member}.`);
-      }
-      const i = struct.memberNames.indexOf(member);
+  public getMemberSchema(memberName: string): NormalizedSchema {
+    const struct = this.getSchema() as StructureSchema;
+    if (this.isStructSchema() && struct.memberNames.includes(memberName)) {
+      const i = struct.memberNames.indexOf(memberName);
       const memberSchema = struct.memberList[i];
-      return this.memberFrom(Array.isArray(memberSchema) ? memberSchema : [memberSchema, 0], member);
+      return member(Array.isArray(memberSchema) ? memberSchema : [memberSchema, 0], memberName);
     }
     if (this.isDocumentSchema()) {
-      return this.memberFrom([SCHEMA.DOCUMENT, 0], member);
+      return member([15 satisfies DocumentSchema, 0], memberName);
     }
-    throw new Error(`@smithy/core/schema - ${this.getName(true)} has no members.`);
+    throw new Error(`@smithy/core/schema - ${this.getName(true)} has no no member=${memberName}.`);
   }
 
   /**
@@ -445,44 +389,23 @@ export class NormalizedSchema implements INormalizedSchema {
     }
     const struct = this.getSchema() as StructureSchema;
     for (let i = 0; i < struct.memberNames.length; ++i) {
-      yield [struct.memberNames[i], this.memberFrom([struct.memberList[i], 0], struct.memberNames[i])];
+      yield [struct.memberNames[i], member([struct.memberList[i], 0], struct.memberNames[i])];
     }
   }
+}
 
-  /**
-   * Creates a normalized member schema from the given schema and member name.
-   */
-  private memberFrom(memberSchema: NormalizedSchema | [SchemaRef, SchemaTraits], memberName: string): NormalizedSchema {
-    if (memberSchema instanceof NormalizedSchema) {
-      return Object.assign(memberSchema, {
-        memberName,
-        _isMemberSchema: true,
-      });
-    }
-    return new NormalizedSchema(memberSchema, memberName);
+/**
+ * Creates a normalized member schema from the given schema and member name.
+ *
+ * @internal
+ */
+function member(memberSchema: NormalizedSchema | [SchemaRef, SchemaTraits], memberName: string): NormalizedSchema {
+  if (memberSchema instanceof NormalizedSchema) {
+    return Object.assign(memberSchema, {
+      memberName,
+      _isMemberSchema: true,
+    });
   }
-
-  /**
-   * @returns a last-resort human-readable name for the schema if it has no other identifiers.
-   */
-  private getSchemaName(): string {
-    const schema = this.getSchema();
-    if (typeof schema === "number") {
-      const _schema = 0b0011_1111 & schema;
-      const container = 0b1100_0000 & schema;
-      const type =
-        Object.entries(SCHEMA).find(([, value]) => {
-          return value === _schema;
-        })?.[0] ?? "Unknown";
-      switch (container) {
-        case SCHEMA.MAP_MODIFIER:
-          return `${type}Map`;
-        case SCHEMA.LIST_MODIFIER:
-          return `${type}List`;
-        case 0:
-          return type;
-      }
-    }
-    return "Unknown";
-  }
+  const internalCtorAccess = NormalizedSchema as any;
+  return new internalCtorAccess(memberSchema, memberName);
 }

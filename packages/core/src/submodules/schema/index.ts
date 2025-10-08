@@ -9,4 +9,5 @@ export * from "./schemas/Schema";
 export * from "./schemas/SimpleSchema";
 export * from "./schemas/StructureSchema";
 export * from "./schemas/sentinels";
+export * from "./schemas/translateTraits";
 export * from "./TypeRegistry";

@@ -1,6 +1,14 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import { NormalizedSchema } from "@smithy/core/schema";
 import { dateToUtcString, LazyJsonString, quoteHeader } from "@smithy/core/serde";
-import type { CodecSettings, Schema, SerdeFunctions, ShapeSerializer } from "@smithy/types";
+import type {
+  CodecSettings,
+  Schema,
+  SerdeFunctions,
+  ShapeSerializer,
+  TimestampDateTimeSchema,
+  TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
+} from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 
 import { determineTimestampFormat } from "./determineTimestampFormat";
@@ -38,13 +46,13 @@ export class ToStringShapeSerializer implements ShapeSerializer<string> {
           }
           const format = determineTimestampFormat(ns, this.settings);
           switch (format) {
-            case SCHEMA.TIMESTAMP_DATE_TIME:
+            case 5 satisfies TimestampDateTimeSchema:
               this.stringBuffer = value.toISOString().replace(".000Z", "Z");
               break;
-            case SCHEMA.TIMESTAMP_HTTP_DATE:
+            case 6 satisfies TimestampHttpDateSchema:
               this.stringBuffer = dateToUtcString(value);
               break;
-            case SCHEMA.TIMESTAMP_EPOCH_SECONDS:
+            case 7 satisfies TimestampEpochSecondsSchema:
               this.stringBuffer = String(value.getTime() / 1000);
               break;
             default:

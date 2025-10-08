@@ -1,7 +1,8 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
 import { splitEvery, splitHeader } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
+  DocumentSchema,
   Endpoint,
   EndpointBearer,
   HandlerExecutionContext,
@@ -11,6 +12,7 @@ import type {
   OperationSchema,
   Schema,
   SerdeFunctions,
+  TimestampDefaultSchema,
 } from "@smithy/types";
 import { sdkStreamMixin } from "@smithy/util-stream";
 
@@ -58,7 +60,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     if (endpoint) {
       this.updateServiceEndpoint(request, endpoint);
       this.setHostPrefix(request, operationSchema, input);
-      const opTraits = NormalizedSchema.translateTraits(operationSchema.traits);
+      const opTraits = translateTraits(operationSchema.traits);
       if (opTraits.http) {
         request.method = opTraits.http[0];
         const [path, search] = opTraits.http[1].split("?");
@@ -203,7 +205,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     if (response.statusCode >= 300) {
       const bytes: Uint8Array = await collectBody(response.body, context);
       if (bytes.byteLength > 0) {
-        Object.assign(dataObject, await deserializer.read(SCHEMA.DOCUMENT, bytes));
+        Object.assign(dataObject, await deserializer.read(15 satisfies DocumentSchema, bytes));
       }
       await this.handleError(operationSchema, context, response, dataObject, this.deserializeMetadata(response));
       throw new Error("@smithy/core/protocols - HTTP Protocol error handler failed to throw.");
@@ -304,7 +306,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
             let sections: string[];
             if (
               headerListValueSchema.isTimestampSchema() &&
-              headerListValueSchema.getSchema() === SCHEMA.TIMESTAMP_DEFAULT
+              headerListValueSchema.getSchema() === (4 satisfies TimestampDefaultSchema)
             ) {
               sections = splitEvery(value, ",", 2);
             } else {
