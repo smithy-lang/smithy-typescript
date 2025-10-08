@@ -1,6 +1,6 @@
-import type { NormalizedSchema } from "@smithy/core/schema";
-import { SCHEMA } from "@smithy/core/schema";
+import type { NormalizedSchema, StructureSchema } from "@smithy/core/schema";
 import type {
+  DocumentSchema,
   EventStreamMarshaller,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
@@ -232,14 +232,17 @@ export class EventStreamSerde {
     let explicitPayloadMember = null as null | string;
     let explicitPayloadContentType: undefined | string;
 
-    const isKnownSchema = unionSchema.hasMemberSchema(unionMember);
+    const isKnownSchema = (() => {
+      const struct = unionSchema.getSchema() as StructureSchema;
+      return struct.memberNames.includes(unionMember);
+    })();
     const additionalHeaders: MessageHeaders = {};
 
     if (!isKnownSchema) {
       // $unknown member
       const [type, value] = event[unionMember];
       eventType = type;
-      serializer.write(SCHEMA.DOCUMENT, value);
+      serializer.write(15 satisfies DocumentSchema, value);
     } else {
       const eventSchema = unionSchema.getMemberSchema(unionMember);
 

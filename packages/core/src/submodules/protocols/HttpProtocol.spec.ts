@@ -1,5 +1,11 @@
-import { map, SCHEMA, struct } from "@smithy/core/schema";
-import type { HandlerExecutionContext, HttpResponse as IHttpResponse, Schema, SerdeFunctions } from "@smithy/types";
+import { map, struct } from "@smithy/core/schema";
+import type {
+  HandlerExecutionContext,
+  HttpResponse as IHttpResponse,
+  Schema,
+  SerdeFunctions,
+  TimestampEpochSecondsSchema,
+} from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { HttpProtocol } from "./HttpProtocol";
@@ -18,7 +24,7 @@ describe(HttpProtocol.name, () => {
         httpBindings: true,
         timestampFormat: {
           useTrait: true,
-          default: SCHEMA.TIMESTAMP_EPOCH_SECONDS,
+          default: 7 satisfies TimestampEpochSecondsSchema,
         },
       }),
     });

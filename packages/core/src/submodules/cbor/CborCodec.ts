@@ -1,5 +1,5 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import { generateIdempotencyToken, parseEpochTimestamp } from "@smithy/core/serde";
+import { _parseEpochTimestamp, generateIdempotencyToken } from "@smithy/core/serde";
 import type { Codec, Schema, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
@@ -148,7 +148,7 @@ export class CborShapeDeserializer implements ShapeDeserializer {
 
     if (ns.isTimestampSchema() && typeof value === "number") {
       // format is ignored.
-      return parseEpochTimestamp(value);
+      return _parseEpochTimestamp(value);
     }
 
     if (ns.isBlobSchema()) {

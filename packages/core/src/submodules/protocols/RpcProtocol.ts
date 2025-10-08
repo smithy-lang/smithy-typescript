@@ -1,6 +1,7 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import { NormalizedSchema } from "@smithy/core/schema";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
+  DocumentSchema,
   Endpoint,
   EndpointBearer,
   HandlerExecutionContext,
@@ -101,7 +102,7 @@ export abstract class RpcProtocol extends HttpProtocol {
     if (response.statusCode >= 300) {
       const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
       if (bytes.byteLength > 0) {
-        Object.assign(dataObject, await deserializer.read(SCHEMA.DOCUMENT, bytes));
+        Object.assign(dataObject, await deserializer.read(15 satisfies DocumentSchema, bytes));
       }
       await this.handleError(operationSchema, context, response, dataObject, this.deserializeMetadata(response));
       throw new Error("@smithy/core/protocols - RPC Protocol error handler failed to throw.");

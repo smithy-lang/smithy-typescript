@@ -9,6 +9,11 @@
 export type NumericType = "bigDecimal";
 
 /**
+ * @internal
+ */
+const format = /^-?\d*(\.\d+)?$/;
+
+/**
  * Serialization container for Smithy simple types that do not have a
  * direct JavaScript runtime representation.
  *
@@ -25,27 +30,10 @@ export class NumericValue {
     public readonly string: string,
     public readonly type: NumericType
   ) {
-    let dot = 0;
-    for (let i = 0; i < string.length; ++i) {
-      const char = string.charCodeAt(i);
-      if (i === 0 && char === 45) {
-        // negation prefix "-"
-        continue;
-      }
-      if (char === 46) {
-        // decimal point "."
-        if (dot) {
-          throw new Error("@smithy/core/serde - NumericValue must contain at most one decimal point.");
-        }
-        dot = 1;
-        continue;
-      }
-      if (char < 48 || char > 57) {
-        // not in 0 through 9
-        throw new Error(
-          `@smithy/core/serde - NumericValue must only contain [0-9], at most one decimal point ".", and an optional negation prefix "-".`
-        );
-      }
+    if (!format.test(string)) {
+      throw new Error(
+        `@smithy/core/serde - NumericValue must only contain [0-9], at most one decimal point ".", and an optional negation prefix "-".`
+      );
     }
   }
 
@@ -58,18 +46,7 @@ export class NumericValue {
       return false;
     }
     const _nv = object as NumericValue;
-    const prototypeMatch = NumericValue.prototype.isPrototypeOf(object);
-    if (prototypeMatch) {
-      return prototypeMatch;
-    }
-    if (
-      typeof _nv.string === "string" &&
-      typeof _nv.type === "string" &&
-      _nv.constructor?.name?.endsWith("NumericValue")
-    ) {
-      return true;
-    }
-    return prototypeMatch;
+    return NumericValue.prototype.isPrototypeOf(object) || (_nv.type === "bigDecimal" && format.test(_nv.string));
   }
 }
 

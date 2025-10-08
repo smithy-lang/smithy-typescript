@@ -1,13 +1,21 @@
-import { NormalizedSchema, SCHEMA } from "@smithy/core/schema";
+import { NormalizedSchema } from "@smithy/core/schema";
 import {
+  _parseEpochTimestamp,
+  _parseRfc3339DateTimeWithOffset,
+  _parseRfc7231DateTime,
   LazyJsonString,
   NumericValue,
-  parseEpochTimestamp,
-  parseRfc3339DateTimeWithOffset,
-  parseRfc7231DateTime,
   splitHeader,
 } from "@smithy/core/serde";
-import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
+import type {
+  CodecSettings,
+  Schema,
+  SerdeFunctions,
+  ShapeDeserializer,
+  TimestampDateTimeSchema,
+  TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
+} from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
 
@@ -42,12 +50,12 @@ export class FromStringShapeDeserializer implements ShapeDeserializer<string> {
       const format = determineTimestampFormat(ns, this.settings);
 
       switch (format) {
-        case SCHEMA.TIMESTAMP_DATE_TIME:
-          return parseRfc3339DateTimeWithOffset(data);
-        case SCHEMA.TIMESTAMP_HTTP_DATE:
-          return parseRfc7231DateTime(data);
-        case SCHEMA.TIMESTAMP_EPOCH_SECONDS:
-          return parseEpochTimestamp(data);
+        case 5 satisfies TimestampDateTimeSchema:
+          return _parseRfc3339DateTimeWithOffset(data);
+        case 6 satisfies TimestampHttpDateSchema:
+          return _parseRfc7231DateTime(data);
+        case 7 satisfies TimestampEpochSecondsSchema:
+          return _parseEpochTimestamp(data);
         default:
           console.warn("Missing timestamp format, parsing value with Date constructor:", data);
           return new Date(data as string | number);
@@ -69,15 +77,17 @@ export class FromStringShapeDeserializer implements ShapeDeserializer<string> {
       }
     }
 
-    switch (true) {
-      case ns.isNumericSchema():
-        return Number(data);
-      case ns.isBigIntegerSchema():
-        return BigInt(data);
-      case ns.isBigDecimalSchema():
-        return new NumericValue(data, "bigDecimal");
-      case ns.isBooleanSchema():
-        return String(data).toLowerCase() === "true";
+    if (ns.isNumericSchema()) {
+      return Number(data);
+    }
+    if (ns.isBigIntegerSchema()) {
+      return BigInt(data);
+    }
+    if (ns.isBigDecimalSchema()) {
+      return new NumericValue(data, "bigDecimal");
+    }
+    if (ns.isBooleanSchema()) {
+      return String(data).toLowerCase() === "true";
     }
     return data;
   }
