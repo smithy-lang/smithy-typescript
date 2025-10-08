@@ -29,8 +29,11 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Build and Publish
-        run: ./gradlew clean build publish -Plog-tests
+      - name: clean and build
+        run: ./gradlew clean build -Plog-tests
+
+      - name: publish
+        run: ./gradlew publish
 
   protocol-tests:
     runs-on: ${{ matrix.os }}
