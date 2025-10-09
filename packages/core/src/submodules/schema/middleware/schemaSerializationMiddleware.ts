@@ -6,9 +6,11 @@ import type {
   Provider,
   SerializeHandler,
   SerializeHandlerArguments,
+  StaticOperationSchema,
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
+import { hydrate, isStaticSchema } from "../schemas/NormalizedSchema";
 import type { PreviouslyResolved } from "./schema-middleware-types";
 
 /**
@@ -18,9 +20,12 @@ export const schemaSerializationMiddleware =
   (config: PreviouslyResolved) =>
   (next: SerializeHandler<any, any>, context: HandlerExecutionContext) =>
   async (args: SerializeHandlerArguments<any>) => {
-    const { operationSchema } = getSmithyContext(context) as {
-      operationSchema: IOperationSchema;
+    let { operationSchema } = getSmithyContext(context) as {
+      operationSchema: IOperationSchema | StaticOperationSchema;
     };
+    if (isStaticSchema(operationSchema)) {
+      operationSchema = hydrate(operationSchema);
+    }
 
     const endpoint: Provider<Endpoint> =
       context.endpointV2?.url && config.urlParser

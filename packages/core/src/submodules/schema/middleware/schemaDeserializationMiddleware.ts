@@ -5,9 +5,11 @@ import type {
   HandlerExecutionContext,
   MetadataBearer,
   OperationSchema,
+  StaticOperationSchema,
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
+import { hydrate, isStaticSchema } from "../schemas/NormalizedSchema";
 import type { PreviouslyResolved } from "./schema-middleware-types";
 
 /**
@@ -18,9 +20,13 @@ export const schemaDeserializationMiddleware =
   (next: DeserializeHandler<any, any>, context: HandlerExecutionContext) =>
   async (args: DeserializeHandlerArguments<any>) => {
     const { response } = await next(args);
-    const { operationSchema } = getSmithyContext(context) as {
-      operationSchema: OperationSchema;
+    let { operationSchema } = getSmithyContext(context) as {
+      operationSchema: OperationSchema | StaticOperationSchema;
     };
+    if (isStaticSchema(operationSchema)) {
+      operationSchema = hydrate(operationSchema);
+    }
+
     try {
       const parsed = await config.protocol.deserializeResponse(
         operationSchema,

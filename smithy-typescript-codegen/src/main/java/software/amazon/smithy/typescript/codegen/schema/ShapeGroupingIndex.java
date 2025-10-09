@@ -85,11 +85,20 @@ public class ShapeGroupingIndex implements KnowledgeIndex {
      * @return the group name (filename) of the schema group for the given shape.
      */
     public String getGroup(ShapeId id) {
+        /*
+        As of the introduction of static schemas, we don't need to bucket schemas into
+        different files anymore.
+        todo: remove usage of this class.
+         */
+        return getBaseGroup();
+
+        /*
         if (!shapeToOperationalGroup.containsKey(id)) {
             return getBaseGroup();
         }
         TreeSet<ShapeId> operations = shapeToOperationalGroup.get(id);
         return hashOperationSet(operations);
+        */
     }
 
     /**
