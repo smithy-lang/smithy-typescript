@@ -1,6 +1,7 @@
+import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { _parseEpochTimestamp, generateIdempotencyToken } from "@smithy/core/serde";
-import type { Codec, Schema, SerdeFunctions, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
+import type { Codec, Schema, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
 import { cbor } from "./cbor";
@@ -9,9 +10,7 @@ import { dateToTag } from "./parseCborBody";
 /**
  * @alpha
  */
-export class CborCodec implements Codec<Uint8Array, Uint8Array> {
-  private serdeContext?: SerdeFunctions;
-
+export class CborCodec extends SerdeContext implements Codec<Uint8Array, Uint8Array> {
   public createSerializer(): CborShapeSerializer {
     const serializer = new CborShapeSerializer();
     serializer.setSerdeContext(this.serdeContext!);
@@ -23,22 +22,13 @@ export class CborCodec implements Codec<Uint8Array, Uint8Array> {
     deserializer.setSerdeContext(this.serdeContext!);
     return deserializer;
   }
-
-  public setSerdeContext(serdeContext: SerdeFunctions): void {
-    this.serdeContext = serdeContext;
-  }
 }
 
 /**
  * @alpha
  */
-export class CborShapeSerializer implements ShapeSerializer {
-  private serdeContext?: SerdeFunctions;
+export class CborShapeSerializer extends SerdeContext implements ShapeSerializer {
   private value: unknown;
-
-  public setSerdeContext(serdeContext: SerdeFunctions) {
-    this.serdeContext = serdeContext;
-  }
 
   public write(schema: Schema, value: unknown): void {
     this.value = this.serialize(schema, value);
@@ -127,13 +117,7 @@ export class CborShapeSerializer implements ShapeSerializer {
 /**
  * @alpha
  */
-export class CborShapeDeserializer implements ShapeDeserializer {
-  private serdeContext?: SerdeFunctions;
-
-  public setSerdeContext(serdeContext: SerdeFunctions) {
-    this.serdeContext = serdeContext;
-  }
-
+export class CborShapeDeserializer extends SerdeContext implements ShapeDeserializer {
   public read(schema: Schema, bytes: Uint8Array): any {
     const data: any = cbor.deserialize(bytes);
     return this.readValue(schema, data);
