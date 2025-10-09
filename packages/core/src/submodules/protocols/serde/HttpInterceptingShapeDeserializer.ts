@@ -2,6 +2,7 @@ import { NormalizedSchema } from "@smithy/core/schema";
 import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
+import { SerdeContext } from "../SerdeContext";
 import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";
 
 /**
@@ -14,18 +15,22 @@ import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";
  * @alpha
  */
 export class HttpInterceptingShapeDeserializer<CodecShapeDeserializer extends ShapeDeserializer<any>>
+  extends SerdeContext
   implements ShapeDeserializer<string | Uint8Array>
 {
   private stringDeserializer: FromStringShapeDeserializer;
-  private serdeContext: SerdeFunctions | undefined;
 
   public constructor(
     private codecDeserializer: CodecShapeDeserializer,
     codecSettings: CodecSettings
   ) {
+    super();
     this.stringDeserializer = new FromStringShapeDeserializer(codecSettings);
   }
 
+  /**
+   * @override
+   */
   public setSerdeContext(serdeContext: SerdeFunctions): void {
     this.stringDeserializer.setSerdeContext(serdeContext);
     this.codecDeserializer.setSerdeContext(serdeContext);

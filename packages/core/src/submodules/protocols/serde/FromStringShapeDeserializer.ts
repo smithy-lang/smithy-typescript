@@ -10,7 +10,6 @@ import {
 import type {
   CodecSettings,
   Schema,
-  SerdeFunctions,
   ShapeDeserializer,
   TimestampDateTimeSchema,
   TimestampEpochSecondsSchema,
@@ -19,6 +18,7 @@ import type {
 import { fromBase64 } from "@smithy/util-base64";
 import { toUtf8 } from "@smithy/util-utf8";
 
+import { SerdeContext } from "../SerdeContext";
 import { determineTimestampFormat } from "./determineTimestampFormat";
 
 /**
@@ -26,13 +26,9 @@ import { determineTimestampFormat } from "./determineTimestampFormat";
  *
  * @alpha
  */
-export class FromStringShapeDeserializer implements ShapeDeserializer<string> {
-  private serdeContext: SerdeFunctions | undefined;
-
-  public constructor(private settings: CodecSettings) {}
-
-  public setSerdeContext(serdeContext: SerdeFunctions): void {
-    this.serdeContext = serdeContext;
+export class FromStringShapeDeserializer extends SerdeContext implements ShapeDeserializer<string> {
+  public constructor(private settings: CodecSettings) {
+    super();
   }
 
   public read(_schema: Schema, data: string): any {

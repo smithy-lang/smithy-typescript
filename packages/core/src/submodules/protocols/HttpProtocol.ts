@@ -21,21 +21,24 @@ import type {
   ShapeSerializer,
 } from "@smithy/types";
 
+import { SerdeContext } from "./SerdeContext";
+
 /**
  * Abstract base for HTTP-based client protocols.
  *
  * @alpha
  */
-export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttpResponse> {
+export abstract class HttpProtocol extends SerdeContext implements ClientProtocol<IHttpRequest, IHttpResponse> {
   protected abstract serializer: ShapeSerializer<string | Uint8Array>;
   protected abstract deserializer: ShapeDeserializer<string | Uint8Array>;
-  protected serdeContext?: SerdeFunctions;
 
   protected constructor(
     public readonly options: {
       defaultNamespace: string;
     }
-  ) {}
+  ) {
+    super();
+  }
 
   public abstract getShapeId(): string;
 
@@ -49,6 +52,9 @@ export abstract class HttpProtocol implements ClientProtocol<IHttpRequest, IHttp
     return HttpResponse;
   }
 
+  /**
+   * @override
+   */
   public setSerdeContext(serdeContext: SerdeFunctions): void {
     this.serdeContext = serdeContext;
     this.serializer.setSerdeContext(serdeContext);
