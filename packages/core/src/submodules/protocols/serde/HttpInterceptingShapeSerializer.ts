@@ -1,5 +1,11 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import type { CodecSettings, Schema as ISchema, SerdeFunctions, ShapeSerializer } from "@smithy/types";
+import type {
+  CodecSettings,
+  ConfigurableSerdeContext,
+  Schema as ISchema,
+  SerdeFunctions,
+  ShapeSerializer,
+} from "@smithy/types";
 
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
 
@@ -13,7 +19,7 @@ import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
  * @alpha
  */
 export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeSerializer<string | Uint8Array>>
-  implements ShapeSerializer<string | Uint8Array>
+  implements ShapeSerializer<string | Uint8Array>, ConfigurableSerdeContext
 {
   private buffer: string | undefined;
 
@@ -23,6 +29,9 @@ export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeS
     private stringSerializer = new ToStringShapeSerializer(codecSettings)
   ) {}
 
+  /**
+   * @override
+   */
   public setSerdeContext(serdeContext: SerdeFunctions): void {
     this.codecSerializer.setSerdeContext(serdeContext);
     this.stringSerializer.setSerdeContext(serdeContext);

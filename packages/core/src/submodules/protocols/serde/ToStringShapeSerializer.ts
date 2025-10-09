@@ -3,7 +3,6 @@ import { dateToUtcString, LazyJsonString, quoteHeader } from "@smithy/core/serde
 import type {
   CodecSettings,
   Schema,
-  SerdeFunctions,
   ShapeSerializer,
   TimestampDateTimeSchema,
   TimestampEpochSecondsSchema,
@@ -11,6 +10,7 @@ import type {
 } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 
+import { SerdeContext } from "../SerdeContext";
 import { determineTimestampFormat } from "./determineTimestampFormat";
 
 /**
@@ -18,14 +18,11 @@ import { determineTimestampFormat } from "./determineTimestampFormat";
  *
  * @alpha
  */
-export class ToStringShapeSerializer implements ShapeSerializer<string> {
+export class ToStringShapeSerializer extends SerdeContext implements ShapeSerializer<string> {
   private stringBuffer = "";
-  private serdeContext: SerdeFunctions | undefined = undefined;
 
-  public constructor(private settings: CodecSettings) {}
-
-  public setSerdeContext(serdeContext: SerdeFunctions): void {
-    this.serdeContext = serdeContext;
+  public constructor(private settings: CodecSettings) {
+    super();
   }
 
   public write(schema: Schema, value: unknown): void {

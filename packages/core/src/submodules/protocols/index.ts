@@ -10,3 +10,4 @@ export * from "./serde/HttpInterceptingShapeDeserializer";
 export * from "./serde/HttpInterceptingShapeSerializer";
 export * from "./serde/ToStringShapeSerializer";
 export * from "./serde/determineTimestampFormat";
+export * from "./SerdeContext";
