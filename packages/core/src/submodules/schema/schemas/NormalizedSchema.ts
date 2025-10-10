@@ -18,7 +18,12 @@ import type {
   StaticMapSchema,
   StaticOperationSchema,
   StaticSchema,
-  StaticSchemaId,
+  StaticSchemaIdError,
+  StaticSchemaIdList,
+  StaticSchemaIdMap,
+  StaticSchemaIdOperation,
+  StaticSchemaIdSimple,
+  StaticSchemaIdStruct,
   StaticSimpleSchema,
   StaticStructureSchema,
   StreamingBlobSchema,
@@ -445,12 +450,12 @@ export function hydrate(
   const [id, ...rest] = ss;
   return (
     {
-      [0 satisfies StaticSchemaId.Simple]: sim,
-      [1 satisfies StaticSchemaId.List]: list,
-      [2 satisfies StaticSchemaId.Map]: map,
-      [3 satisfies StaticSchemaId.Struct]: struct,
-      [-3 satisfies StaticSchemaId.Error]: error,
-      [9 satisfies StaticSchemaId.Operation]: op,
+      [0 satisfies StaticSchemaIdSimple]: sim,
+      [1 satisfies StaticSchemaIdList]: list,
+      [2 satisfies StaticSchemaIdMap]: map,
+      [3 satisfies StaticSchemaIdStruct]: struct,
+      [-3 satisfies StaticSchemaIdError]: error,
+      [9 satisfies StaticSchemaIdOperation]: op,
     }[id] as Function
   ).call(null, ...rest);
 }
