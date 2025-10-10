@@ -40,6 +40,8 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  * const input = { // GetNumbersRequest
  *   bigDecimal: Number("bigdecimal"),
  *   bigInteger: Number("bigint"),
+ *   fieldWithoutMessage: "STRING_VALUE",
+ *   fieldWithMessage: "STRING_VALUE",
  * };
  * const command = new GetNumbersCommand(input);
  * const response = await client.send(command);
