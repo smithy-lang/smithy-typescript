@@ -296,6 +296,8 @@ const se_GetNumbersRequest = (input: GetNumbersRequest, context: __SerdeContext)
   return take(input, {
     bigDecimal: __nv,
     bigInteger: [],
+    fieldWithMessage: [],
+    fieldWithoutMessage: [],
   });
 };
 

@@ -39,6 +39,21 @@ export class CodedThrottlingError extends __BaseException {
 export interface GetNumbersRequest {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;
+  /**
+   * This is deprecated documentation annotation
+   *
+   * @deprecated deprecated
+   * @public
+   */
+  fieldWithoutMessage?: string | undefined;
+
+  /**
+   * This is deprecated documentation annotation
+   *
+   * @deprecated This field has been deprecated
+   * @public
+   */
+  fieldWithMessage?: string | undefined;
 }
 
 /**
