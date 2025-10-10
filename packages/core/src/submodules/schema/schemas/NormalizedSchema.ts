@@ -13,6 +13,14 @@ import type {
   SchemaRef,
   SchemaTraits,
   SchemaTraitsObject,
+  StaticErrorSchema,
+  StaticListSchema,
+  StaticMapSchema,
+  StaticOperationSchema,
+  StaticSchema,
+  StaticSchemaId,
+  StaticSimpleSchema,
+  StaticStructureSchema,
   StreamingBlobSchema,
   StringSchema,
   TimestampDefaultSchema,
@@ -22,11 +30,16 @@ import type {
 import type { IdempotencyTokenBitMask, TraitBitVector } from "@smithy/types/src/schema/traits";
 
 import { deref } from "../deref";
-import { ListSchema } from "./ListSchema";
-import { MapSchema } from "./MapSchema";
+import type { ErrorSchema } from "./ErrorSchema";
+import { error } from "./ErrorSchema";
+import { list, ListSchema } from "./ListSchema";
+import { map, MapSchema } from "./MapSchema";
+import type { OperationSchema } from "./OperationSchema";
+import { op } from "./OperationSchema";
 import { Schema } from "./Schema";
 import type { SimpleSchema } from "./SimpleSchema";
-import { StructureSchema } from "./StructureSchema";
+import { sim } from "./SimpleSchema";
+import { struct, StructureSchema } from "./StructureSchema";
 import { translateTraits } from "./translateTraits";
 
 /**
@@ -67,12 +80,14 @@ export class NormalizedSchema implements INormalizedSchema {
     let schema = ref;
     this._isMemberSchema = false;
 
-    while (Array.isArray(_ref)) {
+    while (isMemberSchema(_ref)) {
       traitStack.push(_ref[1]);
       _ref = _ref[0];
       schema = deref(_ref);
       this._isMemberSchema = true;
     }
+
+    if (isStaticSchema(schema)) schema = hydrate(schema);
 
     if (traitStack.length > 0) {
       this.memberTraits = {};
@@ -96,7 +111,8 @@ export class NormalizedSchema implements INormalizedSchema {
     this.schema = deref(schema) as Exclude<ISchema, MemberSchema | INormalizedSchema>;
 
     if (this.schema && typeof this.schema === "object") {
-      this.traits = this.schema?.traits ?? {};
+      // excluded by the checked hydrate call above.
+      this.traits = (this.schema as Exclude<typeof this.schema, StaticSchema>)?.traits ?? {};
     } else {
       this.traits = 0;
     }
@@ -120,7 +136,7 @@ export class NormalizedSchema implements INormalizedSchema {
     if (sc instanceof NormalizedSchema) {
       return sc;
     }
-    if (Array.isArray(sc)) {
+    if (isMemberSchema(sc)) {
       const [ns, traits] = sc;
       if (ns instanceof NormalizedSchema) {
         Object.assign(ns.getMergedTraits(), translateTraits(traits));
@@ -331,7 +347,7 @@ export class NormalizedSchema implements INormalizedSchema {
     if (this.isStructSchema() && struct.memberNames.includes(memberName)) {
       const i = struct.memberNames.indexOf(memberName);
       const memberSchema = struct.memberList[i];
-      return member(Array.isArray(memberSchema) ? memberSchema : [memberSchema, 0], memberName);
+      return member(isMemberSchema(memberSchema) ? memberSchema : [memberSchema, 0], memberName);
     }
     if (this.isDocumentSchema()) {
       return member([15 satisfies DocumentSchema, 0], memberName);
@@ -409,3 +425,42 @@ function member(memberSchema: NormalizedSchema | [SchemaRef, SchemaTraits], memb
   const internalCtorAccess = NormalizedSchema as any;
   return new internalCtorAccess(memberSchema, memberName);
 }
+
+/**
+ * @internal
+ * @returns a class instance version of a static schema.
+ */
+export function hydrate(ss: StaticSimpleSchema): SimpleSchema;
+export function hydrate(ss: StaticListSchema): ListSchema;
+export function hydrate(ss: StaticMapSchema): MapSchema;
+export function hydrate(ss: StaticStructureSchema): StructureSchema;
+export function hydrate(ss: StaticErrorSchema): ErrorSchema;
+export function hydrate(ss: StaticOperationSchema): OperationSchema;
+export function hydrate(
+  ss: StaticSchema
+): SimpleSchema | ListSchema | MapSchema | StructureSchema | ErrorSchema | OperationSchema;
+export function hydrate(
+  ss: StaticSchema
+): SimpleSchema | ListSchema | MapSchema | StructureSchema | ErrorSchema | OperationSchema {
+  const [id, ...rest] = ss;
+  return (
+    {
+      [0 satisfies StaticSchemaId.Simple]: sim,
+      [1 satisfies StaticSchemaId.List]: list,
+      [2 satisfies StaticSchemaId.Map]: map,
+      [3 satisfies StaticSchemaId.Struct]: struct,
+      [-3 satisfies StaticSchemaId.Error]: error,
+      [9 satisfies StaticSchemaId.Operation]: op,
+    }[id] as Function
+  ).call(null, ...rest);
+}
+
+/**
+ * @internal
+ */
+const isMemberSchema = (sc: SchemaRef): sc is MemberSchema => Array.isArray(sc) && sc.length === 2;
+
+/**
+ * @internal
+ */
+export const isStaticSchema = (sc: SchemaRef): sc is StaticSchema => Array.isArray(sc) && sc.length >= 5;

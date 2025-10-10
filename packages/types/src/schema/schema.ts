@@ -16,6 +16,7 @@ import type {
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
 } from "./sentinels";
+import type { StaticSchema } from "./static-schemas";
 import type { TraitBitVector } from "./traits";
 
 /**
@@ -31,6 +32,7 @@ export type Schema =
   | StructureSchema
   | MemberSchema
   | OperationSchema
+  | StaticSchema
   | NormalizedSchema;
 
 /**

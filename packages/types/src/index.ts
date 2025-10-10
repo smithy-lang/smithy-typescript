@@ -23,6 +23,7 @@ export * from "./response";
 export * from "./retry";
 export * from "./schema/schema";
 export * from "./schema/sentinels";
+export * from "./schema/static-schemas";
 export * from "./serde";
 export * from "./shapes";
 export * from "./signature";

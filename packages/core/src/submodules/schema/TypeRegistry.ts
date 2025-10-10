@@ -1,4 +1,4 @@
-import type { Schema as ISchema } from "@smithy/types";
+import type { Schema as ISchema, StaticErrorSchema } from "@smithy/types";
 
 import type { ErrorSchema } from "./schemas/ErrorSchema";
 
@@ -13,7 +13,7 @@ export class TypeRegistry {
   private constructor(
     public readonly namespace: string,
     private schemas: Map<string, ISchema> = new Map(),
-    private exceptions: Map<ErrorSchema, any> = new Map()
+    private exceptions: Map<ErrorSchema | StaticErrorSchema, any> = new Map()
   ) {}
 
   /**
@@ -53,16 +53,16 @@ export class TypeRegistry {
   /**
    * Associates an error schema with its constructor.
    */
-  public registerError(errorSchema: ErrorSchema, ctor: any) {
-    this.exceptions.set(errorSchema, ctor);
+  public registerError(es: ErrorSchema | StaticErrorSchema, ctor: any) {
+    this.exceptions.set(es, ctor);
   }
 
   /**
-   * @param errorSchema - query.
+   * @param es - query.
    * @returns Error constructor that extends the service's base exception.
    */
-  public getErrorCtor(errorSchema: ErrorSchema): any {
-    return this.exceptions.get(errorSchema);
+  public getErrorCtor(es: ErrorSchema | StaticErrorSchema): any {
+    return this.exceptions.get(es);
   }
 
   /**

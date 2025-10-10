@@ -275,16 +275,16 @@ public class SchemaGenerator implements Runnable {
     private void writeSimpleSchema(Shape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         if (elision.traits.hasSchemaTraits(shape)) {
-            writer.addImportSubmodule("sim", "sim", TypeScriptDependency.SMITHY_CORE, "/schema");
+            writer.addImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.write("""
-                    export var $L = sim($L, $L, $L,""",
+                    export var $L: StaticSimpleSchema = [0, $L, $L, $L,""",
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
                 resolveSimpleSchema(shape, shape)
             );
             writeTraits(shape);
-            writer.write(");");
+            writer.write("];");
         }
     }
 
@@ -294,15 +294,15 @@ public class SchemaGenerator implements Runnable {
             String symbolName = reservedWords.escape(shape.getId().getName());
             if (shape.hasTrait(ErrorTrait.class)) {
                 String exceptionCtorSymbolName = "__" + symbolName;
-                writer.addImportSubmodule("error", "error", TypeScriptDependency.SMITHY_CORE, "/schema");
+                writer.addImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addRelativeImport(
                     symbolName,
                     exceptionCtorSymbolName,
                     Paths.get("..", "models", "index")
                 );
                 writer.openBlock("""
-                export var $L = error($L, $L,""",
-                    ", null);",
+                export var $L: StaticErrorSchema = [-3, $L, $L,""",
+                    "];",
                     getShapeVariableName(shape),
                     checkImportString(shape, shape.getId().getNamespace(), "n"),
                     checkImportString(shape, shape.getId().getName()),
@@ -317,10 +317,10 @@ public class SchemaGenerator implements Runnable {
                     exceptionCtorSymbolName
                 );
             } else {
-                writer.addImportSubmodule("struct", "struct", TypeScriptDependency.SMITHY_CORE, "/schema");
+                writer.addImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.openBlock("""
-                export var $L = struct($L, $L,""",
-                    ");",
+                export var $L: StaticStructureSchema = [3, $L, $L,""",
+                    "];",
                     getShapeVariableName(shape),
                     checkImportString(shape, shape.getId().getNamespace(), "n"),
                     checkImportString(shape, shape.getId().getName()),
@@ -368,10 +368,10 @@ public class SchemaGenerator implements Runnable {
     private void writeUnionSchema(UnionShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         checkedWriteSchema(shape, () -> {
-            writer.addImportSubmodule("struct", "uni", TypeScriptDependency.SMITHY_CORE, "/schema");
+            writer.addImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
-                    export var $L = uni($L, $L,""",
-                ");",
+                    export var $L: StaticStructureSchema = [3, $L, $L,""",
+                "];",
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
@@ -416,10 +416,10 @@ public class SchemaGenerator implements Runnable {
     private void writeListSchema(CollectionShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         checkedWriteSchema(shape, () -> {
-            writer.addImportSubmodule("list", "list", TypeScriptDependency.SMITHY_CORE, "/schema");
+            writer.addImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
-                    export var $L = list($L, $L,""",
-                ");",
+                    export var $L: StaticListSchema = [1, $L, $L,""",
+                "];",
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
@@ -434,10 +434,10 @@ public class SchemaGenerator implements Runnable {
     private void writeMapSchema(MapShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         checkedWriteSchema(shape, () -> {
-            writer.addImportSubmodule("map", "map", TypeScriptDependency.SMITHY_CORE, "/schema");
+            writer.addImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
-                    export var $L = map($L, $L,""",
-                ");",
+                    export var $L: StaticMapSchema = [2, $L, $L,""",
+                "];",
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
@@ -503,10 +503,10 @@ public class SchemaGenerator implements Runnable {
 
     private void writeOperationSchema(OperationShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
-        writer.addImportSubmodule("op", "op", TypeScriptDependency.SMITHY_CORE, "/schema");
+        writer.addImport("StaticOperationSchema", null, TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("""
-            export var $L = op($L, $L,""",
-            ");",
+            export var $L: StaticOperationSchema = [9, $L, $L,""",
+            "];",
             getShapeVariableName(shape),
             checkImportString(shape, shape.getId().getNamespace(), "n"),
             checkImportString(shape, shape.getId().getName()),
@@ -669,21 +669,28 @@ public class SchemaGenerator implements Runnable {
      */
     private String resolveSimpleSchemaNestedContainer(Shape context, Shape shape, TypeScriptWriter writer) {
         Shape contained;
-        String factory;
+        String staticTypePrefix;
         String sentinel;
-        String keyMemberSchema;
+        String keySchema = "";
+        String valueSchema;
+        String as;
         switch (shape.getType()) {
             case LIST -> {
                 contained = shape.asListShape().get().getMember();
-                factory = "list";
-                keyMemberSchema = "";
+                staticTypePrefix = "([1, ";
+                valueSchema = "";
                 sentinel = "64";
+                writer.addImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                as = " as StaticListSchema)";
             }
             case MAP -> {
                 contained = shape.asMapShape().get().getValue();
-                factory = "map";
-                keyMemberSchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getKey()) + ", ";
+                staticTypePrefix = "([2, ";
+                keySchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getKey()) + ", ";
+                valueSchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getValue()) + ", ";
                 sentinel = "128";
+                writer.addImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                as = " as StaticMapSchema)";
             }
             default -> {
                 throw new IllegalArgumentException(
@@ -696,19 +703,18 @@ public class SchemaGenerator implements Runnable {
         }
 
         if (contained.isListShape()) {
-            writer.addImportSubmodule(factory, factory, TypeScriptDependency.SMITHY_CORE, "/schema");
             String schemaVarName = checkImportString(context, shape.getId().getName());
-            return factory + "("
+            return staticTypePrefix
                 + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
-                + keyMemberSchema
-                + this.resolveSimpleSchema(context, contained) + ")";
+                + valueSchema
+                + this.resolveSimpleSchema(context, contained) + "]" + as;
         } else if (contained.isMapShape()) {
-            writer.addImportSubmodule(factory, factory, TypeScriptDependency.SMITHY_CORE, "/schema");
             String schemaVarName = checkImportString(context, shape.getId().getName());
-            return factory + "("
+            return staticTypePrefix
                 + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
-                + keyMemberSchema
-                + this.resolveSimpleSchema(context, contained) + ")";
+                + keySchema
+                + valueSchema
+                + this.resolveSimpleSchema(context, contained) + "]" + as;
         } else {
             return sentinel + "|" + this.resolveSimpleSchema(context, contained);
         }

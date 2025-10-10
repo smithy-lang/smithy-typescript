@@ -8,6 +8,9 @@ import type {
   MapSchemaModifier,
   MemberSchema,
   NumericSchema,
+  StaticListSchema,
+  StaticMapSchema,
+  StaticStructureSchema,
   StreamingBlobSchema,
   StringSchema,
   StructureSchema,
@@ -311,6 +314,34 @@ describe(NormalizedSchema.name, () => {
       const ns = NormalizedSchema.of(schema);
 
       expect(ns.getEventStreamMember()).toEqual("");
+    });
+  });
+
+  describe("static schema", () => {
+    it("can normalize static schema indifferently to schema class objects", () => {
+      const [List, Map, Struct]: [StaticListSchema, StaticMapSchema, () => StaticStructureSchema] = [
+        [1, "ack", "List", { sparse: 1 }, 0],
+        [2, "ack", "Map", 0, 0, 1],
+        () => schema,
+      ];
+      const schema: StaticStructureSchema = [3, "ack", "Structure", {}, ["list", "map", "struct"], [List, Map, Struct]];
+
+      const ns = NormalizedSchema.of(schema);
+
+      expect(ns.isStructSchema()).toBe(true);
+      expect(ns.getMemberSchema("list").isListSchema()).toBe(true);
+      expect(ns.getMemberSchema("list").getMergedTraits().sparse).toBe(1);
+
+      expect(ns.getMemberSchema("map").isMapSchema()).toBe(true);
+      expect(ns.getMemberSchema("map").getKeySchema().isStringSchema()).toBe(true);
+      expect(ns.getMemberSchema("map").getValueSchema().isNumericSchema()).toBe(true);
+
+      expect(ns.getMemberSchema("struct").isStructSchema()).toBe(true);
+      expect(ns.getMemberSchema("struct").getMemberSchema("list").isListSchema()).toBe(true);
+      expect(ns.getMemberSchema("struct").getMemberSchema("list").getMergedTraits().sparse).toBe(1);
+      expect(ns.getMemberSchema("struct").getMemberSchema("map").isMapSchema()).toBe(true);
+      expect(ns.getMemberSchema("struct").getMemberSchema("map").getKeySchema().isStringSchema()).toBe(true);
+      expect(ns.getMemberSchema("struct").getMemberSchema("map").getValueSchema().isNumericSchema()).toBe(true);
     });
   });
 });
