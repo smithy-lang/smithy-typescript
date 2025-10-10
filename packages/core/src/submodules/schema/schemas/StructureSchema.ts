@@ -7,6 +7,7 @@ import { Schema } from "./Schema";
  * A structure schema has a known list of members. This is also used for unions.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export class StructureSchema extends Schema implements IStructureSchema {
   public static symbol = Symbol.for("@smithy/str");
@@ -21,6 +22,7 @@ export class StructureSchema extends Schema implements IStructureSchema {
  * Factory for StructureSchema.
  *
  * @internal
+ * @deprecated use StaticSchema
  */
 export const struct = (
   namespace: string,

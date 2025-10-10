@@ -6,6 +6,7 @@ import { TypeRegistry } from "../TypeRegistry";
  * Abstract base for class-based Schema except NormalizedSchema.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export abstract class Schema implements TraitsSchema {
   public name!: string;
@@ -15,7 +16,7 @@ export abstract class Schema implements TraitsSchema {
 
   public static assign<T extends Schema>(instance: T, values: Omit<T, "getName" | "symbol">): T {
     const schema = Object.assign(instance, values);
-    TypeRegistry.for(schema.namespace).register(schema.name, schema);
+    TypeRegistry.for(schema.namespace).register(schema.name, schema as any);
     return schema;
   }
 

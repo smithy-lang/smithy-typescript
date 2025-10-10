@@ -3,6 +3,7 @@ export * from "./middleware/getSchemaSerdePlugin";
 export * from "./schemas/ListSchema";
 export * from "./schemas/MapSchema";
 export * from "./schemas/OperationSchema";
+export * from "./schemas/operation";
 export * from "./schemas/ErrorSchema";
 export * from "./schemas/NormalizedSchema";
 export * from "./schemas/Schema";

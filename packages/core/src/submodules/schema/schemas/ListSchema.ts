@@ -7,6 +7,7 @@ import { Schema } from "./Schema";
  * The deprecated Set type may be represented as a list.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export class ListSchema extends Schema implements IListSchema {
   public static readonly symbol = Symbol.for("@smithy/lis");
@@ -20,6 +21,7 @@ export class ListSchema extends Schema implements IListSchema {
  * Factory for ListSchema.
  *
  * @internal
+ * @deprecated use StaticSchema
  */
 export const list = (namespace: string, name: string, traits: SchemaTraits, valueSchema: SchemaRef): ListSchema =>
   Schema.assign(new ListSchema(), {

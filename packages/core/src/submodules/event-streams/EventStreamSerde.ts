@@ -10,6 +10,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticStructureSchema,
 } from "@smithy/types";
 import { fromUtf8 } from "@smithy/util-utf8";
 
@@ -233,8 +234,8 @@ export class EventStreamSerde {
     let explicitPayloadContentType: undefined | string;
 
     const isKnownSchema = (() => {
-      const struct = unionSchema.getSchema() as StructureSchema;
-      return struct.memberNames.includes(unionMember);
+      const struct = unionSchema.getSchema() as StaticStructureSchema;
+      return struct[4].includes(unionMember);
     })();
     const additionalHeaders: MessageHeaders = {};
 

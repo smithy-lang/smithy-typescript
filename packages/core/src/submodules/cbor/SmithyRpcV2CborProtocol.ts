@@ -10,6 +10,7 @@ import type {
   OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
+  StaticErrorSchema,
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
 
@@ -104,9 +105,9 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
 
     const registry = TypeRegistry.for(namespace);
 
-    let errorSchema: ErrorSchema;
+    let errorSchema: StaticErrorSchema;
     try {
-      errorSchema = registry.getSchema(errorName) as ErrorSchema;
+      errorSchema = registry.getSchema(errorName) as StaticErrorSchema;
     } catch (e) {
       if (dataObject.Message) {
         dataObject.message = dataObject.Message;

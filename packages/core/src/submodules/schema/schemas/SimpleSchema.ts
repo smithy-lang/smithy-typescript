@@ -8,6 +8,7 @@ import { Schema } from "./Schema";
  * attached to those schema, since a single number cannot easily represent both a schema and its traits.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export class SimpleSchema extends Schema implements TraitsSchema {
   public static readonly symbol = Symbol.for("@smithy/sim");
@@ -21,6 +22,7 @@ export class SimpleSchema extends Schema implements TraitsSchema {
  * Factory for simple schema class objects.
  *
  * @internal
+ * @deprecated use StaticSchema
  */
 export const sim = (namespace: string, name: string, schemaRef: SchemaRef, traits: SchemaTraits) =>
   Schema.assign(new SimpleSchema(), {

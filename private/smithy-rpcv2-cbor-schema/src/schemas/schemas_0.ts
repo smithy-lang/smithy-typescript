@@ -137,7 +137,7 @@ import {
   InvalidGreeting as __InvalidGreeting,
   ValidationException as __ValidationException,
 } from "../models/index";
-import { TypeRegistry, error } from "@smithy/core/schema";
+import { TypeRegistry } from "@smithy/core/schema";
 import {
   StaticErrorSchema,
   StaticListSchema,
@@ -352,7 +352,7 @@ export var SparseNullsOperationInputOutput: StaticStructureSchema = [
 ];
 export var StructureListMember: StaticStructureSchema = [3, n1, _SLM, 0, [_a, _b_], [0, 0]];
 export var GreetingStruct: StaticStructureSchema = [3, n2, _GS, 0, [_h], [0]];
-export var RpcV2ProtocolServiceException = error(_sC, "RpcV2ProtocolServiceException", 0, [], [], null);
+export var RpcV2ProtocolServiceException: StaticErrorSchema = [-3, _sC, "RpcV2ProtocolServiceException", 0, [], []];
 TypeRegistry.for(_sC).registerError(RpcV2ProtocolServiceException, __RpcV2ProtocolServiceException);
 
 export var ValidationExceptionFieldList: StaticListSchema = [1, n0, _VEFL, 0, () => ValidationExceptionField];
