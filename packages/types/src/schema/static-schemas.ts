@@ -8,14 +8,32 @@ import type { SchemaRef, SchemaTraits } from "../schema/schema";
 /**
  * @alpha
  */
-export namespace StaticSchemaId {
-  export type Simple = 0;
-  export type List = 1;
-  export type Map = 2;
-  export type Struct = 3;
-  export type Error = -3;
-  export type Operation = 9;
-}
+export type StaticSchemaIdSimple = 0;
+
+/**
+ * @alpha
+ */
+export type StaticSchemaIdList = 1;
+
+/**
+ * @alpha
+ */
+export type StaticSchemaIdMap = 2;
+
+/**
+ * @alpha
+ */
+export type StaticSchemaIdStruct = 3;
+
+/**
+ * @alpha
+ */
+export type StaticSchemaIdError = -3;
+
+/**
+ * @alpha
+ */
+export type StaticSchemaIdOperation = 9;
 
 /**
  * @alpha
@@ -41,23 +59,23 @@ export type ShapeNamespace = string;
 /**
  * @alpha
  */
-export type StaticSimpleSchema = [StaticSchemaId.Simple, ShapeNamespace, ShapeName, SchemaRef, SchemaTraits];
+export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaRef, SchemaTraits];
 
 /**
  * @alpha
  */
-export type StaticListSchema = [StaticSchemaId.List, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef];
+export type StaticListSchema = [StaticSchemaIdList, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef];
 
 /**
  * @alpha
  */
-export type StaticMapSchema = [StaticSchemaId.Map, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef, SchemaRef];
+export type StaticMapSchema = [StaticSchemaIdMap, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef, SchemaRef];
 
 /**
  * @alpha
  */
 export type StaticStructureSchema = [
-  StaticSchemaId.Struct,
+  StaticSchemaIdStruct,
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
@@ -69,7 +87,7 @@ export type StaticStructureSchema = [
  * @alpha
  */
 export type StaticErrorSchema = [
-  StaticSchemaId.Error,
+  StaticSchemaIdError,
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
@@ -81,7 +99,7 @@ export type StaticErrorSchema = [
  * @alpha
  */
 export type StaticOperationSchema = [
-  StaticSchemaId.Operation,
+  StaticSchemaIdOperation,
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
