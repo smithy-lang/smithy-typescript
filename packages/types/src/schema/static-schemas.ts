@@ -59,7 +59,7 @@ export type ShapeNamespace = string;
 /**
  * @alpha
  */
-export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaRef, SchemaTraits];
+export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef];
 
 /**
  * @alpha
@@ -80,7 +80,7 @@ export type StaticStructureSchema = [
   ShapeName,
   SchemaTraits,
   string[], // member name list
-  SchemaRef[], // member schema list
+  SchemaRef[] // member schema list
 ];
 
 /**
@@ -92,7 +92,7 @@ export type StaticErrorSchema = [
   ShapeName,
   SchemaTraits,
   string[], // member name list
-  SchemaRef[], // member schema list
+  SchemaRef[] // member schema list
 ];
 
 /**
@@ -104,5 +104,5 @@ export type StaticOperationSchema = [
   ShapeName,
   SchemaTraits,
   SchemaRef, // input schema
-  SchemaRef, // output schema
+  SchemaRef // output schema
 ];

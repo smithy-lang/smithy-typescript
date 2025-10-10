@@ -22,6 +22,7 @@ import type { TraitBitVector } from "./traits";
 /**
  * A schema is an object or value that describes how to serialize/deserialize data.
  * @public
+ * @deprecated use $Schema
  */
 export type Schema =
   | UnitSchema
@@ -34,6 +35,12 @@ export type Schema =
   | OperationSchema
   | StaticSchema
   | NormalizedSchema;
+
+/**
+ * A schema is an object or value that describes how to serialize/deserialize data.
+ * @alpha
+ */
+export type $Schema = UnitSchema | SimpleSchema | MemberSchema | StaticSchema | NormalizedSchema;
 
 /**
  * Traits attached to schema objects.
@@ -50,6 +57,7 @@ export type SchemaTraits = TraitBitVector | SchemaTraitsObject;
  * A schema that has traits.
  *
  * @public
+ * @deprecated use static schema.
  */
 export interface TraitsSchema {
   namespace: string;
@@ -154,10 +162,9 @@ export type SchemaTraitsObject = {
 /**
  * Schema for the structure aggregate type.
  * @public
+ * @deprecated use static schema.
  */
 export interface StructureSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
   memberNames: string[];
   memberList: SchemaRef[];
 
@@ -171,35 +178,36 @@ export interface StructureSchema extends TraitsSchema {
 /**
  * Schema for the list aggregate type.
  * @public
+ * @deprecated use static schema.
  */
 export interface ListSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
   valueSchema: SchemaRef;
 }
 
 /**
  * Schema for the map aggregate type.
  * @public
+ * @deprecated use static schema.
  */
 export interface MapSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
   keySchema: SchemaRef;
   valueSchema: SchemaRef;
 }
 
 /**
+ * Indicates the schema is a member of a parent Structure schema.
+ * It may also have a set of member traits distinct from its target shape's traits.
  * @public
  */
 export type MemberSchema = [SchemaRef, SchemaTraits];
 
 /**
  * Schema for an operation.
- *
  * @public
+ * @deprecated use StaticOperationSchema
  */
-export interface OperationSchema extends TraitsSchema {
+export interface OperationSchema {
+  namespace: string;
   name: string;
   traits: SchemaTraits;
   input: SchemaRef;
@@ -244,8 +252,17 @@ export interface NormalizedSchema {
  * provides a schema. This is useful for lazy loading, and to allow
  * code generation to define schema out of dependency order.
  * @public
+ * @deprecated use $SchemaRef
  */
 export type SchemaRef = Schema | (() => Schema);
+
+/**
+ * A schema "reference" is either a schema or a function that
+ * provides a schema. This is useful for lazy loading, and to allow
+ * code generation to define schema out of dependency order.
+ * @alpha
+ */
+export type $SchemaRef = $Schema | (() => $Schema);
 
 /**
  * A codec creates serializers and deserializers for some format such as JSON, XML, or CBOR.

@@ -13,7 +13,7 @@ export class TypeRegistry {
   private constructor(
     public readonly namespace: string,
     private schemas: Map<string, ISchema> = new Map(),
-    private exceptions: Map<ErrorSchema | StaticErrorSchema, any> = new Map()
+    private exceptions: Map<StaticErrorSchema, any> = new Map()
   ) {}
 
   /**
@@ -53,8 +53,9 @@ export class TypeRegistry {
   /**
    * Associates an error schema with its constructor.
    */
-  public registerError(es: ErrorSchema | StaticErrorSchema, ctor: any) {
+  public registerError(es: StaticErrorSchema, ctor: any) {
     this.exceptions.set(es, ctor);
+    this.register(es[1] + "#" + es[2], es);
   }
 
   /**
@@ -62,7 +63,7 @@ export class TypeRegistry {
    * @returns Error constructor that extends the service's base exception.
    */
   public getErrorCtor(es: ErrorSchema | StaticErrorSchema): any {
-    return this.exceptions.get(es);
+    return this.exceptions.get(es as StaticErrorSchema);
   }
 
   /**
@@ -78,10 +79,14 @@ export class TypeRegistry {
    *
    * @returns the synthetic base exception of the service namespace associated with this registry instance.
    */
-  public getBaseException(): ErrorSchema | undefined {
-    for (const [id, schema] of this.schemas.entries()) {
-      if (id.startsWith("smithy.ts.sdk.synthetic.") && id.endsWith("ServiceException")) {
-        return schema as ErrorSchema;
+  public getBaseException(): StaticErrorSchema | undefined {
+    for (const exceptionKey of this.exceptions.keys()) {
+      if (Array.isArray(exceptionKey)) {
+        const [, ns, name] = exceptionKey;
+        const id = ns + "#" + name;
+        if (id.startsWith("smithy.ts.sdk.synthetic.") && id.endsWith("ServiceException")) {
+          return exceptionKey;
+        }
       }
     }
     return undefined;
