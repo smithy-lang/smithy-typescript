@@ -21,19 +21,9 @@ import type { TraitBitVector } from "./traits";
 
 /**
  * A schema is an object or value that describes how to serialize/deserialize data.
- * @public
+ * @alpha
  */
-export type Schema =
-  | UnitSchema
-  | TraitsSchema
-  | SimpleSchema
-  | ListSchema
-  | MapSchema
-  | StructureSchema
-  | MemberSchema
-  | OperationSchema
-  | StaticSchema
-  | NormalizedSchema;
+export type $Schema = UnitSchema | SimpleSchema | $MemberSchema | StaticSchema | NormalizedSchema;
 
 /**
  * Traits attached to schema objects.
@@ -45,17 +35,6 @@ export type Schema =
  * @public
  */
 export type SchemaTraits = TraitBitVector | SchemaTraitsObject;
-
-/**
- * A schema that has traits.
- *
- * @public
- */
-export interface TraitsSchema {
-  namespace: string;
-  name: string;
-  traits: SchemaTraits;
-}
 
 /**
  * Simple schemas are those corresponding to simple Smithy types.
@@ -95,7 +74,7 @@ export type BlobSchemas = BlobSchema | StreamingBlobSchema;
  * Signal value for the Smithy void value. Typically used for
  * operation input and outputs.
  *
- * @internal
+ * @alpha
  */
 export type UnitSchema = "unit";
 
@@ -152,58 +131,22 @@ export type SchemaTraitsObject = {
 };
 
 /**
- * Schema for the structure aggregate type.
- * @public
+ * Indicates the schema is a member of a parent Structure schema.
+ * It may also have a set of member traits distinct from its target shape's traits.
+ * @alpha
  */
-export interface StructureSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
-  memberNames: string[];
-  memberList: SchemaRef[];
-
-  /**
-   * @deprecated structure member iteration will be linear on the memberNames and memberList arrays.
-   * It can be collected into a hashmap form on an ad-hoc basis, but will not initialize as such.
-   */
-  members?: Record<string, [SchemaRef, SchemaTraits]> | undefined;
-}
-
-/**
- * Schema for the list aggregate type.
- * @public
- */
-export interface ListSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
-  valueSchema: SchemaRef;
-}
-
-/**
- * Schema for the map aggregate type.
- * @public
- */
-export interface MapSchema extends TraitsSchema {
-  name: string;
-  traits: SchemaTraits;
-  keySchema: SchemaRef;
-  valueSchema: SchemaRef;
-}
-
-/**
- * @public
- */
-export type MemberSchema = [SchemaRef, SchemaTraits];
+export type $MemberSchema = [$SchemaRef, SchemaTraits];
 
 /**
  * Schema for an operation.
- *
- * @public
+ * @alpha
  */
-export interface OperationSchema extends TraitsSchema {
+export interface $OperationSchema {
+  namespace: string;
   name: string;
   traits: SchemaTraits;
-  input: SchemaRef;
-  output: SchemaRef;
+  input: $SchemaRef;
+  output: $SchemaRef;
 }
 
 /**
@@ -211,7 +154,7 @@ export interface OperationSchema extends TraitsSchema {
  * @public
  */
 export interface NormalizedSchema {
-  getSchema(): Schema;
+  getSchema(): $Schema;
   getName(): string | undefined;
   isMemberSchema(): boolean;
   isListSchema(): boolean;
@@ -243,18 +186,18 @@ export interface NormalizedSchema {
  * A schema "reference" is either a schema or a function that
  * provides a schema. This is useful for lazy loading, and to allow
  * code generation to define schema out of dependency order.
- * @public
+ * @alpha
  */
-export type SchemaRef = Schema | (() => Schema);
+export type $SchemaRef = $Schema | (() => $Schema);
 
 /**
  * A codec creates serializers and deserializers for some format such as JSON, XML, or CBOR.
  *
  * @public
  */
-export interface Codec<S, D> extends ConfigurableSerdeContext {
-  createSerializer(): ShapeSerializer<S>;
-  createDeserializer(): ShapeDeserializer<D>;
+export interface $Codec<S, D> extends ConfigurableSerdeContext {
+  createSerializer(): $ShapeSerializer<S>;
+  createDeserializer(): $ShapeDeserializer<D>;
 }
 
 /**
@@ -283,19 +226,19 @@ export type CodecSettings = {
  * Turns a serialization into a data object.
  * @public
  */
-export interface ShapeDeserializer<SerializationType = Uint8Array> extends ConfigurableSerdeContext {
+export interface $ShapeDeserializer<SerializationType = Uint8Array> extends ConfigurableSerdeContext {
   /**
    * Optionally async.
    */
-  read(schema: Schema, data: SerializationType): any | Promise<any>;
+  read(schema: $Schema, data: SerializationType): any | Promise<any>;
 }
 
 /**
  * Turns a data object into a serialization.
  * @public
  */
-export interface ShapeSerializer<SerializationType = Uint8Array> extends ConfigurableSerdeContext {
-  write(schema: Schema, value: unknown): void;
+export interface $ShapeSerializer<SerializationType = Uint8Array> extends ConfigurableSerdeContext {
+  write(schema: $Schema, value: unknown): void;
 
   flush(): SerializationType;
 }
@@ -304,7 +247,7 @@ export interface ShapeSerializer<SerializationType = Uint8Array> extends Configu
  * A client protocol defines how to convert a message (e.g. HTTP request/response) to and from a data object.
  * @public
  */
-export interface ClientProtocol<Request, Response> extends ConfigurableSerdeContext {
+export interface $ClientProtocol<Request, Response> extends ConfigurableSerdeContext {
   /**
    * @returns the Smithy qualified shape id.
    */
@@ -317,10 +260,10 @@ export interface ClientProtocol<Request, Response> extends ConfigurableSerdeCont
    * @returns the payload codec if the requests/responses have a symmetric format.
    * It otherwise may return null.
    */
-  getPayloadCodec(): Codec<any, any>;
+  getPayloadCodec(): $Codec<any, any>;
 
   serializeRequest<Input extends object>(
-    operationSchema: OperationSchema,
+    operationSchema: $OperationSchema,
     input: Input,
     context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
   ): Promise<Request>;
@@ -328,7 +271,7 @@ export interface ClientProtocol<Request, Response> extends ConfigurableSerdeCont
   updateServiceEndpoint(request: Request, endpoint: EndpointV2): Request;
 
   deserializeResponse<Output extends MetadataBearer>(
-    operationSchema: OperationSchema,
+    operationSchema: $OperationSchema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: Response
   ): Promise<Output>;

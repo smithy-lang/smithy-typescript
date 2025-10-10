@@ -59,7 +59,7 @@ describe(schemaSerializationMiddleware.name, () => {
     await expect(schemaSerializationMiddleware(mockOptions)(mockNext, {})(mockArgs)).resolves.toStrictEqual(mockReturn);
 
     expect(mockSerializer).toHaveBeenCalledTimes(1);
-    expect(mockSerializer).toHaveBeenCalledWith(undefined as unknown as SchemaRef, mockArgs.input, {
+    expect(mockSerializer).toHaveBeenCalledWith({}, mockArgs.input, {
       ...mockOptions,
       __smithy_context: {},
     });

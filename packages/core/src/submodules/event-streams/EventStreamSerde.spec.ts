@@ -1,10 +1,12 @@
 import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
-import { NormalizedSchema, sim, struct } from "@smithy/core/schema";
+import { NormalizedSchema } from "@smithy/core/schema";
 import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
   BlobSchema,
   Message as EventMessage,
+  StaticSimpleSchema,
+  StaticStructureSchema,
   StreamingBlobSchema,
   StringSchema,
   TimestampEpochSecondsSchema,
@@ -44,49 +46,65 @@ describe(EventStreamSerde.name, () => {
       defaultContentType: impl.getDefaultContentType(),
     });
 
-    const eventStreamUnionSchema = struct(
+    const eventStreamUnionSchema = [
+      3,
       "ns",
       "EventStreamStructure",
       { streaming: 1 },
       ["A", "B", "C", "Payload", "TextPayload", "CustomHeaders"],
       // D is omitted to represent an unknown event.
       [
-        struct("ns", "A", 0, ["name"], [0]),
-        struct("ns", "B", 0, ["name"], [0]),
-        struct("ns", "C", 0, ["name"], [0]),
-        struct(
+        [3, "ns", "A", 0, ["name"], [0]] satisfies StaticStructureSchema,
+        [3, "ns", "B", 0, ["name"], [0]] satisfies StaticStructureSchema,
+        [3, "ns", "C", 0, ["name"], [0]] satisfies StaticStructureSchema,
+        [
+          3,
           "ns",
           "Payload",
           0,
           ["payload"],
-          [sim("ns", "StreamingBlobPayload", 42 satisfies StreamingBlobSchema, { eventPayload: 1 })]
-        ),
-        struct(
+          [
+            [
+              0,
+              "ns",
+              "StreamingBlobPayload",
+              { eventPayload: 1 },
+              42 satisfies StreamingBlobSchema,
+            ] satisfies StaticSimpleSchema,
+          ],
+        ],
+        [
+          3,
           "ns",
           "TextPayload",
           0,
           ["payload"],
-          [sim("ns", "TextPayload", 0 satisfies StringSchema, { eventPayload: 1 })]
-        ),
-        struct(
+          [[0, "ns", "TextPayload", { eventPayload: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema],
+        ],
+        [
+          3,
           "ns",
           "CustomHeaders",
           0,
           ["header1", "header2"],
-          [sim("ns", "EventHeader", 0, { eventHeader: 1 }), sim("ns", "EventHeader", 0, { eventHeader: 1 })]
-        ),
-      ]
-    );
+          [
+            [0, "ns", "EventHeader", { eventHeader: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema,
+            [0, "ns", "EventHeader", { eventHeader: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema,
+          ],
+        ],
+      ],
+    ] satisfies StaticStructureSchema;
 
-    const eventStreamContainerSchema = struct(
+    const eventStreamContainerSchema = [
+      3,
       "ns",
       "EventStreamContainer",
       0,
       // here the non-eventstream members form an initial-request
       // or initial-response when present.
       ["eventStreamMember", "dateMember", "blobMember"],
-      [eventStreamUnionSchema, 7 satisfies TimestampEpochSecondsSchema, 21 satisfies BlobSchema]
-    );
+      [eventStreamUnionSchema, 7 satisfies TimestampEpochSecondsSchema, 21 satisfies BlobSchema],
+    ] satisfies StaticStructureSchema;
 
     describe("serialization", () => {
       async function messageDeserializer(event: Record<string, EventMessage>): Promise<any> {

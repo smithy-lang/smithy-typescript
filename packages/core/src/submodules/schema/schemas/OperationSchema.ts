@@ -7,6 +7,7 @@ import { Schema } from "./Schema";
  * detection on the operation that may affect client protocol logic.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export class OperationSchema extends Schema implements IOperationSchema {
   public static readonly symbol = Symbol.for("@smithy/ope");
@@ -20,6 +21,7 @@ export class OperationSchema extends Schema implements IOperationSchema {
 /**
  * Factory for OperationSchema.
  * @internal
+ * @deprecated use StaticSchema
  */
 export const op = (
   namespace: string,

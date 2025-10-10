@@ -13,7 +13,7 @@ export class TypeRegistry {
   private constructor(
     public readonly namespace: string,
     private schemas: Map<string, ISchema> = new Map(),
-    private exceptions: Map<ErrorSchema | StaticErrorSchema, any> = new Map()
+    private exceptions: Map<StaticErrorSchema, any> = new Map()
   ) {}
 
   /**
@@ -68,7 +68,7 @@ export class TypeRegistry {
   public getErrorCtor(es: ErrorSchema | StaticErrorSchema): any {
     const $error = es as StaticErrorSchema;
     const registry = TypeRegistry.for($error[1]);
-    return registry.exceptions.get(es);
+    return registry.exceptions.get($error);
   }
 
   /**

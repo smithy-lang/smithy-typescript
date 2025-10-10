@@ -1,5 +1,5 @@
 import type { Endpoint } from "./http";
-import type { ClientProtocol } from "./schema/schema";
+import type { $ClientProtocol } from "./schema/schema";
 import type { RequestHandler } from "./transfer";
 import type { Decoder, Encoder, Provider } from "./util";
 
@@ -35,7 +35,7 @@ export interface StreamCollector {
 export interface SerdeContext extends SerdeFunctions, EndpointBearer {
   requestHandler: RequestHandler<any, any>;
   disableHostPrefix: boolean;
-  protocol?: ClientProtocol<any, any>;
+  protocol?: $ClientProtocol<any, any>;
 }
 
 /**

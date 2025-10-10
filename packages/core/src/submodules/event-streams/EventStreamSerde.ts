@@ -1,4 +1,4 @@
-import type { NormalizedSchema, StructureSchema } from "@smithy/core/schema";
+import type { NormalizedSchema } from "@smithy/core/schema";
 import type {
   DocumentSchema,
   EventStreamMarshaller,
@@ -10,6 +10,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticStructureSchema,
 } from "@smithy/types";
 import { fromUtf8 } from "@smithy/util-utf8";
 
@@ -68,7 +69,6 @@ export class EventStreamSerde {
     const marshaller = this.marshaller;
     const eventStreamMember = requestSchema.getEventStreamMember();
     const unionSchema = requestSchema.getMemberSchema(eventStreamMember);
-    const memberSchemas = unionSchema.getMemberSchemas();
 
     const serializer = this.serializer;
     const defaultContentType = this.defaultContentType;
@@ -233,8 +233,8 @@ export class EventStreamSerde {
     let explicitPayloadContentType: undefined | string;
 
     const isKnownSchema = (() => {
-      const struct = unionSchema.getSchema() as StructureSchema;
-      return struct.memberNames.includes(unionMember);
+      const struct = unionSchema.getSchema() as StaticStructureSchema;
+      return struct[4].includes(unionMember);
     })();
     const additionalHeaders: MessageHeaders = {};
 

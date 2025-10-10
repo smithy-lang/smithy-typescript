@@ -1,5 +1,5 @@
 import type { EventStreamSerde } from "@smithy/core/event-streams";
-import { NormalizedSchema } from "@smithy/core/schema";
+import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
   ClientProtocol,
@@ -109,10 +109,11 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
     operationSchema: OperationSchema,
     input: Input
   ): void {
-    const operationNs = NormalizedSchema.of(operationSchema);
     const inputNs = NormalizedSchema.of(operationSchema.input);
-    if (operationNs.getMergedTraits().endpoint) {
-      let hostPrefix = operationNs.getMergedTraits().endpoint?.[0];
+    const opTraits = translateTraits(operationSchema.traits ?? {});
+
+    if (opTraits.endpoint) {
+      let hostPrefix = opTraits.endpoint?.[0];
       if (typeof hostPrefix === "string") {
         const hostLabelInputs = [...inputNs.structIterator()].filter(
           ([, member]) => member.getMergedTraits().hostLabel

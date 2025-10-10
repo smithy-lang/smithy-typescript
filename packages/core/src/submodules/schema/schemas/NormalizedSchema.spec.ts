@@ -10,24 +10,24 @@ import type {
   NumericSchema,
   StaticListSchema,
   StaticMapSchema,
+  StaticSimpleSchema,
   StaticStructureSchema,
   StreamingBlobSchema,
   StringSchema,
-  StructureSchema,
   TimestampDefaultSchema,
 } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { list } from "./ListSchema";
-import { map } from "./MapSchema";
 import { NormalizedSchema } from "./NormalizedSchema";
-import { sim } from "./SimpleSchema";
-import { struct } from "./StructureSchema";
 import { translateTraits } from "./translateTraits";
 
 describe(NormalizedSchema.name, () => {
-  const [List, Map, Struct] = [list("ack", "List", { sparse: 1 }, 0), map("ack", "Map", 0, 0, 1), () => schema];
-  const schema = struct("ack", "Structure", {}, ["list", "map", "struct"], [List, Map, Struct]);
+  const [List, Map, Struct]: [StaticListSchema, StaticMapSchema, () => StaticStructureSchema] = [
+    [1, "ack", "List", { sparse: 1 }, 0] satisfies StaticListSchema,
+    [2, "ack", "Map", 0, 0, 1] satisfies StaticMapSchema,
+    () => schema,
+  ];
+  const schema: StaticStructureSchema = [3, "ack", "Structure", {}, ["list", "map", "struct"], [List, Map, Struct]];
 
   const ns = NormalizedSchema.of(schema);
   const nsFromIndirect = NormalizedSchema.of(() => ns);
@@ -121,13 +121,14 @@ describe(NormalizedSchema.name, () => {
       expect(NormalizedSchema.of(19 satisfies BigDecimalSchema).isBigDecimalSchema()).toBe(true);
       expect(NormalizedSchema.of(42 satisfies StreamingBlobSchema).isStreaming()).toBe(true);
 
-      const structWithStreamingMember = struct(
+      const structWithStreamingMember = [
+        3,
         "ack",
         "StructWithStreamingMember",
         0,
         ["m"],
-        [sim("ns", "blob", 21 as BlobSchema, { streaming: 1 })]
-      );
+        [[0, "ns", "blob", { streaming: 1 }, 21 as BlobSchema] satisfies StaticSimpleSchema],
+      ] satisfies StaticStructureSchema;
       expect(NormalizedSchema.of(structWithStreamingMember).getMemberSchema("m").isStreaming()).toBe(true);
     });
 
@@ -221,8 +222,11 @@ describe(NormalizedSchema.name, () => {
   });
 
   describe("traits", () => {
-    const member: MemberSchema = [sim("ack", "SimpleString", 0, { idempotencyToken: 1 }), 0b0000_0001];
-    const container: StructureSchema = struct("ack", "Container", 0, ["member_name"], [member, 0]);
+    const member: MemberSchema = [
+      [0, "ack", "SimpleString", { idempotencyToken: 1 }, 0] satisfies StaticSimpleSchema,
+      0b0000_0001,
+    ];
+    const container: StaticStructureSchema = [3, "ack", "Container", 0, ["member_name"], [member, 0]];
 
     const ns = NormalizedSchema.of(container).getMemberSchema("member_name");
 
@@ -247,14 +251,14 @@ describe(NormalizedSchema.name, () => {
 
   describe("idempotency token detection", () => {
     const idempotencyTokenSchemas = [
-      NormalizedSchema.of(sim("", "StringWithTraits", 0, 0b0100)),
-      NormalizedSchema.of(sim("", "StringWithTraits", 0, { idempotencyToken: 1 })),
+      NormalizedSchema.of([0, "", "StringWithTraits", 0b0100, 0] satisfies StaticSimpleSchema),
+      NormalizedSchema.of([0, "", "StringWithTraits", { idempotencyToken: 1 }, 0] satisfies StaticSimpleSchema),
     ];
 
     const plainSchemas = [
       NormalizedSchema.of(0),
-      NormalizedSchema.of(sim("", "StringWithTraits", 0, 0)),
-      NormalizedSchema.of(sim("", "StringWithTraits", 0, {})),
+      NormalizedSchema.of([0, "", "StringWithTraits", 0, 0] satisfies StaticSimpleSchema),
+      NormalizedSchema.of([0, "", "StringWithTraits", {}, 0] satisfies StaticSimpleSchema),
     ];
 
     it("has a consistent shortcut method for idempotencyToken detection", () => {
@@ -274,7 +278,14 @@ describe(NormalizedSchema.name, () => {
         expect(schema.isIdempotencyToken()).toBe(false);
         expect(schema.getMergedTraits().idempotencyToken).toBe(undefined);
 
-        const structure = struct("", "StructureWithIdempotencyTokenMember", 0, ["token"], [[() => schema, 0b0100]]);
+        const structure = [
+          3,
+          "",
+          "StructureWithIdempotencyTokenMember",
+          0,
+          ["token"],
+          [[() => schema, 0b0100]],
+        ] satisfies StaticStructureSchema;
         const ns = NormalizedSchema.of(structure).getMemberSchema("token");
 
         expect(ns.isIdempotencyToken()).toBe(true);
@@ -284,26 +295,28 @@ describe(NormalizedSchema.name, () => {
 
   describe("event stream detection", () => {
     it("should retrieve the event stream member", () => {
-      const schema = struct(
+      const schema: StaticStructureSchema = [
+        3,
         "ns",
         "StructureWithEventStream",
         0,
         ["A", "B", "C", "D", "EventStream"],
-        [0, 0, 0, 0, struct("ns", "Union", { streaming: 1 }, [], [])]
-      );
+        [0, 0, 0, 0, [3, "ns", "Union", { streaming: 1 }, [], []] satisfies StaticStructureSchema],
+      ];
       const ns = NormalizedSchema.of(schema);
 
       expect(ns.getEventStreamMember()).toEqual("EventStream");
     });
 
     it("should return empty string if no event stream member is present", () => {
-      const schema = struct(
+      const schema: StaticStructureSchema = [
+        3,
         "ns",
         "StructureWithEventStream",
         0,
         ["A", "B", "C", "D", "EventStream"],
-        [0, 0, 0, 0, struct("ns", "Union", 0, [], [])]
-      );
+        [0, 0, 0, 0, [3, "ns", "Union", 0, [], []] satisfies StaticStructureSchema],
+      ];
       const ns = NormalizedSchema.of(schema);
 
       expect(ns.getEventStreamMember()).toEqual("");
@@ -342,6 +355,15 @@ describe(NormalizedSchema.name, () => {
       expect(ns.getMemberSchema("struct").getMemberSchema("map").isMapSchema()).toBe(true);
       expect(ns.getMemberSchema("struct").getMemberSchema("map").getKeySchema().isStringSchema()).toBe(true);
       expect(ns.getMemberSchema("struct").getMemberSchema("map").getValueSchema().isNumericSchema()).toBe(true);
+    });
+  });
+
+  describe("simple schema wrapper", () => {
+    it("should still be able to detect the inner schema type", () => {
+      const schema: StaticSimpleSchema = [0, "ack", "String", { unknownTrait: 1 }, 0];
+
+      const ns = NormalizedSchema.of(schema);
+      expect(ns.isStringSchema()).toBe(true);
     });
   });
 });

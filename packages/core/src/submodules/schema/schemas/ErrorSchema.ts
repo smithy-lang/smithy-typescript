@@ -10,6 +10,7 @@ import { StructureSchema } from "./StructureSchema";
  * by additionally holding the class reference for the corresponding ServiceException class.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export class ErrorSchema extends StructureSchema {
   public static readonly symbol = Symbol.for("@smithy/err");
@@ -24,6 +25,7 @@ export class ErrorSchema extends StructureSchema {
  * Factory for ErrorSchema, to reduce codegen output and register the schema.
  *
  * @internal
+ * @deprecated use StaticSchema
  *
  * @param namespace - shapeId namespace.
  * @param name - shapeId name.
