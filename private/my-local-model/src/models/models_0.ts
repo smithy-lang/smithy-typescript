@@ -42,7 +42,7 @@ export interface GetNumbersRequest {
   /**
    * This is deprecated documentation annotation
    *
-   * @deprecated see description
+   * @deprecated deprecated
    * @public
    */
   fieldWithoutMessage?: string | undefined;
