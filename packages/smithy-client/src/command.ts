@@ -17,6 +17,7 @@ import type {
   Pluggable,
   RequestHandler,
   SerdeContext,
+  StaticOperationSchema,
 } from "@smithy/types";
 import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 
@@ -35,7 +36,7 @@ export abstract class Command<
 {
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
-  public readonly schema?: OperationSchema;
+  public readonly schema?: OperationSchema | StaticOperationSchema;
 
   /**
    * Factory for Command ClassBuilder.
@@ -136,7 +137,7 @@ class ClassBuilder<
   private _outputFilterSensitiveLog: any = undefined;
   private _serializer: (input: I, context: SerdeContext | any) => Promise<IHttpRequest> = null as any;
   private _deserializer: (output: IHttpResponse, context: SerdeContext | any) => Promise<O> = null as any;
-  private _operationSchema?: OperationSchema;
+  private _operationSchema?: OperationSchema | StaticOperationSchema;
 
   /**
    * Optional init callback.
@@ -223,7 +224,7 @@ class ClassBuilder<
   /**
    * Sets input/output schema for the operation.
    */
-  public sc(operation: OperationSchema): ClassBuilder<I, O, C, SI, SO> {
+  public sc(operation: OperationSchema | StaticOperationSchema): ClassBuilder<I, O, C, SI, SO> {
     this._operationSchema = operation;
     this._smithyContext.operationSchema = operation;
     return this;
@@ -265,17 +266,19 @@ class ClassBuilder<
        * @internal
        */
       public resolveMiddleware(stack: IMiddlewareStack<any, any>, configuration: C, options: any): Handler<any, any> {
+        const op = closure._operationSchema;
+        const input = (op as StaticOperationSchema)?.[4] ?? (op as OperationSchema)?.input;
+        const output = (op as StaticOperationSchema)?.[5] ?? (op as OperationSchema)?.output;
+
         return this.resolveMiddlewareWithContext(stack, configuration, options, {
           CommandCtor: CommandRef,
           middlewareFn: closure._middlewareFn,
           clientName: closure._clientName,
           commandName: closure._commandName,
           inputFilterSensitiveLog:
-            closure._inputFilterSensitiveLog ??
-            (closure._operationSchema ? schemaLogFilter.bind(null, closure._operationSchema!.input) : (_) => _),
+            closure._inputFilterSensitiveLog ?? (op ? schemaLogFilter.bind(null, input) : (_) => _),
           outputFilterSensitiveLog:
-            closure._outputFilterSensitiveLog ??
-            (closure._operationSchema ? schemaLogFilter.bind(null, closure._operationSchema!.output) : (_) => _),
+            closure._outputFilterSensitiveLog ?? (op ? schemaLogFilter.bind(null, output) : (_) => _),
           smithyContext: closure._smithyContext,
           additionalContext: closure._additionalContext,
         });
