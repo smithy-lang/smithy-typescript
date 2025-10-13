@@ -10,6 +10,7 @@ import { Agent as hsAgent, request as hsRequest } from "https";
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { setConnectionTimeout } from "./set-connection-timeout";
+import { setRequestTimeout } from "./set-request-timeout";
 import { setSocketKeepAlive } from "./set-socket-keep-alive";
 import { setSocketTimeout } from "./set-socket-timeout";
 import { timing } from "./timing";
@@ -124,15 +125,24 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
   }
 
   private resolveDefaultConfig(options?: NodeHttpHandlerOptions | void): ResolvedNodeHttpHandlerConfig {
-    const { requestTimeout, connectionTimeout, socketTimeout, socketAcquisitionWarningTimeout, httpAgent, httpsAgent } =
-      options || {};
+    const {
+      requestTimeout,
+      connectionTimeout,
+      socketTimeout,
+      socketAcquisitionWarningTimeout,
+      httpAgent,
+      httpsAgent,
+      throwOnRequestTimeout,
+    } = options || {};
     const keepAlive = true;
     const maxSockets = 50;
 
     return {
       connectionTimeout,
-      requestTimeout: requestTimeout ?? socketTimeout,
+      requestTimeout,
+      socketTimeout,
       socketAcquisitionWarningTimeout,
+      throwOnRequestTimeout,
       httpAgent: (() => {
         if (httpAgent instanceof hAgent || typeof (httpAgent as hAgent)?.destroy === "function") {
           return httpAgent as hAgent;
@@ -288,7 +298,16 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // are longer than a few seconds. This avoids slowing down faster operations.
       const effectiveRequestTimeout = requestTimeout ?? this.config.requestTimeout;
       timeouts.push(setConnectionTimeout(req, reject, this.config.connectionTimeout));
-      timeouts.push(setSocketTimeout(req, reject, effectiveRequestTimeout));
+      timeouts.push(
+        setRequestTimeout(
+          req,
+          reject,
+          effectiveRequestTimeout,
+          this.config.throwOnRequestTimeout,
+          this.config.logger ?? console
+        )
+      );
+      timeouts.push(setSocketTimeout(req, reject, this.config.socketTimeout));
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;

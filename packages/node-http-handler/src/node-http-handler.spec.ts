@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 import { NodeHttpHandler } from "./node-http-handler";
 import * as setConnectionTimeoutModule from "./set-connection-timeout";
+import * as setRequestTimeoutModule from "./set-request-timeout";
 import * as setSocketTimeoutModule from "./set-socket-timeout";
 import { timing } from "./timing";
 
@@ -57,6 +58,7 @@ describe("NodeHttpHandler", () => {
     const randomMaxSocket = Math.round(Math.random() * 50) + 1;
     const randomSocketAcquisitionWarningTimeout = Math.round(Math.random() * 10000) + 1;
     const randomConnectionTimeout = Math.round(Math.random() * 10000) + 1;
+    const randomSocketTimeout = Math.round(Math.random() * 10000) + 1;
     const randomRequestTimeout = Math.round(Math.random() * 10000) + 1;
 
     beforeEach(() => {});
@@ -140,10 +142,25 @@ describe("NodeHttpHandler", () => {
           }),
         ],
       ])("sets requestTimeout correctly when input is %s", async (_, option) => {
+        vi.spyOn(setRequestTimeoutModule, "setRequestTimeout");
+        const nodeHttpHandler = new NodeHttpHandler(option);
+        await nodeHttpHandler.handle({} as any);
+        expect(vi.mocked(setRequestTimeoutModule.setRequestTimeout).mock.calls[0][2]).toBe(randomRequestTimeout);
+      });
+
+      it.each([
+        ["an options hash", { socketTimeout: randomSocketTimeout }],
+        [
+          "a provider",
+          async () => ({
+            socketTimeout: randomSocketTimeout,
+          }),
+        ],
+      ])("sets socketTimeout correctly when input is %s", async (_, option) => {
         vi.spyOn(setSocketTimeoutModule, "setSocketTimeout");
         const nodeHttpHandler = new NodeHttpHandler(option);
         await nodeHttpHandler.handle({} as any);
-        expect(vi.mocked(setSocketTimeoutModule.setSocketTimeout).mock.calls[0][2]).toBe(randomRequestTimeout);
+        expect(vi.mocked(setSocketTimeoutModule.setSocketTimeout).mock.calls[0][2]).toBe(randomSocketTimeout);
       });
 
       it.each([

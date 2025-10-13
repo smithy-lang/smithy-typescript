@@ -26,16 +26,33 @@ export interface NodeHttpHandlerOptions {
   /**
    * The maximum time in milliseconds that the connection phase of a request
    * may take before the connection attempt is abandoned.
-   *
    * Defaults to 0, which disables the timeout.
    */
   connectionTimeout?: number;
 
   /**
-   * The number of milliseconds a request can take before automatically being terminated.
+   * The maximum number of milliseconds request & response should take.
    * Defaults to 0, which disables the timeout.
+   *
+   * If exceeded, a warning will be emitted unless throwOnRequestTimeout=true,
+   * in which case a TimeoutError will be thrown.
    */
   requestTimeout?: number;
+
+  /**
+   * Because requestTimeout was for a long time incorrectly being set as a socket idle timeout,
+   * users must also opt-in for request timeout thrown errors.
+   * Without this setting, a breach of the request timeout will be logged as a warning.
+   */
+  throwOnRequestTimeout?: boolean;
+
+  /**
+   * The maximum time in milliseconds that a socket may remain idle before it
+   * is closed. Defaults to 0, which means no maximum.
+   *
+   * This does not affect the server, which may still close the connection due to an idle socket.
+   */
+  socketTimeout?: number;
 
   /**
    * Delay before the NodeHttpHandler checks for socket exhaustion,
@@ -45,15 +62,6 @@ export interface NodeHttpHandlerOptions {
    * Defaults to connectionTimeout + requestTimeout or 3000ms if those are not set.
    */
   socketAcquisitionWarningTimeout?: number;
-
-  /**
-   * This field is deprecated, and requestTimeout should be used instead.
-   * The maximum time in milliseconds that a socket may remain idle before it
-   * is closed.
-   *
-   * @deprecated Use {@link requestTimeout}
-   */
-  socketTimeout?: number;
 
   /**
    * You can pass http.Agent or its constructor options.

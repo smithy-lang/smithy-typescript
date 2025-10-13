@@ -90,7 +90,12 @@ describe("setSocketTimeout", () => {
     clientRequest.setTimeout.mock.calls[0][1]();
     expect(reject).toHaveBeenCalledTimes(1);
     expect(reject).toHaveBeenCalledWith(
-      Object.assign(new Error(`Connection timed out after ${timeoutInMs} ms`), { name: "TimeoutError" })
+      Object.assign(
+        new Error(
+          `@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (configured by client requestHandler).`
+        ),
+        { name: "TimeoutError" }
+      )
     );
   });
 });

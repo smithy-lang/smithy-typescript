@@ -18,9 +18,14 @@ export const setConnectionTimeout = (
     const timeoutId = timing.setTimeout(() => {
       request.destroy();
       reject(
-        Object.assign(new Error(`Socket timed out without establishing a connection within ${timeoutInMs} ms`), {
-          name: "TimeoutError",
-        })
+        Object.assign(
+          new Error(
+            `@smithy/node-http-handler - the request socket did not establish a connection with the server within the configured timeout of ${timeoutInMs} ms.`
+          ),
+          {
+            name: "TimeoutError",
+          }
+        )
       );
     }, timeoutInMs - offset);
 
