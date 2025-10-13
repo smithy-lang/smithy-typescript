@@ -225,10 +225,9 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
                         String deprecationMessage = deprecatedTrait.getMessage()
-                            .map(msg -> " " + msg)
-                            .orElse("");
-                        String deprecationString = "@deprecated" + deprecationMessage;
-                        docs = docs + "\n\n" + deprecationString;
+                            .orElse("deprecated");
+                        String deprecationAnnotation = "@deprecated " + deprecationMessage;
+                        docs = docs + "\n\n" + deprecationAnnotation;
                     }
                     docs = preprocessor.apply(docs);
                     docs = addReleaseTag(shape, docs);
@@ -266,7 +265,13 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     docs = docs.replace("{", "\\{")
                         .replace("}", "\\}");
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
-                        docs = docs + "\n\n@deprecated";
+                        DeprecatedTrait deprecatedTrait = member.getTrait(DeprecatedTrait.class)
+                            .or(() -> model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class))
+                            .orElseThrow();
+                        String deprecationMessage = deprecatedTrait.getMessage()
+                            .orElse("deprecated");
+                        String deprecationAnnotation = "@deprecated " + deprecationMessage;
+                        docs = docs + "\n\n" + deprecationAnnotation;
                     }
                     docs = addReleaseTag(member, docs);
                     writeDocs(docs);

@@ -29,7 +29,16 @@ operation GetNumbers {
 @input
 structure GetNumbersRequest {
     bigDecimal: BigDecimal
+
     bigInteger: BigInteger
+
+    @documentation("This is deprecated documentation annotation")
+    @deprecated
+    fieldWithoutMessage: String
+
+    @documentation("This is deprecated documentation annotation")
+    @deprecated(message: "This field has been deprecated", since: "3.0")
+    fieldWithMessage: String
 }
 
 @output
