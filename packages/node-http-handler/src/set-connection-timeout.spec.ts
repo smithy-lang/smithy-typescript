@@ -78,9 +78,14 @@ describe("setConnectionTimeout", () => {
       expect(clientRequest.destroy).toHaveBeenCalledTimes(1);
       expect(reject).toHaveBeenCalledTimes(1);
       expect(reject).toHaveBeenCalledWith(
-        Object.assign(new Error(`Socket timed out without establishing a connection within ${timeoutInMs} ms`), {
-          name: "TimeoutError",
-        })
+        Object.assign(
+          new Error(
+            `@smithy/node-http-handler - the request socket did not establish a connection with the server within the configured timeout of ${timeoutInMs} ms.`
+          ),
+          {
+            name: "TimeoutError",
+          }
+        )
       );
     });
 
