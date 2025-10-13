@@ -15,7 +15,7 @@ export abstract class Schema implements TraitsSchema {
 
   public static assign<T extends Schema>(instance: T, values: Omit<T, "getName" | "symbol">): T {
     const schema = Object.assign(instance, values);
-    TypeRegistry.for(schema.namespace).register(schema.name, schema);
+    // TypeRegistry.for(schema.namespace).register(schema.name, schema);
     return schema;
   }
 

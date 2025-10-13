@@ -276,15 +276,17 @@ public class SchemaGenerator implements Runnable {
         TypeScriptWriter writer = getWriter(shape.getId());
         if (elision.traits.hasSchemaTraits(shape)) {
             writer.addImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
-            writer.write("""
-                    export var $L: StaticSimpleSchema = [0, $L, $L, $L,""",
+            writer.openBlock("""
+                    export var $L: StaticSimpleSchema = [0, $L, $L,""",
+                ", $L];",
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
-                resolveSimpleSchema(shape, shape)
+                resolveSimpleSchema(shape, shape),
+                () -> {
+                    writeTraits(shape);
+                }
             );
-            writeTraits(shape);
-            writer.write("];");
         }
     }
 
@@ -341,7 +343,7 @@ public class SchemaGenerator implements Runnable {
         String namespace = settings.getService(model).getId().getNamespace();
 
         String exceptionCtorSymbolName = "__" + serviceExceptionName;
-        writer.addImportSubmodule("error", null, TypeScriptDependency.SMITHY_CORE, "/schema");
+        writer.addImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport(
             serviceExceptionName,
             exceptionCtorSymbolName,
@@ -350,7 +352,7 @@ public class SchemaGenerator implements Runnable {
 
         String syntheticNamespace = store.var("smithy.ts.sdk.synthetic." + namespace);
         writer.write("""
-                export var $L = error($L, $S, 0, [], [], null);""",
+                export var $L: StaticErrorSchema = [-3, $L, $S, 0, [], []];""",
             serviceExceptionName,
             syntheticNamespace,
             serviceExceptionName
@@ -672,25 +674,19 @@ public class SchemaGenerator implements Runnable {
         String staticTypePrefix;
         String sentinel;
         String keySchema = "";
-        String valueSchema;
-        String as;
         switch (shape.getType()) {
             case LIST -> {
                 contained = shape.asListShape().get().getMember();
-                staticTypePrefix = "([1, ";
-                valueSchema = "";
+                staticTypePrefix = "[1, ";
                 sentinel = "64";
                 writer.addImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
-                as = " as StaticListSchema)";
             }
             case MAP -> {
                 contained = shape.asMapShape().get().getValue();
-                staticTypePrefix = "([2, ";
+                staticTypePrefix = "[2, ";
                 keySchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getKey()) + ", ";
-                valueSchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getValue()) + ", ";
                 sentinel = "128";
                 writer.addImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
-                as = " as StaticMapSchema)";
             }
             default -> {
                 throw new IllegalArgumentException(
@@ -702,19 +698,12 @@ public class SchemaGenerator implements Runnable {
             contained = model.expectShape(contained.asMemberShape().get().getTarget());
         }
 
-        if (contained.isListShape()) {
-            String schemaVarName = checkImportString(context, shape.getId().getName());
-            return staticTypePrefix
-                + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
-                + valueSchema
-                + this.resolveSimpleSchema(context, contained) + "]" + as;
-        } else if (contained.isMapShape()) {
+        if (contained.isListShape() || contained.isMapShape()) {
             String schemaVarName = checkImportString(context, shape.getId().getName());
             return staticTypePrefix
                 + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
                 + keySchema
-                + valueSchema
-                + this.resolveSimpleSchema(context, contained) + "]" + as;
+                + this.resolveSimpleSchema(context, contained) + "]";
         } else {
             return sentinel + "|" + this.resolveSimpleSchema(context, contained);
         }

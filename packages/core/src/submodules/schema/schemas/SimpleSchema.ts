@@ -29,3 +29,15 @@ export const sim = (namespace: string, name: string, schemaRef: SchemaRef, trait
     traits,
     schemaRef,
   });
+
+/**
+ * @internal
+ * @deprecated
+ */
+export const simAdapter = (namespace: string, name: string, traits: SchemaTraits, schemaRef: SchemaRef) =>
+  Schema.assign(new SimpleSchema(), {
+    name,
+    namespace,
+    traits,
+    schemaRef,
+  });
