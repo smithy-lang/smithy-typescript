@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.7.0
+
+### Minor Changes
+
+- 761d89c: undeprecate socketTimeout for node:https requests
+- 7f8af58: generation of static schema
+
 ## 4.6.0
 
 ### Minor Changes

@@ -1,5 +1,23 @@
 # Change Log
 
+## 4.8.0
+
+### Minor Changes
+
+- 7f8af58: generation of static schema
+
+### Patch Changes
+
+- Updated dependencies [761d89c]
+- Updated dependencies [7f8af58]
+- Updated dependencies [8a2873c]
+  - @smithy/types@4.7.0
+  - @smithy/core@3.16.0
+  - @smithy/util-stream@4.5.1
+  - @smithy/middleware-endpoint@4.3.2
+  - @smithy/middleware-stack@4.2.1
+  - @smithy/protocol-http@5.3.1
+
 ## 4.7.1
 
 ### Patch Changes

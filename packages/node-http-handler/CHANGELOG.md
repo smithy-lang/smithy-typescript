@@ -1,5 +1,20 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 761d89c: undeprecate socketTimeout for node:https requests
+
+### Patch Changes
+
+- Updated dependencies [761d89c]
+- Updated dependencies [7f8af58]
+  - @smithy/types@4.7.0
+  - @smithy/abort-controller@4.2.1
+  - @smithy/protocol-http@5.3.1
+  - @smithy/querystring-builder@4.2.1
+
 ## 4.3.0
 
 ### Minor Changes

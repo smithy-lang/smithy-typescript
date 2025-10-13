@@ -1,5 +1,22 @@
 # Change Log
 
+## 3.16.0
+
+### Minor Changes
+
+- 7f8af58: generation of static schema
+- 8a2873c: implement SerdeContext base class
+
+### Patch Changes
+
+- Updated dependencies [761d89c]
+- Updated dependencies [7f8af58]
+  - @smithy/types@4.7.0
+  - @smithy/util-stream@4.5.1
+  - @smithy/middleware-serde@4.2.1
+  - @smithy/protocol-http@5.3.1
+  - @smithy/util-middleware@4.2.1
+
 ## 3.15.0
 
 ### Minor Changes
