@@ -33,7 +33,7 @@ describe("setRequestTimeout", () => {
             `@smithy/node-http-handler - [ERROR] a request has exceeded the configured ${1} ms requestTimeout.`
           ),
           {
-            name: "TimedoutError",
+            name: "TimeoutError",
             code: "ETIMEDOUT",
           }
         )

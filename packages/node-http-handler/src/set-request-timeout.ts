@@ -20,7 +20,7 @@ export const setRequestTimeout = (
       }] a request has exceeded the configured ${timeoutInMs} ms requestTimeout.`;
       if (throwOnRequestTimeout) {
         const error = Object.assign(new Error(msg), {
-          name: "TimedoutError",
+          name: "TimeoutError",
           code: "ETIMEDOUT",
         });
         req.destroy(error);
