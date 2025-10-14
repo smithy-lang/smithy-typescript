@@ -1,26 +1,33 @@
-import type { StaticErrorSchema } from "@smithy/types";
+import type { StaticErrorSchema, StaticListSchema, StaticMapSchema, StaticStructureSchema } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { list } from "./schemas/ListSchema";
-import { map } from "./schemas/MapSchema";
-import { struct } from "./schemas/StructureSchema";
 import { TypeRegistry } from "./TypeRegistry";
 
 describe(TypeRegistry.name, () => {
-  const [List, Map, Struct] = [
-    list("NAMESPACE", "List", { sparse: 1 }, 0),
-    map("NAMESPACE", "Map", 0, 0, 1),
+  const [List, Map, Struct]: [StaticListSchema, StaticMapSchema, () => StaticStructureSchema] = [
+    [1, "NAMESPACE", "List", { sparse: 1 }, 0],
+    [2, "NAMESPACE", "Map", 0, 0, 1],
     () => schema,
   ];
-  const schema = struct("NAMESPACE", "Structure", {}, ["list", "map", "struct"], [List, Map, Struct]);
+  const schema: StaticStructureSchema = [
+    3,
+    "NAMESPACE",
+    "Structure",
+    {},
+    ["list", "map", "struct"],
+    [List, Map, Struct],
+  ];
 
   it("stores and retrieves schema objects", () => {
     const tr = TypeRegistry.for("NAMESPACE");
-    tr.register(List.getName(), List);
+
+    tr.register(`${List[1]}#${List[2]}`, List);
     expect(tr.getSchema("List")).toBe(List);
-    tr.register(Map.getName(), Map);
+
+    tr.register(`${Map[1]}#${Map[2]}`, Map);
     expect(tr.getSchema("Map")).toBe(Map);
-    tr.register(Struct().getName(), Struct());
+
+    tr.register(`${Struct()[1]}#${Struct()[2]}`, Struct());
     expect(tr.getSchema("Structure")).toBe(schema);
   });
 

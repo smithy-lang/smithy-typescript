@@ -1,14 +1,16 @@
-import { error, list, map, op, SCHEMA, struct, TypeRegistry } from "@smithy/core/schema";
+import { op, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
+  $SchemaRef,
   BlobSchema,
   BooleanSchema,
   MapSchemaModifier,
   NumericSchema,
   ResponseMetadata,
   RetryableTrait,
-  SchemaRef,
   StaticErrorSchema,
+  StaticOperationSchema,
+  StaticStructureSchema,
   StringSchema,
   TimestampDefaultSchema,
 } from "@smithy/types";
@@ -24,7 +26,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
   describe("serialization", () => {
     const testCases: Array<{
       name: string;
-      schema: SchemaRef;
+      schema: $SchemaRef;
       input: any;
       expected: {
         request: any;
@@ -33,7 +35,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
     }> = [
       {
         name: "document with timestamp and blob",
-        schema: struct(
+        schema: [
+          3,
           "",
           "MyExtendedDocument",
           {},
@@ -41,8 +44,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
           [
             [4 satisfies TimestampDefaultSchema, 0],
             [21 satisfies BlobSchema, 0],
-          ]
-        ),
+          ],
+        ],
         input: {
           bool: true,
           int: 5,
@@ -60,7 +63,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
       },
       {
         name: "do not write to header or query",
-        schema: struct(
+        schema: [
+          3,
           "",
           "MyExtendedDocument",
           {},
@@ -71,8 +75,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
             [21 satisfies BlobSchema, { httpHeader: "blob" }],
             [(128 satisfies MapSchemaModifier) | (0 satisfies StringSchema), { httpPrefixHeaders: "anti-" }],
             [(128 satisfies MapSchemaModifier) | (0 satisfies StringSchema), { httpQueryParams: 1 }],
-          ]
-        ),
+          ],
+        ],
         input: {
           bool: true,
           timestamp: new Date(1_000_000),
@@ -108,18 +112,19 @@ describe(SmithyRpcV2CborProtocol.name, () => {
       },
       {
         name: "sparse list and map",
-        schema: struct(
+        schema: [
+          3,
           "",
           "MyShape",
           0,
           ["mySparseList", "myRegularList", "mySparseMap", "myRegularMap"],
           [
-            [() => list("", "MySparseList", { sparse: 1 }, 1 satisfies NumericSchema), {}],
-            [() => list("", "MyList", {}, 1 satisfies NumericSchema), {}],
-            [() => map("", "MySparseMap", { sparse: 1 }, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
-            [() => map("", "MyMap", {}, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
-          ]
-        ),
+            [() => [1, "", "MySparseList", { sparse: 1 }, 1 satisfies NumericSchema], {}],
+            [() => [1, "", "MyList", {}, 1 satisfies NumericSchema], {}],
+            [() => [2, "", "MySparseMap", { sparse: 1 }, 0 satisfies StringSchema, 1 satisfies NumericSchema], {}],
+            [() => [2, "", "MyMap", {}, 0 satisfies StringSchema, 1 satisfies NumericSchema], {}],
+          ],
+        ],
         input: {
           mySparseList: [null, 1, null, 2, null],
           myRegularList: [null, 1, null, 2, null],
@@ -211,18 +216,19 @@ describe(SmithyRpcV2CborProtocol.name, () => {
     const testCases = [
       {
         name: "sparse list and map",
-        schema: struct(
+        schema: [
+          3,
           "",
           "MyShape",
           0,
           ["mySparseList", "myRegularList", "mySparseMap", "myRegularMap"],
           [
-            [() => list("", "MyList", { sparse: 1 }, 1 satisfies NumericSchema), {}],
-            [() => list("", "MyList", {}, 1 satisfies NumericSchema), {}],
-            [() => map("", "MyMap", { sparse: 1 }, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
-            [() => map("", "MyMap", {}, 0 satisfies StringSchema, 1 satisfies NumericSchema), {}],
-          ]
-        ),
+            [() => [1, "", "MyList", { sparse: 1 }, 1 satisfies NumericSchema], {}],
+            [() => [1, "", "MyList", {}, 1 satisfies NumericSchema], {}],
+            [() => [2, "", "MyMap", { sparse: 1 }, 0 satisfies StringSchema, 1 satisfies NumericSchema], {}],
+            [() => [2, "", "MyMap", {}, 0 satisfies StringSchema, 1 satisfies NumericSchema], {}],
+          ],
+        ] satisfies StaticStructureSchema,
         mockOutput: {
           mySparseList: [null, 1, null, 2, null],
           myRegularList: [null, 1, null, 2, null],
@@ -290,12 +296,21 @@ describe(SmithyRpcV2CborProtocol.name, () => {
   describe("error handling", () => {
     const protocol = new SmithyRpcV2CborProtocol({ defaultNamespace: "ns" });
 
-    const operation = op(
+    const staticOperation = [
+      9,
       "ns",
       "OperationWithModeledException",
       {},
-      struct("ns", "Input", 0, [], []),
-      struct("ns", "Output", 0, [], [])
+      [3, "ns", "Input", 0, [], []],
+      [3, "ns", "Output", 0, [], []],
+    ] satisfies StaticOperationSchema;
+
+    const operation = op(
+      staticOperation[1],
+      staticOperation[2],
+      staticOperation[3],
+      staticOperation[4],
+      staticOperation[5]
     );
 
     const errorResponse = new HttpResponse({

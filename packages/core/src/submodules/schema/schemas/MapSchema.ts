@@ -5,6 +5,7 @@ import { Schema } from "./Schema";
 /**
  * A schema with a key schema and value schema.
  * @alpha
+ * @deprecated use StaticSchema
  */
 export class MapSchema extends Schema implements IMapSchema {
   public static readonly symbol = Symbol.for("@smithy/map");
@@ -21,6 +22,7 @@ export class MapSchema extends Schema implements IMapSchema {
 /**
  * Factory for MapSchema.
  * @internal
+ * @deprecated use StaticSchema
  */
 export const map = (
   namespace: string,

@@ -1,6 +1,7 @@
-import { map, op, struct } from "@smithy/core/schema";
+import { op } from "@smithy/core/schema";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
+  $Schema,
   Codec,
   CodecSettings,
   HandlerExecutionContext,
@@ -10,7 +11,6 @@ import type {
   MetadataBearer,
   OperationSchema,
   ResponseMetadata,
-  Schema,
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
@@ -75,26 +75,21 @@ describe(HttpBindingProtocol.name, () => {
 
     const protocol = new StringRestProtocol();
     const output = (await protocol.deserializeResponse(
-      op(
+      op("", "", 0, "unit", [
+        3,
         "",
         "",
         0,
-        "unit",
-        struct(
-          "",
-          "",
-          0,
-          ["timestampList"],
+        ["timestampList"],
+        [
           [
-            [
-              (64 satisfies ListSchemaModifier) | (4 satisfies TimestampDefaultSchema),
-              {
-                httpHeader: "x-timestamplist",
-              },
-            ],
-          ]
-        )
-      ),
+            (64 satisfies ListSchemaModifier) | (4 satisfies TimestampDefaultSchema),
+            {
+              httpHeader: "x-timestamplist",
+            },
+          ],
+        ],
+      ]),
       {} as any,
       response
     )) as Partial<MetadataBearer>;
@@ -115,26 +110,21 @@ describe(HttpBindingProtocol.name, () => {
 
     const protocol = new StringRestProtocol();
     const output = (await protocol.deserializeResponse(
-      op(
+      op("", "", 0, "unit", [
+        3,
         "",
         "",
         0,
-        "unit",
-        struct(
-          "",
-          "",
-          0,
-          ["httpPrefixHeaders"],
+        ["httpPrefixHeaders"],
+        [
           [
-            [
-              (128 satisfies MapSchemaModifier) | (0 satisfies StringSchema),
-              {
-                httpPrefixHeaders: "",
-              },
-            ],
-          ]
-        )
-      ),
+            (128 satisfies MapSchemaModifier) | (0 satisfies StringSchema),
+            {
+              httpPrefixHeaders: "",
+            },
+          ],
+        ],
+      ]),
       {} as any,
       response
     )) as Partial<MetadataBearer>;
@@ -169,7 +159,7 @@ describe(HttpBindingProtocol.name, () => {
 
   it("can deserialize a prefix header binding and header binding from the same header", async () => {
     type TestSignature = (
-      schema: Schema,
+      schema: $Schema,
       context: HandlerExecutionContext & SerdeFunctions,
       response: IHttpResponse,
       dataObject: any
@@ -194,16 +184,17 @@ describe(HttpBindingProtocol.name, () => {
 
     const dataObject = {};
     await deserializeHttpMessage(
-      struct(
+      [
+        3,
         "",
         "Struct",
         0,
         ["prefixHeaders", "header"],
         [
-          [map("", "Map", 0, 0, 0), { httpPrefixHeaders: "my-" }],
+          [[2, "", "Map", 0, 0, 0], { httpPrefixHeaders: "my-" }],
           [0, { httpHeader: "my-header" }],
-        ]
-      ),
+        ],
+      ],
       {} as any,
       httpResponse,
       dataObject

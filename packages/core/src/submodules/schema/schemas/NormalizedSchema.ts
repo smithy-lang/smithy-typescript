@@ -1,4 +1,7 @@
 import type {
+  $MemberSchema,
+  $Schema,
+  $SchemaRef,
   BigDecimalSchema,
   BigIntegerSchema,
   BlobSchema,
@@ -6,23 +9,18 @@ import type {
   DocumentSchema,
   ListSchemaModifier,
   MapSchemaModifier,
-  MemberSchema,
   NormalizedSchema as INormalizedSchema,
   NumericSchema,
-  Schema as ISchema,
   SchemaRef,
   SchemaTraits,
   SchemaTraitsObject,
-  StaticErrorSchema,
+  SimpleSchema,
   StaticListSchema,
   StaticMapSchema,
-  StaticOperationSchema,
   StaticSchema,
   StaticSchemaIdError,
   StaticSchemaIdList,
   StaticSchemaIdMap,
-  StaticSchemaIdOperation,
-  StaticSchemaIdSimple,
   StaticSchemaIdStruct,
   StaticSimpleSchema,
   StaticStructureSchema,
@@ -35,16 +33,6 @@ import type {
 import type { IdempotencyTokenBitMask, TraitBitVector } from "@smithy/types/src/schema/traits";
 
 import { deref } from "../deref";
-import type { ErrorSchema } from "./ErrorSchema";
-import { error } from "./ErrorSchema";
-import { list, ListSchema } from "./ListSchema";
-import { map, MapSchema } from "./MapSchema";
-import type { OperationSchema } from "./OperationSchema";
-import { op } from "./OperationSchema";
-import { Schema } from "./Schema";
-import type { SimpleSchema } from "./SimpleSchema";
-import { simAdapter } from "./SimpleSchema";
-import { struct, StructureSchema } from "./StructureSchema";
 import { translateTraits } from "./translateTraits";
 
 /**
@@ -65,7 +53,7 @@ export class NormalizedSchema implements INormalizedSchema {
   protected readonly symbol = NormalizedSchema.symbol;
 
   private readonly name!: string;
-  private readonly schema!: Exclude<ISchema, MemberSchema | INormalizedSchema>;
+  private readonly schema!: Exclude<$Schema, $MemberSchema | INormalizedSchema>;
   private readonly _isMemberSchema: boolean;
 
   private readonly traits!: SchemaTraits;
@@ -77,7 +65,7 @@ export class NormalizedSchema implements INormalizedSchema {
    * @param memberName - optional memberName if this NormalizedSchema should be considered a member schema.
    */
   private constructor(
-    readonly ref: SchemaRef,
+    readonly ref: $SchemaRef,
     private readonly memberName?: string
   ) {
     const traitStack = [] as SchemaTraits[];
@@ -87,12 +75,10 @@ export class NormalizedSchema implements INormalizedSchema {
 
     while (isMemberSchema(_ref)) {
       traitStack.push(_ref[1]);
-      _ref = _ref[0];
-      schema = deref(_ref);
+      _ref = _ref[0] as $SchemaRef;
+      schema = deref(_ref) as $Schema;
       this._isMemberSchema = true;
     }
-
-    if (isStaticSchema(schema)) schema = hydrate(schema);
 
     if (traitStack.length > 0) {
       this.memberTraits = {};
@@ -113,16 +99,15 @@ export class NormalizedSchema implements INormalizedSchema {
       return;
     }
 
-    this.schema = deref(schema) as Exclude<ISchema, MemberSchema | INormalizedSchema>;
+    this.schema = deref(schema) as Exclude<$Schema, $MemberSchema | INormalizedSchema>;
 
-    if (this.schema && typeof this.schema === "object") {
-      // excluded by the checked hydrate call above.
-      this.traits = (this.schema as Exclude<typeof this.schema, StaticSchema>)?.traits ?? {};
+    if (isStaticSchema(this.schema)) {
+      this.name = `${this.schema[1]}#${this.schema[2]}`;
+      this.traits = this.schema[3];
     } else {
+      this.name = this.memberName ?? String(schema);
       this.traits = 0;
     }
-
-    this.name = (this.schema instanceof Schema ? this.schema.getName?.() : void 0) ?? this.memberName ?? String(schema);
 
     if (this._isMemberSchema && !memberName) {
       throw new Error(`@smithy/core/schema - NormalizedSchema member init ${this.getName(true)} missing member name.`);
@@ -130,13 +115,18 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   public static [Symbol.hasInstance](lhs: unknown): lhs is NormalizedSchema {
-    return Schema[Symbol.hasInstance].bind(this)(lhs);
+    const isPrototype = this.prototype.isPrototypeOf(lhs as any);
+    if (!isPrototype && typeof lhs === "object" && lhs !== null) {
+      const ns = lhs as any;
+      return ns.symbol === (this as any).symbol;
+    }
+    return isPrototype;
   }
 
   /**
    * Static constructor that attempts to avoid wrapping a NormalizedSchema within another.
    */
-  public static of(ref: SchemaRef): NormalizedSchema {
+  public static of(ref: SchemaRef | $SchemaRef): NormalizedSchema {
     const sc = deref(ref);
     if (sc instanceof NormalizedSchema) {
       return sc;
@@ -151,17 +141,18 @@ export class NormalizedSchema implements INormalizedSchema {
       // container.
       throw new Error(`@smithy/core/schema - may not init unwrapped member schema=${JSON.stringify(ref, null, 2)}.`);
     }
-    return new NormalizedSchema(sc);
+    return new NormalizedSchema(sc as $SchemaRef);
   }
 
   /**
    * @returns the underlying non-normalized schema.
    */
-  public getSchema(): Exclude<ISchema, MemberSchema | INormalizedSchema> {
-    return deref((this.schema as SimpleSchema)?.schemaRef ?? this.schema) as Exclude<
-      ISchema,
-      MemberSchema | INormalizedSchema
-    >;
+  public getSchema(): Exclude<$Schema, $MemberSchema | INormalizedSchema> {
+    const sc = this.schema;
+    if ((sc as StaticSimpleSchema)[0] === 0) {
+      return (sc as StaticSimpleSchema)[4] as SimpleSchema;
+    }
+    return sc as Exclude<$Schema, $MemberSchema | INormalizedSchema>;
   }
 
   /**
@@ -193,19 +184,22 @@ export class NormalizedSchema implements INormalizedSchema {
     const sc = this.getSchema();
     return typeof sc === "number"
       ? sc >= (64 satisfies ListSchemaModifier) && sc < (128 satisfies MapSchemaModifier)
-      : sc instanceof ListSchema;
+      : (sc as StaticSchema)[0] === (1 satisfies StaticSchemaIdList);
   }
 
   public isMapSchema(): boolean {
     const sc = this.getSchema();
     return typeof sc === "number"
       ? sc >= (128 satisfies MapSchemaModifier) && sc <= 0b1111_1111
-      : sc instanceof MapSchema;
+      : (sc as StaticSchema)[0] === (2 satisfies StaticSchemaIdMap);
   }
 
   public isStructSchema(): boolean {
     const sc = this.getSchema();
-    return (sc !== null && typeof sc === "object" && "members" in sc) || sc instanceof StructureSchema;
+    return (
+      (sc as StaticSchema)[0] === (3 satisfies StaticSchemaIdStruct) ||
+      (sc as StaticSchema)[0] === (-3 satisfies StaticSchemaIdError)
+    );
   }
 
   public isBlobSchema(): boolean {
@@ -312,7 +306,7 @@ export class NormalizedSchema implements INormalizedSchema {
     const schema = this.getSchema();
     const memberSchema = isDoc
       ? (15 satisfies DocumentSchema)
-      : (schema as MapSchema)?.keySchema ?? (0 satisfies StringSchema);
+      : (schema as StaticMapSchema)[4] ?? (0 satisfies StringSchema);
     return member([memberSchema, 0], "key");
   }
 
@@ -329,7 +323,7 @@ export class NormalizedSchema implements INormalizedSchema {
       typeof sc === "number"
         ? 0b0011_1111 & sc
         : sc && typeof sc === "object" && (isMap || isList)
-          ? ((sc as MapSchema | ListSchema).valueSchema as typeof sc)
+          ? ((sc as StaticMapSchema | StaticListSchema)[3 + (sc as StaticSchema)[0]] as typeof sc)
           : isDoc
             ? (15 satisfies DocumentSchema)
             : void 0;
@@ -348,10 +342,10 @@ export class NormalizedSchema implements INormalizedSchema {
    * Note that errors are assumed to be structures and unions are considered structures for these purposes.
    */
   public getMemberSchema(memberName: string): NormalizedSchema {
-    const struct = this.getSchema() as StructureSchema;
-    if (this.isStructSchema() && struct.memberNames.includes(memberName)) {
-      const i = struct.memberNames.indexOf(memberName);
-      const memberSchema = struct.memberList[i];
+    const struct = this.getSchema() as StaticStructureSchema;
+    if (this.isStructSchema() && struct[4].includes(memberName)) {
+      const i = struct[4].indexOf(memberName);
+      const memberSchema = struct[5][i];
       return member(isMemberSchema(memberSchema) ? memberSchema : [memberSchema, 0], memberName);
     }
     if (this.isDocumentSchema()) {
@@ -408,9 +402,9 @@ export class NormalizedSchema implements INormalizedSchema {
     if (!this.isStructSchema()) {
       throw new Error("@smithy/core/schema - cannot iterate non-struct schema.");
     }
-    const struct = this.getSchema() as StructureSchema;
-    for (let i = 0; i < struct.memberNames.length; ++i) {
-      yield [struct.memberNames[i], member([struct.memberList[i], 0], struct.memberNames[i])];
+    const struct = this.getSchema() as StaticStructureSchema;
+    for (let i = 0; i < struct[4].length; ++i) {
+      yield [struct[4][i], member([struct[5][i], 0], struct[4][i])];
     }
   }
 }
@@ -433,37 +427,8 @@ function member(memberSchema: NormalizedSchema | [SchemaRef, SchemaTraits], memb
 
 /**
  * @internal
- * @returns a class instance version of a static schema.
  */
-export function hydrate(ss: StaticSimpleSchema): SimpleSchema;
-export function hydrate(ss: StaticListSchema): ListSchema;
-export function hydrate(ss: StaticMapSchema): MapSchema;
-export function hydrate(ss: StaticStructureSchema): StructureSchema;
-export function hydrate(ss: StaticErrorSchema): ErrorSchema;
-export function hydrate(ss: StaticOperationSchema): OperationSchema;
-export function hydrate(
-  ss: StaticSchema
-): SimpleSchema | ListSchema | MapSchema | StructureSchema | ErrorSchema | OperationSchema;
-export function hydrate(
-  ss: StaticSchema
-): SimpleSchema | ListSchema | MapSchema | StructureSchema | ErrorSchema | OperationSchema {
-  const [id, ...rest] = ss;
-  return (
-    {
-      [0 satisfies StaticSchemaIdSimple]: simAdapter,
-      [1 satisfies StaticSchemaIdList]: list,
-      [2 satisfies StaticSchemaIdMap]: map,
-      [3 satisfies StaticSchemaIdStruct]: struct,
-      [-3 satisfies StaticSchemaIdError]: error,
-      [9 satisfies StaticSchemaIdOperation]: op,
-    }[id] as Function
-  ).call(null, ...rest);
-}
-
-/**
- * @internal
- */
-const isMemberSchema = (sc: SchemaRef): sc is MemberSchema => Array.isArray(sc) && sc.length === 2;
+const isMemberSchema = (sc: SchemaRef): sc is $MemberSchema => Array.isArray(sc) && sc.length === 2;
 
 /**
  * @internal

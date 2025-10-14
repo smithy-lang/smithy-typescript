@@ -6,6 +6,7 @@ import { TypeRegistry } from "../TypeRegistry";
  * Abstract base for class-based Schema except NormalizedSchema.
  *
  * @alpha
+ * @deprecated use StaticSchema
  */
 export abstract class Schema implements TraitsSchema {
   public name!: string;

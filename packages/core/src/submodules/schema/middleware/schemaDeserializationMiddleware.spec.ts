@@ -85,7 +85,7 @@ describe(schemaDeserializationMiddleware.name, () => {
     expect(mockNext).toHaveBeenCalledWith(mockArgs);
     expect(mockDeserializer).toHaveBeenCalledTimes(1);
     expect(mockDeserializer).toHaveBeenCalledWith(
-      undefined as any as SchemaRef,
+      {},
       {
         ...mockOptions,
         __smithy_context: {},
@@ -182,7 +182,11 @@ describe(schemaDeserializationMiddleware.name, () => {
             statusCode: 503,
           }),
         }),
-        {}
+        {
+          __smithy_context: {
+            operationSchema: [9, "", "", 0, "unit", "unit"],
+          },
+        }
       );
       try {
         await handler(mockArgs);
@@ -209,7 +213,11 @@ describe(schemaDeserializationMiddleware.name, () => {
             },
           }),
         }),
-        {}
+        {
+          __smithy_context: {
+            operationSchema: [9, "", "", 0, "unit", "unit"],
+          },
+        }
       );
       try {
         await handler(mockArgs);

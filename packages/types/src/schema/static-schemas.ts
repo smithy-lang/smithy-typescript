@@ -3,7 +3,7 @@ A static schema is a non-function-call object that has no side effects.
 Schemas are generated as static objects to improve tree-shaking behavior in downstream applications.
  */
 
-import type { SchemaRef, SchemaTraits } from "../schema/schema";
+import type { $SchemaRef, SchemaTraits } from "../schema/schema";
 
 /**
  * @alpha
@@ -59,17 +59,17 @@ export type ShapeNamespace = string;
 /**
  * @alpha
  */
-export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef];
+export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaTraits, $SchemaRef];
 
 /**
  * @alpha
  */
-export type StaticListSchema = [StaticSchemaIdList, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef];
+export type StaticListSchema = [StaticSchemaIdList, ShapeNamespace, ShapeName, SchemaTraits, $SchemaRef];
 
 /**
  * @alpha
  */
-export type StaticMapSchema = [StaticSchemaIdMap, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef, SchemaRef];
+export type StaticMapSchema = [StaticSchemaIdMap, ShapeNamespace, ShapeName, SchemaTraits, $SchemaRef, $SchemaRef];
 
 /**
  * @alpha
@@ -80,7 +80,7 @@ export type StaticStructureSchema = [
   ShapeName,
   SchemaTraits,
   string[], // member name list
-  SchemaRef[], // member schema list
+  $SchemaRef[], // member schema list
 ];
 
 /**
@@ -92,7 +92,7 @@ export type StaticErrorSchema = [
   ShapeName,
   SchemaTraits,
   string[], // member name list
-  SchemaRef[], // member schema list
+  $SchemaRef[], // member schema list
 ];
 
 /**
@@ -103,6 +103,6 @@ export type StaticOperationSchema = [
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
-  SchemaRef, // input schema
-  SchemaRef, // output schema
+  $SchemaRef, // input schema
+  $SchemaRef, // output schema
 ];
