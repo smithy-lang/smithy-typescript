@@ -35,7 +35,8 @@ export class TypeRegistry {
    */
   public register(shapeId: string, schema: ISchema) {
     const qualifiedName = this.normalizeShapeId(shapeId);
-    this.schemas.set(qualifiedName, schema);
+    const registry = TypeRegistry.for(qualifiedName.split("#")[0]);
+    registry.schemas.set(qualifiedName, schema);
   }
 
   /**
@@ -54,7 +55,10 @@ export class TypeRegistry {
    * Associates an error schema with its constructor.
    */
   public registerError(es: ErrorSchema | StaticErrorSchema, ctor: any) {
-    this.exceptions.set(es, ctor);
+    const $error = es as StaticErrorSchema;
+    const registry = TypeRegistry.for($error[1]);
+    registry.schemas.set($error[1] + "#" + $error[2], $error);
+    registry.exceptions.set($error, ctor);
   }
 
   /**
@@ -62,7 +66,9 @@ export class TypeRegistry {
    * @returns Error constructor that extends the service's base exception.
    */
   public getErrorCtor(es: ErrorSchema | StaticErrorSchema): any {
-    return this.exceptions.get(es);
+    const $error = es as StaticErrorSchema;
+    const registry = TypeRegistry.for($error[1]);
+    return registry.exceptions.get(es);
   }
 
   /**
@@ -78,10 +84,14 @@ export class TypeRegistry {
    *
    * @returns the synthetic base exception of the service namespace associated with this registry instance.
    */
-  public getBaseException(): ErrorSchema | undefined {
-    for (const [id, schema] of this.schemas.entries()) {
-      if (id.startsWith("smithy.ts.sdk.synthetic.") && id.endsWith("ServiceException")) {
-        return schema as ErrorSchema;
+  public getBaseException(): StaticErrorSchema | undefined {
+    for (const exceptionKey of this.exceptions.keys()) {
+      if (Array.isArray(exceptionKey)) {
+        const [, ns, name] = exceptionKey;
+        const id = ns + "#" + name;
+        if (id.startsWith("smithy.ts.sdk.synthetic.") && id.endsWith("ServiceException")) {
+          return exceptionKey;
+        }
       }
     }
     return undefined;
@@ -108,9 +118,5 @@ export class TypeRegistry {
       return shapeId;
     }
     return this.namespace + "#" + shapeId;
-  }
-
-  private getNamespace(shapeId: string) {
-    return this.normalizeShapeId(shapeId).split("#")[0];
   }
 }

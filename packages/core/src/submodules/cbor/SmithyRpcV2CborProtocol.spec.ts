@@ -8,6 +8,7 @@ import type {
   ResponseMetadata,
   RetryableTrait,
   SchemaRef,
+  StaticErrorSchema,
   StringSchema,
   TimestampDefaultSchema,
 } from "@smithy/types";
@@ -306,6 +307,14 @@ describe(SmithyRpcV2CborProtocol.name, () => {
       }),
     });
 
+    const errorResponseNoDiscriminator = new HttpResponse({
+      statusCode: 404,
+      headers: {},
+      body: cbor.serialize({
+        modeledProperty: "oh no",
+      }),
+    });
+
     const serdeContext = {};
 
     class ServiceBaseException extends Error {
@@ -326,18 +335,31 @@ describe(SmithyRpcV2CborProtocol.name, () => {
 
     beforeEach(() => {
       ns.clear();
+      synthetic.clear();
     });
 
-    const modeledExceptionSchema = error("ns", "ModeledException", 0, ["modeledProperty"], [0], null);
-    const baseServiceExceptionSchema = error("smithy.ts.sdk.synthetic.ns", "BaseServiceException", 0, [], [], null);
+    const modeledExceptionSchema = [
+      -3,
+      "ns",
+      "ModeledException",
+      0,
+      ["modeledProperty"],
+      [0],
+    ] satisfies StaticErrorSchema;
+    const baseServiceExceptionSchema = [
+      -3,
+      "smithy.ts.sdk.synthetic.ns",
+      "BaseServiceException",
+      0,
+      [],
+      [],
+    ] satisfies StaticErrorSchema;
 
     it("should throw the schema error ctor if one exists", async () => {
       // this is for modeled exceptions.
 
-      ns.register(modeledExceptionSchema.getName(), modeledExceptionSchema);
       ns.registerError(modeledExceptionSchema, ModeledExceptionCtor);
 
-      synthetic.register(baseServiceExceptionSchema.getName(), baseServiceExceptionSchema);
       synthetic.registerError(baseServiceExceptionSchema, ServiceBaseException);
 
       try {
@@ -353,11 +375,10 @@ describe(SmithyRpcV2CborProtocol.name, () => {
     it("should throw a base error if available in the namespace, when no error schema is modeled", async () => {
       // this is the expected fallback case for all generated clients.
 
-      synthetic.register(baseServiceExceptionSchema.getName(), baseServiceExceptionSchema);
       synthetic.registerError(baseServiceExceptionSchema, ServiceBaseException);
 
       try {
-        await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);
+        await protocol.deserializeResponse(operation, serdeContext as any, errorResponseNoDiscriminator);
       } catch (e) {
         expect(e).toBeInstanceOf(ServiceBaseException);
       }

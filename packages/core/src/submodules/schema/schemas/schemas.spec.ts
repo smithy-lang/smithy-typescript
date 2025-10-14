@@ -23,9 +23,8 @@ describe("schemas", () => {
       expect(schema.ctor).toBe(null);
     });
 
-    it("has a factory and the factory registers the schema", () => {
+    it("has a factory", () => {
       expect(error("ack", "Error", 0, [], [])).toEqual(schema);
-      expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
 
     it("has an instanceOf operator", () => {
@@ -44,9 +43,8 @@ describe("schemas", () => {
     it("has a value schema", () => {
       expect(schema.valueSchema).toBe(0 as SchemaRef);
     });
-    it("has a factory and the factory registers the schema", () => {
+    it("has a factory", () => {
       expect(list("ack", "List", 0, 0)).toEqual(schema);
-      expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
     it("has an instanceOf operator", () => {
       const object = { ...schema };
@@ -65,9 +63,8 @@ describe("schemas", () => {
       expect(schema.keySchema).toBe(0 as SchemaRef);
       expect(schema.valueSchema).toBe(1 as SchemaRef);
     });
-    it("has a factory and the factory registers the schema", () => {
+    it("has a factory", () => {
       expect(map("ack", "Map", 0, 0, 1)).toEqual(schema);
-      expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
     it("has an instanceOf operator", () => {
       const object = { ...schema };
@@ -86,9 +83,8 @@ describe("schemas", () => {
       expect(schema.input).toEqual("unit");
       expect(schema.output).toEqual("unit");
     });
-    it("has a factory and the factory registers the schema", () => {
+    it("has a factory", () => {
       expect(op("ack", "Operation", 0, "unit", "unit")).toEqual(schema);
-      expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
   });
 
@@ -121,9 +117,8 @@ describe("schemas", () => {
       expect(schema).toBeInstanceOf(Schema);
       expect(schema).toBeInstanceOf(SimpleSchema);
     });
-    it("has a factory and the factory registers the schema", () => {
+    it("has a factory", () => {
       expect(sim("ack", "Simple", 0, 0)).toEqual(schema);
-      expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
     it("has an instanceOf operator", () => {
       const object = { ...schema };
@@ -143,9 +138,8 @@ describe("schemas", () => {
       expect(schema.memberNames).toEqual(["a", "b", "c"]);
       expect(schema.memberList).toEqual([0, 1, 2]);
     });
-    it("has a factory and the factory registers the schema", () => {
+    it("has a factory", () => {
       expect(struct("ack", "Structure", 0, ["a", "b", "c"], [0, 1, 2])).toEqual(schema);
-      expect(TypeRegistry.for("ack").getSchema(schema.name)).toEqual(schema);
     });
     it("has an instanceOf operator", () => {
       const object = { ...schema };

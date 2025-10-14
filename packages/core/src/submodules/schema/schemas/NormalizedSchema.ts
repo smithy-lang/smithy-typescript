@@ -43,7 +43,7 @@ import type { OperationSchema } from "./OperationSchema";
 import { op } from "./OperationSchema";
 import { Schema } from "./Schema";
 import type { SimpleSchema } from "./SimpleSchema";
-import { sim } from "./SimpleSchema";
+import { simAdapter } from "./SimpleSchema";
 import { struct, StructureSchema } from "./StructureSchema";
 import { translateTraits } from "./translateTraits";
 
@@ -450,7 +450,7 @@ export function hydrate(
   const [id, ...rest] = ss;
   return (
     {
-      [0 satisfies StaticSchemaIdSimple]: sim,
+      [0 satisfies StaticSchemaIdSimple]: simAdapter,
       [1 satisfies StaticSchemaIdList]: list,
       [2 satisfies StaticSchemaIdMap]: map,
       [3 satisfies StaticSchemaIdStruct]: struct,

@@ -59,7 +59,7 @@ export type ShapeNamespace = string;
 /**
  * @alpha
  */
-export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaRef, SchemaTraits];
+export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaTraits, SchemaRef];
 
 /**
  * @alpha
