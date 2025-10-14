@@ -1,4 +1,5 @@
 import type {
+  $MemberSchema,
   BigDecimalSchema,
   BigIntegerSchema,
   BlobSchema,
@@ -6,7 +7,6 @@ import type {
   DocumentSchema,
   ListSchemaModifier,
   MapSchemaModifier,
-  MemberSchema,
   NumericSchema,
   StaticListSchema,
   StaticMapSchema,
@@ -222,7 +222,7 @@ describe(NormalizedSchema.name, () => {
   });
 
   describe("traits", () => {
-    const member: MemberSchema = [
+    const member: $MemberSchema = [
       [0, "ack", "SimpleString", { idempotencyToken: 1 }, 0] satisfies StaticSimpleSchema,
       0b0000_0001,
     ];

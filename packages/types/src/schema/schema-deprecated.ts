@@ -1,9 +1,9 @@
-import type { SchemaTraits, UnitSchema, SimpleSchema, NormalizedSchema, ConfigurableSerdeContext } from "./schema";
-import type { StaticSchema } from "./static-schemas";
+import type { EndpointV2 } from "../endpoint";
+import type { HandlerExecutionContext } from "../middleware";
 import type { MetadataBearer } from "../response";
 import type { EndpointBearer, SerdeFunctions } from "../serde";
-import type { HandlerExecutionContext } from "../middleware";
-import type { EndpointV2 } from "../endpoint";
+import type { ConfigurableSerdeContext, NormalizedSchema, SchemaTraits, SimpleSchema, UnitSchema } from "./schema";
+import type { StaticSchema } from "./static-schemas";
 
 /**
  * A schema is an object or value that describes how to serialize/deserialize data.

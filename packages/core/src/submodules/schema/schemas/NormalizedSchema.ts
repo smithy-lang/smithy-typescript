@@ -64,7 +64,10 @@ export class NormalizedSchema implements INormalizedSchema {
    * @param ref - a polymorphic SchemaRef to be dereferenced/normalized.
    * @param memberName - optional memberName if this NormalizedSchema should be considered a member schema.
    */
-  private constructor(readonly ref: $SchemaRef, private readonly memberName?: string) {
+  private constructor(
+    readonly ref: $SchemaRef,
+    private readonly memberName?: string
+  ) {
     const traitStack = [] as SchemaTraits[];
     let _ref = ref;
     let schema = ref;
@@ -320,10 +323,10 @@ export class NormalizedSchema implements INormalizedSchema {
       typeof sc === "number"
         ? 0b0011_1111 & sc
         : sc && typeof sc === "object" && (isMap || isList)
-        ? ((sc as StaticMapSchema | StaticListSchema)[3 + (sc as StaticSchema)[0]] as typeof sc)
-        : isDoc
-        ? (15 satisfies DocumentSchema)
-        : void 0;
+          ? ((sc as StaticMapSchema | StaticListSchema)[3 + (sc as StaticSchema)[0]] as typeof sc)
+          : isDoc
+            ? (15 satisfies DocumentSchema)
+            : void 0;
     if (memberSchema != null) {
       return member([memberSchema, 0], isMap ? "value" : "member");
     }
