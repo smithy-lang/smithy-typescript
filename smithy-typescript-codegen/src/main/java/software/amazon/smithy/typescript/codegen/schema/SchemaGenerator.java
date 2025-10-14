@@ -278,13 +278,13 @@ public class SchemaGenerator implements Runnable {
             writer.addImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
                     export var $L: StaticSimpleSchema = [0, $L, $L,""",
-                ", $L];",
+                "",
                 getShapeVariableName(shape),
                 checkImportString(shape, shape.getId().getNamespace(), "n"),
                 checkImportString(shape, shape.getId().getName()),
-                resolveSimpleSchema(shape, shape),
                 () -> {
                     writeTraits(shape);
+                    writer.writeInline(", $L];", resolveSimpleSchema(shape, shape));
                 }
             );
         }
