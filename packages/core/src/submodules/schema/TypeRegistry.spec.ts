@@ -1,6 +1,6 @@
+import type { StaticErrorSchema } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { error } from "./schemas/ErrorSchema";
 import { list } from "./schemas/ListSchema";
 import { map } from "./schemas/MapSchema";
 import { struct } from "./schemas/StructureSchema";
@@ -16,15 +16,26 @@ describe(TypeRegistry.name, () => {
 
   it("stores and retrieves schema objects", () => {
     const tr = TypeRegistry.for("NAMESPACE");
+    tr.register(List.getName(), List);
     expect(tr.getSchema("List")).toBe(List);
+    tr.register(Map.getName(), Map);
     expect(tr.getSchema("Map")).toBe(Map);
+    tr.register(Struct().getName(), Struct());
     expect(tr.getSchema("Structure")).toBe(schema);
   });
 
   it("has a helper method to retrieve a synthetic base exception", () => {
     // the service namespace is appended to the synthetic prefix.
-    const err = error("smithy.ts.sdk.synthetic.NAMESPACE", "UhOhServiceException", 0, [], [], Error);
-    const tr = TypeRegistry.for("smithy.ts.sdk.synthetic.NAMESPACE");
+    const err = [
+      -3,
+      "smithy.ts.sdk.synthetic.NAMESPACE",
+      "UhOhServiceException",
+      0,
+      [],
+      [],
+    ] satisfies StaticErrorSchema;
+    const tr = TypeRegistry.for(err[1]);
+    tr.registerError(err, Error);
     expect(tr.getBaseException()).toBe(err);
   });
 });
