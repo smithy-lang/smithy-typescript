@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.7.1
+
+### Patch Changes
+
+- 052d261: fix ordering of static simple schema type
+
 ## 4.7.0
 
 ### Minor Changes

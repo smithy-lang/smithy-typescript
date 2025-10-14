@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.16.1
+
+### Patch Changes
+
+- 052d261: fix ordering of static simple schema type
+- Updated dependencies [052d261]
+  - @smithy/types@4.7.1
+  - @smithy/middleware-serde@4.2.2
+  - @smithy/protocol-http@5.3.2
+  - @smithy/util-middleware@4.2.2
+  - @smithy/util-stream@4.5.2
+
 ## 3.16.0
 
 ### Minor Changes
