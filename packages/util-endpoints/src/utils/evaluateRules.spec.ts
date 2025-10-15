@@ -4,14 +4,16 @@ import type { EndpointRuleObject, ErrorRuleObject, TreeRuleObject } from "../typ
 import { EndpointError } from "../types";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
 import { evaluateErrorRule } from "./evaluateErrorRule";
-import { evaluateRules } from "./evaluateRules";
-import { evaluateTreeRule } from "./evaluateTreeRule";
+import { evaluateRules, group } from "./evaluateRules";
 
 vi.mock("./evaluateEndpointRule");
 vi.mock("./evaluateErrorRule");
 vi.mock("./evaluateTreeRule");
 
 describe(evaluateRules.name, () => {
+  vi.spyOn(group, "evaluateTreeRule").mockImplementation(vi.fn());
+  const { evaluateTreeRule } = group;
+
   const mockOptions = {
     endpointParams: {},
     referenceRecord: {},

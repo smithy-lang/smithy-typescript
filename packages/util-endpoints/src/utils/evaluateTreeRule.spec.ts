@@ -2,13 +2,15 @@ import { describe, expect, test as it, vi } from "vitest";
 
 import type { TreeRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
-import { evaluateRules } from "./evaluateRules";
+import { group } from "./evaluateRules";
 import { evaluateTreeRule } from "./evaluateTreeRule";
 
 vi.mock("./evaluateConditions");
-vi.mock("./evaluateRules");
 
 describe(evaluateTreeRule.name, () => {
+  vi.spyOn(group, "evaluateRules").mockImplementation(() => ({}) as any);
+  const { evaluateRules } = group;
+
   const mockOptions = {
     endpointParams: {},
     referenceRecord: {},

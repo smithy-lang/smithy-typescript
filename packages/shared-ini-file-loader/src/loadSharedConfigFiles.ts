@@ -40,10 +40,7 @@ export interface SharedConfigInit {
 
 const swallowError = () => ({});
 
-/**
- * @internal
- */
-export const CONFIG_PREFIX_SEPARATOR = ".";
+export { CONFIG_PREFIX_SEPARATOR } from "./constants";
 
 /**
  * Loads the config and credentials files.
