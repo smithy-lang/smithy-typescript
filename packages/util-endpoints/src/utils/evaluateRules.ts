@@ -16,7 +16,7 @@ export const evaluateRules = (rules: RuleSetRules, options: EvaluateOptions): En
     } else if (rule.type === "error") {
       evaluateErrorRule(rule, options);
     } else if (rule.type === "tree") {
-      const endpointOrUndefined = evaluateTreeRule(rule, options);
+      const endpointOrUndefined = group.evaluateTreeRule(rule, options);
       if (endpointOrUndefined) {
         return endpointOrUndefined;
       }
@@ -35,8 +35,13 @@ export const evaluateTreeRule = (treeRule: TreeRuleObject, options: EvaluateOpti
     return;
   }
 
-  return evaluateRules(rules, {
+  return group.evaluateRules(rules, {
     ...options,
     referenceRecord: { ...options.referenceRecord, ...referenceRecord },
   });
+};
+
+export const group = {
+  evaluateRules,
+  evaluateTreeRule,
 };

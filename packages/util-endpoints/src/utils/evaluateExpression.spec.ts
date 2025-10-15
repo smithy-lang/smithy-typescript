@@ -1,16 +1,17 @@
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { EndpointError } from "../types";
-import { callFunction } from "./callFunction";
-import { evaluateExpression } from "./evaluateExpression";
+import { evaluateExpression, group } from "./evaluateExpression";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getReferenceValue } from "./getReferenceValue";
 
-vi.mock("./callFunction");
 vi.mock("./getReferenceValue");
 vi.mock("./evaluateTemplate");
 
 describe(evaluateExpression.name, () => {
+  vi.spyOn(group, "callFunction").mockImplementation(vi.fn());
+  const { callFunction } = group;
+
   const mockOptions = {
     endpointParams: {},
     referenceRecord: {},

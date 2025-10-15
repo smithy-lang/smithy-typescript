@@ -2,13 +2,14 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 import { EndpointError } from "../types";
 import { evaluateTemplate } from "./evaluateTemplate";
-import { getEndpointProperties } from "./getEndpointProperties";
-import { getEndpointProperty } from "./getEndpointProperty";
+import { getEndpointProperty, group } from "./getEndpointProperties";
 
 vi.mock("./evaluateTemplate");
-vi.mock("./getEndpointProperties");
 
 describe(getEndpointProperty.name, () => {
+  vi.spyOn(group, "getEndpointProperties").mockImplementation(vi.fn());
+  const { getEndpointProperties } = group;
+
   const mockOptions = {
     endpointParams: {},
     referenceRecord: {},

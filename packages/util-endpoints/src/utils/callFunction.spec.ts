@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { callFunction } from "./callFunction";
 import { customEndpointFunctions } from "./customEndpointFunctions";
 import { endpointFunctions } from "./endpointFunctions";
-import { evaluateExpression } from "./evaluateExpression";
-
-vi.mock("./evaluateExpression");
+import { callFunction, group } from "./evaluateExpression";
 
 describe(callFunction.name, () => {
+  vi.spyOn(group, "evaluateExpression").mockImplementation(vi.fn());
+  const { evaluateExpression } = group;
+
   const mockOptions = {
     endpointParams: {},
     referenceRecord: {},

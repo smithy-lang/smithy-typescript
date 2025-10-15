@@ -8,7 +8,7 @@ export const getEndpointProperties = (properties: EndpointObjectProperties, opti
   Object.entries(properties).reduce(
     (acc, [propertyKey, propertyVal]) => ({
       ...acc,
-      [propertyKey]: getEndpointProperty(propertyVal, options),
+      [propertyKey]: group.getEndpointProperty(propertyVal, options),
     }),
     {}
   );
@@ -27,10 +27,15 @@ export const getEndpointProperty = (
       if (property === null) {
         throw new EndpointError(`Unexpected endpoint property: ${property}`);
       }
-      return getEndpointProperties(property, options);
+      return group.getEndpointProperties(property, options);
     case "boolean":
       return property;
     default:
       throw new EndpointError(`Unexpected endpoint property type: ${typeof property}`);
   }
+};
+
+export const group = {
+  getEndpointProperty,
+  getEndpointProperties,
 };
