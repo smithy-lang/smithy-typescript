@@ -1,10 +1,10 @@
 import type { EndpointV2 } from "@smithy/types";
 
-import type { EvaluateOptions, RuleSetRules } from "../types";
+import type { EvaluateOptions, RuleSetRules, TreeRuleObject } from "../types";
 import { EndpointError } from "../types";
+import { evaluateConditions } from "./evaluateConditions";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
 import { evaluateErrorRule } from "./evaluateErrorRule";
-import { evaluateTreeRule } from "./evaluateTreeRule";
 
 export const evaluateRules = (rules: RuleSetRules, options: EvaluateOptions): EndpointV2 => {
   for (const rule of rules) {
@@ -25,4 +25,18 @@ export const evaluateRules = (rules: RuleSetRules, options: EvaluateOptions): En
     }
   }
   throw new EndpointError(`Rules evaluation failed`);
+};
+
+export const evaluateTreeRule = (treeRule: TreeRuleObject, options: EvaluateOptions): EndpointV2 | undefined => {
+  const { conditions, rules } = treeRule;
+
+  const { result, referenceRecord } = evaluateConditions(conditions, options);
+  if (!result) {
+    return;
+  }
+
+  return evaluateRules(rules, {
+    ...options,
+    referenceRecord: { ...options.referenceRecord, ...referenceRecord },
+  });
 };

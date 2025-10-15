@@ -1,7 +1,7 @@
 import type { ParsedIniData } from "@smithy/types";
 import { IniSectionType } from "@smithy/types";
 
-import { CONFIG_PREFIX_SEPARATOR } from "./loadSharedConfigFiles";
+import { CONFIG_PREFIX_SEPARATOR } from "./constants";
 
 /**
  * Returns the config data from parsed ini data.

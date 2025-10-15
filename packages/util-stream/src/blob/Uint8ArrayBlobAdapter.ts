@@ -1,4 +1,5 @@
-import { transformFromString, transformToString } from "./transforms";
+import { fromBase64, toBase64 } from "@smithy/util-base64";
+import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 /**
  * Adapter for conversions of the native Uint8Array type.
@@ -12,7 +13,10 @@ export class Uint8ArrayBlobAdapter extends Uint8Array {
    */
   public static fromString(source: string, encoding = "utf-8"): Uint8ArrayBlobAdapter {
     if (typeof source === "string") {
-      return transformFromString(source, encoding);
+      if (encoding === "base64") {
+        return Uint8ArrayBlobAdapter.mutate(fromBase64(source));
+      }
+      return Uint8ArrayBlobAdapter.mutate(fromUtf8(source));
     }
     throw new Error(`Unsupported conversion from ${typeof source} to Uint8ArrayBlobAdapter.`);
   }
@@ -31,6 +35,9 @@ export class Uint8ArrayBlobAdapter extends Uint8Array {
    * @returns the blob as string.
    */
   public transformToString(encoding = "utf-8"): string {
-    return transformToString(this, encoding);
+    if (encoding === "base64") {
+      return toBase64(this);
+    }
+    return toUtf8(this);
   }
 }
