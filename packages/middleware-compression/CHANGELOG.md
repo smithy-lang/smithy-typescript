@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.3.4
+
+### Patch Changes
+
+- Updated dependencies [8a2a912]
+  - @smithy/types@4.8.0
+  - @smithy/core@3.17.0
+  - @smithy/node-config-provider@4.3.3
+  - @smithy/protocol-http@5.3.3
+  - @smithy/util-middleware@4.2.3
+
 ## 4.3.3
 
 ### Patch Changes

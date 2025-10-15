@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.2.3
+
+### Patch Changes
+
+- 7e359e2: remove and ban circular imports
+- Updated dependencies [8a2a912]
+  - @smithy/types@4.8.0
+  - @smithy/node-config-provider@4.3.3
+
 ## 3.2.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.8.0
+
+### Minor Changes
+
+- 8a2a912: remove usage of non-static schema classes
+
 ## 4.7.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.3.3
+
+### Patch Changes
+
+- 7e359e2: remove and ban circular imports
+- Updated dependencies [8a2a912]
+  - @smithy/types@4.8.0
+
 ## 4.3.2
 
 ### Patch Changes

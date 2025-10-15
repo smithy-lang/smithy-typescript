@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.5.3
+
+### Patch Changes
+
+- 7e359e2: remove and ban circular imports
+- Updated dependencies [8a2a912]
+  - @smithy/types@4.8.0
+  - @smithy/fetch-http-handler@5.3.4
+  - @smithy/node-http-handler@4.4.2
+
 ## 4.5.2
 
 ### Patch Changes

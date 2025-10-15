@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.9.0
+
+### Minor Changes
+
+- 8a2a912: remove usage of non-static schema classes
+
+### Patch Changes
+
+- Updated dependencies [8a2a912]
+- Updated dependencies [7e359e2]
+  - @smithy/types@4.8.0
+  - @smithy/core@3.17.0
+  - @smithy/util-stream@4.5.3
+  - @smithy/middleware-endpoint@4.3.4
+  - @smithy/middleware-stack@4.2.3
+  - @smithy/protocol-http@5.3.3
+
 ## 4.8.1
 
 ### Patch Changes

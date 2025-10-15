@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.17.0
+
+### Minor Changes
+
+- 8a2a912: remove usage of non-static schema classes
+
+### Patch Changes
+
+- Updated dependencies [8a2a912]
+- Updated dependencies [7e359e2]
+  - @smithy/types@4.8.0
+  - @smithy/util-stream@4.5.3
+  - @smithy/middleware-serde@4.2.3
+  - @smithy/protocol-http@5.3.3
+  - @smithy/util-middleware@4.2.3
+
 ## 3.16.1
 
 ### Patch Changes
