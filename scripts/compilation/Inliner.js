@@ -469,6 +469,7 @@ module.exports = class Inliner {
               "limitedParseFloat", // aliased to limitedParseDouble
               "strictParseFloat", // aliased to strictParseDouble
               "strictParseInt", // aliased to strictParseLong
+              "Ec", // name gets renamed
             ].includes(sym)
           ) {
             return `import { ${sym} } from "${this.pkgJson.name}";`;
