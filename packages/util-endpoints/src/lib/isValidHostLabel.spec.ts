@@ -32,7 +32,7 @@ describe(isValidHostLabel.name, () => {
       expect(isValidHostLabel(hostLabelToTest, true)).toBe(output);
     });
 
-    describe("returns false is any subdomain is invalid", () => {
+    describe("returns false if any subdomain is invalid", () => {
       const validHostLabel = testCases
         .filter(([outputEntry]) => outputEntry === true)
         .map(([, value]) => value)

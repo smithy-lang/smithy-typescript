@@ -2,6 +2,7 @@ import type { Provider } from "@smithy/types";
 
 import { getRealRegion } from "./getRealRegion";
 import { isFipsRegion } from "./isFipsRegion";
+import { checkRegion } from "./checkRegion";
 
 /**
  * @public
@@ -47,11 +48,10 @@ export const resolveRegionConfig = <T>(input: T & RegionInputConfig & Previously
 
   return Object.assign(input, {
     region: async () => {
-      if (typeof region === "string") {
-        return getRealRegion(region);
-      }
-      const providedRegion = await region();
-      return getRealRegion(providedRegion);
+      const providedRegion = typeof region === "function" ? await region() : region;
+      const realRegion = getRealRegion(providedRegion);
+      checkRegion(realRegion);
+      return realRegion;
     },
     useFipsEndpoint: async () => {
       const providedRegion = typeof region === "string" ? region : await region();
