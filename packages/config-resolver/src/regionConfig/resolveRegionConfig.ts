@@ -1,8 +1,8 @@
 import type { Provider } from "@smithy/types";
 
+import { checkRegion } from "./checkRegion";
 import { getRealRegion } from "./getRealRegion";
 import { isFipsRegion } from "./isFipsRegion";
-import { checkRegion } from "./checkRegion";
 
 /**
  * @public

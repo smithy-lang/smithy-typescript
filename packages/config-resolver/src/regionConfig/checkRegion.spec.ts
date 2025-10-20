@@ -1,5 +1,6 @@
-import { describe, test as it, expect, vi } from "vitest";
 import { isValidHostLabel } from "@smithy/util-endpoints";
+import { describe, expect, test as it, vi } from "vitest";
+
 import { checkRegion } from "./checkRegion";
 
 describe("checkRegion", () => {
