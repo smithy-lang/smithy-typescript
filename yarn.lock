@@ -2514,6 +2514,7 @@ __metadata:
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-config-provider": "workspace:^"
+    "@smithy/util-endpoints": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
