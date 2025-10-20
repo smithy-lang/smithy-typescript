@@ -1,6 +1,6 @@
 ---
 "@smithy/signature-v4a": patch
-"@smithy/elliptic": patch
+"@smithy/external-dependencies": patch
 ---
 
-Move elliptic to separate @smithy/elliptic package
+external dependency container

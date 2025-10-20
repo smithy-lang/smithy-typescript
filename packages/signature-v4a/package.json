@@ -25,7 +25,7 @@
   "license": "Apache-2.0",
   "sideEffects": true,
   "dependencies": {
-    "@smithy/elliptic": "workspace:^",
+    "@smithy/external-dependencies": "workspace:^",
     "@smithy/signature-v4": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",

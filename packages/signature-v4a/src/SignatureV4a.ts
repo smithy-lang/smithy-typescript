@@ -1,4 +1,4 @@
-import { Ec } from "@smithy/elliptic";
+import { Ec } from "@smithy/external-dependencies";
 import type { SignatureV4CryptoInit, SignatureV4Init } from "@smithy/signature-v4";
 import {
   ALGORITHM_IDENTIFIER_V4A,
