@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 13c5cd9: validate region is hostname component
+
 ## 4.3.3
 
 ### Patch Changes
