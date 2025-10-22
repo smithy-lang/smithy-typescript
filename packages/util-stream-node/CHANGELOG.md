@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.2.4
+
+### Patch Changes
+
+- Updated dependencies [344d06a]
+  - @smithy/node-http-handler@4.4.3
+
 ## 4.2.3
 
 ### Patch Changes

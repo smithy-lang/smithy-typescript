@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.3
+
+### Patch Changes
+
+- 344d06a: shfit http1 calls with expect 100-continue header to isolated http Agents
+
 ## 4.4.2
 
 ### Patch Changes
