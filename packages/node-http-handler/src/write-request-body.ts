@@ -20,7 +20,7 @@ export async function writeRequestBody(
   maxContinueTimeoutMs = MIN_WAIT_TIME
 ): Promise<void> {
   const headers = request.headers ?? {};
-  const expect = headers["Expect"] || headers["expect"];
+  const expect = headers.Expect || headers.expect;
 
   let timeoutId = -1;
   let sendBody = true;
