@@ -173,6 +173,8 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     }
 
     return new Promise((_resolve, _reject) => {
+      const config = this.config!;
+
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
 
       // Timeouts related to this request to clear upon completion.
@@ -189,10 +191,6 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         _reject(arg);
       };
 
-      if (!this.config) {
-        throw new Error("Node HTTP request handler config is not resolved");
-      }
-
       // if the request was already aborted, prevent doing extra work
       if (abortSignal?.aborted) {
         const abortError = new Error("Request aborted");
@@ -203,7 +201,22 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // determine which http(s) client to use
       const isSSL = request.protocol === "https:";
-      const agent = isSSL ? this.config.httpsAgent : this.config.httpAgent;
+
+      const headers = request.headers ?? {};
+      const expectContinue = (headers.Expect ?? headers.expect) === "100-continue";
+
+      let agent = isSSL ? config.httpsAgent : config.httpAgent;
+      if (expectContinue) {
+        // Because awaiting 100-continue desynchronizes the request and request body transmission,
+        // such requests must be offloaded to a separate Agent instance.
+        // Additional logic will exist on the client using this handler to determine whether to add the header at all.
+        agent = new (isSSL ? hsAgent : hAgent)({
+          keepAlive: false,
+          // This is an explicit value matching the default (Infinity).
+          // This should allow the connection to close cleanly after making the single request.
+          maxSockets: Infinity,
+        });
+      }
 
       // If the request is taking a long time, check socket usage and potentially warn.
       // This warning will be cancelled if the request resolves.
@@ -213,11 +226,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
             this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
               agent,
               this.socketWarningTimestamp,
-              this.config!.logger
+              config.logger
             );
           },
-          this.config.socketAcquisitionWarningTimeout ??
-            (this.config.requestTimeout ?? 2000) + (this.config.connectionTimeout ?? 1000)
+          config.socketAcquisitionWarningTimeout ?? (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000)
         )
       );
 
@@ -296,18 +308,12 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // Defer registration of socket event listeners if the connection and request timeouts
       // are longer than a few seconds. This avoids slowing down faster operations.
-      const effectiveRequestTimeout = requestTimeout ?? this.config.requestTimeout;
-      timeouts.push(setConnectionTimeout(req, reject, this.config.connectionTimeout));
+      const effectiveRequestTimeout = requestTimeout ?? config.requestTimeout;
+      timeouts.push(setConnectionTimeout(req, reject, config.connectionTimeout));
       timeouts.push(
-        setRequestTimeout(
-          req,
-          reject,
-          effectiveRequestTimeout,
-          this.config.throwOnRequestTimeout,
-          this.config.logger ?? console
-        )
+        setRequestTimeout(req, reject, effectiveRequestTimeout, config.throwOnRequestTimeout, config.logger ?? console)
       );
-      timeouts.push(setSocketTimeout(req, reject, this.config.socketTimeout));
+      timeouts.push(setSocketTimeout(req, reject, config.socketTimeout));
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;

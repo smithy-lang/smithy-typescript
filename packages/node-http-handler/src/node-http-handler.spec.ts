@@ -261,6 +261,34 @@ describe("NodeHttpHandler", () => {
         await nodeHttpHandler.handle(httpRequest as any);
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.host).toEqual("host");
       });
+
+      it("creates a new http(s) Agent if the request has expect: 100-continue header", async () => {
+        const nodeHttpHandler = new NodeHttpHandler({});
+        {
+          const httpRequest = {
+            protocol: "http:",
+            hostname: "[host]",
+            path: "/some/path",
+            headers: {
+              expect: "100-continue",
+            },
+          };
+          await nodeHttpHandler.handle(httpRequest as any);
+          expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent).not.toBe(
+            (nodeHttpHandler as any).config.httpAgent
+          );
+        }
+        {
+          const httpRequest = {
+            protocol: "http:",
+            hostname: "[host]",
+            path: "/some/path",
+            headers: {},
+          };
+          await nodeHttpHandler.handle(httpRequest as any);
+          expect(vi.mocked(hRequest as any).mock.calls[1][0]?.agent).toBe((nodeHttpHandler as any).config.httpAgent);
+        }
+      });
     });
   });
 
