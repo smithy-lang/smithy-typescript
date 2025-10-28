@@ -30,7 +30,7 @@ import type {
   TimestampEpochSecondsSchema,
   UnitSchema,
 } from "@smithy/types";
-import type { IdempotencyTokenBitMask, TraitBitVector } from "@smithy/types/src/schema/traits";
+import type { IdempotencyTokenBitMask, TraitBitVector } from "@smithy/types";
 
 import { deref } from "../deref";
 import { translateTraits } from "./translateTraits";
