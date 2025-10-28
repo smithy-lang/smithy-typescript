@@ -36,4 +36,22 @@ module.exports = {
     "simple-import-sort/imports": "error",
     "@typescript-eslint/consistent-type-imports": "error",
   },
+  overrides: [
+    {
+      files: ["packages/*/src/**/*.ts"],
+      excludedFiles: ["packages/*/src/**/*.spec.ts"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            patterns: [
+              {
+                group: ["*src*", "*dist-*"],
+              },
+            ],
+          },
+        ],
+      }
+    },
+  ],
 };

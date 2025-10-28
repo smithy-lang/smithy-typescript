@@ -22,6 +22,7 @@ export * from "./profile";
 export * from "./response";
 export * from "./retry";
 export * from "./schema/schema";
+export * from "./schema/traits";
 export * from "./schema/schema-deprecated";
 export * from "./schema/sentinels";
 export * from "./schema/static-schemas";
