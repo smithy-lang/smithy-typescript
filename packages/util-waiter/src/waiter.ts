@@ -1,5 +1,7 @@
 import type { WaiterConfiguration as WaiterConfiguration__ } from "@smithy/types";
 
+import { getCircularReplacer } from "./circularReplacer";
+
 /**
  * @internal
  */
@@ -57,24 +59,30 @@ export type WaiterResult = {
 export const checkExceptions = (result: WaiterResult): WaiterResult => {
   if (result.state === WaiterState.ABORTED) {
     const abortError = new Error(
-      `${JSON.stringify({
-        ...result,
-        reason: "Request was aborted",
-      })}`
+      `${JSON.stringify(
+        {
+          ...result,
+          reason: "Request was aborted",
+        },
+        getCircularReplacer()
+      )}`
     );
     abortError.name = "AbortError";
     throw abortError;
   } else if (result.state === WaiterState.TIMEOUT) {
     const timeoutError = new Error(
-      `${JSON.stringify({
-        ...result,
-        reason: "Waiter has timed out",
-      })}`
+      `${JSON.stringify(
+        {
+          ...result,
+          reason: "Waiter has timed out",
+        },
+        getCircularReplacer()
+      )}`
     );
     timeoutError.name = "TimeoutError";
     throw timeoutError;
   } else if (result.state !== WaiterState.SUCCESS) {
-    throw new Error(`${JSON.stringify(result)}`);
+    throw new Error(`${JSON.stringify(result, getCircularReplacer())}`);
   }
   return result;
 };
