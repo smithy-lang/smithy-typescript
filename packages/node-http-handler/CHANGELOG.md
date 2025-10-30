@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.4.4
+
+### Patch Changes
+
+- df00095: skip body write delay when http Agent is externally owned
+- Updated dependencies [6da0ab3]
+  - @smithy/types@4.8.1
+  - @smithy/abort-controller@4.2.4
+  - @smithy/protocol-http@5.3.4
+  - @smithy/querystring-builder@4.2.4
+
 ## 4.4.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-endpoints",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "Utilities to help with endpoint resolution.",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

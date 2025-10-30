@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.2.4
+
+### Patch Changes
+
+- 75177cd: handle circular refs in debug messages
+- Updated dependencies [6da0ab3]
+  - @smithy/types@4.8.1
+  - @smithy/abort-controller@4.2.4
+
 ## 4.2.3
 
 ### Patch Changes
