@@ -1,8 +1,7 @@
 import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
 import { HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
-import type { Logger, NodeHttpHandlerOptions } from "@smithy/types";
-import type { HttpHandlerOptions, Provider } from "@smithy/types";
+import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 import { Agent as hAgent, request as hRequest } from "http";
 import type { RequestOptions } from "https";
 import { Agent as hsAgent, request as hsRequest } from "https";
@@ -37,6 +36,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private config?: ResolvedNodeHttpHandlerConfig;
   private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
   private socketWarningTimestamp = 0;
+  private externalAgent = false;
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
@@ -145,12 +145,14 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       throwOnRequestTimeout,
       httpAgent: (() => {
         if (httpAgent instanceof hAgent || typeof (httpAgent as hAgent)?.destroy === "function") {
+          this.externalAgent = true;
           return httpAgent as hAgent;
         }
         return new hAgent({ keepAlive, maxSockets, ...httpAgent });
       })(),
       httpsAgent: (() => {
         if (httpsAgent instanceof hsAgent || typeof (httpsAgent as hsAgent)?.destroy === "function") {
+          this.externalAgent = true;
           return httpsAgent as hsAgent;
         }
         return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
@@ -206,7 +208,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       const expectContinue = (headers.Expect ?? headers.expect) === "100-continue";
 
       let agent = isSSL ? config.httpsAgent : config.httpAgent;
-      if (expectContinue) {
+      if (expectContinue && !this.externalAgent) {
         // Because awaiting 100-continue desynchronizes the request and request body transmission,
         // such requests must be offloaded to a separate Agent instance.
         // Additional logic will exist on the client using this handler to determine whether to add the header at all.
@@ -328,10 +330,12 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         );
       }
 
-      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout).catch((e) => {
-        timeouts.forEach(timing.clearTimeout);
-        return _reject(e);
-      });
+      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout, this.externalAgent).catch(
+        (e) => {
+          timeouts.forEach(timing.clearTimeout);
+          return _reject(e);
+        }
+      );
     });
   }
 

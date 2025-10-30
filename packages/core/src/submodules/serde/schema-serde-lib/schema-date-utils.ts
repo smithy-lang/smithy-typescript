@@ -83,12 +83,18 @@ export const _parseRfc3339DateTimeWithOffset = (value: unknown): Date | undefine
   range(minutes, 0, 59);
   range(seconds, 0, 60); // leap second
 
-  const date = new Date();
-  date.setUTCFullYear(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
-  date.setUTCHours(Number(hours));
-  date.setUTCMinutes(Number(minutes));
-  date.setUTCSeconds(Number(seconds));
-  date.setUTCMilliseconds(Number(ms) ? Math.round(parseFloat(`0.${ms}`) * 1000) : 0);
+  const date = new Date(
+    Date.UTC(
+      Number(yearStr),
+      Number(monthStr) - 1,
+      Number(dayStr),
+      Number(hours),
+      Number(minutes),
+      Number(seconds),
+      Number(ms) ? Math.round(parseFloat(`0.${ms}`) * 1000) : 0
+    )
+  );
+  date.setUTCFullYear(Number(yearStr));
 
   if (offsetStr.toUpperCase() != "Z") {
     const [, sign, offsetH, offsetM] = /([+-])(\d\d):(\d\d)/.exec(offsetStr) || [void 0, "+", 0, 0];
@@ -147,18 +153,21 @@ export const _parseRfc7231DateTime = (value: unknown): Date | undefined => {
   }
 
   if (year && second) {
-    const date = new Date();
-    date.setUTCFullYear(Number(year));
-    date.setUTCMonth(months.indexOf(month));
+    const timestamp = Date.UTC(
+      Number(year),
+      months.indexOf(month),
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+      fraction ? Math.round(parseFloat(`0.${fraction}`) * 1000) : 0
+    );
     range(day, 1, 31);
-    date.setUTCDate(Number(day));
     range(hour, 0, 23);
-    date.setUTCHours(Number(hour));
     range(minute, 0, 59);
-    date.setUTCMinutes(Number(minute));
-    range(second, 0, 60); // leap second.
-    date.setUTCSeconds(Number(second));
-    date.setUTCMilliseconds(fraction ? Math.round(parseFloat(`0.${fraction}`) * 1000) : 0);
+    range(second, 0, 60); // leap second
+    const date = new Date(timestamp);
+    date.setUTCFullYear(Number(year));
     return date;
   }
 

@@ -13,11 +13,13 @@ const MIN_WAIT_TIME = 6_000;
  * @param httpRequest - opened Node.js request.
  * @param request - container with the request body.
  * @param maxContinueTimeoutMs - time to wait for the continue event.
+ * @param externalAgent - whether agent is owned by caller code.
  */
 export async function writeRequestBody(
   httpRequest: ClientRequest | ClientHttp2Stream,
   request: HttpRequest,
-  maxContinueTimeoutMs = MIN_WAIT_TIME
+  maxContinueTimeoutMs = MIN_WAIT_TIME,
+  externalAgent = false
 ): Promise<void> {
   const headers = request.headers ?? {};
   const expect = headers.Expect || headers.expect;
@@ -25,7 +27,7 @@ export async function writeRequestBody(
   let timeoutId = -1;
   let sendBody = true;
 
-  if (expect === "100-continue") {
+  if (!externalAgent && expect === "100-continue") {
     sendBody = await Promise.race<boolean>([
       new Promise((resolve) => {
         // If this resolves first (wins the race), it means that at least MIN_WAIT_TIME ms
