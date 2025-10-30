@@ -1,3 +1,4 @@
+import { getCircularReplacer } from "./circularReplacer";
 import { sleep } from "./utils/sleep";
 import type { WaiterOptions, WaiterResult } from "./waiter";
 import { WaiterState } from "./waiter";
@@ -21,7 +22,7 @@ const randomInRange = (min: number, max: number) => min + Math.random() * (max -
  * @param params - options passed to the waiter.
  * @param client - AWS SDK Client
  * @param input - client input
- * @param stateChecker - function that checks the acceptor states on each poll.
+ * @param acceptorChecks - function that checks the acceptor states on each poll.
  */
 export const runPolling = async <Client, Input>(
   { minDelay, maxDelay, maxWaitTime, abortController, client, abortSignal }: WaiterOptions<Client>,
@@ -96,5 +97,5 @@ const createMessageFromResponse = (reason: any): string => {
     return `${reason.$metadata.httpStatusCode}: OK`;
   }
   // is an unknown object.
-  return String(reason?.message ?? JSON.stringify(reason) ?? "Unknown");
+  return String(reason?.message ?? JSON.stringify(reason, getCircularReplacer()) ?? "Unknown");
 };
