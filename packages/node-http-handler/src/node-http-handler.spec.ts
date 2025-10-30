@@ -1,6 +1,6 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import http from "http";
-import https from "https";
+import http, { request as hRequest } from "http";
+import https, { request as hsRequest } from "https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
@@ -49,9 +49,6 @@ vi.mock("https", async () => {
     default: pkg,
   };
 });
-
-import { request as hRequest } from "http";
-import { request as hsRequest } from "https";
 
 describe("NodeHttpHandler", () => {
   describe("constructor and #handle", () => {
@@ -262,32 +259,69 @@ describe("NodeHttpHandler", () => {
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.host).toEqual("host");
       });
 
-      it("creates a new http(s) Agent if the request has expect: 100-continue header", async () => {
-        const nodeHttpHandler = new NodeHttpHandler({});
-        {
-          const httpRequest = {
-            protocol: "http:",
-            hostname: "[host]",
-            path: "/some/path",
-            headers: {
-              expect: "100-continue",
+      describe("expect 100-continue", () => {
+        it("creates a new http(s) Agent if the request has expect: 100-continue header and agents are NodeHttpHandler-owned", async () => {
+          const nodeHttpHandler = new NodeHttpHandler({
+            httpAgent: {
+              maxSockets: 25,
             },
-          };
-          await nodeHttpHandler.handle(httpRequest as any);
-          expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent).not.toBe(
-            (nodeHttpHandler as any).config.httpAgent
-          );
-        }
-        {
-          const httpRequest = {
-            protocol: "http:",
-            hostname: "[host]",
-            path: "/some/path",
-            headers: {},
-          };
-          await nodeHttpHandler.handle(httpRequest as any);
-          expect(vi.mocked(hRequest as any).mock.calls[1][0]?.agent).toBe((nodeHttpHandler as any).config.httpAgent);
-        }
+            httpsAgent: {
+              maxSockets: 25,
+            },
+          });
+          {
+            const httpRequest = {
+              protocol: "http:",
+              hostname: "[host]",
+              path: "/some/path",
+              headers: {
+                expect: "100-continue",
+              },
+            };
+            await nodeHttpHandler.handle(httpRequest as any);
+            expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent).not.toBe(
+              (nodeHttpHandler as any).config.httpAgent
+            );
+          }
+          {
+            const httpRequest = {
+              protocol: "http:",
+              hostname: "[host]",
+              path: "/some/path",
+              headers: {},
+            };
+            await nodeHttpHandler.handle(httpRequest as any);
+            expect(vi.mocked(hRequest as any).mock.calls[1][0]?.agent).toBe((nodeHttpHandler as any).config.httpAgent);
+          }
+        });
+
+        it("does not create a new Agent if configured Agent is caller-owned (e.g. proxy), but instead skips the writeBody delay", async () => {
+          const nodeHttpHandler = new NodeHttpHandler({
+            httpAgent: new http.Agent(),
+          });
+          {
+            const httpRequest = {
+              protocol: "http:",
+              hostname: "[host]",
+              path: "/some/path",
+              headers: {
+                expect: "100-continue",
+              },
+            };
+            await nodeHttpHandler.handle(httpRequest as any);
+            expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent).toBe((nodeHttpHandler as any).config.httpAgent);
+          }
+          {
+            const httpRequest = {
+              protocol: "http:",
+              hostname: "[host]",
+              path: "/some/path",
+              headers: {},
+            };
+            await nodeHttpHandler.handle(httpRequest as any);
+            expect(vi.mocked(hRequest as any).mock.calls[1][0]?.agent).toBe((nodeHttpHandler as any).config.httpAgent);
+          }
+        });
       });
     });
   });
