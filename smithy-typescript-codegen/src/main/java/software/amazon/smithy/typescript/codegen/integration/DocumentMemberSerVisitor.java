@@ -17,8 +17,6 @@ package software.amazon.smithy.typescript.codegen.integration;
 
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.model.knowledge.HttpBinding.Location;
-import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -43,6 +41,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -234,8 +233,9 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-        HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-        Format format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
+        Format format = shape.getTrait(TimestampFormatTrait.class)
+                .map(trait -> Format.fromString(trait.getValue()))
+                .orElse(defaultTimestampFormat);
         return HttpProtocolGeneratorUtils.getTimestampInputParam(context, dataSource, shape, format);
     }
 
