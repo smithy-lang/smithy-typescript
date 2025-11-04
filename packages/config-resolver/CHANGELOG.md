@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.2
+
+### Patch Changes
+
+- 372b46f: allow \* region with warning
+
 ## 4.4.1
 
 ### Patch Changes
