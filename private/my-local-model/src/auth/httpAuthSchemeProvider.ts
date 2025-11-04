@@ -65,7 +65,7 @@ export const defaultXYZServiceHttpAuthSchemeProvider: XYZServiceHttpAuthSchemePr
 };
 
 /**
- * @internal
+ * @public
  */
 export interface HttpAuthSchemeInputConfig {
   /**

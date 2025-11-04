@@ -39,7 +39,7 @@ describe("checkRegion", () => {
       "%",
       "^",
       "&",
-      "*",
+      "**",
       "(",
       ")",
       ".",
@@ -59,7 +59,14 @@ describe("checkRegion", () => {
     }
   });
 
+  it("emits a warning when asterisk region is used", () => {
+    vi.spyOn(console, "warn");
+    checkRegion("*");
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("@smithy/config-resolver WARN"));
+  });
+
   it("caches accepted regions", () => {
+    vi.spyOn(console, "warn");
     const di = {
       isValidHostLabel,
     };
@@ -73,5 +80,6 @@ describe("checkRegion", () => {
     expect(di.isValidHostLabel).toHaveBeenCalledTimes(0);
     expect(() => checkRegion("oh-canada", di.isValidHostLabel)).not.toThrow();
     expect(di.isValidHostLabel).toHaveBeenCalledTimes(1);
+    expect(console.warn).not.toHaveBeenCalled();
   });
 });
