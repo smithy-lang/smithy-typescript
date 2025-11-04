@@ -66,7 +66,7 @@ export const defaultRpcV2ProtocolHttpAuthSchemeProvider: RpcV2ProtocolHttpAuthSc
 };
 
 /**
- * @internal
+ * @public
  */
 export interface HttpAuthSchemeInputConfig {
   /**

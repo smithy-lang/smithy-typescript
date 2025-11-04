@@ -222,7 +222,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             s.getResolveConfigFunctions();
         String serviceName = CodegenUtils.getServiceName(
             s.getSettings(), s.getModel(), s.getSymbolProvider());
-        w.writeDocs("@internal");
+        w.writeDocs("@public");
         w.writeInline("export interface HttpAuthSchemeInputConfig");
         if (!resolveConfigFunctions.isEmpty()) {
             w.writeInline(" extends ");
