@@ -59,7 +59,7 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         boolean isClientSdk = settings.generateClient();
         if (isClientSdk) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-            String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
+            String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
             writerFactory.accept(
                     Paths.get(CodegenUtils.SOURCE_FOLDER, "models", serviceExceptionName + ".ts").toString(),
                     writer -> {
@@ -93,7 +93,7 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         boolean isClientSdk = settings.generateClient();
         if (isClientSdk) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-            String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
+            String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
             writer.write("export { $1L } from \"./models/$1L\";", serviceExceptionName);
         }
     }
@@ -117,7 +117,7 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
                 String baseExceptionAlias = "__BaseException";
                 SymbolReference reference;
                 if (settings.generateClient()) {
-                    String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
+                    String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
                     String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
                     Symbol serviceExceptionSymbol = Symbol.builder()
                             .name(serviceExceptionName)
@@ -140,5 +140,4 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
             return symbol;
         };
     }
-
 }

@@ -66,7 +66,9 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  *
  * @throws {@link HaltError} (client fault)
  *
- * @throws {@link XYZServiceServiceException}
+ * @throws {@link XYZServiceServiceException} (client fault)
+ *
+ * @throws {@link XYZServiceSyntheticServiceException}
  * <p>Base exception class for all service exceptions from XYZService service.</p>
  *
  *

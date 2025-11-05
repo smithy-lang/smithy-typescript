@@ -13,12 +13,12 @@ export { __ServiceException };
  *
  * Base exception class for all service exceptions from XYZService service.
  */
-export class XYZServiceServiceException extends __ServiceException {
+export class XYZServiceSyntheticServiceException extends __ServiceException {
   /**
    * @internal
    */
   constructor(options: __ServiceExceptionOptions) {
     super(options);
-    Object.setPrototypeOf(this, XYZServiceServiceException.prototype);
+    Object.setPrototypeOf(this, XYZServiceSyntheticServiceException.prototype);
   }
 }

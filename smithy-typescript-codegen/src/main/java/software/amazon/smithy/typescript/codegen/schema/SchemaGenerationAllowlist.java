@@ -29,9 +29,10 @@ public abstract class SchemaGenerationAllowlist {
     }
 
     public static boolean allows(ShapeId serviceShapeId, TypeScriptSettings settings) {
+        boolean generateClient = settings.generateClient();
         boolean allowedByProtocol = PROTOCOLS.contains(settings.getProtocol());
         boolean allowedByName = ALLOWED.contains(serviceShapeId);
-        return settings.generateSchemas() && (allowedByProtocol || allowedByName);
+        return settings.generateSchemas() && generateClient && (allowedByProtocol || allowedByName);
     }
 
     @Deprecated

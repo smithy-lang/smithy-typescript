@@ -73,7 +73,7 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  * @see {@link TradeEventStreamCommandOutput} for command's `response` shape.
  * @see {@link XYZServiceClientResolvedConfig | config} for XYZServiceClient's `config` shape.
  *
- * @throws {@link XYZServiceServiceException}
+ * @throws {@link XYZServiceSyntheticServiceException}
  * <p>Base exception class for all service exceptions from XYZService service.</p>
  *
  *
