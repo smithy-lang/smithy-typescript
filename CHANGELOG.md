@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.37.0 (2025-11-04)
+
+### Features
+
+- Upgraded smithy version to 1.63.0 ([#1761](https://github.com/smithy-lang/smithy-typescript/pull/1761))
+
+### Bug Fixes
+
+- Added default description for deprecatedTrait ([#1541](https://github.com/smithy-lang/smithy-typescript/pull/1541))
+
 ## 0.36.1 (2025-10-06)
 
 ### Features
