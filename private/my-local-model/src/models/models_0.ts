@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { XYZServiceServiceException as __BaseException } from "./XYZServiceServiceException";
+import { XYZServiceSyntheticServiceException as __BaseException } from "./XYZServiceSyntheticServiceException";
 import { NumericValue } from "@smithy/core/serde";
 import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
 
@@ -122,6 +122,25 @@ export class RetryableError extends __BaseException {
       ...opts,
     });
     Object.setPrototypeOf(this, RetryableError.prototype);
+  }
+}
+
+/**
+ * @public
+ */
+export class XYZServiceServiceException extends __BaseException {
+  readonly name: "XYZServiceServiceException" = "XYZServiceServiceException";
+  readonly $fault: "client" = "client";
+  /**
+   * @internal
+   */
+  constructor(opts: __ExceptionOptionType<XYZServiceServiceException, __BaseException>) {
+    super({
+      name: "XYZServiceServiceException",
+      $fault: "client",
+      ...opts,
+    });
+    Object.setPrototypeOf(this, XYZServiceServiceException.prototype);
   }
 }
 

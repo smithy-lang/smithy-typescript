@@ -396,7 +396,7 @@ final class CommandGenerator implements Runnable {
         }
 
         String name = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        buffer.append(String.format("@throws {@link %s}%n", CodegenUtils.getServiceExceptionName(name)));
+        buffer.append(String.format("@throws {@link %s}%n", CodegenUtils.getSyntheticBaseExceptionName(name, model)));
         buffer.append(String.format("<p>Base exception class for all service exceptions from %s service.</p>%n", name));
 
         return buffer.toString();

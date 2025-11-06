@@ -23,6 +23,7 @@ operation GetNumbers {
         MysteryThrottlingError
         RetryableError
         HaltError
+        XYZServiceServiceException
     ]
 }
 
@@ -62,6 +63,9 @@ structure RetryableError {}
 
 @error("client")
 structure HaltError {}
+
+@error("client")
+structure XYZServiceServiceException {}
 
 operation TradeEventStream {
     input: TradeEventStreamRequest

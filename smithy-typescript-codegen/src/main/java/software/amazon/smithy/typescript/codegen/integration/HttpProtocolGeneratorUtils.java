@@ -452,8 +452,11 @@ public final class HttpProtocolGeneratorUtils {
     public static SymbolReference getClientBaseException(GenerationContext context) {
         ServiceShape service = context.getService();
         SymbolProvider symbolProvider = context.getSymbolProvider();
-        String serviceExceptionName = symbolProvider.toSymbol(service).getName()
-                        .replaceAll("(Client)$", "ServiceException");
+        String serviceName = symbolProvider.toSymbol(service).getName()
+                        .replaceAll("(Client)$", "");
+        String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(
+            serviceName, context.getModel()
+        );
         String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
         Symbol serviceExceptionSymbol = Symbol.builder()
                             .name(serviceExceptionName)

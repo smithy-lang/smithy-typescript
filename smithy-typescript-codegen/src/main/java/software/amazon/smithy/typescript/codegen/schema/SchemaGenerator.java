@@ -261,6 +261,9 @@ public class SchemaGenerator implements Runnable {
      * unqualified name.
      */
     private String getShapeVariableName(Shape shape) {
+        if (shape.getId().equals(ShapeId.from("smithy.api#Unit"))) {
+            return "__Unit";
+        }
         String symbolName = reservedWords.escape(shape.getId().getName());
         if (requiresNamingDeconfliction.contains(shape)) {
             symbolName += "_" + checkImportString(shape, shape.getId().getNamespace(), "n");
@@ -339,7 +342,10 @@ public class SchemaGenerator implements Runnable {
         TypeScriptWriter writer = getBaseWriter();
 
         String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        String serviceExceptionName = CodegenUtils.getServiceExceptionName(serviceName);
+        String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(
+            serviceName, model
+        );
+
         String namespace = settings.getService(model).getId().getNamespace();
 
         String exceptionCtorSymbolName = "__" + serviceExceptionName;
@@ -554,7 +560,7 @@ public class SchemaGenerator implements Runnable {
             && shape.getId().getName().equals("Unit")) {
             // special signal value for operation input/output.
             writer.write("""
-                export var Unit = "unit" as const;
+                export var __Unit = "unit" as const;
                 """);
         } else if (!elision.isReferenceSchema(shape) && !elision.traits.hasSchemaTraits(shape)) {
             String sentinel = this.resolveSchema(model.expectShape(ShapeId.from("smithy.api#Unit")), shape);

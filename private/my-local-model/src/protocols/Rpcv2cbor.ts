@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
-import { XYZServiceServiceException as __BaseException } from "../models/XYZServiceServiceException";
+import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
 import {
   Alpha,
   CodedThrottlingError,
@@ -12,6 +12,7 @@ import {
   RetryableError,
   TradeEvents,
   Unit,
+  XYZServiceServiceException,
 } from "../models/models_0";
 import {
   dateToTag as __dateToTag,
@@ -138,6 +139,9 @@ const de_CommandError = async (output: __HttpResponse, context: __SerdeContext):
     case "RetryableError":
     case "org.xyz.v1#RetryableError":
       throw await de_RetryableErrorRes(parsedOutput, context);
+    case "XYZServiceServiceException":
+    case "org.xyz.v1#XYZServiceServiceException":
+      throw await de_XYZServiceServiceExceptionRes(parsedOutput, context);
     default:
       const parsedBody = parsedOutput.body;
       return throwDefaultError({
@@ -200,6 +204,22 @@ const de_RetryableErrorRes = async (parsedOutput: any, context: __SerdeContext):
   const body = parsedOutput.body;
   const deserialized: any = _json(body);
   const exception = new RetryableError({
+    $metadata: deserializeMetadata(parsedOutput),
+    ...deserialized,
+  });
+  return __decorateServiceException(exception, body);
+};
+
+/**
+ * deserializeRpcv2cborXYZServiceServiceExceptionRes
+ */
+const de_XYZServiceServiceExceptionRes = async (
+  parsedOutput: any,
+  context: __SerdeContext
+): Promise<XYZServiceServiceException> => {
+  const body = parsedOutput.body;
+  const deserialized: any = _json(body);
+  const exception = new XYZServiceServiceException({
     $metadata: deserializeMetadata(parsedOutput),
     ...deserialized,
   });
@@ -330,6 +350,8 @@ const de_GetNumbersResponse = (output: any, context: __SerdeContext): GetNumbers
 // de_MysteryThrottlingError omitted.
 
 // de_RetryableError omitted.
+
+// de_XYZServiceServiceException omitted.
 
 // de_Unit omitted.
 

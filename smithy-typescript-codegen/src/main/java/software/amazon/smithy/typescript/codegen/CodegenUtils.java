@@ -352,7 +352,36 @@ public final class CodegenUtils {
         return symbolProvider.toSymbol(service).getName().replaceAll("(Client)$", "");
     }
 
+    /**
+     * The alternative should be used because the base exception may have been renamed
+     * due to a collision in the model.
+     *
+     * @deprecated use {@link #getSyntheticBaseExceptionName}.
+     */
+    @Deprecated
     public static String getServiceExceptionName(String serviceName) {
         return serviceName + "ServiceException";
+    }
+
+    /**
+     * If the service unfortunately defines a ServiceNameBaseException error,
+     * we still generate a synthetic base error for uniformity, but it must be renamed.
+     */
+    public static String getSyntheticBaseExceptionName(String serviceName, Model model) {
+        String serviceExceptionName = getServiceExceptionName(serviceName);
+        while (true) {
+            String finalServiceExceptionName = serviceExceptionName;
+            boolean namingCollision = model.getStructureShapes()
+                .stream()
+                .anyMatch(structureShape -> structureShape.getId().getName().equals(finalServiceExceptionName));
+
+            if (namingCollision) {
+                serviceExceptionName = serviceExceptionName
+                    .replaceAll("ServiceException$", "SyntheticServiceException");
+            } else {
+                break;
+            }
+        }
+        return serviceExceptionName;
     }
 }
