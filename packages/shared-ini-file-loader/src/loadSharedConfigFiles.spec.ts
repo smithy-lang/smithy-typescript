@@ -6,13 +6,13 @@ import { getCredentialsFilepath } from "./getCredentialsFilepath";
 import { getHomeDir } from "./getHomeDir";
 import { loadSharedConfigFiles } from "./loadSharedConfigFiles";
 import { parseIni } from "./parseIni";
-import { slurpFile } from "./slurpFile";
+import { readFile } from "./readFile";
 
 vi.mock("./getConfigData");
 vi.mock("./getConfigFilepath");
 vi.mock("./getCredentialsFilepath");
 vi.mock("./parseIni");
-vi.mock("./slurpFile");
+vi.mock("./readFile");
 vi.mock("./getHomeDir");
 
 describe("loadSharedConfigFiles", () => {
@@ -29,7 +29,7 @@ describe("loadSharedConfigFiles", () => {
     vi.mocked(getCredentialsFilepath).mockReturnValue(mockCredsFilepath);
     vi.mocked(parseIni).mockImplementation((args: any) => args);
     vi.mocked(getConfigData).mockImplementation((args) => args);
-    vi.mocked(slurpFile).mockImplementation((path) => Promise.resolve(path));
+    vi.mocked(readFile).mockImplementation((path) => Promise.resolve(path));
     vi.mocked(getHomeDir).mockReturnValue(mockHomeDir);
   });
 
@@ -71,7 +71,7 @@ describe("loadSharedConfigFiles", () => {
 
   describe("swallows error and returns empty configuration", () => {
     it("when readFile throws error", async () => {
-      vi.mocked(slurpFile).mockRejectedValue("error");
+      vi.mocked(readFile).mockRejectedValue("error");
       const sharedConfigFiles = await loadSharedConfigFiles();
       expect(sharedConfigFiles).toStrictEqual({ configFile: {}, credentialsFile: {} });
     });

@@ -2,13 +2,13 @@ import { describe, expect, test as it } from "vitest";
 
 import { externalDataInterceptor } from "./externalDataInterceptor";
 import { getSSOTokenFromFile } from "./getSSOTokenFromFile";
-import { slurpFile } from "./slurpFile";
+import { readFile } from "./readFile";
 
 describe("fileMockController", () => {
-  it("intercepts slurpFile", async () => {
+  it("intercepts readFile", async () => {
     externalDataInterceptor.interceptFile("abcd", "contents");
 
-    expect(await slurpFile("abcd")).toEqual("contents");
+    expect(await readFile("abcd")).toEqual("contents");
     expect(externalDataInterceptor.getFileRecord()).toEqual({
       abcd: Promise.resolve("contents"),
     });

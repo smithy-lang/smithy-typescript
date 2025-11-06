@@ -1,5 +1,5 @@
 import { tokenIntercept } from "./getSSOTokenFromFile";
-import { fileIntercept } from "./slurpFile";
+import { fileIntercept } from "./readFile";
 
 /**
  * @internal

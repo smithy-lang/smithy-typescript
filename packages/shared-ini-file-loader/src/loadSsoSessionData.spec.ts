@@ -4,12 +4,12 @@ import { getConfigFilepath } from "./getConfigFilepath";
 import { getSsoSessionData } from "./getSsoSessionData";
 import { loadSsoSessionData } from "./loadSsoSessionData";
 import { parseIni } from "./parseIni";
-import { slurpFile } from "./slurpFile";
+import { readFile } from "./readFile";
 
 vi.mock("./getConfigFilepath");
 vi.mock("./getSsoSessionData");
 vi.mock("./parseIni");
-vi.mock("./slurpFile");
+vi.mock("./readFile");
 
 describe(loadSsoSessionData.name, () => {
   const mockConfigFilepath = "/mock/file/path/config";
@@ -19,7 +19,7 @@ describe(loadSsoSessionData.name, () => {
     vi.mocked(getConfigFilepath).mockReturnValue(mockConfigFilepath);
     vi.mocked(parseIni).mockImplementation((args: any) => args);
     vi.mocked(getSsoSessionData).mockReturnValue(mockSsoSessionData);
-    vi.mocked(slurpFile).mockImplementation((path) => Promise.resolve(path));
+    vi.mocked(readFile).mockImplementation((path) => Promise.resolve(path));
   });
 
   afterEach(() => {
@@ -42,7 +42,7 @@ describe(loadSsoSessionData.name, () => {
 
   describe("swallows error and returns empty configuration", () => {
     it("when readFile throws error", async () => {
-      vi.mocked(slurpFile).mockRejectedValue("error");
+      vi.mocked(readFile).mockRejectedValue("error");
       const ssoSessionData = await loadSsoSessionData();
       expect(ssoSessionData).toStrictEqual({});
     });

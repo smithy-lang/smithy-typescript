@@ -1,11 +1,10 @@
-// ToDo: Change to "fs/promises" when supporting nodejs>=14
-import { promises } from "fs";
+import * as promises from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getSSOTokenFilepath } from "./getSSOTokenFilepath";
 import { getSSOTokenFromFile } from "./getSSOTokenFromFile";
 
-vi.mock("fs", () => ({ promises: { readFile: vi.fn() } }));
+vi.mock("node:fs/promises", () => ({ readFile: vi.fn() }));
 vi.mock("./getSSOTokenFilepath");
 
 describe(getSSOTokenFromFile.name, () => {
