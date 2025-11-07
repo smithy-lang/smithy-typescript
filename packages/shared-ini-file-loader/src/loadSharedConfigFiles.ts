@@ -6,7 +6,7 @@ import { getConfigFilepath } from "./getConfigFilepath";
 import { getCredentialsFilepath } from "./getCredentialsFilepath";
 import { getHomeDir } from "./getHomeDir";
 import { parseIni } from "./parseIni";
-import { slurpFile } from "./slurpFile";
+import { readFile } from "./readFile";
 
 /**
  * @public
@@ -62,13 +62,13 @@ export const loadSharedConfigFiles = async (init: SharedConfigInit = {}): Promis
   }
 
   const parsedFiles = await Promise.all([
-    slurpFile(resolvedConfigFilepath, {
+    readFile(resolvedConfigFilepath, {
       ignoreCache: init.ignoreCache,
     })
       .then(parseIni)
       .then(getConfigData)
       .catch(swallowError),
-    slurpFile(resolvedFilepath, {
+    readFile(resolvedFilepath, {
       ignoreCache: init.ignoreCache,
     })
       .then(parseIni)

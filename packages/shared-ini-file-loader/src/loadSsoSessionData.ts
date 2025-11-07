@@ -3,7 +3,7 @@ import type { ParsedIniData } from "@smithy/types";
 import { getConfigFilepath } from "./getConfigFilepath";
 import { getSsoSessionData } from "./getSsoSessionData";
 import { parseIni } from "./parseIni";
-import { slurpFile } from "./slurpFile";
+import { readFile } from "./readFile";
 
 /**
  * Subset of {@link SharedConfigInit}.
@@ -24,7 +24,7 @@ const swallowError = () => ({});
  * @internal
  */
 export const loadSsoSessionData = async (init: SsoSessionInit = {}): Promise<ParsedIniData> =>
-  slurpFile(init.configFilepath ?? getConfigFilepath())
+  readFile(init.configFilepath ?? getConfigFilepath())
     .then(parseIni)
     .then(getSsoSessionData)
     .catch(swallowError);

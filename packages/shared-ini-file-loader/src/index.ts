@@ -7,3 +7,4 @@ export * from "./loadSsoSessionData";
 export * from "./parseKnownFiles";
 export { externalDataInterceptor } from "./externalDataInterceptor";
 export * from "./types";
+export { type ReadFileOptions, readFile } from "./readFile";

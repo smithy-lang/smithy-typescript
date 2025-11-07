@@ -37,13 +37,13 @@
   "types": "./dist-types/index.d.ts",
   "browser": {
     "./dist-es/getSSOTokenFromFile": false,
-    "./dist-es/slurpFile": false
+    "./dist-es/readFile": false
   },
   "react-native": {
     "./dist-cjs/getSSOTokenFromFile": false,
-    "./dist-cjs/slurpFile": false,
+    "./dist-cjs/readFile": false,
     "./dist-es/getSSOTokenFromFile": false,
-    "./dist-es/slurpFile": false
+    "./dist-es/readFile": false
   },
   "engines": {
     "node": ">=18.0.0"
