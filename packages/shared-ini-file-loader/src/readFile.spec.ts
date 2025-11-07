@@ -19,7 +19,7 @@ describe("readFile", () => {
     vi.resetModules();
   });
 
-  describe("makes one readFile call for a filepath irrespective of readFile calls", () => {
+  describe("makes one fs.readFile call for a filepath irrespective of smithy.readFile calls", () => {
     it.each([10, 100, 1000, 10000])("parallel calls: %d ", async (num: number) => {
       const { readFile } = await import("./readFile");
       const mockPath = "/mock/path";
@@ -29,7 +29,7 @@ describe("readFile", () => {
       const fileContentArr = await Promise.all(Array(num).fill(readFile(mockPath)));
       expect(fileContentArr).toStrictEqual(Array(num).fill(mockPathContent));
 
-      // There is one readFile call even through readFile is called in parallel num times.
+      // There is one fs.readFile call even through smithy.readFile is called in parallel num times.
       expect(promises.readFile).toHaveBeenCalledTimes(1);
       expect(promises.readFile).toHaveBeenCalledWith(mockPath, UTF8);
     });
@@ -43,14 +43,14 @@ describe("readFile", () => {
       const fileContentArr = await Promise.all([readFile(mockPath), readFile(mockPath)]);
       expect(fileContentArr).toStrictEqual([mockPathContent, mockPathContent]);
 
-      // There is one readFile call even through readFile is called in parallel twice.
+      // There is one fs.readFile call even though smithy.readFile is called in parallel twice.
       expect(promises.readFile).toHaveBeenCalledTimes(1);
       expect(promises.readFile).toHaveBeenCalledWith(mockPath, UTF8);
 
       const fileContent = await readFile(mockPath);
       expect(fileContent).toStrictEqual(mockPathContent);
 
-      // There is one readFile call even through readFile is called for the third time.
+      // There is one fs.readFile call even though smithy.readFile is called for the third time.
       expect(promises.readFile).toHaveBeenCalledTimes(1);
     });
   });
@@ -68,7 +68,7 @@ describe("readFile", () => {
     const fileContentArr = await Promise.all([readFile(mockPath1), readFile(mockPath2)]);
     expect(fileContentArr).toStrictEqual([mockPathContent1, mockPathContent2]);
 
-    // There are two readFile calls as readFile is called in parallel with different filepaths.
+    // There are two fs.readFile calls as smithy.readFile is called in parallel with different file paths.
     expect(promises.readFile).toHaveBeenCalledTimes(2);
     expect(promises.readFile).toHaveBeenNthCalledWith(1, mockPath1, UTF8);
     expect(promises.readFile).toHaveBeenNthCalledWith(2, mockPath2, UTF8);
@@ -78,7 +78,7 @@ describe("readFile", () => {
     const fileContent2 = await readFile(mockPath2);
     expect(fileContent2).toStrictEqual(mockPathContent2);
 
-    // There is one readFile call even through readFile is called for the third time.
+    // There is one fs.readFile call even though smithy.readFile is called for the third time.
     expect(promises.readFile).toHaveBeenCalledTimes(2);
   });
 
@@ -95,7 +95,7 @@ describe("readFile", () => {
     ]);
     expect(fileContentArr).toStrictEqual([mockPathContent1, mockPathContent1]);
 
-    // There are two readFile calls as readFile is called in parallel with the same filepath.
+    // There are two fs.readFile calls as smithy.readFile is called in parallel with the same filepath.
     expect(promises.readFile).toHaveBeenCalledTimes(2);
     expect(promises.readFile).toHaveBeenNthCalledWith(1, mockPath1, UTF8);
     expect(promises.readFile).toHaveBeenNthCalledWith(2, mockPath1, UTF8);
@@ -103,7 +103,7 @@ describe("readFile", () => {
     const fileContent1 = await readFile(mockPath1);
     expect(fileContent1).toStrictEqual(mockPathContent1);
 
-    // There is no readFile call since readFile is now called without refresh.
+    // There is no fs.readFile call since smithy.readFile is now called without refresh.
     expect(promises.readFile).toHaveBeenCalledTimes(2);
   });
 });
