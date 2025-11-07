@@ -1,1 +1,1 @@
-export { RpcV2ProtocolClient } from "@smithy/smithy-rpcv2-cbor-schema";
+export { RpcV2ProtocolClient, FractionalSecondsCommand } from "@smithy/smithy-rpcv2-cbor-schema";
