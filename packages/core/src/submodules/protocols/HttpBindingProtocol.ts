@@ -24,7 +24,7 @@ import { HttpProtocol } from "./HttpProtocol";
  * Base for HTTP-binding protocols. Downstream examples
  * include AWS REST JSON and AWS REST XML.
  *
- * @alpha
+ * @public
  */
 export abstract class HttpBindingProtocol extends HttpProtocol {
   public async serializeRequest<Input extends object>(

@@ -24,7 +24,7 @@ import { determineTimestampFormat } from "./determineTimestampFormat";
 /**
  * This deserializer reads strings.
  *
- * @alpha
+ * @public
  */
 export class FromStringShapeDeserializer extends SerdeContext implements ShapeDeserializer<string> {
   public constructor(private settings: CodecSettings) {

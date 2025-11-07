@@ -21,7 +21,7 @@ import type { TraitBitVector } from "./traits";
 
 /**
  * A schema is an object or value that describes how to serialize/deserialize data.
- * @alpha
+ * @public
  */
 export type $Schema = UnitSchema | SimpleSchema | $MemberSchema | StaticSchema | NormalizedSchema;
 
@@ -74,7 +74,7 @@ export type BlobSchemas = BlobSchema | StreamingBlobSchema;
  * Signal value for the Smithy void value. Typically used for
  * operation input and outputs.
  *
- * @alpha
+ * @public
  */
 export type UnitSchema = "unit";
 
@@ -133,13 +133,13 @@ export type SchemaTraitsObject = {
 /**
  * Indicates the schema is a member of a parent Structure schema.
  * It may also have a set of member traits distinct from its target shape's traits.
- * @alpha
+ * @public
  */
 export type $MemberSchema = [$SchemaRef, SchemaTraits];
 
 /**
  * Schema for an operation.
- * @alpha
+ * @public
  */
 export interface $OperationSchema {
   namespace: string;
@@ -186,7 +186,7 @@ export interface NormalizedSchema {
  * A schema "reference" is either a schema or a function that
  * provides a schema. This is useful for lazy loading, and to allow
  * code generation to define schema out of dependency order.
- * @alpha
+ * @public
  */
 export type $SchemaRef = $Schema | (() => $Schema);
 

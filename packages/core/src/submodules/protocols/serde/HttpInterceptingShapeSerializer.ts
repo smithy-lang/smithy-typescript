@@ -16,7 +16,7 @@ import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
  * For example, a JavaScript array is serialized differently when being written
  * to a REST JSON HTTP header (comma-delimited string) and a REST JSON HTTP body (JSON array).
  *
- * @alpha
+ * @public
  */
 export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeSerializer<string | Uint8Array>>
   implements ShapeSerializer<string | Uint8Array>, ConfigurableSerdeContext

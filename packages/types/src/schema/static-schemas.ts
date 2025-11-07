@@ -6,37 +6,37 @@ Schemas are generated as static objects to improve tree-shaking behavior in down
 import type { $SchemaRef, SchemaTraits } from "../schema/schema";
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchemaIdSimple = 0;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchemaIdList = 1;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchemaIdMap = 2;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchemaIdStruct = 3;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchemaIdError = -3;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchemaIdOperation = 9;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSchema =
   | StaticSimpleSchema
@@ -47,32 +47,32 @@ export type StaticSchema =
   | StaticOperationSchema;
 
 /**
- * @alpha
+ * @public
  */
 export type ShapeName = string;
 
 /**
- * @alpha
+ * @public
  */
 export type ShapeNamespace = string;
 
 /**
- * @alpha
+ * @public
  */
 export type StaticSimpleSchema = [StaticSchemaIdSimple, ShapeNamespace, ShapeName, SchemaTraits, $SchemaRef];
 
 /**
- * @alpha
+ * @public
  */
 export type StaticListSchema = [StaticSchemaIdList, ShapeNamespace, ShapeName, SchemaTraits, $SchemaRef];
 
 /**
- * @alpha
+ * @public
  */
 export type StaticMapSchema = [StaticSchemaIdMap, ShapeNamespace, ShapeName, SchemaTraits, $SchemaRef, $SchemaRef];
 
 /**
- * @alpha
+ * @public
  */
 export type StaticStructureSchema = [
   StaticSchemaIdStruct,
@@ -84,7 +84,7 @@ export type StaticStructureSchema = [
 ];
 
 /**
- * @alpha
+ * @public
  */
 export type StaticErrorSchema = [
   StaticSchemaIdError,
@@ -96,7 +96,7 @@ export type StaticErrorSchema = [
 ];
 
 /**
- * @alpha
+ * @public
  */
 export type StaticOperationSchema = [
   StaticSchemaIdOperation,

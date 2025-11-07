@@ -39,7 +39,7 @@ import { translateTraits } from "./translateTraits";
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
  * Presents a consistent interface for interacting with polymorphic schema representations.
  *
- * @alpha
+ * @public
  */
 export class NormalizedSchema implements INormalizedSchema {
   // ========================

@@ -18,7 +18,7 @@ import { HttpProtocol } from "./HttpProtocol";
 /**
  * Abstract base for RPC-over-HTTP protocols.
  *
- * @alpha
+ * @public
  */
 export abstract class RpcProtocol extends HttpProtocol {
   public async serializeRequest<Input extends object>(

@@ -18,7 +18,7 @@ import { fromUtf8 } from "@smithy/util-utf8";
  * Separated module for async mixin of EventStream serde capability.
  * This is used by the HttpProtocol base class from \@smithy/core/protocols.
  *
- * @alpha
+ * @public
  */
 export class EventStreamSerde {
   private readonly marshaller: EventStreamMarshaller;
