@@ -8,7 +8,7 @@ import { cbor } from "./cbor";
 import { dateToTag } from "./parseCborBody";
 
 /**
- * @alpha
+ * @public
  */
 export class CborCodec extends SerdeContext implements Codec<Uint8Array, Uint8Array> {
   public createSerializer(): CborShapeSerializer {
@@ -25,7 +25,7 @@ export class CborCodec extends SerdeContext implements Codec<Uint8Array, Uint8Ar
 }
 
 /**
- * @alpha
+ * @public
  */
 export class CborShapeSerializer extends SerdeContext implements ShapeSerializer {
   private value: unknown;
@@ -115,7 +115,7 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
 }
 
 /**
- * @alpha
+ * @public
  */
 export class CborShapeDeserializer extends SerdeContext implements ShapeDeserializer {
   public read(schema: Schema, bytes: Uint8Array): any {

@@ -5,7 +5,7 @@ import type { ErrorSchema } from "./schemas/ErrorSchema";
 /**
  * A way to look up schema by their ShapeId values.
  *
- * @alpha
+ * @public
  */
 export class TypeRegistry {
   public static readonly registries = new Map<string, TypeRegistry>();

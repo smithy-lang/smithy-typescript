@@ -20,7 +20,7 @@ import { loadSmithyRpcV2CborErrorCode } from "./parseCborBody";
 /**
  * Client protocol for Smithy RPCv2 CBOR.
  *
- * @alpha
+ * @public
  */
 export class SmithyRpcV2CborProtocol extends RpcProtocol {
   private codec = new CborCodec();

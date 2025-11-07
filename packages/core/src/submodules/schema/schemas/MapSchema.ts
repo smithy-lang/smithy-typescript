@@ -4,7 +4,7 @@ import { Schema } from "./Schema";
 
 /**
  * A schema with a key schema and value schema.
- * @alpha
+ * @internal
  * @deprecated use StaticSchema
  */
 export class MapSchema extends Schema implements IMapSchema {

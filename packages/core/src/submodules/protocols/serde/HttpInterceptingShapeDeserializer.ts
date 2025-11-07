@@ -12,7 +12,7 @@ import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";
  * For example, in a JSON HTTP message, the deserialization of a field will differ depending on whether
  * it is bound to the HTTP header (string) or body (JSON).
  *
- * @alpha
+ * @public
  */
 export class HttpInterceptingShapeDeserializer<CodecShapeDeserializer extends ShapeDeserializer<any>>
   extends SerdeContext

@@ -17,7 +17,7 @@ import type {
 
 /**
  * Schema sentinel runtime values.
- * @alpha
+ * @internal
  *
  * @deprecated use inline numbers with type annotation to save space.
  */

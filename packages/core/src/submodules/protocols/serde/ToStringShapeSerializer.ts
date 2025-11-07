@@ -16,7 +16,7 @@ import { determineTimestampFormat } from "./determineTimestampFormat";
 /**
  * Serializes a shape to string.
  *
- * @alpha
+ * @public
  */
 export class ToStringShapeSerializer extends SerdeContext implements ShapeSerializer<string> {
   private stringBuffer = "";

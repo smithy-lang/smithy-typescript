@@ -7,7 +7,7 @@ import type { StaticSchema } from "./static-schemas";
 
 /**
  * A schema is an object or value that describes how to serialize/deserialize data.
- * @public
+ * @internal
  * @deprecated use $Schema
  */
 export type Schema =
@@ -26,7 +26,7 @@ export type Schema =
  * A schema "reference" is either a schema or a function that
  * provides a schema. This is useful for lazy loading, and to allow
  * code generation to define schema out of dependency order.
- * @public
+ * @internal
  * @deprecated use $SchemaRef
  */
 export type SchemaRef = Schema | (() => Schema);
@@ -34,7 +34,7 @@ export type SchemaRef = Schema | (() => Schema);
 /**
  * A schema that has traits.
  *
- * @public
+ * @internal
  * @deprecated use static schema.
  */
 export interface TraitsSchema {
@@ -46,14 +46,14 @@ export interface TraitsSchema {
 /**
  * Indicates the schema is a member of a parent Structure schema.
  * It may also have a set of member traits distinct from its target shape's traits.
- * @public
+ * @internal
  * @deprecated use $MemberSchema
  */
 export type MemberSchema = [SchemaRef, SchemaTraits];
 
 /**
  * Schema for the structure aggregate type.
- * @public
+ * @internal
  * @deprecated use static schema.
  */
 export interface StructureSchema extends TraitsSchema {
@@ -69,7 +69,7 @@ export interface StructureSchema extends TraitsSchema {
 
 /**
  * Schema for the list aggregate type.
- * @public
+ * @internal
  * @deprecated use static schema.
  */
 export interface ListSchema extends TraitsSchema {
@@ -78,7 +78,7 @@ export interface ListSchema extends TraitsSchema {
 
 /**
  * Schema for the map aggregate type.
- * @public
+ * @internal
  * @deprecated use static schema.
  */
 export interface MapSchema extends TraitsSchema {
@@ -88,7 +88,7 @@ export interface MapSchema extends TraitsSchema {
 
 /**
  * Schema for an operation.
- * @public
+ * @internal
  * @deprecated use StaticOperationSchema or $OperationSchema
  */
 export interface OperationSchema {
@@ -101,7 +101,7 @@ export interface OperationSchema {
 
 /**
  * Turns a serialization into a data object.
- * @public
+ * @internal
  * @deprecated use $ShapeDeserializer
  */
 export interface ShapeDeserializer<SerializationType = Uint8Array> extends ConfigurableSerdeContext {
@@ -113,7 +113,7 @@ export interface ShapeDeserializer<SerializationType = Uint8Array> extends Confi
 
 /**
  * Turns a data object into a serialization.
- * @public
+ * @internal
  * @deprecated use $ShapeSerializer
  */
 export interface ShapeSerializer<SerializationType = Uint8Array> extends ConfigurableSerdeContext {
@@ -125,7 +125,7 @@ export interface ShapeSerializer<SerializationType = Uint8Array> extends Configu
 /**
  * A codec creates serializers and deserializers for some format such as JSON, XML, or CBOR.
  *
- * @public
+ * @internal
  * @deprecated use $Codec
  */
 export interface Codec<S, D> extends ConfigurableSerdeContext {
@@ -135,7 +135,7 @@ export interface Codec<S, D> extends ConfigurableSerdeContext {
 
 /**
  * A client protocol defines how to convert a message (e.g. HTTP request/response) to and from a data object.
- * @public
+ * @internal
  * @deprecated use $ClientProtocol
  */
 export interface ClientProtocol<Request, Response> extends ConfigurableSerdeContext {

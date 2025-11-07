@@ -26,7 +26,7 @@ import { SerdeContext } from "./SerdeContext";
 /**
  * Abstract base for HTTP-based client protocols.
  *
- * @alpha
+ * @public
  */
 export abstract class HttpProtocol extends SerdeContext implements ClientProtocol<IHttpRequest, IHttpResponse> {
   protected abstract serializer: ShapeSerializer<string | Uint8Array>;
