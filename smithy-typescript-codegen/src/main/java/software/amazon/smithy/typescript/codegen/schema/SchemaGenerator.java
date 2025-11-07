@@ -5,7 +5,6 @@
 
 package software.amazon.smithy.typescript.codegen.schema;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +48,6 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public class SchemaGenerator implements Runnable {
     public static final String SCHEMAS_FOLDER = "schemas";
     private final SchemaReferenceIndex elision;
-    private final ShapeGroupingIndex groupingIndex;
     private final TypeScriptSettings settings;
     private final SymbolProvider symbolProvider;
     private final Model model;
@@ -90,7 +88,6 @@ public class SchemaGenerator implements Runnable {
         elision = SchemaReferenceIndex.of(model);
         this.settings = settings;
         this.symbolProvider = symbolProvider;
-        groupingIndex = ShapeGroupingIndex.of(model);
     }
 
     /**
@@ -130,8 +127,7 @@ public class SchemaGenerator implements Runnable {
         unionShapes.forEach(this::writeUnionSchema);
         operationShapes.forEach(this::writeOperationSchema);
 
-        String stringConstants = store.flushVariableDeclarationCode()
-            .replaceAll("const ", "export const ");
+        String stringConstants = store.flushVariableDeclarationCode();
 
         for (Map.Entry<String, TypeScriptWriter> entry : writers.entrySet()) {
             String group = entry.getKey();
@@ -158,7 +154,7 @@ public class SchemaGenerator implements Runnable {
      * @return writer corresponding to the file that will hold the shape's schema.
      */
     private TypeScriptWriter getWriter(ShapeId shape) {
-        return writers.computeIfAbsent(groupingIndex.getGroup(shape), k -> {
+        return writers.computeIfAbsent("schemas_0", k -> {
             TypeScriptWriter typeScriptWriter = new TypeScriptWriter("");
             typeScriptWriter.write("""
                 /* eslint no-var: 0 */
@@ -266,7 +262,7 @@ public class SchemaGenerator implements Runnable {
         }
         String symbolName = reservedWords.escape(shape.getId().getName());
         if (requiresNamingDeconfliction.contains(shape)) {
-            symbolName += "_" + checkImportString(shape, shape.getId().getNamespace(), "n");
+            symbolName += "_" + store.var(shape.getId().getNamespace(), "n");
         }
         return symbolName;
     }
@@ -283,8 +279,8 @@ public class SchemaGenerator implements Runnable {
                     export var $L: StaticSimpleSchema = [0, $L, $L,""",
                 "",
                 getShapeVariableName(shape),
-                checkImportString(shape, shape.getId().getNamespace(), "n"),
-                checkImportString(shape, shape.getId().getName()),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
                 () -> {
                     writeTraits(shape);
                     writer.writeInline(", $L];", resolveSimpleSchema(shape, shape));
@@ -309,15 +305,15 @@ public class SchemaGenerator implements Runnable {
                 export var $L: StaticErrorSchema = [-3, $L, $L,""",
                     "];",
                     getShapeVariableName(shape),
-                    checkImportString(shape, shape.getId().getNamespace(), "n"),
-                    checkImportString(shape, shape.getId().getName()),
+                    store.var(shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getName()),
                     () -> doWithMembers(shape)
                 );
                 writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
                 writer.write("""
                     TypeRegistry.for($L).registerError($L, $L);
                     """,
-                    checkImportString(shape, shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getNamespace(), "n"),
                     getShapeVariableName(shape),
                     exceptionCtorSymbolName
                 );
@@ -327,8 +323,8 @@ public class SchemaGenerator implements Runnable {
                 export var $L: StaticStructureSchema = [3, $L, $L,""",
                     "];",
                     getShapeVariableName(shape),
-                    checkImportString(shape, shape.getId().getNamespace(), "n"),
-                    checkImportString(shape, shape.getId().getName()),
+                    store.var(shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getName()),
                     () -> doWithMembers(shape)
                 );
             }
@@ -381,8 +377,8 @@ public class SchemaGenerator implements Runnable {
                     export var $L: StaticStructureSchema = [3, $L, $L,""",
                 "];",
                 getShapeVariableName(shape),
-                checkImportString(shape, shape.getId().getNamespace(), "n"),
-                checkImportString(shape, shape.getId().getName()),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
                 () -> doWithMembers(shape)
             );
         });
@@ -398,7 +394,7 @@ public class SchemaGenerator implements Runnable {
         // member names.
         writer.write(", [ ");
         shape.getAllMembers().forEach((memberName, member) -> {
-            writer.write("$L,", checkImportString(shape, memberName));
+            writer.write("$L,", store.var(memberName));
         });
 
         // member schemas.
@@ -429,8 +425,8 @@ public class SchemaGenerator implements Runnable {
                     export var $L: StaticListSchema = [1, $L, $L,""",
                 "];",
                 getShapeVariableName(shape),
-                checkImportString(shape, shape.getId().getNamespace(), "n"),
-                checkImportString(shape, shape.getId().getName()),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
                 () -> this.doWithMember(
                     shape,
                     shape.getMember()
@@ -447,8 +443,8 @@ public class SchemaGenerator implements Runnable {
                     export var $L: StaticMapSchema = [2, $L, $L,""",
                 "];",
                 getShapeVariableName(shape),
-                checkImportString(shape, shape.getId().getNamespace(), "n"),
-                checkImportString(shape, shape.getId().getName()),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
                 () -> this.doWithMember(
                     shape,
                     shape.getKey(),
@@ -516,12 +512,10 @@ public class SchemaGenerator implements Runnable {
             export var $L: StaticOperationSchema = [9, $L, $L,""",
             "];",
             getShapeVariableName(shape),
-            checkImportString(shape, shape.getId().getNamespace(), "n"),
-            checkImportString(shape, shape.getId().getName()),
+            store.var(shape.getId().getNamespace(), "n"),
+            store.var(shape.getId().getName()),
             () -> {
                 writeTraits(shape);
-                checkImportSchema(shape, model.expectShape(shape.getInputShape()));
-                checkImportSchema(shape, model.expectShape(shape.getOutputShape()));
                 writer.write("""
                     , () => $L, () => $L""",
                     getShapeVariableName(model.expectShape(shape.getInputShape())),
@@ -541,11 +535,10 @@ public class SchemaGenerator implements Runnable {
      */
     private void writeTraitsInContext(Shape context, Shape shape) {
         TypeScriptWriter writer = getWriter(context.getId());
-        boolean useImportedStrings = !groupingIndex.isBaseGroup(context);
 
         String traitCode = new SchemaTraitWriter(
             shape, elision,
-            useImportedStrings ? store.useSchemaWriter(writer) : store
+            store
         ).toString();
 
         writer.write(traitCode.replace("$", "$$"));
@@ -597,10 +590,6 @@ public class SchemaGenerator implements Runnable {
             } catch (IllegalArgumentException ignored) {
                 //
             }
-        }
-
-        if (isReference || hasTraits) {
-            checkImportSchema(context, shape);
         }
 
         return (isReference || hasTraits ? "() => " : "") + getShapeVariableName(shape);
@@ -705,44 +694,13 @@ public class SchemaGenerator implements Runnable {
         }
 
         if (contained.isListShape() || contained.isMapShape()) {
-            String schemaVarName = checkImportString(context, shape.getId().getName());
+            String schemaVarName = store.var(shape.getId().getName());
             return staticTypePrefix
-                + checkImportString(context, shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
+                + store.var(shape.getId().getNamespace(), "n") + ", " + schemaVarName + ", 0, "
                 + keySchema
                 + this.resolveSimpleSchema(context, contained) + "]";
         } else {
             return sentinel + "|" + this.resolveSimpleSchema(context, contained);
         }
-    }
-
-    /**
-     * Imports the shape's schema from another file if the context group differs from the shape group.
-     */
-    private void checkImportSchema(Shape context, Shape shape) {
-        String shapeGroup = groupingIndex.getGroup(shape.getId());
-        if (groupingIndex.different(context, shape)) {
-            getWriter(context.getId()).addRelativeImport(
-                getShapeVariableName(shape), null, Path.of("./", shapeGroup)
-            );
-        }
-    }
-
-    private String checkImportString(Shape context, String fullString) {
-        return checkImportString(context, fullString, null);
-    }
-
-    /**
-     * Imports a string variable from the base group if the context is not the base group.
-     */
-    private String checkImportString(Shape context, String fullString, String prefix) {
-        String var = prefix != null ? store.var(fullString, prefix) : store.var(fullString);
-        if (!groupingIndex.isBaseGroup(context)) {
-            getWriter(context.getId()).addRelativeImport(
-                var,
-                null,
-                Path.of("./schemas_0")
-            );
-        }
-        return var;
     }
 }

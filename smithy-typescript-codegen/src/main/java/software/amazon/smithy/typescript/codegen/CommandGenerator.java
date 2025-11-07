@@ -61,7 +61,6 @@ import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFin
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
-import software.amazon.smithy.typescript.codegen.schema.ShapeGroupingIndex;
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandPropertiesCodeSection;
@@ -671,10 +670,9 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeSchemaSerde() {
-        ShapeGroupingIndex shapeTree = ShapeGroupingIndex.of(model);
         String operationSchema = reservedWords.escape(operation.getId().getName());
         writer.addRelativeImport(operationSchema, null, Paths.get(
-            ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, shapeTree.getGroup(operation.getId())
+            ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0"
         ));
         writer.write("""
             .sc($L)""",
