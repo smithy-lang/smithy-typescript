@@ -193,7 +193,10 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         }
       } else if (ns.isStructSchema()) {
         for (const [key, memberSchema] of ns.structIterator()) {
-          newObject[key] = this.readValue(memberSchema, value[key]);
+          const v = this.readValue(memberSchema, value[key]);
+          if (v != null) {
+            newObject[key] = v;
+          }
         }
       }
       return newObject;
