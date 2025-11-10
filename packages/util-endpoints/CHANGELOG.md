@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.2.5
+
+### Patch Changes
+
+- Updated dependencies [3926fd7]
+  - @smithy/types@4.9.0
+  - @smithy/node-config-provider@4.3.5
+
 ## 3.2.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.9.0
+
+### Minor Changes
+
+- 3926fd7: set release level for schemas
+
 ## 4.8.1
 
 ### Patch Changes

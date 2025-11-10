@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.3.5
+
+### Patch Changes
+
+- Updated dependencies [3926fd7]
+  - @smithy/types@4.9.0
+  - @smithy/protocol-http@5.3.5
+
 ## 4.3.4
 
 ### Patch Changes

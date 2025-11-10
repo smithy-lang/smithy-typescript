@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.18.0
+
+### Minor Changes
+
+- 3926fd7: set release level for schemas
+
+### Patch Changes
+
+- e77f705: omit undefined values in cbor deserialization
+- Updated dependencies [3926fd7]
+  - @smithy/types@4.9.0
+  - @smithy/middleware-serde@4.2.5
+  - @smithy/protocol-http@5.3.5
+  - @smithy/util-middleware@4.2.5
+  - @smithy/util-stream@4.5.6
+
 ## 3.17.2
 
 ### Patch Changes

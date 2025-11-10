@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- d90999a: export readFile from shared-ini-file-loader
+
+### Patch Changes
+
+- Updated dependencies [3926fd7]
+  - @smithy/types@4.9.0
+
 ## 4.3.4
 
 ### Patch Changes
