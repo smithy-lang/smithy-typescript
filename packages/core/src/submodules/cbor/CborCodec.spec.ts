@@ -70,4 +70,23 @@ describe(CborShapeSerializer.name, () => {
       }
     });
   });
+
+  describe("deserialization", () => {
+    it("should not create undefined values", async () => {
+      const struct = [3, "ns", "Struct", 0, ["sessionId", "tokenId"], [0, 0]] satisfies StaticStructureSchema;
+      const deserializer = codec.createDeserializer();
+
+      const data = cbor.serialize({
+        sessionId: "abcd",
+      });
+
+      const deserialized = deserializer.read(struct, data);
+
+      expect(deserialized).toEqual({
+        sessionId: "abcd",
+      });
+
+      expect("tokenId" in deserialized).toEqual(false);
+    });
+  });
 });
