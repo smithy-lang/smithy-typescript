@@ -1,0 +1,487 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "@smithy/abort-controller": {
+    "AbortController": "function, since <=4.2.5",
+    "AbortSignal": "function, since <=4.2.5"
+  },
+  "@smithy/chunked-blob-reader": {
+    "blobReader": "function, since <=5.2.0"
+  },
+  "@smithy/chunked-blob-reader-native": {
+    "blobReader": "function, since <=4.2.1"
+  },
+  "@smithy/config-resolver": {
+    "CONFIG_USE_DUALSTACK_ENDPOINT": "string, since <=4.4.3",
+    "CONFIG_USE_FIPS_ENDPOINT": "string, since <=4.4.3",
+    "DEFAULT_USE_DUALSTACK_ENDPOINT": "boolean, since <=4.4.3",
+    "DEFAULT_USE_FIPS_ENDPOINT": "boolean, since <=4.4.3",
+    "ENV_USE_DUALSTACK_ENDPOINT": "string, since <=4.4.3",
+    "ENV_USE_FIPS_ENDPOINT": "string, since <=4.4.3",
+    "NODE_REGION_CONFIG_FILE_OPTIONS": "object, since <=4.4.3",
+    "NODE_REGION_CONFIG_OPTIONS": "object, since <=4.4.3",
+    "NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS": "object, since <=4.4.3",
+    "NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS": "object, since <=4.4.3",
+    "REGION_ENV_NAME": "string, since <=4.4.3",
+    "REGION_INI_NAME": "string, since <=4.4.3",
+    "getRegionInfo": "function, since <=4.4.3",
+    "resolveCustomEndpointsConfig": "function, since <=4.4.3",
+    "resolveEndpointsConfig": "function, since <=4.4.3",
+    "resolveRegionConfig": "function, since <=4.4.3"
+  },
+  "@smithy/core": {
+    "requestBuilder": "function, since <=3.18.0",
+    "DefaultIdentityProviderConfig": "function, since <=3.18.0",
+    "EXPIRATION_MS": "number, since <=3.18.0",
+    "HttpApiKeyAuthSigner": "function, since <=3.18.0",
+    "HttpBearerAuthSigner": "function, since <=3.18.0",
+    "NoAuthSigner": "function, since <=3.18.0",
+    "createIsIdentityExpiredFunction": "function, since <=3.18.0",
+    "createPaginator": "function, since <=3.18.0",
+    "doesIdentityRequireRefresh": "function, since <=3.18.0",
+    "getHttpAuthSchemeEndpointRuleSetPlugin": "function, since <=3.18.0",
+    "getHttpAuthSchemePlugin": "function, since <=3.18.0",
+    "getHttpSigningPlugin": "function, since <=3.18.0",
+    "getSmithyContext": "function, since <=3.18.0",
+    "httpAuthSchemeEndpointRuleSetMiddlewareOptions": "object, since <=3.18.0",
+    "httpAuthSchemeMiddleware": "function, since <=3.18.0",
+    "httpAuthSchemeMiddlewareOptions": "object, since <=3.18.0",
+    "httpSigningMiddleware": "function, since <=3.18.0",
+    "httpSigningMiddlewareOptions": "object, since <=3.18.0",
+    "isIdentityExpired": "function, since <=3.18.0",
+    "memoizeIdentityProvider": "function, since <=3.18.0",
+    "normalizeProvider": "function, since <=3.18.0",
+    "setFeature": "function, since <=3.18.0"
+  },
+  "@smithy/credential-provider-imds": {
+    "Endpoint": "object, since <=4.2.5",
+    "DEFAULT_MAX_RETRIES": "number, since <=4.2.5",
+    "DEFAULT_TIMEOUT": "number, since <=4.2.5",
+    "ENV_CMDS_AUTH_TOKEN": "string, since <=4.2.5",
+    "ENV_CMDS_FULL_URI": "string, since <=4.2.5",
+    "ENV_CMDS_RELATIVE_URI": "string, since <=4.2.5",
+    "fromContainerMetadata": "function, since <=4.2.5",
+    "fromInstanceMetadata": "function, since <=4.2.5",
+    "getInstanceMetadataEndpoint": "function, since <=4.2.5",
+    "httpRequest": "function, since <=4.2.5",
+    "providerConfigFromInit": "function, since <=4.2.5"
+  },
+  "@smithy/eventstream-codec": {
+    "EventStreamCodec": "function, since <=4.2.5",
+    "HeaderMarshaller": "function, since <=4.2.5",
+    "Int64": "function, since <=4.2.5",
+    "MessageDecoderStream": "function, since <=4.2.5",
+    "MessageEncoderStream": "function, since <=4.2.5",
+    "SmithyMessageDecoderStream": "function, since <=4.2.5",
+    "SmithyMessageEncoderStream": "function, since <=4.2.5"
+  },
+  "@smithy/eventstream-serde-browser": {
+    "EventStreamMarshaller": "function, since <=4.2.5",
+    "eventStreamSerdeProvider": "function, since <=4.2.5",
+    "iterableToReadableStream": "function, since <=4.2.5",
+    "readableStreamtoIterable": "function, since <=4.2.5"
+  },
+  "@smithy/eventstream-serde-config-resolver": {
+    "resolveEventStreamSerdeConfig": "function, since <=4.3.5"
+  },
+  "@smithy/eventstream-serde-node": {
+    "EventStreamMarshaller": "function, since <=4.2.5",
+    "eventStreamSerdeProvider": "function, since <=4.2.5"
+  },
+  "@smithy/eventstream-serde-universal": {
+    "EventStreamMarshaller": "function, since <=4.2.5",
+    "eventStreamSerdeProvider": "function, since <=4.2.5"
+  },
+  "@smithy/experimental-identity-and-auth": {
+    "HttpApiKeyAuthLocation": "object, since <=0.5.7",
+    "DefaultIdentityProviderConfig": "function, since <=0.5.7",
+    "EXPIRATION_MS": "number, since <=0.5.7",
+    "HttpApiKeyAuthSigner": "function, since <=0.5.7",
+    "HttpBearerAuthSigner": "function, since <=0.5.7",
+    "NoAuthSigner": "function, since <=0.5.7",
+    "SigV4Signer": "function, since <=0.5.7",
+    "createEndpointRuleSetHttpAuthSchemeParametersProvider": "function, since <=0.5.7",
+    "createEndpointRuleSetHttpAuthSchemeProvider": "function, since <=0.5.7",
+    "createIsIdentityExpiredFunction": "function, since <=0.5.7",
+    "doesIdentityRequireRefresh": "function, since <=0.5.7",
+    "getHttpAuthSchemeEndpointRuleSetPlugin": "function, since <=0.5.7",
+    "getHttpAuthSchemePlugin": "function, since <=0.5.7",
+    "getHttpSigningPlugin": "function, since <=0.5.7",
+    "httpAuthSchemeEndpointRuleSetMiddlewareOptions": "object, since <=0.5.7",
+    "httpAuthSchemeMiddleware": "function, since <=0.5.7",
+    "httpAuthSchemeMiddlewareOptions": "object, since <=0.5.7",
+    "httpSigningMiddleware": "function, since <=0.5.7",
+    "httpSigningMiddlewareOptions": "object, since <=0.5.7",
+    "isIdentityExpired": "function, since <=0.5.7",
+    "memoizeIdentityProvider": "function, since <=0.5.7"
+  },
+  "@smithy/fetch-http-handler": {
+    "FetchHttpHandler": "function, since <=5.3.6",
+    "keepAliveSupport": "object, since <=5.3.6",
+    "streamCollector": "function, since <=5.3.6"
+  },
+  "@smithy/hash-blob-browser": {
+    "blobHasher": "function, since <=4.2.6"
+  },
+  "@smithy/hash-node": {
+    "Hash": "function, since <=4.2.5"
+  },
+  "@smithy/hash-stream-node": {
+    "fileStreamHasher": "function, since <=4.2.5",
+    "readableStreamHasher": "function, since <=4.2.5"
+  },
+  "@smithy/invalid-dependency": {
+    "invalidFunction": "function, since <=4.2.5",
+    "invalidProvider": "function, since <=4.2.5"
+  },
+  "@smithy/is-array-buffer": {
+    "isArrayBuffer": "function, since <=4.2.0"
+  },
+  "@smithy/md5-js": {
+    "Md5": "function, since <=4.2.5"
+  },
+  "@smithy/middleware-apply-body-checksum": {
+    "applyMd5BodyChecksumMiddleware": "function, since <=4.3.5",
+    "applyMd5BodyChecksumMiddlewareOptions": "object, since <=4.3.5",
+    "getApplyMd5BodyChecksumPlugin": "function, since <=4.3.5",
+    "resolveMd5BodyChecksumConfig": "function, since <=4.3.5"
+  },
+  "@smithy/middleware-compression": {
+    "DEFAULT_DISABLE_REQUEST_COMPRESSION": "boolean, since <=4.3.7",
+    "DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES": "number, since <=4.3.7",
+    "NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS": "object, since <=4.3.7",
+    "NODE_DISABLE_REQUEST_COMPRESSION_ENV_NAME": "string, since <=4.3.7",
+    "NODE_DISABLE_REQUEST_COMPRESSION_INI_NAME": "string, since <=4.3.7",
+    "NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS": "object, since <=4.3.7",
+    "NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_ENV_NAME": "string, since <=4.3.7",
+    "NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_INI_NAME": "string, since <=4.3.7",
+    "compressionMiddleware": "function, since <=4.3.7",
+    "compressionMiddlewareOptions": "object, since <=4.3.7",
+    "getCompressionPlugin": "function, since <=4.3.7",
+    "resolveCompressionConfig": "function, since <=4.3.7"
+  },
+  "@smithy/middleware-content-length": {
+    "contentLengthMiddleware": "function, since <=4.2.5",
+    "contentLengthMiddlewareOptions": "object, since <=4.2.5",
+    "getContentLengthPlugin": "function, since <=4.2.5"
+  },
+  "@smithy/middleware-endpoint": {
+    "endpointMiddleware": "function, since <=4.3.7",
+    "endpointMiddlewareOptions": "object, since <=4.3.7",
+    "getEndpointFromInstructions": "function, since <=4.3.7",
+    "getEndpointPlugin": "function, since <=4.3.7",
+    "resolveEndpointConfig": "function, since <=4.3.7",
+    "resolveEndpointRequiredConfig": "function, since <=4.3.7",
+    "resolveParams": "function, since <=4.3.7",
+    "toEndpointV1": "function, since <=4.3.7"
+  },
+  "@smithy/middleware-retry": {
+    "AdaptiveRetryStrategy": "function, since <=4.4.7",
+    "CONFIG_MAX_ATTEMPTS": "string, since <=4.4.7",
+    "CONFIG_RETRY_MODE": "string, since <=4.4.7",
+    "ENV_MAX_ATTEMPTS": "string, since <=4.4.7",
+    "ENV_RETRY_MODE": "string, since <=4.4.7",
+    "NODE_MAX_ATTEMPT_CONFIG_OPTIONS": "object, since <=4.4.7",
+    "NODE_RETRY_MODE_CONFIG_OPTIONS": "object, since <=4.4.7",
+    "StandardRetryStrategy": "function, since <=4.4.7",
+    "defaultDelayDecider": "function, since <=4.4.7",
+    "defaultRetryDecider": "function, since <=4.4.7",
+    "getOmitRetryHeadersPlugin": "function, since <=4.4.7",
+    "getRetryAfterHint": "function, since <=4.4.7",
+    "getRetryPlugin": "function, since <=4.4.7",
+    "omitRetryHeadersMiddleware": "function, since <=4.4.7",
+    "omitRetryHeadersMiddlewareOptions": "object, since <=4.4.7",
+    "resolveRetryConfig": "function, since <=4.4.7",
+    "retryMiddleware": "function, since <=4.4.7",
+    "retryMiddlewareOptions": "object, since <=4.4.7"
+  },
+  "@smithy/middleware-serde": {
+    "deserializerMiddleware": "function, since <=4.2.5",
+    "deserializerMiddlewareOption": "object, since <=4.2.5",
+    "getSerdePlugin": "function, since <=4.2.5",
+    "serializerMiddleware": "function, since <=4.2.5",
+    "serializerMiddlewareOption": "object, since <=4.2.5"
+  },
+  "@smithy/middleware-stack": {
+    "constructStack": "function, since <=4.2.5"
+  },
+  "@smithy/node-config-provider": {
+    "loadConfig": "function, since <=4.3.5"
+  },
+  "@smithy/node-http-handler": {
+    "DEFAULT_REQUEST_TIMEOUT": "number, since <=4.4.5",
+    "NodeHttp2Handler": "function, since <=4.4.5",
+    "NodeHttpHandler": "function, since <=4.4.5",
+    "streamCollector": "function, since <=4.4.5"
+  },
+  "@smithy/property-provider": {
+    "CredentialsProviderError": "function, since <=4.2.5",
+    "ProviderError": "function, since <=4.2.5",
+    "TokenProviderError": "function, since <=4.2.5",
+    "chain": "function, since <=4.2.5",
+    "fromStatic": "function, since <=4.2.5",
+    "memoize": "function, since <=4.2.5"
+  },
+  "@smithy/protocol-http": {
+    "Field": "function, since <=5.3.5",
+    "Fields": "function, since <=5.3.5",
+    "HttpRequest": "function, since <=5.3.5",
+    "HttpResponse": "function, since <=5.3.5",
+    "getHttpHandlerExtensionConfiguration": "function, since <=5.3.5",
+    "isValidHostname": "function, since <=5.3.5",
+    "resolveHttpHandlerRuntimeConfig": "function, since <=5.3.5"
+  },
+  "@smithy/querystring-builder": {
+    "buildQueryString": "function, since <=4.2.5"
+  },
+  "@smithy/querystring-parser": {
+    "parseQueryString": "function, since <=4.2.5"
+  },
+  "@smithy/service-client-documentation-generator": {
+    "load": "function, since <=4.2.0"
+  },
+  "@smithy/service-error-classification": {
+    "isBrowserNetworkError": "function, since <=4.2.5",
+    "isClockSkewCorrectedError": "function, since <=4.2.5",
+    "isClockSkewError": "function, since <=4.2.5",
+    "isRetryableByTrait": "function, since <=4.2.5",
+    "isServerError": "function, since <=4.2.5",
+    "isThrottlingError": "function, since <=4.2.5",
+    "isTransientError": "function, since <=4.2.5"
+  },
+  "@smithy/shared-ini-file-loader": {
+    "getSSOTokenFromFile": "function, since <=4.4.0",
+    "readFile": "function, since <=4.4.0",
+    "CONFIG_PREFIX_SEPARATOR": "string, since <=4.4.0",
+    "DEFAULT_PROFILE": "string, since <=4.4.0",
+    "ENV_PROFILE": "string, since <=4.4.0",
+    "externalDataInterceptor": "object, since <=4.4.0",
+    "getProfileName": "function, since <=4.4.0",
+    "loadSharedConfigFiles": "function, since <=4.4.0",
+    "loadSsoSessionData": "function, since <=4.4.0",
+    "parseKnownFiles": "function, since <=4.4.0",
+    "getHomeDir": "function, since <=4.4.0",
+    "getSSOTokenFilepath": "function, since <=4.4.0"
+  },
+  "@smithy/signature-v4": {
+    "ALGORITHM_IDENTIFIER": "string, since <=5.3.5",
+    "ALGORITHM_IDENTIFIER_V4A": "string, since <=5.3.5",
+    "ALGORITHM_QUERY_PARAM": "string, since <=5.3.5",
+    "ALWAYS_UNSIGNABLE_HEADERS": "object, since <=5.3.5",
+    "AMZ_DATE_HEADER": "string, since <=5.3.5",
+    "AMZ_DATE_QUERY_PARAM": "string, since <=5.3.5",
+    "AUTH_HEADER": "string, since <=5.3.5",
+    "CREDENTIAL_QUERY_PARAM": "string, since <=5.3.5",
+    "DATE_HEADER": "string, since <=5.3.5",
+    "EVENT_ALGORITHM_IDENTIFIER": "string, since <=5.3.5",
+    "EXPIRES_QUERY_PARAM": "string, since <=5.3.5",
+    "GENERATED_HEADERS": "object, since <=5.3.5",
+    "HOST_HEADER": "string, since <=5.3.5",
+    "KEY_TYPE_IDENTIFIER": "string, since <=5.3.5",
+    "MAX_CACHE_SIZE": "number, since <=5.3.5",
+    "MAX_PRESIGNED_TTL": "number, since <=5.3.5",
+    "PROXY_HEADER_PATTERN": "object, since <=5.3.5",
+    "REGION_SET_PARAM": "string, since <=5.3.5",
+    "SEC_HEADER_PATTERN": "object, since <=5.3.5",
+    "SHA256_HEADER": "string, since <=5.3.5",
+    "SIGNATURE_HEADER": "string, since <=5.3.5",
+    "SIGNATURE_QUERY_PARAM": "string, since <=5.3.5",
+    "SIGNED_HEADERS_QUERY_PARAM": "string, since <=5.3.5",
+    "SignatureV4": "function, since <=5.3.5",
+    "SignatureV4Base": "function, since <=5.3.5",
+    "TOKEN_HEADER": "string, since <=5.3.5",
+    "TOKEN_QUERY_PARAM": "string, since <=5.3.5",
+    "UNSIGNABLE_PATTERNS": "object, since <=5.3.5",
+    "UNSIGNED_PAYLOAD": "string, since <=5.3.5",
+    "clearCredentialCache": "function, since <=5.3.5",
+    "createScope": "function, since <=5.3.5",
+    "getCanonicalHeaders": "function, since <=5.3.5",
+    "getCanonicalQuery": "function, since <=5.3.5",
+    "getPayloadHash": "function, since <=5.3.5",
+    "getSigningKey": "function, since <=5.3.5",
+    "hasHeader": "function, since <=5.3.5",
+    "moveHeadersToQuery": "function, since <=5.3.5",
+    "prepareRequest": "function, since <=5.3.5",
+    "signatureV4aContainer": "object, since <=5.3.5"
+  },
+  "@smithy/signature-v4a": {
+    "SignatureV4a": "function, since <=3.1.5"
+  },
+  "@smithy/smithy-client": {
+    "collectBody": "function, since <=4.9.3",
+    "extendedEncodeURIComponent": "function, since <=4.9.3",
+    "resolvedPath": "function, since <=4.9.3",
+    "Client": "function, since <=4.9.3",
+    "Command": "function, since <=4.9.3",
+    "NoOpLogger": "function, since <=4.9.3",
+    "SENSITIVE_STRING": "string, since <=4.9.3",
+    "ServiceException": "function, since <=4.9.3",
+    "_json": "function, since <=4.9.3",
+    "convertMap": "function, since <=4.9.3",
+    "createAggregatedClient": "function, since <=4.9.3",
+    "decorateServiceException": "function, since <=4.9.3",
+    "emitWarningIfUnsupportedVersion": "function, since <=4.9.3",
+    "getArrayIfSingleItem": "function, since <=4.9.3",
+    "getDefaultClientConfiguration": "function, since <=4.9.3",
+    "getDefaultExtensionConfiguration": "function, since <=4.9.3",
+    "getValueFromTextNode": "function, since <=4.9.3",
+    "isSerializableHeaderValue": "function, since <=4.9.3",
+    "loadConfigsForDefaultMode": "function, since <=4.9.3",
+    "map": "function, since <=4.9.3",
+    "resolveDefaultRuntimeConfig": "function, since <=4.9.3",
+    "serializeDateTime": "function, since <=4.9.3",
+    "serializeFloat": "function, since <=4.9.3",
+    "take": "function, since <=4.9.3",
+    "throwDefaultError": "function, since <=4.9.3",
+    "withBaseException": "function, since <=4.9.3",
+    "generateIdempotencyToken": "function, since <=4.9.3",
+    "LazyJsonString": "function, since <=4.9.3",
+    "NumericValue": "function, since <=4.9.3",
+    "_parseEpochTimestamp": "function, since <=4.9.3",
+    "_parseRfc3339DateTimeWithOffset": "function, since <=4.9.3",
+    "_parseRfc7231DateTime": "function, since <=4.9.3",
+    "copyDocumentWithTransform": "function, since <=4.9.3",
+    "dateToUtcString": "function, since <=4.9.3",
+    "expectBoolean": "function, since <=4.9.3",
+    "expectByte": "function, since <=4.9.3",
+    "expectFloat32": "function, since <=4.9.3",
+    "expectInt": "function, since <=4.9.3",
+    "expectInt32": "function, since <=4.9.3",
+    "expectLong": "function, since <=4.9.3",
+    "expectNonNull": "function, since <=4.9.3",
+    "expectNumber": "function, since <=4.9.3",
+    "expectObject": "function, since <=4.9.3",
+    "expectShort": "function, since <=4.9.3",
+    "expectString": "function, since <=4.9.3",
+    "expectUnion": "function, since <=4.9.3",
+    "handleFloat": "function, since <=4.9.3",
+    "limitedParseDouble": "function, since <=4.9.3",
+    "limitedParseFloat": "function, since <=4.9.3",
+    "limitedParseFloat32": "function, since <=4.9.3",
+    "logger": "object, since <=4.9.3",
+    "nv": "function, since <=4.9.3",
+    "parseBoolean": "function, since <=4.9.3",
+    "parseEpochTimestamp": "function, since <=4.9.3",
+    "parseRfc3339DateTime": "function, since <=4.9.3",
+    "parseRfc3339DateTimeWithOffset": "function, since <=4.9.3",
+    "parseRfc7231DateTime": "function, since <=4.9.3",
+    "quoteHeader": "function, since <=4.9.3",
+    "splitEvery": "function, since <=4.9.3",
+    "splitHeader": "function, since <=4.9.3",
+    "strictParseByte": "function, since <=4.9.3",
+    "strictParseDouble": "function, since <=4.9.3",
+    "strictParseFloat": "function, since <=4.9.3",
+    "strictParseFloat32": "function, since <=4.9.3",
+    "strictParseInt": "function, since <=4.9.3",
+    "strictParseInt32": "function, since <=4.9.3",
+    "strictParseLong": "function, since <=4.9.3",
+    "strictParseShort": "function, since <=4.9.3"
+  },
+  "@smithy/types": {
+    "HttpAuthLocation": "object, since <=4.9.0",
+    "HttpApiKeyAuthLocation": "object, since <=4.9.0",
+    "EndpointURLScheme": "object, since <=4.9.0",
+    "AlgorithmId": "object, since <=4.9.0",
+    "FieldPosition": "object, since <=4.9.0",
+    "IniSectionType": "object, since <=4.9.0",
+    "RequestHandlerProtocol": "object, since <=4.9.0",
+    "SMITHY_CONTEXT_KEY": "string, since <=4.9.0",
+    "getDefaultClientConfiguration": "function, since <=4.9.0",
+    "resolveDefaultRuntimeConfig": "function, since <=4.9.0"
+  },
+  "@smithy/url-parser": {
+    "parseUrl": "function, since <=4.2.5"
+  },
+  "@smithy/util-base64": {
+    "fromBase64": "function, since <=4.3.0",
+    "toBase64": "function, since <=4.3.0"
+  },
+  "@smithy/util-body-length-browser": {
+    "calculateBodyLength": "function, since <=4.2.0"
+  },
+  "@smithy/util-body-length-node": {
+    "calculateBodyLength": "function, since <=4.2.1"
+  },
+  "@smithy/util-buffer-from": {
+    "fromArrayBuffer": "function, since <=4.2.0",
+    "fromString": "function, since <=4.2.0"
+  },
+  "@smithy/util-config-provider": {
+    "SelectorType": "object, since <=4.2.0",
+    "booleanSelector": "function, since <=4.2.0",
+    "numberSelector": "function, since <=4.2.0"
+  },
+  "@smithy/util-defaults-mode-browser": {
+    "resolveDefaultsModeConfig": "function, since <=4.3.6"
+  },
+  "@smithy/util-defaults-mode-node": {
+    "resolveDefaultsModeConfig": "function, since <=4.2.9"
+  },
+  "@smithy/util-endpoints": {
+    "EndpointCache": "function, since <=3.2.5",
+    "EndpointError": "function, since <=3.2.5",
+    "customEndpointFunctions": "object, since <=3.2.5",
+    "isIpAddress": "function, since <=3.2.5",
+    "isValidHostLabel": "function, since <=3.2.5",
+    "resolveEndpoint": "function, since <=3.2.5"
+  },
+  "@smithy/util-hex-encoding": {
+    "fromHex": "function, since <=4.2.0",
+    "toHex": "function, since <=4.2.0"
+  },
+  "@smithy/util-middleware": {
+    "getSmithyContext": "function, since <=4.2.5",
+    "normalizeProvider": "function, since <=4.2.5"
+  },
+  "@smithy/util-retry": {
+    "RETRY_MODES": "object, since <=4.2.5",
+    "AdaptiveRetryStrategy": "function, since <=4.2.5",
+    "ConfiguredRetryStrategy": "function, since <=4.2.5",
+    "DEFAULT_MAX_ATTEMPTS": "number, since <=4.2.5",
+    "DEFAULT_RETRY_DELAY_BASE": "number, since <=4.2.5",
+    "DEFAULT_RETRY_MODE": "string, since <=4.2.5",
+    "DefaultRateLimiter": "function, since <=4.2.5",
+    "INITIAL_RETRY_TOKENS": "number, since <=4.2.5",
+    "INVOCATION_ID_HEADER": "string, since <=4.2.5",
+    "MAXIMUM_RETRY_DELAY": "number, since <=4.2.5",
+    "NO_RETRY_INCREMENT": "number, since <=4.2.5",
+    "REQUEST_HEADER": "string, since <=4.2.5",
+    "RETRY_COST": "number, since <=4.2.5",
+    "StandardRetryStrategy": "function, since <=4.2.5",
+    "THROTTLING_RETRY_DELAY_BASE": "number, since <=4.2.5",
+    "TIMEOUT_RETRY_COST": "number, since <=4.2.5"
+  },
+  "@smithy/util-stream": {
+    "Uint8ArrayBlobAdapter": "function, since <=4.5.6",
+    "ChecksumStream": "function, since <=4.5.6",
+    "createChecksumStream": "function, since <=4.5.6",
+    "getAwsChunkedEncodingStream": "function, since <=4.5.6",
+    "headStream": "function, since <=4.5.6",
+    "sdkStreamMixin": "function, since <=4.5.6",
+    "splitStream": "function, since <=4.5.6",
+    "isReadableStream": "function, since <=4.5.6",
+    "isBlob": "function, since <=4.5.6",
+    "createBufferedReadable": "function, since 4.5.6"
+  },
+  "@smithy/util-stream-node": {
+    "getAwsChunkedEncodingStream": "function, since <=4.2.6",
+    "sdkStreamMixin": "function, since <=4.2.6"
+  },
+  "@smithy/util-uri-escape": {
+    "escapeUri": "function, since <=4.2.0",
+    "escapeUriPath": "function, since <=4.2.0"
+  },
+  "@smithy/util-utf8": {
+    "fromUtf8": "function, since <=4.2.0",
+    "toUint8Array": "function, since <=4.2.0",
+    "toUtf8": "function, since <=4.2.0"
+  },
+  "@smithy/util-waiter": {
+    "WaiterState": "object, since <=4.2.5",
+    "checkExceptions": "function, since <=4.2.5",
+    "createWaiter": "function, since <=4.2.5",
+    "waiterServiceDefaults": "object, since <=4.2.5"
+  },
+  "@smithy/uuid": {
+    "v4": "function, since <=1.1.0"
+  }
+}

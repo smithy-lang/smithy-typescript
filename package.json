@@ -15,6 +15,7 @@
     "lint:pkgJson": "yarn lint:dependencies",
     "lint:dependencies": "node scripts/check-dependencies.js",
     "lint:versions": "node scripts/runtime-dep-version-check.js",
+    "lint:api": "node scripts/validation/api-snapshot-validation.js",
     "format": "turbo run format --parallel",
     "stage-release": "turbo run stage-release",
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",
@@ -71,7 +72,7 @@
   "packageManager": "yarn@4.10.3",
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint:dependencies && yarn lint:versions"
+      "pre-commit": "yarn lint:dependencies && yarn lint:versions & yarn lint:api"
     }
   }
 }
