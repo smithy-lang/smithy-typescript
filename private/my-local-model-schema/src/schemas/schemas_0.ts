@@ -36,7 +36,7 @@ import {
   MysteryThrottlingError as __MysteryThrottlingError,
   RetryableError as __RetryableError,
   XYZServiceServiceException as __XYZServiceServiceException,
-} from "../models/index";
+} from "../models/errors";
 import { TypeRegistry } from "@smithy/core/schema";
 import { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema } from "@smithy/types";
 

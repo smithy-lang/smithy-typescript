@@ -449,8 +449,10 @@ final class DirectedTypeScriptCodegen
             directive.fileManifest().writeFile(from, getClass(), to);
         });
 
-        SymbolVisitor.writeModelIndex(directive.connectedShapes().values(), directive.symbolProvider(),
-                directive.fileManifest());
+        TypeScriptWriter modelIndexer = SymbolVisitor.modelIndexer(
+            directive.connectedShapes().values(),
+            directive.symbolProvider()
+        );
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
@@ -497,17 +499,19 @@ final class DirectedTypeScriptCodegen
                 directive.model(),
                 directive.symbolProvider(),
                 directive.context().protocolGenerator(),
-                writer
+                writer,
+                modelIndexer
             );
         });
 
         if (directive.settings().generateServerSdk()) {
             // Generate index for server
             IndexGenerator.writeServerIndex(
-                    directive.settings(),
-                    directive.model(),
-                    directive.symbolProvider(),
-                    directive.fileManifest());
+                directive.settings(),
+                directive.model(),
+                directive.symbolProvider(),
+                directive.fileManifest()
+            );
         }
 
         // Generate protocol tests IFF found in the model.

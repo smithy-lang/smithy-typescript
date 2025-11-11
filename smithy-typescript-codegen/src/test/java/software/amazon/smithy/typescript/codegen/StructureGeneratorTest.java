@@ -19,8 +19,8 @@ public class StructureGeneratorTest {
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  /**\n"
                         + "   * @internal\n"
                         + "   */\n"
@@ -39,8 +39,8 @@ public class StructureGeneratorTest {
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  /**\n"
                         + "   * @internal\n"
                         + "   */\n"
@@ -59,8 +59,8 @@ public class StructureGeneratorTest {
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  /**\n"
                         + "   * @internal\n"
                         + "   */\n"
@@ -79,8 +79,8 @@ public class StructureGeneratorTest {
     public void properlyGeneratesOptionalNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-member-no-message.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  foo?: string | undefined;\n"
                         + "  /**\n"
                         + "   * @internal\n"
@@ -101,8 +101,8 @@ public class StructureGeneratorTest {
     public void properlyGeneratesRequiredNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-member-no-message.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  foo: string | undefined;\n"
                         + "  /**\n"
                         + "   * @internal\n"
@@ -123,8 +123,8 @@ public class StructureGeneratorTest {
     public void generatesEmptyRetryableTrait() {
         testErrorStructureCodegen("error-test-retryable.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  $retryable = {\n"
                         + "  };\n"
                         + "  /**\n"
@@ -145,8 +145,8 @@ public class StructureGeneratorTest {
     public void generatesRetryableTraitWithThrottling() {
         testErrorStructureCodegen("error-test-retryable-throttling.smithy",
                 "export class Err extends __BaseException {\n"
-                        + "  readonly name: \"Err\" = \"Err\";\n"
-                        + "  readonly $fault: \"client\" = \"client\";\n"
+                        + "  readonly name = \"Err\" as const;\n"
+                        + "  readonly $fault = \"client\" as const;\n"
                         + "  $retryable = {\n"
                         + "    throttling: true,\n"
                         + "  };\n"
@@ -203,7 +203,10 @@ public class StructureGeneratorTest {
                 .build();
 
         new TypeScriptCodegenPlugin().execute(context);
-        String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "//models/models_0.ts").get();
+        String contents = "";
+        contents += manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "//models/models_0.ts").orElse("");
+        contents += manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "//models/enums.ts").orElse("");
+        contents += manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "//models/errors.ts").orElse("");
 
         if (assertContains) {
             assertThat(contents, containsString(testString));
