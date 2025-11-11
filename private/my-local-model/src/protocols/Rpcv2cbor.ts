@@ -3,17 +3,13 @@ import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/Get
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
 import {
-  Alpha,
   CodedThrottlingError,
-  GetNumbersRequest,
-  GetNumbersResponse,
   HaltError,
   MysteryThrottlingError,
   RetryableError,
-  TradeEvents,
-  Unit,
   XYZServiceServiceException,
-} from "../models/models_0";
+} from "../models/errors";
+import { Alpha, GetNumbersRequest, GetNumbersResponse, TradeEvents, Unit } from "../models/models_0";
 import {
   dateToTag as __dateToTag,
   buildHttpRpcRequest,

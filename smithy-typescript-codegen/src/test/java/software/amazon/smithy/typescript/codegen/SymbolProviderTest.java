@@ -1,12 +1,10 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -61,8 +59,7 @@ public class SymbolProviderTest {
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
-        MockManifest manifest = new MockManifest();
-        SymbolVisitor.writeModelIndex(Arrays.asList(shape1, shape2), provider, manifest);
+        SymbolVisitor.modelIndexer(Arrays.asList(shape1, shape2), provider);
 
         assertThat(symbol1.getName(), equalTo("Hello"));
         assertThat(symbol1.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
@@ -73,8 +70,6 @@ public class SymbolProviderTest {
         assertThat(symbol2.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
         assertThat(symbol2.getNamespaceDelimiter(), equalTo("/"));
         assertThat(symbol2.getDefinitionFile(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0.ts"));
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/models/index.ts").get(),
-                containsString("export * from \"./models_0\";"));
     }
 
     @Test
@@ -266,14 +261,11 @@ public class SymbolProviderTest {
         SymbolProvider provider = new SymbolVisitor(model, settings, 1);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
-        MockManifest manifest = new MockManifest();
-        SymbolVisitor.writeModelIndex(Arrays.asList(shape1, shape2), provider, manifest);
+        SymbolVisitor.modelIndexer(Arrays.asList(shape1, shape2), provider);
 
         assertThat(symbol1.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
         assertThat(symbol1.getDefinitionFile(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0.ts"));
         assertThat(symbol2.getNamespace(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0"));
         assertThat(symbol2.getDefinitionFile(), equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/models/models_0.ts"));
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/models/index.ts").get(),
-                containsString("export * from \"./models_0\";"));
     }
 }
