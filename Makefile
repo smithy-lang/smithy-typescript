@@ -40,6 +40,7 @@ test-types:
 
 test-integration:
 	node ./scripts/validation/no-generic-byte-arrays.js
+	node ./scripts/validation/api-snapshot-validation.js
 	make test-browser
 	yarn g:vitest run -c vitest.config.integ.mts
 	make test-types
