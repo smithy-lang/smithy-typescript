@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.3.8
+
+### Patch Changes
+
+- Updated dependencies [0976f42]
+  - @smithy/core@3.18.1
+
 ## 4.3.7
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.9.4
+
+### Patch Changes
+
+- Updated dependencies [0976f42]
+  - @smithy/core@3.18.1
+  - @smithy/middleware-endpoint@4.3.8
+
 ## 4.9.3
 
 ### Patch Changes
