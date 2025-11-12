@@ -14,6 +14,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticStructureSchema,
   StringSchema,
   TimestampDefaultSchema,
   TimestampEpochSecondsSchema,
@@ -205,5 +206,42 @@ describe(HttpBindingProtocol.name, () => {
       },
       header: "header-value",
     });
+  });
+
+  it("should fill in undefined idempotency tokens", async () => {
+    const protocol = new StringRestProtocol();
+    const request = await protocol.serializeRequest(
+      op(
+        "",
+        "",
+        {
+          http: ["GET", "/{labelToken}/Operation", 200],
+        },
+        [
+          3,
+          "ns",
+          "Struct",
+          0,
+          ["name", "queryToken", "labelToken", "headerToken"],
+          [
+            0,
+            [0, { idempotencyToken: 1, httpQuery: "token" }],
+            [0, { idempotencyToken: 1, httpLabel: 1 }],
+            [0, { idempotencyToken: 1, httpHeader: "header-token" }],
+          ],
+        ] satisfies StaticStructureSchema,
+        "unit"
+      ),
+      {
+        Name: "my-name",
+      },
+      {
+        endpoint: async () => parseUrl("https://localhost/custom"),
+      } as any
+    );
+
+    expect(request.query?.token).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(request.path).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
+    expect(request.headers?.["header-token"]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
   });
 });
