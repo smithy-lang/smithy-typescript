@@ -78,7 +78,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       const memberTraits = memberNs.getMergedTraits() ?? {};
       const inputMemberValue = input[memberName];
 
-      if (inputMemberValue == null) {
+      if (inputMemberValue == null && !memberNs.isIdempotencyToken()) {
         continue;
       }
 
