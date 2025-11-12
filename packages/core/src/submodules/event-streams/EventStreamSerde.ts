@@ -4,6 +4,7 @@ import type {
   EventStreamMarshaller,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
+  Int64,
   Message as EventStreamMessage,
   MessageHeaders,
   MessageHeaderValue,
@@ -12,7 +13,8 @@ import type {
   ShapeSerializer,
   StaticStructureSchema,
 } from "@smithy/types";
-import { fromUtf8 } from "@smithy/util-utf8";
+import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
+import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 /**
  * Separated module for async mixin of EventStream serde capability.
@@ -159,8 +161,10 @@ export class EventStreamSerde {
           return key !== "__type";
         }) ?? "";
 
+      const body = event[unionMember].body;
+
       if (unionMember === "initial-response") {
-        const dataObject = await this.deserializer.read(responseSchema, event[unionMember].body);
+        const dataObject = await this.deserializer.read(responseSchema, body);
         delete dataObject[eventStreamMember];
         return {
           [initialResponseMarker]: true,
@@ -168,8 +172,50 @@ export class EventStreamSerde {
         };
       } else if (unionMember in memberSchemas) {
         const eventStreamSchema = memberSchemas[unionMember];
+
+        if (eventStreamSchema.isStructSchema()) {
+          // check for event stream bindings
+          const out = {} as any;
+          let hasBindings = false;
+
+          for (const [name, member] of eventStreamSchema.structIterator()) {
+            const { eventHeader, eventPayload } = member.getMergedTraits();
+            hasBindings = hasBindings || Boolean(eventHeader || eventPayload);
+            if (eventPayload) {
+              // https://smithy.io/2.0/spec/streaming.html#eventpayload-trait
+              // structure > :test(member > :test(blob, string, structure, union))
+              if (member.isBlobSchema()) {
+                out[name] = Uint8ArrayBlobAdapter.mutate(body);
+              } else if (member.isStringSchema()) {
+                out[name] = (this.serdeContext?.utf8Encoder ?? toUtf8)(body);
+              } else if (member.isStructSchema()) {
+                out[name] = await this.deserializer.read(member, body);
+              }
+            } else if (eventHeader) {
+              const value = event[unionMember].headers[name]?.value;
+              if (value != null) {
+                if (member.isNumericSchema()) {
+                  if (value && typeof value === "object" && "bytes" in (value as Int64)) {
+                    out[name] = BigInt(value.toString());
+                  } else {
+                    out[name] = Number(value);
+                  }
+                } else {
+                  out[name] = value;
+                }
+              }
+            }
+          }
+
+          if (hasBindings) {
+            return {
+              [unionMember]: out,
+            };
+          }
+        }
+
         return {
-          [unionMember]: await this.deserializer.read(eventStreamSchema, event[unionMember].body),
+          [unionMember]: await this.deserializer.read(eventStreamSchema, body),
         };
       } else {
         // todo(schema): This union convention is ignored by the event stream marshaller.

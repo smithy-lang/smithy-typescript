@@ -4,13 +4,15 @@ import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
   BlobSchema,
+  BooleanSchema,
   Message as EventMessage,
+  NumericSchema,
   StaticSimpleSchema,
   StaticStructureSchema,
-  StreamingBlobSchema,
   StringSchema,
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
+import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { describe, expect, test as it } from "vitest";
 
@@ -63,15 +65,7 @@ describe(EventStreamSerde.name, () => {
           "Payload",
           0,
           ["payload"],
-          [
-            [
-              0,
-              "ns",
-              "StreamingBlobPayload",
-              { eventPayload: 1 },
-              42 satisfies StreamingBlobSchema,
-            ] satisfies StaticSimpleSchema,
-          ],
+          [[0, "ns", "BlobPayload", { eventPayload: 1 }, 21 satisfies BlobSchema] satisfies StaticSimpleSchema],
         ],
         [
           3,
@@ -86,10 +80,21 @@ describe(EventStreamSerde.name, () => {
           "ns",
           "CustomHeaders",
           0,
-          ["header1", "header2"],
+          ["header1", "header2", "header-date", "header-number", "header-boolean", "header-blob"],
           [
             [0, "ns", "EventHeader", { eventHeader: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema,
             [0, "ns", "EventHeader", { eventHeader: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema,
+
+            [
+              0,
+              "ns",
+              "EventHeader",
+              { eventHeader: 1 },
+              7 satisfies TimestampEpochSecondsSchema,
+            ] satisfies StaticSimpleSchema,
+            [0, "ns", "EventHeader", { eventHeader: 1 }, 1 satisfies NumericSchema] satisfies StaticSimpleSchema,
+            [0, "ns", "EventHeader", { eventHeader: 1 }, 2 satisfies BooleanSchema] satisfies StaticSimpleSchema,
+            [0, "ns", "EventHeader", { eventHeader: 1 }, 21 satisfies BlobSchema] satisfies StaticSimpleSchema,
           ],
         ],
       ],
@@ -119,7 +124,16 @@ describe(EventStreamSerde.name, () => {
           yield { $unknown: ["D", { name: "d" }] };
           yield { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } };
           yield { TextPayload: { payload: "beep boop" } };
-          yield { CustomHeaders: { header1: "h1", header2: "h2" } };
+          yield {
+            CustomHeaders: {
+              header1: "h1",
+              header2: "h2",
+              "header-date": new Date(0),
+              "header-number": -2,
+              "header-boolean": false,
+              "header-blob": new Uint8Array([0, 1, 2, 3]),
+            },
+          };
         },
       };
 
@@ -179,6 +193,22 @@ describe(EventStreamSerde.name, () => {
             ":content-type": { type: "string", value: "application/cbor" },
             header1: { type: "string", value: "h1" },
             header2: { type: "string", value: "h2" },
+            "header-boolean": {
+              type: "boolean",
+              value: false,
+            },
+            "header-date": {
+              type: "timestamp",
+              value: new Date(0),
+            },
+            "header-number": {
+              type: "integer",
+              value: -2,
+            },
+            "header-blob": {
+              type: "binary",
+              value: new Uint8Array([0, 1, 2, 3]),
+            },
           },
           body: {},
         },
@@ -248,13 +278,60 @@ describe(EventStreamSerde.name, () => {
        */
       function messageSerializer(event: any): EventMessage {
         const eventType = Object.keys(event)[0];
+        const data = event[eventType];
+
+        const headerKeys = Object.keys(data).filter((k) => k.startsWith("header"));
+        const headers = {
+          ":message-type": { type: "string", value: "event" },
+          ":event-type": { type: "string", value: eventType },
+          ":content-type": { type: "string", value: "application/cbor" },
+        } as any;
+
+        for (const key of headerKeys) {
+          const v = data[key];
+          if (v instanceof Date) {
+            headers[key] = {
+              type: "timestamp",
+              value: data[key],
+            };
+          } else if (typeof v === "boolean") {
+            headers[key] = {
+              type: "boolean",
+              value: data[key],
+            };
+          } else if (typeof v === "string") {
+            headers[key] = {
+              type: "string",
+              value: data[key],
+            };
+          } else if (typeof v === "number") {
+            headers[key] = {
+              type: "integer",
+              value: v,
+            };
+          } else if (v instanceof Uint8Array) {
+            headers[key] = {
+              type: "binary",
+              value: v,
+            };
+          } else {
+            throw new Error("unhandled type");
+          }
+
+          delete data[key];
+        }
+
+        const payload = data.payload;
+        if (payload) {
+          return {
+            headers,
+            body: typeof payload === "string" ? fromUtf8(payload) : payload,
+          };
+        }
+
         return {
-          headers: {
-            ":message-type": { type: "string", value: "event" },
-            ":event-type": { type: "string", value: eventType },
-            ":content-type": { type: "string", value: "application/cbor" },
-          },
-          body: cbor.serialize(event[eventType]),
+          headers,
+          body: cbor.serialize(data),
         };
       }
 
@@ -266,9 +343,18 @@ describe(EventStreamSerde.name, () => {
           yield { B: { name: "b" } };
           yield { C: { name: "c" } };
           yield { D: { name: "d" } };
-          yield { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } };
+          yield { Payload: { payload: new Uint8ArrayBlobAdapter([0, 1, 2, 3, 4, 5, 6]) } };
           yield { TextPayload: { payload: "boop beep" } };
-          yield { CustomHeaders: { header1: "h1", header2: "h2" } };
+          yield {
+            CustomHeaders: {
+              header1: "h1",
+              header2: "h2",
+              "header-date": new Date(0),
+              "header-number": -2,
+              "header-boolean": false,
+              "header-blob": new Uint8Array([0, 1, 2, 3]),
+            },
+          };
         },
       };
 
@@ -280,7 +366,7 @@ describe(EventStreamSerde.name, () => {
               ":event-type": { type: "string", value: "D" },
               ":content-type": { type: "string", value: "application/cbor" },
             },
-            body: Uint8Array.from(cbor.serialize({ name: "d" })),
+            body: Uint8ArrayBlobAdapter.from(cbor.serialize({ name: "d" })),
           },
         },
       };
@@ -311,9 +397,18 @@ describe(EventStreamSerde.name, () => {
           { C: { name: `c` } },
           // todo(schema) getMessageUnmarshaller.ts must be patched to return unknown events.
           // $unknownEvent,
-          { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } },
+          { Payload: { payload: new Uint8ArrayBlobAdapter([0, 1, 2, 3, 4, 5, 6]) } },
           { TextPayload: { payload: "boop beep" } },
-          { CustomHeaders: { header1: "h1", header2: "h2" } },
+          {
+            CustomHeaders: {
+              header1: "h1",
+              header2: "h2",
+              "header-boolean": false,
+              "header-date": new Date(0),
+              "header-number": -2,
+              "header-blob": new Uint8Array([0, 1, 2, 3]),
+            },
+          },
         ]);
       });
 
@@ -349,9 +444,18 @@ describe(EventStreamSerde.name, () => {
           { C: { name: `c` } },
           // todo(schema) getMessageUnmarshaller.ts must be patched to return unknown events.
           // $unknownEvent,
-          { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } },
+          { Payload: { payload: new Uint8ArrayBlobAdapter([0, 1, 2, 3, 4, 5, 6]) } },
           { TextPayload: { payload: "boop beep" } },
-          { CustomHeaders: { header1: "h1", header2: "h2" } },
+          {
+            CustomHeaders: {
+              header1: "h1",
+              header2: "h2",
+              "header-boolean": false,
+              "header-date": new Date(0),
+              "header-number": -2,
+              "header-blob": new Uint8Array([0, 1, 2, 3]),
+            },
+          },
         ]);
 
         expect(initialResponseContainer).toEqual({
