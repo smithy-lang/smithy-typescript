@@ -1,5 +1,5 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import { dateToUtcString, LazyJsonString, quoteHeader } from "@smithy/core/serde";
+import { dateToUtcString, generateIdempotencyToken, LazyJsonString, quoteHeader } from "@smithy/core/serde";
 import type {
   CodecSettings,
   Schema,
@@ -94,7 +94,11 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
         this.stringBuffer = value;
         break;
       default:
-        this.stringBuffer = String(value);
+        if (ns.isIdempotencyToken()) {
+          this.stringBuffer = generateIdempotencyToken();
+        } else {
+          this.stringBuffer = String(value);
+        }
     }
   }
 
