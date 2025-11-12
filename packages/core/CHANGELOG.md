@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.18.2
+
+### Patch Changes
+
+- c8b148c: idempotency token generation for HttpBindingProtocol
+
 ## 3.18.1
 
 ### Patch Changes
