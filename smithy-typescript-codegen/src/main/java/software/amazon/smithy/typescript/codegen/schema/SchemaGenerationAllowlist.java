@@ -25,6 +25,7 @@ public abstract class SchemaGenerationAllowlist {
 
     static {
         ALLOWED.add(ShapeId.from("smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"));
+        ALLOWED.add(ShapeId.from("org.xyz.v1#XYZService"));
         PROTOCOLS.add(Rpcv2CborTrait.ID);
     }
 

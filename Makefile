@@ -12,13 +12,16 @@ generate-protocol-tests:
 	rm -rf ./private/smithy-rpcv2-cbor
 	rm -rf ./private/smithy-rpcv2-cbor-schema
 	rm -rf ./private/my-local-model
+	rm -rf ./private/my-local-model-schema
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-cbor/typescript-codegen ./private/smithy-rpcv2-cbor
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-cbor-schema/typescript-codegen ./private/smithy-rpcv2-cbor-schema
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model/typescript-client-codegen/ ./private/my-local-model
+	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema/typescript-client-codegen/ ./private/my-local-model-schema
 	node ./scripts/post-protocol-test-codegen
 	npx prettier --write ./private/smithy-rpcv2-cbor
 	npx prettier --write ./private/smithy-rpcv2-cbor-schema
 	npx prettier --write ./private/my-local-model
+	npx prettier --write ./private/my-local-model-schema
 	yarn
 
 test-protocols:
