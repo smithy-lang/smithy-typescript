@@ -230,10 +230,15 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeVisitorType() {
+        if (schemaMode) {
+            writer.writeDocs("""
+                @deprecated unused in schema-serde mode.
+                """);
+        }
         writer.openBlock("export interface Visitor<T> {", "}", () -> {
             for (MemberShape member : shape.getAllMembers().values()) {
                 writer.write("$L: (value: $T) => T;",
-                        symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
+                    symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
             }
             writer.write("_: (name: string, value: any) => T;");
         });
@@ -241,18 +246,20 @@ final class UnionGenerator implements Runnable {
     }
 
     private void writeVisitorFunction() {
-        // Create the visitor dispatcher for the union.
-        writer.write("export const visit = <T>(").indent();
-        writer.write("value: $L,", symbol.getName());
-        writer.write("visitor: Visitor<T>");
-        writer.dedent().write("): T => {").indent();
-        for (MemberShape member : shape.getAllMembers().values()) {
-            String memberName = symbolProvider.toMemberName(member);
-            writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
+        if (!schemaMode) {
+            // Create the visitor dispatcher for the union.
+            writer.write("export const visit = <T>(").indent();
+            writer.write("value: $L,", symbol.getName());
+            writer.write("visitor: Visitor<T>");
+            writer.dedent().write("): T => {").indent();
+            for (MemberShape member : shape.getAllMembers().values()) {
+                String memberName = symbolProvider.toMemberName(member);
+                writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
+            }
+            writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
+            writer.dedent().write("}");
+            writer.write("");
         }
-        writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
-        writer.dedent().write("}");
-        writer.write("");
     }
 
     private void writeFilterSensitiveLog(String namespace) {
