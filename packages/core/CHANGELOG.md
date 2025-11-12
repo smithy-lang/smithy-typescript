@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.18.3
+
+### Patch Changes
+
+- 5bcd041: fix for event stream binding deserialization
+
 ## 3.18.2
 
 ### Patch Changes
