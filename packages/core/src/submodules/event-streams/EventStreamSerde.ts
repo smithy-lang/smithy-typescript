@@ -13,7 +13,6 @@ import type {
   ShapeSerializer,
   StaticStructureSchema,
 } from "@smithy/types";
-import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 /**
@@ -185,7 +184,7 @@ export class EventStreamSerde {
               // https://smithy.io/2.0/spec/streaming.html#eventpayload-trait
               // structure > :test(member > :test(blob, string, structure, union))
               if (member.isBlobSchema()) {
-                out[name] = Uint8ArrayBlobAdapter.mutate(body);
+                out[name] = body;
               } else if (member.isStringSchema()) {
                 out[name] = (this.serdeContext?.utf8Encoder ?? toUtf8)(body);
               } else if (member.isStructSchema()) {

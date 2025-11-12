@@ -12,7 +12,6 @@ import type {
   StringSchema,
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
-import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { describe, expect, test as it } from "vitest";
 
@@ -343,7 +342,7 @@ describe(EventStreamSerde.name, () => {
           yield { B: { name: "b" } };
           yield { C: { name: "c" } };
           yield { D: { name: "d" } };
-          yield { Payload: { payload: new Uint8ArrayBlobAdapter([0, 1, 2, 3, 4, 5, 6]) } };
+          yield { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } };
           yield { TextPayload: { payload: "boop beep" } };
           yield {
             CustomHeaders: {
@@ -366,7 +365,7 @@ describe(EventStreamSerde.name, () => {
               ":event-type": { type: "string", value: "D" },
               ":content-type": { type: "string", value: "application/cbor" },
             },
-            body: Uint8ArrayBlobAdapter.from(cbor.serialize({ name: "d" })),
+            body: Uint8Array.from(cbor.serialize({ name: "d" })),
           },
         },
       };
@@ -397,7 +396,7 @@ describe(EventStreamSerde.name, () => {
           { C: { name: `c` } },
           // todo(schema) getMessageUnmarshaller.ts must be patched to return unknown events.
           // $unknownEvent,
-          { Payload: { payload: new Uint8ArrayBlobAdapter([0, 1, 2, 3, 4, 5, 6]) } },
+          { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } },
           { TextPayload: { payload: "boop beep" } },
           {
             CustomHeaders: {
@@ -444,7 +443,7 @@ describe(EventStreamSerde.name, () => {
           { C: { name: `c` } },
           // todo(schema) getMessageUnmarshaller.ts must be patched to return unknown events.
           // $unknownEvent,
-          { Payload: { payload: new Uint8ArrayBlobAdapter([0, 1, 2, 3, 4, 5, 6]) } },
+          { Payload: { payload: new Uint8Array([0, 1, 2, 3, 4, 5, 6]) } },
           { TextPayload: { payload: "boop beep" } },
           {
             CustomHeaders: {
