@@ -299,7 +299,7 @@ public class SchemaGenerator implements Runnable {
                 writer.addRelativeImport(
                     symbolName,
                     exceptionCtorSymbolName,
-                    Paths.get("..", "models", "index")
+                    Paths.get("..", "models", "errors")
                 );
                 writer.openBlock("""
                 export var $L: StaticErrorSchema = [-3, $L, $L,""",
