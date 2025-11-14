@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.18.4
+
+### Patch Changes
+
+- e659a06: set explicit enumerability on error.$response
+- Updated dependencies [e659a06]
+  - @smithy/middleware-serde@4.2.6
+
 ## 3.18.3
 
 ### Patch Changes

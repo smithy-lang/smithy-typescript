@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.2.6
+
+### Patch Changes
+
+- e659a06: explicit non-enumerability for error.$response
+
 ## 4.2.5
 
 ### Patch Changes
