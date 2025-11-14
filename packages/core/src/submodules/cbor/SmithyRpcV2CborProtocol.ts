@@ -99,7 +99,6 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
 
     const errorMetadata = {
       $metadata: metadata,
-      $response: response,
       $fault: response.statusCode <= 500 ? ("client" as const) : ("server" as const),
     };
 

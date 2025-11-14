@@ -40,6 +40,11 @@ export const deserializerMiddleware =
       // For security reasons, the error response is not completely visible by default.
       Object.defineProperty(error, "$response", {
         value: response,
+        // we need to define these properties explicitly because
+        // the service exception class may have set the value to undefined, but populated the key.
+        enumerable: false,
+        writable: false,
+        configurable: false,
       });
 
       if (!("$metadata" in error)) {
