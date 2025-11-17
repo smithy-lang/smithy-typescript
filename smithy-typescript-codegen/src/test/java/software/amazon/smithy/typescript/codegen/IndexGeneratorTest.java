@@ -21,12 +21,11 @@ public class IndexGeneratorTest {
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptWriter writer = new TypeScriptWriter("");
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer, writer);
 
         String contents = writer.toString();
         assertThat(contents, containsString("export * from \"./Example\";"));
         assertThat(contents, containsString("export * from \"./ExampleClient\";"));
         assertThat(contents, containsString("export * from \"./commands\";"));
-        assertThat(contents, containsString("export * from \"./models\";"));
     }
 }

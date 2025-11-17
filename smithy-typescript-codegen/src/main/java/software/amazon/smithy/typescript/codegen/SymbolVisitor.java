@@ -17,7 +17,6 @@ package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
 
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,9 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -66,6 +66,7 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.ToShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
@@ -123,8 +124,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
     }
 
-    static void writeModelIndex(Collection<Shape> shapes, SymbolProvider symbolProvider, FileManifest fileManifest) {
-        ModuleNameDelegator.writeModelIndex(shapes, symbolProvider, fileManifest);
+    static TypeScriptWriter modelIndexer(Collection<Shape> shapes, SymbolProvider symbolProvider) {
+        return ModuleNameDelegator.modelIndexer(shapes, symbolProvider);
     }
 
     @Override
@@ -478,9 +479,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             } else if (visitedModels.containsKey(shape)) {
                 return visitedModels.get(shape);
             }
-            // Add models into buckets no bigger than chunk size.
+
             String path;
-            if (shape.getId().equals(UnitTypeTrait.UNIT) || shape.isResourceShape()) {
+            if (shape.isEnumShape() || shape.isIntEnumShape()) {
+                path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "enums");
+            } else if (shape.isStructureShape() && shape.hasTrait(ErrorTrait.class)) {
+                path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "errors");
+            } else if (shape.getId().equals(UnitTypeTrait.UNIT) || shape.isResourceShape()) {
                 // Unit or Resource shapes should only be put in the zero bucket, since they do not
                 // generate anything. They also do not contribute to bucket size.
                 path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "models_0");
@@ -496,8 +501,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return path;
         }
 
-        static void writeModelIndex(Collection<Shape> shapes, SymbolProvider symbolProvider,
-                                    FileManifest fileManifest) {
+        static TypeScriptWriter modelIndexer(
+            Collection<Shape> shapes,
+            SymbolProvider symbolProvider
+        ) {
             TypeScriptWriter writer = new TypeScriptWriter("");
             String modelPrefix = String.join("/", ".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX);
             List<String> collectedModelNamespaces = shapes.stream()
@@ -505,21 +512,53 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                     .filter(namespace -> namespace.startsWith(modelPrefix))
                     .distinct()
                     .sorted(Comparator.naturalOrder())
-                    .map(namespace -> namespace.replaceFirst(Matcher.quoteReplacement(modelPrefix), "."))
+                    .map(namespace -> namespace.replaceFirst(
+                        Matcher.quoteReplacement(modelPrefix),
+                        String.join("/", ".", SHAPE_NAMESPACE_PREFIX)
+                    ))
                     .toList();
 
-            // Export empty model index if no models_* files are present
+            // Export empty model index if no other files are present.
             if (collectedModelNamespaces.isEmpty()) {
                 writer.write("export {};");
             } else {
                 for (String namespace : collectedModelNamespaces) {
-                    writer.write("export * from $S;", namespace);
+                    boolean typesOnly = namespace.contains("models_");
+                    if (!typesOnly) {
+                        writer.write("export * from $S;", namespace);
+                    }
                 }
             }
 
-            fileManifest.writeFile(
-                    Paths.get(CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX, "index.ts").toString(),
-                    writer.toString());
+            // export types by name only
+            Map<String, TreeSet<String>> namespaceToShapes = new TreeMap<>();
+
+            for (Shape shape : shapes) {
+                if (shape.isStructureShape() && !shape.hasTrait(ErrorTrait.class)) {
+                    Symbol symbol = symbolProvider.toSymbol(shape);
+                    String namespace = symbol.getNamespace()
+                        .replaceFirst(Matcher.quoteReplacement(
+                            String.join("/", ".", CodegenUtils.SOURCE_FOLDER)
+                        ),
+                        "."
+                    );
+                    namespaceToShapes.computeIfAbsent(namespace, k -> new TreeSet<>());
+                    namespaceToShapes.get(namespace).add(symbol.getName());
+                }
+            }
+
+            for (Map.Entry<String, TreeSet<String>> entry : namespaceToShapes.entrySet()) {
+                String namespace = entry.getKey();
+                // todo: export symbols instead of * if switching
+                // todo: to type+schema overload exports in the future.
+                // TreeSet<String> types = entry.getValue();
+                // String symbols = String.join(", ", types);
+
+                writer.write("""
+                    export type * from $S;""", namespace);
+            }
+
+            return writer;
         }
 
     }

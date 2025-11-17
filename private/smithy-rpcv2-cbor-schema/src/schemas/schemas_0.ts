@@ -136,7 +136,7 @@ import {
   ComplexError as __ComplexError,
   InvalidGreeting as __InvalidGreeting,
   ValidationException as __ValidationException,
-} from "../models/index";
+} from "../models/errors";
 import { TypeRegistry } from "@smithy/core/schema";
 import {
   StaticErrorSchema,

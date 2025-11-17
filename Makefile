@@ -23,6 +23,9 @@ generate-protocol-tests:
 	npx prettier --write ./private/my-local-model
 	npx prettier --write ./private/my-local-model-schema
 	yarn
+	(cd ./private/smithy-rpcv2-cbor && npm run build)
+	(cd ./private/smithy-rpcv2-cbor-schema && npm run build)
+	(cd ./private/my-local-model && npm run build)
 
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals)

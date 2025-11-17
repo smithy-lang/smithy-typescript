@@ -45,7 +45,8 @@ final class IndexGenerator {
         Model model,
         SymbolProvider symbolProvider,
         ProtocolGenerator protocolGenerator,
-        TypeScriptWriter writer
+        TypeScriptWriter writer,
+        TypeScriptWriter modelIndexer
     ) {
 
         writer.write("/* eslint-disable */");
@@ -63,7 +64,10 @@ final class IndexGenerator {
         }
 
         // write export statement for models
-        writer.write("export * from \"./models\";");
+        writer.write(
+            // the header comment is already present in the upper writer.
+            modelIndexer.toString().replace("// smithy-typescript generated code", "")
+        );
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
@@ -72,10 +76,10 @@ final class IndexGenerator {
     }
 
     static void writeServerIndex(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            FileManifest fileManifest
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        FileManifest fileManifest
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
         ServiceShape service = settings.getService(model);
@@ -91,10 +95,10 @@ final class IndexGenerator {
     }
 
     private static void writeClientExports(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer
     ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
