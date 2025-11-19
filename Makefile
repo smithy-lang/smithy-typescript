@@ -18,10 +18,10 @@ generate-protocol-tests:
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model/typescript-client-codegen/ ./private/my-local-model
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema/typescript-client-codegen/ ./private/my-local-model-schema
 	node ./scripts/post-protocol-test-codegen
-	npx prettier --write ./private/smithy-rpcv2-cbor
-	npx prettier --write ./private/smithy-rpcv2-cbor-schema
-	npx prettier --write ./private/my-local-model
-	npx prettier --write ./private/my-local-model-schema
+	#	npx prettier --write ./private/smithy-rpcv2-cbor
+	#	npx prettier --write ./private/smithy-rpcv2-cbor-schema
+	#	npx prettier --write ./private/my-local-model
+	#	npx prettier --write ./private/my-local-model-schema
 	yarn
 	yarn turbo run build -F="./private/*" --only
 

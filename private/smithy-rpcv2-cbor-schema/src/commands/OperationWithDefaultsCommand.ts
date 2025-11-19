@@ -1,7 +1,14 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
-import { OperationWithDefaultsInput, OperationWithDefaultsOutput } from "../models/models_0";
+import {
+  OperationWithDefaultsInput,
+  OperationWithDefaultsOutput,
+} from "../models/models_0";
 import { OperationWithDefaults } from "../schemas/schemas_0";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { Command as $Command } from "@smithy/smithy-client";
@@ -122,31 +129,29 @@ export interface OperationWithDefaultsCommandOutput extends OperationWithDefault
  *
  *
  */
-export class OperationWithDefaultsCommand extends $Command
-  .classBuilder<
-    OperationWithDefaultsCommandInput,
-    OperationWithDefaultsCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class OperationWithDefaultsCommand extends $Command.classBuilder<OperationWithDefaultsCommandInput, OperationWithDefaultsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "OperationWithDefaults", {})
+  .s("RpcV2Protocol", "OperationWithDefaults", {
+
+  })
   .n("RpcV2ProtocolClient", "OperationWithDefaultsCommand")
   .sc(OperationWithDefaults)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: OperationWithDefaultsInput;
       output: OperationWithDefaultsOutput;
-    };
-    sdk: {
+  };
+  sdk: {
       input: OperationWithDefaultsCommandInput;
       output: OperationWithDefaultsCommandOutput;
-    };
   };
+};
 }

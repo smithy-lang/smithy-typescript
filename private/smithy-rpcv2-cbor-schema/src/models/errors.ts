@@ -1,6 +1,9 @@
 // smithy-typescript generated code
 import { RpcV2ProtocolServiceException as __BaseException } from "./RpcV2ProtocolServiceException";
-import { ComplexNestedErrorData, ValidationExceptionField } from "./models_0";
+import {
+  ComplexNestedErrorData,
+  ValidationExceptionField,
+} from "./models_0";
 import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
 
 /**
@@ -17,7 +20,7 @@ export class ValidationException extends __BaseException {
    * A member can appear in this list more than once if it failed to satisfy multiple constraints.
    * @public
    */
-  fieldList?: ValidationExceptionField[] | undefined;
+  fieldList?: (ValidationExceptionField)[] | undefined;
 
   /**
    * @internal
@@ -26,7 +29,7 @@ export class ValidationException extends __BaseException {
     super({
       name: "ValidationException",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, ValidationException.prototype);
     this.fieldList = opts.fieldList;
@@ -49,7 +52,7 @@ export class ComplexError extends __BaseException {
     super({
       name: "ComplexError",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, ComplexError.prototype);
     this.TopLevel = opts.TopLevel;
@@ -72,7 +75,7 @@ export class InvalidGreeting extends __BaseException {
     super({
       name: "InvalidGreeting",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, InvalidGreeting.prototype);
     this.Message = opts.Message;

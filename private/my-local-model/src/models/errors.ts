@@ -18,7 +18,7 @@ export class CodedThrottlingError extends __BaseException {
     super({
       name: "CodedThrottlingError",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, CodedThrottlingError.prototype);
   }
@@ -37,7 +37,7 @@ export class HaltError extends __BaseException {
     super({
       name: "HaltError",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, HaltError.prototype);
   }
@@ -59,7 +59,7 @@ export class MysteryThrottlingError extends __BaseException {
     super({
       name: "MysteryThrottlingError",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, MysteryThrottlingError.prototype);
   }
@@ -71,7 +71,8 @@ export class MysteryThrottlingError extends __BaseException {
 export class RetryableError extends __BaseException {
   readonly name = "RetryableError" as const;
   readonly $fault = "client" as const;
-  $retryable = {};
+  $retryable = {
+  };
   /**
    * @internal
    */
@@ -79,7 +80,7 @@ export class RetryableError extends __BaseException {
     super({
       name: "RetryableError",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, RetryableError.prototype);
   }
@@ -98,7 +99,7 @@ export class XYZServiceServiceException extends __BaseException {
     super({
       name: "XYZServiceServiceException",
       $fault: "client",
-      ...opts,
+      ...opts
     });
     Object.setPrototypeOf(this, XYZServiceServiceException.prototype);
   }

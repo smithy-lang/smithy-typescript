@@ -1,7 +1,14 @@
 // smithy-typescript generated code
-import { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
+import {
+  ServiceInputTypes,
+  ServiceOutputTypes,
+  XYZServiceClientResolvedConfig,
+} from "../XYZServiceClient";
 import { commonParams } from "../endpoint/EndpointParameters";
-import { TradeEventStreamRequest, TradeEventStreamResponse } from "../models/models_0";
+import {
+  TradeEventStreamRequest,
+  TradeEventStreamResponse,
+} from "../models/models_0";
 import { TradeEventStream } from "../schemas/schemas_0";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { Command as $Command } from "@smithy/smithy-client";
@@ -72,19 +79,16 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  *
  *
  */
-export class TradeEventStreamCommand extends $Command
-  .classBuilder<
-    TradeEventStreamCommandInput,
-    TradeEventStreamCommandOutput,
-    XYZServiceClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class TradeEventStreamCommand extends $Command.classBuilder<TradeEventStreamCommandInput, TradeEventStreamCommandOutput, XYZServiceClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
   .s("XYZService", "TradeEventStream", {
+
     /**
      * @internal
      */
@@ -95,16 +99,16 @@ export class TradeEventStreamCommand extends $Command
   })
   .n("XYZServiceClient", "TradeEventStreamCommand")
   .sc(TradeEventStream)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: TradeEventStreamRequest;
       output: TradeEventStreamResponse;
-    };
-    sdk: {
+  };
+  sdk: {
       input: TradeEventStreamCommandInput;
       output: TradeEventStreamCommandOutput;
-    };
   };
+};
 }

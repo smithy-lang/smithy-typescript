@@ -1,8 +1,15 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { SparseNullsOperationInputOutput } from "../models/models_0";
-import { de_SparseNullsOperationCommand, se_SparseNullsOperationCommand } from "../protocols/Rpcv2cbor";
+import {
+  de_SparseNullsOperationCommand,
+  se_SparseNullsOperationCommand,
+} from "../protocols/Rpcv2cbor";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
@@ -69,36 +76,31 @@ export interface SparseNullsOperationCommandOutput extends SparseNullsOperationI
  *
  *
  */
-export class SparseNullsOperationCommand extends $Command
-  .classBuilder<
-    SparseNullsOperationCommandInput,
-    SparseNullsOperationCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class SparseNullsOperationCommand extends $Command.classBuilder<SparseNullsOperationCommandInput, SparseNullsOperationCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [
-      getSerdePlugin(config, this.serialize, this.deserialize),
-      getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
-    ];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getSerdePlugin(config, this.serialize, this.deserialize),
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "SparseNullsOperation", {})
-  .n("RpcV2ProtocolClient", "SparseNullsOperationCommand")
-  .f(void 0, void 0)
+  .s("RpcV2Protocol", "SparseNullsOperation", {
+
+  })
+  .n("RpcV2ProtocolClient", "SparseNullsOperationCommand").f(void 0, void 0)
   .ser(se_SparseNullsOperationCommand)
   .de(de_SparseNullsOperationCommand)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: SparseNullsOperationInputOutput;
       output: SparseNullsOperationInputOutput;
-    };
-    sdk: {
+  };
+  sdk: {
       input: SparseNullsOperationCommandInput;
       output: SparseNullsOperationCommandOutput;
-    };
   };
+};
 }

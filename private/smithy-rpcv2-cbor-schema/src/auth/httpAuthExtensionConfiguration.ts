@@ -23,14 +23,12 @@ export type HttpAuthRuntimeConfig = Partial<{
 /**
  * @internal
  */
-export const getHttpAuthExtensionConfiguration = (
-  runtimeConfig: HttpAuthRuntimeConfig
-): HttpAuthExtensionConfiguration => {
+export const getHttpAuthExtensionConfiguration = (runtimeConfig: HttpAuthRuntimeConfig): HttpAuthExtensionConfiguration => {
   let _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;
   let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider!;
   return {
     setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void {
-      const index = _httpAuthSchemes.findIndex((scheme) => scheme.schemeId === httpAuthScheme.schemeId);
+      const index = _httpAuthSchemes.findIndex(scheme => scheme.schemeId === httpAuthScheme.schemeId);
       if (index === -1) {
         _httpAuthSchemes.push(httpAuthScheme);
       } else {
@@ -46,7 +44,7 @@ export const getHttpAuthExtensionConfiguration = (
     httpAuthSchemeProvider(): RpcV2ProtocolHttpAuthSchemeProvider {
       return _httpAuthSchemeProvider;
     },
-  };
+  }
 };
 
 /**

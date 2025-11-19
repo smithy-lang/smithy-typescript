@@ -5,11 +5,26 @@ import {
   defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
   resolveHttpAuthSchemeConfig,
 } from "./auth/httpAuthSchemeProvider";
-import { EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput } from "./commands/EmptyInputOutputCommand";
-import { Float16CommandInput, Float16CommandOutput } from "./commands/Float16Command";
-import { FractionalSecondsCommandInput, FractionalSecondsCommandOutput } from "./commands/FractionalSecondsCommand";
-import { GreetingWithErrorsCommandInput, GreetingWithErrorsCommandOutput } from "./commands/GreetingWithErrorsCommand";
-import { NoInputOutputCommandInput, NoInputOutputCommandOutput } from "./commands/NoInputOutputCommand";
+import {
+  EmptyInputOutputCommandInput,
+  EmptyInputOutputCommandOutput,
+} from "./commands/EmptyInputOutputCommand";
+import {
+  Float16CommandInput,
+  Float16CommandOutput,
+} from "./commands/Float16Command";
+import {
+  FractionalSecondsCommandInput,
+  FractionalSecondsCommandOutput,
+} from "./commands/FractionalSecondsCommand";
+import {
+  GreetingWithErrorsCommandInput,
+  GreetingWithErrorsCommandOutput,
+} from "./commands/GreetingWithErrorsCommand";
+import {
+  NoInputOutputCommandInput,
+  NoInputOutputCommandOutput,
+} from "./commands/NoInputOutputCommand";
 import {
   OperationWithDefaultsCommandInput,
   OperationWithDefaultsCommandOutput,
@@ -18,9 +33,18 @@ import {
   OptionalInputOutputCommandInput,
   OptionalInputOutputCommandOutput,
 } from "./commands/OptionalInputOutputCommand";
-import { RecursiveShapesCommandInput, RecursiveShapesCommandOutput } from "./commands/RecursiveShapesCommand";
-import { RpcV2CborDenseMapsCommandInput, RpcV2CborDenseMapsCommandOutput } from "./commands/RpcV2CborDenseMapsCommand";
-import { RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput } from "./commands/RpcV2CborListsCommand";
+import {
+  RecursiveShapesCommandInput,
+  RecursiveShapesCommandOutput,
+} from "./commands/RecursiveShapesCommand";
+import {
+  RpcV2CborDenseMapsCommandInput,
+  RpcV2CborDenseMapsCommandOutput,
+} from "./commands/RpcV2CborDenseMapsCommand";
+import {
+  RpcV2CborListsCommandInput,
+  RpcV2CborListsCommandOutput,
+} from "./commands/RpcV2CborListsCommand";
 import {
   RpcV2CborSparseMapsCommandInput,
   RpcV2CborSparseMapsCommandOutput,
@@ -40,7 +64,11 @@ import {
   resolveClientEndpointParameters,
 } from "./endpoint/EndpointParameters";
 import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
-import { RuntimeExtension, RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
+import {
+  RuntimeExtension,
+  RuntimeExtensionsConfig,
+  resolveRuntimeExtensions,
+} from "./runtimeExtensions";
 import {
   DefaultIdentityProviderConfig,
   getHttpAuthSchemeEndpointRuleSetPlugin,
@@ -55,7 +83,12 @@ import {
   resolveEndpointConfig,
   resolveEndpointRequiredConfig,
 } from "@smithy/middleware-endpoint";
-import { RetryInputConfig, RetryResolvedConfig, getRetryPlugin, resolveRetryConfig } from "@smithy/middleware-retry";
+import {
+  RetryInputConfig,
+  RetryResolvedConfig,
+  getRetryPlugin,
+  resolveRetryConfig,
+} from "@smithy/middleware-retry";
 import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
   Client as __Client,
@@ -77,7 +110,7 @@ import {
   UrlParser as __UrlParser,
 } from "@smithy/types";
 
-export { __Client };
+export { __Client }
 
 /**
  * @public
@@ -118,7 +151,8 @@ export type ServiceOutputTypes =
 /**
  * @public
  */
-export interface ClientDefaults extends Partial<__SmithyConfiguration<__HttpHandlerOptions>> {
+export interface ClientDefaults
+  extends Partial<__SmithyConfiguration<__HttpHandlerOptions>> {
   /**
    * The HTTP handler to use or its constructor options. Fetch in browser and Https in Nodejs.
    */
@@ -211,18 +245,19 @@ export interface ClientDefaults extends Partial<__SmithyConfiguration<__HttpHand
    * The {@link @smithy/smithy-client#DefaultsMode} that will be used to determine how certain default configuration options are resolved in the SDK.
    */
   defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;
+
 }
 
 /**
  * @public
  */
-export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>> &
-  ClientDefaults &
-  RetryInputConfig &
-  EndpointInputConfig<EndpointParameters> &
-  EndpointRequiredInputConfig &
-  HttpAuthSchemeInputConfig &
-  ClientInputEndpointParameters;
+export type RpcV2ProtocolClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>>
+  & ClientDefaults
+  & RetryInputConfig
+  & EndpointInputConfig<EndpointParameters>
+  & EndpointRequiredInputConfig
+  & HttpAuthSchemeInputConfig
+  & ClientInputEndpointParameters
 /**
  * @public
  *
@@ -233,14 +268,14 @@ export interface RpcV2ProtocolClientConfig extends RpcV2ProtocolClientConfigType
 /**
  * @public
  */
-export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions> &
-  Required<ClientDefaults> &
-  RuntimeExtensionsConfig &
-  RetryResolvedConfig &
-  EndpointResolvedConfig<EndpointParameters> &
-  EndpointRequiredResolvedConfig &
-  HttpAuthSchemeResolvedConfig &
-  ClientResolvedEndpointParameters;
+export type RpcV2ProtocolClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions>
+  & Required<ClientDefaults>
+  & RuntimeExtensionsConfig
+  & RetryResolvedConfig
+  & EndpointResolvedConfig<EndpointParameters>
+  & EndpointRequiredResolvedConfig
+  & HttpAuthSchemeResolvedConfig
+  & ClientResolvedEndpointParameters
 /**
  * @public
  *
@@ -273,16 +308,17 @@ export class RpcV2ProtocolClient extends __Client<
     let _config_5 = resolveHttpAuthSchemeConfig(_config_4);
     let _config_6 = resolveRuntimeExtensions(_config_5, configuration?.extensions || []);
     this.config = _config_6;
-    this.middlewareStack.use(getRetryPlugin(this.config));
-    this.middlewareStack.use(getContentLengthPlugin(this.config));
-    this.middlewareStack.use(
-      getHttpAuthSchemeEndpointRuleSetPlugin(this.config, {
-        httpAuthSchemeParametersProvider: defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
-        identityProviderConfigProvider: async (config: RpcV2ProtocolClientResolvedConfig) =>
-          new DefaultIdentityProviderConfig({}),
-      })
-    );
-    this.middlewareStack.use(getHttpSigningPlugin(this.config));
+    this.middlewareStack.use(getRetryPlugin(this.config
+    ));
+    this.middlewareStack.use(getContentLengthPlugin(this.config
+    ));
+    this.middlewareStack.use(getHttpAuthSchemeEndpointRuleSetPlugin(this.config
+      , {
+        httpAuthSchemeParametersProvider: defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,identityProviderConfigProvider: async (config: RpcV2ProtocolClientResolvedConfig) => new DefaultIdentityProviderConfig({
+        }), }
+    ));
+    this.middlewareStack.use(getHttpSigningPlugin(this.config
+    ));
   }
 
   /**

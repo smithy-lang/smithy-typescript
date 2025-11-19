@@ -7,11 +7,11 @@ export const TestEnum = {
   BAR: "BAR",
   BAZ: "BAZ",
   FOO: "FOO",
-} as const;
+} as const
 /**
  * @public
  */
-export type TestEnum = (typeof TestEnum)[keyof typeof TestEnum];
+export type TestEnum = typeof TestEnum[keyof typeof TestEnum]
 
 export enum TestIntEnum {
   ONE = 1,
@@ -28,11 +28,11 @@ export const FooEnum = {
   FOO: "Foo",
   ONE: "1",
   ZERO: "0",
-} as const;
+} as const
 /**
  * @public
  */
-export type FooEnum = (typeof FooEnum)[keyof typeof FooEnum];
+export type FooEnum = typeof FooEnum[keyof typeof FooEnum]
 
 export enum IntegerEnum {
   A = 1,

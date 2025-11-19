@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { EmptyStructure } from "../models/models_0";
 import { EmptyInputOutput } from "../schemas/schemas_0";
@@ -54,31 +58,29 @@ export interface EmptyInputOutputCommandOutput extends EmptyStructure, __Metadat
  *
  *
  */
-export class EmptyInputOutputCommand extends $Command
-  .classBuilder<
-    EmptyInputOutputCommandInput,
-    EmptyInputOutputCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class EmptyInputOutputCommand extends $Command.classBuilder<EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "EmptyInputOutput", {})
+  .s("RpcV2Protocol", "EmptyInputOutput", {
+
+  })
   .n("RpcV2ProtocolClient", "EmptyInputOutputCommand")
   .sc(EmptyInputOutput)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: {};
       output: {};
-    };
-    sdk: {
+  };
+  sdk: {
       input: EmptyInputOutputCommandInput;
       output: EmptyInputOutputCommandOutput;
-    };
   };
+};
 }

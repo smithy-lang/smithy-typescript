@@ -43,7 +43,8 @@ export interface GetNumbersResponse {
 /**
  * @public
  */
-export interface Unit {}
+export interface Unit {
+}
 
 /**
  * @public
@@ -52,12 +53,13 @@ export type TradeEvents =
   | TradeEvents.AlphaMember
   | TradeEvents.BetaMember
   | TradeEvents.GammaMember
-  | TradeEvents.$UnknownMember;
+  | TradeEvents.$UnknownMember
 
 /**
  * @public
  */
 export namespace TradeEvents {
+
   export interface AlphaMember {
     alpha: Alpha;
     beta?: never;
@@ -99,6 +101,7 @@ export namespace TradeEvents {
     gamma: (value: Unit) => T;
     _: (name: string, value: any) => T;
   }
+
 }
 
 /**

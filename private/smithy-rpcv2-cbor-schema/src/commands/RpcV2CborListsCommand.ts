@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { RpcV2CborListInputOutput } from "../models/models_0";
 import { RpcV2CborLists } from "../schemas/schemas_0";
@@ -137,31 +141,29 @@ export interface RpcV2CborListsCommandOutput extends RpcV2CborListInputOutput, _
  *
  * @public
  */
-export class RpcV2CborListsCommand extends $Command
-  .classBuilder<
-    RpcV2CborListsCommandInput,
-    RpcV2CborListsCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class RpcV2CborListsCommand extends $Command.classBuilder<RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "RpcV2CborLists", {})
+  .s("RpcV2Protocol", "RpcV2CborLists", {
+
+  })
   .n("RpcV2ProtocolClient", "RpcV2CborListsCommand")
   .sc(RpcV2CborLists)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: RpcV2CborListInputOutput;
       output: RpcV2CborListInputOutput;
-    };
-    sdk: {
+  };
+  sdk: {
       input: RpcV2CborListsCommandInput;
       output: RpcV2CborListsCommandOutput;
-    };
   };
+};
 }

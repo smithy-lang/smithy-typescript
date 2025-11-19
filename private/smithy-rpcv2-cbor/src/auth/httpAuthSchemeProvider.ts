@@ -9,32 +9,26 @@ import {
   HttpAuthSchemeProvider,
   Provider,
 } from "@smithy/types";
-import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
+import {
+  getSmithyContext,
+  normalizeProvider,
+} from "@smithy/util-middleware";
 
 /**
  * @internal
  */
-export interface RpcV2ProtocolHttpAuthSchemeParameters extends HttpAuthSchemeParameters {}
+export interface RpcV2ProtocolHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
+}
 
 /**
  * @internal
  */
-export interface RpcV2ProtocolHttpAuthSchemeParametersProvider
-  extends HttpAuthSchemeParametersProvider<
-    RpcV2ProtocolClientResolvedConfig,
-    HandlerExecutionContext,
-    RpcV2ProtocolHttpAuthSchemeParameters,
-    object
-  > {}
+export interface RpcV2ProtocolHttpAuthSchemeParametersProvider extends HttpAuthSchemeParametersProvider<RpcV2ProtocolClientResolvedConfig, HandlerExecutionContext, RpcV2ProtocolHttpAuthSchemeParameters, object> {}
 
 /**
  * @internal
  */
-export const defaultRpcV2ProtocolHttpAuthSchemeParametersProvider = async (
-  config: RpcV2ProtocolClientResolvedConfig,
-  context: HandlerExecutionContext,
-  input: object
-): Promise<RpcV2ProtocolHttpAuthSchemeParameters> => {
+export const defaultRpcV2ProtocolHttpAuthSchemeParametersProvider = async (config: RpcV2ProtocolClientResolvedConfig, context: HandlerExecutionContext, input: object): Promise<RpcV2ProtocolHttpAuthSchemeParameters> => {
   return {
     operation: getSmithyContext(context).operation as string,
   };
@@ -44,13 +38,12 @@ function createSmithyApiNoAuthHttpAuthOption(authParameters: RpcV2ProtocolHttpAu
   return {
     schemeId: "smithy.api#noAuth",
   };
-}
+};
 
 /**
  * @internal
  */
-export interface RpcV2ProtocolHttpAuthSchemeProvider
-  extends HttpAuthSchemeProvider<RpcV2ProtocolHttpAuthSchemeParameters> {}
+export interface RpcV2ProtocolHttpAuthSchemeProvider extends HttpAuthSchemeProvider<RpcV2ProtocolHttpAuthSchemeParameters> {}
 
 /**
  * @internal
@@ -60,8 +53,8 @@ export const defaultRpcV2ProtocolHttpAuthSchemeProvider: RpcV2ProtocolHttpAuthSc
   switch (authParameters.operation) {
     default: {
       options.push(createSmithyApiNoAuthHttpAuthOption(authParameters));
-    }
-  }
+    };
+  };
   return options;
 };
 
@@ -88,6 +81,7 @@ export interface HttpAuthSchemeInputConfig {
    * @internal
    */
   httpAuthSchemeProvider?: RpcV2ProtocolHttpAuthSchemeProvider;
+
 }
 
 /**
@@ -113,15 +107,15 @@ export interface HttpAuthSchemeResolvedConfig {
    * @internal
    */
   readonly httpAuthSchemeProvider: RpcV2ProtocolHttpAuthSchemeProvider;
+
 }
 
 /**
  * @internal
  */
-export const resolveHttpAuthSchemeConfig = <T>(
-  config: T & HttpAuthSchemeInputConfig
-): T & HttpAuthSchemeResolvedConfig => {
-  return Object.assign(config, {
+export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig): T & HttpAuthSchemeResolvedConfig => {
+  return Object.assign(
+    config, {
     authSchemePreference: normalizeProvider(config.authSchemePreference ?? []),
   }) as T & HttpAuthSchemeResolvedConfig;
 };

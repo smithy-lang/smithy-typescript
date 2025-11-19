@@ -1,8 +1,14 @@
 // smithy-typescript generated code
 import { Sha256 } from "@aws-crypto/sha256-browser";
-import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
+import {
+  FetchHttpHandler as RequestHandler,
+  streamCollector,
+} from "@smithy/fetch-http-handler";
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
-import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/util-retry";
+import {
+  DEFAULT_MAX_ATTEMPTS,
+  DEFAULT_RETRY_MODE,
+} from "@smithy/util-retry";
 import { RpcV2ProtocolClientConfig } from "./RpcV2ProtocolClient";
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";
 import { loadConfigsForDefaultMode } from "@smithy/smithy-client";

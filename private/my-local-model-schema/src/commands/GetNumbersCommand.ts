@@ -1,7 +1,14 @@
 // smithy-typescript generated code
-import { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
+import {
+  ServiceInputTypes,
+  ServiceOutputTypes,
+  XYZServiceClientResolvedConfig,
+} from "../XYZServiceClient";
 import { commonParams } from "../endpoint/EndpointParameters";
-import { GetNumbersRequest, GetNumbersResponse } from "../models/models_0";
+import {
+  GetNumbersRequest,
+  GetNumbersResponse,
+} from "../models/models_0";
 import { GetNumbers } from "../schemas/schemas_0";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { Command as $Command } from "@smithy/smithy-client";
@@ -72,31 +79,29 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  *
  *
  */
-export class GetNumbersCommand extends $Command
-  .classBuilder<
-    GetNumbersCommandInput,
-    GetNumbersCommandOutput,
-    XYZServiceClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class GetNumbersCommand extends $Command.classBuilder<GetNumbersCommandInput, GetNumbersCommandOutput, XYZServiceClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("XYZService", "GetNumbers", {})
+  .s("XYZService", "GetNumbers", {
+
+  })
   .n("XYZServiceClient", "GetNumbersCommand")
   .sc(GetNumbers)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: GetNumbersRequest;
       output: GetNumbersResponse;
-    };
-    sdk: {
+  };
+  sdk: {
       input: GetNumbersCommandInput;
       output: GetNumbersCommandOutput;
-    };
   };
+};
 }

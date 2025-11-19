@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { Float16Output } from "../models/models_0";
 import { Float16 } from "../schemas/schemas_0";
@@ -56,31 +60,29 @@ export interface Float16CommandOutput extends Float16Output, __MetadataBearer {}
  *
  *
  */
-export class Float16Command extends $Command
-  .classBuilder<
-    Float16CommandInput,
-    Float16CommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class Float16Command extends $Command.classBuilder<Float16CommandInput, Float16CommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "Float16", {})
+  .s("RpcV2Protocol", "Float16", {
+
+  })
   .n("RpcV2ProtocolClient", "Float16Command")
   .sc(Float16)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: {};
       output: Float16Output;
-    };
-    sdk: {
+  };
+  sdk: {
       input: Float16CommandInput;
       output: Float16CommandOutput;
-    };
   };
+};
 }

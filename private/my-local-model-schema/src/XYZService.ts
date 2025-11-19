@@ -1,6 +1,13 @@
 // smithy-typescript generated code
-import { XYZServiceClient, XYZServiceClientConfig } from "./XYZServiceClient";
-import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
+import {
+  XYZServiceClient,
+  XYZServiceClientConfig,
+} from "./XYZServiceClient";
+import {
+  GetNumbersCommand,
+  GetNumbersCommandInput,
+  GetNumbersCommandOutput,
+} from "./commands/GetNumbersCommand";
 import {
   TradeEventStreamCommand,
   TradeEventStreamCommandInput,
@@ -12,15 +19,21 @@ import { HttpHandlerOptions as __HttpHandlerOptions } from "@smithy/types";
 const commands = {
   GetNumbersCommand,
   TradeEventStreamCommand,
-};
+}
 
 export interface XYZService {
   /**
    * @see {@link GetNumbersCommand}
    */
   getNumbers(): Promise<GetNumbersCommandOutput>;
-  getNumbers(args: GetNumbersCommandInput, options?: __HttpHandlerOptions): Promise<GetNumbersCommandOutput>;
-  getNumbers(args: GetNumbersCommandInput, cb: (err: any, data?: GetNumbersCommandOutput) => void): void;
+  getNumbers(
+    args: GetNumbersCommandInput,
+    options?: __HttpHandlerOptions,
+  ): Promise<GetNumbersCommandOutput>;
+  getNumbers(
+    args: GetNumbersCommandInput,
+    cb: (err: any, data?: GetNumbersCommandOutput) => void
+  ): void;
   getNumbers(
     args: GetNumbersCommandInput,
     options: __HttpHandlerOptions,
@@ -33,7 +46,7 @@ export interface XYZService {
   tradeEventStream(): Promise<TradeEventStreamCommandOutput>;
   tradeEventStream(
     args: TradeEventStreamCommandInput,
-    options?: __HttpHandlerOptions
+    options?: __HttpHandlerOptions,
   ): Promise<TradeEventStreamCommandOutput>;
   tradeEventStream(
     args: TradeEventStreamCommandInput,
@@ -44,6 +57,7 @@ export interface XYZService {
     options: __HttpHandlerOptions,
     cb: (err: any, data?: TradeEventStreamCommandOutput) => void
   ): void;
+
 }
 
 /**

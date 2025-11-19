@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { GreetingWithErrorsOutput } from "../models/models_0";
 import { GreetingWithErrors } from "../schemas/schemas_0";
@@ -69,31 +73,29 @@ export interface GreetingWithErrorsCommandOutput extends GreetingWithErrorsOutpu
  *
  * @public
  */
-export class GreetingWithErrorsCommand extends $Command
-  .classBuilder<
-    GreetingWithErrorsCommandInput,
-    GreetingWithErrorsCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class GreetingWithErrorsCommand extends $Command.classBuilder<GreetingWithErrorsCommandInput, GreetingWithErrorsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "GreetingWithErrors", {})
+  .s("RpcV2Protocol", "GreetingWithErrors", {
+
+  })
   .n("RpcV2ProtocolClient", "GreetingWithErrorsCommand")
   .sc(GreetingWithErrors)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: {};
       output: GreetingWithErrorsOutput;
-    };
-    sdk: {
+  };
+  sdk: {
       input: GreetingWithErrorsCommandInput;
       output: GreetingWithErrorsCommandOutput;
-    };
   };
+};
 }

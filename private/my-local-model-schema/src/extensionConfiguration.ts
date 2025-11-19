@@ -6,7 +6,4 @@ import { DefaultExtensionConfiguration } from "@smithy/types";
 /**
  * @internal
  */
-export interface XYZServiceExtensionConfiguration
-  extends HttpHandlerExtensionConfiguration,
-    DefaultExtensionConfiguration,
-    HttpAuthExtensionConfiguration {}
+export interface XYZServiceExtensionConfiguration extends HttpHandlerExtensionConfiguration, DefaultExtensionConfiguration, HttpAuthExtensionConfiguration {}

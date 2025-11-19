@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
+import {
+  ServiceInputTypes,
+  ServiceOutputTypes,
+  XYZServiceClientResolvedConfig,
+} from "../XYZServiceClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import {
   TradeEventStreamRequest,
@@ -7,7 +11,10 @@ import {
   TradeEventStreamResponse,
   TradeEventStreamResponseFilterSensitiveLog,
 } from "../models/models_0";
-import { de_TradeEventStreamCommand, se_TradeEventStreamCommand } from "../protocols/Rpcv2cbor";
+import {
+  de_TradeEventStreamCommand,
+  se_TradeEventStreamCommand,
+} from "../protocols/Rpcv2cbor";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
@@ -78,22 +85,17 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  *
  *
  */
-export class TradeEventStreamCommand extends $Command
-  .classBuilder<
-    TradeEventStreamCommandInput,
-    TradeEventStreamCommandOutput,
-    XYZServiceClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class TradeEventStreamCommand extends $Command.classBuilder<TradeEventStreamCommandInput, TradeEventStreamCommandOutput, XYZServiceClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
-    return [
-      getSerdePlugin(config, this.serialize, this.deserialize),
-      getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
-    ];
+      .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
+          return [
+
+  getSerdePlugin(config, this.serialize, this.deserialize),
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
   .s("XYZService", "TradeEventStream", {
+
     /**
      * @internal
      */
@@ -102,20 +104,19 @@ export class TradeEventStreamCommand extends $Command
       output: true,
     },
   })
-  .n("XYZServiceClient", "TradeEventStreamCommand")
-  .f(TradeEventStreamRequestFilterSensitiveLog, TradeEventStreamResponseFilterSensitiveLog)
+  .n("XYZServiceClient", "TradeEventStreamCommand").f(TradeEventStreamRequestFilterSensitiveLog, TradeEventStreamResponseFilterSensitiveLog)
   .ser(se_TradeEventStreamCommand)
   .de(de_TradeEventStreamCommand)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: TradeEventStreamRequest;
       output: TradeEventStreamResponse;
-    };
-    sdk: {
+  };
+  sdk: {
       input: TradeEventStreamCommandInput;
       output: TradeEventStreamCommandOutput;
-    };
   };
+};
 }

@@ -1,5 +1,10 @@
 // smithy-typescript generated code
-import { Endpoint, EndpointV2, Provider, EndpointParameters as __EndpointParameters } from "@smithy/types";
+import {
+  Endpoint,
+  EndpointV2,
+  Provider,
+  EndpointParameters as __EndpointParameters,
+} from "@smithy/types";
 
 /**
  * @public
@@ -9,20 +14,19 @@ export interface ClientInputEndpointParameters {
 }
 
 export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
+
   defaultSigningName: string;
 };
 
-export const resolveClientEndpointParameters = <T>(
-  options: T & ClientInputEndpointParameters
-): T & ClientResolvedEndpointParameters => {
+export const resolveClientEndpointParameters = <T>(options: T & ClientInputEndpointParameters): T & ClientResolvedEndpointParameters => {
   return Object.assign(options, {
     defaultSigningName: "",
   });
-};
+}
 
 export const commonParams = {
   endpoint: { type: "builtInParams", name: "endpoint" },
-} as const;
+} as const
 
 export interface EndpointParameters extends __EndpointParameters {
   endpoint?: string | undefined;

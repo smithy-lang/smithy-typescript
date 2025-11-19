@@ -43,7 +43,8 @@ export interface GetNumbersResponse {
 /**
  * @public
  */
-export interface Unit {}
+export interface Unit {
+}
 
 /**
  * @public
@@ -52,12 +53,13 @@ export type TradeEvents =
   | TradeEvents.AlphaMember
   | TradeEvents.BetaMember
   | TradeEvents.GammaMember
-  | TradeEvents.$UnknownMember;
+  | TradeEvents.$UnknownMember
 
 /**
  * @public
  */
 export namespace TradeEvents {
+
   export interface AlphaMember {
     alpha: Alpha;
     beta?: never;
@@ -96,22 +98,32 @@ export namespace TradeEvents {
     _: (name: string, value: any) => T;
   }
 
-  export const visit = <T>(value: TradeEvents, visitor: Visitor<T>): T => {
+  export const visit = <T>(
+    value: TradeEvents,
+    visitor: Visitor<T>
+  ): T => {
     if (value.alpha !== undefined) return visitor.alpha(value.alpha);
     if (value.beta !== undefined) return visitor.beta(value.beta);
     if (value.gamma !== undefined) return visitor.gamma(value.gamma);
     return visitor._(value.$unknown[0], value.$unknown[1]);
-  };
+  }
+
 }
 /**
  * @internal
  */
 export const TradeEventsFilterSensitiveLog = (obj: TradeEvents): any => {
-  if (obj.alpha !== undefined) return { alpha: obj.alpha };
-  if (obj.beta !== undefined) return { beta: obj.beta };
-  if (obj.gamma !== undefined) return { gamma: obj.gamma };
-  if (obj.$unknown !== undefined) return { [obj.$unknown[0]]: "UNKNOWN" };
-};
+  if (obj.alpha !== undefined) return {alpha:
+    obj.alpha
+  };
+  if (obj.beta !== undefined) return {beta:
+    obj.beta
+  };
+  if (obj.gamma !== undefined) return {gamma:
+    obj.gamma
+  };
+  if (obj.$unknown !== undefined) return {[obj.$unknown[0]]: 'UNKNOWN'};
+}
 
 /**
  * @public
@@ -125,8 +137,10 @@ export interface TradeEventStreamRequest {
  */
 export const TradeEventStreamRequestFilterSensitiveLog = (obj: TradeEventStreamRequest): any => ({
   ...obj,
-  ...(obj.eventStream && { eventStream: "STREAMING_CONTENT" }),
-});
+  ...(obj.eventStream && { eventStream:
+    'STREAMING_CONTENT'
+  }),
+})
 
 /**
  * @public
@@ -140,5 +154,7 @@ export interface TradeEventStreamResponse {
  */
 export const TradeEventStreamResponseFilterSensitiveLog = (obj: TradeEventStreamResponse): any => ({
   ...obj,
-  ...(obj.eventStream && { eventStream: "STREAMING_CONTENT" }),
-});
+  ...(obj.eventStream && { eventStream:
+    'STREAMING_CONTENT'
+  }),
+})

@@ -9,32 +9,26 @@ import {
   HttpAuthSchemeProvider,
   Provider,
 } from "@smithy/types";
-import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
+import {
+  getSmithyContext,
+  normalizeProvider,
+} from "@smithy/util-middleware";
 
 /**
  * @internal
  */
-export interface XYZServiceHttpAuthSchemeParameters extends HttpAuthSchemeParameters {}
+export interface XYZServiceHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
+}
 
 /**
  * @internal
  */
-export interface XYZServiceHttpAuthSchemeParametersProvider
-  extends HttpAuthSchemeParametersProvider<
-    XYZServiceClientResolvedConfig,
-    HandlerExecutionContext,
-    XYZServiceHttpAuthSchemeParameters,
-    object
-  > {}
+export interface XYZServiceHttpAuthSchemeParametersProvider extends HttpAuthSchemeParametersProvider<XYZServiceClientResolvedConfig, HandlerExecutionContext, XYZServiceHttpAuthSchemeParameters, object> {}
 
 /**
  * @internal
  */
-export const defaultXYZServiceHttpAuthSchemeParametersProvider = async (
-  config: XYZServiceClientResolvedConfig,
-  context: HandlerExecutionContext,
-  input: object
-): Promise<XYZServiceHttpAuthSchemeParameters> => {
+export const defaultXYZServiceHttpAuthSchemeParametersProvider = async (config: XYZServiceClientResolvedConfig, context: HandlerExecutionContext, input: object): Promise<XYZServiceHttpAuthSchemeParameters> => {
   return {
     operation: getSmithyContext(context).operation as string,
   };
@@ -44,7 +38,7 @@ function createSmithyApiNoAuthHttpAuthOption(authParameters: XYZServiceHttpAuthS
   return {
     schemeId: "smithy.api#noAuth",
   };
-}
+};
 
 /**
  * @internal
@@ -59,8 +53,8 @@ export const defaultXYZServiceHttpAuthSchemeProvider: XYZServiceHttpAuthSchemePr
   switch (authParameters.operation) {
     default: {
       options.push(createSmithyApiNoAuthHttpAuthOption(authParameters));
-    }
-  }
+    };
+  };
   return options;
 };
 
@@ -87,6 +81,7 @@ export interface HttpAuthSchemeInputConfig {
    * @internal
    */
   httpAuthSchemeProvider?: XYZServiceHttpAuthSchemeProvider;
+
 }
 
 /**
@@ -112,15 +107,15 @@ export interface HttpAuthSchemeResolvedConfig {
    * @internal
    */
   readonly httpAuthSchemeProvider: XYZServiceHttpAuthSchemeProvider;
+
 }
 
 /**
  * @internal
  */
-export const resolveHttpAuthSchemeConfig = <T>(
-  config: T & HttpAuthSchemeInputConfig
-): T & HttpAuthSchemeResolvedConfig => {
-  return Object.assign(config, {
+export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig): T & HttpAuthSchemeResolvedConfig => {
+  return Object.assign(
+    config, {
     authSchemePreference: normalizeProvider(config.authSchemePreference ?? []),
   }) as T & HttpAuthSchemeResolvedConfig;
 };

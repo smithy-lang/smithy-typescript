@@ -6,7 +6,4 @@ import { DefaultExtensionConfiguration } from "@smithy/types";
 /**
  * @internal
  */
-export interface RpcV2ProtocolExtensionConfiguration
-  extends HttpHandlerExtensionConfiguration,
-    DefaultExtensionConfiguration,
-    HttpAuthExtensionConfiguration {}
+export interface RpcV2ProtocolExtensionConfiguration extends HttpHandlerExtensionConfiguration, DefaultExtensionConfiguration, HttpAuthExtensionConfiguration {}

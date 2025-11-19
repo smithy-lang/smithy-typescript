@@ -1,5 +1,10 @@
 // smithy-typescript generated code
-import { FooEnum, IntegerEnum, TestEnum, TestIntEnum } from "./enums";
+import {
+  FooEnum,
+  IntegerEnum,
+  TestEnum,
+  TestIntEnum,
+} from "./enums";
 
 /**
  * Describes one specific validation failure for an input member.
@@ -39,7 +44,7 @@ export interface ComplexNestedErrorData {
 export interface Defaults {
   defaultString?: string | undefined;
   defaultBoolean?: boolean | undefined;
-  defaultList?: string[] | undefined;
+  defaultList?: (string)[] | undefined;
   defaultTimestamp?: Date | undefined;
   defaultBlob?: Uint8Array | undefined;
   defaultByte?: number | undefined;
@@ -72,7 +77,8 @@ export interface GreetingStruct {
 /**
  * @public
  */
-export interface EmptyStructure {}
+export interface EmptyStructure {
+}
 
 /**
  * @public
@@ -111,7 +117,7 @@ export interface OperationWithDefaultsInput {
 export interface OperationWithDefaultsOutput {
   defaultString?: string | undefined;
   defaultBoolean?: boolean | undefined;
-  defaultList?: string[] | undefined;
+  defaultList?: (string)[] | undefined;
   defaultTimestamp?: Date | undefined;
   defaultBlob?: Uint8Array | undefined;
   defaultByte?: number | undefined;
@@ -149,7 +155,7 @@ export interface RpcV2CborDenseMapsInputOutput {
   denseNumberMap?: Record<string, number> | undefined;
   denseBooleanMap?: Record<string, boolean> | undefined;
   denseStringMap?: Record<string, string> | undefined;
-  denseSetMap?: Record<string, string[]> | undefined;
+  denseSetMap?: Record<string, (string)[]> | undefined;
 }
 
 /**
@@ -164,21 +170,21 @@ export interface StructureListMember {
  * @public
  */
 export interface RpcV2CborListInputOutput {
-  stringList?: string[] | undefined;
-  stringSet?: string[] | undefined;
-  integerList?: number[] | undefined;
-  booleanList?: boolean[] | undefined;
-  timestampList?: Date[] | undefined;
-  enumList?: FooEnum[] | undefined;
-  intEnumList?: IntegerEnum[] | undefined;
+  stringList?: (string)[] | undefined;
+  stringSet?: (string)[] | undefined;
+  integerList?: (number)[] | undefined;
+  booleanList?: (boolean)[] | undefined;
+  timestampList?: (Date)[] | undefined;
+  enumList?: (FooEnum)[] | undefined;
+  intEnumList?: (IntegerEnum)[] | undefined;
   /**
    * A list of lists of strings.
    * @public
    */
-  nestedStringList?: string[][] | undefined;
+  nestedStringList?: ((string)[])[] | undefined;
 
-  structureList?: StructureListMember[] | undefined;
-  blobList?: Uint8Array[] | undefined;
+  structureList?: (StructureListMember)[] | undefined;
+  blobList?: (Uint8Array)[] | undefined;
 }
 
 /**
@@ -189,7 +195,7 @@ export interface RpcV2CborSparseMapsInputOutput {
   sparseNumberMap?: Record<string, number> | undefined;
   sparseBooleanMap?: Record<string, boolean> | undefined;
   sparseStringMap?: Record<string, string> | undefined;
-  sparseSetMap?: Record<string, string[]> | undefined;
+  sparseSetMap?: Record<string, (string)[]> | undefined;
 }
 
 /**
@@ -212,7 +218,7 @@ export interface SimpleScalarStructure {
  * @public
  */
 export interface SparseNullsOperationInputOutput {
-  sparseStringList?: string[] | undefined;
+  sparseStringList?: (string)[] | undefined;
   sparseStringMap?: Record<string, string> | undefined;
 }
 

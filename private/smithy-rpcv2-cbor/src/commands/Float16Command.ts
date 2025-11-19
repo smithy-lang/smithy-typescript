@@ -1,8 +1,15 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { Float16Output } from "../models/models_0";
-import { de_Float16Command, se_Float16Command } from "../protocols/Rpcv2cbor";
+import {
+  de_Float16Command,
+  se_Float16Command,
+} from "../protocols/Rpcv2cbor";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
@@ -57,36 +64,31 @@ export interface Float16CommandOutput extends Float16Output, __MetadataBearer {}
  *
  *
  */
-export class Float16Command extends $Command
-  .classBuilder<
-    Float16CommandInput,
-    Float16CommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class Float16Command extends $Command.classBuilder<Float16CommandInput, Float16CommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [
-      getSerdePlugin(config, this.serialize, this.deserialize),
-      getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
-    ];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getSerdePlugin(config, this.serialize, this.deserialize),
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "Float16", {})
-  .n("RpcV2ProtocolClient", "Float16Command")
-  .f(void 0, void 0)
+  .s("RpcV2Protocol", "Float16", {
+
+  })
+  .n("RpcV2ProtocolClient", "Float16Command").f(void 0, void 0)
   .ser(se_Float16Command)
   .de(de_Float16Command)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: {};
       output: Float16Output;
-    };
-    sdk: {
+  };
+  sdk: {
       input: Float16CommandInput;
       output: Float16CommandOutput;
-    };
   };
+};
 }

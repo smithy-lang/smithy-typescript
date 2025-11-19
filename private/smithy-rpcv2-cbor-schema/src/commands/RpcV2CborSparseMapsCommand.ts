@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { RpcV2CborSparseMapsInputOutput } from "../models/models_0";
 import { RpcV2CborSparseMaps } from "../schemas/schemas_0";
@@ -99,31 +103,29 @@ export interface RpcV2CborSparseMapsCommandOutput extends RpcV2CborSparseMapsInp
  *
  *
  */
-export class RpcV2CborSparseMapsCommand extends $Command
-  .classBuilder<
-    RpcV2CborSparseMapsCommandInput,
-    RpcV2CborSparseMapsCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class RpcV2CborSparseMapsCommand extends $Command.classBuilder<RpcV2CborSparseMapsCommandInput, RpcV2CborSparseMapsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "RpcV2CborSparseMaps", {})
+  .s("RpcV2Protocol", "RpcV2CborSparseMaps", {
+
+  })
   .n("RpcV2ProtocolClient", "RpcV2CborSparseMapsCommand")
   .sc(RpcV2CborSparseMaps)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: RpcV2CborSparseMapsInputOutput;
       output: RpcV2CborSparseMapsInputOutput;
-    };
-    sdk: {
+  };
+  sdk: {
       input: RpcV2CborSparseMapsCommandInput;
       output: RpcV2CborSparseMapsCommandOutput;
-    };
   };
+};
 }

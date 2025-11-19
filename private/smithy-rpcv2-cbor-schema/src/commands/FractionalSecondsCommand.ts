@@ -1,5 +1,9 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
+import {
+  RpcV2ProtocolClientResolvedConfig,
+  ServiceInputTypes,
+  ServiceOutputTypes,
+} from "../RpcV2ProtocolClient";
 import { commonParams } from "../endpoint/EndpointParameters";
 import { FractionalSecondsOutput } from "../models/models_0";
 import { FractionalSeconds } from "../schemas/schemas_0";
@@ -56,31 +60,29 @@ export interface FractionalSecondsCommandOutput extends FractionalSecondsOutput,
  *
  *
  */
-export class FractionalSecondsCommand extends $Command
-  .classBuilder<
-    FractionalSecondsCommandInput,
-    FractionalSecondsCommandOutput,
-    RpcV2ProtocolClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
+export class FractionalSecondsCommand extends $Command.classBuilder<FractionalSecondsCommandInput, FractionalSecondsCommandOutput, RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
   .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
+      .m(function (this: any, Command: any, cs: any, config: RpcV2ProtocolClientResolvedConfig, o: any) {
+          return [
+
+  getEndpointPlugin(config, Command.getEndpointParameterInstructions()),
+      ];
   })
-  .s("RpcV2Protocol", "FractionalSeconds", {})
+  .s("RpcV2Protocol", "FractionalSeconds", {
+
+  })
   .n("RpcV2ProtocolClient", "FractionalSecondsCommand")
   .sc(FractionalSeconds)
-  .build() {
-  /** @internal type navigation helper, not in runtime. */
-  protected declare static __types: {
-    api: {
+.build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
       input: {};
       output: FractionalSecondsOutput;
-    };
-    sdk: {
+  };
+  sdk: {
       input: FractionalSecondsCommandInput;
       output: FractionalSecondsCommandOutput;
-    };
   };
+};
 }
