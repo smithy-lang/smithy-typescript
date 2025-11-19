@@ -1,4 +1,5 @@
 import { op } from "@smithy/core/schema";
+import { streamCollector } from "@smithy/node-http-handler";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
   $Schema,
@@ -20,6 +21,7 @@ import type {
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser/src";
+import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 
 import { HttpBindingProtocol } from "./HttpBindingProtocol";
@@ -243,5 +245,43 @@ describe(HttpBindingProtocol.name, () => {
     expect(request.query?.token).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     expect(request.path).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
     expect(request.headers?.["header-token"]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  it("should discard response bodies for Unit operation outputs, making no attempt to parse them", async () => {
+    const protocol = new StringRestProtocol();
+    let streamProgress = 0;
+    const response = await protocol.deserializeResponse(
+      op("", "", {}, "unit", "unit"),
+      {
+        streamCollector: streamCollector,
+      } as any,
+      new HttpResponse({
+        statusCode: 200,
+        headers: {},
+        body: Readable.from({
+          async *[Symbol.asyncIterator]() {
+            yield "@";
+            streamProgress = 25;
+            yield "#";
+            streamProgress = 50;
+            yield "$";
+            streamProgress = 75;
+            yield "%";
+            streamProgress = 100;
+          },
+        }),
+      })
+    );
+
+    expect(response).toEqual({
+      $metadata: {
+        cfId: undefined,
+        extendedRequestId: undefined,
+        httpStatusCode: 200,
+        requestId: undefined,
+      },
+    });
+
+    expect(streamProgress).toBe(100);
   });
 });
