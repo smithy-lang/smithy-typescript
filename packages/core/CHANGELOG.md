@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.18.5
+
+### Patch Changes
+
+- 77c149f: drain stream in httpBindingProtocol with unit output
+
 ## 3.18.4
 
 ### Patch Changes
