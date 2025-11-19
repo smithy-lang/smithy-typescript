@@ -229,6 +229,8 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       }
       // Due to Smithy validation, we can assume that the members with no HTTP
       // bindings DO NOT contain an event stream.
+    } else if (nonHttpBindingMembers.discardResponseBody) {
+      await collectBody(response.body, context);
     }
 
     dataObject.$metadata = this.deserializeMetadata(response);
@@ -247,20 +249,20 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     response: IHttpResponse,
     headerBindings: Set<string>,
     dataObject: any
-  ): Promise<string[]>;
+  ): Promise<string[] & { discardResponseBody?: boolean }>;
   protected async deserializeHttpMessage(
     schema: Schema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: IHttpResponse,
     dataObject: any
-  ): Promise<string[]>;
+  ): Promise<string[] & { discardResponseBody?: boolean }>;
   protected async deserializeHttpMessage(
     schema: Schema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: IHttpResponse,
     arg4: unknown,
     arg5?: unknown
-  ): Promise<string[]> {
+  ): Promise<string[] & { discardResponseBody?: boolean }> {
     let dataObject: any;
     if (arg4 instanceof Set) {
       dataObject = arg5;
@@ -268,14 +270,16 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       dataObject = arg4;
     }
 
+    let discardResponseBody = true;
     const deserializer = this.deserializer;
     const ns = NormalizedSchema.of(schema);
-    const nonHttpBindingMembers = [] as string[];
+    const nonHttpBindingMembers = [] as string[] & { discardResponseBody?: boolean };
 
     for (const [memberName, memberSchema] of ns.structIterator()) {
       const memberTraits = memberSchema.getMemberTraits();
 
       if (memberTraits.httpPayload) {
+        discardResponseBody = false;
         const isStreaming = memberSchema.isStreaming();
         if (isStreaming) {
           const isEventStream = memberSchema.isStructSchema();
@@ -339,6 +343,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         nonHttpBindingMembers.push(memberName);
       }
     }
+    nonHttpBindingMembers.discardResponseBody = discardResponseBody;
     return nonHttpBindingMembers;
   }
 }
