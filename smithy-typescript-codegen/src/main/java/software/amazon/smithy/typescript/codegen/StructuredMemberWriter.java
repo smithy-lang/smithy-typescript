@@ -409,8 +409,16 @@ final class StructuredMemberWriter {
                     // the object
                     optionalSuffix = "?.toString()";
                 }
-                writer.write("...getMemberValidator($1S).validate($2L.$1L$4L, `$${path}/$3L`),",
+                Shape memberTarget = model.expectShape(member.getTarget());
+                if (memberTarget.isUnionShape() && memberTarget.hasTrait(StreamingTrait.class)) {
+                    // todo: validating event streams in unsupported.
+                    writer.write("// unsupported event stream validation");
+                    writer.write("// ...getMemberValidator($1S).validate($2L.$1L$4L, `$${path}/$3L`),",
                         getSanitizedMemberName(member), param, member.getMemberName(), optionalSuffix);
+                } else {
+                    writer.write("...getMemberValidator($1S).validate($2L.$1L$4L, `$${path}/$3L`),",
+                        getSanitizedMemberName(member), param, member.getMemberName(), optionalSuffix);
+                }
             }
         });
     }
@@ -458,7 +466,14 @@ final class StructuredMemberWriter {
                     getValidatorValueType(shape),
                     () -> {
                         writeShapeValidator(writer, shape, constraintTraits, ",");
-                        writer.write("$T.validate", symbolProvider.toSymbol(shape));
+                        if (!shape.hasTrait(ErrorTrait.class)) {
+                            writer.write("$T.validate", symbolProvider.toSymbol(shape));
+                        } else {
+                            // todo: unsupported
+                            // Error classes have no static validator.
+                            writer.write("""
+                                () => [/*Error validator unsupported*/]""");
+                        }
                     });
         } else if (shape.isListShape() || shape.isSetShape()) {
             writer.addImport("CompositeCollectionValidator",

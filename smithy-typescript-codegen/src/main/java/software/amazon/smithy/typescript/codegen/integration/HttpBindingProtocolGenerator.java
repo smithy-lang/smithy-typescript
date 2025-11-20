@@ -559,7 +559,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 + "  input: $T,\n"
                 + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", methodName, outputType, responseType, () -> {
-            writeEmptyEndpoint(context);
+            writeEmptyEndpoint(context, operation);
             writeOperationStatusCode(context, operation, bindingIndex, trait);
             writeResponseHeaders(context, operation, bindingIndex,
                     () -> writeDefaultOutputHeaders(context, operation));
@@ -646,14 +646,36 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     }
 
     private void writeEmptyEndpoint(GenerationContext context) {
-        context.getWriter().write("const context: __SerdeContext = {\n"
-                + "  ...ctx,\n"
-                + "  endpoint: () => Promise.resolve({\n"
-                + "    protocol: '',\n"
-                + "    hostname: '',\n"
-                + "    path: '',\n"
-                + "  }),\n"
-                + "}");
+        context.getWriter().write("""
+            const context: __SerdeContext = {
+              ...ctx,
+              endpoint: () => Promise.resolve({
+                protocol: '',
+                hostname: '',
+                path: '',
+              }),
+            };"""
+        );
+    }
+
+    private void writeEmptyEndpoint(GenerationContext context, OperationShape operation) {
+        String contextType = "__SerdeContext";
+        boolean hasEventStreamResponse = EventStreamGenerator.hasEventStreamOutput(context, operation);
+        if (hasEventStreamResponse) {
+            // todo: unsupported SSDK feature.
+            contextType += "& any /*event stream context unsupported in ssdk*/";
+        }
+        context.getWriter().write("""
+            const context: $L = {
+              ...ctx,
+              endpoint: () => Promise.resolve({
+                protocol: '',
+                hostname: '',
+                path: '',
+              }),
+            };""",
+            contextType
+        );
     }
 
     private void generateOperationRequestSerializer(
@@ -2205,10 +2227,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
-            writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
-                writer.write("$$metadata: deserializeMetadata($L),", outputName);
-                writer.write("...contents");
-            });
+            // todo: unsupported ssdk feature.
+            String serverSdkInfix = context.getSettings().generateServerSdk()
+                ? ": any /* $metadata unsupported on ssdk error */"
+                : "";
+            writer.openBlock("const exception$L = new $T({", "});",
+                serverSdkInfix,
+                errorSymbol,
+                () -> {
+                    writer.write("$$metadata: deserializeMetadata($L),", outputName);
+                    writer.write("...contents");
+                }
+            );
             String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
             writer.addImport("decorateServiceException", "__decorateServiceException",
                     TypeScriptDependency.AWS_SMITHY_CLIENT);

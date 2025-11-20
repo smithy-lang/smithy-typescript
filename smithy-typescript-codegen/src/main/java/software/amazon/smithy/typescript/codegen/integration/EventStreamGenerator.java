@@ -334,8 +334,16 @@ public class EventStreamGenerator {
             String memberName = headerMember.getMemberName();
             Shape target = model.expectShape(headerMember.getTarget());
             writer.openBlock("if (input.$L != null) {", "}", memberName, () -> {
-                writer.write("headers[$1S] = { type: $2S, value: input.$1L }", memberName,
+                if (target.isLongShape()) {
+                    writer.addImport("Int64", "__Int64", TypeScriptDependency.AWS_SDK_EVENTSTREAM_CODEC);
+                    writer.write("headers[$1S] = { type: $2S, value: __Int64.fromNumber(input.$1L) }",
+                        memberName,
+                        getEventHeaderType(target)
+                    );
+                } else {
+                    writer.write("headers[$1S] = { type: $2S, value: input.$1L }", memberName,
                         getEventHeaderType(target));
+                }
             });
         }
     }
