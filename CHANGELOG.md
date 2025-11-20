@@ -1,5 +1,12 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.38.0 (2025-11-20)
+
+### Features
+
+- Upgraded to smithy version 1.64.0 ([#1784](https://github.com/smithy-lang/smithy-typescript/pull/1784))
+- Divided codegen models folder into enums, errors, and other interfaces ([#1770](https://github.com/smithy-lang/smithy-typescript/pull/1770))
+
 ## 0.37.0 (2025-11-04)
 
 ### Features
