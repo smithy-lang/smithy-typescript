@@ -1,5 +1,7 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClient } from "../../src/RpcV2ProtocolClient";
+import { cbor } from "@smithy/core/cbor";
+import { expect, test as it } from "vitest";
+
 import { EmptyInputOutputCommand } from "../../src/commands/EmptyInputOutputCommand";
 import { Float16Command } from "../../src/commands/Float16Command";
 import { FractionalSecondsCommand } from "../../src/commands/FractionalSecondsCommand";
@@ -13,11 +15,10 @@ import { RpcV2CborListsCommand } from "../../src/commands/RpcV2CborListsCommand"
 import { RpcV2CborSparseMapsCommand } from "../../src/commands/RpcV2CborSparseMapsCommand";
 import { SimpleScalarPropertiesCommand } from "../../src/commands/SimpleScalarPropertiesCommand";
 import { SparseNullsOperationCommand } from "../../src/commands/SparseNullsOperationCommand";
-import { cbor } from "@smithy/core/cbor";
-import { expect, test as it } from "vitest";
-import { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { Readable } from "stream";
+import { RpcV2ProtocolClient } from "../../src/RpcV2ProtocolClient";
+import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
+import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { Readable } from "node:stream";
 
 /**
  * Throws an expected exception that contains the serialized request.

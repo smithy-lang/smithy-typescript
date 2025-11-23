@@ -79,7 +79,7 @@ public class ExtensionConfigurationGenerator {
         delegator.useFileWriter(Paths.get(CodegenUtils.SOURCE_FOLDER, FILENAME).toString(), writer -> {
             interfaces.entrySet().forEach(entry -> {
                 writer.addDependency(entry.getValue());
-                writer.addImport(entry.getKey(), null, entry.getValue());
+                writer.addTypeImport(entry.getKey(), null, entry.getValue());
             });
             writer.write(clientConfigurationContent);
         });

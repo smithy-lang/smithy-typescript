@@ -1,17 +1,18 @@
 // smithy-typescript generated code
-import { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
-import { commonParams } from "../endpoint/EndpointParameters";
-import {
-  TradeEventStreamRequest,
-  TradeEventStreamRequestFilterSensitiveLog,
-  TradeEventStreamResponse,
-  TradeEventStreamResponseFilterSensitiveLog,
-} from "../models/models_0";
-import { de_TradeEventStreamCommand, se_TradeEventStreamCommand } from "../protocols/Rpcv2cbor";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
-import { MetadataBearer as __MetadataBearer } from "@smithy/types";
+import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
+
+import { commonParams } from "../endpoint/EndpointParameters";
+import {
+  type TradeEventStreamRequest,
+  type TradeEventStreamResponse,
+  TradeEventStreamRequestFilterSensitiveLog,
+  TradeEventStreamResponseFilterSensitiveLog,
+} from "../models/models_0";
+import { de_TradeEventStreamCommand, se_TradeEventStreamCommand } from "../protocols/Rpcv2cbor";
+import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
 /**
  * @public

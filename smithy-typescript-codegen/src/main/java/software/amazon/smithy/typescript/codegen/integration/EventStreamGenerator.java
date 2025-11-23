@@ -218,7 +218,7 @@ public class EventStreamGenerator {
         Symbol eventsUnionSymbol = getSymbol(context, eventsUnion);
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
-        writer.addImport("Message", "__Message", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Message", "__Message", TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs(methodLongName);
         writer.openBlock("const $L = (\n"
@@ -249,10 +249,10 @@ public class EventStreamGenerator {
 
     private String getEventStreamSerdeContextType(GenerationContext context, UnionShape eventsUnion) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         String contextType = "__SerdeContext";
         if (eventsUnion.hasTrait(StreamingTrait.class)) {
-            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
+            writer.addTypeImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
                     TypeScriptDependency.SMITHY_TYPES);
             contextType += " & __EventStreamSerdeContext";
         }
@@ -276,7 +276,7 @@ public class EventStreamGenerator {
         String methodName = getEventSerFunctionName(context, event);
         Symbol symbol = getSymbol(context, event);
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("MessageHeaders", "__MessageHeaders", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("MessageHeaders", "__MessageHeaders", TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("const $L = (\n"
                 + "  input: $T,\n"
                 + "  context: __SerdeContext\n"

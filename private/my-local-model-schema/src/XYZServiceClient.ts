@@ -1,65 +1,71 @@
 // smithy-typescript generated code
 import {
-  HttpAuthSchemeInputConfig,
-  HttpAuthSchemeResolvedConfig,
-  defaultXYZServiceHttpAuthSchemeParametersProvider,
-  resolveHttpAuthSchemeConfig,
-} from "./auth/httpAuthSchemeProvider";
-import { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
-import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
-import {
-  ClientInputEndpointParameters,
-  ClientResolvedEndpointParameters,
-  EndpointParameters,
-  resolveClientEndpointParameters,
-} from "./endpoint/EndpointParameters";
-import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
-import { RuntimeExtension, RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
-import {
   DefaultIdentityProviderConfig,
   getHttpAuthSchemeEndpointRuleSetPlugin,
   getHttpSigningPlugin,
 } from "@smithy/core";
 import { getSchemaSerdePlugin } from "@smithy/core/schema";
 import {
-  EventStreamSerdeInputConfig,
-  EventStreamSerdeResolvedConfig,
+  type EventStreamSerdeInputConfig,
+  type EventStreamSerdeResolvedConfig,
   resolveEventStreamSerdeConfig,
 } from "@smithy/eventstream-serde-config-resolver";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import {
-  EndpointInputConfig,
-  EndpointRequiredInputConfig,
-  EndpointRequiredResolvedConfig,
-  EndpointResolvedConfig,
+  type EndpointInputConfig,
+  type EndpointRequiredInputConfig,
+  type EndpointRequiredResolvedConfig,
+  type EndpointResolvedConfig,
   resolveEndpointConfig,
   resolveEndpointRequiredConfig,
 } from "@smithy/middleware-endpoint";
-import { RetryInputConfig, RetryResolvedConfig, getRetryPlugin, resolveRetryConfig } from "@smithy/middleware-retry";
-import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
+  type RetryInputConfig,
+  type RetryResolvedConfig,
+  getRetryPlugin,
+  resolveRetryConfig,
+} from "@smithy/middleware-retry";
+import type { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
+import {
+  type DefaultsMode as __DefaultsMode,
+  type SmithyConfiguration as __SmithyConfiguration,
+  type SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
   Client as __Client,
-  DefaultsMode as __DefaultsMode,
-  SmithyConfiguration as __SmithyConfiguration,
-  SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
 } from "@smithy/smithy-client";
-import {
-  ClientProtocol,
-  HttpRequest,
-  HttpResponse,
+import type {
   BodyLengthCalculator as __BodyLengthCalculator,
   CheckOptionalClientConfig as __CheckOptionalClientConfig,
   ChecksumConstructor as __ChecksumConstructor,
+  ClientProtocol,
   Decoder as __Decoder,
   Encoder as __Encoder,
   EventStreamSerdeProvider as __EventStreamSerdeProvider,
   HashConstructor as __HashConstructor,
   HttpHandlerOptions as __HttpHandlerOptions,
+  HttpRequest,
+  HttpResponse,
   Logger as __Logger,
   Provider as __Provider,
   StreamCollector as __StreamCollector,
   UrlParser as __UrlParser,
 } from "@smithy/types";
+
+import {
+  type HttpAuthSchemeInputConfig,
+  type HttpAuthSchemeResolvedConfig,
+  defaultXYZServiceHttpAuthSchemeParametersProvider,
+  resolveHttpAuthSchemeConfig,
+} from "./auth/httpAuthSchemeProvider";
+import type { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
+import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
+import {
+  type ClientInputEndpointParameters,
+  type ClientResolvedEndpointParameters,
+  type EndpointParameters,
+  resolveClientEndpointParameters,
+} from "./endpoint/EndpointParameters";
+import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
+import { type RuntimeExtension, type RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
 
 export { __Client };
 

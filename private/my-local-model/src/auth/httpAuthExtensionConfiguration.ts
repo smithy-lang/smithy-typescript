@@ -1,6 +1,7 @@
 // smithy-typescript generated code
-import { XYZServiceHttpAuthSchemeProvider } from "./httpAuthSchemeProvider";
-import { HttpAuthScheme } from "@smithy/types";
+import type { HttpAuthScheme } from "@smithy/types";
+
+import type { XYZServiceHttpAuthSchemeProvider } from "./httpAuthSchemeProvider";
 
 /**
  * @internal

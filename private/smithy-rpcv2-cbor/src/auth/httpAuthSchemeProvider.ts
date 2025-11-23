@@ -1,6 +1,5 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolClientResolvedConfig } from "../RpcV2ProtocolClient";
-import {
+import type {
   HandlerExecutionContext,
   HttpAuthOption,
   HttpAuthScheme,
@@ -10,6 +9,8 @@ import {
   Provider,
 } from "@smithy/types";
 import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
+
+import type { RpcV2ProtocolClientResolvedConfig } from "../RpcV2ProtocolClient";
 
 /**
  * @internal

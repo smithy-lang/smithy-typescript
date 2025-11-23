@@ -2,6 +2,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.amazon.smithy.typescript.codegen.TypeScriptWriter.CODEGEN_INDICATOR;
 
 import java.nio.file.Paths;
@@ -26,12 +27,13 @@ public class TypeScriptWriterTest {
         writer.addRelativeImport("Qux", "__Qux", Paths.get("./qux"));
         String result = writer.toString();
 
-        assertThat(result, equalTo("""
-            %simport { Baz } from "./hello";
+        assertEquals("""
+            %simport { Bar as __Bar } from "@smithy/types";
+            
+            import { Baz } from "./hello";
             import { Qux as __Qux } from "./qux";
-            import { Bar as __Bar } from "@smithy/types";
             import { Foo } from "baz";
-            """.formatted(CODEGEN_INDICATOR)));
+            """.formatted(CODEGEN_INDICATOR), result);
     }
 
     @Test
@@ -73,8 +75,8 @@ public class TypeScriptWriterTest {
         writer.addImportSubmodule("symbol", "__symbol", () -> "@smithy/core", "/submodule");
         String result = writer.toString();
 
-        assertThat(result.trim(), equalTo("""
+        assertEquals("""
             %simport { symbol as __symbol } from "@smithy/core/submodule";
-            """.formatted(CODEGEN_INDICATOR).trim()));
+            """.formatted(CODEGEN_INDICATOR).trim(), result.trim());
     }
 }

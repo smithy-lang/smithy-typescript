@@ -1,13 +1,14 @@
 // smithy-typescript generated code
-import { XYZServiceClient, XYZServiceClientConfig } from "./XYZServiceClient";
+import { createAggregatedClient } from "@smithy/smithy-client";
+import type { HttpHandlerOptions as __HttpHandlerOptions } from "@smithy/types";
+
 import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
 import {
   TradeEventStreamCommand,
   TradeEventStreamCommandInput,
   TradeEventStreamCommandOutput,
 } from "./commands/TradeEventStreamCommand";
-import { createAggregatedClient } from "@smithy/smithy-client";
-import { HttpHandlerOptions as __HttpHandlerOptions } from "@smithy/types";
+import { XYZServiceClient } from "./XYZServiceClient";
 
 const commands = {
   GetNumbersCommand,

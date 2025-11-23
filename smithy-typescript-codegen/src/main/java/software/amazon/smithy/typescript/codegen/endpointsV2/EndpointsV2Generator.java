@@ -109,8 +109,8 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
-                writer.addImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
-                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.writeDocs("@public");
                 writer.openBlock(
@@ -210,13 +210,13 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RESOLVER_FILE).toString(),
             writer -> {
-                writer.addImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.addImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.addDependency(TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.addImport("EndpointParams", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.addTypeImport("EndpointParams", null, TypeScriptDependency.UTIL_ENDPOINTS);
                 writer.addImport("resolveEndpoint", null, TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.addRelativeImport("EndpointParameters", null,
+                writer.addRelativeTypeImport("EndpointParameters", null,
                     Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
                         ENDPOINT_PARAMETERS_FILE.replace(".ts", "")));
                 writer.addRelativeImport("ruleSet", null,
@@ -258,7 +258,7 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RULESET_FILE).toString(),
             writer -> {
-                writer.addImport("RuleSetObject", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("RuleSetObject", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.openBlock(
                     "export const ruleSet: RuleSetObject = ",
                     ";",

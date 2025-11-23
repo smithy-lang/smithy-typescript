@@ -274,7 +274,7 @@ public class SchemaGenerator implements Runnable {
     private void writeSimpleSchema(Shape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         if (elision.traits.hasSchemaTraits(shape)) {
-            writer.addImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
                     export var $L: StaticSimpleSchema = [0, $L, $L,""",
                 "",
@@ -295,7 +295,7 @@ public class SchemaGenerator implements Runnable {
             String symbolName = reservedWords.escape(shape.getId().getName());
             if (shape.hasTrait(ErrorTrait.class)) {
                 String exceptionCtorSymbolName = "__" + symbolName;
-                writer.addImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addRelativeImport(
                     symbolName,
                     exceptionCtorSymbolName,
@@ -318,7 +318,7 @@ public class SchemaGenerator implements Runnable {
                     exceptionCtorSymbolName
                 );
             } else {
-                writer.addImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.openBlock("""
                 export var $L: StaticStructureSchema = [3, $L, $L,""",
                     "];",
@@ -345,7 +345,7 @@ public class SchemaGenerator implements Runnable {
         String namespace = settings.getService(model).getId().getNamespace();
 
         String exceptionCtorSymbolName = "__" + serviceExceptionName;
-        writer.addImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport(
             serviceExceptionName,
             exceptionCtorSymbolName,
@@ -372,7 +372,7 @@ public class SchemaGenerator implements Runnable {
     private void writeUnionSchema(UnionShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         checkedWriteSchema(shape, () -> {
-            writer.addImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
                     export var $L: StaticStructureSchema = [3, $L, $L,""",
                 "];",
@@ -420,7 +420,7 @@ public class SchemaGenerator implements Runnable {
     private void writeListSchema(CollectionShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         checkedWriteSchema(shape, () -> {
-            writer.addImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
                     export var $L: StaticListSchema = [1, $L, $L,""",
                 "];",
@@ -438,7 +438,7 @@ public class SchemaGenerator implements Runnable {
     private void writeMapSchema(MapShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
         checkedWriteSchema(shape, () -> {
-            writer.addImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
                     export var $L: StaticMapSchema = [2, $L, $L,""",
                 "];",
@@ -507,7 +507,7 @@ public class SchemaGenerator implements Runnable {
 
     private void writeOperationSchema(OperationShape shape) {
         TypeScriptWriter writer = getWriter(shape.getId());
-        writer.addImport("StaticOperationSchema", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("StaticOperationSchema", null, TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("""
             export var $L: StaticOperationSchema = [9, $L, $L,""",
             "];",
@@ -674,14 +674,14 @@ public class SchemaGenerator implements Runnable {
                 contained = shape.asListShape().get().getMember();
                 staticTypePrefix = "[1, ";
                 sentinel = "64";
-                writer.addImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
             }
             case MAP -> {
                 contained = shape.asMapShape().get().getValue();
                 staticTypePrefix = "[2, ";
                 keySchema = this.resolveSimpleSchema(context, shape.asMapShape().get().getKey()) + ", ";
                 sentinel = "128";
-                writer.addImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
             }
             default -> {
                 throw new IllegalArgumentException(

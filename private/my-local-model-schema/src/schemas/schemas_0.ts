@@ -29,7 +29,9 @@ const _t = "timestamp";
 const n0 = "org.xyz.v1";
 
 // smithy-typescript generated code
-import { XYZServiceSyntheticServiceException as __XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
+import { TypeRegistry } from "@smithy/core/schema";
+import type { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema } from "@smithy/types";
+
 import {
   CodedThrottlingError as __CodedThrottlingError,
   HaltError as __HaltError,
@@ -37,8 +39,7 @@ import {
   RetryableError as __RetryableError,
   XYZServiceServiceException as __XYZServiceServiceException,
 } from "../models/errors";
-import { TypeRegistry } from "@smithy/core/schema";
-import { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema } from "@smithy/types";
+import { XYZServiceSyntheticServiceException as __XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
 
 /* eslint no-var: 0 */
 

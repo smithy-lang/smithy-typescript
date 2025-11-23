@@ -128,8 +128,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .symbolProvider(symbolProvider)
                 .httpAuthSchemeParameters(httpAuthSchemeParameters)
                 .build());
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            w.addImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
+            w.addTypeImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
             w.openBlock("""
                 /**
                  * @internal
@@ -166,12 +165,10 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .model(model)
                 .symbolProvider(symbolProvider)
                 .build());
-            w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
+            w.addRelativeTypeImport(serviceSymbol.getName() + "ResolvedConfig", null,
                 Paths.get(".", serviceSymbol.getNamespace()));
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            w.addImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.SMITHY_TYPES);
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            w.addImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
+            w.addTypeImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.SMITHY_TYPES);
+            w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
             w.write("""
                 /**
                  * @internal
@@ -205,10 +202,9 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .symbolProvider(symbolProvider)
                 .httpAuthSchemeParameters(httpAuthSchemeParameters)
                 .build());
-            w.addRelativeImport(serviceSymbol.getName() + "ResolvedConfig", null,
+            w.addRelativeTypeImport(serviceSymbol.getName() + "ResolvedConfig", null,
                 Paths.get(".", serviceSymbol.getNamespace()));
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            w.addImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
+            w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
             w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
             w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
             w.openBlock("""
@@ -281,8 +277,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         ShapeId schemeId = s.getSchemeId();
         String normalizedAuthSchemeName = normalizeAuthSchemeName(schemeId);
         Optional<HttpAuthScheme> authSchemeOptional = s.getHttpAuthScheme();
-        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-        w.addImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
+        w.addTypeImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
         w.openBlock("""
             function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
             HttpAuthOption {""", "};\n",
@@ -356,8 +351,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 .model(model)
                 .symbolProvider(symbolProvider)
                 .build());
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            w.addImport("HttpAuthSchemeProvider", null, TypeScriptDependency.SMITHY_TYPES);
+            w.addTypeImport("HttpAuthSchemeProvider", null, TypeScriptDependency.SMITHY_TYPES);
             w.write("""
             /**
              * @internal

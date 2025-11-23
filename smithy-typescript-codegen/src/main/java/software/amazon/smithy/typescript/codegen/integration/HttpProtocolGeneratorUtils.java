@@ -250,7 +250,7 @@ public final class HttpProtocolGeneratorUtils {
     public static void generateMetadataDeserializer(GenerationContext context, SymbolReference responseType) {
         TypeScriptWriter writer = context.getWriter();
 
-        writer.addImport("ResponseMetadata", "__ResponseMetadata", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("ResponseMetadata", "__ResponseMetadata", TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("const deserializeMetadata = (output: $T): __ResponseMetadata => ({", "});", responseType,
                 () -> {
                     writer.write("httpStatusCode: output.statusCode,");
@@ -272,7 +272,7 @@ public final class HttpProtocolGeneratorUtils {
     public static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
         writer.addImport("collectBody", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.write("// Encode Uint8Array data into string with utf-8.");
         writer.write("const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => "
                 + "collectBody(streamBody, context).then(body => context.utf8Encoder(body))");

@@ -1,9 +1,3 @@
-import { ${clientConfigName} } from "${clientModuleName}";
-import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";
-import { loadConfigsForDefaultMode } from "@smithy/smithy-client";
-import { resolveDefaultsModeConfig } from "@smithy/util-defaults-mode-node";
-import { emitWarningIfUnsupportedVersion } from "@smithy/smithy-client";
-
 /**
  * @internal
  */
@@ -12,7 +6,8 @@ export const getRuntimeConfig = (config: ${clientConfigName}) => {
   const defaultsMode = resolveDefaultsModeConfig(config);
   const defaultConfigProvider = () => defaultsMode().then(loadConfigsForDefaultMode);
   const clientSharedValues = getSharedRuntimeConfig(config);
-  ${prepareCustomizations}return {
+  ${prepareCustomizations}
+  return {
     ...clientSharedValues,
     ...config,
     runtime: "node",

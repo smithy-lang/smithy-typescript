@@ -131,20 +131,21 @@ const n1 = "smithy.protocoltests.rpcv2Cbor";
 const n2 = "smithy.protocoltests.shared";
 
 // smithy-typescript generated code
-import { RpcV2ProtocolServiceException as __RpcV2ProtocolServiceException } from "../models/RpcV2ProtocolServiceException";
-import {
-  ComplexError as __ComplexError,
-  InvalidGreeting as __InvalidGreeting,
-  ValidationException as __ValidationException,
-} from "../models/errors";
 import { TypeRegistry } from "@smithy/core/schema";
-import {
+import type {
   StaticErrorSchema,
   StaticListSchema,
   StaticMapSchema,
   StaticOperationSchema,
   StaticStructureSchema,
 } from "@smithy/types";
+
+import {
+  ComplexError as __ComplexError,
+  InvalidGreeting as __InvalidGreeting,
+  ValidationException as __ValidationException,
+} from "../models/errors";
+import { RpcV2ProtocolServiceException as __RpcV2ProtocolServiceException } from "../models/RpcV2ProtocolServiceException";
 
 /* eslint no-var: 0 */
 

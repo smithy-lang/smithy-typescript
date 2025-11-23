@@ -1,7 +1,37 @@
 // smithy-typescript generated code
+import {
+  buildHttpRpcRequest,
+  cbor,
+  checkCborResponse as cr,
+  dateToTag as __dateToTag,
+  loadSmithyRpcV2CborErrorCode,
+  parseCborBody as parseBody,
+  parseCborErrorBody as parseErrorBody,
+} from "@smithy/core/cbor";
+import { nv as __nv } from "@smithy/core/serde";
+import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
+import {
+  _json,
+  collectBody,
+  decorateServiceException as __decorateServiceException,
+  expectNonNull as __expectNonNull,
+  expectString as __expectString,
+  parseEpochTimestamp as __parseEpochTimestamp,
+  take,
+  withBaseException,
+} from "@smithy/smithy-client";
+import type {
+  Endpoint as __Endpoint,
+  EventStreamSerdeContext as __EventStreamSerdeContext,
+  HeaderBag as __HeaderBag,
+  MessageHeaders as __MessageHeaders,
+  Message as __Message,
+  ResponseMetadata as __ResponseMetadata,
+  SerdeContext as __SerdeContext,
+} from "@smithy/types";
+
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
-import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
 import {
   CodedThrottlingError,
   HaltError,
@@ -10,36 +40,7 @@ import {
   XYZServiceServiceException,
 } from "../models/errors";
 import { Alpha, GetNumbersRequest, GetNumbersResponse, TradeEvents, Unit } from "../models/models_0";
-import {
-  dateToTag as __dateToTag,
-  buildHttpRpcRequest,
-  cbor,
-  checkCborResponse as cr,
-  loadSmithyRpcV2CborErrorCode,
-  parseCborBody as parseBody,
-  parseCborErrorBody as parseErrorBody,
-} from "@smithy/core/cbor";
-import { nv as __nv } from "@smithy/core/serde";
-import { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
-import {
-  decorateServiceException as __decorateServiceException,
-  expectNonNull as __expectNonNull,
-  expectString as __expectString,
-  parseEpochTimestamp as __parseEpochTimestamp,
-  _json,
-  collectBody,
-  take,
-  withBaseException,
-} from "@smithy/smithy-client";
-import {
-  Endpoint as __Endpoint,
-  EventStreamSerdeContext as __EventStreamSerdeContext,
-  HeaderBag as __HeaderBag,
-  Message as __Message,
-  MessageHeaders as __MessageHeaders,
-  ResponseMetadata as __ResponseMetadata,
-  SerdeContext as __SerdeContext,
-} from "@smithy/types";
+import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
 
 /**
  * serializeRpcv2cborGetNumbersCommand
