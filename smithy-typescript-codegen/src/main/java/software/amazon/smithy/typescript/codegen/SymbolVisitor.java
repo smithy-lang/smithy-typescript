@@ -481,7 +481,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             }
 
             String path;
-            if (shape.isEnumShape() || shape.isIntEnumShape()) {
+            if (shape.isEnumShape() || shape.isIntEnumShape() || shape.hasTrait(EnumTrait.class)) {
                 path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "enums");
             } else if (shape.isStructureShape() && shape.hasTrait(ErrorTrait.class)) {
                 path = String.join("/", ".", SHAPE_NAMESPACE_PREFIX, "errors");
