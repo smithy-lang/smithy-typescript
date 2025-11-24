@@ -61,6 +61,10 @@ public class EndpointsV2GeneratorTest {
         assertThat(endpointParameters, containsString(
             """
                 export interface ClientInputEndpointParameters {
+                  clientContextParams: {
+                    region?: string | undefined | Provider<string | undefined>;
+                    stage?: string | undefined | Provider<string | undefined>;
+                  };
                   region?: string | undefined | Provider<string | undefined>;
                   stage?: string | undefined | Provider<string | undefined>;
                   endpoint?:"""));
