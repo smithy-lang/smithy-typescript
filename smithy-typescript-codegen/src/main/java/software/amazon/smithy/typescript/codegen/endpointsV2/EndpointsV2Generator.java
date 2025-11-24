@@ -6,6 +6,7 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
@@ -109,18 +111,46 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
                 writer.writeDocs("@public");
-                writer.openBlock("export interface ClientInputEndpointParameters {", "}", () -> {
-                    Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
-                    //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
-                    Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                    builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                    clientInputParams.putAll(builtInParams);
-
-                    ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                    ruleSet
-                        .getObjectMember("parameters")
-                        .ifPresent(parameters -> {
-                            parameters.accept(new RuleSetParametersVisitor(writer, clientInputParams, true));
+                writer.openBlock(
+                    "export interface ClientInputEndpointParameters {",
+                    "}",
+                    () -> {
+                        Map<String, String> clientContextParams =
+                            ruleSetParameterFinder.getClientContextParams();
+                        Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
+                        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+                        Set<String> knownConfigKeys = Set.of(
+                            "apiKey", "retryStrategy", "requestHandler");
+                        // Generate clientContextParams with all params excluding built-ins
+                        Map<String, String> customerContextParams = new HashMap<>();
+                        for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
+                            if (!builtInParams.containsKey(entry.getKey())) {
+                                    customerContextParams.put(entry.getKey(), entry.getValue());
+                                }
+                            }
+                        if (!customerContextParams.isEmpty()) {
+                            writer.write("clientContextParams: {");
+                            writer.indent();
+                            ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                parameters.accept(new RuleSetParametersVisitor(
+                                    writer, customerContextParams, true));
+                            });
+                            writer.dedent();
+                            writer.write("};");
+                        }
+                        // Add direct params (built-ins + non-conflicting client context params)
+                        Map<String, String> directParams = new HashMap<>(builtInParams);
+                        for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
+                            // Only add non-conflicting client context params that aren't built-ins
+                            if (!knownConfigKeys.contains(entry.getKey())
+                                && !builtInParams.containsKey(entry.getKey())) {
+                                directParams.put(entry.getKey(), entry.getValue());
+                            }
+                        }
+                        ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                        ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                            parameters.accept(new RuleSetParametersVisitor(writer, directParams, true));
                         });
                 });
 
@@ -132,6 +162,54 @@ public final class EndpointsV2Generator implements Runnable {
                       defaultSigningName: string;
                     };"""
                 );
+                // Generate clientContextParamDefaults only if there are customer context params
+                Map<String, String> clientContextParams = ruleSetParameterFinder.getClientContextParams();
+                Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
+                Map<String, String> customerContextParams = new HashMap<>();
+                for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
+                    if (!builtInParams.containsKey(entry.getKey())) {
+                        customerContextParams.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                if (!customerContextParams.isEmpty()) {
+                    // Check if any parameters have default values
+                    boolean hasDefaults = false;
+                    ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                    if (ruleSet.getObjectMember("parameters").isPresent()) {
+                        ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
+                        for (Map.Entry<String, String> entry : customerContextParams.entrySet()) {
+                            String paramName = entry.getKey();
+                            ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
+                            if (paramNode != null && paramNode.containsMember("default")) {
+                                hasDefaults = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (hasDefaults) {
+                        writer.write("");
+                        writer.writeDocs("@internal");
+                        writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
+                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                for (Map.Entry<String, String> entry : customerContextParams.entrySet()) {
+                                    String paramName = entry.getKey();
+                                    ObjectNode paramNode = parameters.expectObjectNode()
+                                        .getObjectMember(paramName).orElse(null);
+                                    if (paramNode != null && paramNode.containsMember("default")) {
+                                        Node defaultValue = paramNode.getMember("default").get();
+                                        if (defaultValue.isStringNode()) {
+                                            writer.write("$L: \"$L\",", paramName,
+                                                defaultValue.expectStringNode().getValue());
+                                        } else if (defaultValue.isBooleanNode()) {
+                                            writer.write("$L: $L,", paramName,
+                                                defaultValue.expectBooleanNode().getValue());
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
                 writer.write("");
 
                 writer.writeDocs("@internal");
