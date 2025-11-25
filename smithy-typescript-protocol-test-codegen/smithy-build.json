@@ -24,7 +24,8 @@
             },
             "license": "Apache-2.0"
           },
-          "private": true
+          "private": true,
+          "generateIndexTests": true
         }
       }
     },
@@ -51,7 +52,8 @@
             "license": "Apache-2.0"
           },
           "private": true,
-          "generateSchemas": true
+          "generateSchemas": true,
+          "generateIndexTests": true
         }
       }
     },
@@ -94,7 +96,8 @@
             "private": true
           },
           "bigNumberMode": "native",
-          "generateSchemas": true
+          "generateSchemas": true,
+          "generateIndexTests": true
         }
       }
     }

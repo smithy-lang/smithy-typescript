@@ -1,0 +1,169 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package software.amazon.smithy.typescript.codegen;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+import java.util.TreeSet;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
+import software.amazon.smithy.utils.SmithyInternalApi;
+
+/**
+ * This class generates a runnable pair of test files
+ * that demonstrates the exportable components of the generated client
+ * are accounted for.
+ */
+@SmithyInternalApi
+public final class PackageApiValidationGenerator {
+    private final TypeScriptWriter writer;
+    private final TypeScriptSettings settings;
+    private final Model model;
+    private final SymbolProvider symbolProvider;
+    private final ServiceClosure serviceClosure;
+
+    public PackageApiValidationGenerator(
+        TypeScriptWriter writer,
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider
+    ) {
+        this.writer = writer;
+        this.settings = settings;
+        this.model = model;
+        this.symbolProvider = symbolProvider;
+        serviceClosure = ServiceClosure.of(model, settings.getService(model));
+    }
+
+    /**
+     * Code written by this method is types-only TypeScript.
+     */
+    public void writeTypeIndexTest() {
+        writer.openBlock("""
+            export type {""",
+            """
+            } from "../dist-types/index.d\"""",
+            () -> {
+                // exportable types include:
+
+                // the barebones client
+                String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+                writer.write("$L", aggregateClientName + "Client,");
+
+                // the aggregate client
+                writer.write(aggregateClientName + ",");
+
+                // all commands
+                Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
+                    settings.getService()
+                );
+                for (OperationShape operation : containedOperations) {
+                    writer.write("$L,", symbolProvider.toSymbol(operation).getName());
+                }
+
+                // enums
+                TreeSet<Shape> enumShapes = serviceClosure.getEnums();
+                for (Shape enumShape : enumShapes) {
+                    writer.write("$L,", symbolProvider.toSymbol(enumShape).getName());
+                }
+
+                // structure & union types & modeled errors
+                TreeSet<Shape> structuralShapes = serviceClosure.getStructuralNonErrorShapes();
+                for (Shape structuralShape : structuralShapes) {
+                    writer.write("$L,", symbolProvider.toSymbol(structuralShape).getName());
+                }
+
+                TreeSet<Shape> errorShapes = serviceClosure.getErrorShapes();
+                for (Shape errorShape : errorShapes) {
+                    writer.write("$L,", symbolProvider.toSymbol(errorShape).getName());
+                }
+
+                // synthetic base exception
+                writer.write("$L,", aggregateClientName + "ServiceException");
+            }
+        );
+    }
+
+    /**
+     * Code written by this method is pure JavaScript (CJS).
+     */
+    public void writeRuntimeIndexTest() {
+        writer.write("""
+            import assert from "node:assert";""");
+        // runtime components include:
+
+        Path cjsIndex = Paths.get("./dist-cjs/index.js");
+
+        // the barebones client
+        String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+        writer.addRelativeImport(aggregateClientName + "Client", null, cjsIndex);
+        writer.addRelativeImport(aggregateClientName, null, cjsIndex);
+
+        // the aggregate client
+        writer.write("// clients");
+        writer.write("""
+            assert(typeof $L === "function")""",
+            aggregateClientName + "Client"
+        );
+        writer.write("""
+            assert(typeof $L === "function")""",
+            aggregateClientName
+        );
+
+        // all commands
+        writer.write("// commands");
+        Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
+            settings.getService()
+        );
+        for (OperationShape operation : containedOperations) {
+            Symbol operationSymbol = symbolProvider.toSymbol(operation);
+            writer.addRelativeImport(operationSymbol.getName(), null, cjsIndex);
+            writer.write("""
+                assert(typeof $L === "function")""",
+                operationSymbol.getName()
+            );
+        }
+
+        // enums
+        TreeSet<Shape> enumShapes = serviceClosure.getEnums();
+        if (!enumShapes.isEmpty()) {
+            writer.write("// enums");
+        }
+        for (Shape enumShape : enumShapes) {
+            Symbol enumSymbol = symbolProvider.toSymbol(enumShape);
+            writer.addRelativeImport(enumSymbol.getName(), null, cjsIndex);
+            writer.write("""
+                assert(typeof $L === "object");""",
+                enumSymbol.getName()
+            );
+        }
+
+        String baseExceptionName = aggregateClientName + "ServiceException";
+
+        // modeled errors and synthetic base error
+        writer.write("// errors");
+        TreeSet<Shape> errors = serviceClosure.getErrorShapes();
+        for (Shape error : errors) {
+            Symbol errorSymbol = symbolProvider.toSymbol(error);
+            writer.addRelativeImport(errorSymbol.getName(), null, cjsIndex);
+            writer.write(
+                "assert($L.prototype instanceof $L)",
+                errorSymbol.getName(),
+                baseExceptionName
+            );
+        }
+        writer.addRelativeImport(baseExceptionName, null, cjsIndex);
+        writer.write("assert($L.prototype instanceof Error)", baseExceptionName);
+
+        writer.write("console.log(`$L index test passed.`);", aggregateClientName);
+    }
+}

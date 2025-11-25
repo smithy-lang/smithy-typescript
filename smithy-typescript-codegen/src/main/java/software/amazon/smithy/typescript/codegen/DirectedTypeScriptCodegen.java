@@ -504,6 +504,25 @@ final class DirectedTypeScriptCodegen
             );
         });
 
+        if (directive.settings().generateClient() && directive.settings().generateIndexTests()) {
+            writerFactory.accept(Paths.get(CodegenUtils.TEST_FOLDER, "index-types.ts").toString(), writer -> {
+                new PackageApiValidationGenerator(
+                    writer,
+                    directive.settings(),
+                    directive.model(),
+                    directive.symbolProvider()
+                ).writeTypeIndexTest();
+            });
+            writerFactory.accept(Paths.get(CodegenUtils.TEST_FOLDER, "index-objects.spec.mjs").toString(), writer -> {
+                new PackageApiValidationGenerator(
+                    writer,
+                    directive.settings(),
+                    directive.model(),
+                    directive.symbolProvider()
+                ).writeRuntimeIndexTest();
+            });
+        }
+
         if (directive.settings().generateServerSdk()) {
             // Generate index for server
             IndexGenerator.writeServerIndex(

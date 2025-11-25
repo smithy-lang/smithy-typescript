@@ -67,6 +67,7 @@ public final class TypeScriptSettings {
     private static final String CREATE_DEFAULT_README = "createDefaultReadme";
     private static final String USE_LEGACY_AUTH = "useLegacyAuth";
     private static final String GENERATE_TYPEDOC = "generateTypeDoc";
+    private static final String GENERATE_INDEX_TESTS = "generateIndexTests";
     private static final String SERVICE_PROTOCOL_PRIORITY = "serviceProtocolPriority";
     private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
 
@@ -90,6 +91,7 @@ public final class TypeScriptSettings {
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
     private String bigNumberMode = "native";
     private boolean generateSchemas = false;
+    private boolean generateIndexTests = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -150,6 +152,10 @@ public final class TypeScriptSettings {
         // `true` will eventually be the only available option, and this should not be set by users.
         settings.setGenerateSchemas(
             config.getBooleanMemberOrDefault("generateSchemas", false)
+        );
+
+        settings.setGenerateIndexTests(
+            config.getBooleanMemberOrDefault("generateIndexTests", false)
         );
 
         return settings;
@@ -260,6 +266,14 @@ public final class TypeScriptSettings {
     @SmithyInternalApi
     public boolean generateSchemas() {
         return generateSchemas;
+    }
+
+    public void setGenerateIndexTests(boolean generateIndexTests) {
+        this.generateIndexTests = generateIndexTests;
+    }
+
+    public boolean generateIndexTests() {
+        return generateIndexTests;
     }
 
     /**
@@ -558,13 +572,19 @@ public final class TypeScriptSettings {
      */
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
-                Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                              CREATE_DEFAULT_README, USE_LEGACY_AUTH, GENERATE_TYPEDOC)),
+                Arrays.asList(
+                    PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
+                    SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
+                    CREATE_DEFAULT_README, USE_LEGACY_AUTH, GENERATE_TYPEDOC,
+                    GENERATE_INDEX_TESTS
+                )),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
-                Arrays.asList(PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                              SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                              DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README, GENERATE_TYPEDOC));
+                Arrays.asList(
+                    PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
+                    SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
+                    DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README, GENERATE_TYPEDOC,
+                    GENERATE_INDEX_TESTS
+                ));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
