@@ -866,10 +866,15 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             for (Convention convention : conventions) {
                 switch (convention) {
                     case HAS_CONFIG:
-                        inputConfig(Convention.createSymbol(packageName, version, pluginName + "InputConfig"));
-                        resolvedConfig(Convention.createSymbol(packageName, version, pluginName + "ResolvedConfig"));
+                        inputConfig(Convention.createTypeSymbol(
+                            packageName, version, pluginName + "InputConfig")
+                        );
+                        resolvedConfig(Convention.createTypeSymbol(
+                            packageName, version, pluginName + "ResolvedConfig")
+                        );
                         resolveFunction(Convention.createSymbol(
-                                packageName, version, "resolve" + pluginName + "Config"));
+                            packageName, version, "resolve" + pluginName + "Config")
+                        );
                         break;
                     case HAS_MIDDLEWARE:
                         pluginFunction(Convention.createSymbol(packageName, version, "get" + pluginName + "Plugin"));
@@ -942,6 +947,15 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                     .name(name)
                     .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
                     .build();
+        }
+
+        private static Symbol createTypeSymbol(String packageName, String version, String name) {
+            return Symbol.builder()
+                .namespace(packageName, "/")
+                .name(name)
+                .putProperty("typeOnly", true)
+                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
+                .build();
         }
     }
 }

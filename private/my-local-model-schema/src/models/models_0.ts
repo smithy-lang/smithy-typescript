@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { NumericValue } from "@smithy/core/serde";
+import type { NumericValue } from "@smithy/core/serde";
 
 /**
  * @public

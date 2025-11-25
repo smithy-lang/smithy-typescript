@@ -160,7 +160,7 @@ final class StructuredMemberWriter {
         if (!isServerSdk) {
             writer.writeDocs("@internal");
         }
-        writer.addImport("ExceptionOptionType", "__ExceptionOptionType",
+        writer.addTypeImport("ExceptionOptionType", "__ExceptionOptionType",
                 TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.openBlock("constructor(opts: __ExceptionOptionType<$L, __BaseException>) {", symbol.getName());
         writer.openBlock("super({", "});", () -> {

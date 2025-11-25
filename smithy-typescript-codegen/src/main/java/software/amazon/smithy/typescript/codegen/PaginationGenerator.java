@@ -97,7 +97,7 @@ final class PaginationGenerator implements Runnable {
                 Paths.get(".", serviceSymbol.getNamespace()));
 
         // Import Pagination types
-        writer.addImport("Paginator", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Paginator", null, TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport(paginationType, paginationType,
             Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", "")));
 
@@ -114,7 +114,7 @@ final class PaginationGenerator implements Runnable {
             Symbol service,
             TypeScriptWriter writer
     ) {
-        writer.addImport("PaginationConfiguration", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("PaginationConfiguration", null, TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport(service.getName(), service.getName(), Paths.get(".", service.getNamespace()));
         writer.writeDocs("@public")
             .openBlock("export interface $LPaginationConfiguration extends PaginationConfiguration {",
@@ -183,17 +183,17 @@ final class PaginationGenerator implements Runnable {
             .write(
                 """
                 export const paginate${operation:L}: (
-                    config: ${aggClient:L}PaginationConfiguration,
-                    input: ${inputType:L},
-                    ...rest: any[]
+                  config: ${aggClient:L}PaginationConfiguration,
+                  input: ${inputType:L},
+                  ...rest: any[]
                 ) => Paginator<${outputType:L}> =
-                    createPaginator<${paginationType:L}, ${inputType:L}, ${outputType:L}>(
-                        ${serviceTypeName:L},
-                        ${operationName:L},
-                        ${inputToken:S},
-                        ${outputToken:S},
-                        ${pageSizeMember:S}
-                    );
+                  createPaginator<${paginationType:L}, ${inputType:L}, ${outputType:L}>(
+                    ${serviceTypeName:L},
+                    ${operationName:L},
+                    ${inputToken:S},
+                    ${outputToken:S},
+                    ${pageSizeMember:S}
+                  );
                 """
             )
             .popState();

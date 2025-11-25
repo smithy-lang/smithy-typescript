@@ -65,7 +65,7 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
                     writer -> {
                             writer.addImport("ServiceException", "__ServiceException",
                                     TypeScriptDependency.AWS_SMITHY_CLIENT);
-                            writer.addImport("ServiceExceptionOptions", "__ServiceExceptionOptions",
+                            writer.addTypeImport("ServiceExceptionOptions", "__ServiceExceptionOptions",
                                     TypeScriptDependency.AWS_SMITHY_CLIENT);
                             // Export ServiceException information to allow
                             //      documentation inheritance to consume their types

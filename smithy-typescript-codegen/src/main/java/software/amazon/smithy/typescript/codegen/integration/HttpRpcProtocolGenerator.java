@@ -142,8 +142,13 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         // Write a function to generate HTTP requests since they're so similar.
         SymbolReference requestType = getApplicationProtocol().getRequestType();
         writer.addUseImports(requestType);
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
+        Symbol requestSymbol = requestType.getSymbol()
+            .toBuilder()
+            .putProperty("typeOnly", false)
+            .build();
+
         writer.openBlock("const buildHttpRpcRequest = async (\n"
                        + "  context: __SerdeContext,\n"
                        + "  headers: __HeaderBag,\n"
@@ -168,7 +173,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
                 writer.openBlock("if (body !== undefined) {", "}", () -> {
                     writer.write("contents.body = body;");
                 });
-                writer.write("return new $T(contents);", requestType);
+                writer.write("return new $T(contents);", requestSymbol);
             }
         );
         // Write common request header to be shared by all requests
@@ -178,6 +183,9 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.write(
             context.getStringStore().flushVariableDeclarationCode()
         );
+
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
     }
 
     @Override
@@ -248,7 +256,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
         // e.g., se_ES
         String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
         // e.g., serializeAws_restJson1_1ExecuteStatement
@@ -344,7 +352,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
      */
     protected void writeSharedRequestHeaders(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("const SHARED_HEADERS: __HeaderBag = {", "};", () -> {
             writer.write("'content-type': $S,", getDocumentContentType());
         });
@@ -521,7 +529,10 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
             }
 
             // Then load it into the object with additional error and response properties.
-            writer.openBlock("const exception = new $T({", "});", errorSymbol, () -> {
+            Symbol materializedError = errorSymbol.toBuilder()
+                .putProperty("typeOnly", false)
+                .build();
+            writer.openBlock("const exception = new $T({", "});", materializedError, () -> {
                 writer.write("$$metadata: deserializeMetadata($L),", outputReference);
                 writer.write("...deserialized");
             });

@@ -1,6 +1,6 @@
-import { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
-import { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import { Readable } from "stream";
+import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
+import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { Readable } from "node:stream";
 
 /**
  * Throws an expected exception that contains the serialized request.

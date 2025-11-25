@@ -1,47 +1,5 @@
 // smithy-typescript generated code
 import {
-  HttpAuthSchemeInputConfig,
-  HttpAuthSchemeResolvedConfig,
-  defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
-  resolveHttpAuthSchemeConfig,
-} from "./auth/httpAuthSchemeProvider";
-import { EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput } from "./commands/EmptyInputOutputCommand";
-import { Float16CommandInput, Float16CommandOutput } from "./commands/Float16Command";
-import { FractionalSecondsCommandInput, FractionalSecondsCommandOutput } from "./commands/FractionalSecondsCommand";
-import { GreetingWithErrorsCommandInput, GreetingWithErrorsCommandOutput } from "./commands/GreetingWithErrorsCommand";
-import { NoInputOutputCommandInput, NoInputOutputCommandOutput } from "./commands/NoInputOutputCommand";
-import {
-  OperationWithDefaultsCommandInput,
-  OperationWithDefaultsCommandOutput,
-} from "./commands/OperationWithDefaultsCommand";
-import {
-  OptionalInputOutputCommandInput,
-  OptionalInputOutputCommandOutput,
-} from "./commands/OptionalInputOutputCommand";
-import { RecursiveShapesCommandInput, RecursiveShapesCommandOutput } from "./commands/RecursiveShapesCommand";
-import { RpcV2CborDenseMapsCommandInput, RpcV2CborDenseMapsCommandOutput } from "./commands/RpcV2CborDenseMapsCommand";
-import { RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput } from "./commands/RpcV2CborListsCommand";
-import {
-  RpcV2CborSparseMapsCommandInput,
-  RpcV2CborSparseMapsCommandOutput,
-} from "./commands/RpcV2CborSparseMapsCommand";
-import {
-  SimpleScalarPropertiesCommandInput,
-  SimpleScalarPropertiesCommandOutput,
-} from "./commands/SimpleScalarPropertiesCommand";
-import {
-  SparseNullsOperationCommandInput,
-  SparseNullsOperationCommandOutput,
-} from "./commands/SparseNullsOperationCommand";
-import {
-  ClientInputEndpointParameters,
-  ClientResolvedEndpointParameters,
-  EndpointParameters,
-  resolveClientEndpointParameters,
-} from "./endpoint/EndpointParameters";
-import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
-import { RuntimeExtension, RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
-import {
   DefaultIdentityProviderConfig,
   getHttpAuthSchemeEndpointRuleSetPlugin,
   getHttpSigningPlugin,
@@ -49,37 +7,94 @@ import {
 import { getSchemaSerdePlugin } from "@smithy/core/schema";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import {
-  EndpointInputConfig,
-  EndpointRequiredInputConfig,
-  EndpointRequiredResolvedConfig,
-  EndpointResolvedConfig,
+  type EndpointInputConfig,
+  type EndpointRequiredInputConfig,
+  type EndpointRequiredResolvedConfig,
+  type EndpointResolvedConfig,
   resolveEndpointConfig,
   resolveEndpointRequiredConfig,
 } from "@smithy/middleware-endpoint";
-import { RetryInputConfig, RetryResolvedConfig, getRetryPlugin, resolveRetryConfig } from "@smithy/middleware-retry";
-import { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
+  type RetryInputConfig,
+  type RetryResolvedConfig,
+  getRetryPlugin,
+  resolveRetryConfig,
+} from "@smithy/middleware-retry";
+import type { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
+import {
+  type DefaultsMode as __DefaultsMode,
+  type SmithyConfiguration as __SmithyConfiguration,
+  type SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
   Client as __Client,
-  DefaultsMode as __DefaultsMode,
-  SmithyConfiguration as __SmithyConfiguration,
-  SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
 } from "@smithy/smithy-client";
-import {
-  ClientProtocol,
-  HttpRequest,
-  HttpResponse,
+import type {
   BodyLengthCalculator as __BodyLengthCalculator,
   CheckOptionalClientConfig as __CheckOptionalClientConfig,
   ChecksumConstructor as __ChecksumConstructor,
+  ClientProtocol,
   Decoder as __Decoder,
   Encoder as __Encoder,
   HashConstructor as __HashConstructor,
   HttpHandlerOptions as __HttpHandlerOptions,
+  HttpRequest,
+  HttpResponse,
   Logger as __Logger,
   Provider as __Provider,
   StreamCollector as __StreamCollector,
   UrlParser as __UrlParser,
 } from "@smithy/types";
+
+import {
+  type HttpAuthSchemeInputConfig,
+  type HttpAuthSchemeResolvedConfig,
+  defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
+  resolveHttpAuthSchemeConfig,
+} from "./auth/httpAuthSchemeProvider";
+import type { EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput } from "./commands/EmptyInputOutputCommand";
+import type { Float16CommandInput, Float16CommandOutput } from "./commands/Float16Command";
+import type {
+  FractionalSecondsCommandInput,
+  FractionalSecondsCommandOutput,
+} from "./commands/FractionalSecondsCommand";
+import type {
+  GreetingWithErrorsCommandInput,
+  GreetingWithErrorsCommandOutput,
+} from "./commands/GreetingWithErrorsCommand";
+import type { NoInputOutputCommandInput, NoInputOutputCommandOutput } from "./commands/NoInputOutputCommand";
+import type {
+  OperationWithDefaultsCommandInput,
+  OperationWithDefaultsCommandOutput,
+} from "./commands/OperationWithDefaultsCommand";
+import type {
+  OptionalInputOutputCommandInput,
+  OptionalInputOutputCommandOutput,
+} from "./commands/OptionalInputOutputCommand";
+import type { RecursiveShapesCommandInput, RecursiveShapesCommandOutput } from "./commands/RecursiveShapesCommand";
+import type {
+  RpcV2CborDenseMapsCommandInput,
+  RpcV2CborDenseMapsCommandOutput,
+} from "./commands/RpcV2CborDenseMapsCommand";
+import type { RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput } from "./commands/RpcV2CborListsCommand";
+import type {
+  RpcV2CborSparseMapsCommandInput,
+  RpcV2CborSparseMapsCommandOutput,
+} from "./commands/RpcV2CborSparseMapsCommand";
+import type {
+  SimpleScalarPropertiesCommandInput,
+  SimpleScalarPropertiesCommandOutput,
+} from "./commands/SimpleScalarPropertiesCommand";
+import type {
+  SparseNullsOperationCommandInput,
+  SparseNullsOperationCommandOutput,
+} from "./commands/SparseNullsOperationCommand";
+import {
+  type ClientInputEndpointParameters,
+  type ClientResolvedEndpointParameters,
+  type EndpointParameters,
+  resolveClientEndpointParameters,
+} from "./endpoint/EndpointParameters";
+import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
+import { type RuntimeExtension, type RuntimeExtensionsConfig, resolveRuntimeExtensions } from "./runtimeExtensions";
 
 export { __Client };
 

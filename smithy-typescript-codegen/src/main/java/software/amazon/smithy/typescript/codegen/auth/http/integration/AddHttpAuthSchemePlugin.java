@@ -64,17 +64,19 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 .build(),
             RuntimeClientPlugin.builder()
                 .inputConfig(Symbol.builder()
-                        .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
-                        .name("HttpAuthSchemeInputConfig")
-                        .build())
+                    .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
+                    .name("HttpAuthSchemeInputConfig")
+                    .putProperty("typeOnly", true)
+                    .build())
                 .resolvedConfig(Symbol.builder()
-                        .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
-                        .name("HttpAuthSchemeResolvedConfig")
-                        .build())
+                    .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
+                    .name("HttpAuthSchemeResolvedConfig")
+                    .putProperty("typeOnly", true)
+                    .build())
                 .resolveFunction(Symbol.builder()
-                        .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
-                        .name("resolveHttpAuthSchemeConfig")
-                        .build())
+                    .namespace(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_MODULE, "/")
+                    .name("resolveHttpAuthSchemeConfig")
+                    .build())
                 .build()
         );
     }
@@ -237,9 +239,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         }
         w.write(" {");
         w.indent();
-        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
 
-        w.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+        w.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             A comma-separated list of case-sensitive auth scheme names.
             An auth scheme name is a fully qualified auth scheme ID with the namespace prefix trimmed.
@@ -247,7 +248,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             @public""");
         w.write("authSchemePreference?: string[] | Provider<string[]>;\n");
 
-        w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
+        w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             Configuration of HttpAuthSchemes for a client which provides \
             default identity providers and signers per auth scheme.
@@ -312,9 +313,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         }
         w.write(" {");
         w.indent();
-        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
 
-        w.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+        w.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             A comma-separated list of case-sensitive auth scheme names.
             An auth scheme name is a fully qualified auth scheme ID with the namespace prefix trimmed.
@@ -322,7 +322,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             @public""");
         w.write("readonly authSchemePreference: Provider<string[]>;\n");
 
-        w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
+        w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             Configuration of HttpAuthSchemes for a client which provides \
             default identity providers and signers per auth scheme.

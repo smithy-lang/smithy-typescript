@@ -117,21 +117,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
     @Deprecated
     public TypeScriptWriter addImport(String name, String as, String from) {
         ImportFrom importFrom = new ImportFrom(from);
-
-        if (importFrom.isDeclarablePackageImport()) {
-            String packageName = importFrom.getPackageName();
-            if (getDependencies()
-                .stream()
-                .map(SymbolDependency::getPackageName)
-                .noneMatch(packageName::equals)) {
-                throw new CodegenException(
-                    """
-                    The import %s does not correspond to a registered dependency.
-                    TypeScriptWriter::addDependency() is required before ::addImport().
-                    """.formatted(from)
-                );
-            }
-        }
+        checkImport(importFrom, from);
 
         getImportContainer().addImport(name, as, from);
         return this;
@@ -154,6 +140,14 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
     }
 
     /**
+     * Type-only version of {@link #addImport}.
+     */
+    public TypeScriptWriter addTypeImport(String name, String as, Dependency from) {
+        addDependency(from);
+        return addTypeImport(name, as, from.getPackageName());
+    }
+
+    /**
      * Same as {@link #addImport(String, String, PackageContainer)} but appends a
      * submodule path, for example "@smithy/core/cbor".
      */
@@ -162,6 +156,16 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
             addDependency(dependency);
         }
         return this.addImport(name, as, from.getPackageName() + submodule);
+    }
+
+    /**
+     * Type-only version of {@link #addImportSubmodule}.
+     */
+    public TypeScriptWriter addTypeImportSubmodule(String name, String as, PackageContainer from, String submodule) {
+        if (from instanceof Dependency dependency) {
+            addDependency(dependency);
+        }
+        return this.addTypeImport(name, as, from.getPackageName() + submodule);
     }
 
     /**
@@ -174,6 +178,13 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     public TypeScriptWriter addRelativeImport(String name, String as, Path from) {
         return this.addImport(name, as, from.toString());
+    }
+
+    /**
+     * Type-only version of {@link #addRelativeImport}.
+     */
+    public TypeScriptWriter addRelativeTypeImport(String name, String as, Path from) {
+        return this.addTypeImport(name, as, from.toString());
     }
 
     /**
@@ -292,6 +303,40 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
             docs = docs + "\n@public";
         }
         return docs;
+    }
+
+    /**
+     * This is private because the string-value [from] signature is
+     * deprecated for the corresponding addImport() signature. Importing a string
+     * makes it difficult to ensure the package is added to the dependency manifest,
+     * so package imports should be by package object, and relative imports by path object.
+     */
+    private TypeScriptWriter addTypeImport(String name, String as, String from) {
+        ImportFrom importFrom = new ImportFrom(from);
+        checkImport(importFrom, from);
+        getImportContainer().addTypeImport(name, as, from);
+        return this;
+    }
+
+    /**
+     * Check that the import source string has been registered with the dependency manifest
+     * if it is a package, not a node package, and not a relative path.
+     */
+    private void checkImport(ImportFrom importFrom, String from) {
+        if (importFrom.isDeclarablePackageImport()) {
+            String packageName = importFrom.getPackageName();
+            if (getDependencies()
+                .stream()
+                .map(SymbolDependency::getPackageName)
+                .noneMatch(packageName::equals)) {
+                throw new CodegenException(
+                    """
+                    The import %s does not correspond to a registered dependency.
+                    TypeScriptWriter::addDependency() is required before ::addImport().
+                    """.formatted(from)
+                );
+            }
+        }
     }
 
     @Override

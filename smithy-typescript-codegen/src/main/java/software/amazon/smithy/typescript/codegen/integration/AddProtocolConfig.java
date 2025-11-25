@@ -41,9 +41,9 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
         }
 
         writer
-            .addImport("ClientProtocol", null, TypeScriptDependency.SMITHY_TYPES)
-            .addImport("HttpRequest", null, TypeScriptDependency.SMITHY_TYPES)
-            .addImport("HttpResponse", null, TypeScriptDependency.SMITHY_TYPES)
+            .addTypeImport("ClientProtocol", null, TypeScriptDependency.SMITHY_TYPES)
+            .addTypeImport("HttpRequest", null, TypeScriptDependency.SMITHY_TYPES)
+            .addTypeImport("HttpResponse", null, TypeScriptDependency.SMITHY_TYPES)
             .writeDocs("""
             The protocol controlling the message type (e.g. HTTP) and format (e.g. JSON)
             may be overridden. A default will always be set by the client.

@@ -91,7 +91,7 @@ public class RuntimeConfigGeneratorTest {
         // Does the runtimeConfig.ts file expand the template properties properly?
         String runtimeConfigContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts").get();
         assertThat(runtimeConfigContents,
-                   containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
+                   containsString("import type { ExampleClientConfig } from \"./ExampleClient\";"));
         assertThat(runtimeConfigSharedContents,
                 containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
         assertThat(runtimeConfigContents, containsString("config?.syn ?? syn: 'ack2',"));
@@ -100,7 +100,7 @@ public class RuntimeConfigGeneratorTest {
         // Does the runtimeConfig.browser.ts file expand the template properties properly?
         String runtimeConfigBrowserContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.browser.ts").get();
         assertThat(runtimeConfigBrowserContents,
-                   containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
+                   containsString("import type { ExampleClientConfig } from \"./ExampleClient\";"));
         assertThat(runtimeConfigSharedContents,
                 containsString("export const getRuntimeConfig = (config: ExampleClientConfig) =>"));
         assertThat(runtimeConfigContents, containsString("config?.syn ?? syn: 'ack2',"));
@@ -109,7 +109,7 @@ public class RuntimeConfigGeneratorTest {
         // Does the runtimeConfig.native.ts file expand the browser template properties properly?
         String runtimeConfigNativeContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.native.ts").get();
         assertThat(runtimeConfigNativeContents,
-                containsString("import { ExampleClientConfig } from \"./ExampleClient\";"));
+                containsString("import type { ExampleClientConfig } from \"./ExampleClient\";"));
         assertThat(runtimeConfigNativeContents,
                 containsString(
                         "import { getRuntimeConfig as getBrowserRuntimeConfig } from \"./runtimeConfig.browser\";"));

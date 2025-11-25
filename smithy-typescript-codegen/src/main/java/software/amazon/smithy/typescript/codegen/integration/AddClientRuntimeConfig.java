@@ -63,8 +63,8 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
         SymbolProvider symbolProvider,
         TypeScriptWriter writer
     ) {
-        writer.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("Logger", "__Logger", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Logger", "__Logger", TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("Value for how many times a request will be made at most in case of retry.")
             .write("maxAttempts?: number | __Provider<number>;\n");
@@ -75,7 +75,7 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
             .write("retryMode?: string | __Provider<string>;\n");
         writer.writeDocs("Optional logger for logging debug/info/warn/error.")
             .write("logger?: __Logger;\n");
-        writer.addRelativeImport("RuntimeExtension", null,
+        writer.addRelativeTypeImport("RuntimeExtension", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
         writer.writeDocs("Optional extensions")
             .write("extensions?: RuntimeExtension[];\n");

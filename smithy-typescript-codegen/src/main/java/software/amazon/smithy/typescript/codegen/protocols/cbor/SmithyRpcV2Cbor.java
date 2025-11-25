@@ -104,8 +104,8 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         }
 
         writer.addUseImports(requestType);
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
         writer.addImportSubmodule(
             "buildHttpRpcRequest", null,
             TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
@@ -266,7 +266,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
     @Override
     protected void writeSharedRequestHeaders(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("const SHARED_HEADERS: __HeaderBag = {", "};", () -> {
             writer.write("'content-type': $S,", getDocumentContentType());
             writer.write("""

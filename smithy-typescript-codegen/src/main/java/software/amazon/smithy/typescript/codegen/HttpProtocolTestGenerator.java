@@ -118,7 +118,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
         this.service = settings.getService(model);
         this.symbolProvider = context.getSymbolProvider();
         this.protocolGenerator = protocolGenerator;
-        serviceSymbol = symbolProvider.toSymbol(service);
+        serviceSymbol = symbolProvider.toSymbol(service)
+            .toBuilder()
+            .putProperty("typeOnly", false)
+            .build();
         this.testFilter = testFilter;
         this.malformedRequestTestFilter = malformedRequestTestFilter;
         this.context = context;
@@ -229,7 +232,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private void initializeWriterIfNeeded() {
         if (writer == null) {
             context.getWriterDelegator().useFileWriter(createTestCaseFilename(), writer -> this.writer = writer);
-            writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
             writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
             writer.addDependency(TypeScriptDependency.PROTOCOL_HTTP);
             // Add the template to each generated test.
@@ -610,7 +612,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 additionalStubs.add("protocol-test-xml-stub.ts");
                 return "compareEquivalentXmlBodies(bodyString, r.body.toString())";
             case "application/octet-stream":
-                writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
                 additionalStubs.add("protocol-test-octet-stream-stub.ts");
                 return "compareEquivalentOctetStreamBodies(utf8Encoder, bodyString, r.body)";
             case "text/plain":
@@ -624,7 +626,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             default:
                 LOGGER.warning("Unable to compare bodies with unknown media type `" + mediaType
                     + "`, defaulting to direct comparison.");
-                writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
                 additionalStubs.add("protocol-test-unknown-type-stub.ts");
                 return "compareEquivalentUnknownTypeBodies(utf8Encoder, bodyString, r.body)";
         }
@@ -964,7 +966,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     ) {
         // Skipped tests are still generated, just not run.
         if (testFilter.skip(service, operation, testCase, settings)) {
-            writer.openBlock("it.skip($S, async() => {", "});\n", testName, f);
+            writer.openBlock("it.skip($S, async () => {", "});\n", testName, f);
         } else {
             writer.openBlock("it($S, async () => {", "});\n", testName, f);
         }
@@ -978,7 +980,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     ) {
         // Skipped tests are still generated, just not run.
         if (malformedRequestTestFilter.skip(service, operation, testCase, settings)) {
-            writer.openBlock("it.skip($S, async() => {", "});\n", testName, f);
+            writer.openBlock("it.skip($S, async () => {", "});\n", testName, f);
         } else {
             writer.openBlock("it($S, async () => {", "});\n", testName, f);
         }

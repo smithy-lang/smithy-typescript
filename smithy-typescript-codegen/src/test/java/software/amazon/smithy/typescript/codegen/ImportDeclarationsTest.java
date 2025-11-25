@@ -2,6 +2,7 @@ package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ public class ImportDeclarationsTest {
         declarations.addImport("Big", "$Big", "big.js");
         String result = declarations.toString();
 
-        assertThat(result, containsString("import {\n  Big as $Big,\n  Big,\n} from \"big.js\";"));
+        assertThat(result, containsString("import { Big, Big as $Big } from \"big.js\";"));
     }
 
     @Test
@@ -145,5 +146,41 @@ public class ImportDeclarationsTest {
         String result = declarations.toString();
 
         assertThat(result, containsString("import { Foo } from \"./models/hello/index\";"));
+    }
+
+    @Test
+    public void importOrdering() {
+        ImportDeclarations declarations = new ImportDeclarations("./FooClient");
+
+        declarations.addTypeImport("ServiceOutputTypes", null, "../RpcV2ProtocolClient");
+        declarations.addImport("FractionalSeconds", null, "../schemas/schemas_0");
+        declarations.addTypeImport("RpcV2ProtocolClientResolvedConfig", null, "../RpcV2ProtocolClient");
+        declarations.addTypeImport("FractionalSecondsOutput", null, "../models/models_0");
+        declarations.addImport("commonParams", null, "../endpoint/EndpointParameters");
+        declarations.addImport("Command", "$Command", "@smithy/smithy-client");
+        declarations.addTypeImport("MetadataBearer", "__MetadataBearer", "@smithy/types");
+        declarations.addImport("getEndpointPlugin", null, "@smithy/middleware-endpoint");
+        declarations.addTypeImport("ServiceInputTypes", null, "../RpcV2ProtocolClient");
+
+
+        String result = declarations.toString();
+
+        assertEquals("""
+            import { getEndpointPlugin } from "@smithy/middleware-endpoint";
+            import { Command as $Command } from "@smithy/smithy-client";
+            import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
+            
+            import { commonParams } from "../endpoint/EndpointParameters";
+            import type { FractionalSecondsOutput } from "../models/models_0";
+            import type {
+              RpcV2ProtocolClientResolvedConfig,
+              ServiceInputTypes,
+              ServiceOutputTypes,
+            } from "../RpcV2ProtocolClient";
+            import { FractionalSeconds } from "../schemas/schemas_0";
+
+            """,
+            result
+        );
     }
 }

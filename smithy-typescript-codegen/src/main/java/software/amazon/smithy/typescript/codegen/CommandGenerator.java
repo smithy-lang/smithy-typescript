@@ -22,6 +22,7 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClient
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingInputType;
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClientCommandStreamingOutputType;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,9 +138,9 @@ final class CommandGenerator implements Runnable {
         String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
 
         // Add required imports.
-        writer.addRelativeImport(configType, null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addRelativeImport("ServiceInputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addRelativeImport("ServiceOutputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
+        writer.addRelativeTypeImport(configType, null, Paths.get(".", serviceSymbol.getNamespace()));
+        writer.addRelativeTypeImport("ServiceInputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
+        writer.addRelativeTypeImport("ServiceOutputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
         writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
 
         String name = symbol.getName();
@@ -231,9 +232,18 @@ final class CommandGenerator implements Runnable {
             // in IDEs.
             Shape operationInputShape = model.expectShape(operation.getInputShape());
             Symbol baseInput = symbolProvider.toSymbol(operationInputShape);
+
             Shape operationOutputShape = model.expectShape(operation.getOutputShape());
             Symbol baseOutput = symbolProvider.toSymbol(operationOutputShape);
 
+            if (!operationInputShape.getAllMembers().isEmpty()) {
+                writer.addRelativeTypeImport(baseInput.getName(), null, Path.of(baseInput.getNamespace()));
+            }
+            if (!operationOutputShape.getAllMembers().isEmpty()) {
+                writer.addRelativeTypeImport(baseOutput.getName(), null, Path.of(baseOutput.getNamespace()));
+            }
+
+            writer.indent();
             writer.write("/** @internal type navigation helper, not in runtime. */");
             writer.openBlock("declare protected static __types: {", "};", () -> {
                 String baseInputStr = operationInputShape.getAllMembers().isEmpty()
@@ -253,6 +263,7 @@ final class CommandGenerator implements Runnable {
                     output: $T;
                 };""", inputType, outputType);
             });
+            writer.dedent();
         }
 
         writer.write("}"); // class close bracket.
@@ -576,7 +587,13 @@ final class CommandGenerator implements Runnable {
                 );
             } else {
                 writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
-                writer.write("export interface $L extends $T {}", typeName, symbolProvider.toSymbol(input));
+                Symbol inputSymbol = symbolProvider.toSymbol(input);
+                writer.addRelativeTypeImport(
+                    inputSymbol.getName(),
+                    null,
+                    Path.of(inputSymbol.getNamespace())
+                );
+                writer.write("export interface $L extends $L {}", typeName, inputSymbol.getName());
             }
         } else {
             // If the input is non-existent, then use an empty object.
@@ -588,7 +605,7 @@ final class CommandGenerator implements Runnable {
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
         // Output types should always be MetadataBearers, possibly in addition
         // to a defined output shape.
-        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
         if (outputShape.isPresent()) {
             StructureShape output = outputShape.get();
             List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, output);
@@ -606,8 +623,14 @@ final class CommandGenerator implements Runnable {
                 );
             } else {
                 writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
-                writer.write("export interface $L extends $T, __MetadataBearer {}",
-                        typeName, symbolProvider.toSymbol(outputShape.get()));
+                Symbol outputSymbol = symbolProvider.toSymbol(output);
+                writer.addRelativeTypeImport(
+                    outputSymbol.getName(),
+                    null,
+                    Path.of(outputSymbol.getNamespace())
+                );
+                writer.write("export interface $L extends $L, __MetadataBearer {}",
+                        typeName, outputSymbol.getName());
             }
         } else {
             writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
@@ -625,7 +648,6 @@ final class CommandGenerator implements Runnable {
                 // Construct additional parameters string
                 Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
                         model, service, operation);
-
 
                 // Construct writer context
                 Map<String, Object> symbolMap = new HashMap<>();

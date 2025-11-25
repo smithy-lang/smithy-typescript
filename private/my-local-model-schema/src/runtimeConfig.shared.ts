@@ -1,14 +1,15 @@
 // smithy-typescript generated code
-import { defaultXYZServiceHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
-import { defaultEndpointResolver } from "./endpoint/endpointResolver";
 import { NoAuthSigner } from "@smithy/core";
 import { SmithyRpcV2CborProtocol } from "@smithy/core/cbor";
 import { NoOpLogger } from "@smithy/smithy-client";
-import { IdentityProviderConfig } from "@smithy/types";
+import type { IdentityProviderConfig } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
 import { fromBase64, toBase64 } from "@smithy/util-base64";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
-import { XYZServiceClientConfig } from "./XYZServiceClient";
+
+import { defaultXYZServiceHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
+import { defaultEndpointResolver } from "./endpoint/endpointResolver";
+import type { XYZServiceClientConfig } from "./XYZServiceClient";
 
 /**
  * @internal

@@ -1,11 +1,10 @@
-import { ${clientConfigName} } from "${clientModuleName}";
-
 /**
  * @internal
  */
 export const getRuntimeConfig = (config: ${clientConfigName}) => {
-  ${prepareCustomizations}return {
+  ${prepareCustomizations}
+  return {
     apiVersion: "${apiVersion}",
-    ${customizations}
-  }
+${customizations}
+  };
 };

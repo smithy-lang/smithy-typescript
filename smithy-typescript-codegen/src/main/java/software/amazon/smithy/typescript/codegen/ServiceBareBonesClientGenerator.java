@@ -115,7 +115,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         writeInputOutputTypeUnion("ServiceOutputTypes", writer,
                 operationSymbol -> operationSymbol.getProperty("outputType", Symbol.class), writer -> {
             // Use a MetadataBearer if an operation doesn't define output.
-            writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
             writer.write("| __MetadataBearer");
         });
 
@@ -125,10 +125,10 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void writeInputOutputTypeUnion(
-            String typeName,
-            TypeScriptWriter writer,
-            Function<Symbol, Optional<Symbol>> mapper,
-            Consumer<TypeScriptWriter> defaultTypeGenerator
+        String typeName,
+        TypeScriptWriter writer,
+        Function<Symbol, Optional<Symbol>> mapper,
+        Consumer<TypeScriptWriter> defaultTypeGenerator
     ) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = topDownIndex.getContainedOperations(service);
@@ -154,10 +154,10 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConfig() {
-        writer.addRelativeImport("RuntimeExtensionsConfig", null,
+        writer.addRelativeTypeImport("RuntimeExtensionsConfig", null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
-        writer.addImport("SmithyConfiguration", "__SmithyConfiguration", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        writer.addImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration",
+        writer.addTypeImport("SmithyConfiguration", "__SmithyConfiguration", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addTypeImport("SmithyResolvedConfiguration", "__SmithyResolvedConfiguration",
             TypeScriptDependency.AWS_SMITHY_CLIENT);
 
         // Hook for intercepting the client configuration.
@@ -191,7 +191,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             writer.indent();
             for (SymbolReference symbolReference : inputTypes) {
                 if (symbolReference.getAlias().equals("EndpointInputConfig")) {
-                    writer.addImport(
+                    writer.addTypeImport(
                         "EndpointParameters",
                         null,
                         EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
@@ -201,7 +201,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     writer.write("& $T", symbolReference);
                 }
             }
-            writer.addImport("ClientInputEndpointParameters", null,
+            writer.addTypeImport("ClientInputEndpointParameters", null,
                 EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
             writer.write("& ClientInputEndpointParameters");
             writer.dedent();
@@ -226,7 +226,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     .flatMap(p -> OptionalUtils.stream(p.getResolvedConfig()))
                     .forEach(symbol -> {
                         if (symbol.getAlias().equals("EndpointResolvedConfig")) {
-                            writer.addImport(
+                            writer.addTypeImport(
                                 "EndpointParameters",
                                 null,
                                 EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
@@ -236,7 +236,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                             writer.write("& $T", symbol);
                         }
                     });
-            writer.addImport("ClientResolvedEndpointParameters", null,
+            writer.addTypeImport("ClientResolvedEndpointParameters", null,
                 EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
             writer.write("& ClientResolvedEndpointParameters");
             writer.dedent();
@@ -257,41 +257,40 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         }
 
         writer.writeDocs("@public")
-            .openBlock("export interface ClientDefaults\n"
-                         + "  extends Partial<__SmithyConfiguration<$T>> {", "}",
+            .openBlock("export interface ClientDefaults extends Partial<__SmithyConfiguration<$T>> {", "}",
                 applicationProtocol.getOptionsType(), () -> {
-            writer.addImport("HttpHandlerUserInput", "__HttpHandlerUserInput", TypeScriptDependency.PROTOCOL_HTTP);
+            writer.addTypeImport("HttpHandlerUserInput", "__HttpHandlerUserInput", TypeScriptDependency.PROTOCOL_HTTP);
             writer.writeDocs(
                 "The HTTP handler to use or its constructor options. Fetch in browser and Https in Nodejs."
             );
             writer.write("requestHandler?: __HttpHandlerUserInput;\n");
 
-            writer.addImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
-            writer.addImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("""
                 A constructor for a class implementing the {@link @smithy/types#ChecksumConstructor} interface
                 that computes the SHA-256 HMAC or checksum of a string or binary buffer.
                 @internal""");
             writer.write("sha256?: __ChecksumConstructor | __HashConstructor;\n");
 
-            writer.addImport("UrlParser", "__UrlParser", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("UrlParser", "__UrlParser", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("The function that will be used to convert strings into HTTP endpoints.\n"
                              + "@internal");
             writer.write("urlParser?: __UrlParser;\n");
 
-            writer.addImport("BodyLengthCalculator", "__BodyLengthCalculator", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("BodyLengthCalculator", "__BodyLengthCalculator", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that can calculate the length of a request body.\n"
                             + "@internal");
             writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");
 
-            writer.addImport("StreamCollector", "__StreamCollector", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("StreamCollector", "__StreamCollector", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that converts a stream into an array of bytes.\n"
                             + "@internal");
             writer.write("streamCollector?: __StreamCollector;\n");
 
             // Note: Encoder and Decoder are both used for base64 and UTF.
-            writer.addImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
-            writer.addImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("Encoder", "__Encoder", TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES);
 
             writer.writeDocs("The function that will be used to convert a base64-encoded string to a byte array.\n"
                             + "@internal");
@@ -368,7 +367,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
     }
 
     private void generateConstructor() {
-        writer.addImport("CheckOptionalClientConfig", "__CheckOptionalClientConfig",
+        writer.addTypeImport("CheckOptionalClientConfig", "__CheckOptionalClientConfig",
             TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("constructor(...[configuration]: __CheckOptionalClientConfig<$L>) {", "}", configType, () -> {
             // Hook for adding/changing the client constructor.
@@ -394,10 +393,10 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 generateConfigVariable(configVariable - 1));
 
             // Add runtime plugin "resolve" method calls. These are invoked one
-            // after the other until all of the runtime plugins have been called.
+            // after the other until all the runtime plugins have been called.
             // Only plugins that have configuration are called. Each time the
             // configuration is updated, the configuration variable is incremented
-            // (e.g., _config_0, _config_1, etc).
+            // (e.g., _config_0, _config_1, etc.).
             for (RuntimeClientPlugin plugin : runtimePlugins) {
                 if (plugin.getResolveFunction().isPresent()) {
                     configVariable++;

@@ -54,15 +54,15 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
         }
 
         writer.addImport("Readable", null, "stream");
-        writer.addImport("StreamHasher", "__StreamHasher", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("StreamHasher", "__StreamHasher", TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("A function that, given a hash constructor and a stream, calculates the \n"
                 + "hash of the streamed value.\n"
                 + "@internal");
         writer.write("streamHasher?: __StreamHasher<Readable> | __StreamHasher<Blob>;\n");
 
-        writer.addImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("Checksum", "__Checksum", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Checksum", "__Checksum", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("""
             A constructor for a class implementing the {@link __Checksum} interface
             that computes MD5 hashes.

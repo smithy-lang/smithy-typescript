@@ -204,6 +204,9 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.write(
             context.getStringStore().flushVariableDeclarationCode()
         );
+
+        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
     }
 
     @Override
@@ -691,7 +694,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
 
         // e.g., se_ES
         String methodName = ProtocolGenerator.getSerFunctionShortName(symbol);
@@ -1810,7 +1813,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Ensure that the request type is imported.
         writer.addUseImports(requestType);
-        writer.addImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("Endpoint", "__Endpoint", TypeScriptDependency.SMITHY_TYPES);
         String methodName = ProtocolGenerator.getGenericDeserFunctionName(symbol) + "Request";
         // Add the normalized input type.
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
@@ -2231,9 +2234,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             String serverSdkInfix = context.getSettings().generateServerSdk()
                 ? ": any /* $metadata unsupported on ssdk error */"
                 : "";
+
+            Symbol materializedErrorSymbol = errorSymbol.toBuilder()
+                .putProperty("typeOnly", false)
+                .build();
             writer.openBlock("const exception$L = new $T({", "});",
                 serverSdkInfix,
-                errorSymbol,
+                materializedErrorSymbol,
                 () -> {
                     writer.write("$$metadata: deserializeMetadata($L),", outputName);
                     writer.write("...contents");

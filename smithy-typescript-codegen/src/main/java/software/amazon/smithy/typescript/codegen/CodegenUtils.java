@@ -71,7 +71,7 @@ public final class CodegenUtils {
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getInputInfo(operation).isPresent()) {
-            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
+            writer.addTypeImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
                 TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
@@ -97,12 +97,12 @@ public final class CodegenUtils {
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-            writer.addImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
+            writer.addTypeImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
                     TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
         if (AddSdkStreamMixinDependency.hasStreamingBlobDeser(settings, model, operation)) {
-            writer.addImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext",
+            writer.addTypeImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext",
                     TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__SdkStreamSerdeContext");
         }
@@ -112,7 +112,7 @@ public final class CodegenUtils {
     private static List<String> getDefaultOperationSerdeContextTypes(TypeScriptWriter writer) {
         List<String> contextInterfaceList = new ArrayList<>();
         // Get default SerdeContext.
-        writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         contextInterfaceList.add("__SerdeContext");
         return contextInterfaceList;
     }
@@ -143,7 +143,7 @@ public final class CodegenUtils {
         MemberShape streamingMember,
         String commandName
     ) {
-        writer.addImport("StreamingBlobPayloadInputTypes", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("StreamingBlobPayloadInputTypes", null, TypeScriptDependency.SMITHY_TYPES);
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
 
@@ -151,7 +151,7 @@ public final class CodegenUtils {
         writer.write(
             """
             export interface $L extends Omit<$T, $S> {
-                $L$L: StreamingBlobPayloadInputTypes;
+              $L$L: StreamingBlobPayloadInputTypes;
             }
             """,
             typeName,
@@ -176,14 +176,14 @@ public final class CodegenUtils {
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.addImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
-        writer.addImport("StreamingBlobPayloadOutputTypes", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("StreamingBlobPayloadOutputTypes", null, TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
         writer.write(
             """
             export interface $L extends Omit<$T, $S>, __MetadataBearer {
-                $L$L: StreamingBlobPayloadOutputTypes;
+              $L$L: StreamingBlobPayloadOutputTypes;
             }
             """,
             typeName,
@@ -215,7 +215,7 @@ public final class CodegenUtils {
         String memberName = payloadMember.getMemberName();
         String optionalSuffix = payloadMember.isRequired() ? "" : "?";
 
-        writer.addImport("BlobPayloadInputTypes", null, TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport("BlobPayloadInputTypes", null, TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs("@public");
         writer.write(

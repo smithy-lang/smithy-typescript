@@ -71,28 +71,26 @@ public final class ExampleWeatherCustomEndpointsRuntimeConfig implements TypeScr
         });
 
         codegenContext.writerDelegator().useFileWriter(ADD_CUSTOM_ENDPOINTS_FILE, w -> {
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
-            w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
+            w.addTypeImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
             w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
             w.write("""
                 export interface GenericCustomEndpointsInputConfig {
-                    region?: string | __Provider<string>;
-                    endpointProvider?: any;
+                  region?: string | __Provider<string>;
+                  endpointProvider?: any;
                 }
 
                 export interface GenericCustomEndpointsResolvedConfig {
-                    region: __Provider<string>;
-                    endpointProvider: any;
+                  region: __Provider<string>;
+                  endpointProvider: any;
                 }
 
                 export const resolveGenericCustomEndpointsConfig = <T>(config: T & GenericCustomEndpointsInputConfig): \
                 T & GenericCustomEndpointsResolvedConfig => {
-                    return {
-                        ...config,
-                        endpointProvider: normalizeProvider(config.endpointProvider || "www.amazon.com"),
-                        region: normalizeProvider(config.region || "us-west-2"),
-                    };
+                  return {
+                    ...config,
+                    endpointProvider: normalizeProvider(config.endpointProvider || "www.amazon.com"),
+                    region: normalizeProvider(config.region || "us-west-2"),
+                  };
                 }
                 """);
         });

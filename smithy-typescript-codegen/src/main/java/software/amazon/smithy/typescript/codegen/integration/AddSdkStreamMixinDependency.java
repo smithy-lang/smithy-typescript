@@ -54,7 +54,7 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
             return;
         }
 
-        writer.addImport("SdkStreamMixinInjector", "__SdkStreamMixinInjector",
+        writer.addTypeImport("SdkStreamMixinInjector", "__SdkStreamMixinInjector",
                 TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("The internal function that inject utilities to runtime-specific stream to help users"
                 + " consume the data\n@internal");

@@ -1,8 +1,9 @@
 // smithy-typescript generated code
-import { getHttpAuthExtensionConfiguration, resolveHttpAuthRuntimeConfig } from "./auth/httpAuthExtensionConfiguration";
 import { getHttpHandlerExtensionConfiguration, resolveHttpHandlerRuntimeConfig } from "@smithy/protocol-http";
 import { getDefaultExtensionConfiguration, resolveDefaultRuntimeConfig } from "@smithy/smithy-client";
-import { RpcV2ProtocolExtensionConfiguration } from "./extensionConfiguration";
+
+import { getHttpAuthExtensionConfiguration, resolveHttpAuthRuntimeConfig } from "./auth/httpAuthExtensionConfiguration";
+import type { RpcV2ProtocolExtensionConfiguration } from "./extensionConfiguration";
 
 /**
  * @public

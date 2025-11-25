@@ -1,11 +1,12 @@
 // smithy-typescript generated code
-import { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
-import { commonParams } from "../endpoint/EndpointParameters";
-import { GetNumbersRequest, GetNumbersResponse } from "../models/models_0";
-import { GetNumbers } from "../schemas/schemas_0";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
 import { Command as $Command } from "@smithy/smithy-client";
-import { MetadataBearer as __MetadataBearer } from "@smithy/types";
+import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
+
+import { commonParams } from "../endpoint/EndpointParameters";
+import type { GetNumbersRequest, GetNumbersResponse } from "../models/models_0";
+import { GetNumbers } from "../schemas/schemas_0";
+import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
 /**
  * @public

@@ -41,10 +41,10 @@ public final class ApplicationProtocol {
      * @param responseType The type used to represent response messages for the protocol.
      */
     public ApplicationProtocol(
-            String name,
-            SymbolReference optionsType,
-            SymbolReference requestType,
-            SymbolReference responseType
+        String name,
+        SymbolReference optionsType,
+        SymbolReference requestType,
+        SymbolReference responseType
     ) {
         this.name = name;
         this.optionsType = optionsType;
@@ -59,30 +59,34 @@ public final class ApplicationProtocol {
      */
     public static ApplicationProtocol createDefaultHttpApplicationProtocol() {
         return new ApplicationProtocol(
-                "http",
-                SymbolReference.builder()
-                        .symbol(createHttpSymbol(TypeScriptDependency.SMITHY_TYPES, "HttpHandlerOptions"))
-                        .alias("__HttpHandlerOptions")
-                        .build(),
-                SymbolReference.builder()
-                        .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpRequest"))
-                        .alias("__HttpRequest")
-                        .build(),
-                SymbolReference.builder()
-                        .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpResponse"))
-                        .alias("__HttpResponse")
-                        .build()
+            "http",
+            SymbolReference.builder()
+                .symbol(createHttpSymbol(TypeScriptDependency.SMITHY_TYPES, "HttpHandlerOptions", true))
+                .alias("__HttpHandlerOptions")
+                .build(),
+            SymbolReference.builder()
+                .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpRequest", true))
+                .alias("__HttpRequest")
+                .build(),
+            SymbolReference.builder()
+                .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpResponse", true))
+                .alias("__HttpResponse")
+                .build()
         );
     }
 
-    private static Symbol createHttpSymbol(TypeScriptDependency dependency, String symbolName) {
-        return Symbol.builder()
-                .namespace(dependency.packageName, "/")
-                .name(symbolName)
-                .addDependency(dependency)
-                .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)
-                .addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER)
-                .build();
+    private static Symbol createHttpSymbol(TypeScriptDependency dependency, String symbolName, boolean typeOnly) {
+        Symbol.Builder builder = Symbol.builder()
+            .namespace(dependency.packageName, "/")
+            .name(symbolName)
+            .addDependency(dependency)
+            .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)
+            .addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
+        if (typeOnly) {
+            builder.putProperty("typeOnly", true);
+        }
+        return builder
+            .build();
     }
 
     /**

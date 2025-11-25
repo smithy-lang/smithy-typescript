@@ -1,7 +1,8 @@
 // smithy-typescript generated code
-import { RpcV2ProtocolServiceException as __BaseException } from "./RpcV2ProtocolServiceException";
+import type { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
+
 import { ComplexNestedErrorData, ValidationExceptionField } from "./models_0";
-import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
+import { RpcV2ProtocolServiceException as __BaseException } from "./RpcV2ProtocolServiceException";
 
 /**
  * A standard error for input validation failures.

@@ -1,6 +1,7 @@
 // smithy-typescript generated code
+import type { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
+
 import { XYZServiceSyntheticServiceException as __BaseException } from "./XYZServiceSyntheticServiceException";
-import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
 
 /**
  * @public

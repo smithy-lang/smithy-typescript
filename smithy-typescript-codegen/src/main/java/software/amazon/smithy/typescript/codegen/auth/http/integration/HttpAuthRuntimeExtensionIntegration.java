@@ -120,18 +120,17 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.openBlock("""
                 /**
                  * @internal
                  */
                 export interface HttpAuthExtensionConfiguration {""", "}",
                 () -> {
-                w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
+                w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.write("setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void;");
                 w.write("httpAuthSchemes(): HttpAuthScheme[];");
 
-                w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
+                w.addTypeImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("setHttpAuthSchemeProvider(httpAuthSchemeProvider: $LHttpAuthSchemeProvider): void;",
                     serviceName);
                 w.write("httpAuthSchemeProvider(): $LHttpAuthSchemeProvider;", serviceName);
@@ -187,16 +186,15 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.openBlock("""
                 /**
                  * @internal
                  */
                 export type HttpAuthRuntimeConfig = Partial<{""", "}>;",
                 () -> {
-                w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
+                w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.write("httpAuthSchemes: HttpAuthScheme[];");
-                w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
+                w.addTypeImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("httpAuthSchemeProvider: $LHttpAuthSchemeProvider;", serviceName);
                 List<ConfigField> mainConfigFields = configFields.values().stream()
                     .filter(c -> c.type().equals(ConfigField.Type.MAIN))
@@ -280,17 +278,17 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
         String serviceName
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
-            w.addDependency(TypeScriptDependency.SMITHY_TYPES);
             w.openBlock("""
                 /**
                  * @internal
                  */
-                export const getHttpAuthExtensionConfiguration = (runtimeConfig: HttpAuthRuntimeConfig): \
-                HttpAuthExtensionConfiguration => {""", "};",
+                export const getHttpAuthExtensionConfiguration = (
+                  runtimeConfig: HttpAuthRuntimeConfig
+                ): HttpAuthExtensionConfiguration => {""", "};",
                 () -> {
-                w.addImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
+                w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.write("let _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;");
-                w.addImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
+                w.addTypeImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider!;");
                 List<ConfigField> mainConfigFields = configFields.values().stream()
                     .filter(c -> c.type().equals(ConfigField.Type.MAIN))
