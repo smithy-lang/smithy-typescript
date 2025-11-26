@@ -70,6 +70,8 @@ public final class TypeScriptSettings {
     private static final String GENERATE_INDEX_TESTS = "generateIndexTests";
     private static final String SERVICE_PROTOCOL_PRIORITY = "serviceProtocolPriority";
     private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
+    private static final String BIG_NUMBER_MODE = "bigNumberMode";
+    private static final String GENERATE_SCHEMAS = "generateSchemas";
 
     private String packageName;
     private String packageDescription = "";
@@ -190,7 +192,7 @@ public final class TypeScriptSettings {
             throw new CodegenException("Cannot infer a service to generate because the model contains "
                                        + "multiple service shapes: " + services);
         } else {
-            LOGGER.info("Inferring service to generate as " + services.get(0));
+            LOGGER.fine("Inferring service to generate as " + services.get(0));
             return services.get(0);
         }
     }
@@ -576,14 +578,14 @@ public final class TypeScriptSettings {
                     PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                     SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
                     CREATE_DEFAULT_README, USE_LEGACY_AUTH, GENERATE_TYPEDOC,
-                    GENERATE_INDEX_TESTS
+                    GENERATE_INDEX_TESTS, BIG_NUMBER_MODE, GENERATE_SCHEMAS
                 )),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(
                     PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
                     SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
                     DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README, GENERATE_TYPEDOC,
-                    GENERATE_INDEX_TESTS
+                    GENERATE_INDEX_TESTS, BIG_NUMBER_MODE, GENERATE_SCHEMAS
                 ));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;

@@ -18,158 +18,173 @@ public class StructureGeneratorTest {
     @Test
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                  }
+                }
+                """);
     }
 
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                  }
+                }
+                """);
     }
 
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                  }
+                }
+                """);
     }
 
     @Test
     public void properlyGeneratesOptionalNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-member-no-message.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  foo?: string | undefined;\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "    this.foo = opts.foo;\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  foo?: string | undefined;
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                    this.foo = opts.foo;
+                  }
+                }
+                """);
     }
 
     @Test
     public void properlyGeneratesRequiredNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-member-no-message.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  foo: string | undefined;\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "    this.foo = opts.foo;\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  foo: string | undefined;
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                    this.foo = opts.foo;
+                  }
+                }
+                """);
     }
 
     @Test
     public void generatesEmptyRetryableTrait() {
         testErrorStructureCodegen("error-test-retryable.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  $retryable = {\n"
-                        + "  };\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  $retryable = {};
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                  }
+                }
+                """);
     }
 
     @Test
     public void generatesRetryableTraitWithThrottling() {
         testErrorStructureCodegen("error-test-retryable-throttling.smithy",
-                "export class Err extends __BaseException {\n"
-                        + "  readonly name = \"Err\" as const;\n"
-                        + "  readonly $fault = \"client\" as const;\n"
-                        + "  $retryable = {\n"
-                        + "    throttling: true,\n"
-                        + "  };\n"
-                        + "  /**\n"
-                        + "   * @internal\n"
-                        + "   */\n"
-                        + "  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {\n"
-                        + "    super({\n"
-                        + "      name: \"Err\",\n"
-                        + "      $fault: \"client\",\n"
-                        + "      ...opts\n"
-                        + "    });\n"
-                        + "    Object.setPrototypeOf(this, Err.prototype);\n"
-                        + "  }\n"
-                        + "}\n");
+                """
+                export class Err extends __BaseException {
+                  readonly name = "Err" as const;
+                  readonly $fault = "client" as const;
+                  $retryable = {
+                    throttling: true,
+                  };
+                  /**
+                   * @internal
+                   */
+                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                    super({
+                      name: "Err",
+                      $fault: "client",
+                      ...opts,
+                    });
+                    Object.setPrototypeOf(this, Err.prototype);
+                  }
+                }
+                """);
     }
 
     @Test
     public void properlyGeneratesRequiredMessageMemberNotBackwardCompatible() {
         testStructureCodegenBase("test-required-member.smithy",
-                "export interface GetFooOutput {\n"
-                        + "  someRequiredMember: string;\n"
-                        + "}\n",
+                """
+                export interface GetFooOutput {
+                  someRequiredMember: string;
+                }
+                """,
                 RequiredMemberMode.STRICT, true);
     }
 

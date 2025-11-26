@@ -162,6 +162,17 @@ public class ImportDeclarationsTest {
         declarations.addImport("getEndpointPlugin", null, "@smithy/middleware-endpoint");
         declarations.addTypeImport("ServiceInputTypes", null, "../RpcV2ProtocolClient");
 
+        // https://projects.haykranen.nl/java/
+        declarations.addTypeImport(
+            "DecoratorContainerSchemaListenerTransactionRepository", null, "../../java8");
+        declarations.addTypeImport(
+            "AuthenticationExpressionDecoratorContainerSchemaListenerTransactionRepository", null, "../../java11");
+        declarations.addTypeImport(
+            "ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenerTransactions", null, "../../java15");
+        // uses multiline format as line width 120 is breached.
+        declarations.addTypeImport(
+            "ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenersTransactions", null, "../../java18");
+
 
         String result = declarations.toString();
 
@@ -170,13 +181,15 @@ public class ImportDeclarationsTest {
             import { Command as $Command } from "@smithy/smithy-client";
             import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
             
+            import type { AuthenticationExpressionDecoratorContainerSchemaListenerTransactionRepository } from "../../java11";
+            import type { ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenerTransactions } from "../../java15";
+            import type {
+              ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenersTransactions,
+            } from "../../java18";
+            import type { DecoratorContainerSchemaListenerTransactionRepository } from "../../java8";
             import { commonParams } from "../endpoint/EndpointParameters";
             import type { FractionalSecondsOutput } from "../models/models_0";
-            import type {
-              RpcV2ProtocolClientResolvedConfig,
-              ServiceInputTypes,
-              ServiceOutputTypes,
-            } from "../RpcV2ProtocolClient";
+            import type { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
             import { FractionalSeconds } from "../schemas/schemas_0";
 
             """,

@@ -141,7 +141,7 @@ public class SymbolProviderTest {
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol listSymbol = provider.toSymbol(list);
 
-        assertThat(listSymbol.getName(), equalTo("(_Record)[]"));
+        assertThat(listSymbol.getName(), equalTo("_Record[]"));
     }
 
     @Test

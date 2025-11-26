@@ -35,7 +35,7 @@ public class EnumGeneratorTest {
 
         assertThat(writer.toString(), containsString("export const Baz = {"));
         assertThat(writer.toString(), stringContainsInOrder("BAR: \"BAR\",", "FOO: \"FOO\""));
-        assertThat(writer.toString(), containsString("export type Baz = typeof Baz[keyof typeof Baz]"));
+        assertThat(writer.toString(), containsString("export type Baz = (typeof Baz)[keyof typeof Baz];"));
     }
 
     @Test

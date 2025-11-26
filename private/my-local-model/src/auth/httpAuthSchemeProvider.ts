@@ -50,7 +50,8 @@ function createSmithyApiNoAuthHttpAuthOption(authParameters: XYZServiceHttpAuthS
 /**
  * @internal
  */
-export interface XYZServiceHttpAuthSchemeProvider extends HttpAuthSchemeProvider<XYZServiceHttpAuthSchemeParameters> {}
+export interface XYZServiceHttpAuthSchemeProvider
+  extends HttpAuthSchemeProvider<XYZServiceHttpAuthSchemeParameters> {}
 
 /**
  * @internal

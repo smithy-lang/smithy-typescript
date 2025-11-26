@@ -182,25 +182,24 @@ final class UnionGenerator implements Runnable {
             for (String variant : variantMap.values()) {
                 writer.write("| $L.$L", symbol.getName(), variant);
             }
-            writer.write("| $L.$$UnknownMember", symbol.getName());
+            writer.write("| $L.$$UnknownMember;", symbol.getName());
         });
 
         // Write out the namespace that contains each variant and visitor.
         writer.writeDocs("@public")
-                .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-                    writeUnionMemberInterfaces();
-                    writeVisitorType();
-                    writeVisitorFunction();
-                    if (includeValidation) {
-                        writeValidate();
-                    }
-                });
+            .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+                writeUnionMemberInterfaces();
+                writeVisitorType();
+                writeVisitorFunction();
+                if (includeValidation) {
+                    writeValidate();
+                }
+                writer.unwrite("\n");
+            });
         writeFilterSensitiveLog(symbol.getName());
     }
 
     private void writeUnionMemberInterfaces() {
-        writer.write("");
-
         for (MemberShape member : shape.getAllMembers().values()) {
             String name = variantMap.get(member.getMemberName());
             writer.writeMemberDocs(model, member);
@@ -248,16 +247,16 @@ final class UnionGenerator implements Runnable {
     private void writeVisitorFunction() {
         if (!schemaMode) {
             // Create the visitor dispatcher for the union.
-            writer.write("export const visit = <T>(").indent();
-            writer.write("value: $L,", symbol.getName());
-            writer.write("visitor: Visitor<T>");
-            writer.dedent().write("): T => {").indent();
+            writer.writeInline("export const visit = <T>(");
+            writer.writeInline("value: $L, ", symbol.getName());
+            writer.writeInline("visitor: Visitor<T>");
+            writer.write("): T => {").indent();
             for (MemberShape member : shape.getAllMembers().values()) {
                 String memberName = symbolProvider.toMemberName(member);
                 writer.write("if (value.${1L} !== undefined) return visitor.$1L(value.${1L});", memberName);
             }
             writer.write("return visitor._(value.$$unknown[0], value.$$unknown[1]);");
-            writer.dedent().write("}");
+            writer.dedent().write("};");
             writer.write("");
         }
     }
@@ -278,15 +277,29 @@ final class UnionGenerator implements Runnable {
                                     shape.getAllMembers().values(),
                                     RequiredMemberMode.NULLABLE,
                                     sensitiveDataFinder);
-                            writer.openBlock("if (${1L}.${2L} !== undefined) return {${2L}: ", "};",
-                                    objectParam, memberName, () -> {
-                                        String memberParam = String.format("%s.%s", objectParam, memberName);
-                                        structuredMemberWriter.writeMemberFilterSensitiveLog(writer, member,
-                                                memberParam);
-                                    });
+
+                            writer.writeInline("""
+                                if (${1L}.${2L} !== undefined) {
+                                  return {
+                                    ${2L}:\s""",
+                                objectParam,
+                                memberName
+                            );
+                            String memberParam = String.format("%s.%s", objectParam, memberName);
+                            writer.indent(2);
+                            structuredMemberWriter.writeMemberFilterSensitiveLog(
+                                writer, member,
+                                memberParam
+                            );
+                            writer.dedent(1);
+                            writer.write("};");
+                            writer.dedent(1);
+                            writer.write("}");
                         }
-                        writer.write("if (${1L}.$$unknown !== undefined) return {[${1L}.$$unknown[0]]: 'UNKNOWN'};",
-                                objectParam);
+                        writer.write(
+                            "if (${1L}.$$unknown !== undefined) return { [${1L}.$$unknown[0]]: \"UNKNOWN\" };",
+                            objectParam
+                        );
                     });
         }
     }

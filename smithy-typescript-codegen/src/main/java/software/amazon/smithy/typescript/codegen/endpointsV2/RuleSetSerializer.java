@@ -19,6 +19,7 @@ import software.amazon.smithy.model.node.ArrayNode;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 
 public class RuleSetSerializer {
     private final Node ruleSet;
@@ -34,12 +35,13 @@ public class RuleSetSerializer {
      */
     public void generate() {
         ObjectNode objectNode = ruleSet.expectObjectNode();
-        writer.openBlock(
+        writer.openCollapsibleBlock(
             "{",
-            "}",
+            "};",
+            !objectNode.getMembers().isEmpty(),
             () -> {
                 objectNode.getMembers().forEach((k, v) -> {
-                    writer.writeInline("\"" + k + "\": ");
+                    writer.writeInline(PropertyAccessor.inlineKey(k.toString()) + ": ");
                     traverse(v);
                 });
             }
@@ -50,21 +52,23 @@ public class RuleSetSerializer {
         if (node.isObjectNode()) {
             ObjectNode objectNode = node.expectObjectNode();
 
-            writer.openBlock(
+            writer.openCollapsibleBlock(
                 "{",
                 "},",
+                !objectNode.getMembers().isEmpty(),
                 () -> {
                     objectNode.getMembers().forEach((k, v) -> {
-                        writer.writeInline("\"" + k + "\": ");
+                        writer.writeInline(PropertyAccessor.inlineKey(k.toString()) + ": ");
                         traverse(v);
                     });
                 }
             );
         } else if (node.isArrayNode()) {
             ArrayNode arrayNode = node.expectArrayNode();
-            writer.openBlock(
+            writer.openCollapsibleBlock(
                 "[",
                 "],",
+                !arrayNode.getElements().isEmpty(),
                 () -> {
                     arrayNode.getElements().forEach(this::traverse);
                 }

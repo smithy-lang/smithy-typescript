@@ -43,7 +43,8 @@ export interface GetNumbersResponse {
 /**
  * @public
  */
-export interface Unit {}
+export interface Unit {
+}
 
 /**
  * @public
@@ -107,11 +108,23 @@ export namespace TradeEvents {
  * @internal
  */
 export const TradeEventsFilterSensitiveLog = (obj: TradeEvents): any => {
-  if (obj.alpha !== undefined) return { alpha: obj.alpha };
-  if (obj.beta !== undefined) return { beta: obj.beta };
-  if (obj.gamma !== undefined) return { gamma: obj.gamma };
+  if (obj.alpha !== undefined) {
+    return {
+      alpha: obj.alpha
+    };
+  }
+  if (obj.beta !== undefined) {
+    return {
+      beta: obj.beta
+    };
+  }
+  if (obj.gamma !== undefined) {
+    return {
+      gamma: obj.gamma
+    };
+  }
   if (obj.$unknown !== undefined) return { [obj.$unknown[0]]: "UNKNOWN" };
-};
+}
 
 /**
  * @public
@@ -125,8 +138,10 @@ export interface TradeEventStreamRequest {
  */
 export const TradeEventStreamRequestFilterSensitiveLog = (obj: TradeEventStreamRequest): any => ({
   ...obj,
-  ...(obj.eventStream && { eventStream: "STREAMING_CONTENT" }),
-});
+  ...(obj.eventStream && { eventStream:
+    'STREAMING_CONTENT'
+  }),
+})
 
 /**
  * @public
@@ -140,5 +155,7 @@ export interface TradeEventStreamResponse {
  */
 export const TradeEventStreamResponseFilterSensitiveLog = (obj: TradeEventStreamResponse): any => ({
   ...obj,
-  ...(obj.eventStream && { eventStream: "STREAMING_CONTENT" }),
-});
+  ...(obj.eventStream && { eventStream:
+    'STREAMING_CONTENT'
+  }),
+})
