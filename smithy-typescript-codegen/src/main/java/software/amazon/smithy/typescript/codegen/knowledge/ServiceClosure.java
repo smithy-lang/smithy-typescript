@@ -27,7 +27,9 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
+import software.amazon.smithy.waiters.WaitableTrait;
 
 /**
  * Retrieves shapes in the service operation closure.
@@ -37,6 +39,7 @@ public final class ServiceClosure implements KnowledgeIndex {
     private static final Map<ShapeId, ServiceClosure> BY_SERVICE = new ConcurrentHashMap<>();
     private final Model model;
 
+    private final TreeSet<OperationShape> operations = new TreeSet<>();
     private final TreeSet<Shape> structures = new TreeSet<>();
     private final TreeSet<Shape> errors = new TreeSet<>();
     private final TreeSet<Shape> enums = new TreeSet<>();
@@ -56,6 +59,7 @@ public final class ServiceClosure implements KnowledgeIndex {
         TopDownIndex topDown = TopDownIndex.of(model);
         ServiceClosure instance = new ServiceClosure(model);
         Set<OperationShape> containedOperations = topDown.getContainedOperations(service);
+        instance.operations.addAll(containedOperations);
         instance.scan(containedOperations);
         instance.scanned.clear();
 
@@ -74,6 +78,29 @@ public final class ServiceClosure implements KnowledgeIndex {
 
     public TreeSet<Shape> getEnums() {
         return enums;
+    }
+
+    public TreeSet<String> getWaiterNames() {
+        TreeSet<String> waiters = new TreeSet<>();
+        for (OperationShape operation : operations) {
+            operation.getTrait(WaitableTrait.class).ifPresent(trait -> {
+                trait.getWaiters().forEach((waiterName, waiter) -> {
+                    waiters.add("waitFor" + waiterName);
+                    waiters.add("waitUntil" + waiterName);
+                });
+            });
+        }
+        return waiters;
+    }
+
+    public TreeSet<String> getPaginatorNames() {
+        TreeSet<String> paginators = new TreeSet<>();
+        for (OperationShape operation : operations) {
+            operation.getTrait(PaginatedTrait.class).ifPresent(trait -> {
+                paginators.add("paginate" + operation.getId().getName());
+            });
+        }
+        return paginators;
     }
 
     private void scan(Shape shape) {
