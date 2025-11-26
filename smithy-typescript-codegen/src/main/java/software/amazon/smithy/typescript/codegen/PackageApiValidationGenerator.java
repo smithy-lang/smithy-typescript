@@ -15,6 +15,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -146,7 +147,16 @@ public final class PackageApiValidationGenerator {
         }
 
         // enums
-        TreeSet<Shape> enumShapes = serviceClosure.getEnums();
+
+        // string shapes with enum trait do not generate anything if
+        // any enum value does not have a name.
+        TreeSet<Shape> enumShapes = serviceClosure.getEnums().stream()
+            .filter(shape -> shape
+                .getTrait(EnumTrait.class)
+                .map(EnumTrait::hasNames)
+                .orElse(true))
+            .collect(TreeSet::new, Set::add, Set::addAll);
+
         if (!enumShapes.isEmpty()) {
             writer.write("// enums");
         }
