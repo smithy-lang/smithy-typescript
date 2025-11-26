@@ -67,7 +67,10 @@ public final class PackageApiValidationGenerator {
                     settings.getService()
                 );
                 for (OperationShape operation : containedOperations) {
-                    writer.write("$L,", symbolProvider.toSymbol(operation).getName());
+                    String commandName = symbolProvider.toSymbol(operation).getName();
+                    writer.write("$L,", commandName);
+                    writer.write("$LInput,", commandName);
+                    writer.write("$LOutput,", commandName);
                 }
 
                 // enums
@@ -89,6 +92,15 @@ public final class PackageApiValidationGenerator {
 
                 // synthetic base exception
                 writer.write("$L,", aggregateClientName + "ServiceException");
+
+                // waiters
+                serviceClosure.getWaiterNames().forEach(waiter -> {
+                    writer.write("$L,", waiter);
+                });
+                // paginators
+                serviceClosure.getPaginatorNames().forEach(paginator -> {
+                    writer.write("$L,", paginator);
+                });
             }
         );
     }
@@ -163,6 +175,30 @@ public final class PackageApiValidationGenerator {
         }
         writer.addRelativeImport(baseExceptionName, null, cjsIndex);
         writer.write("assert($L.prototype instanceof Error)", baseExceptionName);
+
+        // waiters & paginators
+        TreeSet<String> waiterNames = serviceClosure.getWaiterNames();
+        if (!waiterNames.isEmpty()) {
+            writer.write("// waiters");
+        }
+        waiterNames.forEach(waiter -> {
+            writer.addRelativeImport(waiter, null, cjsIndex);
+            writer.write("""
+                assert(typeof $L === "function")""",
+                waiter
+            );
+        });
+        TreeSet<String> paginatorNames = serviceClosure.getPaginatorNames();
+        if (!paginatorNames.isEmpty()) {
+            writer.write("// paginators");
+        }
+        paginatorNames.forEach(paginator -> {
+            writer.addRelativeImport(paginator, null, cjsIndex);
+            writer.write("""
+                assert(typeof $L === "function")""",
+                paginator
+            );
+        });
 
         writer.write("console.log(`$L index test passed.`);", aggregateClientName);
     }
