@@ -290,11 +290,16 @@ public final class HttpProtocolGeneratorUtils {
         Optional<RetryableTrait> retryableTrait = error.getTrait(RetryableTrait.class);
         if (retryableTrait.isPresent()) {
             String textAfterBlock = String.format("}%s", separator);
-            writer.openBlock("$$retryable = {", textAfterBlock, () -> {
-                if (retryableTrait.get().getThrottling()) {
-                    writer.write("throttling: true,");
+            writer.openCollapsibleBlock(
+                "$$retryable = {",
+                textAfterBlock,
+                retryableTrait.get().getThrottling(),
+                () -> {
+                    if (retryableTrait.get().getThrottling()) {
+                        writer.write("throttling: true,");
+                    }
                 }
-            });
+            );
         }
     }
 
@@ -332,7 +337,7 @@ public final class HttpProtocolGeneratorUtils {
             + "CommandError";
 
         writer.writeDocs(errorMethodLongName);
-        writer.openBlock("const $L = async(\n"
+        writer.openBlock("const $L = async (\n"
             + "  output: $T,\n"
             + "  context: __SerdeContext,\n"
             + "): Promise<never> => {", "}", errorMethodName, responseType, () -> {
@@ -360,7 +365,7 @@ public final class HttpProtocolGeneratorUtils {
 
                 // Get the protocol specific error location for retrieving contents.
                 String errorLocation = bodyErrorLocationModifier.apply(context, "parsedBody");
-                writer.openBlock("return throwDefaultError({", "}) as never", () -> {
+                writer.openBlock("return throwDefaultError({", "}) as never;", () -> {
                     writer.write("output,");
                     if (errorLocation.equals("parsedBody")) {
                         writer.write("parsedBody,");
@@ -400,6 +405,7 @@ public final class HttpProtocolGeneratorUtils {
                     // Build a generic error the best we can for ones we don't know about.
                     writer.write("default:").indent();
                     defaultErrorHandler.run();
+                    writer.dedent();
                 });
             } else {
                 defaultErrorHandler.run();

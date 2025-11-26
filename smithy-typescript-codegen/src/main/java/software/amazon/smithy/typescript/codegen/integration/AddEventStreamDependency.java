@@ -123,6 +123,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                 return;
             }
             // Otherwise, write present input and output streaming
+            w.write("").indent();
             w.writeDocs("@internal");
             w.openBlock("eventStream: {", "},", () -> {
                 if (input) {
@@ -132,6 +133,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
                     w.write("output: true,");
                 }
             });
+            w.dedent();
         }));
     }
 

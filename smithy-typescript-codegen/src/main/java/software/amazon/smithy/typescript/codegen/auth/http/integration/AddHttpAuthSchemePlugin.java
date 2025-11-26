@@ -144,12 +144,12 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     private static void httpAuthSchemeParametersProvider(TypeScriptWriter w,
                                                          ClientBodyExtraCodeSection clientBodySection) {
         String httpAuthSchemeParametersProviderName = "default"
-            + CodegenUtils.getServiceName(
+                                                      + CodegenUtils.getServiceName(
             clientBodySection.getSettings(),
             clientBodySection.getModel(),
             clientBodySection.getSymbolProvider()
         )
-            + "HttpAuthSchemeParametersProvider";
+                                                      + "HttpAuthSchemeParametersProvider";
         w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
         w.writeInline(httpAuthSchemeParametersProviderName);
     }
@@ -169,19 +169,30 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                                                        ClientBodyExtraCodeSection s) {
         w.addDependency(TypeScriptDependency.SMITHY_CORE);
         w.addImport("DefaultIdentityProviderConfig", null, TypeScriptDependency.SMITHY_CORE);
+
+        SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
+            s.getIntegrations(),
+            s.getModel(),
+            s.getSettings()
+        );
+        ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
+        TopDownIndex topDownIndex = TopDownIndex.of(s.getModel());
+        Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
+            s.getService(), serviceIndex, authIndex, topDownIndex
+        );
+
         w.openBlock("""
-                        async (config: $LResolvedConfig) => \
-                        new DefaultIdentityProviderConfig({""", "})",
-            s.getSymbolProvider().toSymbol(s.getService()).getName(),
+            async (config: $LResolvedConfig) =>""",
+            s.getSymbolProvider().toSymbol(s.getService()).getName()
+        );
+        w.openCollapsibleBlock("""
+            new DefaultIdentityProviderConfig({""", "})",
+            httpAuthSchemes.values().stream().anyMatch(scheme ->
+                scheme.getConfigFields().stream().anyMatch(
+                    field -> field.type().equals(ConfigField.Type.MAIN)
+                )
+            ),
             () -> {
-                SupportedHttpAuthSchemesIndex authIndex = new SupportedHttpAuthSchemesIndex(
-                    s.getIntegrations(),
-                    s.getModel(),
-                    s.getSettings());
-                ServiceIndex serviceIndex = ServiceIndex.of(s.getModel());
-                TopDownIndex topDownIndex = TopDownIndex.of(s.getModel());
-                Map<ShapeId, HttpAuthScheme> httpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
-                    s.getService(), serviceIndex, authIndex, topDownIndex);
                 for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
                     if (scheme == null) {
                         continue;
@@ -196,7 +207,11 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                         }
                     }
                 }
-            });
+            }
+        );
+        // no closeBlock needed here, the caller will write the comma
+        // inline with the close of `new DefaultIdentityProviderConfig({})`
+        w.dedent();
     }
 
     /*
@@ -246,21 +261,23 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             An auth scheme name is a fully qualified auth scheme ID with the namespace prefix trimmed.
             For example, the auth scheme with ID aws.auth#sigv4 is named sigv4.
             @public""");
-        w.write("authSchemePreference?: string[] | Provider<string[]>;\n");
+        w.write("authSchemePreference?: string[] | Provider<string[]>;");
+        w.write("");
 
         w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
         w.writeDocs("""
             Configuration of HttpAuthSchemes for a client which provides \
             default identity providers and signers per auth scheme.
             @internal""");
-        w.write("httpAuthSchemes?: HttpAuthScheme[];\n");
+        w.write("httpAuthSchemes?: HttpAuthScheme[];");
+        w.write("");
 
         String httpAuthSchemeProviderName = serviceName + "HttpAuthSchemeProvider";
         w.writeDocs("""
             Configuration of an HttpAuthSchemeProvider for a client which \
             resolves which HttpAuthScheme to use.
             @internal""");
-        w.write("httpAuthSchemeProvider?: $L;\n", httpAuthSchemeProviderName);
+        w.write("httpAuthSchemeProvider?: $L;", httpAuthSchemeProviderName);
 
         for (ConfigField configField : configFields.values()) {
             if (configField.configFieldWriter().isPresent()) {
@@ -269,7 +286,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             }
         }
         w.dedent();
-        w.write("}\n");
+        w.write("}");
+        w.write("");
         w.popState();
     }
 
@@ -334,7 +352,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             Configuration of an HttpAuthSchemeProvider for a client which \
             resolves which HttpAuthScheme to use.
             @internal""");
-        w.write("readonly httpAuthSchemeProvider: $L;\n", httpAuthSchemeProviderName);
+        w.write("readonly httpAuthSchemeProvider: $L;", httpAuthSchemeProviderName);
         for (ConfigField configField : configFields.values()) {
             if (configField.configFieldWriter().isPresent()) {
                 configField.docs().ifPresent(docs -> w.writeDocs(() -> w.write("$C", docs)));
@@ -342,7 +360,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             }
         }
         w.dedent();
-        w.write("}\n");
+        w.write("}");
+        w.write("");
         w.popState();
     }
 
@@ -372,7 +391,8 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         w.writeDocs("@internal");
         w.writeInline("""
-            export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig""");
+            export const resolveHttpAuthSchemeConfig = <T>(
+              config: T & HttpAuthSchemeInputConfig""");
         if (!previousResolvedFunctions.isEmpty()) {
             w.writeInline(" & ");
             Iterator<ResolveConfigFunction> iter = previousResolvedFunctions.values().iterator();
@@ -384,6 +404,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 }
             }
         }
+        w.write("");
         w.write("""
             ): T & HttpAuthSchemeResolvedConfig => {""");
         w.indent();
@@ -426,9 +447,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             configName = "config_" + i;
             i++;
         }
-        w.write("return Object.assign(");
-        w.indent();
-        w.write("$L, {", configName);
+        w.write("return Object.assign($L, {", configName).indent();
         w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
         w.write("authSchemePreference: normalizeProvider(config.authSchemePreference ?? []),");
         for (ConfigField configField : configFields.values()) {
@@ -436,8 +455,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                 w.write("$L,", configField.name());
             }
         }
-        w.dedent();
-        w.write("}) as T & HttpAuthSchemeResolvedConfig;");
+        w.dedent().write("}) as T & HttpAuthSchemeResolvedConfig;");
         w.popState();
         w.dedent();
         w.write("};");

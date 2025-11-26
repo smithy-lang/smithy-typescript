@@ -174,10 +174,10 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
 
         writer.writeDocs(methodLongName);
         writer.openBlock("""
-            export const $L = async(
+            export const $L = async (
               output: $T,
               context: $L
-            ): Promise<$T> => {""", "}",
+            ): Promise<$T> => {""", "};",
             methodName, responseType, serdeContextType, outputType,
             () -> {
                 writer.addImportSubmodule(
@@ -199,7 +199,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
 
                 writer.write("""
                     const response: $T = {
-                        $$metadata: deserializeMetadata(output), $L
+                      $$metadata: deserializeMetadata(output), $L
                     };
                     return response;
                     """,

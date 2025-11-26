@@ -183,7 +183,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol listShape(ListShape shape) {
         Symbol reference = toSymbol(shape.getMember());
-        return createSymbolBuilder(shape, format("(%s)[]", reference.getName()), null)
+        return createSymbolBuilder(shape, format("%s[]", reference.getName()), null)
             .addReference(reference)
             .putProperty("typeOnly", schemaMode)
             .build();
@@ -192,7 +192,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol setShape(SetShape shape) {
         Symbol reference = toSymbol(shape.getMember());
-        return createSymbolBuilder(shape, format("(%s)[]", reference.getName()), null)
+        return createSymbolBuilder(shape, format("%s[]", reference.getName()), null)
             .addReference(reference)
             .putProperty("typeOnly", schemaMode)
             .build();

@@ -51,6 +51,7 @@ import software.amazon.smithy.utils.StringUtils;
 @SmithyUnstableApi
 public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, ImportDeclarations> {
     public static final String CODEGEN_INDICATOR = "// smithy-typescript generated code\n";
+    public static final int LINE_WIDTH = 120;
 
     private final String moduleName;
     private final boolean withAttribution;
@@ -217,6 +218,34 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         // Escapes multi-line comment closings.
         writeDocs(() -> write(docs.replace("$", "$$").replace("*/", "*\\/")));
         return this;
+    }
+
+    /**
+     * As openBlock, but collapses all space between open and close strings
+     * if the condition is not met.
+     */
+    public TypeScriptWriter openCollapsibleBlock(String open,
+                                                 String close,
+                                                 boolean condition,
+                                                 Object[] args,
+                                                 Runnable runnable) {
+        if (condition) {
+            openBlock(open, close, args, runnable);
+        } else {
+            write(open + close, args);
+        }
+        return this;
+    }
+
+    public TypeScriptWriter openCollapsibleBlock(String open, String close, boolean condition,
+                                                 Runnable runnable) {
+        return openCollapsibleBlock(open, close, condition, new Object[] {}, runnable);
+    }
+
+    public TypeScriptWriter openCollapsibleBlock(String open, String close, boolean condition,
+                                                 Object arg1,
+                                                 Runnable runnable) {
+        return openCollapsibleBlock(open, close, condition, new Object[] {arg1}, runnable);
     }
 
     /**

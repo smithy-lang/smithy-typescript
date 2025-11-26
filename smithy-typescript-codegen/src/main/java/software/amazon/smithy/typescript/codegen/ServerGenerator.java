@@ -299,11 +299,17 @@ final class ServerGenerator {
 
         String serviceInterfaceName = symbolProvider.toSymbol(service).getName();
 
-        writer.openBlock("export interface $L<Context> {", "}", serviceInterfaceName, () -> {
-            for (OperationShape operation : operations) {
-                Symbol symbol = symbolProvider.toSymbol(operation);
-                writer.write("$L: $T<Context>", symbol.getName(), symbol);
+        writer.openCollapsibleBlock(
+            "export interface $L<Context> {",
+            "}",
+            !operations.isEmpty(),
+            serviceInterfaceName,
+            () -> {
+                for (OperationShape operation : operations) {
+                    Symbol symbol = symbolProvider.toSymbol(operation);
+                    writer.write("$L: $T<Context>", symbol.getName(), symbol);
+                }
             }
-        });
+        );
     }
 }

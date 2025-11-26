@@ -191,20 +191,21 @@ final class RuntimeConfigGenerator {
                 if (applicationProtocol.isHttpProtocol() && !settings.useLegacyAuth()) {
                     generateHttpAuthSchemeConfig(configs, writer, target);
                 }
-                int indentation = target.equals(LanguageTarget.SHARED) ? 1 : 2;
                 configs.forEach((key, value) -> {
                     String valuePrefix =
                         runtimeConfigDefaultValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
+                    if (key.equals("retryMode") && target.equals(LanguageTarget.NODE)) {
+                        valuePrefix = """
+                            \n  config?.retryMode ??
+                            """;
+                    }
                     writer
-                        .indent(indentation)
-                        .disableNewlines()
-                        .openBlock(
-                            "$1L: " + valuePrefix, ",\n", key,
-                            () -> {
-                                value.accept(writer);
-                            }
-                        )
-                        .dedent(indentation);
+                        .indent(2)
+                        .writeInline("$1L: " + valuePrefix, key);
+                    value.accept(writer);
+                    writer.unwrite("\n");
+                    writer.dedent(2);
+                    writer.write(",");
                 });
             });
             writer.dedent();
@@ -305,39 +306,45 @@ final class RuntimeConfigGenerator {
 
         configs.put("httpAuthSchemes", w -> {
             w.addTypeImport("IdentityProviderConfig", null, TypeScriptDependency.SMITHY_TYPES);
-            w.openBlock("[", "]", () -> {
-                Iterator<HttpAuthSchemeTarget> iter = targetAuthSchemes.iterator();
-                while (iter.hasNext()) {
-                    HttpAuthSchemeTarget entry = iter.next();
-                    if (entry.identityProvider == null) {
-                        w.write("""
-                            {
-                              schemeId: $S,
-                              identityProvider: (ipc: IdentityProviderConfig) =>
-                                ipc.getIdentityProvider($S),
-                              signer: $C,
-                            }""",
-                            entry.httpAuthScheme.getSchemeId(),
-                            entry.httpAuthScheme.getSchemeId(),
-                            entry.signer);
-                    } else {
-                        w.write("""
-                            {
-                              schemeId: $S,
-                              identityProvider: (ipc: IdentityProviderConfig) =>
-                                ipc.getIdentityProvider($S) || ($C),
-                              signer: $C,
-                            }""",
-                            entry.httpAuthScheme.getSchemeId(),
-                            entry.httpAuthScheme.getSchemeId(),
-                            entry.identityProvider,
-                            entry.signer);
-                    }
-                    if (iter.hasNext()) {
-                        w.writeInline(", ");
-                    }
+
+            w.writeInline("[");
+            Iterator<HttpAuthSchemeTarget> iter = targetAuthSchemes.iterator();
+            if (iter.hasNext()) {
+                w.write("");
+            }
+            while (iter.hasNext()) {
+                HttpAuthSchemeTarget entry = iter.next();
+                w.indent();
+                if (entry.identityProvider == null) {
+                    w.writeInline("""
+                        {
+                          schemeId: $S,
+                          identityProvider: (ipc: IdentityProviderConfig) =>
+                            ipc.getIdentityProvider($S),
+                          signer: $C,
+                        }""",
+                        entry.httpAuthScheme.getSchemeId(),
+                        entry.httpAuthScheme.getSchemeId(),
+                        entry.signer
+                    );
+                } else {
+                    w.writeInline("""
+                        {
+                          schemeId: $S,
+                          identityProvider: (ipc: IdentityProviderConfig) =>
+                            ipc.getIdentityProvider($S) || ($C),
+                          signer: $C,
+                        }""",
+                        entry.httpAuthScheme.getSchemeId(),
+                        entry.httpAuthScheme.getSchemeId(),
+                        entry.identityProvider,
+                        entry.signer
+                    );
                 }
-            });
+                w.write(",");
+                w.dedent();
+            }
+            w.write("]");
         });
     }
 

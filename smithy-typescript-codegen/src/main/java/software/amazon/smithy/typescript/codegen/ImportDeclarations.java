@@ -215,30 +215,38 @@ final class ImportDeclarations implements ImportContainer {
             }
 
             if (!imports.isEmpty()) {
+                String inline;
+                String multiline;
+
                 String head;
                 String symbols;
-                String source;
-                String tail;
-
-                if (imports.size() <= 2) {
+                String tail = "\";\n";
+                boolean allImportsAreTypes = imports.stream().allMatch(s -> s.startsWith("type "));
+                {
                     head = "import { ";
                     symbols = String.join(", ", imports);
-                    source = " } from \"" + module;
-                    tail = "\";\n";
-                } else  {
+                    String source = " } from \"" + module;
+                    if (allImportsAreTypes) {
+                        head = head.replace("import ", "import type ");
+                        symbols = symbols.replaceAll("type ", "");
+                    }
+                    inline = head + symbols + source + tail;
+                }
+                {
                     head = "import {\n  ";
                     symbols = String.join(",\n  ", imports);
-                    source = ",\n} from \"" + module;
-                    tail = "\";\n";
+                    String source = ",\n} from \"" + module;
+                    if (allImportsAreTypes) {
+                        head = head.replace("import ", "import type ");
+                        symbols = symbols.replaceAll("type ", "");
+                    }
+                    multiline = head + symbols + source + tail;
                 }
-
-                boolean allImportsAreTypes = imports.stream().allMatch(s -> s.startsWith("type "));
-                if (allImportsAreTypes) {
-                    head = head.replace("import ", "import type ");
-                    symbols = symbols.replaceAll("type ", "");
+                if (inline.trim().length() <= TypeScriptWriter.LINE_WIDTH) {
+                    buffer.append(inline);
+                } else {
+                    buffer.append(multiline);
                 }
-
-                buffer.append(head).append(symbols).append(source).append(tail);
             }
         }
         if (!namedImports.isEmpty() || !namedTypeImports.isEmpty()) {

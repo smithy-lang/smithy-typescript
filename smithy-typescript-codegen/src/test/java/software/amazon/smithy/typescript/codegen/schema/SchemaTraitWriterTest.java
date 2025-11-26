@@ -42,8 +42,7 @@ class SchemaTraitWriterTest {
             );
             String codeGeneration = subject.toString();
             assertEquals("""
-                {
-                [_s]: 1,}""", codeGeneration);
+                { [_s]: 1 }""", codeGeneration);
         }
     }
 }

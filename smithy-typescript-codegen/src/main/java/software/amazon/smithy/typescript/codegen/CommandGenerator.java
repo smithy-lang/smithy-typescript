@@ -184,8 +184,16 @@ final class CommandGenerator implements Runnable {
             .applicationProtocol(applicationProtocol)
             .build());
         writer.openBlock(
-            "export class $L extends $$Command.classBuilder<$T, $T, $L, ServiceInputTypes, ServiceOutputTypes>()",
-            ".build() {", // class open bracket.
+            """
+            export class $L extends $$Command
+              .classBuilder<
+                $T,
+                $T,
+                $L,
+                ServiceInputTypes,
+                ServiceOutputTypes
+              >()""",
+            "  .build() {", // class open bracket.
             name, inputType, outputType, configType,
             () -> {
                 generateEndpointParameterInstructionProvider();
@@ -245,7 +253,7 @@ final class CommandGenerator implements Runnable {
 
             writer.indent();
             writer.write("/** @internal type navigation helper, not in runtime. */");
-            writer.openBlock("declare protected static __types: {", "};", () -> {
+            writer.openBlock("protected declare static __types: {", "};", () -> {
                 String baseInputStr = operationInputShape.getAllMembers().isEmpty()
                     ? "{}"
                     : baseInput.getName();
@@ -254,13 +262,13 @@ final class CommandGenerator implements Runnable {
                     : baseOutput.getName();
                 writer.write("""
                 api: {
-                    input: $L;
-                    output: $L;
+                  input: $L;
+                  output: $L;
                 };""", baseInputStr, baseOutputStr);
                 writer.write("""
                 sdk: {
-                    input: $T;
-                    output: $T;
+                  input: $T;
+                  output: $T;
                 };""", inputType, outputType);
             });
             writer.dedent();
@@ -502,48 +510,59 @@ final class CommandGenerator implements Runnable {
             .putContext("inputType", inputType)
             .putContext("outputType", outputType);
 
-        writer.write(
+        writer.writeInline(
             """
-                .m(function (this: any, Command: any, cs: any, config: $configType:L, o: any) {
-                    return [
-            """
+            .m(function (this: any, Command: any, cs: any, config: $configType:L, o: any) {
+              return ["""
         );
         {
-            // Add serialization and deserialization plugin.
-            if (!schemaMode) {
-                writer.write("$T(config, this.serialize, this.deserialize),", serde);
-            }
+            boolean multiplePlugins = !schemaMode || runtimePlugins.stream()
+                .map(RuntimeClientPlugin::getPluginFunction)
+                .anyMatch(Optional::isPresent);
 
-            // EndpointsV2
             writer.addImport(
                 "getEndpointPlugin",
                 null,
                 TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
-            writer.write(
-                """
-                getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
-            );
-            // Add customizations.
-            addCommandSpecificPlugins();
+
+            if (multiplePlugins) {
+                writer.write("");
+                writer.indent();
+                // Add serialization and deserialization plugin.
+                if (!schemaMode) {
+                    writer.indent();
+                    writer.write("$T(config, this.serialize, this.deserialize),", serde);
+                    writer.dedent();
+                }
+
+                writer.indent().write(
+                    """
+                    getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
+                );
+                // Add customizations.
+                addCommandSpecificPlugins();
+                writer.dedent();
+                writer.write("];"); // end middleware list.
+                writer.dedent();
+            } else {
+                writer.writeInline(
+                    """
+                    getEndpointPlugin(config, Command.getEndpointParameterInstructions())"""
+                );
+                writer.write("];"); // end middleware list.
+            }
         }
-        writer.write(
-            """
-                ];
-            })"""
-        ); // end middleware.
+        writer.write("})"); // end middleware block.
 
         String filters = schemaMode ? "" : ".f($inputFilter:L, $outputFilter:L)";
 
         // context, filters
-        writer.openBlock(
-            """
-            .s($service:S, $operation:S, {
-            """,
-            """
-            })
-            .n($client:S, $command:S)%s""".formatted(filters),
-            () -> {
-                writer.pushState(SmithyContextCodeSection.builder()
+        writer.writeInline(
+                """
+                .s($service:S, $operation:S, {"""
+            )
+            .pushState(
+                SmithyContextCodeSection.builder()
                     .settings(settings)
                     .model(model)
                     .service(service)
@@ -552,11 +571,16 @@ final class CommandGenerator implements Runnable {
                     .runtimeClientPlugins(runtimePlugins)
                     .protocolGenerator(protocolGenerator)
                     .applicationProtocol(applicationProtocol)
-                    .build());
-                writer.popState();
-            }
-        );
-        writer.popState();
+                    .build()
+            )
+            .popState()
+            .write("})")
+            .write("""
+                .n($client:S, $command:S)"""
+            );
+        if (!filters.isEmpty()) {
+            writer.write(filters);
+        }
     }
 
     private void addInputAndOutputTypes() {

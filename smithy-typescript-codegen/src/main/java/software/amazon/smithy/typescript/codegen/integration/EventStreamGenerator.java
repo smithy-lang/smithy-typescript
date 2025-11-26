@@ -221,21 +221,25 @@ public class EventStreamGenerator {
         writer.addTypeImport("Message", "__Message", TypeScriptDependency.SMITHY_TYPES);
 
         writer.writeDocs(methodLongName);
-        writer.openBlock("const $L = (\n"
-                + "  input: any,\n"
-                + "  context: $L\n"
-                + "): any => {", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
+        writer.openBlock("""
+            const $L = (
+              input: any,
+              context: $L
+            ): any => {""", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
+            Symbol materializedSymbol = eventsUnionSymbol.toBuilder()
+                .putProperty("typeOnly", false)
+                .build();
             writer.openBlock("const eventMarshallingVisitor = (event: any): __Message => $T.visit(event, {", "});",
-                    eventsUnionSymbol, () -> {
-                        eventsUnion.getAllMembers().forEach((memberName, memberShape) -> {
-                    StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
-                            String eventSerMethodName = getEventSerFunctionName(context, target);
-                            writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
-                        });
-                        writer.write("_: value => value as any");
+                materializedSymbol, () -> {
+                    eventsUnion.getAllMembers().forEach((memberName, memberShape) -> {
+                        StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
+                        String eventSerMethodName = getEventSerFunctionName(context, target);
+                        writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
                     });
-                    writer.write("return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);");
+                    writer.write("_: value => value as any");
                 });
+            writer.write("return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);");
+        });
     }
 
     private String getSerFunctionName(GenerationContext context, Shape shape) {

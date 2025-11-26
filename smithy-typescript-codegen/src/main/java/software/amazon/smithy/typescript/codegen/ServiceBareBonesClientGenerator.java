@@ -100,7 +100,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
     @Override
     public void run() {
         writer.addImport("Client", "__Client", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        writer.write("export { __Client }\n");
+        writer.write("export { __Client };\n");
         writer.addRelativeImport("getRuntimeConfig", "__getRuntimeConfig",
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig"));
 
@@ -147,7 +147,8 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             defaultTypeGenerator.accept(writer);
         }
         for (int i = 0; i < symbols.size(); i++) {
-            writer.write("| $T$L", symbols.get(i), i == symbols.size() - 1 ? ";" : "");
+            Symbol symbol = symbols.get(i);
+            writer.write("| $T$L", symbol, i == symbols.size() - 1 ? ";" : "");
         }
         writer.dedent();
         writer.write("");
@@ -176,9 +177,13 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         writer.writeDocs("@public");
         // The default configuration type is always just the base-level
         // Smithy configuration requirements.
-        writer.write("export type $LType = Partial<__SmithyConfiguration<$T>>", configType,
-                applicationProtocol.getOptionsType());
-        writer.write("  & ClientDefaults");
+        writer.write(
+            "export type $LType = Partial<__SmithyConfiguration<$T>> &",
+            configType,
+            applicationProtocol.getOptionsType()
+        );
+        writer.indent();
+        writer.write("ClientDefaults &");
 
         // Get the configuration symbol types to reference in code. These are
         // all "&"'d together to create a big configuration type that aggregates
@@ -188,7 +193,6 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 .collect(Collectors.toList());
 
         if (!inputTypes.isEmpty()) {
-            writer.indent();
             for (SymbolReference symbolReference : inputTypes) {
                 if (symbolReference.getAlias().equals("EndpointInputConfig")) {
                     writer.addTypeImport(
@@ -196,14 +200,14 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                         null,
                         EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
                     );
-                    writer.write("& $T<$L>", symbolReference, "EndpointParameters");
+                    writer.write("$T<$L> &", symbolReference, "EndpointParameters");
                 } else {
-                    writer.write("& $T", symbolReference);
+                    writer.write("$T &", symbolReference);
                 }
             }
             writer.addTypeImport("ClientInputEndpointParameters", null,
                 EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-            writer.write("& ClientInputEndpointParameters");
+            writer.write("ClientInputEndpointParameters;");
             writer.dedent();
         }
 
@@ -215,30 +219,30 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         // each "Input" configuration type.
         writer.write("");
         writer.writeDocs("@public");
-        writer.write("export type $LType = __SmithyResolvedConfiguration<$T>",
+        writer.write("export type $LType = __SmithyResolvedConfiguration<$T> &",
                      resolvedConfigType, applicationProtocol.getOptionsType());
-        writer.write("  & Required<ClientDefaults>");
-        writer.write("  & RuntimeExtensionsConfig");
+        writer.indent();
+        writer.write("Required<ClientDefaults> &");
+        writer.write("RuntimeExtensionsConfig &");
 
         if (!inputTypes.isEmpty()) {
-            writer.indent();
             runtimePlugins.stream()
-                    .flatMap(p -> OptionalUtils.stream(p.getResolvedConfig()))
-                    .forEach(symbol -> {
-                        if (symbol.getAlias().equals("EndpointResolvedConfig")) {
-                            writer.addTypeImport(
-                                "EndpointParameters",
-                                null,
-                                EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
-                            );
-                            writer.write("& $T<$L>", symbol, "EndpointParameters");
-                        } else {
-                            writer.write("& $T", symbol);
-                        }
-                    });
+                .flatMap(p -> OptionalUtils.stream(p.getResolvedConfig()))
+                .forEach(symbol -> {
+                    if (symbol.getAlias().equals("EndpointResolvedConfig")) {
+                        writer.addTypeImport(
+                            "EndpointParameters",
+                            null,
+                            EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY
+                        );
+                        writer.write("$T<$L> &", symbol, "EndpointParameters");
+                    } else {
+                        writer.write("$T &", symbol);
+                    }
+                });
             writer.addTypeImport("ClientResolvedEndpointParameters", null,
                 EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-            writer.write("& ClientResolvedEndpointParameters");
+            writer.write("ClientResolvedEndpointParameters;");
             writer.dedent();
         }
 
@@ -256,9 +260,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     "Protocols other than HTTP are not yet implemented: " + applicationProtocol);
         }
 
-        writer.writeDocs("@public")
-            .openBlock("export interface ClientDefaults extends Partial<__SmithyConfiguration<$T>> {", "}",
-                applicationProtocol.getOptionsType(), () -> {
+        Runnable innerContent = () -> {
             writer.addTypeImport("HttpHandlerUserInput", "__HttpHandlerUserInput", TypeScriptDependency.PROTOCOL_HTTP);
             writer.writeDocs(
                 "The HTTP handler to use or its constructor options. Fetch in browser and Https in Nodejs."
@@ -280,12 +282,12 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
 
             writer.addTypeImport("BodyLengthCalculator", "__BodyLengthCalculator", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that can calculate the length of a request body.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("bodyLengthChecker?: __BodyLengthCalculator;\n");
 
             writer.addTypeImport("StreamCollector", "__StreamCollector", TypeScriptDependency.SMITHY_TYPES);
             writer.writeDocs("A function that converts a stream into an array of bytes.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("streamCollector?: __StreamCollector;\n");
 
             // Note: Encoder and Decoder are both used for base64 and UTF.
@@ -293,45 +295,53 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             writer.addTypeImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES);
 
             writer.writeDocs("The function that will be used to convert a base64-encoded string to a byte array.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("base64Decoder?: __Decoder;\n");
 
             writer.writeDocs("The function that will be used to convert binary data to a base64-encoded string.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("base64Encoder?: __Encoder;\n");
 
             writer.writeDocs("The function that will be used to convert a UTF8-encoded string to a byte array.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("utf8Decoder?: __Decoder;\n");
 
             writer.writeDocs("The function that will be used to convert binary data to a UTF-8 encoded string.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("utf8Encoder?: __Encoder;\n");
 
             writer.writeDocs("The runtime environment.\n"
-                            + "@internal");
+                             + "@internal");
             writer.write("runtime?: string;\n");
 
             writer.writeDocs("Disable dynamically changing the endpoint of the client based on the hostPrefix \n"
-                    + "trait of an operation.");
+                             + "trait of an operation.");
             writer.write("disableHostPrefix?: boolean;\n");
 
             // Write custom configuration dependencies.
             for (TypeScriptIntegration integration : integrations) {
                 integration.addConfigInterfaceFields(settings, model, symbolProvider, writer);
             }
-        }).write("");
+        };
+        writer.writeDocs("@public")
+            .openBlock(
+                "export interface ClientDefaults extends Partial<__SmithyConfiguration<$T>> {",
+                "}\n",
+                applicationProtocol.getOptionsType(),
+                innerContent
+        );
     }
 
     private void generateService() {
         // Write out the service.
         writer.writeShapeDocs(service);
-        writer.openBlock("export class $L extends __Client<\n"
-                         + "  $T,\n"
-                         + "  ServiceInputTypes,\n"
-                         + "  ServiceOutputTypes,\n"
-                         + "  $L\n"
-                         + "> {", "}",
+        writer.openBlock("""
+                export class $L extends __Client<
+                  $T,
+                  ServiceInputTypes,
+                  ServiceOutputTypes,
+                  $L
+                > {""", "}",
                 symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
             generateClientProperties();
             generateConstructor();
@@ -462,36 +472,65 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     }
                     writer.pushState();
                     writer.putContext(symbolMap);
-                    writer.openBlock("this.middlewareStack.use($pluginFn:T(this.config", "));", () -> {
-                        List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                        Map<String, ClientWriterConsumer> clientAddParamsWriterConsumers =
-                            plugin.getClientAddParamsWriterConsumers();
 
-                        if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
-                            return;
-                        }
+                    boolean isAuthSchemeEndpointRuleSetPlugin =
+                        pluginSymbol.getAlias().equals("getHttpAuthSchemeEndpointRuleSetPlugin");
 
-                        writer.openBlock(", {", " }", () -> {
+                    if (isAuthSchemeEndpointRuleSetPlugin) {
+                        writer.openBlock("this.middlewareStack.use(");
+                        writer.ensureNewline();
+                        writer.writeInline("$pluginFn:T(this.config");
+                    } else {
+                        writer.writeInline("this.middlewareStack.use($pluginFn:T(this.config");
+                    }
+
+                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+                    Map<String, ClientWriterConsumer> clientAddParamsWriterConsumers =
+                        plugin.getClientAddParamsWriterConsumers();
+
+                    boolean noAdditionalParams = additionalParameters.isEmpty()
+                                                 && clientAddParamsWriterConsumers.isEmpty();
+                    if (!noAdditionalParams) {
+                        writer.writeInline(", ");
+
+                        boolean hasInnerContent =
+                            !clientAddParamsWriterConsumers.isEmpty() || !additionalParameters.isEmpty();
+
+                        if (!hasInnerContent) {
+                            writer.writeInline("{}");
+                        } else {
+                            writer.write("{").indent();
                             // caution: using String.join instead of templating
                             // because additionalParameters may contain Smithy syntax.
                             if (!additionalParameters.isEmpty()) {
                                 writer.writeInline(String.join(", ", additionalParameters) + ", ");
                             }
                             clientAddParamsWriterConsumers.forEach((key, consumer) -> {
-                                writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
-                                    consumer.accept(w, ClientBodyExtraCodeSection.builder()
-                                        .settings(settings)
-                                        .model(model)
-                                        .service(service)
-                                        .symbolProvider(symbolProvider)
-                                        .integrations(integrations)
-                                        .runtimeClientPlugins(runtimePlugins)
-                                        .applicationProtocol(applicationProtocol)
-                                        .build());
+                                writer.write("$L: $C,", key, (Consumer<TypeScriptWriter>) (w2 -> {
+                                    consumer.accept(
+                                        w2,
+                                        ClientBodyExtraCodeSection.builder()
+                                            .settings(settings)
+                                            .model(model)
+                                            .service(service)
+                                            .symbolProvider(symbolProvider)
+                                            .integrations(integrations)
+                                            .runtimeClientPlugins(runtimePlugins)
+                                            .applicationProtocol(applicationProtocol)
+                                            .build()
+                                    );
                                 }));
                             });
-                        });
-                    });
+                            writer.dedent();
+                            writer.writeInline("}");
+                        }
+                    }
+                    if (isAuthSchemeEndpointRuleSetPlugin) {
+                        writer.write(")");
+                        writer.closeBlock(");");
+                    } else {
+                        writer.write("));");
+                    }
                     writer.popState();
                 });
             }

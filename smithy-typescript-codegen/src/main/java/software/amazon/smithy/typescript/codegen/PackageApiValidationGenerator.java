@@ -52,7 +52,7 @@ public final class PackageApiValidationGenerator {
         writer.openBlock("""
             export type {""",
             """
-            } from "../dist-types/index.d\"""",
+            } from "../dist-types/index.d";""",
             () -> {
                 // exportable types include:
 
@@ -124,11 +124,11 @@ public final class PackageApiValidationGenerator {
         // the aggregate client
         writer.write("// clients");
         writer.write("""
-            assert(typeof $L === "function")""",
+            assert(typeof $L === "function");""",
             aggregateClientName + "Client"
         );
         writer.write("""
-            assert(typeof $L === "function")""",
+            assert(typeof $L === "function");""",
             aggregateClientName
         );
 
@@ -141,7 +141,7 @@ public final class PackageApiValidationGenerator {
             Symbol operationSymbol = symbolProvider.toSymbol(operation);
             writer.addRelativeImport(operationSymbol.getName(), null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "function")""",
+                assert(typeof $L === "function");""",
                 operationSymbol.getName()
             );
         }
@@ -178,13 +178,13 @@ public final class PackageApiValidationGenerator {
             Symbol errorSymbol = symbolProvider.toSymbol(error);
             writer.addRelativeImport(errorSymbol.getName(), null, cjsIndex);
             writer.write(
-                "assert($L.prototype instanceof $L)",
+                "assert($L.prototype instanceof $L);",
                 errorSymbol.getName(),
                 baseExceptionName
             );
         }
         writer.addRelativeImport(baseExceptionName, null, cjsIndex);
-        writer.write("assert($L.prototype instanceof Error)", baseExceptionName);
+        writer.write("assert($L.prototype instanceof Error);", baseExceptionName);
 
         // waiters & paginators
         TreeSet<String> waiterNames = serviceClosure.getWaiterNames();
@@ -194,7 +194,7 @@ public final class PackageApiValidationGenerator {
         waiterNames.forEach(waiter -> {
             writer.addRelativeImport(waiter, null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "function")""",
+                assert(typeof $L === "function");""",
                 waiter
             );
         });
@@ -205,7 +205,7 @@ public final class PackageApiValidationGenerator {
         paginatorNames.forEach(paginator -> {
             writer.addRelativeImport(paginator, null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "function")""",
+                assert(typeof $L === "function");""",
                 paginator
             );
         });
