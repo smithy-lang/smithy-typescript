@@ -271,7 +271,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addUseImports(responseType);
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
 
-        writer.openBlock("export const serializeFrameworkException = async(\n"
+        writer.openBlock("export const serializeFrameworkException = async (\n"
                 + "  input: __SmithyFrameworkException,\n"
                 + "  ctx: ServerSerdeContext\n"
                 + "): Promise<$T> => {", "}", responseType, () -> {
@@ -558,10 +558,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
 
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                 + "  input: $T,\n"
                 + "  ctx: ServerSerdeContext\n"
-                + "): Promise<$T> => {", "}", methodName, outputType, responseType, () -> {
+                + "): Promise<$T> => {", "};", methodName, outputType, responseType, () -> {
             writeEmptyEndpoint(context, operation);
             writeOperationStatusCode(context, operation, bindingIndex, trait);
             writeResponseHeaders(context, operation, bindingIndex,
@@ -614,10 +614,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String methodName = ProtocolGenerator.getGenericSerFunctionName(symbol) + "Error";
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
 
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                 + "  input: $T,\n"
                 + "  ctx: ServerSerdeContext\n"
-                + "): Promise<$T> => {", "}", methodName, symbol, responseType, () -> {
+                + "): Promise<$T> => {", "};", methodName, symbol, responseType, () -> {
             writeEmptyEndpoint(context);
             generateErrorSerializationImplementation(context, error, responseType, bindingIndex);
         });
@@ -706,10 +706,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
         writer.writeDocs(methodLongName);
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                        + "  input: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> => {", "}", methodName, inputType, contextType, requestType, () -> {
+                       + "): Promise<$T> => {", "};",
+            methodName, inputType, contextType, requestType, () -> {
 
             // Get the hostname, path, port, and scheme from client's resolved endpoint.
             // Then construct the request from them. The client's resolved endpoint can
@@ -1819,10 +1820,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol inputType = symbol.expectProperty("inputType", Symbol.class);
         String contextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                 + "  output: $T,\n"
                 + "  context: $L\n"
-                + "): Promise<$T> => {", "}", methodName, requestType, contextType, inputType, () -> {
+                + "): Promise<$T> => {", "};", methodName, requestType, contextType, inputType, () -> {
             handleContentType(context, operation, bindingIndex);
             handleAccept(context, operation, bindingIndex);
             // Start deserializing the response.
@@ -2170,10 +2171,10 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         // Handle the general response.
         writer.writeDocs(methodLongName);
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                        + "  output: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> => {", "}",
+                       + "): Promise<$T> => {", "};",
                        methodName, responseType, contextType, outputType, () -> {
             // Redirect error deserialization to the dispatcher if we receive an error range
             // status code that's not the modeled code (300 or higher). This allows for
@@ -2230,6 +2231,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 Shape target = model.expectShape(binding.getMember().getTarget());
                 deserializingDocumentShapes.add(target);
             });
+
             // todo: unsupported ssdk feature.
             String serverSdkInfix = context.getSettings().generateServerSdk()
                 ? ": any /* $metadata unsupported on ssdk error */"

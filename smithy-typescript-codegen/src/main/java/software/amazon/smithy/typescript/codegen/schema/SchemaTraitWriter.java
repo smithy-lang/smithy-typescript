@@ -80,20 +80,22 @@ class SchemaTraitWriter {
     }
 
     private void writeTraitsObject() {
-        buffer.append("{\n");
+        buffer.append("{ ");
 
         shape.getAllTraits().forEach((shapeId, trait) -> {
             if (!elision.traits.includeTrait(trait.toShapeId())) {
                 return;
             }
             buffer.append("""
-                [%s]: %s,""".formatted(
+                [%s]: %s,\s""".formatted(
                     stringStore.var(shapeId.getName()),
                     traitGenerator.serializeTraitData(trait, stringStore)
                 )
             );
         });
 
-        buffer.append("}");
+        buffer.deleteCharAt(buffer.length() - 1);
+        buffer.deleteCharAt(buffer.length() - 1);
+        buffer.append(" }");
     }
 }

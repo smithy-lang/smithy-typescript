@@ -24,8 +24,14 @@ export interface XYZService {
    * @see {@link GetNumbersCommand}
    */
   getNumbers(): Promise<GetNumbersCommandOutput>;
-  getNumbers(args: GetNumbersCommandInput, options?: __HttpHandlerOptions): Promise<GetNumbersCommandOutput>;
-  getNumbers(args: GetNumbersCommandInput, cb: (err: any, data?: GetNumbersCommandOutput) => void): void;
+  getNumbers(
+    args: GetNumbersCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<GetNumbersCommandOutput>;
+  getNumbers(
+    args: GetNumbersCommandInput,
+    cb: (err: any, data?: GetNumbersCommandOutput) => void
+  ): void;
   getNumbers(
     args: GetNumbersCommandInput,
     options: __HttpHandlerOptions,

@@ -91,6 +91,7 @@ public class RuntimeExtensionsGenerator {
                         writer.dedent(2);
                     });
                 }
+                writer.unwrite(",\n").write("");
             });
             writer.dedent().write(template1Contents, "");
 
@@ -102,6 +103,7 @@ public class RuntimeExtensionsGenerator {
                         writer.dedent(2);
                     });
                 }
+                writer.unwrite(",\n").write("");
             });
             writer.dedent().write(template2Contents, "");
         });

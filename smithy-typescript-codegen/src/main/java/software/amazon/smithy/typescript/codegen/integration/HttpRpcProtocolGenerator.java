@@ -144,6 +144,7 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         writer.addUseImports(requestType);
         writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
+
         Symbol requestSymbol = requestType.getSymbol()
             .toBuilder()
             .putProperty("typeOnly", false)
@@ -266,24 +267,27 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
         String serdeContextType = CodegenUtils.getOperationSerializerContextType(writer, context.getModel(), operation);
 
         writer.writeDocs(methodLongName);
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                     + "  input: $T,\n"
                     + "  context: $L\n"
-                    + "): Promise<$T> => {", "}", methodName, inputType, serdeContextType, requestType, () -> {
-            writeRequestHeaders(context, operation);
-            boolean hasRequestBody = writeRequestBody(context, operation);
-            boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
+                    + "): Promise<$T> => {", "};",
+            methodName, inputType, serdeContextType, requestType,
+            () -> {
+                writeRequestHeaders(context, operation);
+                boolean hasRequestBody = writeRequestBody(context, operation);
+                boolean hasHostPrefix = operation.hasTrait(EndpointTrait.class);
 
-            if (hasHostPrefix) {
-                HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+                if (hasHostPrefix) {
+                    HttpProtocolGeneratorUtils.writeHostPrefix(context, operation);
+                }
+
+                // Construct the request with the operation's path and optional hostname and body.
+                writer.write("return buildHttpRpcRequest(context, headers, $S, $L, $L);",
+                        getOperationPath(context, operation),
+                        hasHostPrefix ? "resolvedHostname" : "undefined",
+                        hasRequestBody ? "body" : "undefined");
             }
-
-            // Construct the request with the operation's path and optional hostname and body.
-            writer.write("return buildHttpRpcRequest(context, headers, $S, $L, $L);",
-                    getOperationPath(context, operation),
-                    hasHostPrefix ? "resolvedHostname" : "undefined",
-                    hasRequestBody ? "body" : "undefined");
-        });
+        );
 
         writer.write("");
     }
@@ -466,27 +470,30 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         // Handle the general response.
         writer.writeDocs(methodLongName);
-        writer.openBlock("export const $L = async(\n"
+        writer.openBlock("export const $L = async (\n"
                        + "  output: $T,\n"
                        + "  context: $L\n"
-                       + "): Promise<$T> => {", "}", methodName, responseType, serdeContextType, outputType, () -> {
-            // Redirect error deserialization to the dispatcher
-            writer.openBlock("if (output.statusCode >= 300) {", "}", () -> {
-                writer.write("return $L(output, context);", errorMethodName);
-            });
-
-            // Start deserializing the response.
-            readResponseBody(context, operation);
-
-            // Build the response with typing and metadata.
-            writer.openBlock("const response: $T = {", "};", outputType, () -> {
-                writer.write("$$metadata: deserializeMetadata(output),");
-                operation.getOutput().ifPresent(outputId -> {
-                    writer.write("...contents,");
+                       + "): Promise<$T> => {", "};",
+            methodName, responseType, serdeContextType, outputType,
+            () -> {
+                // Redirect error deserialization to the dispatcher
+                writer.openBlock("if (output.statusCode >= 300) {", "}", () -> {
+                    writer.write("return $L(output, context);", errorMethodName);
                 });
-            });
-            writer.write("return response;");
-        });
+
+                // Start deserializing the response.
+                readResponseBody(context, operation);
+
+                // Build the response with typing and metadata.
+                writer.openBlock("const response: $T = {", "};", outputType, () -> {
+                    writer.write("$$metadata: deserializeMetadata(output),");
+                    operation.getOutput().ifPresent(outputId -> {
+                        writer.write("...contents,");
+                    });
+                });
+                writer.write("return response;");
+            }
+        );
         writer.write("");
     }
 

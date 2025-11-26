@@ -1,4 +1,5 @@
 /**
  * @internal
  */
-export interface ${extensionConfigName} extends ${extensionConfigInterfaces} {}
+export interface ${extensionConfigName}
+  extends ${extensionConfigInterfaces} {}

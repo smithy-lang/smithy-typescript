@@ -55,7 +55,7 @@ public class TypeScriptClientCodegenPlugin implements SmithyBuildPlugin {
                 .filter(integration -> {
                     boolean matchesSettings = integration.matchesSettings(settings);
                     if (!matchesSettings) {
-                        LOGGER.info(() -> "Skipping TypeScript integration based on settings: " + integration.name());
+                        LOGGER.fine(() -> "Skipping TypeScript integration based on settings: " + integration.name());
                     }
                     return matchesSettings;
                 })

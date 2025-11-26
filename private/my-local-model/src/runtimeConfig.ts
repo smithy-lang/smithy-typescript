@@ -29,15 +29,10 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     eventStreamSerdeProvider: config?.eventStreamSerdeProvider ?? eventStreamSerdeProvider,
     maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
     requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
-    retryMode:
-      config?.retryMode ??
-      loadNodeConfig(
-        {
-          ...NODE_RETRY_MODE_CONFIG_OPTIONS,
-          default: async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE,
-        },
-        config
-      ),
+    retryMode: config?.retryMode ?? loadNodeConfig({
+      ...NODE_RETRY_MODE_CONFIG_OPTIONS,
+      default: async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE
+    }, config),
     sha256: config?.sha256 ?? Hash.bind(null, "sha256"),
     streamCollector: config?.streamCollector ?? streamCollector,
   };

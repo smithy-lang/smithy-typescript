@@ -220,6 +220,34 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
     }
 
     /**
+     * As openBlock, but collapses all space between open and close strings
+     * if the condition is not met.
+     */
+    public TypeScriptWriter openCollapsibleBlock(String open,
+                                                 String close,
+                                                 boolean condition,
+                                                 Object[] args,
+                                                 Runnable runnable) {
+        if (condition) {
+            openBlock(open, close, args, runnable);
+        } else {
+            write(open + close, args);
+        }
+        return this;
+    }
+
+    public TypeScriptWriter openCollapsibleBlock(String open, String close, boolean condition,
+                                                 Runnable runnable) {
+        return openCollapsibleBlock(open, close, condition, new Object[] {}, runnable);
+    }
+
+    public TypeScriptWriter openCollapsibleBlock(String open, String close, boolean condition,
+                                                 Object arg1,
+                                                 Runnable runnable) {
+        return openCollapsibleBlock(open, close, condition, new Object[] {arg1}, runnable);
+    }
+
+    /**
      * Modifies and writes shape documentation comments if docs are present.
      *
      * @param shape Shape to write the documentation of.

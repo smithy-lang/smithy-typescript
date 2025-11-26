@@ -68,6 +68,7 @@ import software.amazon.smithy.protocoltests.traits.HttpResponseTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestsTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.Pair;
@@ -269,23 +270,26 @@ public final class HttpProtocolTestGenerator implements Runnable {
             if (inputOptional.isPresent()) {
                 StructureShape inputShape = model.expectShape(inputOptional.get(), StructureShape.class);
                 writer.write("const command = new $T(", operationSymbol)
+                    .indent()
                     .call(() -> params.accept(new CommandInputNodeVisitor(inputShape)))
+                    .dedent()
                     .write(");");
             } else {
                 writer.write("const command = new $T({});", operationSymbol);
             }
 
             // Send the request and look for the expected exception to then perform assertions.
-            writer.write("try {\n"
-                    + "  await client.send(command);\n"
-                    + "  fail('Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown');\n"
-                    + "  return;\n"
-                    + "} catch (err) {\n"
-                    + "  if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {\n"
-                    + "    fail(err);\n"
-                    + "    return;\n"
-                    + "  }\n"
-                    + "  const r = err.request;")
+            writer.write("""
+                    try {
+                      await client.send(command);
+                      fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
+                      return;
+                    } catch (err) {
+                      if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {
+                        fail(err);
+                        return;
+                      }
+                      const r = err.request;""")
                 .indent()
                 .call(() -> writeHttpRequestAssertions(testCase))
                 .dedent()
@@ -520,8 +524,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
         testCase.getRequireHeaders().forEach(requiredHeader -> {
             writer.write("""
                 expect(
-                    r.headers[$1S],
-                    `Header key $1S should have been defined in $${JSON.stringify(r.headers)}`
+                  r.headers[$1S],
+                  `Header key $1S should have been defined in $${JSON.stringify(r.headers)}`
                 ).toBeDefined();""", requiredHeader.toLowerCase());
         });
         writer.write("");
@@ -677,12 +681,13 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Invoke the handler and look for the expected response to then perform assertions.
             writer.write("let r: any;");
-            writer.write("try {\n"
-                + "  r = await client.send(command);\n"
-                + "} catch (err) {\n"
-                + "  fail(\"Expected a valid response to be returned, got \" + err);\n"
-                + "  return;\n"
-                + "}");
+            writer.write("""
+                try {
+                  r = await client.send(command);
+                } catch (err) {
+                  fail("Expected a valid response to be returned, got " + err);
+                  return;
+                }""");
             writeResponseAssertions(operation, testCase);
         });
     }
@@ -792,21 +797,22 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writeResponseTestSetup(operation, testCase, false);
 
             // Invoke the handler and look for the expected exception to then perform assertions.
-            writer.write("try {\n"
-                    + "  await client.send(command);\n"
-                    + "} catch (err) {\n"
-                    + "  if (err.name !== \"$1L\") {\n"
-                    + "    console.log(err);\n"
-                    + "    fail(`Expected a $1L to be thrown, got $${err.name} instead`);\n"
-                    + "    return;\n"
-                    + "  }\n"
-                    + "  const r: any = err;", error.getId().getName())
+            writer.write("""
+                    try {
+                      await client.send(command);
+                    } catch (err) {
+                      if (err.name !== "$1L") {
+                        console.log(err);
+                        fail(`Expected a $1L to be thrown, got $${err.name} instead`);
+                        return;
+                      }
+                      const r: any = err;""", error.getId().getName())
                 .indent()
                 .call(() -> writeResponseAssertions(error, testCase))
                 .write("return;")
                 .dedent()
                 .write("}");
-            writer.write("fail('Expected an exception to be thrown from response');");
+            writer.write("fail(\"Expected an exception to be thrown from response\");");
         });
     }
 
@@ -817,18 +823,31 @@ public final class HttpProtocolTestGenerator implements Runnable {
         Map<String, String> headers = testCase.getHeaders().entrySet().stream()
             .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
             .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
-        String headerParameters = Node.prettyPrintJson(ObjectNode.fromStringMap(headers));
         String body = testCase.getBody().orElse(null);
 
         // Create a client with a custom request handler that intercepts requests.
         writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
             writer.write("...clientParams,");
-            writer.openBlock("requestHandler: new ResponseDeserializationTestHandler(", ")", () -> {
+            writer.openBlock("requestHandler: new ResponseDeserializationTestHandler(", "),", () -> {
                 writer.write("$L,", isSuccess);
                 writer.write("$L,", testCase.getCode());
-                writer.write("$L,", headers.isEmpty() ? "undefined" : headerParameters);
+                if (headers.isEmpty()) {
+                    writer.write("undefined");
+                } else {
+                    writer.openBlock("{", "},", () -> {
+                        for (Map.Entry<String, String> entry : headers.entrySet()) {
+                            String key = entry.getKey().toLowerCase(Locale.US);
+                            String value = entry.getValue();
+                            writer.write(
+                                "$L: $S,",
+                                PropertyAccessor.inlineKey(key),
+                                value
+                            );
+                        }
+                    });
+                }
                 if (body != null) {
-                    writer.write("`$L`,", body);
+                    writer.write("`$L`", body);
                 }
             });
         });
@@ -841,7 +860,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     // Ensure that the serialized response matches the expected response.
     private void writeResponseAssertions(Shape operationOrError, HttpResponseTestCase testCase) {
-        writer.write("expect(r['$$metadata'].httpStatusCode).toBe($L);", testCase.getCode());
+        writer.write("expect(r.$$metadata.httpStatusCode).toBe($L);", testCase.getCode());
 
         writeResponseParamAssertions(operationOrError, testCase);
     }
@@ -855,7 +874,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Use this trick wrapper to not need more complex trailing comma handling.
             writer.write("const paramsToValidate: any = [")
+                .indent()
                 .call(() -> params.accept(new CommandOutputNodeVisitor(testInputShape)))
+                .dedent()
                 .write("][0];");
 
             // Extract a payload binding if present.
@@ -892,7 +913,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
             // Use this trick wrapper to not need more complex trailing comma handling.
             writer.write("const paramsToValidate: any = [")
+                .indent()
                 .call(() -> params.accept(new CommandOutputNodeVisitor(testOutputShape)))
+                .dedent()
                 .write("][0];");
 
             // Extract a payload binding if present.
@@ -934,11 +957,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
         }
 
         // Perform parameter comparisons.
-        writer.openBlock("Object.keys(paramsToValidate).forEach(param => {", "});", () -> {
+        writer.openBlock("Object.keys(paramsToValidate).forEach((param) => {", "});", () -> {
             writer.write("""
             expect(
-                r[param],
-                `The output field $${param} should have been defined in $${JSON.stringify(r, null, 2)}`
+              r[param],
+              `The output field $${param} should have been defined in $${JSON.stringify(r, null, 2)}`
             ).toBeDefined();""");
             if (hasStreamingPayloadBlob) {
                 writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
@@ -1081,11 +1104,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.openBlock("{", suffix, () -> {
                 Shape wrapperShape = this.workingShape;
                 node.getMembers().forEach((keyNode, valueNode) -> {
-                    if (keyNode.getValue().matches("[^\\w]+")) {
-                        writer.writeInline("$L: ", keyNode.getValue());
-                    } else {
-                        writer.writeInline("$S: ", keyNode.getValue());
-                    }
+                    writer.writeInline("$L: ", PropertyAccessor.inlineKey(keyNode.getValue()));
 
                     // Grab the correct member related to the node member we have.
                     MemberShape memberShape;
@@ -1137,7 +1156,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         public Void stringNode(StringNode node) {
             // Handle blobs needing to be converted from strings to their input type of UInt8Array.
             if (workingShape.isBlobShape()) {
-                writer.write("Uint8Array.from($S, c => c.charCodeAt(0)),", node.getValue());
+                writer.write("Uint8Array.from($S, (c) => c.charCodeAt(0)),", node.getValue());
             } else if (workingShape.isFloatShape() || workingShape.isDoubleShape()) {
                 switch (node.getValue()) {
                     case "NaN":
@@ -1309,7 +1328,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     if (wrapperShape.hasTrait(ErrorTrait.class) && validationName.equals("Message")) {
                         validationName = "message";
                     }
-                    writer.write("$S: ", validationName);
+                    writer.writeInline("$L: ", PropertyAccessor.inlineKey(validationName));
 
                     this.workingShape = model.expectShape(memberShape.getTarget());
                     // Alter valueNode to downcase keys if it's a map for prefixHeaders.
@@ -1337,7 +1356,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         public Void stringNode(StringNode node) {
             // Handle blobs needing to be converted from strings to their input type of UInt8Array.
             if (workingShape.isBlobShape()) {
-                writer.write("Uint8Array.from($S, c => c.charCodeAt(0)),", node.getValue());
+                writer.write("Uint8Array.from($S, (c) => c.charCodeAt(0)),", node.getValue());
             } else if (workingShape.isFloatShape() || workingShape.isDoubleShape()) {
                 switch (node.getValue()) {
                     case "NaN":
