@@ -119,6 +119,13 @@ final class PackageJsonGenerator {
             node = node.withMember("private", true);
         }
 
+        if (!settings.generateIndexTests()) {
+            node = node.withMember(
+                "scripts",
+                node.getObjectMember("scripts").get().withoutMember("test:index")
+            );
+        }
+
         // Expand template parameters.
         String template = Node.prettyPrintJson(node);
         template = template.replace("${package}", settings.getPackageName());
