@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import type { Endpoint, EndpointParameters as __EndpointParameters, EndpointV2, Provider } from "@smithy/types";
+import { type Endpoint, type EndpointV2, EndpointParameters as __EndpointParameters, Provider } from "@smithy/types";
 
 /**
  * @public
