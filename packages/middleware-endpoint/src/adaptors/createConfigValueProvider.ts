@@ -18,7 +18,13 @@ export const createConfigValueProvider = <Config extends Record<string, unknown>
   config: Config
 ) => {
   const configProvider = async () => {
-    const configValue: unknown = config[configKey] ?? config[canonicalEndpointParamKey];
+    // Check clientContextParams first for client context parameters
+    const clientContextParams = config.clientContextParams as Record<string, unknown> | undefined;
+    const nestedValue: unknown = clientContextParams?.[configKey] ?? clientContextParams?.[canonicalEndpointParamKey];
+    
+    // Fall back to direct config properties 
+    const configValue: unknown = nestedValue ?? config[configKey] ?? config[canonicalEndpointParamKey];
+    
     if (typeof configValue === "function") {
       return configValue();
     }

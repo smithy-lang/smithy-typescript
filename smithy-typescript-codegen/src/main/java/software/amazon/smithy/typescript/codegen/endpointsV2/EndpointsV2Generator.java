@@ -103,33 +103,29 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
-                writer.addTypeImport(
-                    "EndpointParameters",
-                    "__EndpointParameters",
-                    TypeScriptDependency.SMITHY_TYPES
-                );
-                writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
+                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                Map<String, String> clientContextParams =
+                    ruleSetParameterFinder.getClientContextParams();
+                Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
+                builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+                Set<String> knownConfigKeys = Set.of(
+                    "apiKey", "retryStrategy", "requestHandler");
+                // Generate clientContextParams with all params excluding built-ins
+                Map<String, String> customerContextParams = new HashMap<>();
+                for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
+                    if (!builtInParams.containsKey(entry.getKey())) {
+                        customerContextParams.put(entry.getKey(), entry.getValue());
+                    }
+                }
 
                 writer.writeDocs("@public");
                 writer.openBlock(
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        Map<String, String> clientContextParams =
-                            ruleSetParameterFinder.getClientContextParams();
-                        Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                        Set<String> knownConfigKeys = Set.of(
-                            "apiKey", "retryStrategy", "requestHandler");
-                        // Generate clientContextParams with all params excluding built-ins
-                        Map<String, String> customerContextParams = new HashMap<>();
-                        for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
-                            if (!builtInParams.containsKey(entry.getKey())) {
-                                    customerContextParams.put(entry.getKey(), entry.getValue());
-                                }
-                            }
                         if (!customerContextParams.isEmpty()) {
-                            writer.write("clientContextParams: {");
+                            writer.write("clientContextParams?: {");
                             writer.indent();
                             ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
@@ -163,14 +159,6 @@ public final class EndpointsV2Generator implements Runnable {
                     };"""
                 );
                 // Generate clientContextParamDefaults only if there are customer context params
-                Map<String, String> clientContextParams = ruleSetParameterFinder.getClientContextParams();
-                Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                Map<String, String> customerContextParams = new HashMap<>();
-                for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
-                    if (!builtInParams.containsKey(entry.getKey())) {
-                        customerContextParams.put(entry.getKey(), entry.getValue());
-                    }
-                }
                 if (!customerContextParams.isEmpty()) {
                     // Check if any parameters have default values
                     boolean hasDefaults = false;
@@ -224,9 +212,41 @@ public final class EndpointsV2Generator implements Runnable {
                             .ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
                             });
-                        writer.write("defaultSigningName: \"$L\",", settings.getDefaultSigningName());
-                    });
-                });
+                            writer.write(
+                                "defaultSigningName: \"$L\",",
+                                settings.getDefaultSigningName()
+                            );
+                            // Only generate clientContextParams if there are customer context params
+                            if (!customerContextParams.isEmpty()) {
+                                // Initialize clientContextParams if undefined to satisfy type requirements
+                                // Check if we have defaults to merge
+                                boolean hasDefaultsForResolve = false;
+                                if (ruleSet.getObjectMember("parameters").isPresent()) {
+                                    ObjectNode parameters = ruleSet.getObjectMember("parameters")
+                                        .get().expectObjectNode();
+                                    for (Map.Entry<String, String> entry : customerContextParams.entrySet()) {
+                                        String paramName = entry.getKey();
+                                        ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
+                                        if (paramNode != null && paramNode.containsMember("default")) {
+                                            hasDefaultsForResolve = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (hasDefaultsForResolve) {
+                                    writer.write(
+                                        "clientContextParams: Object.assign(clientContextParamDefaults, "
+                                        + "options.clientContextParams ?? {}),"
+                                    );
+                                } else {
+                                    writer.write(
+                                        "clientContextParams: options.clientContextParams ?? {},"
+                                    );
+                                }
+                            }
+                        });
+                    }
+                );
 
                 writer.write("");
 

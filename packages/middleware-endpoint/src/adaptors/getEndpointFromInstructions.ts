@@ -78,6 +78,13 @@ export const resolveParams = async <
   instructionsSupplier: EndpointParameterInstructionsSupplier,
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config
 ) => {
+  // Initialize clientContextParams to empty object if undefined 
+  // when accessing nested properties during parameter resolution
+  const config = clientConfig as typeof clientConfig & { clientContextParams?: Record<string, unknown> };
+  if (config.clientContextParams === undefined) {
+    config.clientContextParams = {};
+  }
+  
   const endpointParams: EndpointParameters = {};
   const instructions: EndpointParameterInstructions = instructionsSupplier?.getEndpointParameterInstructions?.() || {};
 
