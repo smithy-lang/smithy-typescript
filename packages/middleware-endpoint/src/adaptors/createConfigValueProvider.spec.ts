@@ -58,4 +58,31 @@ describe(createConfigValueProvider.name, () => {
     expect(await createConfigValueProvider("v1", "endpoint", config)()).toEqual(sampleUrl);
     expect(await createConfigValueProvider("v2", "endpoint", config)()).toEqual(sampleUrl);
   });
+
+  it("should prioritize clientContextParams over direct properties", async () => {
+    const config = {
+      apiKey: "direct-api-key",
+      clientContextParams: {
+        apiKey: "nested-api-key",
+      },
+    };
+    expect(await createConfigValueProvider("apiKey", "apiKey", config)()).toEqual("nested-api-key");
+  });
+
+  it("should fall back to direct property when clientContextParams is not provided", async () => {
+    const config = {
+      customParam: "direct-value",
+    };
+    expect(await createConfigValueProvider("customParam", "customParam", config)()).toEqual("direct-value");
+  });
+
+  it("should fall back to direct property when clientContextParams exists but param is not in it", async () => {
+    const config = {
+      customParam: "direct-value",
+      clientContextParams: {
+        otherParam: "other-value",
+      },
+    };
+    expect(await createConfigValueProvider("customParam", "customParam", config)()).toEqual("direct-value");
+  });
 });
