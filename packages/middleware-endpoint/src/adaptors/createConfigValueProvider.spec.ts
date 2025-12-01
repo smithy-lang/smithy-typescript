@@ -66,7 +66,7 @@ describe(createConfigValueProvider.name, () => {
         apiKey: "nested-api-key",
       },
     };
-    expect(await createConfigValueProvider("apiKey", "apiKey", config)()).toEqual("nested-api-key");
+    expect(await createConfigValueProvider("apiKey", "apiKey", config, true)()).toEqual("nested-api-key");
   });
 
   it("should fall back to direct property when clientContextParams is not provided", async () => {
