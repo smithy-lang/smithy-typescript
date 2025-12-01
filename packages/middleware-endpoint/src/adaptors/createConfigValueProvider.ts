@@ -9,20 +9,29 @@ import type { Endpoint, EndpointV2 } from "@smithy/types";
  *                                    it will most likely not contain the config
  *                                    value, but we use it as a fallback.
  * @param config - container of the config values.
+ * @param isClientContextParam - whether this is a client context parameter.
  *
  * @returns async function that will resolve with the value.
  */
 export const createConfigValueProvider = <Config extends Record<string, unknown>>(
   configKey: string,
   canonicalEndpointParamKey: string,
-  config: Config
+  config: Config,
+  isClientContextParam = false
 ) => {
   const configProvider = async () => {
-    // Check clientContextParams first for client context parameters
-    const clientContextParams = config.clientContextParams as Record<string, unknown> | undefined;
-    const nestedValue: unknown = clientContextParams?.[configKey] ?? clientContextParams?.[canonicalEndpointParamKey];
-    // Fall back to direct config properties
-    const configValue: unknown = nestedValue ?? config[configKey] ?? config[canonicalEndpointParamKey];
+    let configValue: unknown;
+
+    if (isClientContextParam) {
+      // For client context parameters, check clientContextParams first
+      const clientContextParams = config.clientContextParams as Record<string, unknown> | undefined;
+      const nestedValue: unknown = clientContextParams?.[configKey] ?? clientContextParams?.[canonicalEndpointParamKey];
+      configValue = nestedValue ?? config[configKey] ?? config[canonicalEndpointParamKey];
+    } else {
+      // For built-in parameters, only check direct config properties
+      configValue = config[configKey] ?? config[canonicalEndpointParamKey];
+    }
+
     if (typeof configValue === "function") {
       return configValue();
     }

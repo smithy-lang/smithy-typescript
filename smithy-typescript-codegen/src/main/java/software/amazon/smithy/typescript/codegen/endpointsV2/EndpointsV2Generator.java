@@ -236,7 +236,7 @@ public final class EndpointsV2Generator implements Runnable {
                                 if (hasDefaultsForResolve) {
                                     writer.write(
                                         "clientContextParams: Object.assign(clientContextParamDefaults, "
-                                        + "options.clientContextParams ?? {}),"
+                                        + "options.clientContextParams),"
                                     );
                                 } else {
                                     writer.write(

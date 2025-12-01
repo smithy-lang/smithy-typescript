@@ -78,11 +78,6 @@ export const resolveParams = async <
   instructionsSupplier: EndpointParameterInstructionsSupplier,
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config
 ) => {
-  // Initialize clientContextParams to empty object if undefined
-  const config = clientConfig as typeof clientConfig & { clientContextParams?: Record<string, unknown> };
-  if (config.clientContextParams === undefined) {
-    config.clientContextParams = {};
-  }
   const endpointParams: EndpointParameters = {};
   const instructions: EndpointParameterInstructions = instructionsSupplier?.getEndpointParameterInstructions?.() || {};
 
@@ -95,8 +90,10 @@ export const resolveParams = async <
         endpointParams[name] = commandInput[instruction.name] as string | boolean;
         break;
       case "clientContextParams":
+        endpointParams[name] = await createConfigValueProvider<Config>(instruction.name, name, clientConfig, true)();
+        break;
       case "builtInParams":
-        endpointParams[name] = await createConfigValueProvider<Config>(instruction.name, name, clientConfig)();
+        endpointParams[name] = await createConfigValueProvider<Config>(instruction.name, name, clientConfig, false)();
         break;
       case "operationContextParams":
         endpointParams[name] = instruction.get(commandInput);
