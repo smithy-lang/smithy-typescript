@@ -297,7 +297,6 @@ export class EventStreamSerde {
 
           if (eventPayload) {
             explicitPayloadMember = memberName;
-            break;
           } else if (eventHeader) {
             const value = event[unionMember][memberName];
             let type = "binary" as MessageHeaderValue["type"];

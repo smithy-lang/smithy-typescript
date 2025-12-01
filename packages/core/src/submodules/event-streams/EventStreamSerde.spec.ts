@@ -79,8 +79,9 @@ describe(EventStreamSerde.name, () => {
           "ns",
           "CustomHeaders",
           0,
-          ["header1", "header2", "header-date", "header-number", "header-boolean", "header-blob"],
+          ["payload", "header1", "header2", "header-date", "header-number", "header-boolean", "header-blob"],
           [
+            [0, "ns", "BlobPayload", { eventPayload: 1 }, 21 satisfies BlobSchema] satisfies StaticSimpleSchema,
             [0, "ns", "EventHeader", { eventHeader: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema,
             [0, "ns", "EventHeader", { eventHeader: 1 }, 0 satisfies StringSchema] satisfies StaticSimpleSchema,
 
@@ -125,6 +126,7 @@ describe(EventStreamSerde.name, () => {
           yield { TextPayload: { payload: "beep boop" } };
           yield {
             CustomHeaders: {
+              payload: new Uint8Array([0, 1, 2, 3]),
               header1: "h1",
               header2: "h2",
               "header-date": new Date(0),
@@ -189,7 +191,7 @@ describe(EventStreamSerde.name, () => {
           headers: {
             ":event-type": { type: "string", value: "CustomHeaders" },
             ":message-type": { type: "string", value: "event" },
-            ":content-type": { type: "string", value: "application/cbor" },
+            ":content-type": { type: "string", value: "application/octet-stream" },
             header1: { type: "string", value: "h1" },
             header2: { type: "string", value: "h2" },
             "header-boolean": {
@@ -209,7 +211,7 @@ describe(EventStreamSerde.name, () => {
               value: new Uint8Array([0, 1, 2, 3]),
             },
           },
-          body: {},
+          body: new Uint8Array([0, 1, 2, 3]),
         },
       ];
 
@@ -346,6 +348,7 @@ describe(EventStreamSerde.name, () => {
           yield { TextPayload: { payload: "boop beep" } };
           yield {
             CustomHeaders: {
+              payload: new Uint8Array([0, 1, 2, 3]),
               header1: "h1",
               header2: "h2",
               "header-date": new Date(0),
@@ -400,6 +403,7 @@ describe(EventStreamSerde.name, () => {
           { TextPayload: { payload: "boop beep" } },
           {
             CustomHeaders: {
+              payload: new Uint8Array([0, 1, 2, 3]),
               header1: "h1",
               header2: "h2",
               "header-boolean": false,
@@ -447,6 +451,7 @@ describe(EventStreamSerde.name, () => {
           { TextPayload: { payload: "boop beep" } },
           {
             CustomHeaders: {
+              payload: new Uint8Array([0, 1, 2, 3]),
               header1: "h1",
               header2: "h2",
               "header-boolean": false,
