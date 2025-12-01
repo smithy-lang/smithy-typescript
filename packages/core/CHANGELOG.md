@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.18.6
+
+### Patch Changes
+
+- 1d6db03: continue looking for event headers after event payload is found
+
 ## 3.18.5
 
 ### Patch Changes
