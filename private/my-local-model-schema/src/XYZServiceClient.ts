@@ -254,7 +254,7 @@ export class XYZServiceClient extends __Client<
     const _config_4 = resolveEndpointRequiredConfig(_config_3);
     const _config_5 = resolveEventStreamSerdeConfig(_config_4);
     const _config_6 = resolveHttpAuthSchemeConfig(_config_5);
-    let _config_7 = resolveRuntimeExtensions(_config_6, configuration?.extensions || []);
+    const _config_7 = resolveRuntimeExtensions(_config_6, configuration?.extensions || []);
     this.config = _config_7;
     this.middlewareStack.use(getSchemaSerdePlugin(this.config));
     this.middlewareStack.use(getRetryPlugin(this.config));

@@ -429,7 +429,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                 Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions"));
 
             configVariable++;
-            writer.write("let $L = resolveRuntimeExtensions($L, configuration?.extensions || []);",
+            writer.write("const $L = resolveRuntimeExtensions($L, configuration?.extensions || []);",
                 generateConfigVariable(configVariable),
                 generateConfigVariable(configVariable - 1));
 
