@@ -92,19 +92,19 @@ final class DirectedTypeScriptCodegen
 
         List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
         directive.integrations().forEach(integration -> {
-            LOGGER.info(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
+            LOGGER.fine(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
             integration.getClientPlugins().forEach(runtimePlugin -> {
                 if (runtimePlugin.matchesSettings(directive.model(), directive.service(), directive.settings())) {
-                    LOGGER.info(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
+                    LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
                     runtimePlugins.add(runtimePlugin);
                 } else {
-                    LOGGER.info(() -> "Skipping TypeScript runtime plugin based on settings: " + runtimePlugin);
+                    LOGGER.fine(() -> "Skipping TypeScript runtime plugin based on settings: " + runtimePlugin);
                 }
             });
         });
 
         directive.integrations().forEach(integration -> {
-            LOGGER.info(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
+            LOGGER.fine(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
             integration.mutateClientPlugins(runtimePlugins);
         });
 
