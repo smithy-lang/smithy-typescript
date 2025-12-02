@@ -103,47 +103,34 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
-                writer.addImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
-                writer.addImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
+                writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
                 Map<String, String> clientContextParams =
                     ruleSetParameterFinder.getClientContextParams();
                 Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
                 builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                Set<String> knownConfigKeys = Set.of(
-                    "apiKey", "retryStrategy", "requestHandler");
-                // Generate clientContextParams with all params excluding built-ins
-                Map<String, String> customerContextParams = new HashMap<>();
-                for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
-                    if (!builtInParams.containsKey(entry.getKey())) {
-                        customerContextParams.put(entry.getKey(), entry.getValue());
-                    }
-                }
+                Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+                    clientContextParams, builtInParams);
 
                 writer.writeDocs("@public");
                 writer.openBlock(
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        if (!customerContextParams.isEmpty()) {
+                        if (!customContextParams.isEmpty()) {
                             writer.write("clientContextParams?: {");
                             writer.indent();
                             ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(
-                                    writer, customerContextParams, true));
+                                    writer, customContextParams, true));
                             });
                             writer.dedent();
                             writer.write("};");
                         }
-                        // Add direct params (built-ins + non-conflicting client context params)
+                        // Add direct params (built-ins + custom context params)
                         Map<String, String> directParams = new HashMap<>(builtInParams);
-                        for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
-                            // Only add non-conflicting client context params that aren't built-ins
-                            if (!knownConfigKeys.contains(entry.getKey())
-                                && !builtInParams.containsKey(entry.getKey())) {
-                                directParams.put(entry.getKey(), entry.getValue());
-                            }
-                        }
+                        directParams.putAll(customContextParams);
                         ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                             parameters.accept(new RuleSetParametersVisitor(writer, directParams, true));
@@ -159,13 +146,13 @@ public final class EndpointsV2Generator implements Runnable {
                     };"""
                 );
                 // Generate clientContextParamDefaults only if there are customer context params
-                if (!customerContextParams.isEmpty()) {
+                if (!customContextParams.isEmpty()) {
                     // Check if any parameters have default values
                     boolean hasDefaults = false;
                     ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                     if (ruleSet.getObjectMember("parameters").isPresent()) {
                         ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
-                        for (Map.Entry<String, String> entry : customerContextParams.entrySet()) {
+                        for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
                             String paramName = entry.getKey();
                             ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
                             if (paramNode != null && paramNode.containsMember("default")) {
@@ -179,7 +166,7 @@ public final class EndpointsV2Generator implements Runnable {
                         writer.writeDocs("@internal");
                         writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                                for (Map.Entry<String, String> entry : customerContextParams.entrySet()) {
+                                for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
                                     String paramName = entry.getKey();
                                     ObjectNode paramNode = parameters.expectObjectNode()
                                         .getObjectMember(paramName).orElse(null);
@@ -217,14 +204,14 @@ public final class EndpointsV2Generator implements Runnable {
                                 settings.getDefaultSigningName()
                             );
                             // Only generate clientContextParams if there are customer context params
-                            if (!customerContextParams.isEmpty()) {
+                            if (!customContextParams.isEmpty()) {
                                 // Initialize clientContextParams if undefined to satisfy type requirements
                                 // Check if we have defaults to merge
                                 boolean hasDefaultsForResolve = false;
                                 if (ruleSet.getObjectMember("parameters").isPresent()) {
                                     ObjectNode parameters = ruleSet.getObjectMember("parameters")
                                         .get().expectObjectNode();
-                                    for (Map.Entry<String, String> entry : customerContextParams.entrySet()) {
+                                    for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
                                         String paramName = entry.getKey();
                                         ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
                                         if (paramNode != null && paramNode.containsMember("default")) {

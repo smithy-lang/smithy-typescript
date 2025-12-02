@@ -13,11 +13,8 @@ import {
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import {
   type EndpointInputConfig,
-  type EndpointRequiredInputConfig,
-  type EndpointRequiredResolvedConfig,
   type EndpointResolvedConfig,
   resolveEndpointConfig,
-  resolveEndpointRequiredConfig,
 } from "@smithy/middleware-endpoint";
 import {
   type RetryInputConfig,
@@ -190,7 +187,6 @@ export type XYZServiceClientConfigType = Partial<__SmithyConfiguration<__HttpHan
   ClientDefaults &
   RetryInputConfig &
   EndpointInputConfig<EndpointParameters> &
-  EndpointRequiredInputConfig &
   EventStreamSerdeInputConfig &
   HttpAuthSchemeInputConfig &
   ClientInputEndpointParameters;
@@ -209,7 +205,6 @@ export type XYZServiceClientResolvedConfigType = __SmithyResolvedConfiguration<_
   RuntimeExtensionsConfig &
   RetryResolvedConfig &
   EndpointResolvedConfig<EndpointParameters> &
-  EndpointRequiredResolvedConfig &
   EventStreamSerdeResolvedConfig &
   HttpAuthSchemeResolvedConfig &
   ClientResolvedEndpointParameters;
@@ -239,14 +234,13 @@ export class XYZServiceClient extends __Client<
     const _config_0 = __getRuntimeConfig(configuration || {});
     super(_config_0 as any);
     this.initConfig = _config_0;
-    const _config_1 = resolveClientEndpointParameters(_config_0);
-    const _config_2 = resolveRetryConfig(_config_1);
-    const _config_3 = resolveEndpointConfig(_config_2);
-    const _config_4 = resolveEndpointRequiredConfig(_config_3);
-    const _config_5 = resolveEventStreamSerdeConfig(_config_4);
-    const _config_6 = resolveHttpAuthSchemeConfig(_config_5);
-    const _config_7 = resolveRuntimeExtensions(_config_6, configuration?.extensions || []);
-    this.config = _config_7;
+    let _config_1 = resolveClientEndpointParameters(_config_0);
+    let _config_2 = resolveRetryConfig(_config_1);
+    let _config_3 = resolveEndpointConfig(_config_2);
+    let _config_4 = resolveEventStreamSerdeConfig(_config_3);
+    let _config_5 = resolveHttpAuthSchemeConfig(_config_4);
+    let _config_6 = resolveRuntimeExtensions(_config_5, configuration?.extensions || []);
+    this.config = _config_6;
     this.middlewareStack.use(getSchemaSerdePlugin(this.config));
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));
