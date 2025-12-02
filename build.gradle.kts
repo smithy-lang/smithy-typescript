@@ -34,9 +34,6 @@ allprojects {
 // The root project doesn't produce a JAR.
 tasks["jar"].enabled = false
 
-// Load the Sonatype user/password for use in publishing tasks.
-val sonatypeUser: String? by project
-val sonatypePassword: String? by project
 
 repositories {
     mavenLocal()
@@ -105,8 +102,14 @@ subprojects {
             }
         }
 
-        // Always run javadoc after build.
-        tasks["build"].finalizedBy(tasks["javadoc"])
+        tasks {
+            javadoc {
+                // not enabled due to excessive output.
+                // if taking up the task of resolving javadoc issues, at
+                // that time this can be enabled again.
+                enabled = false
+            }
+        }
 
         /*
          * Maven
@@ -145,7 +148,7 @@ subprojects {
                             licenses {
                                 license {
                                     name.set("Apache License 2.0")
-                                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                                     distribution.set("repo")
                                 }
                             }

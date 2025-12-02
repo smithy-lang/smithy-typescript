@@ -10,6 +10,7 @@ import java.util.Map;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.KnowledgeIndex;
 import software.amazon.smithy.model.selector.Selector;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ToShapeId;
@@ -28,13 +29,13 @@ import software.amazon.smithy.utils.MapUtils;
  */
 public class SerdeElisionIndex implements KnowledgeIndex {
     private final Map<ShapeId, Boolean> elisionBinding = new HashMap<>();
-    private final Map<String, Class> mutatingTraits = MapUtils.of(
-            "jsonName", JsonNameTrait.class,
-            "streaming", StreamingTrait.class,
-            "mediaType", MediaTypeTrait.class,
-            "sparse", SparseTrait.class,
-            "idempotencyToken", IdempotencyTokenTrait.class
-     );
+    private final Map<String, ShapeId> mutatingTraits = MapUtils.of(
+        "jsonName", JsonNameTrait.ID,
+        "streaming", StreamingTrait.ID,
+        "mediaType", MediaTypeTrait.ID,
+        "sparse", SparseTrait.ID,
+        "idempotencyToken", IdempotencyTokenTrait.ID
+    );
 
     public SerdeElisionIndex(Model model) {
         for (Shape shape : model.toSet()) {
@@ -58,15 +59,17 @@ public class SerdeElisionIndex implements KnowledgeIndex {
     }
 
     private boolean hasMutatingTraits(Shape shape, Model model) {
-        for (Map.Entry<String, Class> entry : mutatingTraits.entrySet()) {
+        for (var entry : mutatingTraits.entrySet()) {
             if (shape.hasTrait(entry.getValue())) {
                 return true;
             }
-            if (shape.getMemberTrait(model, entry.getValue()).isPresent()) {
-                return true;
+            if (shape instanceof MemberShape memberShape) {
+                if (model.expectShape(memberShape.getTarget()).hasTrait(entry.getValue())) {
+                    return true;
+                }
             }
             Selector selector = Selector.parse(
-                    "[id = '" + shape.getId() + "']" + " ~> [trait|" + entry.getKey() + "]");
+                "[id = '" + shape.getId() + "']" + " ~> [trait|" + entry.getKey() + "]");
             if (!selector.select(model).isEmpty()) {
                 return true;
             }
@@ -91,15 +94,15 @@ public class SerdeElisionIndex implements KnowledgeIndex {
                 return hasIncompatibleTypes(target.asSetShape().get().getMember(), model, depth + 1);
             case STRUCTURE:
                 return target.asStructureShape().get().getAllMembers().values().stream().anyMatch(
-                        s -> hasIncompatibleTypes(s, model, depth + 1)
+                    s -> hasIncompatibleTypes(s, model, depth + 1)
                 );
             case UNION:
                 return target.asUnionShape().get().getAllMembers().values().stream().anyMatch(
-                        s -> hasIncompatibleTypes(s, model, depth + 1)
+                    s -> hasIncompatibleTypes(s, model, depth + 1)
                 );
             case MAP:
                 return hasIncompatibleTypes(model.getShape(target.asMapShape().get().getValue().getTarget()).get(),
-                        model, depth + 1);
+                    model, depth + 1);
             case BIG_DECIMAL:
             case BIG_INTEGER:
             case BLOB:
