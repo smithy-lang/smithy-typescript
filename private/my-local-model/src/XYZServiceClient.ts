@@ -231,15 +231,15 @@ export class XYZServiceClient extends __Client<
   readonly config: XYZServiceClientResolvedConfig;
 
   constructor(...[configuration]: __CheckOptionalClientConfig<XYZServiceClientConfig>) {
-    let _config_0 = __getRuntimeConfig(configuration || {});
+    const _config_0 = __getRuntimeConfig(configuration || {});
     super(_config_0 as any);
     this.initConfig = _config_0;
-    let _config_1 = resolveClientEndpointParameters(_config_0);
-    let _config_2 = resolveRetryConfig(_config_1);
-    let _config_3 = resolveEndpointConfig(_config_2);
-    let _config_4 = resolveEndpointRequiredConfig(_config_3);
-    let _config_5 = resolveEventStreamSerdeConfig(_config_4);
-    let _config_6 = resolveHttpAuthSchemeConfig(_config_5);
+    const _config_1 = resolveClientEndpointParameters(_config_0);
+    const _config_2 = resolveRetryConfig(_config_1);
+    const _config_3 = resolveEndpointConfig(_config_2);
+    const _config_4 = resolveEndpointRequiredConfig(_config_3);
+    const _config_5 = resolveEventStreamSerdeConfig(_config_4);
+    const _config_6 = resolveHttpAuthSchemeConfig(_config_5);
     let _config_7 = resolveRuntimeExtensions(_config_6, configuration?.extensions || []);
     this.config = _config_7;
     this.middlewareStack.use(getRetryPlugin(this.config));
