@@ -287,7 +287,7 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 ): HttpAuthExtensionConfiguration => {""", "};",
                 () -> {
                 w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
-                w.write("let _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;");
+                w.write("const _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;");
                 w.addTypeImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
                 w.write("let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider!;");
                 List<ConfigField> mainConfigFields = configFields.values().stream()

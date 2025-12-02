@@ -379,7 +379,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
 
             int configVariable = 0;
             String initialConfigVar = generateConfigVariable(configVariable);
-            writer.write("let $L = __getRuntimeConfig(configuration || {});",
+            writer.write("const $L = __getRuntimeConfig(configuration || {});",
                 initialConfigVar);
             writer.write("super($L as any);", initialConfigVar);
             writer.write("this.initConfig = $L;", initialConfigVar);
@@ -387,7 +387,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             configVariable++;
             writer.addImport("resolveClientEndpointParameters", null,
                 EndpointsV2Generator.ENDPOINT_PARAMETERS_DEPENDENCY);
-            writer.write("let $L = $L($L);",
+            writer.write("const $L = $L($L);",
                 generateConfigVariable(configVariable),
                 "resolveClientEndpointParameters",
                 generateConfigVariable(configVariable - 1));
@@ -420,7 +420,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
                     }
                     writer.pushState();
                     writer.putContext(symbolMap);
-                    writer.write("let $newConfig:L = $resolveFn:T($oldConfig:L" + additionalParamsString + ");");
+                    writer.write("const $newConfig:L = $resolveFn:T($oldConfig:L" + additionalParamsString + ");");
                     writer.popState();
                 }
             }
