@@ -3,9 +3,34 @@ $version: "2.0"
 namespace org.xyz.v1
 
 use smithy.protocols#rpcv2Cbor
+use smithy.rules#clientContextParams
+use smithy.rules#endpointRuleSet
 
 @rpcv2Cbor
 @documentation("xyz interfaces")
+@clientContextParams(
+    apiKey: { type: "string", documentation: "API key for authentication" }
+    customParam: { type: "string", documentation: "Custom parameter" }
+)
+@endpointRuleSet({
+    version: "1.0"
+    parameters: {
+        endpoint: { builtIn: "SDK::Endpoint", required: true, documentation: "The endpoint used to send the request.", type: "String" }
+        apiKey: { type: "String", required: true, default: "default-api-key", documentation: "API key for service authentication" }
+        customParam: { type: "String", required: true, default: "default-custom-value", documentation: "Custom parameter for testing" }
+    }
+    rules: [
+        {
+            conditions: []
+            endpoint: {
+                url: "{endpoint}"
+                properties: {}
+                headers: {}
+            }
+            type: "endpoint"
+        }
+    ]
+})
 service XYZService {
     version: "1.0"
     operations: [
