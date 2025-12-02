@@ -109,8 +109,15 @@ final class StructuredMemberWriter {
             if (optionalSuffix.equals("?")) {
                 typeSuffix = " | undefined"; // support exactOptionalPropertyTypes.
             }
-            writer.write("${L}${L}${L}: ${T}${L};", memberPrefix, memberName, optionalSuffix,
-                    symbolProvider.toSymbol(member), typeSuffix);
+            writer.write(
+                "${L}${L}${L}: ${T}${L};",
+                memberPrefix, memberName, optionalSuffix,
+                symbolProvider.toSymbol(member)
+                    .toBuilder()
+                    .putProperty("typeOnly", true)
+                    .build(),
+                typeSuffix
+            );
 
             if (wroteDocs && position < members.size() - 1) {
                 writer.write("");
