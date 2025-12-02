@@ -5,34 +5,33 @@ export const ruleSet: RuleSetObject = {
   version: "1.0",
   parameters: {
     endpoint: {
-      type: "string",
       builtIn: "SDK::Endpoint",
-      documentation: "Endpoint used for making requests. Should be formatted as a URI.",
+      required: true,
+      documentation: "The endpoint used to send the request.",
+      type: "String",
+    },
+    apiKey: {
+      type: "String",
+      required: true,
+      default: "default-api-key",
+      documentation: "API key for service authentication",
+    },
+    customParam: {
+      type: "String",
+      required: true,
+      default: "default-custom-value",
+      documentation: "Custom parameter for testing",
     },
   },
   rules: [
     {
-      conditions: [
-        {
-          fn: "isSet",
-          argv: [
-            {
-              ref: "endpoint",
-            },
-          ],
-        },
-      ],
+      conditions: [],
       endpoint: {
-        url: {
-          ref: "endpoint",
-        },
+        url: "{endpoint}",
+        properties: {},
+        headers: {},
       },
       type: "endpoint",
-    },
-    {
-      conditions: [],
-      error: "(default endpointRuleSet) endpoint is not set - you must configure an endpoint.",
-      type: "error",
     },
   ],
 };
