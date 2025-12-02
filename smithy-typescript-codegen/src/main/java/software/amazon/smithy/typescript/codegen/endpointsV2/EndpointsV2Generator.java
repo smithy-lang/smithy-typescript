@@ -131,6 +131,7 @@ public final class EndpointsV2Generator implements Runnable {
                 );
 
                 writer.write("");
+                writer.writeDocs("@public");
                 writer.openBlock(
                     """
                     export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
@@ -142,6 +143,7 @@ public final class EndpointsV2Generator implements Runnable {
                 );
                 writer.write("");
 
+                writer.writeDocs("@internal");
                 writer.openBlock(
                     "export const resolveClientEndpointParameters = "
                         + "<T>(options: T & ClientInputEndpointParameters"
@@ -163,6 +165,7 @@ public final class EndpointsV2Generator implements Runnable {
 
                 writer.write("");
 
+                writer.writeDocs("@internal");
                 writer.openBlock(
                     "export const commonParams = {", "} as const",
                     () -> {
@@ -189,6 +192,7 @@ public final class EndpointsV2Generator implements Runnable {
                 );
 
                 writer.write("");
+                writer.writeDocs("@internal");
                 writer.openBlock(
                     "export interface EndpointParameters extends __EndpointParameters {",
                     "}",
@@ -234,6 +238,7 @@ public final class EndpointsV2Generator implements Runnable {
                         .stream().collect(Collectors.joining("\",\n \"", "\"", "\""))
                 );
 
+                writer.writeDocs("@internal");
                 writer.write(
                 """
                     export const defaultEndpointResolver = (
