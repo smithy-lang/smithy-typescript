@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.18.7
+
+### Patch Changes
+
+- 541a18f: fix for CBOR date deserialization
+
 ## 3.18.6
 
 ### Patch Changes
