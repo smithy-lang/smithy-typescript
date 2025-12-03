@@ -1,9 +1,10 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import type { StaticSimpleSchema, StaticStructureSchema, StringSchema } from "@smithy/types";
+import type { StaticSimpleSchema, StaticStructureSchema, StringSchema, TimestampDefaultSchema } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
 import { cbor } from "./cbor";
 import { CborCodec, CborShapeSerializer } from "./CborCodec";
+import { tagSymbol } from "./cbor-types";
 
 describe(CborShapeSerializer.name, () => {
   const codec = new CborCodec();
@@ -22,6 +23,16 @@ describe(CborShapeSerializer.name, () => {
   ];
 
   const serializer = codec.createSerializer();
+  const deserializer = codec.createDeserializer();
+
+  const dateSchema = [
+    3,
+    "ns",
+    "DateContainer",
+    0,
+    ["timestamp"],
+    [4 satisfies TimestampDefaultSchema],
+  ] satisfies StaticStructureSchema;
 
   describe("serialization", () => {
     it("should generate an idempotency token when the input for such a member is undefined", () => {
@@ -69,12 +80,25 @@ describe(CborShapeSerializer.name, () => {
         }
       }
     });
+
+    it("should serialize Dates to tags if the schema is a timestamp", () => {
+      serializer.write(dateSchema, { timestamp: new Date(1) });
+      const serialization = serializer.flush();
+
+      const parsedWithoutSchema = cbor.deserialize(serialization);
+      expect(parsedWithoutSchema).toEqual({
+        timestamp: {
+          tag: 1,
+          value: 0.001,
+          [tagSymbol]: true,
+        },
+      });
+    });
   });
 
   describe("deserialization", () => {
     it("should not create undefined values", async () => {
       const struct = [3, "ns", "Struct", 0, ["sessionId", "tokenId"], [0, 0]] satisfies StaticStructureSchema;
-      const deserializer = codec.createDeserializer();
 
       const data = cbor.serialize({
         sessionId: "abcd",
@@ -87,6 +111,22 @@ describe(CborShapeSerializer.name, () => {
       });
 
       expect("tokenId" in deserialized).toEqual(false);
+    });
+
+    it("should deserialize tags to dates if the schema is a timestamp", async () => {
+      const decoded = {
+        timestamp: {
+          tag: 1,
+          value: 0.001,
+          [tagSymbol]: true,
+        },
+      };
+
+      const deserialized = await deserializer.read(dateSchema, cbor.serialize(decoded));
+
+      expect(deserialized).toEqual({
+        timestamp: new Date(1),
+      });
     });
   });
 });
