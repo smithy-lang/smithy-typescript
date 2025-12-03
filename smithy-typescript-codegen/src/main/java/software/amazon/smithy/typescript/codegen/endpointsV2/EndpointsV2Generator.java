@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
@@ -117,14 +116,10 @@ public final class EndpointsV2Generator implements Runnable {
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        if (!customContextParams.isEmpty()) {
+                        if (ruleSetParameterFinder.hasCustomClientContextParams()) {
                             writer.write("clientContextParams?: {");
                             writer.indent();
-                            ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                                parameters.accept(new RuleSetParametersVisitor(
-                                    writer, customContextParams, true));
-                            });
+                            ruleSetParameterFinder.writeInputConfigCustomClientContextParams(writer);
                             writer.dedent();
                             writer.write("};");
                         }
@@ -145,45 +140,8 @@ public final class EndpointsV2Generator implements Runnable {
                       defaultSigningName: string;
                     };"""
                 );
-                // Generate clientContextParamDefaults only if there are customer context params
-                if (!customContextParams.isEmpty()) {
-                    // Check if any parameters have default values
-                    boolean hasDefaults = false;
-                    ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                    if (ruleSet.getObjectMember("parameters").isPresent()) {
-                        ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
-                        for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
-                            String paramName = entry.getKey();
-                            ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
-                            if (paramNode != null && paramNode.containsMember("default")) {
-                                hasDefaults = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (hasDefaults) {
-                        writer.write("");
-                        writer.writeDocs("@internal");
-                        writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
-                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                                for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
-                                    String paramName = entry.getKey();
-                                    ObjectNode paramNode = parameters.expectObjectNode()
-                                        .getObjectMember(paramName).orElse(null);
-                                    if (paramNode != null && paramNode.containsMember("default")) {
-                                        Node defaultValue = paramNode.getMember("default").get();
-                                        if (defaultValue.isStringNode()) {
-                                            writer.write("$L: \"$L\",", paramName,
-                                                defaultValue.expectStringNode().getValue());
-                                        } else if (defaultValue.isBooleanNode()) {
-                                            writer.write("$L: $L,", paramName,
-                                                defaultValue.expectBooleanNode().getValue());
-                                        }
-                                    }
-                                }
-                            });
-                        });
-                    }
+                if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                    ruleSetParameterFinder.writeNestedClientContextParamDefaults(writer);
                 }
                 writer.write("");
 
@@ -203,33 +161,8 @@ public final class EndpointsV2Generator implements Runnable {
                                 "defaultSigningName: \"$L\",",
                                 settings.getDefaultSigningName()
                             );
-                            // Only generate clientContextParams if there are customer context params
-                            if (!customContextParams.isEmpty()) {
-                                // Initialize clientContextParams if undefined to satisfy type requirements
-                                // Check if we have defaults to merge
-                                boolean hasDefaultsForResolve = false;
-                                if (ruleSet.getObjectMember("parameters").isPresent()) {
-                                    ObjectNode parameters = ruleSet.getObjectMember("parameters")
-                                        .get().expectObjectNode();
-                                    for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
-                                        String paramName = entry.getKey();
-                                        ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
-                                        if (paramNode != null && paramNode.containsMember("default")) {
-                                            hasDefaultsForResolve = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (hasDefaultsForResolve) {
-                                    writer.write(
-                                        "clientContextParams: Object.assign(clientContextParamDefaults, "
-                                        + "options.clientContextParams),"
-                                    );
-                                } else {
-                                    writer.write(
-                                        "clientContextParams: options.clientContextParams ?? {},"
-                                    );
-                                }
+                            if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                                ruleSetParameterFinder.writeConfigResolverNestedClientContextParams(writer);
                             }
                         });
                     }

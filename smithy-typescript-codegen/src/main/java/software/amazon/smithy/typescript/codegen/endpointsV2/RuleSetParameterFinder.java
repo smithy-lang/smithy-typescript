@@ -39,6 +39,7 @@ import software.amazon.smithy.rulesengine.traits.ContextParamTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.rulesengine.traits.OperationContextParamsTrait;
 import software.amazon.smithy.rulesengine.traits.StaticContextParamsTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
@@ -162,6 +163,102 @@ public class RuleSetParameterFinder {
                 parameters.accept(new RuleSetParameterFinderVisitor(map));
             });
         return map;
+    }
+
+    /**
+     * Check if there are custom client context parameters.
+     */
+    public boolean hasCustomClientContextParams() {
+        Map<String, String> clientContextParams = getClientContextParams();
+        Map<String, String> builtInParams = getBuiltInParams();
+        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+        Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+            clientContextParams, builtInParams);
+        return !customContextParams.isEmpty();
+    }
+
+    /**
+     * Write custom client context parameters to TypeScript writer.
+     */
+    public void writeInputConfigCustomClientContextParams(TypeScriptWriter writer) {
+        Map<String, String> clientContextParams = getClientContextParams();
+        Map<String, String> builtInParams = getBuiltInParams();
+        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+        Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+            clientContextParams, builtInParams);
+        ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
+        ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+            parameters.accept(new RuleSetParametersVisitor(writer, customContextParams, true));
+        });
+    }
+
+    /**
+     * Write nested client context parameter defaults to TypeScript writer.
+     */
+    public void writeNestedClientContextParamDefaults(TypeScriptWriter writer) {
+        Map<String, String> clientContextParams = getClientContextParams();
+        Map<String, String> builtInParams = getBuiltInParams();
+        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+        Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+            clientContextParams, builtInParams);
+        ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
+        if (ruleSet.getObjectMember("parameters").isPresent()) {
+            ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
+            boolean hasDefaults = customContextParams.entrySet().stream()
+                .anyMatch(entry -> {
+                    ObjectNode paramNode = parameters.getObjectMember(entry.getKey()).orElse(null);
+                    return paramNode != null && paramNode.containsMember("default");
+                });
+            if (hasDefaults) {
+                writer.write("");
+                writer.writeDocs("@internal");
+                writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
+                    for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
+                        String paramName = entry.getKey();
+                        ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
+                        if (paramNode != null && paramNode.containsMember("default")) {
+                            software.amazon.smithy.model.node.Node defaultValue = paramNode.getMember("default").get();
+                            if (defaultValue.isStringNode()) {
+                                writer.write("$L: \"$L\",", paramName, defaultValue.expectStringNode().getValue());
+                            } else if (defaultValue.isBooleanNode()) {
+                                writer.write("$L: $L,", paramName, defaultValue.expectBooleanNode().getValue());
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Write config resolver nested client context parameters to TypeScript writer.
+     */
+    public void writeConfigResolverNestedClientContextParams(TypeScriptWriter writer) {
+        Map<String, String> clientContextParams = getClientContextParams();
+        Map<String, String> builtInParams = getBuiltInParams();
+        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+        Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+            clientContextParams, builtInParams);
+        ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
+        boolean hasDefaultsForResolve = false;
+        if (ruleSet.getObjectMember("parameters").isPresent()) {
+            ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
+            hasDefaultsForResolve = customContextParams.entrySet().stream()
+                .anyMatch(entry -> {
+                    ObjectNode paramNode = parameters.getObjectMember(entry.getKey()).orElse(null);
+                    return paramNode != null && paramNode.containsMember("default");
+                });
+        }
+        if (hasDefaultsForResolve) {
+            writer.write(
+                "clientContextParams: Object.assign(clientContextParamDefaults, "
+                + "options.clientContextParams),"
+            );
+        } else {
+            writer.write(
+                "clientContextParams: options.clientContextParams ?? {},"
+            );
+        }
     }
 
     /**

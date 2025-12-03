@@ -8,18 +8,47 @@ use smithy.rules#endpointRuleSet
 
 @rpcv2Cbor
 @documentation("xyz interfaces")
+@httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @clientContextParams(
-    apiKey: { type: "string", documentation: "API key for authentication" }
     customParam: { type: "string", documentation: "Custom parameter" }
+    region: { type: "string", documentation: "Conflicting with built-in region" }
+    enableFeature: { type: "boolean", documentation: "Feature toggle flag" }
+    debugMode: { type: "boolean", documentation: "Debug mode flag" }
+    nonConflictingParam: { type: "string", documentation: "Non-conflicting parameter" }
+    ApiKey: { type: "string", documentation: "ApiKey" }
 )
 @endpointRuleSet({
     version: "1.0"
     parameters: {
         endpoint: { builtIn: "SDK::Endpoint", required: true, documentation: "The endpoint used to send the request.", type: "String" }
-        apiKey: { type: "String", required: true, default: "default-api-key", documentation: "API key for service authentication" }
+        ApiKey: { required: false, documentation: "ApiKey", type: "String" }
+        region: { type: "String", required: false, documentation: "AWS region" }
         customParam: { type: "String", required: true, default: "default-custom-value", documentation: "Custom parameter for testing" }
+        enableFeature: { type: "Boolean", required: true, default: true, documentation: "Feature toggle with default" }
+        debugMode: { type: "Boolean", required: true, default: false, documentation: "Debug mode with default" }
+        nonConflictingParam: { type: "String", required: true, default: "non-conflict-default", documentation: "Non-conflicting with default" }
     }
     rules: [
+        {
+            conditions: [
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
+                            ref: "ApiKey"
+                        }
+                    ]
+                }
+            ]
+            endpoint: {
+                url: "{endpoint}"
+                properties: {}
+                headers: {
+                    "x-api-key": ["{ApiKey}"]
+                }
+            }
+            type: "endpoint"
+        }
         {
             conditions: []
             endpoint: {

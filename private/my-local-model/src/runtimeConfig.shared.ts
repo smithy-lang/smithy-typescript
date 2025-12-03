@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { NoAuthSigner } from "@smithy/core";
+import { HttpApiKeyAuthSigner } from "@smithy/core";
 import { NoOpLogger } from "@smithy/smithy-client";
 import type { IdentityProviderConfig } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
@@ -24,10 +24,9 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultXYZServiceHttpAuthSchemeProvider,
     httpAuthSchemes: config?.httpAuthSchemes ?? [
       {
-        schemeId: "smithy.api#noAuth",
-        identityProvider: (ipc: IdentityProviderConfig) =>
-          ipc.getIdentityProvider("smithy.api#noAuth") || (async () => ({})),
-        signer: new NoAuthSigner(),
+        schemeId: "smithy.api#httpApiKeyAuth",
+        identityProvider: (ipc: IdentityProviderConfig) => ipc.getIdentityProvider("smithy.api#httpApiKeyAuth"),
+        signer: new HttpApiKeyAuthSigner(),
       },
     ],
     logger: config?.logger ?? new NoOpLogger(),
