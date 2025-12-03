@@ -130,9 +130,16 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
   public readValue(_schema: Schema, value: any): any {
     const ns = NormalizedSchema.of(_schema);
 
-    if (ns.isTimestampSchema() && typeof value === "number") {
-      // format is ignored.
-      return _parseEpochTimestamp(value);
+    if (ns.isTimestampSchema()) {
+      // timestampFormat is ignored.
+      if (typeof value === "number") {
+        return _parseEpochTimestamp(value);
+      }
+      if (typeof value === "object") {
+        if (value.tag === 1 && "value" in value) {
+          return _parseEpochTimestamp(value.value);
+        }
+      }
     }
 
     if (ns.isBlobSchema()) {
@@ -151,7 +158,7 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
       typeof value === "symbol"
     ) {
       return value;
-    } else if (typeof value === "function" || typeof value === "object") {
+    } else if (typeof value === "object") {
       if (value === null) {
         return null;
       }
