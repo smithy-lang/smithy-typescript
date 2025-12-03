@@ -90,10 +90,13 @@ export const resolveParams = async <
         endpointParams[name] = commandInput[instruction.name] as string | boolean;
         break;
       case "clientContextParams":
-        endpointParams[name] = await createConfigValueProvider<Config>(instruction.name, name, clientConfig, true)();
-        break;
       case "builtInParams":
-        endpointParams[name] = await createConfigValueProvider<Config>(instruction.name, name, clientConfig, false)();
+        endpointParams[name] = await createConfigValueProvider<Config>(
+          instruction.name, 
+          name, 
+          clientConfig, 
+          instruction.type !== "builtInParams"
+        )();
         break;
       case "operationContextParams":
         endpointParams[name] = instruction.get(commandInput);
