@@ -92,9 +92,9 @@ export const resolveParams = async <
       case "clientContextParams":
       case "builtInParams":
         endpointParams[name] = await createConfigValueProvider<Config>(
-          instruction.name, 
-          name, 
-          clientConfig, 
+          instruction.name,
+          name,
+          clientConfig,
           instruction.type !== "builtInParams"
         )();
         break;

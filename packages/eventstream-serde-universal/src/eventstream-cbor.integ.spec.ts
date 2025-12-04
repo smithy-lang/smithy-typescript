@@ -9,7 +9,8 @@ describe("local model integration test for cbor eventstreams", () => {
   it("should read and write cbor event streams", async () => {
     const client = new XYZService({
       endpoint: "https://localhost",
-    });
+      apiKey: { apiKey: "test-api-key" },
+    } as any);
 
     const body = cbor.serialize({
       id: "alpha",
