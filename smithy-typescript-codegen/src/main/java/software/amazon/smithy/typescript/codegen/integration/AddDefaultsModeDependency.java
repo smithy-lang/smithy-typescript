@@ -42,6 +42,6 @@ public class AddDefaultsModeDependency implements TypeScriptIntegration {
         writer.writeDocs("The {@link @smithy/smithy-client#DefaultsMode} that "
                 + "will be used to determine how certain default configuration "
                 + "options are resolved in the SDK.");
-        writer.write("defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;\n");
+        writer.write("defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;");
     }
 }

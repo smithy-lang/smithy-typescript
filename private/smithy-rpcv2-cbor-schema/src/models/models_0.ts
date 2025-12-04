@@ -72,7 +72,8 @@ export interface GreetingStruct {
 /**
  * @public
  */
-export interface EmptyStructure {}
+export interface EmptyStructure {
+}
 
 /**
  * @public

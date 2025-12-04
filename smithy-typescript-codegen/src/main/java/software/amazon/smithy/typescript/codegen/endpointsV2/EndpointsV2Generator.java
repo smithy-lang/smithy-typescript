@@ -132,23 +132,21 @@ public final class EndpointsV2Generator implements Runnable {
 
                 writer.write("");
                 writer.writeDocs("@public");
-                writer.openBlock(
+                writer.write(
                     """
                     export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
-                    """,
-                    "};",
-                    () -> {
-                        writer.write("defaultSigningName: string;");
-                    }
+                      defaultSigningName: string;
+                    };"""
                 );
                 writer.write("");
 
                 writer.writeDocs("@internal");
                 writer.openBlock(
-                    "export const resolveClientEndpointParameters = "
-                        + "<T>(options: T & ClientInputEndpointParameters"
-                        + "): T & ClientResolvedEndpointParameters => {",
-                    "}",
+                    """
+                        export const resolveClientEndpointParameters = <T>(
+                          options: T & ClientInputEndpointParameters
+                        ): T & ClientResolvedEndpointParameters => {""",
+                    "};",
                     () -> {
                         writer.openBlock("return Object.assign(options, {", "});", () -> {
                             ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
@@ -167,7 +165,7 @@ public final class EndpointsV2Generator implements Runnable {
 
                 writer.writeDocs("@internal");
                 writer.openBlock(
-                    "export const commonParams = {", "} as const",
+                    "export const commonParams = {", "} as const;",
                     () -> {
                         Set<String> paramNames = new HashSet<>();
 
@@ -230,8 +228,8 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addImport("EndpointCache", null, TypeScriptDependency.UTIL_ENDPOINTS);
                 writer.write("""
                     const cache = new EndpointCache({
-                        size: 50,
-                        params: [$L]
+                      size: 50,
+                      params: [$L],
                     });
                     """,
                     ruleSetParameterFinder.getEffectiveParams()
@@ -242,13 +240,15 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.write(
                 """
                     export const defaultEndpointResolver = (
-                        endpointParams: EndpointParameters,
-                        context: { logger?: Logger } = {}
+                      endpointParams: EndpointParameters,
+                      context: { logger?: Logger } = {}
                     ): EndpointV2 => {
-                        return cache.get(endpointParams as EndpointParams, () => resolveEndpoint(ruleSet, {
-                            endpointParams: endpointParams as EndpointParams,
-                            logger: context.logger,
-                        }));
+                      return cache.get(endpointParams as EndpointParams, () =>
+                        resolveEndpoint(ruleSet, {
+                          endpointParams: endpointParams as EndpointParams,
+                          logger: context.logger,
+                        })
+                      );
                     };
                     """
                 );
@@ -264,17 +264,12 @@ public final class EndpointsV2Generator implements Runnable {
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RULESET_FILE).toString(),
             writer -> {
                 writer.addTypeImport("RuleSetObject", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.openBlock(
-                    "export const ruleSet: RuleSetObject = ",
-                    ";",
-                    () -> {
-                        new RuleSetSerializer(
-                            endpointRuleSetTrait.getRuleSet(),
-                            writer
-                        ).generate();
-                    }
-                );
 
+                writer.writeInline("export const ruleSet: RuleSetObject = ");
+                new RuleSetSerializer(
+                    endpointRuleSetTrait.getRuleSet(),
+                    writer
+                ).generate();
             }
         );
     }

@@ -108,7 +108,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 writer.write("""
                     $1L(
                       args: $2T,
-                      options?: $3T,
+                      options?: $3T
                     ): Promise<$4T>;
                     $1L(
                       args: $2T,
@@ -123,6 +123,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 );
                 writer.write("");
             }
+            writer.unwrite("\n");
         });
 
         writer.write("");

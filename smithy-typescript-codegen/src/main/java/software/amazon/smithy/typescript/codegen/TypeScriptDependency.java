@@ -263,7 +263,7 @@ public enum TypeScriptDependency implements Dependency {
                 });
                 tmpVersions = Collections.unmodifiableMap(versions);
             } catch (IOException e) {
-                LOGGER.info("Could not read AWS dependency versions from smithy-aws-typescript-codegen, "
+                LOGGER.fine("Could not read AWS dependency versions from smithy-aws-typescript-codegen, "
                         + "will use 'latest' for AWS dependencies");
                 tmpVersions = Collections.emptyMap();
             }
@@ -302,7 +302,7 @@ public enum TypeScriptDependency implements Dependency {
                 });
                 tmpVersions = Collections.unmodifiableMap(versions);
             } catch (IOException e) {
-                LOGGER.info("Could not read dependency versions from smithy-typescript-codegen");
+                LOGGER.warning("Could not read dependency versions from smithy-typescript-codegen");
                 tmpVersions = Collections.emptyMap();
             }
             VERSIONS = tmpVersions;

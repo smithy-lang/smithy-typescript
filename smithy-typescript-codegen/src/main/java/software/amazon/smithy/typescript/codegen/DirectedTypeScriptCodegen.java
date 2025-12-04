@@ -141,7 +141,7 @@ final class DirectedTypeScriptCodegen
             ServiceShape service,
             TypeScriptSettings settings
     ) {
-        // Collect all of the supported protocol generators.
+        // Collect all the supported protocol generators.
         // Preserve insertion order as default priority order.
         Map<ShapeId, ProtocolGenerator> generators = new LinkedHashMap<>();
 

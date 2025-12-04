@@ -297,11 +297,11 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                     w.write("let _$L = runtimeConfig.$L;", configField.name(), configField.name());
                 }
 
-                w.openBlock("return {", "}",
+                w.openBlock("return {", "};",
                 () -> {
                     w.write("""
                         setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void {
-                          const index = _httpAuthSchemes.findIndex(scheme => \
+                          const index = _httpAuthSchemes.findIndex((scheme) => \
                         scheme.schemeId === httpAuthScheme.schemeId);
                           if (index === -1) {
                             _httpAuthSchemes.push(httpAuthScheme);
@@ -323,10 +323,10 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                         String capitalizedName = StringUtils.capitalize(configField.name());
                         w.write("""
                             set$L($L: $T): void {
-                                _$L = $L;
+                              _$L = $L;
                             },
                             $L(): $T | undefined {
-                                return _$L;
+                              return _$L;
                             },""",
                             capitalizedName, configField.name(), configField.inputType(),
                             configField.name(), configField.name(),
@@ -364,16 +364,17 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
                 export const resolveHttpAuthRuntimeConfig = (config: HttpAuthExtensionConfiguration): \
                 HttpAuthRuntimeConfig => {""", "};",
                 () -> {
-                w.openBlock("return {", "};", () -> {
-                    w.write("httpAuthSchemes: config.httpAuthSchemes(),");
-                    w.write("httpAuthSchemeProvider: config.httpAuthSchemeProvider(),");
-                    for (ConfigField configField : configFields.values()) {
-                        if (configField.type().equals(ConfigField.Type.MAIN)) {
-                            w.write("$L: config.$L(),", configField.name(), configField.name());
+                    w.openBlock("return {", "};", () -> {
+                        w.write("httpAuthSchemes: config.httpAuthSchemes(),");
+                        w.write("httpAuthSchemeProvider: config.httpAuthSchemeProvider(),");
+                        for (ConfigField configField : configFields.values()) {
+                            if (configField.type().equals(ConfigField.Type.MAIN)) {
+                                w.write("$L: config.$L(),", configField.name(), configField.name());
+                            }
                         }
-                    }
-                });
-            });
+                    });
+                }
+            );
         });
     }
 }

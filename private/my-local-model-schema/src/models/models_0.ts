@@ -43,7 +43,8 @@ export interface GetNumbersResponse {
 /**
  * @public
  */
-export interface Unit {}
+export interface Unit {
+}
 
 /**
  * @public

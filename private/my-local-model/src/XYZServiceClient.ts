@@ -68,12 +68,16 @@ export { __Client };
 /**
  * @public
  */
-export type ServiceInputTypes = GetNumbersCommandInput | TradeEventStreamCommandInput;
+export type ServiceInputTypes =
+  | GetNumbersCommandInput
+  | TradeEventStreamCommandInput;
 
 /**
  * @public
  */
-export type ServiceOutputTypes = GetNumbersCommandOutput | TradeEventStreamCommandOutput;
+export type ServiceOutputTypes =
+  | GetNumbersCommandOutput
+  | TradeEventStreamCommandOutput;
 
 /**
  * @public

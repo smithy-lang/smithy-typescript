@@ -74,7 +74,7 @@ public class ExtensionConfigurationGenerator {
         String clientConfigurationContent = TypeScriptUtils
             .loadResourceAsString(CLIENT_CONFIGURATION_TEMPLATE)
             .replace("${extensionConfigName}", clientName + "ExtensionConfiguration")
-            .replace("${extensionConfigInterfaces}", String.join(", ", interfaces.keySet()));
+            .replace("${extensionConfigInterfaces}", String.join(",\n    ", interfaces.keySet()));
 
         delegator.useFileWriter(Paths.get(CodegenUtils.SOURCE_FOLDER, FILENAME).toString(), writer -> {
             interfaces.entrySet().forEach(entry -> {

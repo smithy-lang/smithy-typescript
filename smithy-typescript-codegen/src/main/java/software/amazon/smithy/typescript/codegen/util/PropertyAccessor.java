@@ -32,6 +32,20 @@ public final class PropertyAccessor {
     }
 
     /**
+     * @param propertyName - property being accessed.
+     * @return brackets wrapping the name if it's not a valid JavaScript property name.
+     */
+    public static String inlineKey(String propertyName) {
+        if (VALID_JAVASCRIPT_PROPERTY_NAME.matcher(propertyName).matches()) {
+            return propertyName;
+        }
+        if (propertyName.contains("\"")) {
+            return "[`" + propertyName.replace("`", "\\\\`") + "`]";
+        }
+        return "\"" + propertyName.replace("`", "\\\\`") + "\"";
+    }
+
+    /**
      * @param variable - object host.
      * @param propertyName - property being accessed.
      * @return e.g. someObject.prop or someObject['property name'] or reluctantly someObject[`bad"property"name`].
