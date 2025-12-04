@@ -3,8 +3,8 @@ import type { StaticSimpleSchema, StaticStructureSchema, StringSchema, Timestamp
 import { describe, expect, it } from "vitest";
 
 import { cbor } from "./cbor";
-import { CborCodec, CborShapeSerializer } from "./CborCodec";
 import { tagSymbol } from "./cbor-types";
+import { CborCodec, CborShapeSerializer } from "./CborCodec";
 
 describe(CborShapeSerializer.name, () => {
   const codec = new CborCodec();

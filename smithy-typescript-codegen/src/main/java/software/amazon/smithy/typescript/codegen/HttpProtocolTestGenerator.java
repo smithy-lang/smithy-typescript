@@ -832,7 +832,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 writer.write("$L,", isSuccess);
                 writer.write("$L,", testCase.getCode());
                 if (headers.isEmpty()) {
-                    writer.write("undefined");
+                    writer.write("undefined,");
                 } else {
                     writer.openBlock("{", "},", () -> {
                         for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -847,8 +847,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     });
                 }
                 if (body != null) {
-                    writer.write("`$L`", body);
+                    writer.write("`$L`,", body);
                 }
+                writer.unwrite(",\n").write("");
             });
         });
 
