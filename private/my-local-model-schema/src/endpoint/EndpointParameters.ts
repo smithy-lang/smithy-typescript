@@ -13,6 +13,7 @@ export interface ClientInputEndpointParameters {
     nonConflictingParam?: string | undefined | Provider<string | undefined>;
   };
   endpoint?: string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;
+  apiKey?: string | undefined | Provider<string | undefined>;
   customParam?: string | undefined | Provider<string | undefined>;
   enableFeature?: boolean | undefined | Provider<boolean | undefined>;
   debugMode?: boolean | undefined | Provider<boolean | undefined>;
@@ -43,6 +44,9 @@ const clientContextParamDefaults = {
   enableFeature: true,
 } as const;
 
+/**
+ * @internal
+ */
 export const resolveClientEndpointParameters = <T>(
   options: T & ClientInputEndpointParameters
 ): T & ClientResolvedEndpointParameters => {
