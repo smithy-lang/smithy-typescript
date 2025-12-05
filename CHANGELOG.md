@@ -1,5 +1,18 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.39.0 (2025-12-05)
+
+### Features
+
+- added type import API for TypeScriptWriter ([#1786](https://github.com/smithy-lang/smithy-typescript/pull/1786))
+- added `generateIndexTests` setting for generation of optional API surface tests ([#1789](https://github.com/smithy-lang/smithy-typescript/pull/1789))
+- generate well-formatted TypeScript source code ([#1780](https://github.com/smithy-lang/smithy-typescript/pull/1780))
+
+### Chores
+
+- reduced `info` level logging output.
+  To restore previous logging output, use the `fine` logging level. ([#1796](https://github.com/smithy-lang/smithy-typescript/pull/1796))
+
 ## 0.38.0 (2025-11-20)
 
 ### Features
