@@ -1,12 +1,16 @@
 // smithy-typescript generated code
-import type {
-  HandlerExecutionContext,
-  HttpAuthOption,
-  HttpAuthScheme,
-  HttpAuthSchemeParameters,
-  HttpAuthSchemeParametersProvider,
-  HttpAuthSchemeProvider,
-  Provider,
+import { doesIdentityRequireRefresh, isIdentityExpired, memoizeIdentityProvider } from "@smithy/core";
+import {
+  type HandlerExecutionContext,
+  type HttpAuthOption,
+  type HttpAuthScheme,
+  type HttpAuthSchemeParameters,
+  type HttpAuthSchemeParametersProvider,
+  type HttpAuthSchemeProvider,
+  type Provider,
+  ApiKeyIdentity,
+  ApiKeyIdentityProvider,
+  HttpApiKeyAuthLocation,
 } from "@smithy/types";
 import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
 
@@ -41,9 +45,16 @@ export const defaultXYZServiceHttpAuthSchemeParametersProvider = async (
   };
 };
 
-function createSmithyApiNoAuthHttpAuthOption(authParameters: XYZServiceHttpAuthSchemeParameters): HttpAuthOption {
+function createSmithyApiHttpApiKeyAuthHttpAuthOption(
+  authParameters: XYZServiceHttpAuthSchemeParameters
+): HttpAuthOption {
   return {
-    schemeId: "smithy.api#noAuth",
+    schemeId: "smithy.api#httpApiKeyAuth",
+    signingProperties: {
+      name: "X-Api-Key",
+      in: HttpApiKeyAuthLocation.HEADER,
+      scheme: undefined,
+    },
   };
 }
 
@@ -59,7 +70,7 @@ export const defaultXYZServiceHttpAuthSchemeProvider: XYZServiceHttpAuthSchemePr
   const options: HttpAuthOption[] = [];
   switch (authParameters.operation) {
     default: {
-      options.push(createSmithyApiNoAuthHttpAuthOption(authParameters));
+      options.push(createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters));
     }
   }
   return options;
@@ -88,6 +99,11 @@ export interface HttpAuthSchemeInputConfig {
    * @internal
    */
   httpAuthSchemeProvider?: XYZServiceHttpAuthSchemeProvider;
+
+  /**
+   * The API key to use when making requests.
+   */
+  apiKey?: ApiKeyIdentity | ApiKeyIdentityProvider;
 }
 
 /**
@@ -113,6 +129,11 @@ export interface HttpAuthSchemeResolvedConfig {
    * @internal
    */
   readonly httpAuthSchemeProvider: XYZServiceHttpAuthSchemeProvider;
+
+  /**
+   * The API key to use when making requests.
+   */
+  readonly apiKey?: ApiKeyIdentityProvider;
 }
 
 /**
@@ -121,7 +142,9 @@ export interface HttpAuthSchemeResolvedConfig {
 export const resolveHttpAuthSchemeConfig = <T>(
   config: T & HttpAuthSchemeInputConfig
 ): T & HttpAuthSchemeResolvedConfig => {
+  const apiKey = memoizeIdentityProvider(config.apiKey, isIdentityExpired, doesIdentityRequireRefresh);
   return Object.assign(config, {
     authSchemePreference: normalizeProvider(config.authSchemePreference ?? []),
+    apiKey,
   }) as T & HttpAuthSchemeResolvedConfig;
 };

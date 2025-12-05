@@ -17,6 +17,7 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -111,21 +112,31 @@ public final class EndpointsV2Generator implements Runnable {
             writer -> {
                 writer.addTypeImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
                 writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                Map<String, String> clientContextParams =
+                    ruleSetParameterFinder.getClientContextParams();
+                Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
+                builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+                Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+                    clientContextParams, builtInParams);
 
                 writer.writeDocs("@public");
                 writer.openBlock(
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
-                        //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
-                        Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                        clientInputParams.putAll(builtInParams);
-
+                        if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                            writer.write("clientContextParams?: {");
+                            writer.indent();
+                            ruleSetParameterFinder.writeInputConfigCustomClientContextParams(writer);
+                            writer.dedent();
+                            writer.write("};");
+                        }
+                        // Add direct params (built-ins + custom context params)
+                        Map<String, String> directParams = new HashMap<>(builtInParams);
+                        directParams.putAll(customContextParams);
                         ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                            parameters.accept(new RuleSetParametersVisitor(writer, clientInputParams, true));
+                            parameters.accept(new RuleSetParametersVisitor(writer, directParams, true));
                         });
                     }
                 );
@@ -138,6 +149,9 @@ public final class EndpointsV2Generator implements Runnable {
                       defaultSigningName: string;
                     };"""
                 );
+                if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                    ruleSetParameterFinder.writeNestedClientContextParamDefaults(writer);
+                }
                 writer.write("");
 
                 writer.writeDocs("@internal");
@@ -157,6 +171,9 @@ public final class EndpointsV2Generator implements Runnable {
                                 "defaultSigningName: \"$L\",",
                                 settings.getDefaultSigningName()
                             );
+                            if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                                ruleSetParameterFinder.writeConfigResolverNestedClientContextParams(writer);
+                            }
                         });
                     }
                 );

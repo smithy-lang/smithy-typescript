@@ -154,11 +154,16 @@ export const ruleSet: RuleSetObject = {
                   return Object.assign(options, {
                     stage: options.stage ?? "production",
                     defaultSigningName: "",
+                    clientContextParams: Object.assign(clientContextParamDefaults, options.clientContextParams),
                   });
                 """));
         assertThat(endpointParameters, containsString(
             """
                 export interface ClientInputEndpointParameters {
+                  clientContextParams?: {
+                    region?: string | undefined | Provider<string | undefined>;
+                    stage?: string | undefined | Provider<string | undefined>;
+                  };
                   region?: string | undefined | Provider<string | undefined>;
                   stage?: string | undefined | Provider<string | undefined>;
                   endpoint?:"""));

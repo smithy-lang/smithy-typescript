@@ -5,9 +5,44 @@ export const ruleSet: RuleSetObject = {
   version: "1.0",
   parameters: {
     endpoint: {
-      type: "string",
       builtIn: "SDK::Endpoint",
-      documentation: "Endpoint used for making requests. Should be formatted as a URI.",
+      required: true,
+      documentation: "The endpoint used to send the request.",
+      type: "String",
+    },
+    ApiKey: {
+      required: false,
+      documentation: "ApiKey",
+      type: "String",
+    },
+    region: {
+      type: "String",
+      required: false,
+      documentation: "AWS region",
+    },
+    customParam: {
+      type: "String",
+      required: true,
+      default: "default-custom-value",
+      documentation: "Custom parameter for testing",
+    },
+    enableFeature: {
+      type: "Boolean",
+      required: true,
+      default: true,
+      documentation: "Feature toggle with default",
+    },
+    debugMode: {
+      type: "Boolean",
+      required: true,
+      default: false,
+      documentation: "Debug mode with default",
+    },
+    nonConflictingParam: {
+      type: "String",
+      required: true,
+      default: "non-conflict-default",
+      documentation: "Non-conflicting with default",
     },
   },
   rules: [
@@ -17,22 +52,28 @@ export const ruleSet: RuleSetObject = {
           fn: "isSet",
           argv: [
             {
-              ref: "endpoint",
+              ref: "ApiKey",
             },
           ],
         },
       ],
       endpoint: {
-        url: {
-          ref: "endpoint",
+        url: "{endpoint}",
+        properties: {},
+        headers: {
+          "x-api-key": ["{ApiKey}"],
         },
       },
       type: "endpoint",
     },
     {
       conditions: [],
-      error: "(default endpointRuleSet) endpoint is not set - you must configure an endpoint.",
-      type: "error",
+      endpoint: {
+        url: "{endpoint}",
+        properties: {},
+        headers: {},
+      },
+      type: "endpoint",
     },
   ],
 };
