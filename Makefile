@@ -22,8 +22,8 @@ generate-protocol-tests:
 	yarn turbo run build -F="./private/*" --only
 
 test-protocols:
-	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals)
-	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals)
+	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals && yarn test:index)
+	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals && yarn test:index)
 
 test-unit:
 	yarn g:vitest run -c vitest.config.mts

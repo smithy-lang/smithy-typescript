@@ -45,7 +45,9 @@ export type {
   TestIntEnum,
   FooEnum,
   IntegerEnum,
+  ValidationExceptionField,
   ClientOptionalDefaults,
+  ComplexNestedErrorData,
   Defaults,
   EmptyStructure,
   Float16Output,
@@ -64,5 +66,8 @@ export type {
   SparseNullsOperationInputOutput,
   StructureListMember,
   GreetingStruct,
+  ValidationException,
+  ComplexError,
+  InvalidGreeting,
   RpcV2ProtocolServiceException,
 } from "../dist-types/index.d";

@@ -1,10 +1,12 @@
 import {
+  ComplexError,
   EmptyInputOutputCommand,
   Float16Command,
   FooEnum,
   FractionalSecondsCommand,
   GreetingWithErrorsCommand,
   IntegerEnum,
+  InvalidGreeting,
   NoInputOutputCommand,
   OperationWithDefaultsCommand,
   OptionalInputOutputCommand,
@@ -19,6 +21,7 @@ import {
   SparseNullsOperationCommand,
   TestEnum,
   TestIntEnum,
+  ValidationException,
 } from "../dist-cjs/index.js";
 import assert from "node:assert";
 // clients
@@ -44,5 +47,8 @@ assert(typeof TestIntEnum === "object");
 assert(typeof FooEnum === "object");
 assert(typeof IntegerEnum === "object");
 // errors
+assert(ValidationException.prototype instanceof RpcV2ProtocolServiceException);
+assert(ComplexError.prototype instanceof RpcV2ProtocolServiceException);
+assert(InvalidGreeting.prototype instanceof RpcV2ProtocolServiceException);
 assert(RpcV2ProtocolServiceException.prototype instanceof Error);
 console.log(`RpcV2Protocol index test passed.`);

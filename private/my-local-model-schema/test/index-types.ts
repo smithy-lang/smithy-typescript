@@ -14,6 +14,10 @@ export type {
   TradeEvents,
   TradeEventStreamRequest,
   TradeEventStreamResponse,
-  Unit,
+  CodedThrottlingError,
+  HaltError,
+  MysteryThrottlingError,
+  RetryableError,
   XYZServiceServiceException,
+  XYZServiceSyntheticServiceException,
 } from "../dist-types/index.d";

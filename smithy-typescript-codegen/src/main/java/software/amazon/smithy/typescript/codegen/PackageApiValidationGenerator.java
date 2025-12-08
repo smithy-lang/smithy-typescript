@@ -30,7 +30,7 @@ public final class PackageApiValidationGenerator {
     private final TypeScriptSettings settings;
     private final Model model;
     private final SymbolProvider symbolProvider;
-    private final ServiceClosure serviceClosure;
+    private final ServiceClosure closure;
 
     public PackageApiValidationGenerator(
         TypeScriptWriter writer,
@@ -42,7 +42,7 @@ public final class PackageApiValidationGenerator {
         this.settings = settings;
         this.model = model;
         this.symbolProvider = symbolProvider;
-        serviceClosure = ServiceClosure.of(model, settings.getService(model));
+        closure = ServiceClosure.of(model, settings.getService(model));
     }
 
     /**
@@ -75,31 +75,32 @@ public final class PackageApiValidationGenerator {
                 }
 
                 // enums
-                TreeSet<Shape> enumShapes = serviceClosure.getEnums();
+                TreeSet<Shape> enumShapes = closure.getEnums();
                 for (Shape enumShape : enumShapes) {
                     writer.write("$L,", symbolProvider.toSymbol(enumShape).getName());
                 }
 
                 // structure & union types & modeled errors
-                TreeSet<Shape> structuralShapes = serviceClosure.getStructuralNonErrorShapes();
+                TreeSet<Shape> structuralShapes = closure.getStructuralNonErrorShapes();
                 for (Shape structuralShape : structuralShapes) {
                     writer.write("$L,", symbolProvider.toSymbol(structuralShape).getName());
                 }
 
-                TreeSet<Shape> errorShapes = serviceClosure.getErrorShapes();
+                TreeSet<Shape> errorShapes = closure.getErrorShapes();
                 for (Shape errorShape : errorShapes) {
                     writer.write("$L,", symbolProvider.toSymbol(errorShape).getName());
                 }
 
                 // synthetic base exception
-                writer.write("$L,", aggregateClientName + "ServiceException");
+                String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
+                writer.write("$L,", baseExceptionName);
 
                 // waiters
-                serviceClosure.getWaiterNames().forEach(waiter -> {
+                closure.getWaiterNames().forEach(waiter -> {
                     writer.write("$L,", waiter);
                 });
                 // paginators
-                serviceClosure.getPaginatorNames().forEach(paginator -> {
+                closure.getPaginatorNames().forEach(paginator -> {
                     writer.write("$L,", paginator);
                 });
             }
@@ -150,7 +151,7 @@ public final class PackageApiValidationGenerator {
 
         // string shapes with enum trait do not generate anything if
         // any enum value does not have a name.
-        TreeSet<Shape> enumShapes = serviceClosure.getEnums().stream()
+        TreeSet<Shape> enumShapes = closure.getEnums().stream()
             .filter(shape -> shape
                 .getTrait(EnumTrait.class)
                 .map(EnumTrait::hasNames)
@@ -169,11 +170,11 @@ public final class PackageApiValidationGenerator {
             );
         }
 
-        String baseExceptionName = aggregateClientName + "ServiceException";
+        String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
 
         // modeled errors and synthetic base error
         writer.write("// errors");
-        TreeSet<Shape> errors = serviceClosure.getErrorShapes();
+        TreeSet<Shape> errors = closure.getErrorShapes();
         for (Shape error : errors) {
             Symbol errorSymbol = symbolProvider.toSymbol(error);
             writer.addRelativeImport(errorSymbol.getName(), null, cjsIndex);
@@ -187,7 +188,7 @@ public final class PackageApiValidationGenerator {
         writer.write("assert($L.prototype instanceof Error);", baseExceptionName);
 
         // waiters & paginators
-        TreeSet<String> waiterNames = serviceClosure.getWaiterNames();
+        TreeSet<String> waiterNames = closure.getWaiterNames();
         if (!waiterNames.isEmpty()) {
             writer.write("// waiters");
         }
@@ -198,7 +199,7 @@ public final class PackageApiValidationGenerator {
                 waiter
             );
         });
-        TreeSet<String> paginatorNames = serviceClosure.getPaginatorNames();
+        TreeSet<String> paginatorNames = closure.getPaginatorNames();
         if (!paginatorNames.isEmpty()) {
             writer.write("// paginators");
         }

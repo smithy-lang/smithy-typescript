@@ -47,7 +47,7 @@ import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
-final class SchemaTraitFilterIndex implements KnowledgeIndex {
+public final class SchemaTraitFilterIndex implements KnowledgeIndex {
     private static final Set<ShapeId> EXCLUDED_TRAITS = SetUtils.of(
         // excluded due to special schema handling.
         TimestampFormatTrait.ID
@@ -132,6 +132,8 @@ final class SchemaTraitFilterIndex implements KnowledgeIndex {
     }
 
     /**
+     * This operation is cached on call.
+     *
      * @param shape - structure or member, usually.
      * @return whether it has at least 1 trait that is needed in a schema.
      */
