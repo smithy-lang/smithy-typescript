@@ -19,5 +19,5 @@ export type {
   MysteryThrottlingError,
   RetryableError,
   XYZServiceServiceException,
-  XYZServiceServiceException,
+  XYZServiceSyntheticServiceException,
 } from "../dist-types/index.d";

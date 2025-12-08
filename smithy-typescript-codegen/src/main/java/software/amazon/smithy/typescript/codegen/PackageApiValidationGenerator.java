@@ -92,7 +92,8 @@ public final class PackageApiValidationGenerator {
                 }
 
                 // synthetic base exception
-                writer.write("$L,", aggregateClientName + "ServiceException");
+                String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
+                writer.write("$L,", baseExceptionName);
 
                 // waiters
                 closure.getWaiterNames().forEach(waiter -> {
@@ -169,7 +170,7 @@ public final class PackageApiValidationGenerator {
             );
         }
 
-        String baseExceptionName = aggregateClientName + "ServiceException";
+        String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
 
         // modeled errors and synthetic base error
         writer.write("// errors");

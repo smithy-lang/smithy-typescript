@@ -8,6 +8,7 @@ import {
   XYZService,
   XYZServiceClient,
   XYZServiceServiceException,
+  XYZServiceSyntheticServiceException,
 } from "../dist-cjs/index.js";
 import assert from "node:assert";
 // clients
@@ -17,10 +18,10 @@ assert(typeof XYZService === "function");
 assert(typeof GetNumbersCommand === "function");
 assert(typeof TradeEventStreamCommand === "function");
 // errors
-assert(CodedThrottlingError.prototype instanceof XYZServiceServiceException);
-assert(HaltError.prototype instanceof XYZServiceServiceException);
-assert(MysteryThrottlingError.prototype instanceof XYZServiceServiceException);
-assert(RetryableError.prototype instanceof XYZServiceServiceException);
-assert(XYZServiceServiceException.prototype instanceof XYZServiceServiceException);
-assert(XYZServiceServiceException.prototype instanceof Error);
+assert(CodedThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
+assert(HaltError.prototype instanceof XYZServiceSyntheticServiceException);
+assert(MysteryThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
+assert(RetryableError.prototype instanceof XYZServiceSyntheticServiceException);
+assert(XYZServiceServiceException.prototype instanceof XYZServiceSyntheticServiceException);
+assert(XYZServiceSyntheticServiceException.prototype instanceof Error);
 console.log(`XYZService index test passed.`);
