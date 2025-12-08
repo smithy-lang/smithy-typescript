@@ -1,5 +1,9 @@
 import {
+  CodedThrottlingError,
   GetNumbersCommand,
+  HaltError,
+  MysteryThrottlingError,
+  RetryableError,
   TradeEventStreamCommand,
   XYZService,
   XYZServiceClient,
@@ -13,5 +17,10 @@ assert(typeof XYZService === "function");
 assert(typeof GetNumbersCommand === "function");
 assert(typeof TradeEventStreamCommand === "function");
 // errors
+assert(CodedThrottlingError.prototype instanceof XYZServiceServiceException);
+assert(HaltError.prototype instanceof XYZServiceServiceException);
+assert(MysteryThrottlingError.prototype instanceof XYZServiceServiceException);
+assert(RetryableError.prototype instanceof XYZServiceServiceException);
+assert(XYZServiceServiceException.prototype instanceof XYZServiceServiceException);
 assert(XYZServiceServiceException.prototype instanceof Error);
 console.log(`XYZService index test passed.`);

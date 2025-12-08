@@ -18,7 +18,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * Can determine whether a Schema can be defined by a sentinel value.
  */
 @SmithyInternalApi
-final class SchemaReferenceIndex implements KnowledgeIndex {
+public final class SchemaReferenceIndex implements KnowledgeIndex {
     public final SchemaTraitFilterIndex traits;
     private final Model model;
 

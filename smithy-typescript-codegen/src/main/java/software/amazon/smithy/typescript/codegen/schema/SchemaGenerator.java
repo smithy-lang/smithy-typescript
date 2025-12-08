@@ -6,18 +6,13 @@
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.ReservedWords;
 import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -36,6 +31,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.util.StringStore;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -52,24 +48,7 @@ public class SchemaGenerator implements Runnable {
     private final FileManifest fileManifest;
     private final StringStore store = new StringStore();
     private final TypeScriptWriter writer = new TypeScriptWriter("");
-
-    /**
-     * Avoids infinite recursion when navigating shape graph.
-     */
-    private final Set<String> loadShapesVisited = new HashSet<>();
-
-    private final Set<StructureShape> structureShapes = new TreeSet<>();
-    private final Set<CollectionShape> collectionShapes = new TreeSet<>();
-    private final Set<MapShape> mapShapes = new TreeSet<>();
-    private final Set<UnionShape> unionShapes = new TreeSet<>();
-    private final Set<OperationShape> operationShapes = new TreeSet<>();
-    private final Set<Shape> simpleShapes = new TreeSet<>();
-
-    /**
-     * Used to deconflict schema variable names.
-     */
-    private final Set<Shape> existsAsSchema = new HashSet<>();
-    private final Set<Shape> requiresNamingDeconfliction = new HashSet<>();
+    private final ServiceClosure closure;
 
     private final ReservedWords reservedWords = new ReservedWordsBuilder()
         .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
@@ -80,6 +59,7 @@ public class SchemaGenerator implements Runnable {
                            TypeScriptSettings settings, SymbolProvider symbolProvider) {
         this.model = model;
         this.fileManifest = fileManifest;
+        closure = ServiceClosure.of(model, settings.getService(model));
         elision = SchemaReferenceIndex.of(model);
         this.settings = settings;
         this.symbolProvider = symbolProvider;
@@ -96,33 +76,14 @@ public class SchemaGenerator implements Runnable {
             if (!SchemaGenerationAllowlist.allows(service.getId(), settings)) {
                 return;
             }
-            for (OperationShape operation : TopDownIndex.of(model).getContainedOperations(service)) {
-                if (operation.getInput().isPresent()) {
-                    loadShapes(model.expectShape(operation.getInput().get()));
-                } else {
-                    loadShapes(model.expectShape(ShapeId.from("smithy.api#Unit")));
-                }
-                if (operation.getOutput().isPresent()) {
-                    loadShapes(model.expectShape(operation.getOutput().get()));
-                } else {
-                    loadShapes(model.expectShape(ShapeId.from("smithy.api#Unit")));
-                }
-                operation.getErrors().forEach(error -> {
-                    loadShapes(model.expectShape(error));
-                });
-                operationShapes.add(operation);
-                existsAsSchema.add(operation);
-            }
         }
-        deconflictSchemaVarNames();
-
-        simpleShapes.forEach(this::writeSimpleSchema);
-        structureShapes.forEach(this::writeStructureSchema);
+        closure.getSimpleShapes().forEach(this::writeSimpleSchema);
+        closure.getStructureShapes().forEach(this::writeStructureSchema);
         writeBaseError();
-        collectionShapes.forEach(this::writeListSchema);
-        mapShapes.forEach(this::writeMapSchema);
-        unionShapes.forEach(this::writeUnionSchema);
-        operationShapes.forEach(this::writeOperationSchema);
+        closure.getCollectionShapes().forEach(this::writeListSchema);
+        closure.getMapShapes().forEach(this::writeMapSchema);
+        closure.getUnionShapes().forEach(this::writeUnionSchema);
+        closure.getOperationShapes().forEach(this::writeOperationSchema);
 
         String stringConstants = store.flushVariableDeclarationCode();
 
@@ -136,82 +97,6 @@ public class SchemaGenerator implements Runnable {
     }
 
     /**
-     * Identifies repeated strings among the schemas to use in StringStore.
-     */
-    private void loadShapes(Shape shape) {
-        String absoluteName = shape.getId().toString();
-
-        if (shape.isMemberShape()) {
-            loadShapes(model.expectShape(shape.asMemberShape().get().getTarget()));
-            return;
-        }
-
-        if (loadShapesVisited.contains(absoluteName)) {
-            return;
-        }
-
-        loadShapesVisited.add(absoluteName);
-
-        switch (shape.getType()) {
-            case LIST -> {
-                collectionShapes.add(shape.asListShape().get());
-                existsAsSchema.add(shape);
-            }
-            case SET -> {
-                collectionShapes.add(shape.asSetShape().get());
-                existsAsSchema.add(shape);
-            }
-            case MAP -> {
-                mapShapes.add(shape.asMapShape().get());
-                existsAsSchema.add(shape);
-            }
-            case STRUCTURE -> {
-                structureShapes.add(shape.asStructureShape().get());
-                existsAsSchema.add(shape);
-            }
-            case UNION -> {
-                unionShapes.add(shape.asUnionShape().get());
-                existsAsSchema.add(shape);
-            }
-            case BYTE, INT_ENUM, SHORT, INTEGER, LONG, FLOAT, DOUBLE, BIG_INTEGER, BIG_DECIMAL, BOOLEAN, STRING,
-                 TIMESTAMP, DOCUMENT, ENUM, BLOB -> {
-                if (elision.traits.hasSchemaTraits(shape)) {
-                    existsAsSchema.add(shape);
-                }
-                simpleShapes.add(shape);
-            }
-            default -> {
-                // ...
-            }
-        }
-
-        Set<Shape> memberTargetShapes = shape.getAllMembers().values().stream()
-            .map(MemberShape::getTarget)
-            .map(model::expectShape)
-            .collect(Collectors.toSet());
-
-        for (Shape memberTargetShape : memberTargetShapes) {
-            loadShapes(memberTargetShape);
-        }
-    }
-
-    /**
-     * Since we use the short names for schema objects, in rare cases there may be a
-     * naming conflict due to shapes with the same short name in different namespaces.
-     * These shapes will have their variable names deconflicted with a suffix.
-     */
-    private void deconflictSchemaVarNames() {
-        Set<String> observedShapeNames = new HashSet<>();
-        for (Shape shape : existsAsSchema) {
-            if (observedShapeNames.contains(shape.getId().getName())) {
-                requiresNamingDeconfliction.add(shape);
-            } else {
-                observedShapeNames.add(shape.getId().getName());
-            }
-        }
-    }
-
-    /**
      * @return variable name of the shape's schema, with deconfliction for multiple namespaces with the same
      * unqualified name.
      */
@@ -220,7 +105,7 @@ public class SchemaGenerator implements Runnable {
             return "__Unit";
         }
         String symbolName = reservedWords.escape(shape.getId().getName());
-        if (requiresNamingDeconfliction.contains(shape)) {
+        if (closure.getRequiresNamingDeconfliction().contains(shape)) {
             symbolName += "_" + store.var(shape.getId().getNamespace(), "n");
         }
         return symbolName;
