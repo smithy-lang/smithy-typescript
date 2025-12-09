@@ -249,8 +249,7 @@ export class XYZServiceClient extends __Client<
         httpAuthSchemeParametersProvider: defaultXYZServiceHttpAuthSchemeParametersProvider,
         identityProviderConfigProvider: async (config: XYZServiceClientResolvedConfig) =>
           new DefaultIdentityProviderConfig({
-            "smithy.api#httpApiKeyAuth": config.apiKey,
-          }),
+            "smithy.api#httpApiKeyAuth": config.apiKey,}),
       })
     );
     this.middlewareStack.use(getHttpSigningPlugin(this.config));

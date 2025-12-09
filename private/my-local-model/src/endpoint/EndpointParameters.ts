@@ -20,18 +20,11 @@ export interface ClientInputEndpointParameters {
   nonConflictingParam?: string | undefined | Provider<string | undefined>;
 }
 
-export type ClientResolvedEndpointParameters = Omit<
-  ClientInputEndpointParameters,
-  "endpoint" | "clientContextParams"
-> & {
+/**
+ * @public
+ */
+export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
   defaultSigningName: string;
-  clientContextParams: {
-    apiKey?: string | undefined | Provider<string | undefined>;
-    customParam?: string | undefined | Provider<string | undefined>;
-    enableFeature?: boolean | undefined | Provider<boolean | undefined>;
-    debugMode?: boolean | undefined | Provider<boolean | undefined>;
-    nonConflictingParam?: string | undefined | Provider<string | undefined>;
-  };
 };
 
 /**

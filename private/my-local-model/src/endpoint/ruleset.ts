@@ -61,7 +61,9 @@ export const ruleSet: RuleSetObject = {
         url: "{endpoint}",
         properties: {},
         headers: {
-          "x-api-key": ["{ApiKey}"],
+          "x-api-key": [
+            "{ApiKey}",
+          ],
         },
       },
       type: "endpoint",

@@ -25,7 +25,8 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     httpAuthSchemes: config?.httpAuthSchemes ?? [
       {
         schemeId: "smithy.api#httpApiKeyAuth",
-        identityProvider: (ipc: IdentityProviderConfig) => ipc.getIdentityProvider("smithy.api#httpApiKeyAuth"),
+        identityProvider: (ipc: IdentityProviderConfig) =>
+          ipc.getIdentityProvider("smithy.api#httpApiKeyAuth"),
         signer: new HttpApiKeyAuthSigner(),
       },
     ],
