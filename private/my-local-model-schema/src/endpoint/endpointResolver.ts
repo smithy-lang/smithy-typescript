@@ -7,7 +7,8 @@ import { ruleSet } from "./ruleset";
 
 const cache = new EndpointCache({
   size: 50,
-  params: ["ApiKey", "endpoint"],
+  params: ["ApiKey",
+ "endpoint"],
 });
 
 /**

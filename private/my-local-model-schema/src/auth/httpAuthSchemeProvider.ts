@@ -45,9 +45,7 @@ export const defaultXYZServiceHttpAuthSchemeParametersProvider = async (
   };
 };
 
-function createSmithyApiHttpApiKeyAuthHttpAuthOption(
-  authParameters: XYZServiceHttpAuthSchemeParameters
-): HttpAuthOption {
+function createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters: XYZServiceHttpAuthSchemeParameters): HttpAuthOption {
   return {
     schemeId: "smithy.api#httpApiKeyAuth",
     signingProperties: {
@@ -99,7 +97,6 @@ export interface HttpAuthSchemeInputConfig {
    * @internal
    */
   httpAuthSchemeProvider?: XYZServiceHttpAuthSchemeProvider;
-
   /**
    * The API key to use when making requests.
    */
@@ -129,7 +126,6 @@ export interface HttpAuthSchemeResolvedConfig {
    * @internal
    */
   readonly httpAuthSchemeProvider: XYZServiceHttpAuthSchemeProvider;
-
   /**
    * The API key to use when making requests.
    */
