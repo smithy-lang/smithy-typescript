@@ -8,6 +8,7 @@ sync:
 	git fetch --all
 
 generate-protocol-tests:
+	rm -rf ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen
 	./gradlew :smithy-typescript-protocol-test-codegen:build
 	rm -rf ./private/smithy-rpcv2-cbor
 	rm -rf ./private/smithy-rpcv2-cbor-schema

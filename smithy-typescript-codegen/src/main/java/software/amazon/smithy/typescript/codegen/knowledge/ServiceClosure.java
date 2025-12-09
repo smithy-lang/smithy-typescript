@@ -273,11 +273,11 @@ public final class ServiceClosure implements KnowledgeIndex {
                     existsAsSchema.add(operation);
                 }
                 case SERVICE -> {
-//                    ServiceShape serviceShape = (ServiceShape) shape;
-//                    serviceShape.getErrorsSet().forEach(errorShapeId -> {
-//                        Shape errorShape = model.expectShape(errorShapeId);
-//                        scan(errorShape);
-//                    });
+                    ServiceShape serviceShape = (ServiceShape) shape;
+                    serviceShape.getErrorsSet().forEach(errorShapeId -> {
+                        Shape errorShape = model.expectShape(errorShapeId);
+                        scan(errorShape);
+                    });
                 }
                 case BYTE, INT_ENUM, SHORT, INTEGER, LONG, FLOAT, DOUBLE, BIG_INTEGER, BIG_DECIMAL, BOOLEAN, STRING,
                      TIMESTAMP, DOCUMENT, ENUM, BLOB -> {
