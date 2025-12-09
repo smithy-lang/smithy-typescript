@@ -62,7 +62,7 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["org.xyz.v1#XYZService"]
+            "services": ["org.xyz.v1#XYZService", "org.xyz.v1#UnusedService", "org.xyz.secondary#TertiaryService"]
           }
         }
       ],
@@ -83,7 +83,7 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["org.xyz.v1#XYZService"]
+            "services": ["org.xyz.v1#XYZService", "org.xyz.v1#UnusedService", "org.xyz.secondary#TertiaryService"]
           }
         }
       ],

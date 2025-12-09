@@ -4,6 +4,7 @@ const _GN = "GetNumbers";
 const _GNR = "GetNumbersRequest";
 const _GNRe = "GetNumbersResponse";
 const _HE = "HaltError";
+const _MSLE = "MainServiceLinkedError";
 const _MTE = "MysteryThrottlingError";
 const _RE = "RetryableError";
 const _TE = "TradeEvents";
@@ -35,6 +36,7 @@ import type { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema } 
 import {
   CodedThrottlingError as __CodedThrottlingError,
   HaltError as __HaltError,
+  MainServiceLinkedError as __MainServiceLinkedError,
   MysteryThrottlingError as __MysteryThrottlingError,
   RetryableError as __RetryableError,
   XYZServiceServiceException as __XYZServiceServiceException,
@@ -71,6 +73,12 @@ export var HaltError: StaticErrorSchema = [-3, n0, _HE,
   []
 ];
 TypeRegistry.for(n0).registerError(HaltError, __HaltError);
+export var MainServiceLinkedError: StaticErrorSchema = [-3, n0, _MSLE,
+  { [_e]: _c, [_hE]: 400 },
+  [],
+  []
+];
+TypeRegistry.for(n0).registerError(MainServiceLinkedError, __MainServiceLinkedError);
 export var MysteryThrottlingError: StaticErrorSchema = [-3, n0, _MTE,
   { [_e]: _c },
   [],

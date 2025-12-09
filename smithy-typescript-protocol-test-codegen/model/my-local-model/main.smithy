@@ -12,7 +12,14 @@ service XYZService {
         GetNumbers
         TradeEventStream
     ]
+    errors: [
+        MainServiceLinkedError
+    ]
 }
+
+@error("client")
+@httpError(400)
+structure MainServiceLinkedError {}
 
 @readonly
 operation GetNumbers {
@@ -91,3 +98,35 @@ structure Alpha {
     id: String
     timestamp: Timestamp
 }
+
+@rpcv2Cbor
+@documentation("a second service in the same model, unused.")
+service UnusedService {
+    version: "1.0"
+    operations: [
+        UnusedOperation
+    ]
+    errors: [
+        UnusedServiceLinkedError
+    ]
+}
+
+operation UnusedOperation {
+    input: Unit
+    output: Unit
+    errors: [
+        UnusedServiceOperationLinkedError
+    ]
+}
+
+@error("client")
+@httpError(400)
+structure UnusedServiceOperationLinkedError {}
+
+@error("client")
+@httpError(400)
+structure UnusedServiceLinkedError {}
+
+@error("client")
+@httpError(400)
+structure CompletelyUnlinkedError {}
