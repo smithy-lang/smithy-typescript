@@ -8,6 +8,7 @@ package software.amazon.smithy.typescript.codegen.auth.http.integration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
@@ -187,11 +188,13 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         );
         w.openCollapsibleBlock("""
             new DefaultIdentityProviderConfig({""", "})",
-            httpAuthSchemes.values().stream().anyMatch(scheme ->
-                scheme.getConfigFields().stream().anyMatch(
-                    field -> field.type().equals(ConfigField.Type.MAIN)
-                )
-            ),
+            httpAuthSchemes.values().stream()
+                .filter(Objects::nonNull)
+                .anyMatch(scheme ->
+                    scheme.getConfigFields().stream().anyMatch(
+                        field -> field.type().equals(ConfigField.Type.MAIN)
+                    )
+                ),
             () -> {
                 for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
                     if (scheme == null) {
