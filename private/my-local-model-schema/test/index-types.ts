@@ -16,6 +16,7 @@ export type {
   TradeEventStreamResponse,
   CodedThrottlingError,
   HaltError,
+  MainServiceLinkedError,
   MysteryThrottlingError,
   RetryableError,
   XYZServiceServiceException,

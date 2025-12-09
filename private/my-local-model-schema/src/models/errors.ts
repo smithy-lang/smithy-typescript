@@ -47,6 +47,25 @@ export class HaltError extends __BaseException {
 /**
  * @public
  */
+export class MainServiceLinkedError extends __BaseException {
+  readonly name = "MainServiceLinkedError" as const;
+  readonly $fault = "client" as const;
+  /**
+   * @internal
+   */
+  constructor(opts: __ExceptionOptionType<MainServiceLinkedError, __BaseException>) {
+    super({
+      name: "MainServiceLinkedError",
+      $fault: "client",
+      ...opts,
+    });
+    Object.setPrototypeOf(this, MainServiceLinkedError.prototype);
+  }
+}
+
+/**
+ * @public
+ */
 export class MysteryThrottlingError extends __BaseException {
   readonly name = "MysteryThrottlingError" as const;
   readonly $fault = "client" as const;

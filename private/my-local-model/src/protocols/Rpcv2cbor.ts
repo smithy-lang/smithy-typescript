@@ -35,6 +35,7 @@ import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../
 import {
   CodedThrottlingError,
   HaltError,
+  MainServiceLinkedError,
   MysteryThrottlingError,
   RetryableError,
   XYZServiceServiceException,
@@ -133,6 +134,9 @@ const de_CommandError = async (
     case "HaltError":
     case "org.xyz.v1#HaltError":
       throw await de_HaltErrorRes(parsedOutput, context);
+    case "MainServiceLinkedError":
+    case "org.xyz.v1#MainServiceLinkedError":
+      throw await de_MainServiceLinkedErrorRes(parsedOutput, context);
     case "MysteryThrottlingError":
     case "org.xyz.v1#MysteryThrottlingError":
       throw await de_MysteryThrottlingErrorRes(parsedOutput, context);
@@ -178,6 +182,22 @@ const de_HaltErrorRes = async (
   const body = parsedOutput.body
   const deserialized: any = _json(body);
   const exception = new HaltError({
+    $metadata: deserializeMetadata(parsedOutput),
+    ...deserialized
+  });
+  return __decorateServiceException(exception, body);
+};
+
+/**
+ * deserializeRpcv2cborMainServiceLinkedErrorRes
+ */
+const de_MainServiceLinkedErrorRes = async (
+  parsedOutput: any,
+  context: __SerdeContext
+): Promise<MainServiceLinkedError> => {
+  const body = parsedOutput.body
+  const deserialized: any = _json(body);
+  const exception = new MainServiceLinkedError({
     $metadata: deserializeMetadata(parsedOutput),
     ...deserialized
   });
@@ -381,6 +401,8 @@ const se_Alpha_event = (
     }
 
     // de_HaltError omitted.
+
+    // de_MainServiceLinkedError omitted.
 
     // de_MysteryThrottlingError omitted.
 

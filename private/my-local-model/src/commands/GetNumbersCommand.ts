@@ -69,6 +69,8 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  *
  * @throws {@link XYZServiceServiceException} (client fault)
  *
+ * @throws {@link MainServiceLinkedError} (client fault)
+ *
  * @throws {@link XYZServiceSyntheticServiceException}
  * <p>Base exception class for all service exceptions from XYZService service.</p>
  *

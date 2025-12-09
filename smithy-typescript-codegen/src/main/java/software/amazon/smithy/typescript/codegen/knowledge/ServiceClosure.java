@@ -106,6 +106,7 @@ public final class ServiceClosure implements KnowledgeIndex {
         Set<OperationShape> containedOperations = topDown.getContainedOperations(service);
         operations.addAll(containedOperations);
         scan(containedOperations);
+        scan(service);
         scanned.clear();
         deconflictSchemaVarNames();
     }
@@ -270,6 +271,13 @@ public final class ServiceClosure implements KnowledgeIndex {
                     });
                     operations.add(operation);
                     existsAsSchema.add(operation);
+                }
+                case SERVICE -> {
+//                    ServiceShape serviceShape = (ServiceShape) shape;
+//                    serviceShape.getErrorsSet().forEach(errorShapeId -> {
+//                        Shape errorShape = model.expectShape(errorShapeId);
+//                        scan(errorShape);
+//                    });
                 }
                 case BYTE, INT_ENUM, SHORT, INTEGER, LONG, FLOAT, DOUBLE, BIG_INTEGER, BIG_DECIMAL, BOOLEAN, STRING,
                      TIMESTAMP, DOCUMENT, ENUM, BLOB -> {

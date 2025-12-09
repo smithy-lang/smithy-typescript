@@ -2,6 +2,7 @@ import {
   CodedThrottlingError,
   GetNumbersCommand,
   HaltError,
+  MainServiceLinkedError,
   MysteryThrottlingError,
   RetryableError,
   TradeEventStreamCommand,
@@ -20,6 +21,7 @@ assert(typeof TradeEventStreamCommand === "function");
 // errors
 assert(CodedThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
 assert(HaltError.prototype instanceof XYZServiceSyntheticServiceException);
+assert(MainServiceLinkedError.prototype instanceof XYZServiceSyntheticServiceException);
 assert(MysteryThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
 assert(RetryableError.prototype instanceof XYZServiceSyntheticServiceException);
 assert(XYZServiceServiceException.prototype instanceof XYZServiceSyntheticServiceException);
