@@ -65,7 +65,10 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
 
             if (writeDefaults) {
                 if (parameterGenerator.hasDefault()) {
-                    writer.write(parameterGenerator.defaultAsCodeString());
+                    // Don't write root-level defaults for conflicting parameters
+                    if (!ClientConfigKeys.isKnownConfigKey(key)) {
+                        writer.write(parameterGenerator.defaultAsCodeString());
+                    }
                 }
             } else if (clientContextParams.isEmpty() || clientContextParams.containsKey(key)) {
                 boolean isClientContextParams = !clientContextParams.isEmpty();

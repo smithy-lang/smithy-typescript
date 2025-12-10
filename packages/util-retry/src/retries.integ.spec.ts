@@ -21,7 +21,7 @@ describe("retries", () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
       apiKey: { apiKey: "test-api-key" },
-    } as any);
+    });
 
     requireRequestsFrom(client)
       .toMatch({
@@ -52,7 +52,7 @@ describe("retries", () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
       apiKey: { apiKey: "test-api-key" },
-    } as any);
+    });
 
     requireRequestsFrom(client)
       .toMatch({
@@ -83,7 +83,7 @@ describe("retries", () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
       apiKey: { apiKey: "test-api-key" },
-    } as any);
+    });
 
     requireRequestsFrom(client)
       .toMatch({
@@ -114,7 +114,7 @@ describe("retries", () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
       apiKey: { apiKey: "test-api-key" },
-    } as any);
+    });
 
     requireRequestsFrom(client)
       .toMatch({

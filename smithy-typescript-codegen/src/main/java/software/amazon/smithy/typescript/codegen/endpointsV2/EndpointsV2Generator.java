@@ -116,16 +116,31 @@ public final class EndpointsV2Generator implements Runnable {
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                        Map<String, String> allClientContextParams = ruleSetParameterFinder.getClientContextParams();
+                        if (!allClientContextParams.isEmpty()) {
                             writer.write("clientContextParams?: {");
                             writer.indent();
-                            ruleSetParameterFinder.writeInputConfigCustomClientContextParams(writer);
+                            ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                parameters.accept(new RuleSetParametersVisitor(writer, allClientContextParams, true));
+                            });
                             writer.dedent();
                             writer.write("};");
                         }
-                        // Add direct params (built-ins + custom context params)
-                        Map<String, String> directParams = new HashMap<>(builtInParams);
-                        directParams.putAll(customContextParams);
+                        // Add direct params (built-ins + custom context params, excluding conflicting)
+                        Map<String, String> directParams = new HashMap<>();
+                        // Add all built-ins (they should always be at root level, even if conflicting)
+                        directParams.putAll(builtInParams);
+                        // Add custom context params excluding conflicting ones
+                        customContextParams.entrySet().forEach(entry -> {
+                            String paramName = entry.getKey();
+                            String localName = EndpointsParamNameMap
+                                .getLocalName(paramName);
+                            if (!ClientConfigKeys.isKnownConfigKey(paramName)
+                                && !ClientConfigKeys.isKnownConfigKey(localName)) {
+                                directParams.put(paramName, entry.getValue());
+                            }
+                        });
                         ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                             parameters.accept(new RuleSetParametersVisitor(writer, directParams, true));

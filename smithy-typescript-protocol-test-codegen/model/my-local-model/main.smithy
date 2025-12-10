@@ -9,12 +9,14 @@ use smithy.rules#endpointRuleSet
 @rpcv2Cbor
 @documentation("xyz interfaces")
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
+@httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @clientContextParams(
     customParam: { type: "string", documentation: "Custom parameter" }
     region: { type: "string", documentation: "Conflicting with built-in region" }
     enableFeature: { type: "boolean", documentation: "Feature toggle flag" }
     debugMode: { type: "boolean", documentation: "Debug mode flag" }
     nonConflictingParam: { type: "string", documentation: "Non-conflicting parameter" }
+    logger: { type: "string", documentation: "Conflicting logger parameter" }
     ApiKey: { type: "string", documentation: "ApiKey" }
 )
 @endpointRuleSet({
@@ -27,6 +29,7 @@ use smithy.rules#endpointRuleSet
         enableFeature: { type: "Boolean", required: true, default: true, documentation: "Feature toggle with default" }
         debugMode: { type: "Boolean", required: true, default: false, documentation: "Debug mode with default" }
         nonConflictingParam: { type: "String", required: true, default: "non-conflict-default", documentation: "Non-conflicting with default" }
+        logger: { type: "String", required: true, default: "default-logger", documentation: "Conflicting logger with default" }
     }
     rules: [
         {

@@ -194,27 +194,23 @@ public class RuleSetParameterFinder {
 
     /**
      * Write nested client context parameter defaults to TypeScript writer.
+     * Only includes conflicting parameters with default values.
      */
     public void writeNestedClientContextParamDefaults(TypeScriptWriter writer) {
         Map<String, String> clientContextParams = getClientContextParams();
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-        Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams);
         ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
         if (ruleSet.getObjectMember("parameters").isPresent()) {
             ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
-            boolean hasDefaults = customContextParams.entrySet().stream()
-                .anyMatch(entry -> {
-                    ObjectNode paramNode = parameters.getObjectMember(entry.getKey()).orElse(null);
-                    return paramNode != null && paramNode.containsMember("default");
-                });
-            if (hasDefaults) {
-                writer.write("");
-                writer.writeDocs("@internal");
-                writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
-                    for (Map.Entry<String, String> entry : customContextParams.entrySet()) {
-                        String paramName = entry.getKey();
+            writer.write("");
+            writer.writeDocs("@internal");
+            writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
+                // Write defaults only for conflicting parameters
+                for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
+                    String paramName = entry.getKey();
+                    // Check if this is a conflicting parameter (exists in both clientContextParams and knownConfigKeys)
+                    if (ClientConfigKeys.isKnownConfigKey(paramName) && !builtInParams.containsKey(paramName)) {
                         ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
                         if (paramNode != null && paramNode.containsMember("default")) {
                             software.amazon.smithy.model.node.Node defaultValue = paramNode.getMember("default").get();
@@ -225,8 +221,8 @@ public class RuleSetParameterFinder {
                             }
                         }
                     }
-                });
-            }
+                }
+            });
         }
     }
 
