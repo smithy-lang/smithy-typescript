@@ -1,5 +1,11 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.39.1 (2025-12-10)
+
+### Bug Fixes
+
+- fixed an NPE related to auth schemes ([#1804](https://github.com/smithy-lang/smithy-typescript/pull/1804))
+
 ## 0.39.0 (2025-12-05)
 
 ### Features
