@@ -44,6 +44,12 @@ export const ruleSet: RuleSetObject = {
       default: "non-conflict-default",
       documentation: "Non-conflicting with default",
     },
+    logger: {
+      type: "String",
+      required: true,
+      default: "default-logger",
+      documentation: "Conflicting logger with default",
+    },
   },
   rules: [
     {

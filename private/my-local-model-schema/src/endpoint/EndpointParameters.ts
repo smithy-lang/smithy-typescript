@@ -7,13 +7,14 @@ import type { Endpoint, EndpointParameters as __EndpointParameters, EndpointV2, 
 export interface ClientInputEndpointParameters {
   clientContextParams?: {
     apiKey?: string | undefined | Provider<string | undefined>;
+    region?: string | undefined | Provider<string | undefined>;
     customParam?: string | undefined | Provider<string | undefined>;
     enableFeature?: boolean | undefined | Provider<boolean | undefined>;
     debugMode?: boolean | undefined | Provider<boolean | undefined>;
     nonConflictingParam?: string | undefined | Provider<string | undefined>;
+    logger?: string | undefined | Provider<string | undefined>;
   };
   endpoint?: string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;
-  apiKey?: string | undefined | Provider<string | undefined>;
   customParam?: string | undefined | Provider<string | undefined>;
   enableFeature?: boolean | undefined | Provider<boolean | undefined>;
   debugMode?: boolean | undefined | Provider<boolean | undefined>;
@@ -31,10 +32,7 @@ export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameter
  * @internal
  */
 const clientContextParamDefaults = {
-  nonConflictingParam: "non-conflict-default",
-  customParam: "default-custom-value",
-  debugMode: false,
-  enableFeature: true,
+  logger: "default-logger",
 } as const;
 
 /**
@@ -59,6 +57,7 @@ export const resolveClientEndpointParameters = <T>(
 export const commonParams = {
   ApiKey: { type: "clientContextParams", name: "apiKey" },
   nonConflictingParam: { type: "clientContextParams", name: "nonConflictingParam" },
+  logger: { type: "clientContextParams", name: "logger" },
   region: { type: "clientContextParams", name: "region" },
   customParam: { type: "clientContextParams", name: "customParam" },
   debugMode: { type: "clientContextParams", name: "debugMode" },
@@ -77,4 +76,5 @@ export interface EndpointParameters extends __EndpointParameters {
   enableFeature?: boolean | undefined;
   debugMode?: boolean | undefined;
   nonConflictingParam?: string | undefined;
+  logger?: string | undefined;
 }

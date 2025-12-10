@@ -61,12 +61,12 @@ describe(createConfigValueProvider.name, () => {
 
   it("should prioritize clientContextParams over direct properties", async () => {
     const config = {
-      apiKey: "direct-api-key",
+      stage: "prod",
       clientContextParams: {
-        apiKey: "nested-api-key",
+        stage: "beta",
       },
     };
-    expect(await createConfigValueProvider("apiKey", "apiKey", config, true)()).toEqual("nested-api-key");
+    expect(await createConfigValueProvider("stage", "stage", config, true)()).toEqual("beta");
   });
 
   it("should fall back to direct property when clientContextParams is not provided", async () => {

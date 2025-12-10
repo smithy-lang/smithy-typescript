@@ -21,6 +21,7 @@ public final class ClientConfigKeys {
     static {
         // Initialize with common client config keys
         KNOWN_CONFIG_KEYS.add("profile");
+        KNOWN_CONFIG_KEYS.add("apiKey");
         KNOWN_CONFIG_KEYS.add("region");
         KNOWN_CONFIG_KEYS.add("credentials");
         KNOWN_CONFIG_KEYS.add("endpoint");
@@ -81,6 +82,16 @@ public final class ClientConfigKeys {
      */
     public static void addConfigKey(String key) {
         KNOWN_CONFIG_KEYS.add(key);
+    }
+
+    /**
+     * Check if a key is a known configuration key.
+     *
+     * @param key the configuration key to check
+     * @return true if the key is known
+     */
+    public static boolean isKnownConfigKey(String key) {
+        return KNOWN_CONFIG_KEYS.contains(key);
     }
 
     /**
