@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,8 +35,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.codegen.core.ReservedWords;
-import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -61,6 +58,7 @@ import software.amazon.smithy.typescript.codegen.documentation.StructureExampleG
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.sections.CommandBodyExtraCodeSection;
 import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCodeSection;
@@ -95,9 +93,7 @@ final class CommandGenerator implements Runnable {
     private final ProtocolGenerator protocolGenerator;
     private final ApplicationProtocol applicationProtocol;
     private final SensitiveDataFinder sensitiveDataFinder;
-    private final ReservedWords reservedWords = new ReservedWordsBuilder()
-        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
-        .build();
+    private final ServiceClosure closure;
 
     CommandGenerator(
             TypeScriptSettings settings,
@@ -119,6 +115,7 @@ final class CommandGenerator implements Runnable {
                 .collect(Collectors.toList());
         this.protocolGenerator = protocolGenerator;
         this.applicationProtocol = applicationProtocol;
+        this.closure = ServiceClosure.of(model, service);
         sensitiveDataFinder = new SensitiveDataFinder(model);
 
         symbol = symbolProvider.toSymbol(operation);
@@ -716,7 +713,7 @@ final class CommandGenerator implements Runnable {
     }
 
     private void writeSchemaSerde() {
-        String operationSchema = reservedWords.escape(operation.getId().getName());
+        String operationSchema = closure.getShapeSchemaVariableName(operation, null);
         writer.addRelativeImport(operationSchema, null, Paths.get(
             ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0"
         ));

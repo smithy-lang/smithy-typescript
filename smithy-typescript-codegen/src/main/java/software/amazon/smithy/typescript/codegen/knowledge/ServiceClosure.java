@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.KnowledgeIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -27,7 +30,9 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
 import software.amazon.smithy.typescript.codegen.schema.SchemaReferenceIndex;
+import software.amazon.smithy.typescript.codegen.util.StringStore;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
 
@@ -36,6 +41,9 @@ import software.amazon.smithy.waiters.WaitableTrait;
  */
 @SmithyInternalApi
 public final class ServiceClosure implements KnowledgeIndex {
+    public static final ReservedWords RESERVED_WORDS = new ReservedWordsBuilder()
+        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
+        .build();
     private static final ShapeId UNIT = ShapeId.from("smithy.api#Unit");
     private final Model model;
     private final ServiceShape service;
@@ -177,6 +185,34 @@ public final class ServiceClosure implements KnowledgeIndex {
     public TreeSet<OperationShape> getOperationShapes() {
         return operations;
     }
+
+    /**
+     * @return variable name of the shape's schema, with deconfliction for multiple namespaces with the same
+     * unqualified name.
+     */
+    public String getShapeSchemaVariableName(Shape shape, StringStore store) {
+        if (shape.getId().equals(ShapeId.from("smithy.api#Unit"))) {
+            return "__Unit";
+        }
+        String symbolName = RESERVED_WORDS.escape(shape.getId().getName());
+        if (getRequiresNamingDeconfliction().contains(shape)) {
+            if (null == store) {
+                throw new RuntimeException(
+                    "getShapeSchemaVariableName must be called with a StringStore because the shape "
+                    + shape.getId().getName()
+                    + "requires naming deconfliction."
+                );
+            }
+            symbolName += "_" + store.var(shape.getId().getNamespace(), "n");
+        }
+        /*
+         * The schema suffix allows what would otherwise conflict with the
+         * shape's interface symbol name to be exported at the top level of the same package.
+         */
+        String schemaSuffix = "$";
+        return symbolName + schemaSuffix;
+    }
+
 
     /**
      * Since we use the short names for schema objects, in rare cases there may be a

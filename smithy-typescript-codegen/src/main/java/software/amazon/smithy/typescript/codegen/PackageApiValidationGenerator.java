@@ -17,6 +17,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -111,6 +112,8 @@ public final class PackageApiValidationGenerator {
      * Code written by this method is pure JavaScript (CJS).
      */
     public void writeRuntimeIndexTest() {
+        boolean schemaMode = SchemaGenerationAllowlist.allows(settings.getService(), settings);
+
         writer.write("""
             import assert from "node:assert";""");
         // runtime components include:
@@ -145,6 +148,32 @@ public final class PackageApiValidationGenerator {
                 assert(typeof $L === "function");""",
                 operationSymbol.getName()
             );
+            if (schemaMode) {
+                String schemaVarName = closure.getShapeSchemaVariableName(operation, null);
+                writer.addRelativeImport(
+                    schemaVarName, null, cjsIndex
+                );
+                writer.write("""
+                    assert(typeof $L === "object");""",
+                    schemaVarName
+                );
+            }
+        }
+
+        // structure & union types & modeled errors
+        writer.write("// structural schemas");
+        TreeSet<Shape> structuralShapes = closure.getStructuralNonErrorShapes();
+        for (Shape structuralShape : structuralShapes) {
+            if (schemaMode) {
+                String schemaVarName = closure.getShapeSchemaVariableName(structuralShape, null);
+                writer.addRelativeImport(
+                    schemaVarName, null, cjsIndex
+                );
+                writer.write("""
+                    assert(typeof $L === "object");""",
+                    schemaVarName
+                );
+            }
         }
 
         // enums
@@ -183,6 +212,16 @@ public final class PackageApiValidationGenerator {
                 errorSymbol.getName(),
                 baseExceptionName
             );
+            if (schemaMode) {
+                String schemaVarName = closure.getShapeSchemaVariableName(error, null);
+                writer.addRelativeImport(
+                    schemaVarName, null, cjsIndex
+                );
+                writer.write("""
+                    assert(typeof $L === "object");""",
+                    schemaVarName
+                );
+            }
         }
         writer.addRelativeImport(baseExceptionName, null, cjsIndex);
         writer.write("assert($L.prototype instanceof Error);", baseExceptionName);

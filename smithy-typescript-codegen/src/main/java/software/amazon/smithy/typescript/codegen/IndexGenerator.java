@@ -28,6 +28,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
@@ -122,7 +123,14 @@ final class IndexGenerator {
         );
 
         // Write export statement for commands.
-        writer.write("export * from \"./commands\";");
+        writer.write("""
+            export * from "./commands";"""
+        );
+        if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+            writer.write("""
+                export * from "./schemas/schemas_0";"""
+            );
+        }
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         List<OperationShape> operations = new ArrayList<OperationShape>();
