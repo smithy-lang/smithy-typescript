@@ -32,7 +32,10 @@ export const getRuntimeConfig = (config: RpcV2ProtocolClientConfig) => {
       },
     ],
     logger: config?.logger ?? new NoOpLogger(),
-    protocol: config?.protocol ?? new SmithyRpcV2CborProtocol({ defaultNamespace: "smithy.protocoltests.rpcv2Cbor" }),
+    protocol: config?.protocol ?? SmithyRpcV2CborProtocol,
+    protocolSettings: config?.protocolSettings ?? {
+      defaultNamespace: "smithy.protocoltests.rpcv2Cbor",
+    },
     urlParser: config?.urlParser ?? parseUrl,
     utf8Decoder: config?.utf8Decoder ?? fromUtf8,
     utf8Encoder: config?.utf8Encoder ?? toUtf8,

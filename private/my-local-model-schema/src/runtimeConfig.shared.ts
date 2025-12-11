@@ -32,7 +32,10 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
       },
     ],
     logger: config?.logger ?? new NoOpLogger(),
-    protocol: config?.protocol ?? new SmithyRpcV2CborProtocol({ defaultNamespace: "org.xyz.v1" }),
+    protocol: config?.protocol ?? SmithyRpcV2CborProtocol,
+    protocolSettings: config?.protocolSettings ?? {
+      defaultNamespace: "org.xyz.v1",
+    },
     urlParser: config?.urlParser ?? parseUrl,
     utf8Decoder: config?.utf8Decoder ?? fromUtf8,
     utf8Encoder: config?.utf8Encoder ?? toUtf8,
