@@ -19,105 +19,105 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 public final class ClientBodyExtraCodeSection implements CodeSection {
+  private final TypeScriptSettings settings;
+  private final Model model;
+  private final ServiceShape service;
+  private final SymbolProvider symbolProvider;
+  private final List<TypeScriptIntegration> integrations;
+  private final List<RuntimeClientPlugin> runtimeClientPlugins;
+  private final ApplicationProtocol applicationProtocol;
 
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final ServiceShape service;
-    private final SymbolProvider symbolProvider;
-    private final List<TypeScriptIntegration> integrations;
-    private final List<RuntimeClientPlugin> runtimeClientPlugins;
-    private final ApplicationProtocol applicationProtocol;
+  private ClientBodyExtraCodeSection(Builder builder) {
+    settings = SmithyBuilder.requiredState("settings", builder.settings);
+    model = SmithyBuilder.requiredState("model", builder.model);
+    service = SmithyBuilder.requiredState("service", builder.service);
+    symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
+    integrations = SmithyBuilder.requiredState("integrations", builder.integrations);
+    runtimeClientPlugins =
+        SmithyBuilder.requiredState("runtimeClientPlugins", builder.runtimeClientPlugins);
+    applicationProtocol =
+        SmithyBuilder.requiredState("applicationProtocol", builder.applicationProtocol);
+  }
 
-    private ClientBodyExtraCodeSection(Builder builder) {
-        settings = SmithyBuilder.requiredState("settings", builder.settings);
-        model = SmithyBuilder.requiredState("model", builder.model);
-        service = SmithyBuilder.requiredState("service", builder.service);
-        symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
-        integrations = SmithyBuilder.requiredState("integrations", builder.integrations);
-        runtimeClientPlugins = SmithyBuilder.requiredState("runtimeClientPlugins", builder.runtimeClientPlugins);
-        applicationProtocol = SmithyBuilder.requiredState("applicationProtocol", builder.applicationProtocol);
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public TypeScriptSettings getSettings() {
+    return settings;
+  }
+
+  public Model getModel() {
+    return model;
+  }
+
+  public ServiceShape getService() {
+    return service;
+  }
+
+  public SymbolProvider getSymbolProvider() {
+    return symbolProvider;
+  }
+
+  public List<TypeScriptIntegration> getIntegrations() {
+    return integrations;
+  }
+
+  public List<RuntimeClientPlugin> getRuntimeClientPlugins() {
+    return runtimeClientPlugins;
+  }
+
+  public ApplicationProtocol getApplicationProtocol() {
+    return applicationProtocol;
+  }
+
+  public static class Builder implements SmithyBuilder<ClientBodyExtraCodeSection> {
+    private TypeScriptSettings settings;
+    private Model model;
+    private ServiceShape service;
+    private SymbolProvider symbolProvider;
+    private List<TypeScriptIntegration> integrations;
+    private List<RuntimeClientPlugin> runtimeClientPlugins;
+    private ApplicationProtocol applicationProtocol;
+
+    @Override
+    public ClientBodyExtraCodeSection build() {
+      return new ClientBodyExtraCodeSection(this);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder settings(TypeScriptSettings settings) {
+      this.settings = settings;
+      return this;
     }
 
-    public TypeScriptSettings getSettings() {
-        return settings;
+    public Builder model(Model model) {
+      this.model = model;
+      return this;
     }
 
-    public Model getModel() {
-        return model;
+    public Builder service(ServiceShape service) {
+      this.service = service;
+      return this;
     }
 
-    public ServiceShape getService() {
-        return service;
+    public Builder symbolProvider(SymbolProvider symbolProvider) {
+      this.symbolProvider = symbolProvider;
+      return this;
     }
 
-    public SymbolProvider getSymbolProvider() {
-        return symbolProvider;
+    public Builder integrations(List<TypeScriptIntegration> integrations) {
+      this.integrations = integrations;
+      return this;
     }
 
-    public List<TypeScriptIntegration> getIntegrations() {
-        return integrations;
+    public Builder runtimeClientPlugins(List<RuntimeClientPlugin> runtimeClientPlugins) {
+      this.runtimeClientPlugins = runtimeClientPlugins;
+      return this;
     }
 
-    public List<RuntimeClientPlugin> getRuntimeClientPlugins() {
-        return runtimeClientPlugins;
+    public Builder applicationProtocol(ApplicationProtocol applicationProtocol) {
+      this.applicationProtocol = applicationProtocol;
+      return this;
     }
-
-    public ApplicationProtocol getApplicationProtocol() {
-        return applicationProtocol;
-    }
-
-    public static class Builder implements SmithyBuilder<ClientBodyExtraCodeSection> {
-
-        private TypeScriptSettings settings;
-        private Model model;
-        private ServiceShape service;
-        private SymbolProvider symbolProvider;
-        private List<TypeScriptIntegration> integrations;
-        private List<RuntimeClientPlugin> runtimeClientPlugins;
-        private ApplicationProtocol applicationProtocol;
-
-        @Override
-        public ClientBodyExtraCodeSection build() {
-            return new ClientBodyExtraCodeSection(this);
-        }
-
-        public Builder settings(TypeScriptSettings settings) {
-            this.settings = settings;
-            return this;
-        }
-
-        public Builder model(Model model) {
-            this.model = model;
-            return this;
-        }
-
-        public Builder service(ServiceShape service) {
-            this.service = service;
-            return this;
-        }
-
-        public Builder symbolProvider(SymbolProvider symbolProvider) {
-            this.symbolProvider = symbolProvider;
-            return this;
-        }
-
-        public Builder integrations(List<TypeScriptIntegration> integrations) {
-            this.integrations = integrations;
-            return this;
-        }
-
-        public Builder runtimeClientPlugins(List<RuntimeClientPlugin> runtimeClientPlugins) {
-            this.runtimeClientPlugins = runtimeClientPlugins;
-            return this;
-        }
-
-        public Builder applicationProtocol(ApplicationProtocol applicationProtocol) {
-            this.applicationProtocol = applicationProtocol;
-            return this;
-        }
-    }
+  }
 }

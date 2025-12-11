@@ -32,111 +32,107 @@ import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.WaitableTrait;
 
-/**
- * Generates an index to export the service client and each command.
- */
+/** Generates an index to export the service client and each command. */
 @SmithyInternalApi
 final class IndexGenerator {
 
-    private IndexGenerator() {}
+  private IndexGenerator() {}
 
-    static void writeIndex(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        ProtocolGenerator protocolGenerator,
-        TypeScriptWriter writer,
-        TypeScriptWriter modelIndexer
-    ) {
-        writer.write("/* eslint-disable */");
-        settings
-            .getService(model)
-            .getTrait(DocumentationTrait.class)
-            .ifPresent(trait -> writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
+  static void writeIndex(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      ProtocolGenerator protocolGenerator,
+      TypeScriptWriter writer,
+      TypeScriptWriter modelIndexer) {
 
-        if (settings.generateClient()) {
-            writeClientExports(settings, model, symbolProvider, writer);
-        }
+    writer.write("/* eslint-disable */");
+    settings
+        .getService(model)
+        .getTrait(DocumentationTrait.class)
+        .ifPresent(trait -> writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
 
-        if (settings.generateServerSdk() && protocolGenerator != null) {
-            writeProtocolExports(protocolGenerator, writer);
-            writer.write("export * from \"./server/index\";");
-        }
-
-        // write export statement for models
-        writer.write(
-            // the header comment is already present in the upper writer.
-            modelIndexer.toString().replace("// smithy-typescript generated code", "")
-        );
+    if (settings.generateClient()) {
+      writeClientExports(settings, model, symbolProvider, writer);
     }
 
-    private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
-        String protocolName = ProtocolGenerator.getSanitizedName(protocolGenerator.getName());
-        writer.write("export * as $L from \"./protocols/$L\";", protocolName, protocolName);
+    if (settings.generateServerSdk() && protocolGenerator != null) {
+      writeProtocolExports(protocolGenerator, writer);
+      writer.write("export * from \"./server/index\";");
     }
 
-    static void writeServerIndex(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        FileManifest fileManifest
-    ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
-        ServiceShape service = settings.getService(model);
-        Symbol symbol = symbolProvider.toSymbol(service);
+    // write export statement for models
+    writer.write(
+        // the header comment is already present in the upper writer.
+        modelIndexer.toString().replace("// smithy-typescript generated code", ""));
+  }
 
-        // Write export statement for operations.
-        writer.write("export * from \"./operations\";");
+  private static void writeProtocolExports(
+      ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
+    String protocolName = ProtocolGenerator.getSanitizedName(protocolGenerator.getName());
+    writer.write("export * as $L from \"./protocols/$L\";", protocolName, protocolName);
+  }
 
-        writer.write("export * from \"./$L\"", symbol.getName());
-        fileManifest.writeFile(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts").toString(),
-            writer.toString()
-        );
+  static void writeServerIndex(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      FileManifest fileManifest) {
+    TypeScriptWriter writer = new TypeScriptWriter("");
+    ServiceShape service = settings.getService(model);
+    Symbol symbol = symbolProvider.toSymbol(service);
+
+    // Write export statement for operations.
+    writer.write("export * from \"./operations\";");
+
+    writer.write("export * from \"./$L\"", symbol.getName());
+    fileManifest.writeFile(
+        Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts")
+            .toString(),
+        writer.toString());
+  }
+
+  private static void writeClientExports(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      TypeScriptWriter writer) {
+    ServiceShape service = settings.getService(model);
+    Symbol symbol = symbolProvider.toSymbol(service);
+    // Normalizes client name, e.g. WeatherClient => Weather
+    String normalizedClientName = ReplaceLast.in(symbol.getName(), "Client", "");
+
+    // Write export statement for bare-bones client.
+    writer.write("export * from \"./$L\";", symbol.getName());
+
+    // Write export statement for aggregated client.
+    writer.write("export * from \"./$L\";", normalizedClientName);
+
+    // export endpoints config interface
+    writer.write(
+        "export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
+
+    // Export Runtime Extension and Client ExtensionConfiguration interfaces
+    writer.write("export type { RuntimeExtension } from \"./runtimeExtensions\";");
+    writer.write(
+        "export type { $LExtensionConfiguration } from \"./extensionConfiguration\";",
+        normalizedClientName);
+
+    // Write export statement for commands.
+    writer.write("export * from \"./commands\";");
+
+    TopDownIndex topDownIndex = TopDownIndex.of(model);
+    List<OperationShape> operations = new ArrayList<OperationShape>();
+    operations.addAll(topDownIndex.getContainedOperations(service));
+
+    // Export pagination, if present.
+    if (operations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
+      writer.write("export * from \"./pagination\";");
     }
 
-    private static void writeClientExports(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        TypeScriptWriter writer
-    ) {
-        ServiceShape service = settings.getService(model);
-        Symbol symbol = symbolProvider.toSymbol(service);
-        // Normalizes client name, e.g. WeatherClient => Weather
-        String normalizedClientName = ReplaceLast.in(symbol.getName(), "Client", "");
-
-        // Write export statement for bare-bones client.
-        writer.write("export * from \"./$L\";", symbol.getName());
-
-        // Write export statement for aggregated client.
-        writer.write("export * from \"./$L\";", normalizedClientName);
-
-        // export endpoints config interface
-        writer.write("export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
-
-        // Export Runtime Extension and Client ExtensionConfiguration interfaces
-        writer.write("export type { RuntimeExtension } from \"./runtimeExtensions\";");
-        writer.write(
-            "export type { $LExtensionConfiguration } from \"./extensionConfiguration\";",
-            normalizedClientName
-        );
-
-        // Write export statement for commands.
-        writer.write("export * from \"./commands\";");
-
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        List<OperationShape> operations = new ArrayList<OperationShape>();
-        operations.addAll(topDownIndex.getContainedOperations(service));
-
-        // Export pagination, if present.
-        if (operations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
-            writer.write("export * from \"./pagination\";");
-        }
-
-        // Export waiters, if present.
-        if (operations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
-            writer.write("export * from \"./waiters\";");
-        }
+    // Export waiters, if present.
+    if (operations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
+      writer.write("export * from \"./waiters\";");
     }
+  }
 }

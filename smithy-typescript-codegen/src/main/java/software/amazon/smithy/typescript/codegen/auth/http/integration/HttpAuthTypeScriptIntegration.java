@@ -13,32 +13,31 @@ import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSche
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-/**
- * Java SPI for customizing TypeScript code generation for Identity and Authentication.
- */
+/** Java SPI for customizing TypeScript code generation for Identity and Authentication. */
 @SmithyInternalApi
 public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
-    /**
-     * Register an {@link HttpAuthScheme} that is used to generate the {@code HttpAuthSchemeProvider}
-     * and corresponding config field and runtime config values.
-     * @return an empty optional.
-     */
-    default Optional<HttpAuthScheme> getHttpAuthScheme() {
-        return Optional.empty();
-    }
+  /**
+   * Register an {@link HttpAuthScheme} that is used to generate the {@code HttpAuthSchemeProvider}
+   * and corresponding config field and runtime config values.
+   *
+   * @return an empty optional.
+   */
+  default Optional<HttpAuthScheme> getHttpAuthScheme() {
+    return Optional.empty();
+  }
 
-    /**
-     * Mutate an {@link SupportedHttpAuthSchemesIndex} to mutate registered {@link HttpAuthScheme}s,
-     * e.g. default {@code IdentityProvider}s and {@code HttpSigner}s.
-     * @param supportedHttpAuthSchemesIndex index to mutate.
-     * @param model model
-     * @param settings settings
-     */
-    default void customizeSupportedHttpAuthSchemes(
-        SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex,
-        Model model,
-        TypeScriptSettings settings
-    ) {
-        // pass
-    }
+  /**
+   * Mutate an {@link SupportedHttpAuthSchemesIndex} to mutate registered {@link HttpAuthScheme}s,
+   * e.g. default {@code IdentityProvider}s and {@code HttpSigner}s.
+   *
+   * @param supportedHttpAuthSchemesIndex index to mutate.
+   * @param model model
+   * @param settings settings
+   */
+  default void customizeSupportedHttpAuthSchemes(
+      SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex,
+      Model model,
+      TypeScriptSettings settings) {
+    // pass
+  }
 }

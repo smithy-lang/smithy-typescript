@@ -39,352 +39,331 @@ import software.amazon.smithy.utils.StringUtils;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
 /**
- * Represents a runtime plugin for a client that hooks into various aspects
- * of TypeScript code generation, including adding configuration settings
- * to clients and middleware plugins to both clients and commands.
+ * Represents a runtime plugin for a client that hooks into various aspects of TypeScript code
+ * generation, including adding configuration settings to clients and middleware plugins to both
+ * clients and commands.
  *
- * <p>These runtime client plugins are registered through the
- * {@link TypeScriptIntegration} SPI and applied to the code generator at
- * build-time.
+ * <p>These runtime client plugins are registered through the {@link TypeScriptIntegration} SPI and
+ * applied to the code generator at build-time.
  */
 @SmithyUnstableApi
 public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientPlugin> {
 
-    private final SymbolReference inputConfig;
-    private final SymbolReference resolvedConfig;
-    private final SymbolReference resolveFunction;
-    private final FunctionParamsSupplier additionalResolveFunctionParamsSupplier;
-    private final SymbolReference pluginFunction;
-    private final FunctionParamsSupplier additionalPluginFunctionParamsSupplier;
-    private final SymbolReference destroyFunction;
-    private final BiPredicate<Model, ServiceShape> servicePredicate;
-    private final OperationPredicate operationPredicate;
-    private final SettingsPredicate settingsPredicate;
-    private final Map<String, ClientWriterConsumer> writeAdditionalClientParams;
-    private final Map<String, CommandWriterConsumer> writeAdditionalOperationParams;
+  private final SymbolReference inputConfig;
+  private final SymbolReference resolvedConfig;
+  private final SymbolReference resolveFunction;
+  private final FunctionParamsSupplier additionalResolveFunctionParamsSupplier;
+  private final SymbolReference pluginFunction;
+  private final FunctionParamsSupplier additionalPluginFunctionParamsSupplier;
+  private final SymbolReference destroyFunction;
+  private final BiPredicate<Model, ServiceShape> servicePredicate;
+  private final OperationPredicate operationPredicate;
+  private final SettingsPredicate settingsPredicate;
+  private final Map<String, ClientWriterConsumer> writeAdditionalClientParams;
+  private final Map<String, CommandWriterConsumer> writeAdditionalOperationParams;
 
-    private RuntimeClientPlugin(Builder builder) {
-        inputConfig = builder.inputConfig;
-        resolvedConfig = builder.resolvedConfig;
-        resolveFunction = builder.resolveFunction;
-        additionalResolveFunctionParamsSupplier = builder.additionalResolveFunctionParamsSupplier;
-        pluginFunction = builder.pluginFunction;
-        additionalPluginFunctionParamsSupplier = builder.additionalPluginFunctionParamsSupplier;
-        destroyFunction = builder.destroyFunction;
-        operationPredicate = builder.operationPredicate;
-        servicePredicate = builder.servicePredicate;
-        settingsPredicate = builder.settingsPredicate;
-        writeAdditionalClientParams = builder.writeAdditionalClientParams;
-        writeAdditionalOperationParams = builder.writeAdditionalOperationParams;
+  private RuntimeClientPlugin(Builder builder) {
+    inputConfig = builder.inputConfig;
+    resolvedConfig = builder.resolvedConfig;
+    resolveFunction = builder.resolveFunction;
+    additionalResolveFunctionParamsSupplier = builder.additionalResolveFunctionParamsSupplier;
+    pluginFunction = builder.pluginFunction;
+    additionalPluginFunctionParamsSupplier = builder.additionalPluginFunctionParamsSupplier;
+    destroyFunction = builder.destroyFunction;
+    operationPredicate = builder.operationPredicate;
+    servicePredicate = builder.servicePredicate;
+    settingsPredicate = builder.settingsPredicate;
+    writeAdditionalClientParams = builder.writeAdditionalClientParams;
+    writeAdditionalOperationParams = builder.writeAdditionalOperationParams;
 
-        boolean allNull = (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
-        boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
-        if (!(allNull || allSet)) {
-            throw new IllegalStateException(
-                "If any of inputConfig, resolvedConfig, or resolveFunction are set, then all of " +
-                    "inputConfig, resolvedConfig, and resolveFunction must be set: inputConfig: " +
-                    inputConfig +
-                    ", resolvedConfig: " +
-                    resolvedConfig +
-                    ", resolveFunction: " +
-                    resolveFunction
-            );
-        }
-
-        if (destroyFunction != null && resolvedConfig == null) {
-            throw new IllegalStateException("resolvedConfig must be set if destroyFunction is set");
-        }
+    boolean allNull =
+        (inputConfig == null) && (resolvedConfig == null) && (resolveFunction == null);
+    boolean allSet = (inputConfig != null) && (resolvedConfig != null) && (resolveFunction != null);
+    if (!(allNull || allSet)) {
+      throw new IllegalStateException(
+          "If any of inputConfig, resolvedConfig, or resolveFunction are set, then all of "
+              + "inputConfig, resolvedConfig, and resolveFunction must be set: inputConfig: "
+              + inputConfig
+              + ", resolvedConfig: "
+              + resolvedConfig
+              + ", resolveFunction: "
+              + resolveFunction);
     }
 
-    @FunctionalInterface
-    public interface OperationPredicate {
-        /**
-         * Tests if middleware is applied to an individual operation.
-         *
-         * @param model Model the operation belongs to.
-         * @param service Service the operation belongs to.
-         * @param operation Operation to test.
-         * @return Returns true if middleware should be applied to the operation.
-         */
-        boolean test(Model model, ServiceShape service, OperationShape operation);
+    if (destroyFunction != null && resolvedConfig == null) {
+      throw new IllegalStateException("resolvedConfig must be set if destroyFunction is set");
     }
+  }
 
-    @FunctionalInterface
-    public interface SettingsPredicate {
-        /**
-         * Tests if runtime client plugin should be applied based on settings.
-         *
-         * @param model Model the operation belongs to.
-         * @param service Service the operation belongs to.
-         * @param settings Settings from smithy-build configuration.
-         * @return Returns true if runtime client plugin should be applied.
-         */
-        boolean test(Model model, ServiceShape service, TypeScriptSettings settings);
-    }
-
-    @FunctionalInterface
-    public interface FunctionParamsSupplier {
-        /**
-         * Returns parameters to be passed to a function which can be computed dynamically.
-         *
-         * @param model Model the operation belongs to.
-         * @param service Service the operation belongs to.
-         * @param operation Operation to test.
-         * @return Returns the map of parameters to be passed to a function. The key is the key
-         * for a parameter, and value is the value for a parameter.
-         */
-        Map<String, Object> apply(Model model, ServiceShape service, OperationShape operation);
-    }
-
+  @FunctionalInterface
+  public interface OperationPredicate {
     /**
-     * Gets the optionally present symbol reference that points to the
-     * <em>Input configuration interface</em> for the plugin.
-     *
-     * <p>If the plugin has input, then it also must define a
-     * <em>resolved interface</em>, and a <em>resolve function</em>.
-     *
-     * <pre>{@code
-     * export interface FooConfigInput {
-     *     // ...
-     * }
-     *
-     * export interface FooConfigResolved {
-     *     // ...
-     * }
-     *
-     * export function resolveFooConfig(config: FooConfigInput): FooConfigResolved {
-     *     return {
-     *         ...input,
-     *         // more properties...
-     *     };
-     * }
-     * }</pre>
-     *
-     * @return Returns the optionally present input interface symbol.
-     * @see #getResolvedConfig()
-     * @see #getResolveFunction()
-     */
-    public Optional<SymbolReference> getInputConfig() {
-        return Optional.ofNullable(inputConfig);
-    }
-
-    /**
-     * Gets the optionally present symbol reference that points to the
-     * <em>Resolved configuration interface</em> for the plugin.
-     *
-     * <p>If the plugin has a resolved config, then it also must define
-     * an <em>input interface</em>, and a <em>resolve function</em>.
-     *
-     * @return Returns the optionally present resolved interface symbol.
-     * @see #getInputConfig()
-     * @see #getResolveFunction()
-     */
-    public Optional<SymbolReference> getResolvedConfig() {
-        return Optional.ofNullable(resolvedConfig);
-    }
-
-    /**
-     * Gets the optionally present symbol reference that points to the
-     * function that converts the input configuration type into the
-     * resolved configuration type.
-     *
-     * <p>If the plugin has a resolve function, then it also must define a
-     * <em>resolved interface</em> and a <em>resolve function</em>.
-     * The referenced function must accept the input type of the plugin
-     * as the first positional argument and optional parameters as additional
-     * positional arguments, and return the resolved interface as the return
-     * value.
-     *
-     * @return Returns the optionally present resolve function.
-     * @see #getInputConfig()
-     * @see #getResolvedConfig()
-     */
-    public Optional<SymbolReference> getResolveFunction() {
-        return Optional.ofNullable(resolveFunction);
-    }
-
-    /**
-     * Gets a list of additional parameters to be supplied to the
-     * resolve function. These parameters are to be supplied to resolve
-     * function as second argument. The map is empty if there are
-     * no additional parameters.
+     * Tests if middleware is applied to an individual operation.
      *
      * @param model Model the operation belongs to.
      * @param service Service the operation belongs to.
-     * @param operation Operation to test against.
-     * @return Returns the optionally present map of parameters. The key is the key
-     * for a parameter, and value is the value for a parameter.
+     * @param operation Operation to test.
+     * @return Returns true if middleware should be applied to the operation.
      */
-    public Map<String, Object> getAdditionalResolveFunctionParameters(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
-    ) {
-        if (additionalResolveFunctionParamsSupplier != null) {
-            return additionalResolveFunctionParamsSupplier.apply(model, service, operation);
-        }
-        return new HashMap<String, Object>();
-    }
+    boolean test(Model model, ServiceShape service, OperationShape operation);
+  }
 
+  @FunctionalInterface
+  public interface SettingsPredicate {
     /**
-     * Gets the optionally present symbol reference that points to the
-     * function that injects plugin middleware into the middleware stack
-     * of a client or command at runtime.
-     *
-     * <p>If the plugin has middleware, then the plugin must define a method
-     * that takes the plugin's Resolved configuration as the first argument
-     * and returns a {@code Pluggable<any, any>}.
-     *
-     * <pre>{@code
-     * export function getFooPlugin(
-     *   config: FooConfigResolved
-     * ): Pluggable<any, any> => ({
-     *   applyToStack: clientStack => {
-     *     // add or remove middleware from the stack.
-     *   }
-     * });
-     * }</pre>
-     *
-     * @return Returns the optionally present plugin function.
-     */
-    public Optional<SymbolReference> getPluginFunction() {
-        return Optional.ofNullable(pluginFunction);
-    }
-
-    /**
-     * Gets a list of additional parameters to be supplied to the
-     * plugin function. These parameters are to be supplied to plugin
-     * function as second argument. The map is empty if there are
-     * no additional parameters.
+     * Tests if runtime client plugin should be applied based on settings.
      *
      * @param model Model the operation belongs to.
      * @param service Service the operation belongs to.
-     * @param operation Operation to test against.
-     * @return Returns the optionally present map of parameters. The key is the key
-     * for a parameter, and value is the value for a parameter.
+     * @param settings Settings from smithy-build configuration.
+     * @return Returns true if runtime client plugin should be applied.
      */
-    public Map<String, Object> getAdditionalPluginFunctionParameters(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
-    ) {
-        if (additionalPluginFunctionParamsSupplier != null) {
-            return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
-        }
-        return new HashMap<>();
-    }
+    boolean test(Model model, ServiceShape service, TypeScriptSettings settings);
+  }
 
+  @FunctionalInterface
+  public interface FunctionParamsSupplier {
     /**
-     * Gets a list of additional parameters to be supplied to the
-     * plugin function. These parameters are to be supplied to plugin
-     * function as second argument. The map is empty if there are
-     * no additional parameters.
+     * Returns parameters to be passed to a function which can be computed dynamically.
      *
      * @param model Model the operation belongs to.
      * @param service Service the operation belongs to.
-     * @param operation Operation to test against.
-     * @return Returns the optionally present map of parameters. The key is the key
-     * for a parameter, and value is the value for a parameter.
+     * @param operation Operation to test.
+     * @return Returns the map of parameters to be passed to a function. The key is the key for a
+     *     parameter, and value is the value for a parameter.
      */
-    public Map<String, Object> getAdditionalPluginFunctionParameterWriterConsumers(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
-    ) {
-        if (additionalPluginFunctionParamsSupplier != null) {
-            return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
-        }
-        return new HashMap<>();
-    }
+    Map<String, Object> apply(Model model, ServiceShape service, OperationShape operation);
+  }
 
-    /**
-     * Gets the optionally present symbol reference that points to the
-     * function that is used to clean up any resources when a client is
-     * destroyed.
-     *
-     * <p>The referenced method is expected to take a resolved
-     * configuration interface and destroy any necessary values
-     * (for example, close open connections, deallocate resources, etc).
-     *
-     * <pre>{@code
-     * export function destroyFooConfig(config: FooConfigResolved): void {
-     *   // destroy configuration values here...
-     * }
-     * }</pre>
-     *
-     * @return Returns the optionally present destroy function.
-     */
-    public Optional<SymbolReference> getDestroyFunction() {
-        return Optional.ofNullable(destroyFunction);
-    }
+  /**
+   * Gets the optionally present symbol reference that points to the <em>Input configuration
+   * interface</em> for the plugin.
+   *
+   * <p>If the plugin has input, then it also must define a <em>resolved interface</em>, and a
+   * <em>resolve function</em>.
+   *
+   * <pre>{@code
+   * export interface FooConfigInput {
+   *     // ...
+   * }
+   *
+   * export interface FooConfigResolved {
+   *     // ...
+   * }
+   *
+   * export function resolveFooConfig(config: FooConfigInput): FooConfigResolved {
+   *     return {
+   *         ...input,
+   *         // more properties...
+   *     };
+   * }
+   * }</pre>
+   *
+   * @return Returns the optionally present input interface symbol.
+   * @see #getResolvedConfig()
+   * @see #getResolveFunction()
+   */
+  public Optional<SymbolReference> getInputConfig() {
+    return Optional.ofNullable(inputConfig);
+  }
 
-    /**
-     * Returns true if this plugin applies to the given service.
-     *
-     * <p>By default, a plugin applies to all services but not to specific
-     * commands. You an configure a plugin to apply only to a subset of
-     * services (for example, only apply to a known service or a service
-     * with specific traits) or to no services at all (for example, if
-     * the plugin is meant to by command-specific and not on every
-     * command executed by the service).
-     *
-     * @param model The model the service belongs to.
-     * @param service Service shape to test against.
-     * @return Returns true if the plugin is applied to the given service.
-     * @see #matchesOperation(Model, ServiceShape, OperationShape)
-     */
-    public boolean matchesService(Model model, ServiceShape service) {
-        return servicePredicate.test(model, service);
-    }
+  /**
+   * Gets the optionally present symbol reference that points to the <em>Resolved configuration
+   * interface</em> for the plugin.
+   *
+   * <p>If the plugin has a resolved config, then it also must define an <em>input interface</em>,
+   * and a <em>resolve function</em>.
+   *
+   * @return Returns the optionally present resolved interface symbol.
+   * @see #getInputConfig()
+   * @see #getResolveFunction()
+   */
+  public Optional<SymbolReference> getResolvedConfig() {
+    return Optional.ofNullable(resolvedConfig);
+  }
 
-    /**
-     * Returns true if this plugin applies to the given operation.
-     *
-     * @param model Model the operation belongs to.
-     * @param service Service the operation belongs to.
-     * @param operation Operation to test against.
-     * @return Returns true if the plugin is applied to the given operation.
-     * @see #matchesService(Model, ServiceShape)
-     */
-    public boolean matchesOperation(Model model, ServiceShape service, OperationShape operation) {
-        return operationPredicate.test(model, service, operation);
-    }
+  /**
+   * Gets the optionally present symbol reference that points to the function that converts the
+   * input configuration type into the resolved configuration type.
+   *
+   * <p>If the plugin has a resolve function, then it also must define a <em>resolved interface</em>
+   * and a <em>resolve function</em>. The referenced function must accept the input type of the
+   * plugin as the first positional argument and optional parameters as additional positional
+   * arguments, and return the resolved interface as the return value.
+   *
+   * @return Returns the optionally present resolve function.
+   * @see #getInputConfig()
+   * @see #getResolvedConfig()
+   */
+  public Optional<SymbolReference> getResolveFunction() {
+    return Optional.ofNullable(resolveFunction);
+  }
 
-    /**
-     * Returns true if this plugin applies given a smithy-build configuration.
-     *
-     * @param model Model the operation belongs to.
-     * @param service Service the operation belongs to.
-     * @param settings Settings from smithy-build configuration to test against.
-     * @return Returns true if the plugin is applied given a smithy-build configuration.
-     */
-    public boolean matchesSettings(Model model, ServiceShape service, TypeScriptSettings settings) {
-        return settingsPredicate.test(model, service, settings);
+  /**
+   * Gets a list of additional parameters to be supplied to the resolve function. These parameters
+   * are to be supplied to resolve function as second argument. The map is empty if there are no
+   * additional parameters.
+   *
+   * @param model Model the operation belongs to.
+   * @param service Service the operation belongs to.
+   * @param operation Operation to test against.
+   * @return Returns the optionally present map of parameters. The key is the key for a parameter,
+   *     and value is the value for a parameter.
+   */
+  public Map<String, Object> getAdditionalResolveFunctionParameters(
+      Model model, ServiceShape service, OperationShape operation) {
+    if (additionalResolveFunctionParamsSupplier != null) {
+      return additionalResolveFunctionParamsSupplier.apply(model, service, operation);
     }
+    return new HashMap<String, Object>();
+  }
 
-    /**
-     * @return the map of additional client level plugin params and their writer consumers used
-     * to populate the param values.
-     */
-    public Map<String, ClientWriterConsumer> getClientAddParamsWriterConsumers() {
-        return this.writeAdditionalClientParams;
+  /**
+   * Gets the optionally present symbol reference that points to the function that injects plugin
+   * middleware into the middleware stack of a client or command at runtime.
+   *
+   * <p>If the plugin has middleware, then the plugin must define a method that takes the plugin's
+   * Resolved configuration as the first argument and returns a {@code Pluggable<any, any>}.
+   *
+   * <pre>{@code
+   * export function getFooPlugin(
+   *   config: FooConfigResolved
+   * ): Pluggable<any, any> => ({
+   *   applyToStack: clientStack => {
+   *     // add or remove middleware from the stack.
+   *   }
+   * });
+   * }</pre>
+   *
+   * @return Returns the optionally present plugin function.
+   */
+  public Optional<SymbolReference> getPluginFunction() {
+    return Optional.ofNullable(pluginFunction);
+  }
+
+  /**
+   * Gets a list of additional parameters to be supplied to the plugin function. These parameters
+   * are to be supplied to plugin function as second argument. The map is empty if there are no
+   * additional parameters.
+   *
+   * @param model Model the operation belongs to.
+   * @param service Service the operation belongs to.
+   * @param operation Operation to test against.
+   * @return Returns the optionally present map of parameters. The key is the key for a parameter,
+   *     and value is the value for a parameter.
+   */
+  public Map<String, Object> getAdditionalPluginFunctionParameters(
+      Model model, ServiceShape service, OperationShape operation) {
+    if (additionalPluginFunctionParamsSupplier != null) {
+      return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
     }
+    return new HashMap<>();
+  }
 
-    /**
-     * @return the map of additional operation level plugin params and their writer consumers used
-     * to populate the param values.
-     */
-    public Map<String, CommandWriterConsumer> getOperationAddParamsWriterConsumers() {
-        return this.writeAdditionalOperationParams;
+  /**
+   * Gets a list of additional parameters to be supplied to the plugin function. These parameters
+   * are to be supplied to plugin function as second argument. The map is empty if there are no
+   * additional parameters.
+   *
+   * @param model Model the operation belongs to.
+   * @param service Service the operation belongs to.
+   * @param operation Operation to test against.
+   * @return Returns the optionally present map of parameters. The key is the key for a parameter,
+   *     and value is the value for a parameter.
+   */
+  public Map<String, Object> getAdditionalPluginFunctionParameterWriterConsumers(
+      Model model, ServiceShape service, OperationShape operation) {
+    if (additionalPluginFunctionParamsSupplier != null) {
+      return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
     }
+    return new HashMap<>();
+  }
 
-    public static Builder builder() {
-        return new Builder();
-    }
+  /**
+   * Gets the optionally present symbol reference that points to the function that is used to clean
+   * up any resources when a client is destroyed.
+   *
+   * <p>The referenced method is expected to take a resolved configuration interface and destroy any
+   * necessary values (for example, close open connections, deallocate resources, etc).
+   *
+   * <pre>{@code
+   * export function destroyFooConfig(config: FooConfigResolved): void {
+   *   // destroy configuration values here...
+   * }
+   * }</pre>
+   *
+   * @return Returns the optionally present destroy function.
+   */
+  public Optional<SymbolReference> getDestroyFunction() {
+    return Optional.ofNullable(destroyFunction);
+  }
 
-    @Override
-    public Builder toBuilder() {
-        Builder builder = builder()
+  /**
+   * Returns true if this plugin applies to the given service.
+   *
+   * <p>By default, a plugin applies to all services but not to specific commands. You an configure
+   * a plugin to apply only to a subset of services (for example, only apply to a known service or a
+   * service with specific traits) or to no services at all (for example, if the plugin is meant to
+   * by command-specific and not on every command executed by the service).
+   *
+   * @param model The model the service belongs to.
+   * @param service Service shape to test against.
+   * @return Returns true if the plugin is applied to the given service.
+   * @see #matchesOperation(Model, ServiceShape, OperationShape)
+   */
+  public boolean matchesService(Model model, ServiceShape service) {
+    return servicePredicate.test(model, service);
+  }
+
+  /**
+   * Returns true if this plugin applies to the given operation.
+   *
+   * @param model Model the operation belongs to.
+   * @param service Service the operation belongs to.
+   * @param operation Operation to test against.
+   * @return Returns true if the plugin is applied to the given operation.
+   * @see #matchesService(Model, ServiceShape)
+   */
+  public boolean matchesOperation(Model model, ServiceShape service, OperationShape operation) {
+    return operationPredicate.test(model, service, operation);
+  }
+
+  /**
+   * Returns true if this plugin applies given a smithy-build configuration.
+   *
+   * @param model Model the operation belongs to.
+   * @param service Service the operation belongs to.
+   * @param settings Settings from smithy-build configuration to test against.
+   * @return Returns true if the plugin is applied given a smithy-build configuration.
+   */
+  public boolean matchesSettings(Model model, ServiceShape service, TypeScriptSettings settings) {
+    return settingsPredicate.test(model, service, settings);
+  }
+
+  /**
+   * @return the map of additional client level plugin params and their writer consumers used to
+   *     populate the param values.
+   */
+  public Map<String, ClientWriterConsumer> getClientAddParamsWriterConsumers() {
+    return this.writeAdditionalClientParams;
+  }
+
+  /**
+   * @return the map of additional operation level plugin params and their writer consumers used to
+   *     populate the param values.
+   */
+  public Map<String, CommandWriterConsumer> getOperationAddParamsWriterConsumers() {
+    return this.writeAdditionalOperationParams;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  @Override
+  public Builder toBuilder() {
+    Builder builder =
+        builder()
             .inputConfig(inputConfig)
             .resolvedConfig(resolvedConfig)
             .resolveFunction(resolveFunction)
@@ -393,582 +372,548 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             .additionalPluginFunctionParamsSupplier(additionalPluginFunctionParamsSupplier)
             .destroyFunction(destroyFunction);
 
-        // Set these directly since their setters have mutual side-effects.
-        builder.operationPredicate = operationPredicate;
-        builder.servicePredicate = servicePredicate;
+    // Set these directly since their setters have mutual side-effects.
+    builder.operationPredicate = operationPredicate;
+    builder.servicePredicate = servicePredicate;
 
-        return builder;
+    return builder;
+  }
+
+  @Override
+  public String toString() {
+    return "RuntimeClientPlugin{"
+        + "inputConfig="
+        + inputConfig
+        + ", resolvedConfig="
+        + resolvedConfig
+        + ", resolveFunction="
+        + resolveFunction
+        + ", pluginFunction="
+        + pluginFunction
+        + ", destroyFunction="
+        + destroyFunction
+        + '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    } else if (!(o instanceof RuntimeClientPlugin)) {
+      return false;
     }
 
-    @Override
-    public String toString() {
-        return (
-            "RuntimeClientPlugin{" +
-            "inputConfig=" +
-            inputConfig +
-            ", resolvedConfig=" +
-            resolvedConfig +
-            ", resolveFunction=" +
-            resolveFunction +
-            ", pluginFunction=" +
-            pluginFunction +
-            ", destroyFunction=" +
-            destroyFunction +
-            '}'
-        );
-    }
+    RuntimeClientPlugin that = (RuntimeClientPlugin) o;
+    return Objects.equals(inputConfig, that.inputConfig)
+        && Objects.equals(resolvedConfig, that.resolvedConfig)
+        && Objects.equals(resolveFunction, that.resolveFunction)
+        && Objects.equals(
+            additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier)
+        && Objects.equals(pluginFunction, that.pluginFunction)
+        && Objects.equals(
+            additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier)
+        && Objects.equals(destroyFunction, that.destroyFunction)
+        && servicePredicate.equals(that.servicePredicate)
+        && operationPredicate.equals(that.operationPredicate);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        inputConfig, resolvedConfig, resolveFunction, pluginFunction, destroyFunction);
+  }
+
+  /** Builds an {@code RuntimePlugin}. */
+  public static final class Builder implements SmithyBuilder<RuntimeClientPlugin> {
+    private SymbolReference inputConfig;
+    private SymbolReference resolvedConfig;
+    private SymbolReference resolveFunction;
+    private FunctionParamsSupplier additionalResolveFunctionParamsSupplier;
+    private SymbolReference pluginFunction;
+    private FunctionParamsSupplier additionalPluginFunctionParamsSupplier;
+    private SymbolReference destroyFunction;
+    private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
+    private OperationPredicate operationPredicate = (model, service, operation) -> false;
+    private SettingsPredicate settingsPredicate = (model, service, settings) -> true;
+    private Map<String, ClientWriterConsumer> writeAdditionalClientParams = Collections.emptyMap();
+    private Map<String, CommandWriterConsumer> writeAdditionalOperationParams =
+        Collections.emptyMap();
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (!(o instanceof RuntimeClientPlugin)) {
-            return false;
-        }
-
-        RuntimeClientPlugin that = (RuntimeClientPlugin) o;
-        return (
-            Objects.equals(inputConfig, that.inputConfig) &&
-            Objects.equals(resolvedConfig, that.resolvedConfig) &&
-            Objects.equals(resolveFunction, that.resolveFunction) &&
-            Objects.equals(additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier) &&
-            Objects.equals(pluginFunction, that.pluginFunction) &&
-            Objects.equals(additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier) &&
-            Objects.equals(destroyFunction, that.destroyFunction) &&
-            servicePredicate.equals(that.servicePredicate) &&
-            operationPredicate.equals(that.operationPredicate)
-        );
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(inputConfig, resolvedConfig, resolveFunction, pluginFunction, destroyFunction);
+    public RuntimeClientPlugin build() {
+      return new RuntimeClientPlugin(this);
     }
 
     /**
-     * Builds an {@code RuntimePlugin}.
+     * Sets the symbol reference used to configure a client input configuration.
+     *
+     * <p>If this is set, then both {@link #resolvedConfig} and {@link #resolveFunction} must also
+     * be set.
+     *
+     * @param inputConfig Input configuration symbol to set.
+     * @return Returns the builder.
+     * @see #getInputConfig()
      */
-    public static final class Builder implements SmithyBuilder<RuntimeClientPlugin> {
-
-        private SymbolReference inputConfig;
-        private SymbolReference resolvedConfig;
-        private SymbolReference resolveFunction;
-        private FunctionParamsSupplier additionalResolveFunctionParamsSupplier;
-        private SymbolReference pluginFunction;
-        private FunctionParamsSupplier additionalPluginFunctionParamsSupplier;
-        private SymbolReference destroyFunction;
-        private BiPredicate<Model, ServiceShape> servicePredicate = (model, service) -> true;
-        private OperationPredicate operationPredicate = (model, service, operation) -> false;
-        private SettingsPredicate settingsPredicate = (model, service, settings) -> true;
-        private Map<String, ClientWriterConsumer> writeAdditionalClientParams = Collections.emptyMap();
-        private Map<String, CommandWriterConsumer> writeAdditionalOperationParams = Collections.emptyMap();
-
-        @Override
-        public RuntimeClientPlugin build() {
-            return new RuntimeClientPlugin(this);
-        }
-
-        /**
-         * Sets the symbol reference used to configure a client input configuration.
-         *
-         * <p>If this is set, then both {@link #resolvedConfig} and
-         * {@link #resolveFunction} must also be set.
-         *
-         * @param inputConfig Input configuration symbol to set.
-         * @return Returns the builder.
-         * @see #getInputConfig()
-         */
-        public Builder inputConfig(SymbolReference inputConfig) {
-            this.inputConfig = inputConfig;
-            return this;
-        }
-
-        /**
-         * Sets the symbol used to configure a client input configuration.
-         *
-         * <p>If this is set, then both {@link #resolvedConfig} and
-         * {@link #resolveFunction} must also be set.
-         *
-         * @param inputConfig Input configuration symbol to set.
-         * @return Returns the builder.
-         * @see #getInputConfig()
-         */
-        public Builder inputConfig(Symbol inputConfig) {
-            return inputConfig(SymbolReference.builder().symbol(inputConfig).build());
-        }
-
-        /**
-         * Sets the symbol refernece used to configure a client resolved configuration.
-         *
-         * <p>If this is set, then both {@link #resolveFunction} and
-         * {@link #inputConfig} must also be set.
-         *
-         * @param resolvedConfig Resolved configuration symbol to set.
-         * @return Returns the builder.
-         * @see #getResolvedConfig()
-         */
-        public Builder resolvedConfig(SymbolReference resolvedConfig) {
-            this.resolvedConfig = resolvedConfig;
-            return this;
-        }
-
-        /**
-         * Sets the symbol used to configure a client resolved configuration.
-         *
-         * <p>If this is set, then both {@link #resolveFunction} and
-         * {@link #inputConfig} must also be set.
-         *
-         * @param resolvedConfig Resolved configuration symbol to set.
-         * @return Returns the builder.
-         * @see #getResolvedConfig()
-         */
-        public Builder resolvedConfig(Symbol resolvedConfig) {
-            return resolvedConfig(SymbolReference.builder().symbol(resolvedConfig).build());
-        }
-
-        /**
-         * Sets the symbol reference that is invoked in order to convert the
-         * input symbol type to a resolved symbol type.
-         *
-         * <p>If this is set, then both {@link #resolvedConfig} and
-         * {@link #inputConfig} must also be set.
-         *
-         * @param resolveFunction Function used to convert input to resolved.
-         * @return Returns the builder.
-         * @see #getResolveFunction()
-         */
-        public Builder resolveFunction(SymbolReference resolveFunction) {
-            this.resolveFunction = resolveFunction;
-            return this;
-        }
-
-        /**
-         * Sets the symbol reference that is invoked in order to convert the
-         * input symbol type to a resolved symbol type.
-         *
-         * <p>If this is set, then both {@link #resolvedConfig} and
-         * {@link #inputConfig} must also be set.
-         *
-         * @param resolveFunction Function used to convert input to resolved.
-         * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed
-         * as resolve function input.
-         * @return Returns the builder.
-         * @see #getResolveFunction()
-         */
-        public Builder resolveFunction(
-            SymbolReference resolveFunction,
-            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
-        ) {
-            this.resolveFunction = resolveFunction;
-            this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
-            return this;
-        }
-
-        /**
-         * Sets the symbol that is invoked in order to convert the
-         * input symbol type to a resolved symbol type.
-         *
-         * <p>If this is set, then both {@link #resolvedConfig} and
-         * {@link #inputConfig} must also be set.
-         *
-         * @param resolveFunction Function used to convert input to resolved.
-         * @return Returns the builder.
-         * @see #getResolveFunction()
-         */
-        public Builder resolveFunction(Symbol resolveFunction) {
-            return resolveFunction(SymbolReference.builder().symbol(resolveFunction).build());
-        }
-
-        /**
-         * Sets the symbol that is invoked in order to convert the
-         * input symbol type to a resolved symbol type.
-         *
-         * <p>If this is set, then both {@link #resolvedConfig} and
-         * {@link #inputConfig} must also be set.
-         *
-         * @param resolveFunction Function used to convert input to resolved.
-         * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed
-         * as resolve function input.
-         * @return Returns the builder.
-         * @see #getResolveFunction()
-         */
-        public Builder resolveFunction(
-            Symbol resolveFunction,
-            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
-        ) {
-            return resolveFunction(
-                SymbolReference.builder().symbol(resolveFunction).build(),
-                additionalResolveFunctionParamsSupplier
-            );
-        }
-
-        /**
-         * Set function which returns input parameters to resolve function. Set
-         * function to return empty map to remove the current parameters.
-         *
-         * <p>If this is set, then all of {@link #resolveFunction},
-         * {@link #resolvedConfig} and {@link #inputConfig} must also be set.
-         *
-         * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed
-         * as resolve function input.
-         * @return Returns the builder.
-         * @see #getResolveFunction()
-         */
-        public Builder additionalResolveFunctionParamsSupplier(
-            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
-        ) {
-            this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
-            return this;
-        }
-
-        /**
-         * Sets a function symbol reference used to configure clients and
-         * commands to use a specific middleware function.
-         *
-         * @param pluginFunction Plugin function symbol to invoke.
-         * @return Returns the builder.
-         * @see #getPluginFunction()
-         */
-        public Builder pluginFunction(SymbolReference pluginFunction) {
-            this.pluginFunction = pluginFunction;
-            return this;
-        }
-
-        /**
-         * Sets a function symbol reference used to configure clients and
-         * commands to use a specific middleware function.
-         *
-         * @param pluginFunction Plugin function symbol to invoke.
-         * @param pluginFunctionParamsSupplier Function which returns params to be passed as plugin function input.
-         * @return Returns the builder.
-         * @see #getPluginFunction()
-         */
-        public Builder pluginFunction(
-            SymbolReference pluginFunction,
-            FunctionParamsSupplier pluginFunctionParamsSupplier
-        ) {
-            this.pluginFunction = pluginFunction;
-            this.additionalPluginFunctionParamsSupplier = pluginFunctionParamsSupplier;
-            return this;
-        }
-
-        /**
-         * Sets a function symbol used to configure clients and commands to
-         * use a specific middleware function.
-         *
-         * @param pluginFunction Plugin function symbol to invoke.
-         * @return Returns the builder.
-         * @see #getPluginFunction()
-         */
-        public Builder pluginFunction(Symbol pluginFunction) {
-            return pluginFunction(SymbolReference.builder().symbol(pluginFunction).build());
-        }
-
-        /**
-         * Sets a function symbol used to configure clients and commands to
-         * use a specific middleware function.
-         *
-         * @param pluginFunction Plugin function symbol to invoke.
-         * @param additionalPluginFunctionParamsSupplier Function which returns params to be passed
-         * as plugin function input.
-         * @return Returns the builder.
-         * @see #getPluginFunction()
-         */
-        public Builder pluginFunction(
-            Symbol pluginFunction,
-            FunctionParamsSupplier additionalPluginFunctionParamsSupplier
-        ) {
-            return pluginFunction(
-                SymbolReference.builder().symbol(pluginFunction).build(),
-                additionalPluginFunctionParamsSupplier
-            );
-        }
-
-        /**
-         * Set function which returns input parameters to plugin function. Set
-         * function to return empty map to remove the current parameters.
-         *
-         * @param additionalPluginFunctionParamsSupplier Function which returns params to be passed
-         * as plugin function input.
-         * @return Returns the builder.
-         * @see #getPluginFunction()
-         */
-        public Builder additionalPluginFunctionParamsSupplier(
-            FunctionParamsSupplier additionalPluginFunctionParamsSupplier
-        ) {
-            this.additionalPluginFunctionParamsSupplier = additionalPluginFunctionParamsSupplier;
-            return this;
-        }
-
-        /**
-         * Sets a function symbol reference to call from a client in the
-         * {@code destroy} function of a TypeScript client.
-         *
-         * <p>The referenced function takes the resolved configuration
-         * type as the first argument. {@link #resolvedConfig} must be
-         * configured if {@code destroyFunction} is set.
-         *
-         * @param destroyFunction Function to invoke from a client.
-         * @return Returns the builder.
-         * @see #getDestroyFunction()
-         */
-        public Builder destroyFunction(SymbolReference destroyFunction) {
-            this.destroyFunction = destroyFunction;
-            return this;
-        }
-
-        /**
-         * Sets a function symbol to call from a client in the {@code destroy}
-         * function of a TypeScript client.
-         *
-         * <p>The referenced function takes the resolved configuration
-         * type as the first argument. {@link #resolvedConfig} must be
-         * configured if {@code destroyFunction} is set.
-         *
-         * @param destroyFunction Function to invoke from a client.
-         * @return Returns the builder.
-         * @see #getDestroyFunction()
-         */
-        public Builder destroyFunction(Symbol destroyFunction) {
-            return destroyFunction(SymbolReference.builder().symbol(destroyFunction).build());
-        }
-
-        /**
-         * Sets a predicate that determines if the plugin applies to a
-         * specific operation.
-         *
-         * <p>When this method is called, the {@code servicePredicate} is
-         * automatically configured to return false for every service.
-         *
-         * <p>By default, a plugin applies globally to a service, which thereby
-         * applies to every operation when the middleware stack is copied.
-         *
-         * @param operationPredicate Operation matching predicate.
-         * @return Returns the builder.
-         * @see #servicePredicate(BiPredicate)
-         */
-        public Builder operationPredicate(OperationPredicate operationPredicate) {
-            this.operationPredicate = Objects.requireNonNull(operationPredicate);
-            servicePredicate = (model, service) -> false;
-            return this;
-        }
-
-        /**
-         * Configures a predicate that makes a plugin only apply to a set of
-         * operations that match one or more of the set of given shape names,
-         * and ensures that the plugin is not applied globally to services.
-         *
-         * <p>By default, a plugin applies globally to a service, which thereby
-         * applies to every operation when the middleware stack is copied.
-         *
-         * @param operationNames Set of operation names.
-         * @return Returns the builder.
-         */
-        public Builder appliesOnlyToOperations(Set<String> operationNames) {
-            operationPredicate((model, service, operation) -> operationNames.contains(operation.getId().getName()));
-            return servicePredicate((model, service) -> false);
-        }
-
-        /**
-         * Configures a predicate that applies the plugin to a service if the
-         * predicate matches a given model and service and settings.
-         *
-         * <p>Setting a custom settings predicate is useful for plugins
-         * that should only be applied based on certain smithy-build
-         * configurations.
-         *
-         * @param settingsPredicate Settings predicate.
-         * @return Returns the builder.
-         */
-        public Builder settingsPredicate(SettingsPredicate settingsPredicate) {
-            this.settingsPredicate = Objects.requireNonNull(settingsPredicate);
-            return this;
-        }
-
-        /**
-         * Configures a predicate that applies the plugin to a service if the
-         * predicate matches a given model and service.
-         *
-         * <p>When this method is called, the {@code operationPredicate} is
-         * automatically configured to return false for every operation,
-         * causing the plugin to only apply to services and not to individual
-         * operations.
-         *
-         * <p>By default, a plugin applies globally to a service, which
-         * thereby applies to every operation when the middleware stack is
-         * copied. Setting a custom service predicate is useful for plugins
-         * that should only be applied to specific services or only applied
-         * at the operation level.
-         *
-         * @param servicePredicate Service predicate.
-         * @return Returns the builder.
-         * @see #operationPredicate(OperationPredicate)
-         */
-        public Builder servicePredicate(BiPredicate<Model, ServiceShape> servicePredicate) {
-            this.servicePredicate = Objects.requireNonNull(servicePredicate);
-            operationPredicate = (model, service, operation) -> false;
-            return this;
-        }
-
-        /**
-         * Enables access to the writer for adding imports/dependencies.
-         */
-        public Builder withAdditionalClientParams(Map<String, ClientWriterConsumer> writeAdditionalClientParams) {
-            // enforce consistent sorting during codegen.
-            this.writeAdditionalClientParams = new TreeMap<>(writeAdditionalClientParams);
-            return this;
-        }
-
-        /**
-         * Enables access to the writer for adding imports/dependencies.
-         */
-        public Builder withAdditionalOperationParams(
-            Map<String, CommandWriterConsumer> writeAdditionalOperationParams
-        ) {
-            // enforce consistent sorting during codegen.
-            this.writeAdditionalOperationParams = new TreeMap<>(writeAdditionalOperationParams);
-            return this;
-        }
-
-        /**
-         * Configures various aspects of the builder based on naming conventions
-         * defined by the provided {@link Convention} values.
-         *
-         * <p>If no {@code conventions} are provided, a default value of
-         * {@link Convention#HAS_CONFIG} and {@link Convention#HAS_MIDDLEWARE}
-         * is used.
-         *
-         * @param dependency Dependency to pull the package name and version from.
-         * @param pluginName The name of the plugin that is used when generating
-         *   symbol names for each {@code convention}. (for example, "Foo").
-         * @param conventions Conventions to use when configuring the builder.
-         * @return Returns the builder.
-         */
-        public Builder withConventions(SymbolDependency dependency, String pluginName, Convention... conventions) {
-            return withConventions(dependency.getPackageName(), dependency.getVersion(), pluginName, conventions);
-        }
-
-        /**
-         * Configures various aspects of the builder based on naming conventions
-         * defined by the provided {@link Convention} values.
-         *
-         * <p>If no {@code conventions} are provided, a default value of
-         * {@link Convention#HAS_CONFIG} and {@link Convention#HAS_MIDDLEWARE}
-         * is used.
-         *
-         * @param packageName The name of the package to use as an import and
-         *   add as a dependency for each generated symbol
-         *   (for example, "foo/baz").
-         * @param version The version number to use in the symbol dependencies.
-         *   (for example, "1.0.0").
-         * @param pluginName The name of the plugin that is used when generating
-         *   symbol names for each {@code convention}. (for example, "Foo").
-         * @param conventions Conventions to use when configuring the builder.
-         * @return Returns the builder.
-         */
-        public Builder withConventions(
-            String packageName,
-            String version,
-            String pluginName,
-            Convention... conventions
-        ) {
-            pluginName = StringUtils.capitalize(pluginName);
-
-            if (conventions.length == 0) {
-                conventions = Convention.DEFAULT;
-            }
-
-            for (Convention convention : conventions) {
-                switch (convention) {
-                    case HAS_CONFIG:
-                        inputConfig(Convention.createTypeSymbol(packageName, version, pluginName + "InputConfig"));
-                        resolvedConfig(
-                            Convention.createTypeSymbol(packageName, version, pluginName + "ResolvedConfig")
-                        );
-                        resolveFunction(
-                            Convention.createSymbol(packageName, version, "resolve" + pluginName + "Config")
-                        );
-                        break;
-                    case HAS_MIDDLEWARE:
-                        pluginFunction(Convention.createSymbol(packageName, version, "get" + pluginName + "Plugin"));
-                        break;
-                    case HAS_DESTROY:
-                        destroyFunction(Convention.createSymbol(packageName, version, "destroy" + pluginName));
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unexpected switch case: " + convention);
-                }
-            }
-
-            return this;
-        }
+    public Builder inputConfig(SymbolReference inputConfig) {
+      this.inputConfig = inputConfig;
+      return this;
     }
 
     /**
-     * Conventions used in {@link Builder#withConventions}.
+     * Sets the symbol used to configure a client input configuration.
+     *
+     * <p>If this is set, then both {@link #resolvedConfig} and {@link #resolveFunction} must also
+     * be set.
+     *
+     * @param inputConfig Input configuration symbol to set.
+     * @return Returns the builder.
+     * @see #getInputConfig()
      */
-    public enum Convention {
-        /**
-         * Whether or not to generate a configuration Input type, Resolved type,
-         * and resolveConfig function.
-         *
-         * <p>Passing this enum to {@link Builder#withConventions} will cause
-         * the client to resolve configuration using a function named
-         * {@code "resolve" + pluginName + "Config"} (e.g., "resolveFooConfig"),
-         * use an input type named {@code pluginName + "InputConfig"}
-         * (e.g., "FooInputConfig"), and a resolved type named
-         * {@code pluginName + "ResolvedConfig"} (e.g., "FooResolvedConfig").
-         *
-         * @see #getInputConfig()
-         * @see #getResolvedConfig()
-         * @see #getResolveFunction()
-         */
-        HAS_CONFIG,
-
-        /**
-         * Whether or not the plugin applies middleware.
-         *
-         * <p>Passing this enum to {@link Builder#withConventions} will
-         * cause matching clients and commands to call a function name
-         * {@code "get" + pluginName + "Plugin"} to apply middleware
-         * (e.g., "getFooPlugin"). The referenced function is expected
-         * to accept a resolved configuration type and return a
-         * TypeScript {@code Pluggable}.
-         *
-         * @see #getPluginFunction()
-         */
-        HAS_MIDDLEWARE,
-
-        /**
-         * Whether or not the plugin has a destroy method.
-         *
-         * <p>Passing this enum to {@code withConventions} will cause matching
-         * clients to invoke a method named {@code "destroy" + pluginName}
-         * in the {@code destroy} method of the client (e.g., "destroyFoo").
-         * The referenced function is expected to accept the resolved
-         * configuration type of the plugin.
-         *
-         * @see #getDestroyFunction()
-         */
-        HAS_DESTROY;
-
-        private static final Convention[] DEFAULT = { HAS_CONFIG, HAS_MIDDLEWARE };
-
-        private static Symbol createSymbol(String packageName, String version, String name) {
-            return Symbol.builder()
-                .namespace(packageName, "/")
-                .name(name)
-                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
-                .build();
-        }
-
-        private static Symbol createTypeSymbol(String packageName, String version, String name) {
-            return Symbol.builder()
-                .namespace(packageName, "/")
-                .name(name)
-                .putProperty("typeOnly", true)
-                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
-                .build();
-        }
+    public Builder inputConfig(Symbol inputConfig) {
+      return inputConfig(SymbolReference.builder().symbol(inputConfig).build());
     }
+
+    /**
+     * Sets the symbol refernece used to configure a client resolved configuration.
+     *
+     * <p>If this is set, then both {@link #resolveFunction} and {@link #inputConfig} must also be
+     * set.
+     *
+     * @param resolvedConfig Resolved configuration symbol to set.
+     * @return Returns the builder.
+     * @see #getResolvedConfig()
+     */
+    public Builder resolvedConfig(SymbolReference resolvedConfig) {
+      this.resolvedConfig = resolvedConfig;
+      return this;
+    }
+
+    /**
+     * Sets the symbol used to configure a client resolved configuration.
+     *
+     * <p>If this is set, then both {@link #resolveFunction} and {@link #inputConfig} must also be
+     * set.
+     *
+     * @param resolvedConfig Resolved configuration symbol to set.
+     * @return Returns the builder.
+     * @see #getResolvedConfig()
+     */
+    public Builder resolvedConfig(Symbol resolvedConfig) {
+      return resolvedConfig(SymbolReference.builder().symbol(resolvedConfig).build());
+    }
+
+    /**
+     * Sets the symbol reference that is invoked in order to convert the input symbol type to a
+     * resolved symbol type.
+     *
+     * <p>If this is set, then both {@link #resolvedConfig} and {@link #inputConfig} must also be
+     * set.
+     *
+     * @param resolveFunction Function used to convert input to resolved.
+     * @return Returns the builder.
+     * @see #getResolveFunction()
+     */
+    public Builder resolveFunction(SymbolReference resolveFunction) {
+      this.resolveFunction = resolveFunction;
+      return this;
+    }
+
+    /**
+     * Sets the symbol reference that is invoked in order to convert the input symbol type to a
+     * resolved symbol type.
+     *
+     * <p>If this is set, then both {@link #resolvedConfig} and {@link #inputConfig} must also be
+     * set.
+     *
+     * @param resolveFunction Function used to convert input to resolved.
+     * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed as
+     *     resolve function input.
+     * @return Returns the builder.
+     * @see #getResolveFunction()
+     */
+    public Builder resolveFunction(
+        SymbolReference resolveFunction,
+        FunctionParamsSupplier additionalResolveFunctionParamsSupplier) {
+      this.resolveFunction = resolveFunction;
+      this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
+      return this;
+    }
+
+    /**
+     * Sets the symbol that is invoked in order to convert the input symbol type to a resolved
+     * symbol type.
+     *
+     * <p>If this is set, then both {@link #resolvedConfig} and {@link #inputConfig} must also be
+     * set.
+     *
+     * @param resolveFunction Function used to convert input to resolved.
+     * @return Returns the builder.
+     * @see #getResolveFunction()
+     */
+    public Builder resolveFunction(Symbol resolveFunction) {
+      return resolveFunction(SymbolReference.builder().symbol(resolveFunction).build());
+    }
+
+    /**
+     * Sets the symbol that is invoked in order to convert the input symbol type to a resolved
+     * symbol type.
+     *
+     * <p>If this is set, then both {@link #resolvedConfig} and {@link #inputConfig} must also be
+     * set.
+     *
+     * @param resolveFunction Function used to convert input to resolved.
+     * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed as
+     *     resolve function input.
+     * @return Returns the builder.
+     * @see #getResolveFunction()
+     */
+    public Builder resolveFunction(
+        Symbol resolveFunction, FunctionParamsSupplier additionalResolveFunctionParamsSupplier) {
+      return resolveFunction(
+          SymbolReference.builder().symbol(resolveFunction).build(),
+          additionalResolveFunctionParamsSupplier);
+    }
+
+    /**
+     * Set function which returns input parameters to resolve function. Set function to return empty
+     * map to remove the current parameters.
+     *
+     * <p>If this is set, then all of {@link #resolveFunction}, {@link #resolvedConfig} and {@link
+     * #inputConfig} must also be set.
+     *
+     * @param additionalResolveFunctionParamsSupplier Function which returns params to be passed as
+     *     resolve function input.
+     * @return Returns the builder.
+     * @see #getResolveFunction()
+     */
+    public Builder additionalResolveFunctionParamsSupplier(
+        FunctionParamsSupplier additionalResolveFunctionParamsSupplier) {
+      this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
+      return this;
+    }
+
+    /**
+     * Sets a function symbol reference used to configure clients and commands to use a specific
+     * middleware function.
+     *
+     * @param pluginFunction Plugin function symbol to invoke.
+     * @return Returns the builder.
+     * @see #getPluginFunction()
+     */
+    public Builder pluginFunction(SymbolReference pluginFunction) {
+      this.pluginFunction = pluginFunction;
+      return this;
+    }
+
+    /**
+     * Sets a function symbol reference used to configure clients and commands to use a specific
+     * middleware function.
+     *
+     * @param pluginFunction Plugin function symbol to invoke.
+     * @param pluginFunctionParamsSupplier Function which returns params to be passed as plugin
+     *     function input.
+     * @return Returns the builder.
+     * @see #getPluginFunction()
+     */
+    public Builder pluginFunction(
+        SymbolReference pluginFunction, FunctionParamsSupplier pluginFunctionParamsSupplier) {
+      this.pluginFunction = pluginFunction;
+      this.additionalPluginFunctionParamsSupplier = pluginFunctionParamsSupplier;
+      return this;
+    }
+
+    /**
+     * Sets a function symbol used to configure clients and commands to use a specific middleware
+     * function.
+     *
+     * @param pluginFunction Plugin function symbol to invoke.
+     * @return Returns the builder.
+     * @see #getPluginFunction()
+     */
+    public Builder pluginFunction(Symbol pluginFunction) {
+      return pluginFunction(SymbolReference.builder().symbol(pluginFunction).build());
+    }
+
+    /**
+     * Sets a function symbol used to configure clients and commands to use a specific middleware
+     * function.
+     *
+     * @param pluginFunction Plugin function symbol to invoke.
+     * @param additionalPluginFunctionParamsSupplier Function which returns params to be passed as
+     *     plugin function input.
+     * @return Returns the builder.
+     * @see #getPluginFunction()
+     */
+    public Builder pluginFunction(
+        Symbol pluginFunction, FunctionParamsSupplier additionalPluginFunctionParamsSupplier) {
+      return pluginFunction(
+          SymbolReference.builder().symbol(pluginFunction).build(),
+          additionalPluginFunctionParamsSupplier);
+    }
+
+    /**
+     * Set function which returns input parameters to plugin function. Set function to return empty
+     * map to remove the current parameters.
+     *
+     * @param additionalPluginFunctionParamsSupplier Function which returns params to be passed as
+     *     plugin function input.
+     * @return Returns the builder.
+     * @see #getPluginFunction()
+     */
+    public Builder additionalPluginFunctionParamsSupplier(
+        FunctionParamsSupplier additionalPluginFunctionParamsSupplier) {
+      this.additionalPluginFunctionParamsSupplier = additionalPluginFunctionParamsSupplier;
+      return this;
+    }
+
+    /**
+     * Sets a function symbol reference to call from a client in the {@code destroy} function of a
+     * TypeScript client.
+     *
+     * <p>The referenced function takes the resolved configuration type as the first argument.
+     * {@link #resolvedConfig} must be configured if {@code destroyFunction} is set.
+     *
+     * @param destroyFunction Function to invoke from a client.
+     * @return Returns the builder.
+     * @see #getDestroyFunction()
+     */
+    public Builder destroyFunction(SymbolReference destroyFunction) {
+      this.destroyFunction = destroyFunction;
+      return this;
+    }
+
+    /**
+     * Sets a function symbol to call from a client in the {@code destroy} function of a TypeScript
+     * client.
+     *
+     * <p>The referenced function takes the resolved configuration type as the first argument.
+     * {@link #resolvedConfig} must be configured if {@code destroyFunction} is set.
+     *
+     * @param destroyFunction Function to invoke from a client.
+     * @return Returns the builder.
+     * @see #getDestroyFunction()
+     */
+    public Builder destroyFunction(Symbol destroyFunction) {
+      return destroyFunction(SymbolReference.builder().symbol(destroyFunction).build());
+    }
+
+    /**
+     * Sets a predicate that determines if the plugin applies to a specific operation.
+     *
+     * <p>When this method is called, the {@code servicePredicate} is automatically configured to
+     * return false for every service.
+     *
+     * <p>By default, a plugin applies globally to a service, which thereby applies to every
+     * operation when the middleware stack is copied.
+     *
+     * @param operationPredicate Operation matching predicate.
+     * @return Returns the builder.
+     * @see #servicePredicate(BiPredicate)
+     */
+    public Builder operationPredicate(OperationPredicate operationPredicate) {
+      this.operationPredicate = Objects.requireNonNull(operationPredicate);
+      servicePredicate = (model, service) -> false;
+      return this;
+    }
+
+    /**
+     * Configures a predicate that makes a plugin only apply to a set of operations that match one
+     * or more of the set of given shape names, and ensures that the plugin is not applied globally
+     * to services.
+     *
+     * <p>By default, a plugin applies globally to a service, which thereby applies to every
+     * operation when the middleware stack is copied.
+     *
+     * @param operationNames Set of operation names.
+     * @return Returns the builder.
+     */
+    public Builder appliesOnlyToOperations(Set<String> operationNames) {
+      operationPredicate(
+          (model, service, operation) -> operationNames.contains(operation.getId().getName()));
+      return servicePredicate((model, service) -> false);
+    }
+
+    /**
+     * Configures a predicate that applies the plugin to a service if the predicate matches a given
+     * model and service and settings.
+     *
+     * <p>Setting a custom settings predicate is useful for plugins that should only be applied
+     * based on certain smithy-build configurations.
+     *
+     * @param settingsPredicate Settings predicate.
+     * @return Returns the builder.
+     */
+    public Builder settingsPredicate(SettingsPredicate settingsPredicate) {
+      this.settingsPredicate = Objects.requireNonNull(settingsPredicate);
+      return this;
+    }
+
+    /**
+     * Configures a predicate that applies the plugin to a service if the predicate matches a given
+     * model and service.
+     *
+     * <p>When this method is called, the {@code operationPredicate} is automatically configured to
+     * return false for every operation, causing the plugin to only apply to services and not to
+     * individual operations.
+     *
+     * <p>By default, a plugin applies globally to a service, which thereby applies to every
+     * operation when the middleware stack is copied. Setting a custom service predicate is useful
+     * for plugins that should only be applied to specific services or only applied at the operation
+     * level.
+     *
+     * @param servicePredicate Service predicate.
+     * @return Returns the builder.
+     * @see #operationPredicate(OperationPredicate)
+     */
+    public Builder servicePredicate(BiPredicate<Model, ServiceShape> servicePredicate) {
+      this.servicePredicate = Objects.requireNonNull(servicePredicate);
+      operationPredicate = (model, service, operation) -> false;
+      return this;
+    }
+
+    /** Enables access to the writer for adding imports/dependencies. */
+    public Builder withAdditionalClientParams(
+        Map<String, ClientWriterConsumer> writeAdditionalClientParams) {
+      // enforce consistent sorting during codegen.
+      this.writeAdditionalClientParams = new TreeMap<>(writeAdditionalClientParams);
+      return this;
+    }
+
+    /** Enables access to the writer for adding imports/dependencies. */
+    public Builder withAdditionalOperationParams(
+        Map<String, CommandWriterConsumer> writeAdditionalOperationParams) {
+      // enforce consistent sorting during codegen.
+      this.writeAdditionalOperationParams = new TreeMap<>(writeAdditionalOperationParams);
+      return this;
+    }
+
+    /**
+     * Configures various aspects of the builder based on naming conventions defined by the provided
+     * {@link Convention} values.
+     *
+     * <p>If no {@code conventions} are provided, a default value of {@link Convention#HAS_CONFIG}
+     * and {@link Convention#HAS_MIDDLEWARE} is used.
+     *
+     * @param dependency Dependency to pull the package name and version from.
+     * @param pluginName The name of the plugin that is used when generating symbol names for each
+     *     {@code convention}. (for example, "Foo").
+     * @param conventions Conventions to use when configuring the builder.
+     * @return Returns the builder.
+     */
+    public Builder withConventions(
+        SymbolDependency dependency, String pluginName, Convention... conventions) {
+      return withConventions(
+          dependency.getPackageName(), dependency.getVersion(), pluginName, conventions);
+    }
+
+    /**
+     * Configures various aspects of the builder based on naming conventions defined by the provided
+     * {@link Convention} values.
+     *
+     * <p>If no {@code conventions} are provided, a default value of {@link Convention#HAS_CONFIG}
+     * and {@link Convention#HAS_MIDDLEWARE} is used.
+     *
+     * @param packageName The name of the package to use as an import and add as a dependency for
+     *     each generated symbol (for example, "foo/baz").
+     * @param version The version number to use in the symbol dependencies. (for example, "1.0.0").
+     * @param pluginName The name of the plugin that is used when generating symbol names for each
+     *     {@code convention}. (for example, "Foo").
+     * @param conventions Conventions to use when configuring the builder.
+     * @return Returns the builder.
+     */
+    public Builder withConventions(
+        String packageName, String version, String pluginName, Convention... conventions) {
+      pluginName = StringUtils.capitalize(pluginName);
+
+      if (conventions.length == 0) {
+        conventions = Convention.DEFAULT;
+      }
+
+      for (Convention convention : conventions) {
+        switch (convention) {
+          case HAS_CONFIG:
+            inputConfig(
+                Convention.createTypeSymbol(packageName, version, pluginName + "InputConfig"));
+            resolvedConfig(
+                Convention.createTypeSymbol(packageName, version, pluginName + "ResolvedConfig"));
+            resolveFunction(
+                Convention.createSymbol(packageName, version, "resolve" + pluginName + "Config"));
+            break;
+          case HAS_MIDDLEWARE:
+            pluginFunction(
+                Convention.createSymbol(packageName, version, "get" + pluginName + "Plugin"));
+            break;
+          case HAS_DESTROY:
+            destroyFunction(Convention.createSymbol(packageName, version, "destroy" + pluginName));
+            break;
+          default:
+            throw new UnsupportedOperationException("Unexpected switch case: " + convention);
+        }
+      }
+
+      return this;
+    }
+  }
+
+  /** Conventions used in {@link Builder#withConventions}. */
+  public enum Convention {
+    /**
+     * Whether or not to generate a configuration Input type, Resolved type, and resolveConfig
+     * function.
+     *
+     * <p>Passing this enum to {@link Builder#withConventions} will cause the client to resolve
+     * configuration using a function named {@code "resolve" + pluginName + "Config"} (e.g.,
+     * "resolveFooConfig"), use an input type named {@code pluginName + "InputConfig"} (e.g.,
+     * "FooInputConfig"), and a resolved type named {@code pluginName + "ResolvedConfig"} (e.g.,
+     * "FooResolvedConfig").
+     *
+     * @see #getInputConfig()
+     * @see #getResolvedConfig()
+     * @see #getResolveFunction()
+     */
+    HAS_CONFIG,
+
+    /**
+     * Whether or not the plugin applies middleware.
+     *
+     * <p>Passing this enum to {@link Builder#withConventions} will cause matching clients and
+     * commands to call a function name {@code "get" + pluginName + "Plugin"} to apply middleware
+     * (e.g., "getFooPlugin"). The referenced function is expected to accept a resolved
+     * configuration type and return a TypeScript {@code Pluggable}.
+     *
+     * @see #getPluginFunction()
+     */
+    HAS_MIDDLEWARE,
+
+    /**
+     * Whether or not the plugin has a destroy method.
+     *
+     * <p>Passing this enum to {@code withConventions} will cause matching clients to invoke a
+     * method named {@code "destroy" + pluginName} in the {@code destroy} method of the client
+     * (e.g., "destroyFoo"). The referenced function is expected to accept the resolved
+     * configuration type of the plugin.
+     *
+     * @see #getDestroyFunction()
+     */
+    HAS_DESTROY;
+
+    private static final Convention[] DEFAULT = {HAS_CONFIG, HAS_MIDDLEWARE};
+
+    private static Symbol createSymbol(String packageName, String version, String name) {
+      return Symbol.builder()
+          .namespace(packageName, "/")
+          .name(name)
+          .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
+          .build();
+    }
+
+    private static Symbol createTypeSymbol(String packageName, String version, String name) {
+      return Symbol.builder()
+          .namespace(packageName, "/")
+          .name(name)
+          .putProperty("typeOnly", true)
+          .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
+          .build();
+    }
+  }
 }

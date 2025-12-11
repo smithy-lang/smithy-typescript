@@ -43,452 +43,493 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Generator for {@code HttpAuthSchemeProvider} and corresponding interfaces.
  *
- * Code generated includes:
+ * <p>Code generated includes:
  *
- * - {@code $ServiceHttpAuthSchemeParameters}
- * - {@code default$ServiceHttpAuthSchemeParametersProvider}
- * - {@code create$AuthSchemeIdHttpAuthOption}
- * - {@code $ServiceHttpAuthSchemeProvider}
- * - {@code default$ServiceHttpAuthSchemeProvider}
+ * <p>- {@code $ServiceHttpAuthSchemeParameters} - {@code
+ * default$ServiceHttpAuthSchemeParametersProvider} - {@code create$AuthSchemeIdHttpAuthOption} -
+ * {@code $ServiceHttpAuthSchemeProvider} - {@code default$ServiceHttpAuthSchemeProvider}
  */
 @SmithyInternalApi
 public class HttpAuthSchemeProviderGenerator implements Runnable {
+  private final TypeScriptDelegator delegator;
+  private final TypeScriptSettings settings;
+  private final Model model;
+  private final SymbolProvider symbolProvider;
+  private final List<TypeScriptIntegration> integrations;
 
-    private final TypeScriptDelegator delegator;
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final SymbolProvider symbolProvider;
-    private final List<TypeScriptIntegration> integrations;
+  private final SupportedHttpAuthSchemesIndex authIndex;
+  private final ServiceIndex serviceIndex;
+  private final TopDownIndex topDownIndex;
+  private final ServiceShape serviceShape;
+  private final Symbol serviceSymbol;
+  private final String serviceName;
+  private final Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
+  private final Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters;
 
-    private final SupportedHttpAuthSchemesIndex authIndex;
-    private final ServiceIndex serviceIndex;
-    private final TopDownIndex topDownIndex;
-    private final ServiceShape serviceShape;
-    private final Symbol serviceSymbol;
-    private final String serviceName;
-    private final Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
-    private final Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters;
+  /**
+   * Create an HttpAuthSchemeProviderGenerator.
+   *
+   * @param delegator delegator
+   * @param settings settings
+   * @param model model
+   * @param symbolProvider symbolProvider
+   * @param integrations integrations
+   */
+  public HttpAuthSchemeProviderGenerator(
+      TypeScriptDelegator delegator,
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      List<TypeScriptIntegration> integrations) {
+    this.delegator = delegator;
+    this.settings = settings;
+    this.model = model;
+    this.symbolProvider = symbolProvider;
+    this.integrations = integrations;
 
-    /**
-     * Create an HttpAuthSchemeProviderGenerator.
-     * @param delegator delegator
-     * @param settings settings
-     * @param model model
-     * @param symbolProvider symbolProvider
-     * @param integrations integrations
-     */
-    public HttpAuthSchemeProviderGenerator(
-        TypeScriptDelegator delegator,
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        List<TypeScriptIntegration> integrations
-    ) {
-        this.delegator = delegator;
-        this.settings = settings;
-        this.model = model;
-        this.symbolProvider = symbolProvider;
-        this.integrations = integrations;
+    this.authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
+    this.serviceIndex = ServiceIndex.of(model);
+    this.topDownIndex = TopDownIndex.of(model);
+    this.serviceShape = settings.getService(model);
+    this.serviceSymbol = symbolProvider.toSymbol(serviceShape);
+    this.serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+    this.effectiveHttpAuthSchemes =
+        AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
+            serviceShape, serviceIndex, authIndex, topDownIndex);
+    this.httpAuthSchemeParameters =
+        AuthUtils.collectHttpAuthSchemeParameters(effectiveHttpAuthSchemes.values());
+  }
 
-        this.authIndex = new SupportedHttpAuthSchemesIndex(integrations, model, settings);
-        this.serviceIndex = ServiceIndex.of(model);
-        this.topDownIndex = TopDownIndex.of(model);
-        this.serviceShape = settings.getService(model);
-        this.serviceSymbol = symbolProvider.toSymbol(serviceShape);
-        this.serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        this.effectiveHttpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
-            serviceShape,
-            serviceIndex,
-            authIndex,
-            topDownIndex
-        );
-        this.httpAuthSchemeParameters = AuthUtils.collectHttpAuthSchemeParameters(effectiveHttpAuthSchemes.values());
-    }
+  @Override
+  public void run() {
+    generateHttpAuthSchemeParametersInterface();
+    generateHttpAuthSchemeParametersProviderInterface();
+    generateDefaultHttpAuthSchemeParametersProviderFunction();
+    generateHttpAuthOptionFunctions();
+    generateHttpAuthSchemeProviderInterface();
+    generateDefaultHttpAuthSchemeProviderFunction();
+  }
 
-    @Override
-    public void run() {
-        generateHttpAuthSchemeParametersInterface();
-        generateHttpAuthSchemeParametersProviderInterface();
-        generateDefaultHttpAuthSchemeParametersProviderFunction();
-        generateHttpAuthOptionFunctions();
-        generateHttpAuthSchemeProviderInterface();
-        generateDefaultHttpAuthSchemeProviderFunction();
-    }
+  /*
+  import { HttpAuthSchemeParameters } from "@smithy/types";
 
-    /*
-    import { HttpAuthSchemeParameters } from "@smithy/types";
+  // ...
 
-    // ...
+  export interface WeatherHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
+  }
+  */
+  private void generateHttpAuthSchemeParametersInterface() {
+    delegator.useFileWriter(
+        AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH,
+        w -> {
+          w.pushState(
+              HttpAuthSchemeParametersInterfaceCodeSection.builder()
+                  .service(serviceShape)
+                  .settings(settings)
+                  .model(model)
+                  .symbolProvider(symbolProvider)
+                  .httpAuthSchemeParameters(httpAuthSchemeParameters)
+                  .build());
+          w.addTypeImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
 
-    export interface WeatherHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
-    }
-    */
-    private void generateHttpAuthSchemeParametersInterface() {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(
-                HttpAuthSchemeParametersInterfaceCodeSection.builder()
-                    .service(serviceShape)
-                    .settings(settings)
-                    .model(model)
-                    .symbolProvider(symbolProvider)
-                    .httpAuthSchemeParameters(httpAuthSchemeParameters)
-                    .build()
-            );
-            w.addTypeImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
-
-            w.openCollapsibleBlock("""
-            /**
-             * @internal
-             */
-            export interface $LHttpAuthSchemeParameters extends HttpAuthSchemeParameters {""", "}", !httpAuthSchemeParameters.isEmpty(), serviceName, () -> {
+          w.openCollapsibleBlock(
+              """
+              /**
+               * @internal
+               */
+              export interface $LHttpAuthSchemeParameters extends HttpAuthSchemeParameters {\
+              """,
+              "}",
+              !httpAuthSchemeParameters.isEmpty(),
+              serviceName,
+              () -> {
                 for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
-                    w.write("$L?: $C;", parameter.name(), parameter.type());
+                  w.write("$L?: $C;", parameter.name(), parameter.type());
                 }
-            });
-            w.popState();
+              });
+          w.popState();
         });
-    }
+  }
 
-    /*
-    import { HttpAuthSchemeParametersProvider } from "@smithy/types";
-    import { WeatherClientResolvedConfig } from "../WeatherClient";
+  /*
+  import { HttpAuthSchemeParametersProvider } from "@smithy/types";
+  import { WeatherClientResolvedConfig } from "../WeatherClient";
 
-    // ...
+  // ...
 
-    export interface WeatherHttpAuthSchemeParametersProvider extends HttpAuthSchemeParametersProvider<
-      WeatherClientResolvedConfig,
-      HandlerExecutionContext,
-      WeatherHttpAuthSchemeParameters,
-      object
-    > {}
-    */
-    private void generateHttpAuthSchemeParametersProviderInterface() {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(
-                HttpAuthSchemeParametersProviderInterfaceCodeSection.builder()
-                    .service(serviceShape)
-                    .settings(settings)
-                    .model(model)
-                    .symbolProvider(symbolProvider)
-                    .build()
-            );
-            w.addRelativeTypeImport(
-                serviceSymbol.getName() + "ResolvedConfig",
-                null,
-                Paths.get(".", serviceSymbol.getNamespace())
-            );
-            w.addTypeImport("HttpAuthSchemeParametersProvider", null, TypeScriptDependency.SMITHY_TYPES);
-            w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
-            w.write(
-                """
-                /**
-                 * @internal
-                 */
-                export interface $LHttpAuthSchemeParametersProvider
-                  extends HttpAuthSchemeParametersProvider<
-                    $LResolvedConfig,
-                    HandlerExecutionContext,
-                    $LHttpAuthSchemeParameters,
-                    object
-                  > {}""",
-                serviceName,
-                serviceSymbol.getName(),
-                serviceName
-            );
-            w.popState();
+  export interface WeatherHttpAuthSchemeParametersProvider extends HttpAuthSchemeParametersProvider<
+    WeatherClientResolvedConfig,
+    HandlerExecutionContext,
+    WeatherHttpAuthSchemeParameters,
+    object
+  > {}
+  */
+  private void generateHttpAuthSchemeParametersProviderInterface() {
+    delegator.useFileWriter(
+        AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH,
+        w -> {
+          w.pushState(
+              HttpAuthSchemeParametersProviderInterfaceCodeSection.builder()
+                  .service(serviceShape)
+                  .settings(settings)
+                  .model(model)
+                  .symbolProvider(symbolProvider)
+                  .build());
+          w.addRelativeTypeImport(
+              serviceSymbol.getName() + "ResolvedConfig",
+              null,
+              Paths.get(".", serviceSymbol.getNamespace()));
+          w.addTypeImport(
+              "HttpAuthSchemeParametersProvider", null, TypeScriptDependency.SMITHY_TYPES);
+          w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
+          w.write(
+              """
+              /**
+               * @internal
+               */
+              export interface $LHttpAuthSchemeParametersProvider
+                extends HttpAuthSchemeParametersProvider<
+                  $LResolvedConfig,
+                  HandlerExecutionContext,
+                  $LHttpAuthSchemeParameters,
+                  object
+                > {}\
+              """,
+              serviceName,
+              serviceSymbol.getName(),
+              serviceName);
+          w.popState();
         });
-    }
+  }
 
-    /*
-    export const defaultWeatherHttpAuthSchemeParametersProvider =
-    async (config: WeatherClientResolvedConfig, context: HandlerExecutionContext, input: object):
-    Promise<WeatherHttpAuthSchemeParameters> => {
-      return {
-        operation: getSmithyContext(context).operation as string,
-      };
+  /*
+  export const defaultWeatherHttpAuthSchemeParametersProvider =
+  async (config: WeatherClientResolvedConfig, context: HandlerExecutionContext, input: object):
+  Promise<WeatherHttpAuthSchemeParameters> => {
+    return {
+      operation: getSmithyContext(context).operation as string,
     };
-    */
-    private void generateDefaultHttpAuthSchemeParametersProviderFunction() {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(
-                DefaultHttpAuthSchemeParametersProviderFunctionCodeSection.builder()
-                    .service(serviceShape)
-                    .settings(settings)
-                    .model(model)
-                    .symbolProvider(symbolProvider)
-                    .httpAuthSchemeParameters(httpAuthSchemeParameters)
-                    .build()
-            );
-            w.addRelativeTypeImport(
-                serviceSymbol.getName() + "ResolvedConfig",
-                null,
-                Paths.get(".", serviceSymbol.getNamespace())
-            );
-            w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
-            w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-            w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
-            w.openBlock("""
-            /**
-             * @internal
-             */
-            export const default$LHttpAuthSchemeParametersProvider = async (
-              config: $LResolvedConfig,
-              context: HandlerExecutionContext,
-              input: object
-            ): Promise<$LHttpAuthSchemeParameters> => {""", "};", serviceName, serviceSymbol.getName(), serviceName, () -> {
-                w.openBlock("return {", "};", () -> {
-                    w.write("operation: getSmithyContext(context).operation as string,");
-                    for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
+  };
+  */
+  private void generateDefaultHttpAuthSchemeParametersProviderFunction() {
+    delegator.useFileWriter(
+        AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH,
+        w -> {
+          w.pushState(
+              DefaultHttpAuthSchemeParametersProviderFunctionCodeSection.builder()
+                  .service(serviceShape)
+                  .settings(settings)
+                  .model(model)
+                  .symbolProvider(symbolProvider)
+                  .httpAuthSchemeParameters(httpAuthSchemeParameters)
+                  .build());
+          w.addRelativeTypeImport(
+              serviceSymbol.getName() + "ResolvedConfig",
+              null,
+              Paths.get(".", serviceSymbol.getNamespace()));
+          w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
+          w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
+          w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+          w.openBlock(
+              """
+              /**
+               * @internal
+               */
+              export const default$LHttpAuthSchemeParametersProvider = async (
+                config: $LResolvedConfig,
+                context: HandlerExecutionContext,
+                input: object
+              ): Promise<$LHttpAuthSchemeParameters> => {\
+              """,
+              "};",
+              serviceName,
+              serviceSymbol.getName(),
+              serviceName,
+              () -> {
+                w.openBlock(
+                    "return {",
+                    "};",
+                    () -> {
+                      w.write("operation: getSmithyContext(context).operation as string,");
+                      for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
                         w.write("$L: $C,", parameter.name(), parameter.source());
-                    }
-                });
-            });
-            w.popState();
+                      }
+                    });
+              });
+          w.popState();
         });
-    }
+  }
 
-    private void generateHttpAuthOptionFunctions() {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(
-                HttpAuthOptionFunctionsCodeSection.builder()
+  private void generateHttpAuthOptionFunctions() {
+    delegator.useFileWriter(
+        AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH,
+        w -> {
+          w.pushState(
+              HttpAuthOptionFunctionsCodeSection.builder()
+                  .service(serviceShape)
+                  .settings(settings)
+                  .model(model)
+                  .symbolProvider(symbolProvider)
+                  .effectiveHttpAuthSchemes(effectiveHttpAuthSchemes)
+                  .build());
+          for (Entry<ShapeId, HttpAuthScheme> entry : effectiveHttpAuthSchemes.entrySet()) {
+            generateHttpAuthOptionFunction(
+                w,
+                HttpAuthOptionFunctionCodeSection.builder()
                     .service(serviceShape)
                     .settings(settings)
                     .model(model)
                     .symbolProvider(symbolProvider)
                     .effectiveHttpAuthSchemes(effectiveHttpAuthSchemes)
-                    .build()
-            );
-            for (Entry<ShapeId, HttpAuthScheme> entry : effectiveHttpAuthSchemes.entrySet()) {
-                generateHttpAuthOptionFunction(
-                    w,
-                    HttpAuthOptionFunctionCodeSection.builder()
-                        .service(serviceShape)
-                        .settings(settings)
-                        .model(model)
-                        .symbolProvider(symbolProvider)
-                        .effectiveHttpAuthSchemes(effectiveHttpAuthSchemes)
-                        .schemeId(entry.getKey())
-                        .httpAuthScheme(entry.getValue())
-                        .build()
-                );
-            }
-            w.popState();
+                    .schemeId(entry.getKey())
+                    .httpAuthScheme(entry.getValue())
+                    .build());
+          }
+          w.popState();
         });
-    }
+  }
 
-    /*
-    import { HttpAuthOption } from "@smithy/types";
+  /*
+  import { HttpAuthOption } from "@smithy/types";
 
-    // ...
+  // ...
 
-    function createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters: WeatherHttpAuthSchemeParameters):
-    HttpAuthOption[] {
-        return {
-            schemeId: "smithy.api#httpApiKeyAuth",
-            signingProperties: {
-                name: "Authorization",
-                in: HttpApiKeyAuthLocation.HEADER,
-                scheme: "",
-            },
-        };
-    };
-    */
-    private void generateHttpAuthOptionFunction(TypeScriptWriter w, HttpAuthOptionFunctionCodeSection s) {
-        w.pushState(s);
-        ShapeId schemeId = s.getSchemeId();
-        String normalizedAuthSchemeName = normalizeAuthSchemeName(schemeId);
-        Optional<HttpAuthScheme> authSchemeOptional = s.getHttpAuthScheme();
-        w.addTypeImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
-        w.openBlock("""
+  function createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters: WeatherHttpAuthSchemeParameters):
+  HttpAuthOption[] {
+      return {
+          schemeId: "smithy.api#httpApiKeyAuth",
+          signingProperties: {
+              name: "Authorization",
+              in: HttpApiKeyAuthLocation.HEADER,
+              scheme: "",
+          },
+      };
+  };
+  */
+  private void generateHttpAuthOptionFunction(
+      TypeScriptWriter w, HttpAuthOptionFunctionCodeSection s) {
+    w.pushState(s);
+    ShapeId schemeId = s.getSchemeId();
+    String normalizedAuthSchemeName = normalizeAuthSchemeName(schemeId);
+    Optional<HttpAuthScheme> authSchemeOptional = s.getHttpAuthScheme();
+    w.addTypeImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
+    w.openBlock(
+        """
         function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
-        HttpAuthOption {""", "}\n", normalizedAuthSchemeName, serviceName, () -> {
-            w.openBlock("return {", "};", () -> {
+        HttpAuthOption {\
+        """,
+        "}\n",
+        normalizedAuthSchemeName,
+        serviceName,
+        () -> {
+          w.openBlock(
+              "return {",
+              "};",
+              () -> {
                 w.write("schemeId: $S,", schemeId.toString());
-                // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties available.
+                // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties
+                // available.
                 if (authSchemeOptional.isEmpty()) {
-                    return;
+                  return;
                 }
                 HttpAuthScheme authScheme = authSchemeOptional.get();
                 Trait trait = serviceShape.findTrait(authScheme.getTraitId()).orElse(null);
-                List<HttpAuthOptionProperty> identityProperties = authScheme.getHttpAuthSchemeOptionParametersByType(
-                    Type.IDENTITY
-                );
+                List<HttpAuthOptionProperty> identityProperties =
+                    authScheme.getHttpAuthSchemeOptionParametersByType(Type.IDENTITY);
                 if (!identityProperties.isEmpty()) {
-                    w.openBlock("identityProperties: {", "},", () -> {
+                  w.openBlock(
+                      "identityProperties: {",
+                      "},",
+                      () -> {
                         for (HttpAuthOptionProperty parameter : identityProperties) {
-                            w.write(
-                                "$L: $C,",
-                                parameter.name(),
-                                parameter
-                                    .source()
-                                    .apply(
-                                        HttpAuthOptionProperty.Source.builder()
-                                            .httpAuthScheme(authScheme)
-                                            .trait(trait)
-                                            .build()
-                                    )
-                            );
+                          w.write(
+                              "$L: $C,",
+                              parameter.name(),
+                              parameter
+                                  .source()
+                                  .apply(
+                                      HttpAuthOptionProperty.Source.builder()
+                                          .httpAuthScheme(authScheme)
+                                          .trait(trait)
+                                          .build()));
                         }
-                    });
+                      });
                 }
-                List<HttpAuthOptionProperty> signingProperties = authScheme.getHttpAuthSchemeOptionParametersByType(
-                    Type.SIGNING
-                );
+                List<HttpAuthOptionProperty> signingProperties =
+                    authScheme.getHttpAuthSchemeOptionParametersByType(Type.SIGNING);
                 if (!signingProperties.isEmpty()) {
-                    w.openBlock("signingProperties: {", "},", () -> {
+                  w.openBlock(
+                      "signingProperties: {",
+                      "},",
+                      () -> {
                         for (HttpAuthOptionProperty parameter : signingProperties) {
-                            w.write(
-                                "$L: $C,",
-                                parameter.name(),
-                                parameter
-                                    .source()
-                                    .apply(
-                                        HttpAuthOptionProperty.Source.builder()
-                                            .httpAuthScheme(authScheme)
-                                            .trait(trait)
-                                            .build()
-                                    )
-                            );
+                          w.write(
+                              "$L: $C,",
+                              parameter.name(),
+                              parameter
+                                  .source()
+                                  .apply(
+                                      HttpAuthOptionProperty.Source.builder()
+                                          .httpAuthScheme(authScheme)
+                                          .trait(trait)
+                                          .build()));
                         }
-                    });
+                      });
                 }
                 authScheme
                     .getPropertiesExtractor()
-                    .ifPresent(extractor ->
-                        w.write(
-                            "propertiesExtractor: $C",
-                            extractor.apply(
-                                serviceSymbol
-                                    .toBuilder()
-                                    .name(ServiceBareBonesClientGenerator.getConfigTypeName(serviceSymbol))
-                                    .build()
-                            )
-                        )
-                    );
-            });
+                    .ifPresent(
+                        extractor ->
+                            w.write(
+                                "propertiesExtractor: $C",
+                                extractor.apply(
+                                    serviceSymbol.toBuilder()
+                                        .name(
+                                            ServiceBareBonesClientGenerator.getConfigTypeName(
+                                                serviceSymbol))
+                                        .build())));
+              });
         });
-        w.popState();
-    }
+    w.popState();
+  }
 
-    public static String normalizeAuthSchemeName(ShapeId shapeId) {
-        return String.join(
-            "",
-            Arrays.asList(shapeId.toString().split("[.#]")).stream().map(StringUtils::capitalize).toList()
-        );
-    }
+  public static String normalizeAuthSchemeName(ShapeId shapeId) {
+    return String.join(
+        "",
+        Arrays.asList(shapeId.toString().split("[.#]")).stream()
+            .map(StringUtils::capitalize)
+            .toList());
+  }
 
-    /*
-    import { HttpAuthSchemeProvider } from "@smithy/types";
+  /*
+  import { HttpAuthSchemeProvider } from "@smithy/types";
 
-    // ...
+  // ...
 
-    export interface WeatherHttpAuthSchemeProvider extends HttpAuthSchemeProvider<WeatherHttpAuthSchemeParameters> {}
-    */
-    private void generateHttpAuthSchemeProviderInterface() {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(
-                HttpAuthSchemeProviderInterfaceCodeSection.builder()
-                    .service(serviceShape)
-                    .settings(settings)
-                    .model(model)
-                    .symbolProvider(symbolProvider)
-                    .build()
-            );
-            w.addTypeImport("HttpAuthSchemeProvider", null, TypeScriptDependency.SMITHY_TYPES);
-            w.writeDocs("@internal");
+  export interface WeatherHttpAuthSchemeProvider extends HttpAuthSchemeProvider<WeatherHttpAuthSchemeParameters> {}
+  */
+  private void generateHttpAuthSchemeProviderInterface() {
+    delegator.useFileWriter(
+        AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH,
+        w -> {
+          w.pushState(
+              HttpAuthSchemeProviderInterfaceCodeSection.builder()
+                  .service(serviceShape)
+                  .settings(settings)
+                  .model(model)
+                  .symbolProvider(symbolProvider)
+                  .build());
+          w.addTypeImport("HttpAuthSchemeProvider", null, TypeScriptDependency.SMITHY_TYPES);
+          w.writeDocs("@internal");
 
-            String candidate =
-                "export interface %sHttpAuthSchemeProvider extends".formatted(serviceName) +
-                " HttpAuthSchemeProvider<%sHttpAuthSchemeParameters> {}".formatted(serviceName);
+          String candidate =
+              "export interface %sHttpAuthSchemeProvider extends".formatted(serviceName)
+                  + " HttpAuthSchemeProvider<%sHttpAuthSchemeParameters> {}".formatted(serviceName);
 
-            if (candidate.length() <= TypeScriptWriter.LINE_WIDTH) {
-                w.write(candidate);
-            } else {
-                w.write(
-                    """
-                    export interface $LHttpAuthSchemeProvider
-                      extends HttpAuthSchemeProvider<$LHttpAuthSchemeParameters> {}
-                    """,
-                    serviceName,
-                    serviceName
-                );
-            }
-            w.popState();
+          if (candidate.length() <= TypeScriptWriter.LINE_WIDTH) {
+            w.write(candidate);
+          } else {
+            w.write(
+                """
+                export interface $LHttpAuthSchemeProvider
+                  extends HttpAuthSchemeProvider<$LHttpAuthSchemeParameters> {}
+                """,
+                serviceName,
+                serviceName);
+          }
+          w.popState();
         });
-    }
+  }
 
-    /*
-    export const defaultWeatherHttpAuthSchemeProvider: WeatherHttpAuthSchemeProvider =
-    (authParameters) => {
-        const options: HttpAuthOption[] = [];
-        switch (authParameters.operation) {
-            default: {
-                options.push(createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters));
-            };
-        };
-        return options;
-    };
-    */
-    private void generateDefaultHttpAuthSchemeProviderFunction() {
-        delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH, w -> {
-            w.pushState(
-                DefaultHttpAuthSchemeProviderFunctionCodeSection.builder()
-                    .service(serviceShape)
-                    .settings(settings)
-                    .model(model)
-                    .symbolProvider(symbolProvider)
-                    .build()
-            );
-            w.openBlock("""
-            /**
-             * @internal
-             */
-            export const default$LHttpAuthSchemeProvider: $LHttpAuthSchemeProvider = \
-            (authParameters) => {""", "};", serviceName, serviceName, () -> {
+  /*
+  export const defaultWeatherHttpAuthSchemeProvider: WeatherHttpAuthSchemeProvider =
+  (authParameters) => {
+      const options: HttpAuthOption[] = [];
+      switch (authParameters.operation) {
+          default: {
+              options.push(createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters));
+          };
+      };
+      return options;
+  };
+  */
+  private void generateDefaultHttpAuthSchemeProviderFunction() {
+    delegator.useFileWriter(
+        AuthUtils.HTTP_AUTH_SCHEME_PROVIDER_PATH,
+        w -> {
+          w.pushState(
+              DefaultHttpAuthSchemeProviderFunctionCodeSection.builder()
+                  .service(serviceShape)
+                  .settings(settings)
+                  .model(model)
+                  .symbolProvider(symbolProvider)
+                  .build());
+          w.openBlock(
+              """
+              /**
+               * @internal
+               */
+              export const default$LHttpAuthSchemeProvider: $LHttpAuthSchemeProvider = \
+              (authParameters) => {\
+              """,
+              "};",
+              serviceName,
+              serviceName,
+              () -> {
                 w.write("const options: HttpAuthOption[] = [];");
-                w.openBlock("switch (authParameters.operation) {", "}", () -> {
-                    var serviceAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
-                        serviceShape,
-                        AuthSchemeMode.NO_AUTH_AWARE
-                    );
-                    for (OperationShape operationShape : topDownIndex.getContainedOperations(serviceShape)) {
+                w.openBlock(
+                    "switch (authParameters.operation) {",
+                    "}",
+                    () -> {
+                      var serviceAuthSchemes =
+                          serviceIndex.getEffectiveAuthSchemes(
+                              serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
+                      for (OperationShape operationShape :
+                          topDownIndex.getContainedOperations(serviceShape)) {
                         ShapeId operationShapeId = operationShape.getId();
-                        var operationAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
-                            serviceShape,
-                            operationShapeId,
-                            AuthSchemeMode.NO_AUTH_AWARE
-                        );
-                        // Skip operation generation if operation auth schemes are equivalent to the default service
+                        var operationAuthSchemes =
+                            serviceIndex.getEffectiveAuthSchemes(
+                                serviceShape, operationShapeId, AuthSchemeMode.NO_AUTH_AWARE);
+                        // Skip operation generation if operation auth schemes are equivalent to the
+                        // default service
                         // auth schemes.
-                        if (AuthUtils.areHttpAuthSchemesEqual(serviceAuthSchemes, operationAuthSchemes)) {
-                            continue;
+                        if (AuthUtils.areHttpAuthSchemesEqual(
+                            serviceAuthSchemes, operationAuthSchemes)) {
+                          continue;
                         }
-                        w.openBlock("case $S: {", "};", operationShapeId.getName(), () -> {
-                            operationAuthSchemes
-                                .keySet()
-                                .forEach(shapeId -> {
-                                    w.write(
-                                        "options.push(create$LHttpAuthOption(authParameters));",
-                                        normalizeAuthSchemeName(shapeId)
-                                    );
-                                });
-                            w.write("break;");
-                        });
-                    }
-                    w.openBlock("default: {", "}", () -> {
-                        serviceAuthSchemes
-                            .keySet()
-                            .forEach(shapeId -> {
-                                w.write(
-                                    "options.push(create$LHttpAuthOption(authParameters));",
-                                    normalizeAuthSchemeName(shapeId)
-                                );
+                        w.openBlock(
+                            "case $S: {",
+                            "};",
+                            operationShapeId.getName(),
+                            () -> {
+                              operationAuthSchemes
+                                  .keySet()
+                                  .forEach(
+                                      shapeId -> {
+                                        w.write(
+                                            "options.push(create$LHttpAuthOption(authParameters));",
+                                            normalizeAuthSchemeName(shapeId));
+                                      });
+                              w.write("break;");
                             });
+                      }
+                      w.openBlock(
+                          "default: {",
+                          "}",
+                          () -> {
+                            serviceAuthSchemes
+                                .keySet()
+                                .forEach(
+                                    shapeId -> {
+                                      w.write(
+                                          "options.push(create$LHttpAuthOption(authParameters));",
+                                          normalizeAuthSchemeName(shapeId));
+                                    });
+                          });
                     });
-                });
                 w.write("return options;");
-            });
-            w.popState();
+              });
+          w.popState();
         });
-    }
+  }
 }

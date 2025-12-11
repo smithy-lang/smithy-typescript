@@ -42,97 +42,104 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
 import software.amazon.smithy.utils.ListUtils;
 
 public class DocumentMemberSerVisitorTest {
+  private static final String DATA_SOURCE = "dataSource";
+  private static final String PROTOCOL = "TestProtocol";
+  private static final Format FORMAT = Format.EPOCH_SECONDS;
+  private static GenerationContext mockContext;
 
-    private static final String DATA_SOURCE = "dataSource";
-    private static final String PROTOCOL = "TestProtocol";
-    private static final Format FORMAT = Format.EPOCH_SECONDS;
-    private static GenerationContext mockContext;
+  static {
+    mockContext = new GenerationContext();
+    mockContext.setProtocolName(PROTOCOL);
+    mockContext.setSymbolProvider(new MockProvider());
+    mockContext.setWriter(new TypeScriptWriter("foo"));
+    mockContext.setModel(Model.builder().build());
+  }
 
-    static {
-        mockContext = new GenerationContext();
-        mockContext.setProtocolName(PROTOCOL);
-        mockContext.setSymbolProvider(new MockProvider());
-        mockContext.setWriter(new TypeScriptWriter("foo"));
-        mockContext.setModel(Model.builder().build());
-    }
+  @ParameterizedTest
+  @MethodSource("validMemberTargetTypes")
+  public void providesExpectedDefaults(Shape shape, String expected) {
+    DocumentMemberSerVisitor visitor =
+        new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT);
+    assertThat(shape.accept(visitor), equalTo(expected));
+  }
 
-    @ParameterizedTest
-    @MethodSource("validMemberTargetTypes")
-    public void providesExpectedDefaults(Shape shape, String expected) {
-        DocumentMemberSerVisitor visitor = new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT);
-        assertThat(shape.accept(visitor), equalTo(expected));
-    }
+  public static Collection<Object[]> validMemberTargetTypes() {
+    String id = "com.smithy.example#Foo";
+    String targetId = id + "Target";
+    MemberShape member = MemberShape.builder().id(id + "$member").target(targetId).build();
+    MemberShape key = MemberShape.builder().id(id + "$key").target(targetId).build();
+    MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
+    String delegate = "se_Foo(" + DATA_SOURCE + ", context)";
 
-    public static Collection<Object[]> validMemberTargetTypes() {
-        String id = "com.smithy.example#Foo";
-        String targetId = id + "Target";
-        MemberShape member = MemberShape.builder().id(id + "$member").target(targetId).build();
-        MemberShape key = MemberShape.builder().id(id + "$key").target(targetId).build();
-        MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
-        String delegate = "se_Foo(" + DATA_SOURCE + ", context)";
-
-        return ListUtils.of(
-            new Object[][] {
-                { BooleanShape.builder().id(id).build(), DATA_SOURCE },
-                { BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")" },
-                { BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")" },
-                { ByteShape.builder().id(id).build(), DATA_SOURCE },
-                { DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")" },
-                { FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")" },
-                { IntegerShape.builder().id(id).build(), DATA_SOURCE },
-                { LongShape.builder().id(id).build(), DATA_SOURCE },
-                { ShortShape.builder().id(id).build(), DATA_SOURCE },
-                { StringShape.builder().id(id).build(), DATA_SOURCE },
-                {
-                    StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                    "__LazyJsonString.from(" + DATA_SOURCE + ")",
-                },
-                { BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")" },
-                { DocumentShape.builder().id(id).build(), delegate },
-                { ListShape.builder().id(id).member(member).build(), delegate },
-                { SetShape.builder().id(id).member(member).build(), delegate },
-                { MapShape.builder().id(id).key(key).value(value).build(), delegate },
-                { StructureShape.builder().id(id).build(), delegate },
-                { UnionShape.builder().id(id).addMember(member).build(), delegate },
-            }
-        );
-    }
-
-    @Test
-    public void throwsOnInvalidDocumentMembers() {
-        String id = "com.smithy.example#Foo";
-        DocumentMemberSerVisitor visitor = new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT);
-
-        Assertions.assertThrows(CodegenException.class, () -> {
-            ServiceShape.builder().version("1").id(id).build().accept(visitor);
+    return ListUtils.of(
+        new Object[][] {
+          {BooleanShape.builder().id(id).build(), DATA_SOURCE},
+          {BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
+          {BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
+          {ByteShape.builder().id(id).build(), DATA_SOURCE},
+          {DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
+          {FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
+          {IntegerShape.builder().id(id).build(), DATA_SOURCE},
+          {LongShape.builder().id(id).build(), DATA_SOURCE},
+          {ShortShape.builder().id(id).build(), DATA_SOURCE},
+          {StringShape.builder().id(id).build(), DATA_SOURCE},
+          {
+            StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
+            "__LazyJsonString.from(" + DATA_SOURCE + ")"
+          },
+          {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
+          {DocumentShape.builder().id(id).build(), delegate},
+          {ListShape.builder().id(id).member(member).build(), delegate},
+          {SetShape.builder().id(id).member(member).build(), delegate},
+          {MapShape.builder().id(id).key(key).value(value).build(), delegate},
+          {StructureShape.builder().id(id).build(), delegate},
+          {UnionShape.builder().id(id).addMember(member).build(), delegate},
         });
-        Assertions.assertThrows(CodegenException.class, () -> {
-            OperationShape.builder().id(id).build().accept(visitor);
+  }
+
+  @Test
+  public void throwsOnInvalidDocumentMembers() {
+    String id = "com.smithy.example#Foo";
+    DocumentMemberSerVisitor visitor =
+        new DocumentMemberSerVisitor(mockContext, DATA_SOURCE, FORMAT);
+
+    Assertions.assertThrows(
+        CodegenException.class,
+        () -> {
+          ServiceShape.builder().version("1").id(id).build().accept(visitor);
         });
-        Assertions.assertThrows(CodegenException.class, () -> {
-            ResourceShape.builder().addIdentifier("id", id + "Id").id(id).build().accept(visitor);
+    Assertions.assertThrows(
+        CodegenException.class,
+        () -> {
+          OperationShape.builder().id(id).build().accept(visitor);
         });
-        Assertions.assertThrows(CodegenException.class, () -> {
-            MemberShape.builder().target(id + "Target").id(id + "$member").build().accept(visitor);
+    Assertions.assertThrows(
+        CodegenException.class,
+        () -> {
+          ResourceShape.builder().addIdentifier("id", id + "Id").id(id).build().accept(visitor);
         });
+    Assertions.assertThrows(
+        CodegenException.class,
+        () -> {
+          MemberShape.builder().target(id + "Target").id(id + "$member").build().accept(visitor);
+        });
+  }
+
+  private static final class MockProvider implements SymbolProvider {
+    private final String id = "com.smithy.example#Foo";
+    private Symbol mock = Symbol.builder().name("Foo").namespace("com.smithy.example", "/").build();
+    private Symbol collectionMock =
+        Symbol.builder().name("Foo[]").namespace("com.smithy.example", "/").build();
+
+    @Override
+    public Symbol toSymbol(Shape shape) {
+      if (shape instanceof CollectionShape) {
+        MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
+        return collectionMock.toBuilder()
+            .putProperty("shape", ListShape.builder().id(id).member(member).build())
+            .build();
+      }
+      return mock.toBuilder().putProperty("shape", StructureShape.builder().id(id).build()).build();
     }
-
-    private static final class MockProvider implements SymbolProvider {
-
-        private final String id = "com.smithy.example#Foo";
-        private Symbol mock = Symbol.builder().name("Foo").namespace("com.smithy.example", "/").build();
-        private Symbol collectionMock = Symbol.builder().name("Foo[]").namespace("com.smithy.example", "/").build();
-
-        @Override
-        public Symbol toSymbol(Shape shape) {
-            if (shape instanceof CollectionShape) {
-                MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
-                return collectionMock
-                    .toBuilder()
-                    .putProperty("shape", ListShape.builder().id(id).member(member).build())
-                    .build();
-            }
-            return mock.toBuilder().putProperty("shape", StructureShape.builder().id(id).build()).build();
-        }
-    }
+  }
 }

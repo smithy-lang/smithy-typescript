@@ -20,14 +20,15 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 public enum FrameworkErrorModel {
-    INSTANCE;
+  INSTANCE;
 
-    private final Model model = Model.assembler()
-        .addImport(FrameworkErrorModel.class.getResource("framework-errors.smithy"))
-        .assemble()
-        .unwrap();
+  private final Model model =
+      Model.assembler()
+          .addImport(FrameworkErrorModel.class.getResource("framework-errors.smithy"))
+          .assemble()
+          .unwrap();
 
-    public Model getModel() {
-        return model;
-    }
+  public Model getModel() {
+    return model;
+  }
 }

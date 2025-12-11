@@ -15,69 +15,67 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class HttpAuthSchemeProviderInterfaceCodeSection implements CodeSection {
+  private final ServiceShape service;
+  private final TypeScriptSettings settings;
+  private final Model model;
+  private final SymbolProvider symbolProvider;
 
-    private final ServiceShape service;
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final SymbolProvider symbolProvider;
+  private HttpAuthSchemeProviderInterfaceCodeSection(Builder builder) {
+    service = SmithyBuilder.requiredState("service", builder.service);
+    settings = SmithyBuilder.requiredState("settings", builder.settings);
+    model = SmithyBuilder.requiredState("model", builder.model);
+    symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
+  }
 
-    private HttpAuthSchemeProviderInterfaceCodeSection(Builder builder) {
-        service = SmithyBuilder.requiredState("service", builder.service);
-        settings = SmithyBuilder.requiredState("settings", builder.settings);
-        model = SmithyBuilder.requiredState("model", builder.model);
-        symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
+  public ServiceShape getService() {
+    return service;
+  }
+
+  public TypeScriptSettings getSettings() {
+    return settings;
+  }
+
+  public Model getModel() {
+    return model;
+  }
+
+  public SymbolProvider getSymbolProvider() {
+    return symbolProvider;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder implements SmithyBuilder<HttpAuthSchemeProviderInterfaceCodeSection> {
+    private ServiceShape service;
+    private TypeScriptSettings settings;
+    private Model model;
+    private SymbolProvider symbolProvider;
+
+    @Override
+    public HttpAuthSchemeProviderInterfaceCodeSection build() {
+      return new HttpAuthSchemeProviderInterfaceCodeSection(this);
     }
 
-    public ServiceShape getService() {
-        return service;
+    public Builder service(ServiceShape service) {
+      this.service = service;
+      return this;
     }
 
-    public TypeScriptSettings getSettings() {
-        return settings;
+    public Builder settings(TypeScriptSettings settings) {
+      this.settings = settings;
+      return this;
     }
 
-    public Model getModel() {
-        return model;
+    public Builder model(Model model) {
+      this.model = model;
+      return this;
     }
 
-    public SymbolProvider getSymbolProvider() {
-        return symbolProvider;
+    public Builder symbolProvider(SymbolProvider symbolProvider) {
+      this.symbolProvider = symbolProvider;
+      return this;
     }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder implements SmithyBuilder<HttpAuthSchemeProviderInterfaceCodeSection> {
-
-        private ServiceShape service;
-        private TypeScriptSettings settings;
-        private Model model;
-        private SymbolProvider symbolProvider;
-
-        @Override
-        public HttpAuthSchemeProviderInterfaceCodeSection build() {
-            return new HttpAuthSchemeProviderInterfaceCodeSection(this);
-        }
-
-        public Builder service(ServiceShape service) {
-            this.service = service;
-            return this;
-        }
-
-        public Builder settings(TypeScriptSettings settings) {
-            this.settings = settings;
-            return this;
-        }
-
-        public Builder model(Model model) {
-            this.model = model;
-            return this;
-        }
-
-        public Builder symbolProvider(SymbolProvider symbolProvider) {
-            this.symbolProvider = symbolProvider;
-            return this;
-        }
-    }
+  }
 }

@@ -10,11 +10,11 @@ import software.amazon.smithy.typescript.codegen.sections.ClientBodyExtraCodeSec
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * The writer consumer for a RuntimeClientPlugin. May be used to add imports and dependencies
- * used by the plugin at the client level.
+ * The writer consumer for a RuntimeClientPlugin. May be used to add imports and dependencies used
+ * by the plugin at the client level.
  */
 @FunctionalInterface
 @SmithyInternalApi
 public interface ClientWriterConsumer {
-    void accept(TypeScriptWriter writer, ClientBodyExtraCodeSection section);
+  void accept(TypeScriptWriter writer, ClientBodyExtraCodeSection section);
 }

@@ -10,28 +10,29 @@ import software.amazon.smithy.model.node.Node;
 
 public class IndexGeneratorTest {
 
-    @Test
-    public void writesIndex() {
-        Model model = Model.assembler()
+  @Test
+  public void writesIndex() {
+    Model model =
+        Model.assembler()
             .addImport(getClass().getResource("simple-service-with-operation.smithy"))
             .assemble()
             .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(
+    TypeScriptSettings settings =
+        TypeScriptSettings.from(
             model,
             Node.objectNodeBuilder()
                 .withMember("service", Node.from("smithy.example#Example"))
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build()
-        );
-        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
-        TypeScriptWriter writer = new TypeScriptWriter("");
+                .build());
+    SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
+    TypeScriptWriter writer = new TypeScriptWriter("");
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer, writer);
+    IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer, writer);
 
-        String contents = writer.toString();
-        assertThat(contents, containsString("export * from \"./Example\";"));
-        assertThat(contents, containsString("export * from \"./ExampleClient\";"));
-        assertThat(contents, containsString("export * from \"./commands\";"));
-    }
+    String contents = writer.toString();
+    assertThat(contents, containsString("export * from \"./Example\";"));
+    assertThat(contents, containsString("export * from \"./ExampleClient\";"));
+    assertThat(contents, containsString("export * from \"./commands\";"));
+  }
 }

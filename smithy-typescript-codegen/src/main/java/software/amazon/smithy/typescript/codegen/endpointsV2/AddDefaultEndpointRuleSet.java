@@ -29,118 +29,116 @@ import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * This class normalizes models without endpointRuleSet traits to use the same code paths as those with ruleSet,
- * to make reasoning about models easier and less variable.
+ * This class normalizes models without endpointRuleSet traits to use the same code paths as those
+ * with ruleSet, to make reasoning about models easier and less variable.
  */
 @SmithyInternalApi
 public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
-
-    public static final EndpointRuleSetTrait DEFAULT_RULESET = EndpointRuleSetTrait.builder()
-        .ruleSet(
-            Node.parse(
-                """
-                {
-                  "version": "1.0",
-                  "parameters": {
-                    "endpoint": {
-                      "type": "string",
-                      "builtIn": "SDK::Endpoint",
-                      "documentation": "Endpoint used for making requests. Should be formatted as a URI."
-                    }
-                  },
-                  "rules": [
-                    {
-                      "conditions": [
-                        {
-                          "fn": "isSet",
-                          "argv": [
-                            {
-                              "ref": "endpoint"
-                            }
-                          ]
-                        }
-                      ],
+  public static final EndpointRuleSetTrait DEFAULT_RULESET =
+      EndpointRuleSetTrait.builder()
+          .ruleSet(
+              Node.parse(
+                  """
+                  {
+                    "version": "1.0",
+                    "parameters": {
                       "endpoint": {
-                        "url": {
-                          "ref": "endpoint"
-                        }
-                      },
-                      "type": "endpoint"
+                        "type": "string",
+                        "builtIn": "SDK::Endpoint",
+                        "documentation": "Endpoint used for making requests. Should be formatted as a URI."
+                      }
                     },
-                    {
-                      "conditions": [],
-                      "error": "(default endpointRuleSet) endpoint is not set - you must configure an endpoint.",
-                      "type": "error"
-                    }
-                  ]
-                }
-                """
-            )
-        )
-        .build();
+                    "rules": [
+                      {
+                        "conditions": [
+                          {
+                            "fn": "isSet",
+                            "argv": [
+                              {
+                                "ref": "endpoint"
+                              }
+                            ]
+                          }
+                        ],
+                        "endpoint": {
+                          "url": {
+                            "ref": "endpoint"
+                          }
+                        },
+                        "type": "endpoint"
+                      },
+                      {
+                        "conditions": [],
+                        "error": "(default endpointRuleSet) endpoint is not set - you must configure an endpoint.",
+                        "type": "error"
+                      }
+                    ]
+                  }
+                  """))
+          .build();
 
-    private boolean usesDefaultEndpointRuleset = false;
+  private boolean usesDefaultEndpointRuleset = false;
 
-    @Override
-    public List<String> runAfter() {
-        return List.of(AddBuiltinPlugins.class.getCanonicalName());
-    }
+  @Override
+  public List<String> runAfter() {
+    return List.of(AddBuiltinPlugins.class.getCanonicalName());
+  }
 
-    @Override
-    public List<RuntimeClientPlugin> getClientPlugins() {
-        RuntimeClientPlugin endpointConfigResolver = RuntimeClientPlugin.builder()
-            .withConventions(TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
+  @Override
+  public List<RuntimeClientPlugin> getClientPlugins() {
+    RuntimeClientPlugin endpointConfigResolver =
+        RuntimeClientPlugin.builder()
+            .withConventions(
+                TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
             .build();
 
-        if (usesDefaultEndpointRuleset) {
-            return List.of(
-                endpointConfigResolver,
-                RuntimeClientPlugin.builder()
-                    .withConventions(
-                        TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency,
-                        "EndpointRequired",
-                        HAS_CONFIG
-                    )
-                    .build()
-            );
-        }
-        return List.of(endpointConfigResolver);
+    if (usesDefaultEndpointRuleset) {
+      return List.of(
+          endpointConfigResolver,
+          RuntimeClientPlugin.builder()
+              .withConventions(
+                  TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency,
+                  "EndpointRequired",
+                  HAS_CONFIG)
+              .build());
+    }
+    return List.of(endpointConfigResolver);
+  }
+
+  @Override
+  public Model preprocessModel(Model model, TypeScriptSettings settings) {
+    Model.Builder modelBuilder = model.toBuilder();
+
+    ServiceShape serviceShape = settings.getService(model);
+    if (!serviceShape.hasTrait(EndpointRuleSetTrait.class)) {
+      usesDefaultEndpointRuleset = true;
+      modelBuilder.removeShape(serviceShape.toShapeId());
+      modelBuilder.addShape(serviceShape.toBuilder().addTrait(DEFAULT_RULESET).build());
     }
 
-    @Override
-    public Model preprocessModel(Model model, TypeScriptSettings settings) {
-        Model.Builder modelBuilder = model.toBuilder();
+    return modelBuilder.build();
+  }
 
-        ServiceShape serviceShape = settings.getService(model);
-        if (!serviceShape.hasTrait(EndpointRuleSetTrait.class)) {
-            usesDefaultEndpointRuleset = true;
-            modelBuilder.removeShape(serviceShape.toShapeId());
-            modelBuilder.addShape(serviceShape.toBuilder().addTrait(DEFAULT_RULESET).build());
-        }
-
-        return modelBuilder.build();
+  @Override
+  public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      LanguageTarget target) {
+    if (!settings.generateClient()) {
+      return Collections.emptyMap();
     }
-
-    @Override
-    public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        LanguageTarget target
-    ) {
-        if (!settings.generateClient()) {
-            return Collections.emptyMap();
-        }
-        if (target == LanguageTarget.SHARED) {
-            return MapUtils.of("endpointProvider", writer -> {
-                writer.addImport(
-                    "defaultEndpointResolver",
-                    null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/endpointResolver").toString()
-                );
-                writer.write("defaultEndpointResolver");
-            });
-        }
-        return Collections.emptyMap();
+    if (target == LanguageTarget.SHARED) {
+      return MapUtils.of(
+          "endpointProvider",
+          writer -> {
+            writer.addImport(
+                "defaultEndpointResolver",
+                null,
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/endpointResolver").toString());
+            writer.write("defaultEndpointResolver");
+          });
     }
+    return Collections.emptyMap();
+  }
 }

@@ -30,113 +30,123 @@ import software.amazon.smithy.utils.StringUtils;
 /**
  * Generates aggregated client for service.
  *
- * <p>This client extends from the bare-bones client and provides named methods
- * for every operation in the service. Using this client means that all
- * operations of a service are considered referenced, meaning they will
- * not be removed by tree-shaking.
+ * <p>This client extends from the bare-bones client and provides named methods for every operation
+ * in the service. Using this client means that all operations of a service are considered
+ * referenced, meaning they will not be removed by tree-shaking.
  */
 @SmithyInternalApi
 final class ServiceAggregatedClientGenerator implements Runnable {
 
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final ServiceShape service;
-    private final SymbolProvider symbolProvider;
-    private final TypeScriptWriter writer;
-    private final String aggregateClientName;
-    private final Symbol serviceSymbol;
-    private final ApplicationProtocol applicationProtocol;
+  private final TypeScriptSettings settings;
+  private final Model model;
+  private final ServiceShape service;
+  private final SymbolProvider symbolProvider;
+  private final TypeScriptWriter writer;
+  private final String aggregateClientName;
+  private final Symbol serviceSymbol;
+  private final ApplicationProtocol applicationProtocol;
 
-    ServiceAggregatedClientGenerator(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        String aggregateClientName,
-        TypeScriptWriter writer,
-        ApplicationProtocol applicationProtocol
-    ) {
-        this.settings = settings;
-        this.model = model;
-        this.service = settings.getService(model);
-        this.symbolProvider = symbolProvider;
-        this.writer = writer;
-        this.aggregateClientName = aggregateClientName;
-        this.applicationProtocol = applicationProtocol;
-        serviceSymbol = symbolProvider.toSymbol(service).toBuilder().putProperty("typeOnly", false).build();
-    }
+  ServiceAggregatedClientGenerator(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      String aggregateClientName,
+      TypeScriptWriter writer,
+      ApplicationProtocol applicationProtocol) {
+    this.settings = settings;
+    this.model = model;
+    this.service = settings.getService(model);
+    this.symbolProvider = symbolProvider;
+    this.writer = writer;
+    this.aggregateClientName = aggregateClientName;
+    this.applicationProtocol = applicationProtocol;
+    serviceSymbol =
+        symbolProvider.toSymbol(service).toBuilder().putProperty("typeOnly", false).build();
+  }
 
-    @Override
-    public void run() {
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        final Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        writer.openBlock("const commands = {", "};", () -> {
-            for (OperationShape operation : containedOperations) {
-                Symbol operationSymbol = symbolProvider
-                    .toSymbol(operation)
-                    .toBuilder()
+  @Override
+  public void run() {
+    TopDownIndex topDownIndex = TopDownIndex.of(model);
+    final Set<OperationShape> containedOperations =
+        new TreeSet<>(topDownIndex.getContainedOperations(service));
+    writer.openBlock(
+        "const commands = {",
+        "};",
+        () -> {
+          for (OperationShape operation : containedOperations) {
+            Symbol operationSymbol =
+                symbolProvider.toSymbol(operation).toBuilder()
                     .putProperty("typeOnly", false)
                     .build();
-                writer.write("$T,", operationSymbol);
-            }
+            writer.write("$T,", operationSymbol);
+          }
         });
 
-        writer.write("");
+    writer.write("");
 
-        // Generate an aggregated client interface.
-        writer.openBlock("export interface $L {", "}", aggregateClientName, () -> {
-            for (OperationShape operation : containedOperations) {
-                Symbol operationSymbol = symbolProvider.toSymbol(operation);
-                Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
-                Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);
-                writer.addUseImports(operationSymbol);
-                String methodName = StringUtils.uncapitalize(operationSymbol.getName().replaceAll("Command$", ""));
+    // Generate an aggregated client interface.
+    writer.openBlock(
+        "export interface $L {",
+        "}",
+        aggregateClientName,
+        () -> {
+          for (OperationShape operation : containedOperations) {
+            Symbol operationSymbol = symbolProvider.toSymbol(operation);
+            Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
+            Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);
+            writer.addUseImports(operationSymbol);
+            String methodName =
+                StringUtils.uncapitalize(operationSymbol.getName().replaceAll("Command$", ""));
 
-                // Generate a multiple overloaded methods for each command.
-                writer.writeDocs("@see {@link " + operationSymbol.getName() + "}");
-                boolean inputOptional = model
+            // Generate a multiple overloaded methods for each command.
+            writer.writeDocs("@see {@link " + operationSymbol.getName() + "}");
+            boolean inputOptional =
+                model
                     .getShape(operation.getInputShape())
-                    .map(shape -> shape.getAllMembers().values().stream().noneMatch(MemberShape::isRequired))
+                    .map(
+                        shape ->
+                            shape.getAllMembers().values().stream()
+                                .noneMatch(MemberShape::isRequired))
                     .orElse(true);
-                if (inputOptional) {
-                    writer.write("$L(): Promise<$T>;", methodName, output);
-                }
-                writer.write(
-                    """
-                    $1L(
-                      args: $2T,
-                      options?: $3T
-                    ): Promise<$4T>;
-                    $1L(
-                      args: $2T,
-                      cb: (err: any, data?: $4T) => void
-                    ): void;
-                    $1L(
-                      args: $2T,
-                      options: $3T,
-                      cb: (err: any, data?: $4T) => void
-                    ): void;""",
-                    methodName,
-                    input,
-                    applicationProtocol.getOptionsType(),
-                    output
-                );
-                writer.write("");
+            if (inputOptional) {
+              writer.write("$L(): Promise<$T>;", methodName, output);
             }
-            writer.unwrite("\n");
+            writer.write(
+                """
+                $1L(
+                  args: $2T,
+                  options?: $3T
+                ): Promise<$4T>;
+                $1L(
+                  args: $2T,
+                  cb: (err: any, data?: $4T) => void
+                ): void;
+                $1L(
+                  args: $2T,
+                  options: $3T,
+                  cb: (err: any, data?: $4T) => void
+                ): void;\
+                """,
+                methodName,
+                input,
+                applicationProtocol.getOptionsType(),
+                output);
+            writer.write("");
+          }
+          writer.unwrite("\n");
         });
 
-        writer.write("");
+    writer.write("");
 
-        // Generate the client and extend from the bare-bones client.
-        writer.writeShapeDocs(service);
-        writer.write(
-            "export class $L extends $T implements $L {}",
-            aggregateClientName,
-            serviceSymbol,
-            aggregateClientName
-        );
+    // Generate the client and extend from the bare-bones client.
+    writer.writeShapeDocs(service);
+    writer.write(
+        "export class $L extends $T implements $L {}",
+        aggregateClientName,
+        serviceSymbol,
+        aggregateClientName);
 
-        writer.addImport("createAggregatedClient", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
-        writer.write("createAggregatedClient(commands, $L);", aggregateClientName);
-    }
+    writer.addImport("createAggregatedClient", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+    writer.write("createAggregatedClient(commands, $L);", aggregateClientName);
+  }
 }

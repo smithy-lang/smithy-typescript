@@ -9,15 +9,15 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Plugin to trigger TypeScript SSDK code generation.
+ *
  * @deprecated Use {@link TypeScriptServerCodegenPlugin} instead.
  */
 @SmithyInternalApi
 @Deprecated
 @SuppressWarnings("AbbreviationAsWordInName")
 public class TypeScriptSSDKCodegenPlugin extends TypeScriptServerCodegenPlugin {
-
-    @Override
-    public String getName() {
-        return "typescript-ssdk-codegen";
-    }
+  @Override
+  public String getName() {
+    return "typescript-ssdk-codegen";
+  }
 }

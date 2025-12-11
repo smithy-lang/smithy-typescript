@@ -13,33 +13,32 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 public final class ClientDestroyCodeSection implements CodeSection {
+  private final List<RuntimeClientPlugin> runtimeClientPlugins;
 
-    private final List<RuntimeClientPlugin> runtimeClientPlugins;
+  private ClientDestroyCodeSection(Builder builder) {
+    runtimeClientPlugins =
+        SmithyBuilder.requiredState("runtimePlugins", builder.runtimeClientPlugins);
+  }
 
-    private ClientDestroyCodeSection(Builder builder) {
-        runtimeClientPlugins = SmithyBuilder.requiredState("runtimePlugins", builder.runtimeClientPlugins);
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public List<RuntimeClientPlugin> getRuntimeClientPlugins() {
+    return runtimeClientPlugins;
+  }
+
+  public static class Builder implements SmithyBuilder<ClientDestroyCodeSection> {
+    private List<RuntimeClientPlugin> runtimeClientPlugins;
+
+    @Override
+    public ClientDestroyCodeSection build() {
+      return new ClientDestroyCodeSection(this);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder runtimeClientPlugins(List<RuntimeClientPlugin> runtimeClientPlugins) {
+      this.runtimeClientPlugins = runtimeClientPlugins;
+      return this;
     }
-
-    public List<RuntimeClientPlugin> getRuntimeClientPlugins() {
-        return runtimeClientPlugins;
-    }
-
-    public static class Builder implements SmithyBuilder<ClientDestroyCodeSection> {
-
-        private List<RuntimeClientPlugin> runtimeClientPlugins;
-
-        @Override
-        public ClientDestroyCodeSection build() {
-            return new ClientDestroyCodeSection(this);
-        }
-
-        public Builder runtimeClientPlugins(List<RuntimeClientPlugin> runtimeClientPlugins) {
-            this.runtimeClientPlugins = runtimeClientPlugins;
-            return this;
-        }
-    }
+  }
 }

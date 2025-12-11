@@ -52,255 +52,271 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 /**
  * Visitor to generate member values for aggregate types deserialized from documents.
  *
- * The standard implementations are as follows; these implementations may be
- * overridden unless otherwise specified.
+ * <p>The standard implementations are as follows; these implementations may be overridden unless
+ * otherwise specified.
  *
  * <ul>
- *   <li>Blob: base64 decoded.</li>
- *   <li>BigInteger: converted to JS BigInt.</li>
- *   <li>BigDecimal: converted to Big via {@code big.js}.</li>
- *   <li>Timestamp: converted to JS Date.</li>
- *   <li>Service, Operation, Resource, Member: not deserializable from documents. <b>Not overridable.</b></li>
- *   <li>Document, List, Map, Set, Structure, Union: delegated to a deserialization function.
- *     <b>Not overridable.</b></li>
- *   <li>All other types: unmodified.</li>
+ *   <li>Blob: base64 decoded.
+ *   <li>BigInteger: converted to JS BigInt.
+ *   <li>BigDecimal: converted to Big via {@code big.js}.
+ *   <li>Timestamp: converted to JS Date.
+ *   <li>Service, Operation, Resource, Member: not deserializable from documents. <b>Not
+ *       overridable.</b>
+ *   <li>Document, List, Map, Set, Structure, Union: delegated to a deserialization function. <b>Not
+ *       overridable.</b>
+ *   <li>All other types: unmodified.
  * </ul>
  */
 @SmithyUnstableApi
 public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
+  protected boolean serdeElisionEnabled;
+  private final GenerationContext context;
+  private final String dataSource;
+  private final Format defaultTimestampFormat;
+  private final SerdeElisionIndex serdeElisionIndex;
 
-    protected boolean serdeElisionEnabled;
-    private final GenerationContext context;
-    private final String dataSource;
-    private final Format defaultTimestampFormat;
-    private final SerdeElisionIndex serdeElisionIndex;
+  /**
+   * Constructor.
+   *
+   * @param context The generation context.
+   * @param dataSource The in-code location of the data to provide an output of ({@code output.foo},
+   *     {@code entry}, etc.)
+   * @param defaultTimestampFormat The default timestamp format used in absence of a TimestampFormat
+   *     trait.
+   */
+  public DocumentMemberDeserVisitor(
+      GenerationContext context, String dataSource, Format defaultTimestampFormat) {
+    this.context = context;
+    this.dataSource = dataSource;
+    this.defaultTimestampFormat = defaultTimestampFormat;
+    this.serdeElisionEnabled = false;
+    this.serdeElisionIndex = SerdeElisionIndex.of(context.getModel());
+  }
 
-    /**
-     * Constructor.
-     *
-     * @param context The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param defaultTimestampFormat The default timestamp format used in absence
-     *                               of a TimestampFormat trait.
-     */
-    public DocumentMemberDeserVisitor(GenerationContext context, String dataSource, Format defaultTimestampFormat) {
-        this.context = context;
-        this.dataSource = dataSource;
-        this.defaultTimestampFormat = defaultTimestampFormat;
-        this.serdeElisionEnabled = false;
-        this.serdeElisionIndex = SerdeElisionIndex.of(context.getModel());
+  /**
+   * @return the member this visitor is being run against. Used to discover member-applied traits,
+   *     such as @timestampFormat. Can be, and defaults, to, null.
+   */
+  protected MemberShape getMemberShape() {
+    return null;
+  }
+
+  /**
+   * @return true if string-formatted epoch seconds in payloads are disallowed. Defaults to false.
+   */
+  protected boolean requiresNumericEpochSecondsInPayload() {
+    return false;
+  }
+
+  /**
+   * Gets the generation context.
+   *
+   * @return The generation context.
+   */
+  protected final GenerationContext getContext() {
+    return context;
+  }
+
+  /**
+   * Gets the in-code location of the data to provide an output of ({@code output.foo}, {@code
+   * entry}, etc.).
+   *
+   * @return The data source.
+   */
+  protected final String getDataSource() {
+    return dataSource;
+  }
+
+  /**
+   * Gets the default timestamp format used in absence of a TimestampFormat trait.
+   *
+   * @return The default timestamp format.
+   */
+  protected final Format getDefaultTimestampFormat() {
+    return defaultTimestampFormat;
+  }
+
+  @Override
+  public String blobShape(BlobShape shape) {
+    return "context.base64Decoder(" + dataSource + ")";
+  }
+
+  @Override
+  public String booleanShape(BooleanShape shape) {
+    context
+        .getWriter()
+        .addImport("expectBoolean", "__expectBoolean", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__expectBoolean(" + dataSource + ")";
+  }
+
+  @Override
+  public String byteShape(ByteShape shape) {
+    context
+        .getWriter()
+        .addImport("expectByte", "__expectByte", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__expectByte(" + dataSource + ")";
+  }
+
+  @Override
+  public String shortShape(ShortShape shape) {
+    context
+        .getWriter()
+        .addImport("expectShort", "__expectShort", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__expectShort(" + dataSource + ")";
+  }
+
+  @Override
+  public String integerShape(IntegerShape shape) {
+    context
+        .getWriter()
+        .addImport("expectInt32", "__expectInt32", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__expectInt32(" + dataSource + ")";
+  }
+
+  @Override
+  public String longShape(LongShape shape) {
+    context
+        .getWriter()
+        .addImport("expectLong", "__expectLong", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__expectLong(" + dataSource + ")";
+  }
+
+  @Override
+  public String floatShape(FloatShape shape) {
+    context
+        .getWriter()
+        .addImport(
+            "limitedParseFloat32", "__limitedParseFloat32", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__limitedParseFloat32(" + dataSource + ")";
+  }
+
+  @Override
+  public String doubleShape(DoubleShape shape) {
+    context
+        .getWriter()
+        .addImport(
+            "limitedParseDouble", "__limitedParseDouble", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return "__limitedParseDouble(" + dataSource + ")";
+  }
+
+  @Override
+  public String stringShape(StringShape shape) {
+    return HttpProtocolGeneratorUtils.getStringOutputParam(context, shape, dataSource);
+  }
+
+  @Override
+  public String bigIntegerShape(BigIntegerShape shape) {
+    // BigInt is not supported across all environments, use big.js instead.
+    return deserializeToBigJs();
+  }
+
+  @Override
+  public String bigDecimalShape(BigDecimalShape shape) {
+    return deserializeToBigJs();
+  }
+
+  private String deserializeToBigJs() {
+    context.getWriter().addImport("Big", "__Big", TypeScriptDependency.BIG_JS);
+    return "__Big(" + dataSource + ")";
+  }
+
+  @Override
+  public final String operationShape(OperationShape shape) {
+    throw new CodegenException("Operation shapes cannot be bound to documents.");
+  }
+
+  @Override
+  public final String resourceShape(ResourceShape shape) {
+    throw new CodegenException("Resource shapes cannot be bound to documents.");
+  }
+
+  @Override
+  public final String serviceShape(ServiceShape shape) {
+    throw new CodegenException("Service shapes cannot be bound to documents.");
+  }
+
+  @Override
+  public final String memberShape(MemberShape shape) {
+    throw new CodegenException("Member shapes cannot be bound to documents.");
+  }
+
+  @Override
+  public String timestampShape(TimestampShape shape) {
+    HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
+    Format format;
+    if (getMemberShape() == null) {
+      format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
+    } else {
+      if (!shape.getId().equals(getMemberShape().getTarget())) {
+        throw new IllegalArgumentException(
+            String.format(
+                "Encountered timestamp shape %s that was not the target of member shape %s",
+                shape.getId(), getMemberShape().getId()));
+      }
+      format =
+          httpIndex.determineTimestampFormat(
+              getMemberShape(), Location.DOCUMENT, defaultTimestampFormat);
     }
 
-    /**
-     * @return the member this visitor is being run against. Used to discover member-applied
-     * traits, such as @timestampFormat. Can be, and defaults, to, null.
-     */
-    protected MemberShape getMemberShape() {
-        return null;
+    return HttpProtocolGeneratorUtils.getTimestampOutputParam(
+        context.getWriter(),
+        dataSource,
+        Location.DOCUMENT,
+        shape,
+        format,
+        requiresNumericEpochSecondsInPayload(),
+        context.getSettings().generateClient());
+  }
+
+  @Override
+  public final String documentShape(DocumentShape shape) {
+    return getDelegateDeserializer(shape);
+  }
+
+  @Override
+  public final String listShape(ListShape shape) {
+    return getDelegateDeserializer(shape);
+  }
+
+  @Override
+  public final String mapShape(MapShape shape) {
+    return getDelegateDeserializer(shape);
+  }
+
+  @Override
+  public final String setShape(SetShape shape) {
+    return getDelegateDeserializer(shape);
+  }
+
+  @Override
+  public final String structureShape(StructureShape shape) {
+    return getDelegateDeserializer(shape);
+  }
+
+  @Override
+  public String unionShape(UnionShape shape) {
+    context
+        .getWriter()
+        .addImport("expectUnion", "__expectUnion", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    return getDelegateDeserializer(shape, "__expectUnion(" + dataSource + ")");
+  }
+
+  private String getDelegateDeserializer(Shape shape) {
+    return getDelegateDeserializer(shape, dataSource);
+  }
+
+  private String getDelegateDeserializer(Shape shape, String customDataSource) {
+    // Use the shape for the function name.
+    Symbol symbol = context.getSymbolProvider().toSymbol(shape);
+
+    if (serdeElisionEnabled && serdeElisionIndex.mayElide(shape)) {
+      context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+      return "_json(" + customDataSource + ")";
     }
 
-    /**
-     * @return true if string-formatted epoch seconds in payloads are disallowed. Defaults to false.
-     */
-    protected boolean requiresNumericEpochSecondsInPayload() {
-        return false;
-    }
-
-    /**
-     * Gets the generation context.
-     *
-     * @return The generation context.
-     */
-    protected final GenerationContext getContext() {
-        return context;
-    }
-
-    /**
-     * Gets the in-code location of the data to provide an output of
-     * ({@code output.foo}, {@code entry}, etc.).
-     *
-     * @return The data source.
-     */
-    protected final String getDataSource() {
-        return dataSource;
-    }
-
-    /**
-     * Gets the default timestamp format used in absence of a TimestampFormat trait.
-     *
-     * @return The default timestamp format.
-     */
-    protected final Format getDefaultTimestampFormat() {
-        return defaultTimestampFormat;
-    }
-
-    @Override
-    public String blobShape(BlobShape shape) {
-        return "context.base64Decoder(" + dataSource + ")";
-    }
-
-    @Override
-    public String booleanShape(BooleanShape shape) {
-        context.getWriter().addImport("expectBoolean", "__expectBoolean", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__expectBoolean(" + dataSource + ")";
-    }
-
-    @Override
-    public String byteShape(ByteShape shape) {
-        context.getWriter().addImport("expectByte", "__expectByte", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__expectByte(" + dataSource + ")";
-    }
-
-    @Override
-    public String shortShape(ShortShape shape) {
-        context.getWriter().addImport("expectShort", "__expectShort", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__expectShort(" + dataSource + ")";
-    }
-
-    @Override
-    public String integerShape(IntegerShape shape) {
-        context.getWriter().addImport("expectInt32", "__expectInt32", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__expectInt32(" + dataSource + ")";
-    }
-
-    @Override
-    public String longShape(LongShape shape) {
-        context.getWriter().addImport("expectLong", "__expectLong", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__expectLong(" + dataSource + ")";
-    }
-
-    @Override
-    public String floatShape(FloatShape shape) {
-        context
-            .getWriter()
-            .addImport("limitedParseFloat32", "__limitedParseFloat32", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__limitedParseFloat32(" + dataSource + ")";
-    }
-
-    @Override
-    public String doubleShape(DoubleShape shape) {
-        context
-            .getWriter()
-            .addImport("limitedParseDouble", "__limitedParseDouble", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return "__limitedParseDouble(" + dataSource + ")";
-    }
-
-    @Override
-    public String stringShape(StringShape shape) {
-        return HttpProtocolGeneratorUtils.getStringOutputParam(context, shape, dataSource);
-    }
-
-    @Override
-    public String bigIntegerShape(BigIntegerShape shape) {
-        // BigInt is not supported across all environments, use big.js instead.
-        return deserializeToBigJs();
-    }
-
-    @Override
-    public String bigDecimalShape(BigDecimalShape shape) {
-        return deserializeToBigJs();
-    }
-
-    private String deserializeToBigJs() {
-        context.getWriter().addImport("Big", "__Big", TypeScriptDependency.BIG_JS);
-        return "__Big(" + dataSource + ")";
-    }
-
-    @Override
-    public final String operationShape(OperationShape shape) {
-        throw new CodegenException("Operation shapes cannot be bound to documents.");
-    }
-
-    @Override
-    public final String resourceShape(ResourceShape shape) {
-        throw new CodegenException("Resource shapes cannot be bound to documents.");
-    }
-
-    @Override
-    public final String serviceShape(ServiceShape shape) {
-        throw new CodegenException("Service shapes cannot be bound to documents.");
-    }
-
-    @Override
-    public final String memberShape(MemberShape shape) {
-        throw new CodegenException("Member shapes cannot be bound to documents.");
-    }
-
-    @Override
-    public String timestampShape(TimestampShape shape) {
-        HttpBindingIndex httpIndex = HttpBindingIndex.of(context.getModel());
-        Format format;
-        if (getMemberShape() == null) {
-            format = httpIndex.determineTimestampFormat(shape, Location.DOCUMENT, defaultTimestampFormat);
-        } else {
-            if (!shape.getId().equals(getMemberShape().getTarget())) {
-                throw new IllegalArgumentException(
-                    String.format(
-                        "Encountered timestamp shape %s that was not the target of member shape %s",
-                        shape.getId(),
-                        getMemberShape().getId()
-                    )
-                );
-            }
-            format = httpIndex.determineTimestampFormat(getMemberShape(), Location.DOCUMENT, defaultTimestampFormat);
-        }
-
-        return HttpProtocolGeneratorUtils.getTimestampOutputParam(
-            context.getWriter(),
-            dataSource,
-            Location.DOCUMENT,
-            shape,
-            format,
-            requiresNumericEpochSecondsInPayload(),
-            context.getSettings().generateClient()
-        );
-    }
-
-    @Override
-    public final String documentShape(DocumentShape shape) {
-        return getDelegateDeserializer(shape);
-    }
-
-    @Override
-    public final String listShape(ListShape shape) {
-        return getDelegateDeserializer(shape);
-    }
-
-    @Override
-    public final String mapShape(MapShape shape) {
-        return getDelegateDeserializer(shape);
-    }
-
-    @Override
-    public final String setShape(SetShape shape) {
-        return getDelegateDeserializer(shape);
-    }
-
-    @Override
-    public final String structureShape(StructureShape shape) {
-        return getDelegateDeserializer(shape);
-    }
-
-    @Override
-    public String unionShape(UnionShape shape) {
-        context.getWriter().addImport("expectUnion", "__expectUnion", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        return getDelegateDeserializer(shape, "__expectUnion(" + dataSource + ")");
-    }
-
-    private String getDelegateDeserializer(Shape shape) {
-        return getDelegateDeserializer(shape, dataSource);
-    }
-
-    private String getDelegateDeserializer(Shape shape, String customDataSource) {
-        // Use the shape for the function name.
-        Symbol symbol = context.getSymbolProvider().toSymbol(shape);
-
-        if (serdeElisionEnabled && serdeElisionIndex.mayElide(shape)) {
-            context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
-            return "_json(" + customDataSource + ")";
-        }
-
-        return ProtocolGenerator.getDeserFunctionShortName(symbol) + "(" + customDataSource + ", context)";
-    }
+    return ProtocolGenerator.getDeserFunctionShortName(symbol)
+        + "("
+        + customDataSource
+        + ", context)";
+  }
 }

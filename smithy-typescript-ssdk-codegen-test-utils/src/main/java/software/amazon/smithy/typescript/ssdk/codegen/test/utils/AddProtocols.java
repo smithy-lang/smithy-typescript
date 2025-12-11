@@ -6,14 +6,12 @@ import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegrati
 import software.amazon.smithy.utils.ListUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-/**
- * Adds fake protocols.
- */
+/** Adds fake protocols. */
 @SmithyInternalApi
 public class AddProtocols implements TypeScriptIntegration {
 
-    @Override
-    public List<ProtocolGenerator> getProtocolGenerators() {
-        return ListUtils.of(new TestProtocolGenerator());
-    }
+  @Override
+  public List<ProtocolGenerator> getProtocolGenerators() {
+    return ListUtils.of(new TestProtocolGenerator());
+  }
 }

@@ -19,108 +19,104 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class HttpAuthOptionFunctionCodeSection implements CodeSection {
+  private final ServiceShape service;
+  private final TypeScriptSettings settings;
+  private final Model model;
+  private final SymbolProvider symbolProvider;
+  private final Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
+  private final ShapeId schemeId;
+  private final HttpAuthScheme httpAuthScheme;
 
-    private final ServiceShape service;
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final SymbolProvider symbolProvider;
-    private final Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
-    private final ShapeId schemeId;
-    private final HttpAuthScheme httpAuthScheme;
+  private HttpAuthOptionFunctionCodeSection(Builder builder) {
+    service = SmithyBuilder.requiredState("service", builder.service);
+    settings = SmithyBuilder.requiredState("settings", builder.settings);
+    model = SmithyBuilder.requiredState("model", builder.model);
+    symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
+    effectiveHttpAuthSchemes =
+        SmithyBuilder.requiredState("effectiveHttpAuthSchemes", builder.effectiveHttpAuthSchemes);
+    schemeId = SmithyBuilder.requiredState("schemeId", builder.schemeId);
+    httpAuthScheme = builder.httpAuthScheme;
+  }
 
-    private HttpAuthOptionFunctionCodeSection(Builder builder) {
-        service = SmithyBuilder.requiredState("service", builder.service);
-        settings = SmithyBuilder.requiredState("settings", builder.settings);
-        model = SmithyBuilder.requiredState("model", builder.model);
-        symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
-        effectiveHttpAuthSchemes = SmithyBuilder.requiredState(
-            "effectiveHttpAuthSchemes",
-            builder.effectiveHttpAuthSchemes
-        );
-        schemeId = SmithyBuilder.requiredState("schemeId", builder.schemeId);
-        httpAuthScheme = builder.httpAuthScheme;
+  public ServiceShape getService() {
+    return service;
+  }
+
+  public TypeScriptSettings getSettings() {
+    return settings;
+  }
+
+  public Model getModel() {
+    return model;
+  }
+
+  public SymbolProvider getSymbolProvider() {
+    return symbolProvider;
+  }
+
+  public Map<ShapeId, HttpAuthScheme> getEffectiveHttpAuthSchemes() {
+    return effectiveHttpAuthSchemes;
+  }
+
+  public ShapeId getSchemeId() {
+    return schemeId;
+  }
+
+  public Optional<HttpAuthScheme> getHttpAuthScheme() {
+    return Optional.ofNullable(httpAuthScheme);
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder implements SmithyBuilder<HttpAuthOptionFunctionCodeSection> {
+    private ServiceShape service;
+    private TypeScriptSettings settings;
+    private Model model;
+    private SymbolProvider symbolProvider;
+    private Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
+    private ShapeId schemeId;
+    private HttpAuthScheme httpAuthScheme;
+
+    @Override
+    public HttpAuthOptionFunctionCodeSection build() {
+      return new HttpAuthOptionFunctionCodeSection(this);
     }
 
-    public ServiceShape getService() {
-        return service;
+    public Builder service(ServiceShape service) {
+      this.service = service;
+      return this;
     }
 
-    public TypeScriptSettings getSettings() {
-        return settings;
+    public Builder settings(TypeScriptSettings settings) {
+      this.settings = settings;
+      return this;
     }
 
-    public Model getModel() {
-        return model;
+    public Builder model(Model model) {
+      this.model = model;
+      return this;
     }
 
-    public SymbolProvider getSymbolProvider() {
-        return symbolProvider;
+    public Builder symbolProvider(SymbolProvider symbolProvider) {
+      this.symbolProvider = symbolProvider;
+      return this;
     }
 
-    public Map<ShapeId, HttpAuthScheme> getEffectiveHttpAuthSchemes() {
-        return effectiveHttpAuthSchemes;
+    public Builder effectiveHttpAuthSchemes(Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes) {
+      this.effectiveHttpAuthSchemes = effectiveHttpAuthSchemes;
+      return this;
     }
 
-    public ShapeId getSchemeId() {
-        return schemeId;
+    public Builder schemeId(ShapeId schemeId) {
+      this.schemeId = schemeId;
+      return this;
     }
 
-    public Optional<HttpAuthScheme> getHttpAuthScheme() {
-        return Optional.ofNullable(httpAuthScheme);
+    public Builder httpAuthScheme(HttpAuthScheme httpAuthScheme) {
+      this.httpAuthScheme = httpAuthScheme;
+      return this;
     }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder implements SmithyBuilder<HttpAuthOptionFunctionCodeSection> {
-
-        private ServiceShape service;
-        private TypeScriptSettings settings;
-        private Model model;
-        private SymbolProvider symbolProvider;
-        private Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes;
-        private ShapeId schemeId;
-        private HttpAuthScheme httpAuthScheme;
-
-        @Override
-        public HttpAuthOptionFunctionCodeSection build() {
-            return new HttpAuthOptionFunctionCodeSection(this);
-        }
-
-        public Builder service(ServiceShape service) {
-            this.service = service;
-            return this;
-        }
-
-        public Builder settings(TypeScriptSettings settings) {
-            this.settings = settings;
-            return this;
-        }
-
-        public Builder model(Model model) {
-            this.model = model;
-            return this;
-        }
-
-        public Builder symbolProvider(SymbolProvider symbolProvider) {
-            this.symbolProvider = symbolProvider;
-            return this;
-        }
-
-        public Builder effectiveHttpAuthSchemes(Map<ShapeId, HttpAuthScheme> effectiveHttpAuthSchemes) {
-            this.effectiveHttpAuthSchemes = effectiveHttpAuthSchemes;
-            return this;
-        }
-
-        public Builder schemeId(ShapeId schemeId) {
-            this.schemeId = schemeId;
-            return this;
-        }
-
-        public Builder httpAuthScheme(HttpAuthScheme httpAuthScheme) {
-            this.httpAuthScheme = httpAuthScheme;
-            return this;
-        }
-    }
+  }
 }

@@ -30,147 +30,162 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.validation.UnaryFunctionCall;
 
 public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
+  /** The service model's timestampFormat is ignored in RPCv2 CBOR protocol. */
+  private static final TimestampFormatTrait.Format TIMESTAMP_FORMAT =
+      TimestampFormatTrait.Format.EPOCH_SECONDS;
 
-    /**
-     * The service model's timestampFormat is ignored in RPCv2 CBOR protocol.
-     */
-    private static final TimestampFormatTrait.Format TIMESTAMP_FORMAT = TimestampFormatTrait.Format.EPOCH_SECONDS;
+  public CborShapeSerVisitor(ProtocolGenerator.GenerationContext context) {
+    super(context);
+    this.serdeElisionEnabled = true;
+  }
 
-    public CborShapeSerVisitor(ProtocolGenerator.GenerationContext context) {
-        super(context);
-        this.serdeElisionEnabled = true;
+  @Override
+  protected void serializeCollection(
+      ProtocolGenerator.GenerationContext context, CollectionShape shape) {
+    TypeScriptWriter writer = context.getWriter();
+    Shape target = context.getModel().expectShape(shape.getMember().getTarget());
+
+    String potentialFilter = "";
+    boolean hasSparseTrait = shape.hasTrait(SparseTrait.ID);
+    if (!hasSparseTrait) {
+      potentialFilter = ".filter((e: any) => e != null)";
     }
 
-    @Override
-    protected void serializeCollection(ProtocolGenerator.GenerationContext context, CollectionShape shape) {
-        TypeScriptWriter writer = context.getWriter();
-        Shape target = context.getModel().expectShape(shape.getMember().getTarget());
+    String returnedExpression = target.accept(getMemberVisitor("entry"));
 
-        String potentialFilter = "";
-        boolean hasSparseTrait = shape.hasTrait(SparseTrait.ID);
-        if (!hasSparseTrait) {
-            potentialFilter = ".filter((e: any) => e != null)";
-        }
-
-        String returnedExpression = target.accept(getMemberVisitor("entry"));
-
-        if (returnedExpression.equals("entry")) {
-            writer.write("return input$L;", potentialFilter);
-        } else {
-            writer.openBlock("return input$L.map(entry => {", "});", potentialFilter, () -> {
-                if (hasSparseTrait) {
-                    writer.write("if (entry === null) { return null as any; }");
-                }
-                writer.write("return $L;", target.accept(getMemberVisitor("entry")));
-            });
-        }
+    if (returnedExpression.equals("entry")) {
+      writer.write("return input$L;", potentialFilter);
+    } else {
+      writer.openBlock(
+          "return input$L.map(entry => {",
+          "});",
+          potentialFilter,
+          () -> {
+            if (hasSparseTrait) {
+              writer.write("if (entry === null) { return null as any; }");
+            }
+            writer.write("return $L;", target.accept(getMemberVisitor("entry")));
+          });
     }
+  }
 
-    @Override
-    protected void serializeDocument(ProtocolGenerator.GenerationContext context, DocumentShape shape) {
-        context
-            .getWriter()
-            .write(
-                """
-                return input; // document.
-                """
-            );
-    }
+  @Override
+  protected void serializeDocument(
+      ProtocolGenerator.GenerationContext context, DocumentShape shape) {
+    context
+        .getWriter()
+        .write(
+            """
+            return input; // document.
+            """);
+  }
 
-    @Override
-    protected void serializeMap(ProtocolGenerator.GenerationContext context, MapShape shape) {
-        TypeScriptWriter writer = context.getWriter();
-        Shape target = context.getModel().expectShape(shape.getValue().getTarget());
-        SymbolProvider symbolProvider = context.getSymbolProvider();
+  @Override
+  protected void serializeMap(ProtocolGenerator.GenerationContext context, MapShape shape) {
+    TypeScriptWriter writer = context.getWriter();
+    Shape target = context.getModel().expectShape(shape.getValue().getTarget());
+    SymbolProvider symbolProvider = context.getSymbolProvider();
 
-        Symbol keySymbol = symbolProvider.toSymbol(shape.getKey());
-        String entryKeyType = keySymbol.toString().equals("string")
+    Symbol keySymbol = symbolProvider.toSymbol(shape.getKey());
+    String entryKeyType =
+        keySymbol.toString().equals("string")
             ? "string"
             : symbolProvider.toSymbol(shape.getKey()) + "| string";
 
-        writer.openBlock(
-            "return Object.entries(input).reduce((acc: Record<string, any>, " + "[key, value]: [$1L, any]) => {",
-            "}, {});",
-            entryKeyType,
-            () -> {
-                writer.write(
-                    """
-                    if (value !== null) {
-                        acc[key] = $L;
-                    }
-                    """,
-                    target.accept(getMemberVisitor("value"))
-                );
+    writer.openBlock(
+        "return Object.entries(input).reduce((acc: Record<string, any>, "
+            + "[key, value]: [$1L, any]) => {",
+        "}, {});",
+        entryKeyType,
+        () -> {
+          writer.write(
+              """
+              if (value !== null) {
+                  acc[key] = $L;
+              }
+              """,
+              target.accept(getMemberVisitor("value")));
 
-                if (shape.hasTrait(SparseTrait.ID)) {
-                    writer.write(
-                        """
-                        else {
-                            acc[key] = null as any;
-                        }
-                        """
-                    );
+          if (shape.hasTrait(SparseTrait.ID)) {
+            writer.write(
+                """
+                else {
+                    acc[key] = null as any;
                 }
+                """);
+          }
 
-                writer.write("return acc;");
-            }
-        );
-    }
+          writer.write("return acc;");
+        });
+  }
 
-    @Override
-    protected void serializeStructure(ProtocolGenerator.GenerationContext context, StructureShape shape) {
-        TypeScriptWriter writer = context.getWriter();
-        writer.addImport("take", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
-        writer.openBlock("return take(input, {", "});", () -> {
-            Map<String, MemberShape> members = new TreeMap<>(shape.getAllMembers());
-            members.forEach((memberName, memberShape) -> {
+  @Override
+  protected void serializeStructure(
+      ProtocolGenerator.GenerationContext context, StructureShape shape) {
+    TypeScriptWriter writer = context.getWriter();
+    writer.addImport("take", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+    writer.openBlock(
+        "return take(input, {",
+        "});",
+        () -> {
+          Map<String, MemberShape> members = new TreeMap<>(shape.getAllMembers());
+          members.forEach(
+              (memberName, memberShape) -> {
                 Shape target = context.getModel().expectShape(memberShape.getTarget());
 
-                String valueExpression = (memberShape.hasTrait(TimestampFormatTrait.class)
-                    ? HttpProtocolGeneratorUtils.getTimestampInputParam(context, "_", memberShape, TIMESTAMP_FORMAT)
-                    : target.accept(getMemberVisitor("_")));
+                String valueExpression =
+                    (memberShape.hasTrait(TimestampFormatTrait.class)
+                        ? HttpProtocolGeneratorUtils.getTimestampInputParam(
+                            context, "_", memberShape, TIMESTAMP_FORMAT)
+                        : target.accept(getMemberVisitor("_")));
 
                 String valueProvider = "_ => " + valueExpression;
                 boolean isUnaryCall = UnaryFunctionCall.check(valueExpression);
 
                 if (memberShape.hasTrait(IdempotencyTokenTrait.class)) {
-                    writer.addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
-                    writer.write("'$L': [true, _ => _ ?? generateIdempotencyToken()],", memberName);
+                  writer.addImport(
+                      "v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+                  writer.write("'$L': [true, _ => _ ?? generateIdempotencyToken()],", memberName);
                 } else {
-                    if (valueProvider.equals("_ => _")) {
-                        writer.write("'$1L': [],", memberName);
-                    } else if (isUnaryCall) {
-                        writer.write("'$1L': $2L,", memberName, UnaryFunctionCall.toRef(valueExpression));
-                    } else {
-                        writer.write("'$1L': $2L,", memberName, valueProvider);
-                    }
+                  if (valueProvider.equals("_ => _")) {
+                    writer.write("'$1L': [],", memberName);
+                  } else if (isUnaryCall) {
+                    writer.write(
+                        "'$1L': $2L,", memberName, UnaryFunctionCall.toRef(valueExpression));
+                  } else {
+                    writer.write("'$1L': $2L,", memberName, valueProvider);
+                  }
                 }
-            });
+              });
         });
-    }
+  }
 
-    @Override
-    protected void serializeUnion(ProtocolGenerator.GenerationContext context, UnionShape shape) {
-        TypeScriptWriter writer = context.getWriter();
-        Model model = context.getModel();
-        ServiceShape serviceShape = context.getService();
+  @Override
+  protected void serializeUnion(ProtocolGenerator.GenerationContext context, UnionShape shape) {
+    TypeScriptWriter writer = context.getWriter();
+    Model model = context.getModel();
+    ServiceShape serviceShape = context.getService();
 
-        writer.openBlock("return $L.visit(input, {", "});", shape.getId().getName(serviceShape), () -> {
-            Map<String, MemberShape> members = new TreeMap<>(shape.getAllMembers());
-            members.forEach((memberName, memberShape) -> {
+    writer.openBlock(
+        "return $L.visit(input, {",
+        "});",
+        shape.getId().getName(serviceShape),
+        () -> {
+          Map<String, MemberShape> members = new TreeMap<>(shape.getAllMembers());
+          members.forEach(
+              (memberName, memberShape) -> {
                 Shape target = model.expectShape(memberShape.getTarget());
                 writer.write(
                     "$L: value => ({ $S: $L }),",
                     memberName,
                     memberName,
-                    target.accept(getMemberVisitor("value"))
-                );
-            });
-            writer.write("_: (name, value) => ({ [name]: value } as any)");
+                    target.accept(getMemberVisitor("value")));
+              });
+          writer.write("_: (name, value) => ({ [name]: value } as any)");
         });
-    }
+  }
 
-    private DocumentMemberSerVisitor getMemberVisitor(String dataSource) {
-        return new CborMemberSerVisitor(getContext(), dataSource);
-    }
+  private DocumentMemberSerVisitor getMemberVisitor(String dataSource) {
+    return new CborMemberSerVisitor(getContext(), dataSource);
+  }
 }

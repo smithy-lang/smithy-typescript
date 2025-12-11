@@ -38,38 +38,40 @@ import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndexTest
 import software.amazon.smithy.utils.SetUtils;
 
 class SchemaTraitFilterIndexTest {
+  private static Model model;
+  private static SchemaTraitFilterIndex subject;
 
-    private static Model model;
-    private static SchemaTraitFilterIndex subject;
-
-    @BeforeAll
-    public static void before() {
-        model = Model.assembler()
+  @BeforeAll
+  public static void before() {
+    model =
+        Model.assembler()
             .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
             .assemble()
             .unwrap();
-        subject = new SchemaTraitFilterIndex(model);
+    subject = new SchemaTraitFilterIndex(model);
+  }
+
+  @Test
+  void hasSchemaTraits() {
+    Set<Shape> sparseShapes = model.getShapesWithTrait(SparseTrait.class);
+    assertFalse(sparseShapes.isEmpty());
+
+    for (Shape sparseShape : sparseShapes) {
+      assertTrue(subject.hasSchemaTraits(sparseShape));
+      assertTrue(subject.includeTrait(sparseShape.getTrait(SparseTrait.class).get().toShapeId()));
     }
+  }
 
-    @Test
-    void hasSchemaTraits() {
-        Set<Shape> sparseShapes = model.getShapesWithTrait(SparseTrait.class);
-        assertFalse(sparseShapes.isEmpty());
-
-        for (Shape sparseShape : sparseShapes) {
-            assertTrue(subject.hasSchemaTraits(sparseShape));
-            assertTrue(subject.includeTrait(sparseShape.getTrait(SparseTrait.class).get().toShapeId()));
-        }
+  @Test
+  void includeTrait() {
+    Set<ShapeId> excludedShapes = SetUtils.of(TimestampFormatTrait.ID);
+    for (ShapeId excludedShape : excludedShapes) {
+      String presence =
+          subject.includeTrait(excludedShape) ? "should not be included" : excludedShape.getName();
+      assertEquals(excludedShape.getName(), presence);
     }
-
-    @Test
-    void includeTrait() {
-        Set<ShapeId> excludedShapes = SetUtils.of(TimestampFormatTrait.ID);
-        for (ShapeId excludedShape : excludedShapes) {
-            String presence = subject.includeTrait(excludedShape) ? "should not be included" : excludedShape.getName();
-            assertEquals(excludedShape.getName(), presence);
-        }
-        Set<ShapeId> includedTraits = SetUtils.of(
+    Set<ShapeId> includedTraits =
+        SetUtils.of(
             SparseTrait.ID,
             SensitiveTrait.ID,
             IdempotencyTokenTrait.ID,
@@ -94,11 +96,11 @@ class SchemaTraitFilterIndexTest {
             HttpResponseCodeTrait.ID,
             HostLabelTrait.ID,
             ErrorTrait.ID,
-            HttpTrait.ID
-        );
-        for (ShapeId includedTrait : includedTraits) {
-            String presence = subject.includeTrait(includedTrait) ? includedTrait.getName() : "is missing";
-            assertEquals(includedTrait.getName(), presence);
-        }
+            HttpTrait.ID);
+    for (ShapeId includedTrait : includedTraits) {
+      String presence =
+          subject.includeTrait(includedTrait) ? includedTrait.getName() : "is missing";
+      assertEquals(includedTrait.getName(), presence);
     }
+  }
 }
