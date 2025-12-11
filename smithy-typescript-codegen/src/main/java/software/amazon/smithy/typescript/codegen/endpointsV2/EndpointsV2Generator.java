@@ -109,20 +109,24 @@ public final class EndpointsV2Generator implements Runnable {
                 Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
                 builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
                 Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-                    clientContextParams, builtInParams);
+                    clientContextParams, builtInParams
+                );
 
                 writer.writeDocs("@public");
                 writer.openBlock(
                     "export interface ClientInputEndpointParameters {",
                     "}",
                     () -> {
-                        Map<String, String> allClientContextParams = ruleSetParameterFinder.getClientContextParams();
-                        if (!allClientContextParams.isEmpty()) {
+                        // Only include client context params that are NOT built-ins
+                        Map<String, String> clientContextParamsExcludingBuiltIns = new HashMap<>(clientContextParams);
+                        clientContextParamsExcludingBuiltIns.keySet().removeAll(builtInParams.keySet());
+                        if (!clientContextParamsExcludingBuiltIns.isEmpty()) {
                             writer.write("clientContextParams?: {");
                             writer.indent();
                             ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                                parameters.accept(new RuleSetParametersVisitor(writer, allClientContextParams, true));
+                                parameters.accept(new RuleSetParametersVisitor(writer,
+                                    clientContextParamsExcludingBuiltIns, true));
                             });
                             writer.dedent();
                             writer.write("};");

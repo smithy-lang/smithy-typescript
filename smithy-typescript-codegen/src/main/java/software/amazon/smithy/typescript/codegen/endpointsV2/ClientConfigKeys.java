@@ -104,7 +104,8 @@ public final class ClientConfigKeys {
      */
     public static Map<String, String> getCustomContextParams(
             Map<String, String> clientContextParams,
-            Map<String, String> builtInParams) {
+            Map<String, String> builtInParams
+        ) {
         Map<String, String> customContextParams = new java.util.HashMap<>();
         for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
             if (!builtInParams.containsKey(entry.getKey())

@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { type HttpAuthScheme, ApiKeyIdentity, ApiKeyIdentityProvider } from "@smithy/types";
+import type { ApiKeyIdentity, ApiKeyIdentityProvider, HttpAuthScheme } from "@smithy/types";
 
 import type { XYZServiceHttpAuthSchemeProvider } from "./httpAuthSchemeProvider";
 

@@ -25,7 +25,7 @@ export const createConfigValueProvider = <Config extends Record<string, unknown>
     if (isClientContextParam) {
       // For client context parameters, check clientContextParams first
       const clientContextParams = config.clientContextParams as Record<string, unknown> | undefined;
-      const nestedValue: unknown = clientContextParams?.[canonicalEndpointParamKey];
+      const nestedValue: unknown = clientContextParams?.[configKey];
       configValue = nestedValue ?? config[configKey] ?? config[canonicalEndpointParamKey];
     } else {
       // For built-in parameters and other config properties
