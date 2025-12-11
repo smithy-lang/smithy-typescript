@@ -17,35 +17,35 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-/**
- * Add config and middleware to support the synthetic @noAuth auth scheme.
- */
+/** Add config and middleware to support the synthetic @noAuth auth scheme. */
 @SmithyInternalApi
 public final class SupportNoAuth implements HttpAuthTypeScriptIntegration {
-    private static final Consumer<TypeScriptWriter> NO_AUTH_IDENTITY_PROVIDER_WRITER =
-        w -> w.write("async () => ({})");
-    private static final Consumer<TypeScriptWriter> NO_AUTH_SIGNER_WRITER = w ->
-        w.write("new $T()", Symbol.builder()
-            .name("NoAuthSigner")
-            .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
-            .addDependency(TypeScriptDependency.SMITHY_CORE)
-            .build());
+  private static final Consumer<TypeScriptWriter> NO_AUTH_IDENTITY_PROVIDER_WRITER =
+      w -> w.write("async () => ({})");
+  private static final Consumer<TypeScriptWriter> NO_AUTH_SIGNER_WRITER =
+      w ->
+          w.write(
+              "new $T()",
+              Symbol.builder()
+                  .name("NoAuthSigner")
+                  .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
+                  .addDependency(TypeScriptDependency.SMITHY_CORE)
+                  .build());
 
-    /**
-     * Integration should be skipped if the `useLegacyAuth` flag is true.
-     */
-    @Override
-    public boolean matchesSettings(TypeScriptSettings settings) {
-        return !settings.useLegacyAuth();
-    }
+  /** Integration should be skipped if the `useLegacyAuth` flag is true. */
+  @Override
+  public boolean matchesSettings(TypeScriptSettings settings) {
+    return !settings.useLegacyAuth();
+  }
 
-    @Override
-    public Optional<HttpAuthScheme> getHttpAuthScheme() {
-        return Optional.of(HttpAuthScheme.builder()
+  @Override
+  public Optional<HttpAuthScheme> getHttpAuthScheme() {
+    return Optional.of(
+        HttpAuthScheme.builder()
             .schemeId(NoAuthTrait.ID)
             .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
             .putDefaultIdentityProvider(LanguageTarget.SHARED, NO_AUTH_IDENTITY_PROVIDER_WRITER)
             .putDefaultSigner(LanguageTarget.SHARED, NO_AUTH_SIGNER_WRITER)
             .build());
-    }
+  }
 }

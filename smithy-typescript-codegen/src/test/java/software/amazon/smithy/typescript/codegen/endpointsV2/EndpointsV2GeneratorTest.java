@@ -14,14 +14,15 @@ import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenPlugin;
 
 public class EndpointsV2GeneratorTest {
-    @Test
-    public void containsTrailingSemicolon() {
-        MockManifest manifest = testEndpoints("endpoints.smithy");
+  @Test
+  public void containsTrailingSemicolon() {
+    MockManifest manifest = testEndpoints("endpoints.smithy");
 
-        String ruleset = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
+    String ruleset =
+        manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
 
-        assertEquals(
-            """
+    assertEquals(
+"""
 // smithy-typescript generated code
 import type { RuleSetObject } from "@smithy/types";
 
@@ -127,71 +128,85 @@ export const ruleSet: RuleSetObject = {
   ],
 };
 """,
-            ruleset
-        );
-    }
+        ruleset);
+  }
 
-    @Test
-    public void containsExtraContextParameter() {
-        MockManifest manifest = testEndpoints("endpoints.smithy");
+  @Test
+  public void containsExtraContextParameter() {
+    MockManifest manifest = testEndpoints("endpoints.smithy");
 
-        String ruleset = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
+    String ruleset =
+        manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
 
-        assertThat(ruleset, containsString(
+    assertThat(
+        ruleset,
+        containsString(
             """
-                    },
-                    Stage: {
-                      type: "String",
-                      required: true,
-                      default: "production",
-                    },
-                """));
+                },
+                Stage: {
+                  type: "String",
+                  required: true,
+                  default: "production",
+                },
+            """));
 
-        String endpointParameters = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts").get();
+    String endpointParameters =
+        manifest
+            .getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts")
+            .get();
 
-        assertThat(endpointParameters, containsString(
+    assertThat(
+        endpointParameters,
+        containsString(
             """
-                  return Object.assign(options, {
-                    stage: options.stage ?? "production",
-                    defaultSigningName: "",
-                  });
-                """));
-        assertThat(endpointParameters, containsString(
+              return Object.assign(options, {
+                stage: options.stage ?? "production",
+                defaultSigningName: "",
+              });
+            """));
+    assertThat(
+        endpointParameters,
+        containsString(
             """
-                export interface ClientInputEndpointParameters {
-                  region?: string | undefined | Provider<string | undefined>;
-                  stage?: string | undefined | Provider<string | undefined>;
-                  endpoint?:"""));
-    }
+            export interface ClientInputEndpointParameters {
+              region?: string | undefined | Provider<string | undefined>;
+              stage?: string | undefined | Provider<string | undefined>;
+              endpoint?:\
+            """));
+  }
 
-    private MockManifest testEndpoints(String filename) {
-        MockManifest manifest = new MockManifest();
-        PluginContext context = PluginContext.builder()
+  private MockManifest testEndpoints(String filename) {
+    MockManifest manifest = new MockManifest();
+    PluginContext context =
+        PluginContext.builder()
             .pluginClassLoader(getClass().getClassLoader())
-            .model(Model.assembler()
-                .addImport(getClass().getResource(filename))
-                .discoverModels()
-                .assemble()
-                .unwrap())
+            .model(
+                Model.assembler()
+                    .addImport(getClass().getResource(filename))
+                    .discoverModels()
+                    .assemble()
+                    .unwrap())
             .fileManifest(manifest)
-            .settings(Node.objectNodeBuilder()
-                .withMember("service", Node.from("smithy.example#Example"))
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build())
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("service", Node.from("smithy.example#Example"))
+                    .withMember("package", Node.from("example"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .build())
             .build();
 
-        new TypeScriptCodegenPlugin().execute(context);
+    new TypeScriptCodegenPlugin().execute(context);
 
-        assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts"),
-            is(true));
-        assertThat(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/endpointResolver.ts"),
-            is(true));
+    assertThat(
+        manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/EndpointParameters.ts"), is(true));
+    assertThat(
+        manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/endpoint/endpointResolver.ts"), is(true));
 
-        String contents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
+    String contents =
+        manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/endpoint/ruleset.ts").get();
 
-        assertThat(contents, containsString("export const ruleSet: RuleSetObject"));
+    assertThat(contents, containsString("export const ruleSet: RuleSetObject"));
 
-        return manifest;
-    }
+    return manifest;
+  }
 }

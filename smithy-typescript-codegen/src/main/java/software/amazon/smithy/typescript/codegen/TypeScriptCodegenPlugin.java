@@ -19,13 +19,14 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Plugin to trigger TypeScript code generation.
+ *
  * @deprecated Use {@link TypeScriptClientCodegenPlugin} instead.
  */
 @SmithyInternalApi
 @Deprecated
 public final class TypeScriptCodegenPlugin extends TypeScriptClientCodegenPlugin {
-    @Override
-    public String getName() {
-        return "typescript-codegen";
-    }
+  @Override
+  public String getName() {
+    return "typescript-codegen";
+  }
 }

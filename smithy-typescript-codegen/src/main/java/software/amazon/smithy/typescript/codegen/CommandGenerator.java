@@ -72,108 +72,115 @@ import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-/**
- * Generates a client command using plugins.
- */
+/** Generates a client command using plugins. */
 @SmithyInternalApi
 final class CommandGenerator implements Runnable {
 
-    static final String COMMANDS_FOLDER = "commands";
-    static final String SCHEMAS_FOLDER = "schemas";
+  static final String COMMANDS_FOLDER = "commands";
+  static final String SCHEMAS_FOLDER = "schemas";
 
-    private final TypeScriptSettings settings;
-    private final Model model;
-    private final ServiceShape service;
-    private final OperationShape operation;
-    private final SymbolProvider symbolProvider;
-    private final TypeScriptWriter writer;
-    private final Symbol symbol;
-    private final List<RuntimeClientPlugin> runtimePlugins;
-    private final OperationIndex operationIndex;
-    private final Symbol inputType;
-    private final Symbol outputType;
-    private final ProtocolGenerator protocolGenerator;
-    private final ApplicationProtocol applicationProtocol;
-    private final SensitiveDataFinder sensitiveDataFinder;
-    private final ReservedWords reservedWords = new ReservedWordsBuilder()
-        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
-        .build();
+  private final TypeScriptSettings settings;
+  private final Model model;
+  private final ServiceShape service;
+  private final OperationShape operation;
+  private final SymbolProvider symbolProvider;
+  private final TypeScriptWriter writer;
+  private final Symbol symbol;
+  private final List<RuntimeClientPlugin> runtimePlugins;
+  private final OperationIndex operationIndex;
+  private final Symbol inputType;
+  private final Symbol outputType;
+  private final ProtocolGenerator protocolGenerator;
+  private final ApplicationProtocol applicationProtocol;
+  private final SensitiveDataFinder sensitiveDataFinder;
+  private final ReservedWords reservedWords =
+      new ReservedWordsBuilder()
+          .loadWords(
+              Objects.requireNonNull(
+                  TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
+          .build();
 
-    CommandGenerator(
-            TypeScriptSettings settings,
-            Model model,
-            OperationShape operation,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer,
-            List<RuntimeClientPlugin> runtimePlugins,
-            ProtocolGenerator protocolGenerator,
-            ApplicationProtocol applicationProtocol) {
-        this.settings = settings;
-        this.model = model;
-        this.service = settings.getService(model);
-        this.operation = operation;
-        this.symbolProvider = symbolProvider;
-        this.writer = writer;
-        this.runtimePlugins = runtimePlugins.stream()
-                .filter(plugin -> plugin.matchesOperation(model, service, operation))
-                .collect(Collectors.toList());
-        this.protocolGenerator = protocolGenerator;
-        this.applicationProtocol = applicationProtocol;
-        sensitiveDataFinder = new SensitiveDataFinder(model);
+  CommandGenerator(
+      TypeScriptSettings settings,
+      Model model,
+      OperationShape operation,
+      SymbolProvider symbolProvider,
+      TypeScriptWriter writer,
+      List<RuntimeClientPlugin> runtimePlugins,
+      ProtocolGenerator protocolGenerator,
+      ApplicationProtocol applicationProtocol) {
+    this.settings = settings;
+    this.model = model;
+    this.service = settings.getService(model);
+    this.operation = operation;
+    this.symbolProvider = symbolProvider;
+    this.writer = writer;
+    this.runtimePlugins =
+        runtimePlugins.stream()
+            .filter(plugin -> plugin.matchesOperation(model, service, operation))
+            .collect(Collectors.toList());
+    this.protocolGenerator = protocolGenerator;
+    this.applicationProtocol = applicationProtocol;
+    sensitiveDataFinder = new SensitiveDataFinder(model);
 
-        symbol = symbolProvider.toSymbol(operation);
-        operationIndex = OperationIndex.of(model);
-        inputType = symbol.expectProperty("inputType", Symbol.class);
-        outputType = symbol.expectProperty("outputType", Symbol.class);
-    }
+    symbol = symbolProvider.toSymbol(operation);
+    operationIndex = OperationIndex.of(model);
+    inputType = symbol.expectProperty("inputType", Symbol.class);
+    outputType = symbol.expectProperty("outputType", Symbol.class);
+  }
 
-    @Override
-    public void run() {
-        addInputAndOutputTypes();
-        generateClientCommand();
-    }
+  @Override
+  public void run() {
+    addInputAndOutputTypes();
+    generateClientCommand();
+  }
 
-    private void generateClientCommand() {
-        Symbol serviceSymbol = symbolProvider.toSymbol(service);
-        String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
+  private void generateClientCommand() {
+    Symbol serviceSymbol = symbolProvider.toSymbol(service);
+    String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
 
-        // Add required imports.
-        writer.addRelativeTypeImport(configType, null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addRelativeTypeImport("ServiceInputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addRelativeTypeImport("ServiceOutputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
+    // Add required imports.
+    writer.addRelativeTypeImport(configType, null, Paths.get(".", serviceSymbol.getNamespace()));
+    writer.addRelativeTypeImport(
+        "ServiceInputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
+    writer.addRelativeTypeImport(
+        "ServiceOutputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
+    writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
 
-        String name = symbol.getName();
+    String name = symbol.getName();
 
-        StringBuilder additionalDocs = new StringBuilder()
+    StringBuilder additionalDocs =
+        new StringBuilder()
             .append("\n")
-            .append(getCommandExample(
-                    serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName()))
+            .append(
+                getCommandExample(
+                    serviceSymbol.getName(),
+                    configType,
+                    name,
+                    inputType.getName(),
+                    outputType.getName()))
             .append("\n")
             .append(getThrownExceptions())
             .append("\n")
             .append(getCuratedExamples(name));
 
-        boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
+    boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
 
-        if (operationHasDocumentation) {
-            writer.writeShapeDocs(
-                operation,
-                shapeDoc -> shapeDoc + additionalDocs
-            );
-        } else {
-            boolean isPublic = !operation.hasTrait(InternalTrait.class);
-            boolean isDeprecated = operation.hasTrait(DeprecatedTrait.class);
+    if (operationHasDocumentation) {
+      writer.writeShapeDocs(operation, shapeDoc -> shapeDoc + additionalDocs);
+    } else {
+      boolean isPublic = !operation.hasTrait(InternalTrait.class);
+      boolean isDeprecated = operation.hasTrait(DeprecatedTrait.class);
 
-            writer.writeDocs(
-                (isPublic ? "@public\n" : "@internal\n")
-                + (isDeprecated ? "@deprecated\n" : "")
-                + additionalDocs
-            );
-        }
+      writer.writeDocs(
+          (isPublic ? "@public\n" : "@internal\n")
+              + (isDeprecated ? "@deprecated\n" : "")
+              + additionalDocs);
+    }
 
-        // Section of items like TypeScript @ts-ignore
-        writer.injectSection(PreCommandClassCodeSection.builder()
+    // Section of items like TypeScript @ts-ignore
+    writer.injectSection(
+        PreCommandClassCodeSection.builder()
             .settings(settings)
             .model(model)
             .service(service)
@@ -183,25 +190,30 @@ final class CommandGenerator implements Runnable {
             .protocolGenerator(protocolGenerator)
             .applicationProtocol(applicationProtocol)
             .build());
-        writer.openBlock(
-            """
-            export class $L extends $$Command
-              .classBuilder<
-                $T,
-                $T,
-                $L,
-                ServiceInputTypes,
-                ServiceOutputTypes
-              >()""",
-            "  .build() {", // class open bracket.
-            name, inputType, outputType, configType,
-            () -> {
-                generateEndpointParameterInstructionProvider();
-                generateCommandMiddlewareResolver(configType);
-                writeSerde();
-            });
-        // Ctor section.
-        writer.injectSection(CommandConstructorCodeSection.builder()
+    writer.openBlock(
+        """
+        export class $L extends $$Command
+          .classBuilder<
+            $T,
+            $T,
+            $L,
+            ServiceInputTypes,
+            ServiceOutputTypes
+          >()\
+        """,
+        "  .build() {", // class open bracket.
+        name,
+        inputType,
+        outputType,
+        configType,
+        () -> {
+          generateEndpointParameterInstructionProvider();
+          generateCommandMiddlewareResolver(configType);
+          writeSerde();
+        });
+    // Ctor section.
+    writer.injectSection(
+        CommandConstructorCodeSection.builder()
             .settings(settings)
             .model(model)
             .service(service)
@@ -211,8 +223,9 @@ final class CommandGenerator implements Runnable {
             .protocolGenerator(protocolGenerator)
             .applicationProtocol(applicationProtocol)
             .build());
-        // Section for adding custom command properties.
-        writer.injectSection(CommandPropertiesCodeSection.builder()
+    // Section for adding custom command properties.
+    writer.injectSection(
+        CommandPropertiesCodeSection.builder()
             .settings(settings)
             .model(model)
             .service(service)
@@ -222,8 +235,9 @@ final class CommandGenerator implements Runnable {
             .protocolGenerator(protocolGenerator)
             .applicationProtocol(applicationProtocol)
             .build());
-        // Hook for adding more methods to the command.
-        writer.injectSection(CommandBodyExtraCodeSection.builder()
+    // Hook for adding more methods to the command.
+    writer.injectSection(
+        CommandBodyExtraCodeSection.builder()
             .settings(settings)
             .model(model)
             .service(service)
@@ -234,541 +248,592 @@ final class CommandGenerator implements Runnable {
             .applicationProtocol(applicationProtocol)
             .build());
 
-        {
-            // This block places the most commonly sought type definitions
-            // closer to the command definition, for navigation assistance
-            // in IDEs.
-            Shape operationInputShape = model.expectShape(operation.getInputShape());
-            Symbol baseInput = symbolProvider.toSymbol(operationInputShape);
+    {
+      // This block places the most commonly sought type definitions
+      // closer to the command definition, for navigation assistance
+      // in IDEs.
+      Shape operationInputShape = model.expectShape(operation.getInputShape());
+      Symbol baseInput = symbolProvider.toSymbol(operationInputShape);
 
-            Shape operationOutputShape = model.expectShape(operation.getOutputShape());
-            Symbol baseOutput = symbolProvider.toSymbol(operationOutputShape);
+      Shape operationOutputShape = model.expectShape(operation.getOutputShape());
+      Symbol baseOutput = symbolProvider.toSymbol(operationOutputShape);
 
-            if (!operationInputShape.getAllMembers().isEmpty()) {
-                writer.addRelativeTypeImport(baseInput.getName(), null, Path.of(baseInput.getNamespace()));
-            }
-            if (!operationOutputShape.getAllMembers().isEmpty()) {
-                writer.addRelativeTypeImport(baseOutput.getName(), null, Path.of(baseOutput.getNamespace()));
-            }
+      if (!operationInputShape.getAllMembers().isEmpty()) {
+        writer.addRelativeTypeImport(baseInput.getName(), null, Path.of(baseInput.getNamespace()));
+      }
+      if (!operationOutputShape.getAllMembers().isEmpty()) {
+        writer.addRelativeTypeImport(
+            baseOutput.getName(), null, Path.of(baseOutput.getNamespace()));
+      }
 
-            writer.indent();
-            writer.write("/** @internal type navigation helper, not in runtime. */");
-            writer.openBlock("protected declare static __types: {", "};", () -> {
-                String baseInputStr = operationInputShape.getAllMembers().isEmpty()
-                    ? "{}"
-                    : baseInput.getName();
-                String baseOutputStr = operationOutputShape.getAllMembers().isEmpty()
-                    ? "{}"
-                    : baseOutput.getName();
-                writer.write("""
+      writer.indent();
+      writer.write("/** @internal type navigation helper, not in runtime. */");
+      writer.openBlock(
+          "protected declare static __types: {",
+          "};",
+          () -> {
+            String baseInputStr =
+                operationInputShape.getAllMembers().isEmpty() ? "{}" : baseInput.getName();
+            String baseOutputStr =
+                operationOutputShape.getAllMembers().isEmpty() ? "{}" : baseOutput.getName();
+            writer.write(
+                """
                 api: {
                   input: $L;
                   output: $L;
-                };""", baseInputStr, baseOutputStr);
-                writer.write("""
+                };\
+                """,
+                baseInputStr,
+                baseOutputStr);
+            writer.write(
+                """
                 sdk: {
                   input: $T;
                   output: $T;
-                };""", inputType, outputType);
-            });
-            writer.dedent();
-        }
-
-        writer.write("}"); // class close bracket.
+                };\
+                """,
+                inputType,
+                outputType);
+          });
+      writer.dedent();
     }
 
-    private String getCommandExample(
-            String serviceName, String configName, String commandName,
-            String commandInput, String commandOutput
-    ) {
-        String packageName = settings.getPackageName();
-        String exampleDoc = "@example\n"
+    writer.write("}"); // class close bracket.
+  }
+
+  private String getCommandExample(
+      String serviceName,
+      String configName,
+      String commandName,
+      String commandInput,
+      String commandOutput) {
+    String packageName = settings.getPackageName();
+    String exampleDoc =
+        "@example\n"
             + "Use a bare-bones client and the command you need to make an API call.\n"
             + "```javascript\n"
-            + String.format("import { %s, %s } from \"%s\"; // ES Modules import%n", serviceName, commandName,
-                    packageName)
-            + String.format("// const { %s, %s } = require(\"%s\"); // CommonJS import%n", serviceName, commandName,
-                    packageName)
+            + String.format(
+                "import { %s, %s } from \"%s\"; // ES Modules import%n",
+                serviceName, commandName, packageName)
+            + String.format(
+                "// const { %s, %s } = require(\"%s\"); // CommonJS import%n",
+                serviceName, commandName, packageName)
             + String.format("// import type { %sConfig } from \"%s\";%n", serviceName, packageName)
             + String.format("const config = {}; // type is %sConfig%n", serviceName)
             + String.format("const client = new %s(config);%n", serviceName)
-            + String.format("const input = %s%n",
-                    StructureExampleGenerator.generateStructuralHintDocumentation(
-                            model.getShape(operation.getInputShape()).get(), model, false, true))
+            + String.format(
+                "const input = %s%n",
+                StructureExampleGenerator.generateStructuralHintDocumentation(
+                    model.getShape(operation.getInputShape()).get(), model, false, true))
             + String.format("const command = new %s(input);%n", commandName)
             + "const response = await client.send(command);"
             + getStreamingBlobOutputAddendum()
             + "\n"
-            + String.format("%s%n",
-                    StructureExampleGenerator.generateStructuralHintDocumentation(
-                            model.getShape(operation.getOutputShape()).get(), model, true, false))
+            + String.format(
+                "%s%n",
+                StructureExampleGenerator.generateStructuralHintDocumentation(
+                    model.getShape(operation.getOutputShape()).get(), model, true, false))
             + "\n```\n"
             + "\n"
             + String.format("@param %s - {@link %s}%n", commandInput, commandInput)
             + String.format("@returns {@link %s}%n", commandOutput)
             + String.format("@see {@link %s} for command's `input` shape.%n", commandInput)
             + String.format("@see {@link %s} for command's `response` shape.%n", commandOutput)
-            + String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+            + String.format(
+                "@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
 
-        return exampleDoc;
-    }
+    return exampleDoc;
+  }
 
-    /**
-     * Handwritten examples from the operation ExamplesTrait.
-     */
-    private String getCuratedExamples(String commandName) {
-        String exampleDoc = "";
-        if (operation.getTrait(ExamplesTrait.class).isPresent()) {
-            List<ExamplesTrait.Example> examples = operation.getTrait(ExamplesTrait.class).get().getExamples();
-            StringBuilder buffer = new StringBuilder();
+  /** Handwritten examples from the operation ExamplesTrait. */
+  private String getCuratedExamples(String commandName) {
+    String exampleDoc = "";
+    if (operation.getTrait(ExamplesTrait.class).isPresent()) {
+      List<ExamplesTrait.Example> examples =
+          operation.getTrait(ExamplesTrait.class).get().getExamples();
+      StringBuilder buffer = new StringBuilder();
 
-            for (ExamplesTrait.Example example : examples) {
-                ObjectNode input = example.getInput();
-                Optional<ObjectNode> output = example.getOutput();
-                buffer
-                    .append("\n")
-                    .append(String.format("@example %s%n", example.getTitle()))
-                    .append("```javascript\n")
-                    .append(String.format("// %s%n", example.getDocumentation().orElse("")))
-                    .append("""
-                    const input = %s;
-                    const command = new %s(input);
-                    const response = await client.send(command);%s
-                    /* response is
-                    %s
-                    */
-                    """.formatted(
+      for (ExamplesTrait.Example example : examples) {
+        ObjectNode input = example.getInput();
+        Optional<ObjectNode> output = example.getOutput();
+        buffer
+            .append("\n")
+            .append(String.format("@example %s%n", example.getTitle()))
+            .append("```javascript\n")
+            .append(String.format("// %s%n", example.getDocumentation().orElse("")))
+            .append(
+                """
+                const input = %s;
+                const command = new %s(input);
+                const response = await client.send(command);%s
+                /* response is
+                %s
+                */
+                """
+                    .formatted(
                         DocumentationExampleGenerator.inputToJavaScriptObject(input),
                         commandName,
                         getStreamingBlobOutputAddendum(),
-                        DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
-                    ))
-                    .append("```")
-                    .append("\n");
-            }
+                        DocumentationExampleGenerator.outputToJavaScriptObject(
+                            output.orElse(null))))
+            .append("```")
+            .append("\n");
+      }
 
-            exampleDoc +=  buffer.toString();
-        }
-        return exampleDoc;
+      exampleDoc += buffer.toString();
     }
+    return exampleDoc;
+  }
 
-    /**
-     * @param operation - to query.
-     * @return member name of the streaming blob http payload, or empty string.
-     */
-    private String getStreamingBlobOutputMember(OperationShape operation) {
-        return (model.expectShape(operation.getOutputShape()))
-            .getAllMembers()
-            .values()
-            .stream()
-            .filter(memberShape -> {
-                Shape target = model.expectShape(memberShape.getTarget());
-                return target.isBlobShape() && (
-                    target.hasTrait(StreamingTrait.class)
-                        || memberShape.hasTrait(StreamingTrait.class)
-                );
-            })
+  /**
+   * @param operation - to query.
+   * @return member name of the streaming blob http payload, or empty string.
+   */
+  private String getStreamingBlobOutputMember(OperationShape operation) {
+    return (model.expectShape(operation.getOutputShape()))
+        .getAllMembers().values().stream()
+            .filter(
+                memberShape -> {
+                  Shape target = model.expectShape(memberShape.getTarget());
+                  return target.isBlobShape()
+                      && (target.hasTrait(StreamingTrait.class)
+                          || memberShape.hasTrait(StreamingTrait.class));
+                })
             .map(MemberShape::getMemberName)
             .findFirst()
             .orElse("");
+  }
+
+  /**
+   * @return e.g. appendable "const bytes = await response.Body.transformToByteArray();".
+   */
+  private String getStreamingBlobOutputAddendum() {
+    String streamingBlobAddendum = "";
+    String streamingBlobMemberName = getStreamingBlobOutputMember(operation);
+    if (!streamingBlobMemberName.isEmpty()) {
+      String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
+      streamingBlobAddendum =
+          """
+          \n// consume or destroy the stream to free the socket.
+          const bytes = await %s.transformToByteArray();
+          // const str = await %s.transformToString();
+          // %s.destroy(); // only applicable to Node.js Readable streams.
+          """
+              .formatted(propAccess, propAccess, propAccess);
+    }
+    return streamingBlobAddendum;
+  }
+
+  private String getThrownExceptions() {
+    List<ShapeId> errors = operation.getErrors();
+    StringBuilder buffer = new StringBuilder();
+    for (ShapeId error : errors) {
+      Shape errorShape = model.getShape(error).get();
+      Optional<DocumentationTrait> doc = errorShape.getTrait(DocumentationTrait.class);
+      ErrorTrait errorTrait = errorShape.getTrait(ErrorTrait.class).get();
+
+      if (doc.isPresent()) {
+        buffer.append(
+            String.format(
+                "@throws {@link %s} (%s fault)%n %s",
+                error.getName(), errorTrait.getValue(), doc.get().getValue()));
+      } else {
+        buffer.append(
+            String.format("@throws {@link %s} (%s fault)", error.getName(), errorTrait.getValue()));
+      }
+      buffer.append("\n\n");
     }
 
-    /**
-     * @return e.g. appendable "const bytes = await response.Body.transformToByteArray();".
-     */
-    private String getStreamingBlobOutputAddendum() {
-        String streamingBlobAddendum = "";
-        String streamingBlobMemberName = getStreamingBlobOutputMember(operation);
-        if (!streamingBlobMemberName.isEmpty()) {
-            String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
-            streamingBlobAddendum = """
-                    \n// consume or destroy the stream to free the socket.
-                    const bytes = await %s.transformToByteArray();
-                    // const str = await %s.transformToString();
-                    // %s.destroy(); // only applicable to Node.js Readable streams.
-                    """.formatted(
-                propAccess,
-                propAccess,
-                propAccess
-            );
-        }
-        return streamingBlobAddendum;
+    String name = CodegenUtils.getServiceName(settings, model, symbolProvider);
+    buffer.append(
+        String.format(
+            "@throws {@link %s}%n", CodegenUtils.getSyntheticBaseExceptionName(name, model)));
+    buffer.append(
+        String.format(
+            "<p>Base exception class for all service exceptions from %s service.</p>%n", name));
+
+    return buffer.toString();
+  }
+
+  private void generateEndpointParameterInstructionProvider() {
+    writer.addImport(
+        "commonParams",
+        null,
+        Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString());
+
+    RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
+    Map<String, String> staticContextParamValues =
+        parameterFinder.getStaticContextParamValues(operation);
+    Map<String, String> contextParams =
+        parameterFinder.getContextParams(model.getShape(operation.getInputShape()).get());
+    Map<String, String> operationContextParamValues =
+        parameterFinder.getOperationContextParamValues(operation);
+
+    if (staticContextParamValues.isEmpty()
+        && contextParams.isEmpty()
+        && operationContextParamValues.isEmpty()) {
+      writer.write(".ep(commonParams)");
+      return;
     }
 
-    private String getThrownExceptions() {
-        List<ShapeId> errors = operation.getErrors();
-        StringBuilder buffer = new StringBuilder();
-        for (ShapeId error : errors) {
-            Shape errorShape = model.getShape(error).get();
-            Optional<DocumentationTrait> doc = errorShape.getTrait(DocumentationTrait.class);
-            ErrorTrait errorTrait = errorShape.getTrait(ErrorTrait.class).get();
+    writer.write(".ep({").indent();
+    {
+      writer.write("...commonParams,");
+      Set<String> paramNames = new HashSet<>();
 
-            if (doc.isPresent()) {
-                buffer.append(String.format("@throws {@link %s} (%s fault)%n %s",
-                        error.getName(), errorTrait.getValue(), doc.get().getValue()));
-            } else {
-                buffer.append(String.format("@throws {@link %s} (%s fault)",
-                        error.getName(), errorTrait.getValue()));
+      staticContextParamValues.forEach(
+          (name, value) -> {
+            paramNames.add(name);
+            writer.write("$L: { type: \"staticContextParams\", value: $L },", name, value);
+          });
+
+      contextParams.forEach(
+          (name, memberName) -> {
+            if (!paramNames.contains(name)) {
+              writer.write("$L: { type: \"contextParams\", name: \"$L\" },", name, memberName);
             }
-            buffer.append("\n\n");
-        }
+            paramNames.add(name);
+          });
 
-        String name = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        buffer.append(String.format("@throws {@link %s}%n", CodegenUtils.getSyntheticBaseExceptionName(name, model)));
-        buffer.append(String.format("<p>Base exception class for all service exceptions from %s service.</p>%n", name));
-
-        return buffer.toString();
+      operationContextParamValues.forEach(
+          (name, jmesPathForInputInJs) -> {
+            writer.write(
+                """
+                $L: { type: "operationContextParams", get: (input?: any) => $L },
+                """,
+                name,
+                jmesPathForInputInJs);
+          });
     }
+    writer.write("})").dedent();
+  }
 
-    private void generateEndpointParameterInstructionProvider() {
-        writer.addImport(
-            "commonParams", null,
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/EndpointParameters").toString()
-        );
+  private void generateCommandMiddlewareResolver(String configType) {
+    Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
+    boolean schemaMode = SchemaGenerationAllowlist.allows(service.getId(), settings);
 
-        RuleSetParameterFinder parameterFinder = new RuleSetParameterFinder(service);
-        Map<String, String> staticContextParamValues = parameterFinder.getStaticContextParamValues(operation);
-        Map<String, String> contextParams = parameterFinder.getContextParams(
-            model.getShape(operation.getInputShape()).get()
-        );
-        Map<String, String> operationContextParamValues = parameterFinder.getOperationContextParamValues(operation);
-
-        if (staticContextParamValues.isEmpty() && contextParams.isEmpty() && operationContextParamValues.isEmpty()) {
-            writer.write(".ep(commonParams)");
-            return;
-        }
-
-        writer.write(".ep({")
-            .indent();
-        {
-            writer.write("...commonParams,");
-            Set<String> paramNames = new HashSet<>();
-
-            staticContextParamValues.forEach((name, value) -> {
-                paramNames.add(name);
-                writer.write(
-                    "$L: { type: \"staticContextParams\", value: $L },",
-                    name, value);
-            });
-
-            contextParams.forEach((name, memberName) -> {
-                if (!paramNames.contains(name)) {
-                    writer.write(
-                        "$L: { type: \"contextParams\", name: \"$L\" },",
-                        name, memberName);
-                }
-                paramNames.add(name);
-            });
-
-            operationContextParamValues.forEach((name, jmesPathForInputInJs) -> {
-                writer.write(
-                    """
-                    $L: { type: "operationContextParams", get: (input?: any) => $L },
-                    """,
-                    name, jmesPathForInputInJs);
-            });
-        }
-        writer.write("})")
-            .dedent();
-    }
-
-    private void generateCommandMiddlewareResolver(String configType) {
-        Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
-        boolean schemaMode = SchemaGenerationAllowlist.allows(service.getId(), settings);
-
-        Function<StructureShape, String> getFilterFunctionName = input -> {
-            if (sensitiveDataFinder.findsSensitiveDataIn(input) && !schemaMode) {
-                Symbol inputSymbol = symbolProvider.toSymbol(input);
-                String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
-                writer.addRelativeImport(
-                    filterFunctionName,
-                    null,
-                    Paths.get(".", inputSymbol.getNamespace()));
-                return filterFunctionName;
-            }
-            return "void 0";
+    Function<StructureShape, String> getFilterFunctionName =
+        input -> {
+          if (sensitiveDataFinder.findsSensitiveDataIn(input) && !schemaMode) {
+            Symbol inputSymbol = symbolProvider.toSymbol(input);
+            String filterFunctionName = inputSymbol.getName() + "FilterSensitiveLog";
+            writer.addRelativeImport(
+                filterFunctionName, null, Paths.get(".", inputSymbol.getNamespace()));
+            return filterFunctionName;
+          }
+          return "void 0";
         };
-        String inputFilterFn = operationIndex
-            .getInput(operation)
-            .map(getFilterFunctionName)
-            .orElse("void 0");
+    String inputFilterFn =
+        operationIndex.getInput(operation).map(getFilterFunctionName).orElse("void 0");
 
-        String outputFilterFn = operationIndex
-            .getOutput(operation)
-            .map(getFilterFunctionName)
-            .orElse("void 0");
+    String outputFilterFn =
+        operationIndex.getOutput(operation).map(getFilterFunctionName).orElse("void 0");
 
-        writer.pushState()
-            .putContext("client", symbolProvider.toSymbol(service).getName())
-            .putContext("command", symbolProvider.toSymbol(operation).getName())
-            .putContext("service", service.toShapeId().getName())
-            .putContext("operation", operation.toShapeId().getName())
-            .putContext("inputFilter", inputFilterFn)
-            .putContext("outputFilter", outputFilterFn)
-            .putContext("configType", configType)
-            .putContext("optionsType", applicationProtocol.getOptionsType())
-            .putContext("inputType", inputType)
-            .putContext("outputType", outputType);
+    writer
+        .pushState()
+        .putContext("client", symbolProvider.toSymbol(service).getName())
+        .putContext("command", symbolProvider.toSymbol(operation).getName())
+        .putContext("service", service.toShapeId().getName())
+        .putContext("operation", operation.toShapeId().getName())
+        .putContext("inputFilter", inputFilterFn)
+        .putContext("outputFilter", outputFilterFn)
+        .putContext("configType", configType)
+        .putContext("optionsType", applicationProtocol.getOptionsType())
+        .putContext("inputType", inputType)
+        .putContext("outputType", outputType);
 
+    writer.writeInline(
+        """
+        .m(function (this: any, Command: any, cs: any, config: $configType:L, o: any) {
+          return [\
+        """);
+    {
+      boolean multiplePlugins =
+          !schemaMode
+              || runtimePlugins.stream()
+                  .map(RuntimeClientPlugin::getPluginFunction)
+                  .anyMatch(Optional::isPresent);
+
+      writer.addImport("getEndpointPlugin", null, TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
+
+      if (multiplePlugins) {
+        writer.write("");
+        writer.indent();
+        // Add serialization and deserialization plugin.
+        if (!schemaMode) {
+          writer.indent();
+          writer.write("$T(config, this.serialize, this.deserialize),", serde);
+          writer.dedent();
+        }
+
+        writer
+            .indent()
+            .write(
+                """
+                getEndpointPlugin(config, Command.getEndpointParameterInstructions()),\
+                """);
+        // Add customizations.
+        addCommandSpecificPlugins();
+        writer.dedent();
+        writer.write("];"); // end middleware list.
+        writer.dedent();
+      } else {
         writer.writeInline(
             """
-            .m(function (this: any, Command: any, cs: any, config: $configType:L, o: any) {
-              return ["""
-        );
-        {
-            boolean multiplePlugins = !schemaMode || runtimePlugins.stream()
-                .map(RuntimeClientPlugin::getPluginFunction)
-                .anyMatch(Optional::isPresent);
-
-            writer.addImport(
-                "getEndpointPlugin",
-                null,
-                TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
-
-            if (multiplePlugins) {
-                writer.write("");
-                writer.indent();
-                // Add serialization and deserialization plugin.
-                if (!schemaMode) {
-                    writer.indent();
-                    writer.write("$T(config, this.serialize, this.deserialize),", serde);
-                    writer.dedent();
-                }
-
-                writer.indent().write(
-                    """
-                    getEndpointPlugin(config, Command.getEndpointParameterInstructions()),"""
-                );
-                // Add customizations.
-                addCommandSpecificPlugins();
-                writer.dedent();
-                writer.write("];"); // end middleware list.
-                writer.dedent();
-            } else {
-                writer.writeInline(
-                    """
-                    getEndpointPlugin(config, Command.getEndpointParameterInstructions())"""
-                );
-                writer.write("];"); // end middleware list.
-            }
-        }
-        writer.write("})"); // end middleware block.
-
-        String filters = schemaMode ? "" : ".f($inputFilter:L, $outputFilter:L)";
-
-        // context, filters
-        writer.writeInline(
-                """
-                .s($service:S, $operation:S, {"""
-            )
-            .pushState(
-                SmithyContextCodeSection.builder()
-                    .settings(settings)
-                    .model(model)
-                    .service(service)
-                    .operation(operation)
-                    .symbolProvider(symbolProvider)
-                    .runtimeClientPlugins(runtimePlugins)
-                    .protocolGenerator(protocolGenerator)
-                    .applicationProtocol(applicationProtocol)
-                    .build()
-            )
-            .popState()
-            .write("})")
-            .write("""
-                .n($client:S, $command:S)"""
-            );
-        if (!filters.isEmpty()) {
-            writer.write(filters);
-        }
+            getEndpointPlugin(config, Command.getEndpointParameterInstructions())\
+            """);
+        writer.write("];"); // end middleware list.
+      }
     }
+    writer.write("})"); // end middleware block.
 
-    private void addInputAndOutputTypes() {
-        writer.writeDocs("@public");
-        writer.write("export type { __MetadataBearer };");
-        writer.write("export { $$Command };");
+    String filters = schemaMode ? "" : ".f($inputFilter:L, $outputFilter:L)";
 
-        writeInputType(inputType.getName(), operationIndex.getInput(operation), symbol.getName());
-        writeOutputType(outputType.getName(), operationIndex.getOutput(operation), symbol.getName());
-        writer.write("");
+    // context, filters
+    writer
+        .writeInline(
+            """
+            .s($service:S, $operation:S, {\
+            """)
+        .pushState(
+            SmithyContextCodeSection.builder()
+                .settings(settings)
+                .model(model)
+                .service(service)
+                .operation(operation)
+                .symbolProvider(symbolProvider)
+                .runtimeClientPlugins(runtimePlugins)
+                .protocolGenerator(protocolGenerator)
+                .applicationProtocol(applicationProtocol)
+                .build())
+        .popState()
+        .write("})")
+        .write(
+            """
+            .n($client:S, $command:S)\
+            """);
+    if (!filters.isEmpty()) {
+      writer.write(filters);
     }
+  }
 
-    private void writeInputType(String typeName, Optional<StructureShape> inputShape, String commandName) {
-        if (inputShape.isPresent()) {
-            StructureShape input = inputShape.get();
-            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
-            List<MemberShape> blobPayloadMembers = getBlobPayloadMembers(model, input);
+  private void addInputAndOutputTypes() {
+    writer.writeDocs("@public");
+    writer.write("export type { __MetadataBearer };");
+    writer.write("export { $$Command };");
 
-            if (!blobStreamingMembers.isEmpty()) {
-                writeClientCommandStreamingInputType(
-                    writer, symbolProvider.toSymbol(input), typeName,
-                    blobStreamingMembers.get(0), commandName
-                );
-            } else if (!blobPayloadMembers.isEmpty()) {
-                writeClientCommandBlobPayloadInputType(
-                    writer, symbolProvider.toSymbol(input), typeName,
-                    blobPayloadMembers.get(0), commandName
-                );
-            } else {
-                writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
-                Symbol inputSymbol = symbolProvider.toSymbol(input);
-                writer.addRelativeTypeImport(
-                    inputSymbol.getName(),
-                    null,
-                    Path.of(inputSymbol.getNamespace())
-                );
-                writer.write("export interface $L extends $L {}", typeName, inputSymbol.getName());
-            }
-        } else {
-            // If the input is non-existent, then use an empty object.
-            writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
-            writer.write("export interface $L {}", typeName);
-        }
+    writeInputType(inputType.getName(), operationIndex.getInput(operation), symbol.getName());
+    writeOutputType(outputType.getName(), operationIndex.getOutput(operation), symbol.getName());
+    writer.write("");
+  }
+
+  private void writeInputType(
+      String typeName, Optional<StructureShape> inputShape, String commandName) {
+    if (inputShape.isPresent()) {
+      StructureShape input = inputShape.get();
+      List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, input);
+      List<MemberShape> blobPayloadMembers = getBlobPayloadMembers(model, input);
+
+      if (!blobStreamingMembers.isEmpty()) {
+        writeClientCommandStreamingInputType(
+            writer,
+            symbolProvider.toSymbol(input),
+            typeName,
+            blobStreamingMembers.get(0),
+            commandName);
+      } else if (!blobPayloadMembers.isEmpty()) {
+        writeClientCommandBlobPayloadInputType(
+            writer,
+            symbolProvider.toSymbol(input),
+            typeName,
+            blobPayloadMembers.get(0),
+            commandName);
+      } else {
+        writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
+        Symbol inputSymbol = symbolProvider.toSymbol(input);
+        writer.addRelativeTypeImport(
+            inputSymbol.getName(), null, Path.of(inputSymbol.getNamespace()));
+        writer.write("export interface $L extends $L {}", typeName, inputSymbol.getName());
+      }
+    } else {
+      // If the input is non-existent, then use an empty object.
+      writer.writeDocs("@public\n\nThe input for {@link " + commandName + "}.");
+      writer.write("export interface $L {}", typeName);
     }
+  }
 
-    private void writeOutputType(String typeName, Optional<StructureShape> outputShape, String commandName) {
-        // Output types should always be MetadataBearers, possibly in addition
-        // to a defined output shape.
-        writer.addTypeImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
-        if (outputShape.isPresent()) {
-            StructureShape output = outputShape.get();
-            List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, output);
-            List<MemberShape> blobPayloadMembers = getBlobPayloadMembers(model, output);
+  private void writeOutputType(
+      String typeName, Optional<StructureShape> outputShape, String commandName) {
+    // Output types should always be MetadataBearers, possibly in addition
+    // to a defined output shape.
+    writer.addTypeImport("MetadataBearer", "__MetadataBearer", TypeScriptDependency.SMITHY_TYPES);
+    if (outputShape.isPresent()) {
+      StructureShape output = outputShape.get();
+      List<MemberShape> blobStreamingMembers = getBlobStreamingMembers(model, output);
+      List<MemberShape> blobPayloadMembers = getBlobPayloadMembers(model, output);
 
-            if (!blobStreamingMembers.isEmpty()) {
-                writeClientCommandStreamingOutputType(
-                    writer, symbolProvider.toSymbol(output), typeName,
-                    blobStreamingMembers.get(0), commandName
-                );
-            } else if (!blobPayloadMembers.isEmpty()) {
-                writeClientCommandBlobPayloadOutputType(
-                    writer, symbolProvider.toSymbol(output), typeName,
-                    blobPayloadMembers.get(0), commandName
-                );
-            } else {
-                writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
-                Symbol outputSymbol = symbolProvider.toSymbol(output);
-                writer.addRelativeTypeImport(
-                    outputSymbol.getName(),
-                    null,
-                    Path.of(outputSymbol.getNamespace())
-                );
-                writer.write("export interface $L extends $L, __MetadataBearer {}",
-                        typeName, outputSymbol.getName());
-            }
-        } else {
-            writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
-            writer.write("export interface $L extends __MetadataBearer {}", typeName);
-        }
+      if (!blobStreamingMembers.isEmpty()) {
+        writeClientCommandStreamingOutputType(
+            writer,
+            symbolProvider.toSymbol(output),
+            typeName,
+            blobStreamingMembers.get(0),
+            commandName);
+      } else if (!blobPayloadMembers.isEmpty()) {
+        writeClientCommandBlobPayloadOutputType(
+            writer,
+            symbolProvider.toSymbol(output),
+            typeName,
+            blobPayloadMembers.get(0),
+            commandName);
+      } else {
+        writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
+        Symbol outputSymbol = symbolProvider.toSymbol(output);
+        writer.addRelativeTypeImport(
+            outputSymbol.getName(), null, Path.of(outputSymbol.getNamespace()));
+        writer.write(
+            "export interface $L extends $L, __MetadataBearer {}",
+            typeName,
+            outputSymbol.getName());
+      }
+    } else {
+      writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
+      writer.write("export interface $L extends __MetadataBearer {}", typeName);
     }
+  }
 
-    private void addCommandSpecificPlugins() {
-        // Some plugins might only apply to specific commands. They are added to the
-        // command's middleware stack here. Plugins that apply to all commands are
-        // applied automatically when the Command's middleware stack is copied from
-        // the service's middleware stack.
-        for (RuntimeClientPlugin plugin : runtimePlugins) {
-            plugin.getPluginFunction().ifPresent(pluginSymbol -> {
+  private void addCommandSpecificPlugins() {
+    // Some plugins might only apply to specific commands. They are added to the
+    // command's middleware stack here. Plugins that apply to all commands are
+    // applied automatically when the Command's middleware stack is copied from
+    // the service's middleware stack.
+    for (RuntimeClientPlugin plugin : runtimePlugins) {
+      plugin
+          .getPluginFunction()
+          .ifPresent(
+              pluginSymbol -> {
                 // Construct additional parameters string
-                Map<String, Object> paramsMap = plugin.getAdditionalPluginFunctionParameters(
-                        model, service, operation);
+                Map<String, Object> paramsMap =
+                    plugin.getAdditionalPluginFunctionParameters(model, service, operation);
 
                 // Construct writer context
                 Map<String, Object> symbolMap = new HashMap<>();
                 symbolMap.put("pluginFn", pluginSymbol);
                 for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
-                    if (entry.getValue() instanceof Symbol) {
-                        symbolMap.put(entry.getKey(), entry.getValue());
-                    }
+                  if (entry.getValue() instanceof Symbol) {
+                    symbolMap.put(entry.getKey(), entry.getValue());
+                  }
                 }
                 writer.pushState();
                 writer.putContext(symbolMap);
-                writer.openBlock("$pluginFn:T(config", "),", () -> {
-                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                    Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
-                        plugin.getOperationAddParamsWriterConsumers();
-                    if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
+                writer.openBlock(
+                    "$pluginFn:T(config",
+                    "),",
+                    () -> {
+                      List<String> additionalParameters =
+                          CodegenUtils.getFunctionParametersList(paramsMap);
+                      Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
+                          plugin.getOperationAddParamsWriterConsumers();
+                      if (additionalParameters.isEmpty()
+                          && clientAddParamsWriterConsumers.isEmpty()) {
                         return;
-                    }
-                    writer.openBlock(", { ", " }", () -> {
-                        // caution: using String.join instead of templating
-                        // because additionalParameters may contain Smithy syntax.
-                        if (!additionalParameters.isEmpty()) {
-                            writer.writeInline(String.join(", ", additionalParameters) + ", ");
-                        }
-                        clientAddParamsWriterConsumers.forEach((key, consumer) -> {
-                            writer.writeInline("$L: $C,", key, (Consumer<TypeScriptWriter>) (w -> {
-                                consumer.accept(w, CommandConstructorCodeSection.builder()
-                                    .settings(settings)
-                                    .model(model)
-                                    .service(service)
-                                    .symbolProvider(symbolProvider)
-                                    .runtimeClientPlugins(runtimePlugins)
-                                    .applicationProtocol(applicationProtocol)
-                                    .build());
-                            }));
-                        });
+                      }
+                      writer.openBlock(
+                          ", { ",
+                          " }",
+                          () -> {
+                            // caution: using String.join instead of templating
+                            // because additionalParameters may contain Smithy syntax.
+                            if (!additionalParameters.isEmpty()) {
+                              writer.writeInline(String.join(", ", additionalParameters) + ", ");
+                            }
+                            clientAddParamsWriterConsumers.forEach(
+                                (key, consumer) -> {
+                                  writer.writeInline(
+                                      "$L: $C,",
+                                      key,
+                                      (Consumer<TypeScriptWriter>)
+                                          (w -> {
+                                            consumer.accept(
+                                                w,
+                                                CommandConstructorCodeSection.builder()
+                                                    .settings(settings)
+                                                    .model(model)
+                                                    .service(service)
+                                                    .symbolProvider(symbolProvider)
+                                                    .runtimeClientPlugins(runtimePlugins)
+                                                    .applicationProtocol(applicationProtocol)
+                                                    .build());
+                                          }));
+                                });
+                          });
                     });
-                });
                 writer.popState();
-            });
-        }
+              });
+    }
+  }
+
+  private void writeSchemaSerde() {
+    String operationSchema = reservedWords.escape(operation.getId().getName());
+    writer.addRelativeImport(
+        operationSchema,
+        null,
+        Paths.get(".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0"));
+    writer.write(
+        """
+        .sc($L)\
+        """,
+        operationSchema);
+  }
+
+  private void writeSerde() {
+    if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+      writeSchemaSerde();
+    } else {
+      writer
+          .write(".ser($L)", getSerdeDispatcher(true))
+          .write(".de($L)", getSerdeDispatcher(false));
+    }
+  }
+
+  private String getSerdeDispatcher(boolean isInput) {
+    if (protocolGenerator == null) {
+      return "() => { throw new Error(\"No supported protocol was found\"); }";
+    } else {
+      String serdeFunctionName =
+          isInput
+              ? ProtocolGenerator.getSerFunctionShortName(symbol)
+              : ProtocolGenerator.getDeserFunctionShortName(symbol);
+      writer.addRelativeImport(
+          serdeFunctionName,
+          null,
+          Paths.get(
+              ".",
+              CodegenUtils.SOURCE_FOLDER,
+              ProtocolGenerator.PROTOCOLS_FOLDER,
+              ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+      return serdeFunctionName;
+    }
+  }
+
+  static void writeIndex(
+      Model model, ServiceShape service, SymbolProvider symbolProvider, FileManifest fileManifest) {
+    TypeScriptWriter writer = new TypeScriptWriter("");
+
+    TopDownIndex topDownIndex = TopDownIndex.of(model);
+    Set<OperationShape> containedOperations =
+        new TreeSet<>(topDownIndex.getContainedOperations(service));
+    if (containedOperations.isEmpty()) {
+      writer.write("export {};");
+    } else {
+      for (OperationShape operation : containedOperations) {
+        writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
+      }
     }
 
-    private void writeSchemaSerde() {
-        String operationSchema = reservedWords.escape(operation.getId().getName());
-        writer.addRelativeImport(operationSchema, null, Paths.get(
-            ".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0"
-        ));
-        writer.write("""
-            .sc($L)""",
-            operationSchema
-        );
-    }
-
-    private void writeSerde() {
-        if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-            writeSchemaSerde();
-        } else {
-            writer
-                .write(".ser($L)", getSerdeDispatcher(true))
-                .write(".de($L)", getSerdeDispatcher(false));
-        }
-    }
-
-    private String getSerdeDispatcher(boolean isInput) {
-        if (protocolGenerator == null) {
-            return "() => { throw new Error(\"No supported protocol was found\"); }";
-        } else {
-            String serdeFunctionName = isInput
-                ? ProtocolGenerator.getSerFunctionShortName(symbol)
-                : ProtocolGenerator.getDeserFunctionShortName(symbol);
-            writer.addRelativeImport(serdeFunctionName, null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
-            return serdeFunctionName;
-        }
-    }
-
-    static void writeIndex(
-            Model model,
-            ServiceShape service,
-            SymbolProvider symbolProvider,
-            FileManifest fileManifest) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
-
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-        if (containedOperations.isEmpty()) {
-            writer.write("export {};");
-        } else {
-            for (OperationShape operation : containedOperations) {
-                writer.write("export * from \"./$L\";", symbolProvider.toSymbol(operation).getName());
-            }
-        }
-
-        fileManifest.writeFile(
-                Paths.get(CodegenUtils.SOURCE_FOLDER, CommandGenerator.COMMANDS_FOLDER, "index.ts").toString(),
-                writer.toString());
-    }
+    fileManifest.writeFile(
+        Paths.get(CodegenUtils.SOURCE_FOLDER, CommandGenerator.COMMANDS_FOLDER, "index.ts")
+            .toString(),
+        writer.toString());
+  }
 }

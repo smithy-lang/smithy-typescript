@@ -8,12 +8,13 @@ import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 
 public class TypeScriptDelegatorTest {
-    @Test
-    public void addsBuiltinDependencies() {
-        SymbolProvider provider = (shape) -> null;
-        MockManifest manifest = new MockManifest();
-        TypeScriptDelegator delegator = new TypeScriptDelegator(manifest, provider);
+  @Test
+  public void addsBuiltinDependencies() {
+    SymbolProvider provider = (shape) -> null;
+    MockManifest manifest = new MockManifest();
+    TypeScriptDelegator delegator = new TypeScriptDelegator(manifest, provider);
 
-        assertThat(delegator.getDependencies(), equalTo(TypeScriptDependency.getUnconditionalDependencies()));
-    }
+    assertThat(
+        delegator.getDependencies(), equalTo(TypeScriptDependency.getUnconditionalDependencies()));
+  }
 }

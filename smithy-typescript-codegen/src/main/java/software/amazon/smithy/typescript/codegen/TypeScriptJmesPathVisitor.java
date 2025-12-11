@@ -45,333 +45,389 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
-    // Execution context is the current "head" of the execution. This is scope on which the expression
-    // is currently operating across. It is imperative that this is kept up to date on expression.accept and return.
-    private String executionContext;
+  // Execution context is the current "head" of the execution. This is scope on which the expression
+  // is currently operating across. It is imperative that this is kept up to date on
+  // expression.accept and return.
+  private String executionContext;
 
-    private int scopeCount;
-    private String accessor;
-    private TypeScriptWriter writer;
-    private JmespathExpression jmesExpression;
+  private int scopeCount;
+  private String accessor;
+  private TypeScriptWriter writer;
+  private JmespathExpression jmesExpression;
 
-    TypeScriptJmesPathVisitor(TypeScriptWriter writer, String accessor, JmespathExpression expression) {
-        this.writer = writer;
-        this.accessor = accessor;
-        executionContext = accessor;
-        jmesExpression = expression;
-        scopeCount = 0;
-    }
+  TypeScriptJmesPathVisitor(
+      TypeScriptWriter writer, String accessor, JmespathExpression expression) {
+    this.writer = writer;
+    this.accessor = accessor;
+    executionContext = accessor;
+    jmesExpression = expression;
+    scopeCount = 0;
+  }
 
-    public void run() {
-        writer.openBlock("let returnComparator = () => {", "}", () -> {
-            executionContext = accessor;
-            jmesExpression.accept(this);
-            writer.write("return $L;", executionContext);
+  public void run() {
+    writer.openBlock(
+        "let returnComparator = () => {",
+        "}",
+        () -> {
+          executionContext = accessor;
+          jmesExpression.accept(this);
+          writer.write("return $L;", executionContext);
         });
-        executionContext = "returnComparator()";
-    }
+    executionContext = "returnComparator()";
+  }
 
-    @Override
-    public Void visitComparator(ComparatorExpression expression) {
+  @Override
+  public Void visitComparator(ComparatorExpression expression) {
 
-        String executionContextInital = executionContext;
-        String comparator = expression.getComparator().toString();
+    String executionContextInital = executionContext;
+    String comparator = expression.getComparator().toString();
 
-        expression.getLeft().accept(this);
-        String leftContext = executionContext;
+    expression.getLeft().accept(this);
+    String leftContext = executionContext;
 
-        executionContext = executionContextInital;
+    executionContext = executionContextInital;
 
-        expression.getRight().accept(this);
-        String rightContext = executionContext;
+    expression.getRight().accept(this);
+    String rightContext = executionContext;
 
-        executionContext = String.format("(%s %s %s)", leftContext, comparator, rightContext);
-        return null;
-    }
+    executionContext = String.format("(%s %s %s)", leftContext, comparator, rightContext);
+    return null;
+  }
 
-    @Override
-    public Void visitCurrentNode(CurrentExpression expression) {
-        // Fall through as visitCurrentNode is saying that there is a noop here. Execution context does not change.
-        return null;
-    }
+  @Override
+  public Void visitCurrentNode(CurrentExpression expression) {
+    // Fall through as visitCurrentNode is saying that there is a noop here. Execution context does
+    // not change.
+    return null;
+  }
 
-    @Override
-    public Void visitExpressionType(ExpressionTypeExpression expression) {
-        throw new CodegenException("TypeScriptJmesPath visitor not implemented ExpressionTypeExpression");
-    }
+  @Override
+  public Void visitExpressionType(ExpressionTypeExpression expression) {
+    throw new CodegenException(
+        "TypeScriptJmesPath visitor not implemented ExpressionTypeExpression");
+  }
 
-    @Override
-    public Void visitFlatten(FlattenExpression expression) {
-        expression.getExpression().accept(this);
-        String flatScope = makeNewScope("flat_");
-        writer.write("let $L: any[] = [].concat(...$L);", flatScope, executionContext);
-        executionContext = flatScope;
-        return null;
-    }
+  @Override
+  public Void visitFlatten(FlattenExpression expression) {
+    expression.getExpression().accept(this);
+    String flatScope = makeNewScope("flat_");
+    writer.write("let $L: any[] = [].concat(...$L);", flatScope, executionContext);
+    executionContext = flatScope;
+    return null;
+  }
 
-    @Override
-    public Void visitFunction(FunctionExpression expression) {
-        ArrayList<String> executionContexts = new ArrayList<>();
+  @Override
+  public Void visitFunction(FunctionExpression expression) {
+    ArrayList<String> executionContexts = new ArrayList<>();
 
-        String orginalExecutionContext = this.executionContext;
-        expression.arguments.forEach((JmespathExpression argExpression) -> {
-            argExpression.accept(this);
-            switch (expression.getName()) {
-                case "length":
-                    executionContext = executionContext + ".length";
-                    break;
-                case "contains":
-                    executionContexts.add(executionContext);
-                    this.executionContext = orginalExecutionContext;
-                    break;
-                default:
-                    throw new CodegenException("TypeScriptJmesPath visitor has not implemented function: "
-                            + expression.getName());
-            }
-        });
-
-        if (expression.getName().equals("contains")) {
-            executionContext = String.join(".includes(", executionContexts) + ")";
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitField(FieldExpression expression) {
-        executionContext += ".";
-        executionContext += expression.getName();
-        return null;
-    }
-
-    @Override
-    public Void visitIndex(IndexExpression expression) {
-        if (expression.getIndex() >= 0) {
-            executionContext += ("[" + expression.getIndex() + "]");
-        } else {
-            executionContext += "[" + executionContext + ".length";
-            executionContext += " - " + Math.abs(expression.getIndex()) + "]";
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitLiteral(LiteralExpression expression) {
-        switch (expression.getType()) {
-            case STRING:
-                executionContext = "\"" + expression.getValue().toString() + "\"";
-                break;
-            case OBJECT:
-                executionContext = serializeObject(expression.expectObjectValue());
-                break;
-            case ARRAY:
-                executionContext = serializeArray(expression.expectArrayValue());
-                break;
+    String orginalExecutionContext = this.executionContext;
+    expression.arguments.forEach(
+        (JmespathExpression argExpression) -> {
+          argExpression.accept(this);
+          switch (expression.getName()) {
+            case "length":
+              executionContext = executionContext + ".length";
+              break;
+            case "contains":
+              executionContexts.add(executionContext);
+              this.executionContext = orginalExecutionContext;
+              break;
             default:
-                // All other options are already valid js literials.
-                // (BOOLEAN, ANY, NULL, NUMBER, EXPRESSION)
-                executionContext = expression.getValue().toString();
-                break;
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitMultiSelectList(MultiSelectListExpression expression) {
-        ArrayList<String> evaluators = new ArrayList<String>();
-
-        String executionContextInital = executionContext;
-
-        expression.getExpressions().forEach((JmespathExpression exp) -> {
-            exp.accept(this);
-            evaluators.add(executionContext);
-            executionContext = executionContextInital;
+              throw new CodegenException(
+                  "TypeScriptJmesPath visitor has not implemented function: "
+                      + expression.getName());
+          }
         });
 
-        String resultScope = makeNewScope("result_");
-        writer.write("let $L = [];", resultScope);
-        for (String evaluator : evaluators) {
-            writer.write("$L.push($L);", resultScope, evaluator);
-        }
-        writer.write("$L = $L;", executionContext, resultScope);
-
-        return null;
+    if (expression.getName().equals("contains")) {
+      executionContext = String.join(".includes(", executionContexts) + ")";
     }
+    return null;
+  }
 
-    @Override
-    public Void visitMultiSelectHash(MultiSelectHashExpression expression) {
-        throw new CodegenException("TypeScriptJmesPath visitor not implemented MultiSelectHashExpression");
+  @Override
+  public Void visitField(FieldExpression expression) {
+    executionContext += ".";
+    executionContext += expression.getName();
+    return null;
+  }
+
+  @Override
+  public Void visitIndex(IndexExpression expression) {
+    if (expression.getIndex() >= 0) {
+      executionContext += ("[" + expression.getIndex() + "]");
+    } else {
+      executionContext += "[" + executionContext + ".length";
+      executionContext += " - " + Math.abs(expression.getIndex()) + "]";
     }
+    return null;
+  }
 
-    @Override
-    public Void visitAnd(AndExpression expression) {
-        String initialContext = executionContext;
-
-        expression.getLeft().accept(this);
-        String leftContext = executionContext;
-        executionContext = initialContext;
-
-        expression.getRight().accept(this);
-        String rightContext = executionContext;
-
-        executionContext = String.format("(%s && %s)", leftContext, rightContext);
-        return null;
+  @Override
+  public Void visitLiteral(LiteralExpression expression) {
+    switch (expression.getType()) {
+      case STRING:
+        executionContext = "\"" + expression.getValue().toString() + "\"";
+        break;
+      case OBJECT:
+        executionContext = serializeObject(expression.expectObjectValue());
+        break;
+      case ARRAY:
+        executionContext = serializeArray(expression.expectArrayValue());
+        break;
+      default:
+        // All other options are already valid js literials.
+        // (BOOLEAN, ANY, NULL, NUMBER, EXPRESSION)
+        executionContext = expression.getValue().toString();
+        break;
     }
+    return null;
+  }
 
-    @Override
-    public Void visitOr(OrExpression expression) {
-        String initialContext = executionContext;
+  @Override
+  public Void visitMultiSelectList(MultiSelectListExpression expression) {
+    ArrayList<String> evaluators = new ArrayList<String>();
 
-        expression.getLeft().accept(this);
-        String leftContext = executionContext;
-        executionContext = initialContext;
+    String executionContextInital = executionContext;
 
-        expression.getRight().accept(this);
-        String rightContext = executionContext;
+    expression
+        .getExpressions()
+        .forEach(
+            (JmespathExpression exp) -> {
+              exp.accept(this);
+              evaluators.add(executionContext);
+              executionContext = executionContextInital;
+            });
 
-        executionContext = String.format("((%s || %s) && (%s || %s)) ", leftContext, rightContext, rightContext,
-                leftContext);
-
-        return null;
+    String resultScope = makeNewScope("result_");
+    writer.write("let $L = [];", resultScope);
+    for (String evaluator : evaluators) {
+      writer.write("$L.push($L);", resultScope, evaluator);
     }
+    writer.write("$L = $L;", executionContext, resultScope);
 
-    @Override
-    public Void visitNot(NotExpression expression) {
-        expression.getExpression().accept(this);
-        executionContext = String.format("(!%s)", executionContext);
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Void visitObjectProjection(ObjectProjectionExpression expression) {
-        expression.getLeft().accept(this);
+  @Override
+  public Void visitMultiSelectHash(MultiSelectHashExpression expression) {
+    throw new CodegenException(
+        "TypeScriptJmesPath visitor not implemented MultiSelectHashExpression");
+  }
 
-        String element = makeNewScope("element_");
-        String result = makeNewScope("objectProjection_");
-        writer.openBlock("let $L = Object.values($L).map(($L: any) => {", "});", result,
-                executionContext, element, () -> {
+  @Override
+  public Void visitAnd(AndExpression expression) {
+    String initialContext = executionContext;
+
+    expression.getLeft().accept(this);
+    String leftContext = executionContext;
+    executionContext = initialContext;
+
+    expression.getRight().accept(this);
+    String rightContext = executionContext;
+
+    executionContext = String.format("(%s && %s)", leftContext, rightContext);
+    return null;
+  }
+
+  @Override
+  public Void visitOr(OrExpression expression) {
+    String initialContext = executionContext;
+
+    expression.getLeft().accept(this);
+    String leftContext = executionContext;
+    executionContext = initialContext;
+
+    expression.getRight().accept(this);
+    String rightContext = executionContext;
+
+    executionContext =
+        String.format(
+            "((%s || %s) && (%s || %s)) ", leftContext, rightContext, rightContext, leftContext);
+
+    return null;
+  }
+
+  @Override
+  public Void visitNot(NotExpression expression) {
+    expression.getExpression().accept(this);
+    executionContext = String.format("(!%s)", executionContext);
+    return null;
+  }
+
+  @Override
+  public Void visitObjectProjection(ObjectProjectionExpression expression) {
+    expression.getLeft().accept(this);
+
+    String element = makeNewScope("element_");
+    String result = makeNewScope("objectProjection_");
+    writer.openBlock(
+        "let $L = Object.values($L).map(($L: any) => {",
+        "});",
+        result,
+        executionContext,
+        element,
+        () -> {
+          executionContext = element;
+          expression.getRight().accept(this);
+          writer.write("return $L;", executionContext);
+        });
+    executionContext = result;
+    return null;
+  }
+
+  @Override
+  public Void visitProjection(ProjectionExpression expression) {
+    expression.getLeft().accept(this);
+
+    if (!(expression.getRight() instanceof CurrentExpression)) {
+      String element = makeNewScope("element_");
+      String result = makeNewScope("projection_");
+      writer.openBlock(
+          "let $L = $L.map(($L: any) => {",
+          "});",
+          result,
+          executionContext,
+          element,
+          () -> {
             executionContext = element;
             expression.getRight().accept(this);
             writer.write("return $L;", executionContext);
-        });
-        executionContext = result;
-        return null;
+          });
+      executionContext = result;
     }
+    return null;
+  }
 
-    @Override
-    public Void visitProjection(ProjectionExpression expression) {
-        expression.getLeft().accept(this);
+  @Override
+  public Void visitFilterProjection(FilterProjectionExpression expression) {
 
-        if (!(expression.getRight() instanceof CurrentExpression)) {
-            String element = makeNewScope("element_");
-            String result = makeNewScope("projection_");
-            writer.openBlock("let $L = $L.map(($L: any) => {", "});", result,
-                    executionContext, element, () -> {
-                        executionContext = element;
-                        expression.getRight().accept(this);
-                        writer.write("return $L;", executionContext);
-                    });
-            executionContext = result;
-        }
-        return null;
-    }
+    expression.getLeft().accept(this);
 
-    @Override
-    public Void visitFilterProjection(FilterProjectionExpression expression) {
+    expression.getRight().accept(this);
 
-        expression.getLeft().accept(this);
-
-        expression.getRight().accept(this);
-
-        String elementScope = makeNewScope("element_");
-        String resultScope = makeNewScope("filterRes_");
-        writer.openBlock("let $L = $L.filter(($L: any) => {", "});", resultScope,
-                executionContext, elementScope, () -> {
-            executionContext = elementScope;
-            expression.getComparison().accept(this);
-            writer.write("return $L;", executionContext);
+    String elementScope = makeNewScope("element_");
+    String resultScope = makeNewScope("filterRes_");
+    writer.openBlock(
+        "let $L = $L.filter(($L: any) => {",
+        "});",
+        resultScope,
+        executionContext,
+        elementScope,
+        () -> {
+          executionContext = elementScope;
+          expression.getComparison().accept(this);
+          writer.write("return $L;", executionContext);
         });
 
-        executionContext = resultScope;
-        return null;
-    }
+    executionContext = resultScope;
+    return null;
+  }
 
-    @Override
-    public Void visitSlice(SliceExpression expression) {
-        throw new CodegenException("TypeScriptJmesPath visitor not implemented SliceExpression");
-    }
+  @Override
+  public Void visitSlice(SliceExpression expression) {
+    throw new CodegenException("TypeScriptJmesPath visitor not implemented SliceExpression");
+  }
 
-    @Override
-    public Void visitSubexpression(Subexpression expression) {
-        expression.getLeft().accept(this);
-        expression.getRight().accept(this);
-        return null;
-    }
+  @Override
+  public Void visitSubexpression(Subexpression expression) {
+    expression.getLeft().accept(this);
+    expression.getRight().accept(this);
+    return null;
+  }
 
-    void writeBooleanExpectation(String expectedValue, String returnValue) {
-        writer.openBlock("if ($L == $L) {", "}", executionContext, expectedValue, () -> {
-            writer.write("return $L;", returnValue);
+  void writeBooleanExpectation(String expectedValue, String returnValue) {
+    writer.openBlock(
+        "if ($L == $L) {",
+        "}",
+        executionContext,
+        expectedValue,
+        () -> {
+          writer.write("return $L;", returnValue);
         });
-    }
+  }
 
-    void writeAnyStringEqualsExpectation(String expectedValue, String returnValue) {
-        String element = makeNewScope("anyStringEq_");
-        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
-            writer.openBlock("if ($L == $S) {", "}", element, expectedValue, () -> {
+  void writeAnyStringEqualsExpectation(String expectedValue, String returnValue) {
+    String element = makeNewScope("anyStringEq_");
+    writer.openBlock(
+        "for (let $L of $L) {",
+        "}",
+        element,
+        executionContext,
+        () -> {
+          writer.openBlock(
+              "if ($L == $S) {",
+              "}",
+              element,
+              expectedValue,
+              () -> {
                 writer.write("return $L;", returnValue);
-            });
+              });
         });
-    }
+  }
 
-    void writeAllStringEqualsExpectation(String expectedValue, String returnValue) {
-        String element = makeNewScope("element_");
-        String result = makeNewScope("allStringEq_");
-        writer.write("let $L = ($L.length > 0);", result, executionContext);
-        writer.openBlock("for (let $L of $L) {", "}", element, executionContext, () -> {
-            writer.write("$L = $L && ($L == $S)", result, result, element, expectedValue);
+  void writeAllStringEqualsExpectation(String expectedValue, String returnValue) {
+    String element = makeNewScope("element_");
+    String result = makeNewScope("allStringEq_");
+    writer.write("let $L = ($L.length > 0);", result, executionContext);
+    writer.openBlock(
+        "for (let $L of $L) {",
+        "}",
+        element,
+        executionContext,
+        () -> {
+          writer.write("$L = $L && ($L == $S)", result, result, element, expectedValue);
         });
-        writer.openBlock("if ($L) {", "}", result, () -> {
-            writer.write("return $L;", returnValue);
+    writer.openBlock(
+        "if ($L) {",
+        "}",
+        result,
+        () -> {
+          writer.write("return $L;", returnValue);
         });
-    }
+  }
 
-    void writeStringExpectation(String expectedValue, String returnValue) {
-        writer.openBlock("if ($L === $S) {", "}", executionContext, expectedValue, () -> {
-            writer.write("return $L;", returnValue);
+  void writeStringExpectation(String expectedValue, String returnValue) {
+    writer.openBlock(
+        "if ($L === $S) {",
+        "}",
+        executionContext,
+        expectedValue,
+        () -> {
+          writer.write("return $L;", returnValue);
         });
-    }
+  }
 
-    private String makeNewScope(String prefix) {
-        scopeCount += 1;
-        return prefix + scopeCount;
-    }
+  private String makeNewScope(String prefix) {
+    scopeCount += 1;
+    return prefix + scopeCount;
+  }
 
-    private String serializeObject(Map<String, Object> obj) {
-        return "{" + obj.entrySet().stream()
+  private String serializeObject(Map<String, Object> obj) {
+    return "{"
+        + obj.entrySet().stream()
             .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
             .collect(Collectors.joining(","))
-            + "}";
-    }
+        + "}";
+  }
 
-    private String serializeArray(List<Object> array) {
-        return "[" + array.stream()
-            .map(this::serializeValue)
-            .collect(Collectors.joining(","))
-            + "]";
-    }
+  private String serializeArray(List<Object> array) {
+    return "[" + array.stream().map(this::serializeValue).collect(Collectors.joining(",")) + "]";
+  }
 
-    @SuppressWarnings("unchecked")
-    private String serializeValue(Object value) {
-        if (value == null) {
-            return "null";
-        } else if (value instanceof String) {
-            return "\"" + value + "\"";
-        } else if (value instanceof Number || value instanceof Boolean) {
-            return value.toString();
-        } else if (value instanceof Map) {
-            return serializeObject((Map<String, Object>) value);
-        } else if (value instanceof ArrayList) {
-            return serializeArray((List<Object>) value);
-        }
-        throw new CodegenException("Unsupported literal type: " + value.getClass());
+  @SuppressWarnings("unchecked")
+  private String serializeValue(Object value) {
+    if (value == null) {
+      return "null";
+    } else if (value instanceof String) {
+      return "\"" + value + "\"";
+    } else if (value instanceof Number || value instanceof Boolean) {
+      return value.toString();
+    } else if (value instanceof Map) {
+      return serializeObject((Map<String, Object>) value);
+    } else if (value instanceof ArrayList) {
+      return serializeArray((List<Object>) value);
     }
+    throw new CodegenException("Unsupported literal type: " + value.getClass());
+  }
 }

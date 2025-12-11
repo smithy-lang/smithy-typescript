@@ -26,21 +26,22 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public final class TypeScriptDelegator extends WriterDelegator<TypeScriptWriter> {
 
-    TypeScriptDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
-        super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
-    }
+  TypeScriptDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
+    super(fileManifest, symbolProvider, new TypeScriptWriter.TypeScriptWriterFactory());
+  }
 
-    /**
-     * Gets all of the dependencies that have been registered in writers owned by the delegator, along with any
-     * unconditional dependencies.
-     *
-     * @return Returns all the dependencies.
-     */
-    @Override
-    public List<SymbolDependency> getDependencies() {
-        // Always add unconditional dependencies.
-        List<SymbolDependency> resolved = new ArrayList<>(TypeScriptDependency.getUnconditionalDependencies());
-        resolved.addAll(super.getDependencies());
-        return resolved;
-    }
+  /**
+   * Gets all of the dependencies that have been registered in writers owned by the delegator, along
+   * with any unconditional dependencies.
+   *
+   * @return Returns all the dependencies.
+   */
+  @Override
+  public List<SymbolDependency> getDependencies() {
+    // Always add unconditional dependencies.
+    List<SymbolDependency> resolved =
+        new ArrayList<>(TypeScriptDependency.getUnconditionalDependencies());
+    resolved.addAll(super.getDependencies());
+    return resolved;
+  }
 }

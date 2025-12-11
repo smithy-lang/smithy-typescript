@@ -37,74 +37,77 @@ import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * Add runtime config for injecting utility functions to consume the JavaScript
- * runtime-specific stream implementations.
+ * Add runtime config for injecting utility functions to consume the JavaScript runtime-specific
+ * stream implementations.
  */
 @SmithyInternalApi
 public final class AddSdkStreamMixinDependency implements TypeScriptIntegration {
 
-    @Override
-    public void addConfigInterfaceFields(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        TypeScriptWriter writer
-    ) {
-        if (!hasStreamingBlobDeser(settings, model)) {
-            return;
-        }
-
-        writer.addTypeImport("SdkStreamMixinInjector", "__SdkStreamMixinInjector",
-                TypeScriptDependency.SMITHY_TYPES);
-        writer.writeDocs("The internal function that inject utilities to runtime-specific stream to help users"
-                + " consume the data\n@internal");
-        writer.write("sdkStreamMixin?: __SdkStreamMixinInjector;\n");
+  @Override
+  public void addConfigInterfaceFields(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      TypeScriptWriter writer) {
+    if (!hasStreamingBlobDeser(settings, model)) {
+      return;
     }
 
-    @Override
-    public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        LanguageTarget target
-    ) {
-        if (!hasStreamingBlobDeser(settings, model)) {
-            return Collections.emptyMap();
-        }
+    writer.addTypeImport(
+        "SdkStreamMixinInjector", "__SdkStreamMixinInjector", TypeScriptDependency.SMITHY_TYPES);
+    writer.writeDocs(
+        "The internal function that inject utilities to runtime-specific stream to help users"
+            + " consume the data\n@internal");
+    writer.write("sdkStreamMixin?: __SdkStreamMixinInjector;\n");
+  }
 
-        if (target == LanguageTarget.SHARED) {
-           return MapUtils.of("sdkStreamMixin", writer -> {
-               writer.addDependency(TypeScriptDependency.UTIL_STREAM);
-               writer.addImport("sdkStreamMixin", null, TypeScriptDependency.UTIL_STREAM);
-               writer.write("sdkStreamMixin");
-           });
-        } else {
-            return Collections.emptyMap();
-        }
+  @Override
+  public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
+      TypeScriptSettings settings,
+      Model model,
+      SymbolProvider symbolProvider,
+      LanguageTarget target) {
+    if (!hasStreamingBlobDeser(settings, model)) {
+      return Collections.emptyMap();
     }
 
-    private static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model) {
-        ServiceShape serviceShape = settings.getService(model);
-        TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Set<OperationShape> operations = topDownIndex.getContainedOperations(serviceShape);
-        for (OperationShape operation : operations) {
-            if (hasStreamingBlobDeser(settings, model, operation)) {
-                return true;
-            }
-        }
-        return false;
+    if (target == LanguageTarget.SHARED) {
+      return MapUtils.of(
+          "sdkStreamMixin",
+          writer -> {
+            writer.addDependency(TypeScriptDependency.UTIL_STREAM);
+            writer.addImport("sdkStreamMixin", null, TypeScriptDependency.UTIL_STREAM);
+            writer.write("sdkStreamMixin");
+          });
+    } else {
+      return Collections.emptyMap();
     }
+  }
 
-    public static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model, OperationShape operation) {
-        StructureShape ioShapeToDeser = (settings.generateServerSdk())
-          ? model.expectShape(operation.getInputShape()).asStructureShape().get()
-          : model.expectShape(operation.getOutputShape()).asStructureShape().get();
-        for (MemberShape member : ioShapeToDeser.members()) {
-            Shape shape = model.expectShape(member.getTarget());
-            if (shape instanceof BlobShape && shape.hasTrait(StreamingTrait.class)) {
-                return true;
-            }
-        }
-        return false;
+  private static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model) {
+    ServiceShape serviceShape = settings.getService(model);
+    TopDownIndex topDownIndex = TopDownIndex.of(model);
+    Set<OperationShape> operations = topDownIndex.getContainedOperations(serviceShape);
+    for (OperationShape operation : operations) {
+      if (hasStreamingBlobDeser(settings, model, operation)) {
+        return true;
+      }
     }
+    return false;
+  }
+
+  public static boolean hasStreamingBlobDeser(
+      TypeScriptSettings settings, Model model, OperationShape operation) {
+    StructureShape ioShapeToDeser =
+        (settings.generateServerSdk())
+            ? model.expectShape(operation.getInputShape()).asStructureShape().get()
+            : model.expectShape(operation.getOutputShape()).asStructureShape().get();
+    for (MemberShape member : ioShapeToDeser.members()) {
+      Shape shape = model.expectShape(member.getTarget());
+      if (shape instanceof BlobShape && shape.hasTrait(StreamingTrait.class)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

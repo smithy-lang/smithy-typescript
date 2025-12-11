@@ -10,11 +10,11 @@ import software.amazon.smithy.typescript.codegen.sections.CommandConstructorCode
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
- * The writer consumer for a RuntimeClientPlugin. May be used to add imports and dependencies
- * used by the plugin at the command level.
+ * The writer consumer for a RuntimeClientPlugin. May be used to add imports and dependencies used
+ * by the plugin at the command level.
  */
 @FunctionalInterface
 @SmithyInternalApi
 public interface CommandWriterConsumer {
-    void accept(TypeScriptWriter writer, CommandConstructorCodeSection section);
+  void accept(TypeScriptWriter writer, CommandConstructorCodeSection section);
 }

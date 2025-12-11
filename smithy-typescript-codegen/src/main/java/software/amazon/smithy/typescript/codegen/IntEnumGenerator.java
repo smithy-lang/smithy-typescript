@@ -24,7 +24,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 /**
  * Generates an appropriate TypeScript type from a Smithy intEnum shape.
  *
- * <p>For example, given the following Smithy model:</p>
+ * <p>For example, given the following Smithy model:
  *
  * <pre>{@code
  * intEnum FaceCard {
@@ -44,8 +44,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * }
  * }</pre>
  *
- * <p>Shapes that refer to this intEnum as a member will use the following
- * generated code:
+ * <p>Shapes that refer to this intEnum as a member will use the following generated code:
  *
  * <pre>{@code
  * import { FaceCard } from "./FaceCard";
@@ -58,32 +57,36 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 final class IntEnumGenerator implements Runnable {
 
-    private final Symbol symbol;
-    private final IntEnumShape shape;
-    private final TypeScriptWriter writer;
+  private final Symbol symbol;
+  private final IntEnumShape shape;
+  private final TypeScriptWriter writer;
 
-    IntEnumGenerator(IntEnumShape shape, Symbol symbol, TypeScriptWriter writer) {
-        this.shape = shape;
-        this.symbol = symbol;
-        this.writer = writer;
-    }
+  IntEnumGenerator(IntEnumShape shape, Symbol symbol, TypeScriptWriter writer) {
+    this.shape = shape;
+    this.symbol = symbol;
+    this.writer = writer;
+  }
 
-    @Override
-    public void run() {
-        generateIntEnum();
-    }
+  @Override
+  public void run() {
+    generateIntEnum();
+  }
 
-    private void generateIntEnum() {
-        writer.openBlock("export enum $L {", "}", symbol.getName(), () -> {
-            // Sort by the values to ensure a stable order and sane diffs.
-            shape.getEnumValues().entrySet()
-                    .stream()
-                    .sorted(Comparator.comparing(e -> e.getValue()))
-                    .forEach(this::writeIntEnumEntry);
+  private void generateIntEnum() {
+    writer.openBlock(
+        "export enum $L {",
+        "}",
+        symbol.getName(),
+        () -> {
+          // Sort by the values to ensure a stable order and sane diffs.
+          shape.getEnumValues().entrySet().stream()
+              .sorted(Comparator.comparing(e -> e.getValue()))
+              .forEach(this::writeIntEnumEntry);
         });
-    }
+  }
 
-    private void writeIntEnumEntry(Map.Entry<String, Integer> entry) {
-        writer.write("$L = $L,", TypeScriptUtils.sanitizePropertyName(entry.getKey()), entry.getValue());
-    }
+  private void writeIntEnumEntry(Map.Entry<String, Integer> entry) {
+    writer.write(
+        "$L = $L,", TypeScriptUtils.sanitizePropertyName(entry.getKey()), entry.getValue());
+  }
 }

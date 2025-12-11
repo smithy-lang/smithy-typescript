@@ -11,18 +11,18 @@ import software.amazon.smithy.utils.Pair;
 
 public class HttpHandlerExtensionConfigurationInterface implements ExtensionConfigurationInterface {
 
-    @Override
-    public Pair<String, Dependency> name() {
-        return Pair.of("HttpHandlerExtensionConfiguration", TypeScriptDependency.PROTOCOL_HTTP);
-    }
+  @Override
+  public Pair<String, Dependency> name() {
+    return Pair.of("HttpHandlerExtensionConfiguration", TypeScriptDependency.PROTOCOL_HTTP);
+  }
 
-    @Override
-    public Pair<String, Dependency> getExtensionConfigurationFn() {
-        return Pair.of("getHttpHandlerExtensionConfiguration", TypeScriptDependency.PROTOCOL_HTTP);
-    }
+  @Override
+  public Pair<String, Dependency> getExtensionConfigurationFn() {
+    return Pair.of("getHttpHandlerExtensionConfiguration", TypeScriptDependency.PROTOCOL_HTTP);
+  }
 
-    @Override
-    public Pair<String, Dependency> resolveRuntimeConfigFn() {
-        return Pair.of("resolveHttpHandlerRuntimeConfig", TypeScriptDependency.PROTOCOL_HTTP);
-    }
+  @Override
+  public Pair<String, Dependency> resolveRuntimeConfigFn() {
+    return Pair.of("resolveHttpHandlerRuntimeConfig", TypeScriptDependency.PROTOCOL_HTTP);
+  }
 }

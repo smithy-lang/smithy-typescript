@@ -8,20 +8,13 @@ package software.amazon.smithy.typescript.codegen;
 /**
  * This is an enum-like submodule list to be used with
  *
- * TypeScriptWriter::addImportSubmodule(
- *   Dependency == "cbor",
- *   null (no alias),
- *   PackageContainer == "@smithy/core",
- *   SmithyCoreSubmodules.CBOR == "/cbor"
- * );
+ * <p>TypeScriptWriter::addImportSubmodule( Dependency == "cbor", null (no alias), PackageContainer
+ * == "@smithy/core", SmithyCoreSubmodules.CBOR == "/cbor" );
  *
- * The intended result is e.g.
- * ```ts
- * import { cbor } from "@smithy/core/cbor";
- * ```
+ * <p>The intended result is e.g. ```ts import { cbor } from "@smithy/core/cbor"; ```
  */
 public final class SmithyCoreSubmodules {
-    public static final String CBOR = "/cbor";
+  public static final String CBOR = "/cbor";
 
-    private SmithyCoreSubmodules() {}
+  private SmithyCoreSubmodules() {}
 }
